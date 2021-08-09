@@ -1,7 +1,87 @@
+import dayjs from 'dayjs';
+
+import { config } from 'conf';
+
 import { BusinessDataflowRepository } from 'repositories/BusinessDataflowRepository';
 
+import { BusinessDataflow } from 'entities/BusinessDataflow';
+
+import { CoreUtils } from 'repositories/_utils/CoreUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
+import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
+
+import { ObligationService } from 'services/ObligationService';
+
+const parseDataflowDTOs = dataflowDTOs => {
+  const dataflows = dataflowDTOs.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
+  dataflows.sort((a, b) => {
+    const deadline_1 = a.expirationDate;
+    const deadline_2 = b.expirationDate;
+    return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
+  });
+  return dataflows;
+};
+
+const parseDataflowDTO = dataflowDTO =>
+  new BusinessDataflow({
+    creationDate: dataflowDTO.creationDate,
+    description: dataflowDTO.description,
+    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
+    id: dataflowDTO.id,
+    isReleasable: dataflowDTO.releasable,
+    name: dataflowDTO.name,
+    obligation: ObligationService.parseObligation(dataflowDTO.obligation),
+    status: dataflowDTO.status,
+    type: dataflowDTO.type,
+    userRole: dataflowDTO.userRole
+  });
+
 export const BusinessDataflowService = {
-  getAll: async userData => BusinessDataflowRepository.getAll(userData),
+  getAll: async (accessRole, contextRoles) => {
+    const businessDataflowsDTO = await BusinessDataflowRepository.getAll();
+
+    const businessDataflows = !accessRole ? businessDataflowsDTO.data : [];
+
+    const userRoles = [];
+    if (contextRoles) {
+      const dataflowsRoles = contextRoles.filter(role => role.includes(config.permissions.prefixes.DATAFLOW));
+      dataflowsRoles.map((item, i) => {
+        const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
+
+        return (userRoles[i] = {
+          id: parseInt(item.replace(/\D/g, '')),
+          userRole: UserRoleUtils.getUserRoleLabel(role)
+        });
+      });
+    }
+
+    for (let index = 0; index < businessDataflowsDTO.data.length; index++) {
+      const businessDataflow = businessDataflowsDTO.data[index];
+
+      const isOpen = businessDataflow.status === config.dataflowStatus.OPEN;
+
+      if (isOpen) {
+        businessDataflow.releasable ? (businessDataflow.status = 'OPEN') : (businessDataflow.status = 'CLOSED');
+      }
+
+      if (contextRoles.length === 0) {
+        businessDataflow.userRole =
+          accessRole.some(role => role === config.permissions.roles.ADMIN.key) && config.permissions.roles.ADMIN.key; // TODO WITH TWO ROLES
+        businessDataflows.push({
+          ...businessDataflow
+        });
+      } else {
+        const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
+        businessDataflows.push({
+          ...businessDataflow,
+          ...(isDuplicated ? UserRoleUtils.getUserRoles(userRoles) : userRoles).find(
+            item => item.id === businessDataflow.id
+          )
+        });
+      }
+    }
+    return parseDataflowDTOs(businessDataflows);
+  },
 
   create: async (name, description, obligationId, dataProviderGroupId, fmeUserId) =>
     BusinessDataflowRepository.create(name, description, obligationId, dataProviderGroupId, fmeUserId),

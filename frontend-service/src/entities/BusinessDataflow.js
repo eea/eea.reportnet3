@@ -19,6 +19,7 @@ export class BusinessDataflow {
     requestId,
     status,
     testDatasets,
+    type,
     userRole,
     webLinks
   } = {}) {
@@ -41,6 +42,7 @@ export class BusinessDataflow {
     this.requestId = requestId;
     this.status = status;
     this.testDatasets = testDatasets;
+    this.type = type;
     this.userRole = userRole;
     this.webLinks = webLinks;
   }

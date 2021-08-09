@@ -116,7 +116,8 @@ const Dataflow = withRouter(({ history, match }) => {
     status: '',
     updatedDatasetSchema: [],
     userRoles: [],
-    isUserRightManagementDialogVisible: false
+    isUserRightManagementDialogVisible: false,
+    isAdmin: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -250,7 +251,7 @@ const Dataflow = withRouter(({ history, match }) => {
       editBtn: isDesign && isLeadDesigner,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
-      manageRequestersBtn: dataflowState.isCustodian,
+      manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
       showPublicInfoBtn: !isDesign && isLeadDesigner && !dataflowState.isBusinessDataflow,
@@ -466,9 +467,11 @@ const Dataflow = withRouter(({ history, match }) => {
       config.permissions.roles.OBSERVER.key
     ]);
 
+    const isAdmin = userContext.accessRole.some(role => role === config.permissions.roles.ADMIN.key);
+
     dataflowDispatch({
       type: 'LOAD_PERMISSIONS',
-      payload: { hasWritePermissions, isCustodian, isNationalCoordinator, isObserver, userRoles }
+      payload: { hasWritePermissions, isCustodian, isNationalCoordinator, isObserver, isAdmin, userRoles }
     });
   };
 
@@ -482,7 +485,7 @@ const Dataflow = withRouter(({ history, match }) => {
           anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
           description: dataflow.description,
-          isBusinessDataflow: false, // TODO WITH REAL DATA
+          isBusinessDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.BUSINESS), // TODO TEST WITH REAL DATA
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,

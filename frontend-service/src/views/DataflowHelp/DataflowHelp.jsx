@@ -33,6 +33,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataflowHelp = withRouter(({ history, match }) => {
   const {
@@ -149,7 +150,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const onLoadDatasetsSchemas = async () => {
     try {
       const data = await DataflowService.getReportingDatasets(dataflowId);
-      setIsBusinessDataflow(false); // TODO WITH REAL DATA
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS)); // TODO TEST WITH REAL DATA
       setIsLoading(false);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {

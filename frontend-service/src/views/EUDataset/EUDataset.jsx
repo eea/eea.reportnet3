@@ -31,6 +31,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const EUDataset = withRouter(({ history, match }) => {
   const {
@@ -104,14 +105,17 @@ export const EUDataset = withRouter(({ history, match }) => {
   const callSetMetaData = async () => {
     euDatasetDispatch({
       type: 'GET_METADATA',
-      payload: { metadata: await getMetadata({ dataflowId, datasetId }), isBusinessDataflow: false }
-    }); // TODO WITH REAL DATA
+      payload: { metadata: await getMetadata({ dataflowId, datasetId }) }
+    });
   };
 
   const getDataflowDetails = async () => {
     try {
       const data = await DataflowService.getDataflowDetails(match.params.dataflowId);
-      euDatasetDispatch({ type: 'GET_DATAFLOW_DETAILS', payload: { name: data.name, isBusinessDataflow: false } }); // TODO WITH REAL DATA
+      euDatasetDispatch({
+        type: 'GET_DATAFLOW_DETAILS',
+        payload: { name: data.name, isBusinessDataflow: TextUtils.areEquals(data.type, config.dataflowType.BUSINESS) }
+      }); // TODO TEST WITH REAL DATA
     } catch (error) {
       console.error('EUDataset - getDataflowName.', error);
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });

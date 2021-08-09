@@ -290,7 +290,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       payload: {
         metaData,
         dataflowName: metaData.dataflow.name,
-        isBusinessDataflow: false, // TODO WITH REAL DATA
+        isBusinessDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.BUSINESS), // TODO TEST WITH REAL DATA
         schemaName: metaData.dataset.name
       }
     });
