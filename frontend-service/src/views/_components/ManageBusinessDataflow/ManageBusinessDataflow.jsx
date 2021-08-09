@@ -143,7 +143,7 @@ export const ManageBusinessDataflow = ({
     setIsDeleteDialogVisible(false);
     showLoading();
     try {
-      const response = await BusinessDataflowService.deleteReferenceDataflow(dataflowId);
+      const response = await BusinessDataflowService.delete(dataflowId);
       if (response.status >= 200 && response.status <= 299) {
         history.push(getUrl(routes.DATAFLOWS));
         notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });

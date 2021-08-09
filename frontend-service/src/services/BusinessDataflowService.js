@@ -59,5 +59,7 @@ export const BusinessDataflowService = {
     BusinessDataflowRepository.create(name, description, obligationId, dataProviderGroupId, fmeUserId),
 
   update: async (dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId) =>
-    BusinessDataflowRepository.update(dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId)
+    BusinessDataflowRepository.update(dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId),
+
+  delete: async dataflowId => BusinessDataflowRepository.delete(dataflowId)
 };
