@@ -8,6 +8,7 @@ import { config } from 'conf';
 
 import { Button } from 'views/_components/Button';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 
 import { DataflowService } from 'services/DataflowService';
 import { UserService } from 'services/UserService';
@@ -48,12 +49,13 @@ const ManageReportingDataflowForm = forwardRef(
     const checkIsCorrectInputValue = (inputValue, inputName) => {
       let hasErrors = false;
       let message = '';
+      let maxLengthMessage = 'it must be 255 or lower.'
 
       if (checkIsEmptyInput(inputValue)) {
         message = '';
         hasErrors = true;
       } else if (inputName === 'description' && !checkIsCorrectLength(inputValue)) {
-        message = resources.messages['dataflowDescriptionValidationMax'];
+        message = resources.messages['dataflowDescriptionValidationMax'] + maxLengthMessage;
         hasErrors = true;
       } else if (inputName === 'name' && !checkIsCorrectLength(inputValue)) {
         message = resources.messages['dataflowNameValidationMax'];
@@ -179,6 +181,7 @@ const ManageReportingDataflowForm = forwardRef(
             <label className="srOnly" htmlFor="dataflowDescription">
               {resources.messages['createDataflowDescription']}
             </label>
+            <CharacterCounter currentLength={description.length} maxLength={config.INPUT_MAX_LENGTH}/>
             {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
           </div>
           <div></div>

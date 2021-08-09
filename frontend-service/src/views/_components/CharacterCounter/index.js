@@ -1,1 +1,1 @@
-export { CharacterCounter } from './CharavterCounter';
+export { CharacterCounter } from './CharacterCounter';
