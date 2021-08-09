@@ -10,7 +10,7 @@ import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
-import { ObligationService } from 'services/ObligationService';
+import { ObligationUtils } from '_utils/ObligationUtils';
 
 const parseDataflowDTOs = dataflowDTOs => {
   const dataflows = dataflowDTOs.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
@@ -30,7 +30,7 @@ const parseDataflowDTO = dataflowDTO =>
     id: dataflowDTO.id,
     isReleasable: dataflowDTO.releasable,
     name: dataflowDTO.name,
-    obligation: ObligationService.parseObligation(dataflowDTO.obligation),
+    obligation: ObligationUtils.parseObligation(dataflowDTO.obligation),
     status: dataflowDTO.status,
     type: dataflowDTO.type,
     userRole: dataflowDTO.userRole
