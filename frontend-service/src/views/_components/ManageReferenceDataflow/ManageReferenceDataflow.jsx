@@ -19,6 +19,7 @@ import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
 
+import { DataflowService } from 'services/DataflowService';
 import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 
 import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
@@ -96,7 +97,7 @@ export const ManageReferenceDataflow = ({
     setIsDeleteDialogVisible(false);
     showLoading();
     try {
-      await ReferenceDataflowService.delete(dataflowId);
+      await DataflowService.delete(dataflowId);
       history.push(getUrl(routes.DATAFLOWS));
       notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
     } catch (error) {

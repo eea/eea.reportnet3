@@ -18,11 +18,6 @@ export const ReferenceDataflowRepository = {
       data: { description, id: dataflowId, name, type }
     }),
 
-  delete: async referenceDataflowId =>
-    await HTTPRequester.delete({
-      url: getUrl(ReferenceDataflowConfig.delete, { referenceDataflowId })
-    }),
-
   getReferencingDataflows: async referenceDataflowId =>
     await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.getReferencingDataflows, { referenceDataflowId }) }),
 

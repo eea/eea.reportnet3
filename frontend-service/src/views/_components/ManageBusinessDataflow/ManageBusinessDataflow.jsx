@@ -21,6 +21,7 @@ import { InputTextarea } from 'views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
 
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
+import { DataflowService } from 'services/DataflowService';
 import { RepresentativeService } from 'services/RepresentativeService';
 
 import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
@@ -142,7 +143,7 @@ export const ManageBusinessDataflow = ({
     setIsDeleteDialogVisible(false);
     showLoading();
     try {
-      const response = await BusinessDataflowService.delete(dataflowId);
+      const response = await DataflowService.delete(dataflowId);
       if (response.status >= 200 && response.status <= 299) {
         history.push(getUrl(routes.DATAFLOWS));
         notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
