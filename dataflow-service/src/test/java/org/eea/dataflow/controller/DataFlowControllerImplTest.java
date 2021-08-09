@@ -531,9 +531,10 @@ public class DataFlowControllerImplTest {
   }
 
   @Test
-  public void testUpdateDataflowBusinessException() throws EEAException {
+  public void testUpdateDataflowBusinessException() throws EEAException, ParseException {
     DataFlowVO dataflowVO = new DataFlowVO();
-    Date date = new Date();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
     ObligationVO obligation = new ObligationVO();
     obligation.setObligationId(1);
     dataflowVO.setDeadlineDate(date);
