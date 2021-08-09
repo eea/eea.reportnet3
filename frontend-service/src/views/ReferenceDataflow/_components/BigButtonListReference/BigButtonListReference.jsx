@@ -128,7 +128,7 @@ const BigButtonListReference = withRouter(
       });
 
       try {
-        await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
+        await DataflowService.cloneSchemas(cloneDataflow.id, dataflowId);
       } catch (error) {
         if (error.response.status === 423) {
           notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -226,7 +226,7 @@ const BigButtonListReference = withRouter(
     };
 
     const onLoadSchemasValidations = async () => {
-      const { data } = await DataflowService.schemasValidation(dataflowId);
+      const { data } = await DataflowService.getSchemasValidation(dataflowId);
       referenceBigButtonsDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { data } });
     };
 

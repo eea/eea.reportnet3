@@ -474,13 +474,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onLoadReportingDataflow = async () => {
     try {
-      const dataflowResponse = await DataflowService.reporting(dataflowId);
-      const dataflow = dataflowResponse.data;
-
-      Promise.resolve(dataflow).then(res => {
-        dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
-      });
-
+      const dataflow = await DataflowService.getReportingDatasets(dataflowId);
+      dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       dataflowDispatch({
         type: 'INITIAL_LOAD',
         payload: {
@@ -595,8 +590,7 @@ const Dataflow = withRouter(({ history, match }) => {
   );
 
   const onLoadSchemasValidations = async () => {
-    const validationResult = await DataflowService.schemasValidation(dataflowId);
-
+    const validationResult = await DataflowService.getSchemasValidation(dataflowId);
     dataflowDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult: validationResult.data } });
   };
 
@@ -624,7 +618,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmExport = async () => {
     try {
       dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: true });
-      const { data } = await DataflowService.downloadById(dataflowId);
+      const { data } = await DataflowService.exportSchemas(dataflowId);
       if (!isNil(data)) {
         DownloadFile(data, `${dataflowState.data.name}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip`);
       }

@@ -98,9 +98,7 @@ export const ReferenceDataflowService = {
       dataflows.push({ ...dataflow, ...role.find(item => item.id === dataflow.id) });
     });
 
-    dataflowsDTO.data = sortDataflows(dataflows);
-
-    return dataflowsDTO;
+    return sortDataflows(dataflows);
   },
 
   create: async (name, description, type) => ReferenceDataflowRepository.create(name, description, type),
@@ -118,8 +116,6 @@ export const ReferenceDataflowService = {
     const dataflow = parseDataflowDTO(referenceDataflowDTO.data);
     dataflow.datasets.sort(sortDatasetTypeByName);
     dataflow.designDatasets.sort(sortDatasetTypeByName);
-    referenceDataflowDTO.data = dataflow;
-
-    return referenceDataflowDTO;
+    return dataflow;
   }
 };

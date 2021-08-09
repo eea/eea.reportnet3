@@ -55,7 +55,7 @@ export const DataflowDashboards = withRouter(
 
     const getDataflowDetails = async () => {
       try {
-        const { data } = await DataflowService.dataflowDetails(dataflowId);
+        const data = await DataflowService.getDataflowDetails(dataflowId);
         setIsBusinessDataflow(false); //TODO WITH REAL DATA
         setDataflowName(data.name);
         setIsLoading(false);
@@ -66,7 +66,7 @@ export const DataflowDashboards = withRouter(
 
     const onLoadDataSchemas = async () => {
       try {
-        const { data } = await DataflowService.reporting(dataflowId);
+        const data = await DataflowService.getReportingDatasets(dataflowId);
         setDataSchema(data.designDatasets);
         setDashboardInitialValues(
           data.designDatasets.forEach(schema => (dashboardInitialValues[schema.datasetSchemaId] = true))

@@ -708,7 +708,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         });
       };
       const getDatasetSchemas = async () => {
-        const { data } = await DataflowService.getAllSchemas(dataflowId);
+        const data = await DataflowService.getSchemas(dataflowId);
         designerDispatch({ type: 'LOAD_DATASET_SCHEMAS', payload: { schemas: data } });
       };
 
