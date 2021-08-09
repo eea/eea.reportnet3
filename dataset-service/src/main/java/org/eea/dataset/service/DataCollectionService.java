@@ -44,9 +44,11 @@ public interface DataCollectionService {
    * @param manualCheck enable the manual check for the custodian approval
    * @param showPublicInfo the show public info
    * @param referenceDataflow the reference dataflow
+   * @param stopAndNotifyPKError the stop and notify PK error
    */
   void createEmptyDataCollection(Long dataflowId, Date dueDate, boolean stopAndNotifySQLErrors,
-      boolean manualCheck, boolean showPublicInfo, boolean referenceDataflow);
+      boolean manualCheck, boolean showPublicInfo, boolean referenceDataflow,
+      boolean stopAndNotifyPKError);
 
   /**
    * Adds the foreign relations from new reportings.

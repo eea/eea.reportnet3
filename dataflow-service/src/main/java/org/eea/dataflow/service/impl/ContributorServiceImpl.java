@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eea.dataflow.service.ContributorService;
+import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -78,6 +79,10 @@ public class ContributorServiceImpl implements ContributorService {
   /** The reference dataset controller zuul. */
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
+
+  /** The dataflow service. */
+  @Autowired
+  private DataflowService dataflowService;
 
 
   /**
@@ -175,7 +180,12 @@ public class ContributorServiceImpl implements ContributorService {
         break;
       case DATA_CUSTODIAN:
       case DATA_STEWARD:
-        throw new EEAException();
+        if (dataflowService.isAdmin()) {
+          getResourceCustodianSteward(dataflowId, account, resourcesProviders, role);
+          break;
+        } else {
+          throw new EEAException();
+        }
       default:
         break;
     }
@@ -290,6 +300,60 @@ public class ContributorServiceImpl implements ContributorService {
         referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId).stream()
             .map(ReferenceDatasetVO::getId).collect(Collectors.toList()),
         ResourceGroupEnum.REFERENCEDATASET_OBSERVER);
+  }
+
+  /**
+   * Gets the resource custodian steward.
+   *
+   * @param dataflowId the dataflow id
+   * @param account the account
+   * @param resourcesProviders the resources providers
+   * @param role the role
+   * @return the resource custodian steward
+   */
+  private void getResourceCustodianSteward(Long dataflowId, String account,
+      List<ResourceAssignationVO> resourcesProviders, String role) {
+    resourcesProviders.add(fillResourceAssignation(dataflowId, account,
+        SecurityRoleEnum.DATA_CUSTODIAN.toString().equals(role)
+            ? ResourceGroupEnum.DATAFLOW_CUSTODIAN
+            : ResourceGroupEnum.DATAFLOW_STEWARD));
+    // dataset
+    addResources(account, resourcesProviders,
+        dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
+            .map(ReportingDatasetVO::getId).collect(Collectors.toList()),
+        SecurityRoleEnum.DATA_CUSTODIAN.toString().equals(role)
+            ? ResourceGroupEnum.DATASET_CUSTODIAN
+            : ResourceGroupEnum.DATASET_STEWARD);
+    // dc
+    addResources(account, resourcesProviders,
+        dataCollectionControllerZuul.findDataCollectionIdByDataflowId(dataflowId).stream()
+            .map(DataCollectionVO::getId).collect(Collectors.toList()),
+        SecurityRoleEnum.DATA_CUSTODIAN.toString().equals(role)
+            ? ResourceGroupEnum.DATACOLLECTION_CUSTODIAN
+            : ResourceGroupEnum.DATACOLLECTION_STEWARD);
+    // eu
+    addResources(account, resourcesProviders,
+        eUDatasetControllerZuul.findEUDatasetByDataflowId(dataflowId).stream()
+            .map(EUDatasetVO::getId).collect(Collectors.toList()),
+        SecurityRoleEnum.DATA_CUSTODIAN.toString().equals(role)
+            ? ResourceGroupEnum.EUDATASET_CUSTODIAN
+            : ResourceGroupEnum.EUDATASET_STEWARD);
+
+    // reference
+    addResources(account, resourcesProviders,
+        referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId).stream()
+            .map(ReferenceDatasetVO::getId).collect(Collectors.toList()),
+        SecurityRoleEnum.DATA_CUSTODIAN.toString().equals(role)
+            ? ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN
+            : ResourceGroupEnum.REFERENCEDATASET_STEWARD);
+
+    // design datasets
+    addResources(account, resourcesProviders,
+        referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId).stream()
+            .map(ReferenceDatasetVO::getId).collect(Collectors.toList()),
+        SecurityRoleEnum.DATA_CUSTODIAN.toString().equals(role)
+            ? ResourceGroupEnum.REFERENCEDATASET_OBSERVER
+            : ResourceGroupEnum.REFERENCEDATASET_STEWARD);
   }
 
   /**

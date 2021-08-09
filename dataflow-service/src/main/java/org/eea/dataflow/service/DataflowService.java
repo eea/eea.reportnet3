@@ -65,6 +65,15 @@ public interface DataflowService {
    */
   List<DataFlowVO> getReferenceDataflows(String userId) throws EEAException;
 
+  /**
+   * Gets the business dataflows.
+   *
+   * @param userId the user id
+   * @return the business dataflows
+   * @throws EEAException the EEA exception
+   */
+  List<DataFlowVO> getBusinessDataflows(String userId) throws EEAException;
+
 
   /**
    * Gets the completed.
@@ -104,6 +113,7 @@ public interface DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
+   * @return the long
    * @throws EEAException the EEA exception
    */
   Long createDataFlow(DataFlowVO dataflowVO) throws EEAException;
@@ -216,4 +226,11 @@ public interface DataflowService {
    * @return true, if is reference dataflow draft
    */
   boolean isReferenceDataflowDraft(EntityClassEnum entity, Long entityId);
+
+  /**
+   * Checks if user is admin.
+   *
+   * @return true, if is admin
+   */
+  boolean isAdmin();
 }

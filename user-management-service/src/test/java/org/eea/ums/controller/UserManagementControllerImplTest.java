@@ -702,5 +702,9 @@ public class UserManagementControllerImplTest {
     assertNotNull(userManagementController.getUserRolesByDataflowAndCountry(1L, 1L));
   }
 
+  @Test
+  public void getUserRolesByDataflowTest() {
+    assertNotNull(userManagementController.getUserRolesByDataflow(0L));
+  }
 
 }

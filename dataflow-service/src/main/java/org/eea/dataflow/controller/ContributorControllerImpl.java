@@ -74,7 +74,7 @@ public class ContributorControllerImpl implements ContributorController {
    * @param contributorVO the contributor VO
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') || hasRole('ADMIN')")
   @DeleteMapping(value = "/requester/dataflow/{dataflowId}")
   @ApiOperation(value = "Delete one requester in a Dataflow")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted requester"),
@@ -152,7 +152,7 @@ public class ContributorControllerImpl implements ContributorController {
    * @return the list
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') || hasRole('ADMIN')")
   @GetMapping(value = "/requester/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find all Requesters in a Dataflow",
@@ -200,7 +200,7 @@ public class ContributorControllerImpl implements ContributorController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') || hasRole('ADMIN')")
   @PutMapping(value = "/requester/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Update one Requester in a Dataflow",

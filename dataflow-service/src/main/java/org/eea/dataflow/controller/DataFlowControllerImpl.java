@@ -79,7 +79,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find a Dataflow by its Id", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataFlowVO.class)
@@ -181,6 +181,31 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflows;
   }
 
+  /**
+   * Find business dataflows.
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Business Dataflows for the logged User",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      responseContainer = "List")
+  public List<DataFlowVO> findBusinessDataflows() {
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
+    try {
+      dataflows = dataflowService.getBusinessDataflows(userId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return dataflows;
+  }
+
 
   /**
    * Find completed.
@@ -223,7 +248,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
   @PostMapping("/{dataflowId}/contributor/add")
   @ApiOperation(value = "Add one Contributor to a Dataflow")
   @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
@@ -247,7 +272,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
   @DeleteMapping("{dataflowId}/contributor/remove")
   @ApiOperation(value = "Remove one Contributor from a Dataflow")
   @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
@@ -273,7 +298,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @LockMethod
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','DATA_REQUESTER')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','DATA_REQUESTER','ADMIN')")
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Create one Dataflow", produces = MediaType.APPLICATION_JSON_VALUE,
       response = ResponseEntity.class)
@@ -287,9 +312,12 @@ public class DataFlowControllerImpl implements DataFlowController {
 
     String message = "";
     HttpStatus status = HttpStatus.OK;
-
+    if (TypeDataflowEnum.BUSINESS.equals(dataFlowVO.getType()) && !dataflowService.isAdmin()) {
+      message = EEAErrorMessage.UNAUTHORIZED;
+      status = HttpStatus.UNAUTHORIZED;
+    }
     final Timestamp dateToday = java.sql.Timestamp.valueOf(LocalDateTime.now());
-    if (!TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
+    if (status == HttpStatus.OK && !TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
         && null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
             || dataFlowVO.getDeadlineDate().equals(dateToday))) {
 
@@ -324,6 +352,8 @@ public class DataFlowControllerImpl implements DataFlowController {
     return new ResponseEntity<>(message, status);
   }
 
+
+
   /**
    * Update data flow.
    *
@@ -333,7 +363,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Update a Dataflow", produces = MediaType.APPLICATION_JSON_VALUE,
       response = ResponseEntity.class)
@@ -366,6 +396,21 @@ public class DataFlowControllerImpl implements DataFlowController {
       message = EEAErrorMessage.DATAFLOW_OBLIGATION;
       status = HttpStatus.BAD_REQUEST;
     }
+    // If it's a Business Dataflow, check if there are representatives selected. If so, then deny
+    // the update
+    if (TypeDataflowEnum.BUSINESS.equals(dataFlowVO.getType()) && status == HttpStatus.OK) {
+      try {
+        DataFlowVO dataflow = dataflowService.getMetabaseById(dataFlowVO.getId());
+        if (!dataflow.getDataProviderGroupId().equals(dataFlowVO.getDataProviderGroupId())
+            && !representativeService.getRepresetativesByIdDataFlow(dataFlowVO.getId()).isEmpty()) {
+          message = EEAErrorMessage.EXISTING_REPRESENTATIVES;
+          status = HttpStatus.BAD_REQUEST;
+        }
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error finding the representatives from the dataflowId {}",
+            dataFlowVO.getId());
+      }
+    }
 
     if (status == HttpStatus.OK) {
       try {
@@ -389,7 +434,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
   @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get meta information from a Dataflow based on its Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class)
@@ -550,7 +595,6 @@ public class DataFlowControllerImpl implements DataFlowController {
     return result;
   }
 
-
   /**
    * Access reference entity.
    *
@@ -566,6 +610,7 @@ public class DataFlowControllerImpl implements DataFlowController {
       @PathVariable("entityId") Long entityId) {
     return dataflowService.isReferenceDataflowDraft(entity, entityId);
   }
+
 
 
   /**
@@ -588,4 +633,5 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     return false;
   }
+
 }

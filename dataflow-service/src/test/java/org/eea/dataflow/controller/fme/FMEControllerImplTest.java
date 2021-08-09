@@ -58,16 +58,18 @@ public class FMEControllerImplTest {
 
   @Test
   public void findRepositoriesTest() {
-    Mockito.when(fmeCommunicationService.findRepository()).thenReturn(null);
+    Mockito.when(fmeCommunicationService.findRepository(Mockito.anyLong())).thenReturn(null);
     fmeControllerImpl.findRepositories(1L);
-    Mockito.verify(fmeCommunicationService, times(1)).findRepository();
+    Mockito.verify(fmeCommunicationService, times(1)).findRepository(Mockito.anyLong());
   }
 
   @Test
   public void findItemsTest() {
-    Mockito.when(fmeCommunicationService.findItems(Mockito.anyString())).thenReturn(null);
+    Mockito.when(fmeCommunicationService.findItems(Mockito.anyString(), Mockito.anyLong()))
+        .thenReturn(null);
     fmeControllerImpl.findItems(1L, "repository");
-    Mockito.verify(fmeCommunicationService, times(1)).findItems(Mockito.anyString());
+    Mockito.verify(fmeCommunicationService, times(1)).findItems(Mockito.anyString(),
+        Mockito.anyLong());
   }
 
   @Test
