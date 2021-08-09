@@ -634,7 +634,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmRelease = async () => {
     try {
       notificationContext.add({ type: 'RELEASE_START_EVENT' });
-      await SnapshotService.releaseDataflow(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
+      await SnapshotService.release(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
 
       dataflowState.data.datasets
         .filter(dataset => dataset.dataProviderId === dataProviderId)
