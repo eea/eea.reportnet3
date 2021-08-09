@@ -3,7 +3,6 @@ import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
-import isUndefined from 'lodash/isUndefined';
 import orderBy from 'lodash/orderBy';
 import sortBy from 'lodash/sortBy';
 
@@ -11,309 +10,19 @@ import { config } from 'conf';
 
 import { DataflowRepository } from 'repositories/DataflowRepository';
 
-import { DataCollection } from 'entities/DataCollection';
+import { DataflowUtils } from 'services/_utils/DataflowUtils';
+import { DatasetUtils } from 'services/_utils/DatasetUtils';
+import { ObligationUtils } from 'services/_utils/ObligationUtils';
+
 import { Dataflow } from 'entities/Dataflow';
 import { Dataset } from 'entities/Dataset';
 import { DatasetTable } from 'entities/DatasetTable';
 import { DatasetTableField } from 'entities/DatasetTableField';
 import { DatasetTableRecord } from 'entities/DatasetTableRecord';
-import { EUDataset } from 'entities/EUDataset';
-import { LegalInstrument } from 'entities/LegalInstrument';
-import { Obligation } from 'entities/Obligation';
-import { Representative } from 'entities/Representative';
-import { WebLink } from 'entities/WebLink';
 
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
-
-const sortDatasetTypeByName = (a, b) => {
-  let datasetName_A = a.datasetSchemaName;
-  let datasetName_B = b.datasetSchemaName;
-  return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-};
-
-const getPercentageOfValue = (val, total) => (total === 0 ? '0.00' : ((val / total) * 100).toFixed(2));
-
-const parseDataflowListDTO = dataflowsDTO => {
-  if (!isNull(dataflowsDTO) && !isUndefined(dataflowsDTO)) {
-    const dataflows = [];
-    dataflowsDTO.forEach(dataflowDTO => {
-      dataflows.push(parseDataflowDTO(dataflowDTO));
-    });
-    return dataflows;
-  }
-  return;
-};
-
-const parseDataflowDTOs = dataflowDTOs => {
-  const dataflows = dataflowDTOs.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
-  dataflows.sort((a, b) => {
-    const deadline_1 = a.expirationDate;
-    const deadline_2 = b.expirationDate;
-    return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
-  });
-  return dataflows;
-};
-
-const parseDataflowDTO = dataflowDTO =>
-  new Dataflow({
-    anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
-    creationDate: dataflowDTO.creationDate,
-    dataCollections: parseDataCollectionListDTO(dataflowDTO.dataCollections),
-    datasets: parseDatasetListDTO(dataflowDTO.reportingDatasets),
-    description: dataflowDTO.description,
-    designDatasets: parseDatasetListDTO(dataflowDTO.designDatasets),
-    documents: parseDocumentListDTO(dataflowDTO.documents),
-    euDatasets: parseEUDatasetListDTO(dataflowDTO.euDatasets),
-    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
-    id: dataflowDTO.id,
-    isReleasable: dataflowDTO.releasable,
-    manualAcceptance: dataflowDTO.manualAcceptance,
-    name: dataflowDTO.name,
-    obligation: parseObligationDTO(dataflowDTO.obligation),
-    referenceDatasets: parseDatasetListDTO(dataflowDTO.referenceDatasets),
-    reportingDatasetsStatus: dataflowDTO.reportingStatus,
-    representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
-    requestId: dataflowDTO.requestId,
-    showPublicInfo: dataflowDTO.showPublicInfo,
-    status: dataflowDTO.status,
-    testDatasets: parseDatasetListDTO(dataflowDTO.testDatasets),
-    type: dataflowDTO.type,
-    userRole: dataflowDTO.userRole,
-    webLinks: parseWebLinkListDTO(dataflowDTO.weblinks),
-    fmeUserId: dataflowDTO.fmeUserId,
-    dataProviderGroupId: dataflowDTO.dataProviderGroupId
-  });
-
-const parseDataCollectionListDTO = dataCollectionsDTO => {
-  if (!isNull(dataCollectionsDTO) && !isUndefined(dataCollectionsDTO)) {
-    const dataCollections = [];
-    dataCollectionsDTO.forEach(dataCollectionDTO => {
-      dataCollections.push(parseDataCollectionDTO(dataCollectionDTO));
-    });
-    return dataCollections;
-  }
-  return;
-};
-
-const parseDataCollectionDTO = dataCollectionDTO => {
-  return new DataCollection({
-    creationDate: dataCollectionDTO.creationDate,
-    dataCollectionId: dataCollectionDTO.id,
-    dataCollectionName: dataCollectionDTO.dataSetName,
-    dataflowId: dataCollectionDTO.idDataflow,
-    datasetSchemaId: dataCollectionDTO.datasetSchema,
-    expirationDate: dataCollectionDTO.dueDate,
-    status: dataCollectionDTO.status
-  });
-};
-
-const parseEUDatasetListDTO = euDatasetsDTO => {
-  if (!isNull(euDatasetsDTO) && !isUndefined(euDatasetsDTO)) {
-    const euDatasets = [];
-    euDatasetsDTO.forEach(euDatasetDTO => {
-      euDatasets.push(parseEUDatasetDTO(euDatasetDTO));
-    });
-    return euDatasets;
-  }
-  return;
-};
-
-const parseEUDatasetDTO = euDatasetDTO => {
-  return new EUDataset({
-    creationDate: euDatasetDTO.creationDate,
-    euDatasetId: euDatasetDTO.id,
-    euDatasetName: euDatasetDTO.dataSetName,
-    dataflowId: euDatasetDTO.idDataflow,
-    datasetSchemaId: euDatasetDTO.datasetSchema,
-    expirationDate: euDatasetDTO.dueDate,
-    status: euDatasetDTO.status
-  });
-};
-
-const parseDatasetListDTO = datasetsDTO => {
-  if (!isNull(datasetsDTO) && !isUndefined(datasetsDTO)) {
-    const datasets = [];
-    datasetsDTO.forEach(datasetDTO => {
-      datasets.push(parseDatasetDTO(datasetDTO));
-    });
-    return datasets;
-  }
-  return;
-};
-
-const parseDatasetDTO = datasetDTO =>
-  new Dataset({
-    availableInPublic: datasetDTO.availableInPublic,
-    datasetId: datasetDTO.id,
-    datasetSchemaId: datasetDTO.datasetSchema,
-    datasetSchemaName: datasetDTO.dataSetName,
-    isReleased: datasetDTO.isReleased,
-    isReleasing: datasetDTO.releasing,
-    publicFileName: datasetDTO.publicFileName,
-    referenceDataset: datasetDTO.referenceDataset,
-    releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased).format('YYYY-MM-DD HH:mm') : '-',
-    restrictFromPublic: datasetDTO.restrictFromPublic,
-    name: datasetDTO.nameDatasetSchema,
-    dataProviderId: datasetDTO.dataProviderId,
-    updatable: datasetDTO.updatable
-  });
-
-const parseDocumentListDTO = documentsDTO => {
-  if (!isNull(documentsDTO) && !isUndefined(documentsDTO)) {
-    const documents = [];
-    documentsDTO.forEach(documentDTO => {
-      documents.push(parseDocumentDTO(documentDTO));
-    });
-    return documents;
-  }
-  return;
-};
-
-const parseDocumentDTO = documentDTO => {
-  return new Document({
-    category: documentDTO.category,
-    description: documentDTO.description,
-    id: documentDTO.id,
-    language: documentDTO.language,
-    title: documentDTO.name
-  });
-};
-
-const parseLegalInstrument = legalInstrumentDTO => {
-  if (!isNil(legalInstrumentDTO)) {
-    return new LegalInstrument({
-      alias: legalInstrumentDTO.sourceAlias,
-      id: legalInstrumentDTO.sourceId,
-      title: legalInstrumentDTO.sourceTitle
-    });
-  }
-  return;
-};
-
-const parseObligationDTO = obligationDTO => {
-  if (!isNil(obligationDTO)) {
-    return new Obligation({
-      comment: obligationDTO.comment,
-      countries: obligationDTO.countries,
-      description: obligationDTO.description,
-      expirationDate: !isNil(obligationDTO.nextDeadline)
-        ? dayjs(obligationDTO.nextDeadline).format('YYYY-MM-DD')
-        : null,
-      issues: obligationDTO.issues,
-      legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
-      obligationId: obligationDTO.obligationId,
-      reportingFrequency: obligationDTO.reportFreq,
-      reportingFrequencyDetail: obligationDTO.reportFreqDetail,
-      title: obligationDTO.oblTitle,
-      validSince: obligationDTO.validSince,
-      validTo: obligationDTO.validTo
-    });
-  }
-};
-
-const parseRepresentativeListDTO = representativesDTO => {
-  if (!isNull(representativesDTO) && !isUndefined(representativesDTO)) {
-    const representatives = [];
-    representativesDTO.forEach(representativeDTO => {
-      representatives.push(parseRepresentativeDTO(representativeDTO));
-    });
-    return representatives;
-  }
-  return;
-};
-
-const parseRepresentativeDTO = representativeDTO => {
-  return new Representative({
-    dataProviderGroupId: representativeDTO.dataProviderGroupId,
-    dataProviderId: representativeDTO.dataProviderId,
-    hasDatasets: representativeDTO.hasDatasets,
-    id: representativeDTO.id,
-    isReceiptDownloaded: representativeDTO.receiptDownloaded,
-    isReceiptOutdated: representativeDTO.receiptOutdated,
-    leadReporters: parseLeadReporters(representativeDTO.leadReporters)
-  });
-};
-
-const parseLeadReporters = (leadReporters = []) =>
-  leadReporters.map(leadReporter => ({
-    account: leadReporter.email,
-    id: leadReporter.id,
-    representativeId: leadReporter.representativeId
-  }));
-
-const parseAllDataflowsUserList = allDataflowsUserListDTO => {
-  allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {
-    dataflow.users.forEach((user, usersIndex) => {
-      user.roles.forEach((role, roleIndex) => {
-        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] =
-          UserRoleUtils.getUserRoleLabel(role);
-      });
-    });
-  });
-  const usersList = [];
-  allDataflowsUserListDTO.forEach(dataflow => {
-    const { dataflowId, dataflowName } = dataflow;
-    dataflow.users.forEach(parsedUser => {
-      const { email, roles } = parsedUser;
-      roles.forEach(role => {
-        usersList.push({ dataflowId, dataflowName, email, role });
-      });
-    });
-  });
-  return usersList;
-};
-
-const parseCountriesUserList = usersListDTO => {
-  usersListDTO.forEach((user, usersIndex) => {
-    user.roles.forEach((role, roleIndex) => {
-      usersListDTO[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(role);
-    });
-  });
-  const usersList = [];
-  usersListDTO.forEach(parsedUser => {
-    const { country, email, roles } = parsedUser;
-    roles.forEach(role => {
-      usersList.push({ country, email, role });
-    });
-  });
-  usersList.forEach(user => {
-    if (isNil(user.country)) {
-      user.country = '';
-    }
-  });
-  return usersList;
-};
-
-const parseUsersList = usersListDTO => {
-  usersListDTO.forEach((user, usersIndex) => {
-    user.roles.forEach((role, roleIndex) => {
-      usersListDTO[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(role);
-    });
-  });
-  const usersList = [];
-  usersListDTO.forEach(parsedUser => {
-    const { email, roles } = parsedUser;
-    roles.forEach(role => {
-      usersList.push({ email, role });
-    });
-  });
-  return usersList;
-};
-
-const parseWebLinkListDTO = webLinksDTO => {
-  if (!isNull(webLinksDTO) && !isUndefined(webLinksDTO)) {
-    const webLinks = [];
-    webLinksDTO.forEach(webLinkDTO => {
-      webLinks.push(parseWebLinkDTO(webLinkDTO));
-    });
-    return webLinks;
-  }
-  return;
-};
-
-const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
 
 export const DataflowService = {
   getAll: async userData => {
@@ -348,7 +57,7 @@ export const DataflowService = {
       }
     }
 
-    return parseDataflowDTOs(dataflows);
+    return DataflowUtils.parseSortedDataflowListDTO(dataflows);
   },
 
   create: async (name, description, obligationId, type) =>
@@ -388,7 +97,7 @@ export const DataflowService = {
         if (index === -1) {
           tablePercentages.push(
             [
-              getPercentageOfValue(
+              CoreUtils.getPercentageOfValue(
                 table.totalRecords -
                   (table.totalRecordsWithBlockers +
                     table.totalRecordsWithErrors +
@@ -397,10 +106,10 @@ export const DataflowService = {
                 table.totalRecords
               )
             ],
-            [getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)],
-            [getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)],
-            [getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)],
-            [getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)]
+            [CoreUtils.getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)],
+            [CoreUtils.getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)],
+            [CoreUtils.getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)],
+            [CoreUtils.getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)]
           );
           tableValues.push(
             [
@@ -428,7 +137,7 @@ export const DataflowService = {
           const tableById = tables.filter(tab => tab.tableId === table.idTableSchema)[0];
 
           tableById.tableStatisticPercentages[0].push(
-            getPercentageOfValue(
+            CoreUtils.getPercentageOfValue(
               table.totalRecords -
                 (table.totalRecordsWithBlockers +
                   table.totalRecordsWithErrors +
@@ -439,19 +148,19 @@ export const DataflowService = {
           );
 
           tableById.tableStatisticPercentages[1].push(
-            getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)
+            CoreUtils.getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)
           );
 
           tableById.tableStatisticPercentages[2].push(
-            getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)
+            CoreUtils.getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)
           );
 
           tableById.tableStatisticPercentages[3].push(
-            getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)
+            CoreUtils.getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)
           );
 
           tableById.tableStatisticPercentages[4].push(
-            getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)
+            CoreUtils.getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)
           );
 
           tableById.tableStatisticValues[0].push(
@@ -521,7 +230,7 @@ export const DataflowService = {
 
   getDataflowDetails: async dataflowId => {
     const dataflowDetails = await DataflowRepository.getDataflowDetails(dataflowId);
-    return parseDataflowDTO(dataflowDetails.data);
+    return DataflowUtils.parseDataflowDTO(dataflowDetails.data);
   },
 
   delete: async dataflowId => await DataflowRepository.delete(dataflowId),
@@ -611,7 +320,7 @@ export const DataflowService = {
       sortField
     );
 
-    const publicDataflowsByCountryCodeData = parseDataflowListDTO(
+    const publicDataflowsByCountryCodeData = DataflowUtils.parseDataflowListDTO(
       publicDataflowsByCountryCodeResponse.data.publicDataflows
     );
     publicDataflowsByCountryCodeResponse.data.publicDataflows = publicDataflowsByCountryCodeData;
@@ -621,7 +330,7 @@ export const DataflowService = {
 
   getPublicDataflowData: async dataflowId => {
     const publicDataflowDataDTO = await DataflowRepository.getPublicDataflowData(dataflowId);
-    const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO.data);
+    const publicDataflowData = DataflowUtils.parseDataflowDTO(publicDataflowDataDTO.data);
     publicDataflowData.datasets = orderBy(publicDataflowData.datasets, 'datasetSchemaName');
     return publicDataflowData;
   },
@@ -631,19 +340,19 @@ export const DataflowService = {
 
   getAllDataflowsUserList: async () => {
     const usersListDTO = await DataflowRepository.getAllDataflowsUserList();
-    const usersList = parseAllDataflowsUserList(usersListDTO.data);
+    const usersList = DataflowUtils.parseAllDataflowsUserList(usersListDTO.data);
     return sortBy(usersList, ['dataflowName', 'role']);
   },
 
   getRepresentativesUsersList: async dataflowId => {
     const response = await DataflowRepository.getRepresentativesUsersList(dataflowId);
-    const usersList = parseCountriesUserList(response.data);
+    const usersList = DataflowUtils.parseCountriesUserList(response.data);
     return sortBy(usersList, 'country');
   },
 
   getUserList: async (dataflowId, representativeId) => {
     const response = await DataflowRepository.getUserList(dataflowId, representativeId);
-    const usersList = parseUsersList(response.data);
+    const usersList = DataflowUtils.parseUsersList(response.data);
     return sortBy(usersList, 'role');
   },
 
@@ -661,7 +370,7 @@ export const DataflowService = {
           id: publicDataflow.id,
           isReleasable: publicDataflow.releasable,
           name: publicDataflow.name,
-          obligation: parseObligationDTO(publicDataflow.obligation),
+          obligation: ObligationUtils.parseObligation(publicDataflow.obligation),
           status: publicDataflow.status
         })
     );
@@ -669,11 +378,11 @@ export const DataflowService = {
 
   getReportingDatasets: async dataflowId => {
     const reportingDataflowDTO = await DataflowRepository.getReportingDatasets(dataflowId);
-    const dataflow = parseDataflowDTO(reportingDataflowDTO.data);
-    dataflow.testDatasets.sort(sortDatasetTypeByName);
-    dataflow.datasets.sort(sortDatasetTypeByName);
-    dataflow.designDatasets.sort(sortDatasetTypeByName);
-    dataflow.referenceDatasets.sort(sortDatasetTypeByName);
+    const dataflow = DataflowUtils.parseDataflowDTO(reportingDataflowDTO.data);
+    dataflow.testDatasets.sort(DatasetUtils.sortDatasetTypeByName);
+    dataflow.datasets.sort(DatasetUtils.sortDatasetTypeByName);
+    dataflow.designDatasets.sort(DatasetUtils.sortDatasetTypeByName);
+    dataflow.referenceDatasets.sort(DatasetUtils.sortDatasetTypeByName);
     return dataflow;
   },
 

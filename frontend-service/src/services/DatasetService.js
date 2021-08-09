@@ -1,5 +1,4 @@
 import capitalize from 'lodash/capitalize';
-import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -7,6 +6,8 @@ import isUndefined from 'lodash/isUndefined';
 
 import { DatasetRepository } from 'repositories/DatasetRepository';
 import { ValidationRepository } from 'repositories/ValidationRepository';
+
+import { DatasetUtils } from 'services/_utils/DatasetUtils';
 
 import { Dataset } from 'entities/Dataset';
 import { DatasetError } from 'entities/DatasetError';
@@ -16,119 +17,6 @@ import { DatasetTableRecord } from 'entities/DatasetTableRecord';
 import { Validation } from 'entities/Validation';
 
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
-
-const getAllLevelErrorsFromRuleValidations = rulesDTO =>
-  CoreUtils.orderLevelErrors([
-    ...new Set(rulesDTO.rules.map(rule => rule.thenCondition).map(condition => condition[1]))
-  ]);
-
-const isValidJSON = value => {
-  if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) return false;
-  try {
-    JSON.parse(value);
-  } catch (error) {
-    return false;
-  }
-  return true;
-};
-
-const tableStatisticValuesWithErrors = tableStatisticValues => {
-  let tableStatisticValuesWithSomeError = [];
-  let valuesWithValidations = CoreUtils.transposeMatrix(tableStatisticValues).map(error => {
-    return error.map(subError => {
-      return subError;
-    });
-  });
-  valuesWithValidations.forEach(item => {
-    if (!isNil(item) && !item.every(value => value === 0)) {
-      tableStatisticValuesWithSomeError.push(item);
-    }
-  });
-  return tableStatisticValuesWithSomeError;
-};
-
-const parseValue = (type, value, feToBe = false) => {
-  if (
-    ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type) &&
-    value !== '' &&
-    !isNil(value)
-  ) {
-    if (!isValidJSON(value)) {
-      return '';
-    }
-    const inmValue = JSON.parse(cloneDeep(value));
-    const parsedValue = JSON.parse(value);
-
-    if (parsedValue.geometry.type.toUpperCase() !== type) {
-      if (type.toUpperCase() === 'POINT') {
-        return '';
-      }
-      inmValue.geometry.type = type;
-      inmValue.geometry.coordinates = [];
-    } else {
-      switch (type.toUpperCase()) {
-        case 'POINT':
-          inmValue.geometry.coordinates = [parsedValue.geometry.coordinates[1], parsedValue.geometry.coordinates[0]];
-          break;
-        case 'MULTIPOINT':
-        case 'LINESTRING':
-          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
-            !isNil(coordinate) ? [coordinate[1], coordinate[0]] : []
-          );
-          break;
-        case 'POLYGON':
-        case 'MULTILINESTRING':
-          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate => {
-            if (Array.isArray(coordinate)) {
-              return coordinate.map(innerCoordinate =>
-                !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
-              );
-            } else {
-              return [];
-            }
-          });
-          break;
-        case 'MULTIPOLYGON':
-          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon => {
-            if (Array.isArray(polygon)) {
-              return polygon.map(coordinate => {
-                if (Array.isArray(coordinate)) {
-                  return coordinate.map(innerCoordinate =>
-                    !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
-                  );
-                } else {
-                  return [];
-                }
-              });
-            } else {
-              return [];
-            }
-          });
-          break;
-        default:
-          break;
-      }
-    }
-
-    if (!feToBe) {
-      inmValue.properties.srid = `EPSG:${parsedValue.properties.srid}`;
-    } else {
-      inmValue.properties.srid = parsedValue.properties.srid.split(':')[1];
-    }
-
-    return JSON.stringify(inmValue);
-  }
-  return value;
-};
-
-// const getPercentage = valArr => {
-//   let total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));
-//   return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
-// };
-
-// const transposeMatrix = matrix => {
-//   return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
-// };
 
 export const DatasetService = {
   createRecordDesign: async (datasetId, datasetTableRecordField) => {
@@ -160,7 +48,7 @@ export const DatasetService = {
         newField.id = null;
         newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
         newField.type = dataTableFieldDTO.fieldData.type;
-        newField.value = parseValue(
+        newField.value = DatasetUtils.parseValue(
           dataTableFieldDTO.fieldData.type,
           dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
           true
@@ -251,7 +139,7 @@ export const DatasetService = {
 
     //In design datasets the statistics are not generated until validation is executed, so we have to do a sanity check for those cases
     const tableBarStatisticValues = !isEmpty(tableStatisticValues)
-      ? tableStatisticValuesWithErrors(tableStatisticValues)
+      ? DatasetUtils.tableStatisticValuesWithErrors(tableStatisticValues)
       : [];
     levelErrors = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
     dataset.levelErrorTypes = levelErrors;
@@ -387,7 +275,9 @@ export const DatasetService = {
       datasetSchemaId: datasetSchemaDTO.data.idDataSetSchema,
       datasetSchemaName: datasetSchemaDTO.data.nameDatasetSchema,
       levelErrorTypes:
-        !isUndefined(rulesDTO.data) && rulesDTO.data !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO.data) : [],
+        !isUndefined(rulesDTO.data) && rulesDTO.data !== ''
+          ? DatasetUtils.getAllLevelErrorsFromRuleValidations(rulesDTO.data)
+          : [],
       referenceDataset: datasetSchemaDTO.data.referenceDataset,
       webform: datasetSchemaDTO.data.webform ? datasetSchemaDTO.data.webform.name : null
     });
@@ -482,7 +372,7 @@ export const DatasetService = {
           name: DataTableFieldDTO.name,
           recordId: dataTableRecordDTO.idRecordSchema,
           type: DataTableFieldDTO.type,
-          value: parseValue(DataTableFieldDTO.type, DataTableFieldDTO.value)
+          value: DatasetUtils.parseValue(DataTableFieldDTO.type, DataTableFieldDTO.value)
         });
 
         if (!isNull(DataTableFieldDTO.fieldValidations)) {
@@ -529,7 +419,7 @@ export const DatasetService = {
     datasetTableField.id = fieldId;
     datasetTableField.idFieldSchema = fieldSchemaId;
     datasetTableField.type = fieldType;
-    datasetTableField.value = parseValue(fieldType, fieldValue, true);
+    datasetTableField.value = DatasetUtils.parseValue(fieldType, fieldValue, true);
 
     return await DatasetRepository.updateField(datasetId, datasetTableField, updateInCascade);
   },
@@ -560,7 +450,7 @@ export const DatasetService = {
       newField.id = dataTableFieldDTO.fieldData.id;
       newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
       newField.type = dataTableFieldDTO.fieldData.type;
-      newField.value = parseValue(
+      newField.value = DatasetUtils.parseValue(
         dataTableFieldDTO.fieldData.type,
         dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
         true

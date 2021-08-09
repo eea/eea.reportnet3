@@ -1,4 +1,4 @@
-export const UniqueConstraintsConfig = {
+export const UniqueConstraintConfig = {
   getAll: '/dataschema/{:datasetSchemaId}/getUniqueConstraints/dataflow/{:dataflowId}',
   create: '/dataschema/createUniqueConstraint',
   delete: '/dataschema/deleteUniqueConstraint/{:uniqueConstraintId}/dataflow/{:dataflowId}',
