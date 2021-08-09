@@ -1,3 +1,5 @@
+import { Fragment } from 'react';
+
 import styles from './CharacterCounter.module.scss';
 
 const CharacterCounter = ({ currentLength, maxLength }) => {
