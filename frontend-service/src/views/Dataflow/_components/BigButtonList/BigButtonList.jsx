@@ -351,7 +351,7 @@ export const BigButtonList = ({
 
     showLoading();
     try {
-      await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
+      await DatasetService.deleteSchema(dataflowState.designDatasetSchemas[index].datasetId);
       onUpdateData();
       setUpdatedDatasetSchema(remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex !== index));
     } catch (error) {

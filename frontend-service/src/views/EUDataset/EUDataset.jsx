@@ -120,17 +120,17 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const getDataSchema = async () => {
     try {
-      const datasetSchema = await DatasetService.schemaById(datasetId);
+      const datasetSchema = await DatasetService.getSchema(datasetId);
       euDatasetDispatch({
         type: 'GET_DATA_SCHEMA',
         payload: {
-          allTables: datasetSchema.data.tables,
-          errorTypes: datasetSchema.data.levelErrorTypes,
-          schemaId: datasetSchema.data.datasetSchemaId,
-          schemaName: datasetSchema.data.datasetSchemaName
+          allTables: datasetSchema.tables,
+          errorTypes: datasetSchema.levelErrorTypes,
+          schemaId: datasetSchema.datasetSchemaId,
+          schemaName: datasetSchema.datasetSchemaName
         }
       });
-      return datasetSchema.data;
+      return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
     }
@@ -167,8 +167,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
     try {
-      const statistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
-      return statistics.data;
+      return await DatasetService.getStatistics(datasetId, tableSchemaNames);
     } catch (error) {
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
     }
@@ -181,7 +180,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
-      await DatasetService.exportDataById(datasetId, fileType);
+      await DatasetService.exportDatasetData(datasetId, fileType);
     } catch (error) {
       console.error('EUDataset - onExportDataInternalExtension.', error);
       const {

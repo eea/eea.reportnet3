@@ -131,14 +131,14 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const onLoadDatasetSchema = async datasetId => {
     try {
-      const datasetSchema = await DatasetService.schemaById(datasetId);
+      const datasetSchema = await DatasetService.getSchema(datasetId);
 
-      if (!isEmpty(datasetSchema.data)) {
+      if (!isEmpty(datasetSchema)) {
         if (isCustodian) {
           const datasetMetaData = await DatasetService.getMetaData(datasetId);
-          datasetSchema.data.datasetSchemaName = datasetMetaData.data.datasetSchemaName;
+          datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
         }
-        return datasetSchema.data;
+        return datasetSchema;
       }
     } catch (error) {
       console.error('DataflowHelp - onLoadDatasetSchema.', error);

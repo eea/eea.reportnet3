@@ -135,7 +135,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const onSaveDatasetName = async (value, index) => {
     try {
-      await DatasetService.updateSchemaNameById(
+      await DatasetService.updateDatasetNameDesign(
         dataflowState.designDatasetSchemas[index].datasetId,
         encodeURIComponent(value)
       );

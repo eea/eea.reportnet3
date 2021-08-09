@@ -94,7 +94,7 @@ export const NationalSystemsField = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
-      await DatasetService.deleteFileData(datasetId, field.fieldId);
+      await DatasetService.deleteAttachment(datasetId, field.fieldId);
       onFillField(field, field.fieldSchemaId, '');
       handleDialogs('deleteAttachment', false);
     } catch (error) {
@@ -114,7 +114,7 @@ export const NationalSystemsField = ({
         : value;
 
     try {
-      await DatasetService.updateFieldById(datasetId, option, field.fieldId, field.fieldType, parsedValue);
+      await DatasetService.updateField(datasetId, option, field.fieldId, field.fieldType, parsedValue);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -128,7 +128,6 @@ export const NationalSystemsField = ({
   const onFileDownload = async (fileName, fieldId) => {
     try {
       const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
-
       DownloadFile(data, fileName);
     } catch (error) {
       console.error('NationalSystemsField - onFileDownload.', error);
@@ -376,7 +375,7 @@ export const NationalSystemsField = ({
           onError={onUploadFileError}
           onUpload={onAttachFile}
           operation={'PUT'}
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
             datasetId,
             fieldId: field.fieldId
           })}`}

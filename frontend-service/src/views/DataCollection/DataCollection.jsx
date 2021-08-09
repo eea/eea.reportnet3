@@ -122,7 +122,7 @@ export const DataCollection = withRouter(({ match, history }) => {
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
-      await DatasetService.exportDataById(datasetId, fileType);
+      await DatasetService.exportDatasetData(datasetId, fileType);
     } catch (error) {
       console.error('DataCollection - onExportDataInternalExtension.', error);
       const {
@@ -170,11 +170,11 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async () => {
     try {
       setLoading(true);
-      const datasetSchema = await DatasetService.schemaById(datasetId);
-      setLevelErrorTypes(datasetSchema.data.levelErrorTypes);
+      const datasetSchema = await DatasetService.getSchema(datasetId);
+      setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const tableSchemaNamesList = [];
       setTableSchema(
-        datasetSchema.data.tables.map(tableSchema => {
+        datasetSchema.tables.map(tableSchema => {
           tableSchemaNamesList.push(tableSchema.tableSchemaName);
           return {
             id: tableSchema['tableSchemaId'],
@@ -184,7 +184,7 @@ export const DataCollection = withRouter(({ match, history }) => {
         })
       );
       setTableSchemaColumns(
-        datasetSchema.data.tables.map(table => {
+        datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
             return {
               codelistItems: field['codelistItems'],
@@ -218,7 +218,7 @@ export const DataCollection = withRouter(({ match, history }) => {
         }
       } = error;
       const datasetError = { type: '', content: { dataflowId, datasetId, dataflowName, datasetName } };
-      if (!isUndefined(path) && path.includes(getUrl(DatasetConfig.dataSchema, { datasetId }))) {
+      if (!isUndefined(path) && path.includes(getUrl(DatasetConfig.getSchema, { datasetId }))) {
         datasetError.type = 'SCHEMA_BY_ID_ERROR';
       } else {
         datasetError.type = 'ERROR_STATISTICS_BY_ID_ERROR';
