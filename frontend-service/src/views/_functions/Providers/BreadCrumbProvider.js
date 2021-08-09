@@ -1,6 +1,6 @@
 import { useReducer } from 'react';
 
-import { BreadCrumbContext } from 'views/_functions/Contexts/BreadCrumbContext.js';
+import { BreadCrumbContext } from 'views/_functions/Contexts/BreadCrumbContext';
 
 const breadCrumbReducer = (state, { type, payload }) => {
   switch (type) {

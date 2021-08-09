@@ -47,7 +47,7 @@ export const ManageBusinessDataflow = ({
   onEditDataflow,
   resetObligations
 }) => {
-  const dialogName = isEditing ? 'isEditDialogVisible' : 'isBusinessDataflowDialogVisible';
+  const dialogName = 'isBusinessDataflowDialogVisible';
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
   const { hideLoading, showLoading } = useContext(LoadingContext);
@@ -61,6 +61,19 @@ export const ManageBusinessDataflow = ({
   const [description, setDescription] = useState(isEditing ? metadata.description : '');
   const [groupOfCompanies, setGroupOfCompanies] = useState([]);
   const [fmeUsers, setFmeUsers] = useState([]);
+
+  useEffect(() => {
+    if (isEditing) {
+      setSelectedFmeUser(fmeUsers.filter(user => user.id === metadata.fmeUserId)[0]);
+    }
+  }, [fmeUsers]);
+
+  useEffect(() => {
+    if (isEditing) {
+      setSelectedGroup(groupOfCompanies.filter(group => group.dataProviderGroupId === metadata.dataProviderGroupId)[0]);
+      console.log(`groupOfCompanies`, groupOfCompanies);
+    }
+  }, [groupOfCompanies]);
 
   const [errors, setErrors] = useState({
     description: { hasErrors: false, message: '' },
@@ -149,7 +162,7 @@ export const ManageBusinessDataflow = ({
     try {
       setIsSending(true);
       if (isEditing) {
-        const { status } = await BusinessDataflowService.edit(
+        const { status } = await BusinessDataflowService.update(
           dataflowId,
           description,
           obligation.id,
@@ -242,8 +255,8 @@ export const ManageBusinessDataflow = ({
           !isEmpty(name) &&
           !isEmpty(description) &&
           !isNil(obligation.id) &&
-          !isNil(selectedFmeUser.id) &&
-          !isNil(selectedGroup.dataProviderGroupId) &&
+          !isNil(selectedFmeUser?.id) &&
+          !isNil(selectedGroup?.dataProviderGroupId) &&
           !isSending &&
           'p-button-animated-blink'
         }`}
@@ -251,8 +264,8 @@ export const ManageBusinessDataflow = ({
           isEmpty(name) ||
           isEmpty(description) ||
           isNil(obligation.id) ||
-          isNil(selectedFmeUser.id) ||
-          isNil(selectedGroup.dataProviderGroupId) ||
+          isNil(selectedFmeUser?.id) ||
+          isNil(selectedGroup?.dataProviderGroupId) ||
           isSending
         }
         icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}

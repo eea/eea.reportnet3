@@ -11,7 +11,7 @@ export const BusinessDataflowRepository = {
       data: { name, description, obligation: { obligationId }, type: 'BUSINESS', dataProviderGroupId, fmeUserId }
     }),
 
-  edit: async (dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId) =>
+  update: async (dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId) =>
     await HTTPRequester.update({
       url: getUrl(BusinessDataflowConfig.createUpdateReferenceDataflow),
       data: {
