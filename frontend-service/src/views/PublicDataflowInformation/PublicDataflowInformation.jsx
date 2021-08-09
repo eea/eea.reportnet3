@@ -262,7 +262,7 @@ export const PublicDataflowInformation = withRouter(
 
     const onLoadDataflowData = async () => {
       try {
-        const { data } = await DataflowService.getPublicDataflowData(dataflowId);
+        const data = await DataflowService.getPublicDataflowData(dataflowId);
         setDataflowData(data);
         parseDataflowData(data.datasets);
         setReferenceDatasets(data.referenceDatasets);

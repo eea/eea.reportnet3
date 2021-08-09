@@ -125,10 +125,8 @@ export const WebformTable = ({
         : parseNewTableRecord(filteredTable, selectedTable.pamsId, sectorObjectivesTable);
 
       try {
-        const response = await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
-        if (response.status >= 200 && response.status <= 299) {
-          onUpdateData();
-        }
+        await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
+        onUpdateData();
       } catch (error) {
         console.error('WebformTable - onAddMultipleWebform.', error);
         if (error.response.status === 423) {

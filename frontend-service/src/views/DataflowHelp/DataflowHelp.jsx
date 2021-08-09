@@ -121,7 +121,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const getDataflowName = async () => {
     try {
-      const { data } = await DataflowService.dataflowDetails(dataflowId);
+      const data = await DataflowService.getDataflowDetails(dataflowId);
       setDataflowName(data.name);
     } catch (error) {
       console.error('DataflowHelp - getDataflowName.', error);
@@ -148,7 +148,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const onLoadDatasetsSchemas = async () => {
     try {
-      const { data } = await DataflowService.reporting(dataflowId);
+      const data = await DataflowService.getReportingDatasets(dataflowId);
       setIsBusinessDataflow(false); // TODO WITH REAL DATA
       setIsLoading(false);
       if (!isCustodian) {

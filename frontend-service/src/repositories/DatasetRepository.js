@@ -2,7 +2,7 @@ import { DatasetConfig } from './config/DatasetConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const datasetRepository = {
+export const DatasetRepository = {
   addRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
     return await HTTPRequester.post({
       url: getUrl(DatasetConfig.addNewRecordFieldDesign, { datasetId }),

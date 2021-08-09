@@ -111,7 +111,7 @@ const RepresentativesList = ({
   const getAllDataProviders = async () => {
     const { representatives, selectedDataProviderGroup } = formState;
     try {
-      const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
+      const responseAllDataProviders = await RepresentativeService.getAllDataProviders(selectedDataProviderGroup);
 
       const providersNoSelect = [...responseAllDataProviders];
       if (representatives.length <= responseAllDataProviders.length) {
@@ -128,8 +128,8 @@ const RepresentativesList = ({
   };
 
   const getInitialData = async () => {
-    await getGroupProviders();
-    await getAllRepresentatives();
+    await getGroupCountries();
+    await getRepresentatives();
 
     if (!isEmpty(formState.representatives)) {
       await getAllDataProviders();
@@ -137,28 +137,27 @@ const RepresentativesList = ({
     }
   };
 
-  const getAllRepresentatives = async () => {
+  const getRepresentatives = async () => {
     try {
-      let responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-
-      const parsedLeadReporters = parseLeadReporters(responseAllRepresentatives.representatives);
+      let responseRepresentatives = await RepresentativeService.getRepresentatives(dataflowId);
+      const parsedLeadReporters = parseLeadReporters(responseRepresentatives.representatives);
 
       formDispatcher({
         type: 'INITIAL_LOAD',
-        payload: { response: responseAllRepresentatives, parsedLeadReporters }
+        payload: { response: responseRepresentatives, parsedLeadReporters }
       });
     } catch (error) {
-      console.error('RepresentativesList - getAllRepresentatives.', error);
+      console.error('RepresentativesList - getRepresentatives.', error);
       notificationContext.add({ type: 'GET_REPRESENTATIVES_ERROR' });
     }
   };
 
-  const getGroupProviders = async () => {
+  const getGroupCountries = async () => {
     try {
-      const providerTypes = await RepresentativeService.getGroupProviders();
-      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: providerTypes.data } });
+      const response = await RepresentativeService.getGroupCountries();
+      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: response.data } });
     } catch (error) {
-      console.error('RepresentativesList - getGroupProviders.', error);
+      console.error('RepresentativesList - getGroupCountries.', error);
     }
   };
 
@@ -173,7 +172,7 @@ const RepresentativesList = ({
     if (!isEmpty(newRepresentative[0].dataProviderId)) {
       formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
       try {
-        await RepresentativeService.add(
+        await RepresentativeService.createDataProvider(
           dataflowId,
           formState.selectedDataProviderGroup.dataProviderGroupId,
           parseInt(newRepresentative[0].dataProviderId)
@@ -232,7 +231,7 @@ const RepresentativesList = ({
   const onDeleteConfirm = async () => {
     setIsDeleting(true);
     try {
-      await RepresentativeService.deleteById(formState.representativeIdToDelete, dataflowId);
+      await RepresentativeService.deleteRepresentative(formState.representativeIdToDelete, dataflowId);
 
       const updatedList = formState.representatives.filter(
         representative => representative.representativeId !== formState.representativeIdToDelete
@@ -251,11 +250,8 @@ const RepresentativesList = ({
   const onDeleteLeadReporter = async () => {
     setIsDeleting(true);
     try {
-      const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId, dataflowId);
-
-      if (response.status >= 200 && response.status <= 299) {
-        formDispatcher({ type: 'REFRESH' });
-      }
+      await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId, dataflowId);
+      formDispatcher({ type: 'REFRESH' });
     } catch (error) {
       console.error('RepresentativesList - onDeleteLeadReporter.', error);
       notificationContext.add({ type: 'DELETE_LEAD_REPORTER_ERROR' });
@@ -267,7 +263,7 @@ const RepresentativesList = ({
 
   const onExportLeadReportersTemplate = async () => {
     try {
-      const { data } = await RepresentativeService.downloadTemplateById(
+      const { data } = await RepresentativeService.exportTemplateFile(
         formState.selectedDataProviderGroup?.dataProviderGroupId
       );
       if (!isNil(data)) {
@@ -288,19 +284,16 @@ const RepresentativesList = ({
   };
 
   const onSubmitLeadReporter = async (inputValue, representativeId, dataProviderId, leadReporter) => {
-    const { addLeadReporter, updateLeadReporter } = RepresentativeService;
     const hasErrors = true;
 
     if (!TextUtils.areEquals(inputValue, leadReporter.account)) {
       if (isValidEmail(inputValue) && !isDuplicatedLeadReporter(inputValue, dataProviderId, formState.leadReporters)) {
         try {
-          const response = TextUtils.areEquals(leadReporter.id, 'empty')
-            ? await addLeadReporter(inputValue, representativeId, dataflowId)
-            : await updateLeadReporter(inputValue, leadReporter.id, representativeId, dataflowId);
+          TextUtils.areEquals(leadReporter.id, 'empty')
+            ? await RepresentativeService.createLeadReporter(inputValue, representativeId, dataflowId)
+            : await RepresentativeService.updateLeadReporter(inputValue, leadReporter.id, representativeId, dataflowId);
 
-          if (response.status >= 200 && response.status <= 299) {
-            formDispatcher({ type: 'REFRESH' });
-          }
+          formDispatcher({ type: 'REFRESH' });
         } catch (error) {
           console.error('RepresentativesList - onSubmitLeadReporter.', error);
           onCreateError(dataProviderId, hasErrors, leadReporter.id);
