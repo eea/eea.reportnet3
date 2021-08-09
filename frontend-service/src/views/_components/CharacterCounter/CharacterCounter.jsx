@@ -1,16 +1,8 @@
-import { Fragment } from 'react';
-
 import styles from './CharacterCounter.module.scss';
 
 const CharacterCounter = ({ currentLength, maxLength }) => {
   return (
-    <Fragment>
-      {currentLength > 245 ? (
-        <p className={styles.redCharacterCount}>{`${currentLength}/${maxLength}`}</p>
-      ) : (
-        <p className={styles.characterCount}>{`${currentLength}/${maxLength}`}</p>
-      )}
-    </Fragment>
+      <p className={currentLength>245 ? styles.redCharacterCount : styles.characterCount} /> 
   );
 };
 export { CharacterCounter };
