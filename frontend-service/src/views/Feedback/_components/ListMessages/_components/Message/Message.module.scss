@@ -1,0 +1,205 @@
+.message {
+  max-width: 50%;
+  background: #ebebeb;
+  margin: 10px 0 3px 25px;
+  box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.2);
+
+  &.sender {
+    border-radius: 10px 0px 10px 10px;
+    margin: 10px 25px 3px 0px;
+    background: var(--c-corporate-blue);
+    align-self: flex-end;
+    .messageTextWrapper {
+      .messageText {
+        color: var(--white);
+      }
+      .datetime {
+        color: var(--gray-5);
+      }
+      .messageAttachment {
+        background-color: var(--c-corporate-blue-lighter);
+        border-radius: 6px;
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        width: 14rem;
+        span {
+          color: var(--white);
+        }
+        .downloadFileButton {
+          margin-left: auto;
+          &:hover {
+            background-color: transparent;
+          }
+          span {
+            &:first-child {
+              display: none;
+            }
+            &:nth-child(2) {
+              font-size: 18pt;
+            }
+          }
+        }
+        .messageAttachmentFile {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          div {
+            span {
+              font-size: 10pt;
+            }
+          }
+          svg {
+            color: var(--white);
+            font-size: 16pt;
+          }
+        }
+        .messageAttachmentFileData {
+          margin-top: 0.5rem;
+          span {
+            color: var(--gray-15);
+            font-size: 8pt;
+            font-style: italic;
+          }
+        }
+      }
+    }
+    @media (max-width: 468px) {
+      margin-right: 10px;
+    }
+  }
+  &.receiver {
+    align-self: flex-start;
+    border-radius: 0 10px 10px 10px;
+    margin: 10px 0 3px 25px;
+    color: var(--white);
+    background: var(--c-lilac-100);
+    .messageTextWrapper {
+      .messageText {
+        color: var(--c-black-400);
+      }
+      .datetime {
+        color: var(--gray-75);
+      }
+      .messageAttachment {
+        background-color: var(--c-lilac-200);
+        border-radius: 6px;
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        width: 14rem;
+        span {
+          color: var(--c-lilac-400);
+        }
+        .downloadFileButton {
+          margin-left: auto;
+          &:hover {
+            background-color: transparent;
+          }
+          span {
+            &:first-child {
+              display: none;
+            }
+            &:nth-child(2) {
+              font-size: 18pt;
+            }
+          }
+        }
+        .messageAttachmentFile {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          div {
+            span {
+              font-size: 10pt;
+            }
+          }
+          svg {
+            color: var(--c-lilac-400);
+            font-size: 16pt;
+          }
+        }
+        .messageAttachmentFileData {
+          margin-top: 0.5rem;
+          span {
+            color: var(--c-lilac-400);
+            font-size: 8pt;
+            font-style: italic;
+          }
+        }
+      }
+    }
+    @media (max-width: 468px) {
+      margin-left: 10px;
+    }
+  }
+
+  .messageTextWrapper {
+    padding: 1rem;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    .messageText {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .datetime {
+      font-size: 0.7rem;
+      text-align: right;
+      white-space: nowrap;
+      margin-left: 0.5rem;
+    }
+  }
+  .bubbleArrow {
+    position: absolute;
+    float: left;
+    left: -11px;
+    top: 0px;
+    &.sender {
+      bottom: 20px;
+      left: auto;
+      right: 4px;
+      float: right;
+    }
+  }
+  .bubbleArrow:after {
+    content: '';
+    position: absolute;
+    border-top: 15px solid #ebebeb;
+    border-left: 15px solid transparent;
+    border-radius: 4px 0 0 0px;
+    width: 0;
+    height: 0;
+  }
+  .bubbleArrow.sender:after {
+    border-top: 15px solid #dcf8c6;
+    transform: scaleX(-1);
+  }
+  @media (max-width: 468px) {
+    max-width: 85%;
+  }
+}
+
+.unreadSeparator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1rem 10rem;
+  font-style: italic;
+  font-weight: bold;
+  color: var(--feedback-separator-color);
+}
+.unreadSeparator::before,
+.unreadSeparator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--main-font-color);
+}
+.unreadSeparator::before {
+  margin-right: 0.25em;
+}
+.unreadSeparator::after {
+  margin-left: 0.25em;
+}

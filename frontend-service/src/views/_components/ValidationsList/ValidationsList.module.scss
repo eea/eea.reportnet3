@@ -1,0 +1,128 @@
+@import '_styles/mixins';
+
+.validations {
+  height: 75vh;
+}
+
+.validationsWithoutTable {
+  height: 75vh;
+}
+
+.emptyFilteredData,
+.noValidations {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.emptyFilteredData {
+  height: 75%;
+}
+
+.noValidations {
+  height: 100%;
+}
+
+.loadingSpinner {
+  height: 95%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+}
+
+.positioning {
+  position: sticky !important;
+}
+
+.tabsValidations {
+  margin: 0.5em 0;
+}
+
+.searchInput {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  margin: 0 0 1rem 0;
+
+  > span {
+    margin-right: 2rem;
+  }
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .btnDelete {
+    border: 1px solid var(--c-custom-gray) !important;
+    box-shadow: 0em var(--blue-100) !important;
+    color: var(--errors) !important;
+    margin-left: 3px !important;
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+  .btnEdit {
+    border: 1px solid var(--c-custom-gray) !important;
+    box-shadow: 0em var(--blue-100) !important;
+    color: var(--main-color-font) !important;
+    margin-left: 3px !important;
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+}
+
+.checkedValueColumn {
+  text-align: center;
+
+  .icon {
+    color: var(--main-color-font);
+  }
+
+  .spinner {
+    animation: spinnerAnimation 0.75s linear infinite;
+  }
+}
+
+.paginatorValidationViewer :global .p-dropdown-panel {
+  top: -6rem !important;
+}
+
+.levelErrorTemplateWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+@keyframes spinnerAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.actionTemplate {
+  display: flex;
+  justify-content: center;
+}
+.editRowButton {
+  border: 1px solid var(--c-custom-gray) !important;
+  @include shadow-0em;
+  margin-left: 3px !important;
+}
+.deleteRowButton {
+  @extend .editRowButton;
+  color: var(--errors) !important;
+}
