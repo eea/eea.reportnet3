@@ -465,8 +465,9 @@ export const TabsDesigner = withRouter(
         if (status >= 200 && status <= 299) {
           const inmTabs = [...tabs];
           inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
-          inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].tableSchemaName =
-            tableSchemaName;
+          inmTabs[
+            TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')
+          ].tableSchemaName = tableSchemaName;
           setTabs(inmTabs);
         }
       } catch (error) {
