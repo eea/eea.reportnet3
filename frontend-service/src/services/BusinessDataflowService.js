@@ -33,7 +33,8 @@ const parseDataflowDTO = dataflowDTO =>
     obligation: ObligationService.parseObligation(dataflowDTO.obligation),
     status: dataflowDTO.status,
     type: dataflowDTO.type,
-    userRole: dataflowDTO.userRole
+    userRole: dataflowDTO.userRole,
+    fmeUserId: dataflowDTO.fmeUserId
   });
 
 export const BusinessDataflowService = {

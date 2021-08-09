@@ -81,7 +81,9 @@ const parseDataflowDTO = dataflowDTO =>
     testDatasets: parseDatasetListDTO(dataflowDTO.testDatasets),
     type: dataflowDTO.type,
     userRole: dataflowDTO.userRole,
-    webLinks: parseWebLinkListDTO(dataflowDTO.weblinks)
+    webLinks: parseWebLinkListDTO(dataflowDTO.weblinks),
+    fmeUserId: dataflowDTO.fmeUserId,
+    dataProviderGroupId: dataflowDTO.dataProviderGroupId
   });
 
 const parseDataCollectionListDTO = dataCollectionsDTO => {
