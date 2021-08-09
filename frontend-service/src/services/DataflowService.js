@@ -27,353 +27,13 @@ import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
-const all = async userData => {
-  const dataflowsDTO = await DataflowRepository.all();
-  const dataflows = !userData ? dataflowsDTO.data : [];
-
-  if (userData) {
-    const userRoles = [];
-    const dataflowsRoles = userData.filter(role => role.includes(config.permissions.prefixes.DATAFLOW));
-    dataflowsRoles.map((item, i) => {
-      const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
-
-      return (userRoles[i] = { id: parseInt(item.replace(/\D/g, '')), userRole: UserRoleUtils.getUserRoleLabel(role) });
-    });
-
-    for (let index = 0; index < dataflowsDTO.data.length; index++) {
-      const dataflow = dataflowsDTO.data[index];
-      const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
-      const isOpen = dataflow.status === config.dataflowStatus.OPEN;
-
-      if (isOpen) {
-        dataflow.releasable ? (dataflow.status = 'OPEN') : (dataflow.status = 'CLOSED');
-      }
-
-      dataflows.push({
-        ...dataflow,
-        ...(isDuplicated ? UserRoleUtils.getUserRoles(userRoles) : userRoles).find(item => item.id === dataflow.id)
-      });
-    }
-  }
-
-  dataflowsDTO.data = parseDataflowDTOs(dataflows);
-
-  return dataflowsDTO;
+const sortDatasetTypeByName = (a, b) => {
+  let datasetName_A = a.datasetSchemaName;
+  let datasetName_B = b.datasetSchemaName;
+  return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
 };
-
-const create = async (name, description, obligationId, type) => {
-  return await DataflowRepository.create(name, description, obligationId, type);
-};
-
-const cloneDatasetSchemas = async (sourceDataflowId, targetDataflowId) =>
-  await DataflowRepository.cloneDatasetSchemas(sourceDataflowId, targetDataflowId);
-
-const datasetsValidationStatistics = async (dataflowId, datasetSchemaId) => {
-  const datasetsDashboardsDataDTO = await DataflowRepository.datasetsValidationStatistics(dataflowId, datasetSchemaId);
-  datasetsDashboardsDataDTO.data.sort((a, b) => {
-    let datasetName_A = a.nameDataSetSchema;
-    let datasetName_B = b.nameDataSetSchema;
-    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-  });
-
-  const datasetsDashboardsData = {};
-  datasetsDashboardsData.datasetId = datasetsDashboardsDataDTO.data.idDataSetSchema;
-
-  const datasetReporters = [];
-  const tables = [];
-  let tablePercentages = [];
-  let tableValues = [];
-  let levelErrors = [];
-  const allDatasetLevelErrors = [];
-  datasetsDashboardsDataDTO.data.forEach(dataset => {
-    datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
-    datasetReporters.push({ reporterName: dataset.nameDataSetSchema });
-    allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(dataset));
-    dataset.tables.forEach((table, i) => {
-      let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
-      //Check if table has been already added
-      if (index === -1) {
-        tablePercentages.push(
-          [
-            getPercentageOfValue(
-              table.totalRecords -
-                (table.totalRecordsWithBlockers +
-                  table.totalRecordsWithErrors +
-                  table.totalRecordsWithWarnings +
-                  table.totalRecordsWithInfos),
-              table.totalRecords
-            )
-          ],
-          [getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)],
-          [getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)],
-          [getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)],
-          [getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)]
-        );
-        tableValues.push(
-          [
-            table.totalRecords -
-              (table.totalRecordsWithBlockers +
-                table.totalRecordsWithErrors +
-                table.totalRecordsWithWarnings +
-                table.totalRecordsWithInfos)
-          ],
-          [table.totalRecordsWithInfos],
-          [table.totalRecordsWithWarnings],
-          [table.totalRecordsWithErrors],
-          [table.totalRecordsWithBlockers]
-        );
-
-        tables.push({
-          tableId: table.idTableSchema,
-          tableName: table.nameTableSchema,
-          tableStatisticPercentages: tablePercentages,
-          tableStatisticValues: tableValues
-        });
-        tablePercentages = [];
-        tableValues = [];
-      } else {
-        const tableById = tables.filter(tab => tab.tableId === table.idTableSchema)[0];
-
-        tableById.tableStatisticPercentages[0].push(
-          getPercentageOfValue(
-            table.totalRecords -
-              (table.totalRecordsWithBlockers +
-                table.totalRecordsWithErrors +
-                table.totalRecordsWithWarnings +
-                table.totalRecordsWithInfos),
-            table.totalRecords
-          )
-        );
-
-        tableById.tableStatisticPercentages[1].push(
-          getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)
-        );
-
-        tableById.tableStatisticPercentages[2].push(
-          getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)
-        );
-
-        tableById.tableStatisticPercentages[3].push(
-          getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)
-        );
-
-        tableById.tableStatisticPercentages[4].push(
-          getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)
-        );
-
-        tableById.tableStatisticValues[0].push(
-          table.totalRecords -
-            (table.totalRecordsWithBlockers +
-              table.totalRecordsWithErrors +
-              table.totalRecordsWithWarnings +
-              table.totalRecordsWithInfos)
-        );
-        tableById.tableStatisticValues[1].push(table.totalRecordsWithInfos);
-        tableById.tableStatisticValues[2].push(table.totalRecordsWithWarnings);
-        tableById.tableStatisticValues[3].push(table.totalRecordsWithErrors);
-        tableById.tableStatisticValues[4].push(table.totalRecordsWithBlockers);
-        tables[index] = tableById;
-      }
-    });
-  });
-  levelErrors = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
-
-  datasetsDashboardsData.datasetReporters = datasetReporters;
-  datasetsDashboardsData.levelErrors = levelErrors;
-  datasetsDashboardsData.tables = tables;
-  datasetsDashboardsDataDTO.data = datasetsDashboardsData;
-
-  return datasetsDashboardsDataDTO;
-};
-
-const datasetsFinalFeedback = async dataflowId => {
-  const datasetsFinalFeedbackDTO = await DataflowRepository.datasetsFinalFeedback(dataflowId);
-  datasetsFinalFeedbackDTO.data = datasetsFinalFeedbackDTO.data.map(dataset => {
-    return {
-      dataProviderName: dataset.dataSetName,
-      datasetName: dataset.nameDatasetSchema,
-      datasetId: dataset.id,
-      isReleased: dataset.isReleased ?? false,
-      feedbackStatus: !isNil(dataset.status) && capitalize(dataset.status.split('_').join(' '))
-    };
-  });
-
-  return datasetsFinalFeedbackDTO;
-};
-
-const datasetsReleasedStatus = async dataflowId => {
-  const datasetsReleasedStatusDTO = await DataflowRepository.datasetsReleasedStatus(dataflowId);
-  datasetsReleasedStatusDTO.data.sort((a, b) => {
-    let datasetName_A = a.dataSetName;
-    let datasetName_B = b.dataSetName;
-    return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-  });
-
-  const reporters = datasetsReleasedStatusDTO.data.map(dataset => dataset.dataSetName);
-
-  const groupByReporter = CoreUtils.onGroupBy('dataSetName');
-
-  const isReleased = new Array(Object.values(groupByReporter(datasetsReleasedStatusDTO.data)).length).fill(0);
-  const isNotReleased = [...isReleased];
-
-  Object.values(groupByReporter(datasetsReleasedStatusDTO.data)).forEach((reporter, i) => {
-    reporter.forEach(dataset => {
-      dataset.isReleased ? (isReleased[i] += 1) : (isNotReleased[i] += 1);
-    });
-  });
-
-  datasetsReleasedStatusDTO.data = {
-    labels: Array.from(new Set(reporters)),
-    releasedData: isReleased,
-    unReleasedData: isNotReleased
-  };
-
-  return datasetsReleasedStatusDTO;
-};
-
-const dataflowDetails = async dataflowId => {
-  const dataflowDetails = await DataflowRepository.dataflowDetails(dataflowId);
-  dataflowDetails.data = parseDataflowDTO(dataflowDetails.data);
-
-  return dataflowDetails;
-};
-
-const deleteById = async dataflowId => await DataflowRepository.deleteById(dataflowId);
-
-const downloadById = async dataflowId => await DataflowRepository.downloadById(dataflowId);
-
-const getAllSchemas = async dataflowId => {
-  const datasetSchemasDTO = await DataflowRepository.allSchemas(dataflowId);
-  const datasetSchemas = datasetSchemasDTO.data.map(datasetSchemaDTO => {
-    const dataset = new Dataset({
-      datasetSchemaDescription: datasetSchemaDTO.description,
-      datasetSchemaId: datasetSchemaDTO.idDataSetSchema,
-      datasetSchemaName: datasetSchemaDTO.nameDatasetSchema,
-      referenceDataset: datasetSchemaDTO.referenceDataset
-      // levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : []
-    });
-
-    const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
-      const records = !isNull(datasetTableDTO.recordSchema)
-        ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
-            const fields = !isNull(dataTableRecordDTO.fieldSchema)
-              ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
-                  return new DatasetTableField({
-                    codelistItems: DataTableFieldDTO.codelistItems,
-                    description: DataTableFieldDTO.description,
-                    fieldId: DataTableFieldDTO.id,
-                    pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
-                    pkHasMultipleValues: !isNull(DataTableFieldDTO.pkHasMultipleValues)
-                      ? DataTableFieldDTO.pkHasMultipleValues
-                      : false,
-                    pkMustBeUsed: !isNull(DataTableFieldDTO.pkMustBeUsed) ? DataTableFieldDTO.pkMustBeUsed : false,
-                    pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
-                    name: DataTableFieldDTO.name,
-                    readOnly: DataTableFieldDTO.readOnly,
-                    recordId: DataTableFieldDTO.idRecord,
-                    referencedField: DataTableFieldDTO.referencedField,
-                    required: DataTableFieldDTO.required,
-                    type: DataTableFieldDTO.type
-                  });
-                })
-              : null;
-            return new DatasetTableRecord({
-              datasetPartitionId: dataTableRecordDTO.id,
-              fields,
-              recordSchemaId: dataTableRecordDTO.idRecordSchema
-            });
-          })
-        : null;
-
-      return new DatasetTable({
-        hasPKReferenced: !isEmpty(
-          records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
-        ),
-        records: records,
-        recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null,
-        tableSchemaDescription: datasetTableDTO.description,
-        tableSchemaFixedNumber: datasetTableDTO.fixedNumber,
-        tableSchemaId: datasetTableDTO.idTableSchema,
-        tableSchemaName: datasetTableDTO.nameTableSchema,
-        tableSchemaNotEmpty: datasetTableDTO.notEmpty,
-        tableSchemaReadOnly: datasetTableDTO.readOnly,
-        tableSchemaToPrefill: datasetTableDTO.toPrefill
-      });
-    });
-
-    dataset.tables = tables;
-    return dataset;
-  });
-
-  datasetSchemas.sort((a, b) => {
-    const textA = a.datasetSchemaName.toUpperCase();
-    const textB = b.datasetSchemaName.toUpperCase();
-    return textA < textB ? -1 : textA > textB ? 1 : 0;
-  });
-  datasetSchemasDTO.data = datasetSchemas;
-
-  return datasetSchemasDTO;
-};
-
-const getApiKey = async (dataflowId, dataProviderId, isCustodian) =>
-  await DataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian);
-
-const getPublicDataflowsByCountryCode = async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
-  const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
-    countryCode,
-    sortOrder,
-    pageNum,
-    numberRows,
-    sortField
-  );
-
-  const publicDataflowsByCountryCodeData = parseDataflowListDTO(
-    publicDataflowsByCountryCodeResponse.data.publicDataflows
-  );
-  publicDataflowsByCountryCodeResponse.data.publicDataflows = publicDataflowsByCountryCodeData;
-
-  return publicDataflowsByCountryCodeResponse;
-};
-
-const getPublicDataflowData = async dataflowId => {
-  const publicDataflowDataDTO = await DataflowRepository.getPublicDataflowData(dataflowId);
-  const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO.data);
-
-  publicDataflowData.datasets = orderBy(publicDataflowData.datasets, 'datasetSchemaName');
-  publicDataflowDataDTO.data = publicDataflowData;
-
-  return publicDataflowDataDTO;
-};
-
-const generateApiKey = async (dataflowId, dataProviderId, isCustodian) =>
-  await DataflowRepository.generateApiKey(dataflowId, dataProviderId, isCustodian);
 
 const getPercentageOfValue = (val, total) => (total === 0 ? '0.00' : ((val / total) * 100).toFixed(2));
-
-const getAllDataflowsUserList = async () => {
-  const usersListDTO = await DataflowRepository.getAllDataflowsUserList();
-  const usersList = parseAllDataflowsUserList(usersListDTO.data);
-  usersListDTO.data = sortBy(usersList, ['dataflowName', 'role']);
-  return usersListDTO;
-};
-
-const getRepresentativesUsersList = async dataflowId => {
-  const response = await DataflowRepository.getRepresentativesUsersList(dataflowId);
-  const usersList = parseCountriesUserList(response.data);
-  response.data = sortBy(usersList, 'country');
-  return response;
-};
-
-const getUserList = async (dataflowId, representativeId) => {
-  const response = await DataflowRepository.getUserList(dataflowId, representativeId);
-  const usersList = parseUsersList(response.data);
-  response.data = sortBy(usersList, 'role');
-  return response;
-};
-
-const newEmptyDatasetSchema = async (dataflowId, datasetSchemaName) => {
-  return await DataflowRepository.newEmptyDatasetSchema(dataflowId, datasetSchemaName);
-};
 
 const parseDataflowListDTO = dataflowsDTO => {
   if (!isNull(dataflowsDTO) && !isUndefined(dataflowsDTO)) {
@@ -653,70 +313,371 @@ const parseWebLinkListDTO = webLinksDTO => {
 
 const parseWebLinkDTO = webLinkDTO => new WebLink(webLinkDTO);
 
-const publicData = async () => {
-  const publicDataflows = await DataflowRepository.publicData();
-
-  publicDataflows.data = publicDataflows.data.map(
-    publicDataflow =>
-      new Dataflow({
-        description: publicDataflow.description,
-        expirationDate: publicDataflow.deadlineDate > 0 ? dayjs(publicDataflow.deadlineDate).format('YYYY-MM-DD') : '-',
-        id: publicDataflow.id,
-        isReleasable: publicDataflow.releasable,
-        name: publicDataflow.name,
-        obligation: parseObligationDTO(publicDataflow.obligation),
-        status: publicDataflow.status
-      })
-  );
-
-  return publicDataflows;
-};
-
-const sortDatasetTypeByName = (a, b) => {
-  let datasetName_A = a.datasetSchemaName;
-  let datasetName_B = b.datasetSchemaName;
-  return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
-};
-
-const reporting = async dataflowId => {
-  const reportingDataflowDTO = await DataflowRepository.reporting(dataflowId);
-  const dataflow = parseDataflowDTO(reportingDataflowDTO.data);
-  dataflow.testDatasets.sort(sortDatasetTypeByName);
-  dataflow.datasets.sort(sortDatasetTypeByName);
-  dataflow.designDatasets.sort(sortDatasetTypeByName);
-  dataflow.referenceDatasets.sort(sortDatasetTypeByName);
-  reportingDataflowDTO.data = dataflow;
-
-  return reportingDataflowDTO;
-};
-
-const schemasValidation = async dataflowId => await DataflowRepository.schemasValidation(dataflowId);
-
-const update = async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) => {
-  return await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo);
-};
-
 export const DataflowService = {
-  all,
-  cloneDatasetSchemas,
-  create,
-  dataflowDetails,
-  datasetsFinalFeedback,
-  datasetsReleasedStatus,
-  datasetsValidationStatistics,
-  deleteById,
-  downloadById,
-  generateApiKey,
-  getAllDataflowsUserList,
-  getAllSchemas,
-  getApiKey,
-  getPublicDataflowData,
-  getPublicDataflowsByCountryCode,
-  getRepresentativesUsersList,
-  getUserList,
-  newEmptyDatasetSchema,
-  publicData,
-  reporting,
-  schemasValidation,
-  update
+  getAll: async userData => {
+    const dataflowsDTO = await DataflowRepository.getAll();
+    const dataflows = !userData ? dataflowsDTO.data : [];
+
+    if (userData) {
+      const userRoles = [];
+      const dataflowsRoles = userData.filter(role => role.includes(config.permissions.prefixes.DATAFLOW));
+      dataflowsRoles.map((item, i) => {
+        const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
+
+        return (userRoles[i] = {
+          id: parseInt(item.replace(/\D/g, '')),
+          userRole: UserRoleUtils.getUserRoleLabel(role)
+        });
+      });
+
+      for (let index = 0; index < dataflowsDTO.data.length; index++) {
+        const dataflow = dataflowsDTO.data[index];
+        const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
+        const isOpen = dataflow.status === config.dataflowStatus.OPEN;
+
+        if (isOpen) {
+          dataflow.releasable ? (dataflow.status = 'OPEN') : (dataflow.status = 'CLOSED');
+        }
+
+        dataflows.push({
+          ...dataflow,
+          ...(isDuplicated ? UserRoleUtils.getUserRoles(userRoles) : userRoles).find(item => item.id === dataflow.id)
+        });
+      }
+    }
+
+    return parseDataflowDTOs(dataflows);
+  },
+
+  create: async (name, description, obligationId, type) =>
+    await DataflowRepository.create(name, description, obligationId, type),
+
+  cloneSchemas: async (sourceDataflowId, targetDataflowId) =>
+    await DataflowRepository.cloneSchemas(sourceDataflowId, targetDataflowId),
+
+  getDatasetsValidationStatistics: async (dataflowId, datasetSchemaId) => {
+    const datasetsDashboardsDataDTO = await DataflowRepository.getDatasetsValidationStatistics(
+      dataflowId,
+      datasetSchemaId
+    );
+
+    datasetsDashboardsDataDTO.data.sort((a, b) => {
+      let datasetName_A = a.nameDataSetSchema;
+      let datasetName_B = b.nameDataSetSchema;
+      return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
+    });
+
+    const datasetsDashboardsData = {};
+    datasetsDashboardsData.datasetId = datasetsDashboardsDataDTO.data.idDataSetSchema;
+
+    const datasetReporters = [];
+    const tables = [];
+    let tablePercentages = [];
+    let tableValues = [];
+    let levelErrors = [];
+    const allDatasetLevelErrors = [];
+    datasetsDashboardsDataDTO.data.forEach(dataset => {
+      datasetsDashboardsData.datasetId = dataset.idDataSetSchema;
+      datasetReporters.push({ reporterName: dataset.nameDataSetSchema });
+      allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(dataset));
+      dataset.tables.forEach((table, i) => {
+        let index = tables.map(t => t.tableId).indexOf(table.idTableSchema);
+        //Check if table has been already added
+        if (index === -1) {
+          tablePercentages.push(
+            [
+              getPercentageOfValue(
+                table.totalRecords -
+                  (table.totalRecordsWithBlockers +
+                    table.totalRecordsWithErrors +
+                    table.totalRecordsWithWarnings +
+                    table.totalRecordsWithInfos),
+                table.totalRecords
+              )
+            ],
+            [getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)],
+            [getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)],
+            [getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)],
+            [getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)]
+          );
+          tableValues.push(
+            [
+              table.totalRecords -
+                (table.totalRecordsWithBlockers +
+                  table.totalRecordsWithErrors +
+                  table.totalRecordsWithWarnings +
+                  table.totalRecordsWithInfos)
+            ],
+            [table.totalRecordsWithInfos],
+            [table.totalRecordsWithWarnings],
+            [table.totalRecordsWithErrors],
+            [table.totalRecordsWithBlockers]
+          );
+
+          tables.push({
+            tableId: table.idTableSchema,
+            tableName: table.nameTableSchema,
+            tableStatisticPercentages: tablePercentages,
+            tableStatisticValues: tableValues
+          });
+          tablePercentages = [];
+          tableValues = [];
+        } else {
+          const tableById = tables.filter(tab => tab.tableId === table.idTableSchema)[0];
+
+          tableById.tableStatisticPercentages[0].push(
+            getPercentageOfValue(
+              table.totalRecords -
+                (table.totalRecordsWithBlockers +
+                  table.totalRecordsWithErrors +
+                  table.totalRecordsWithWarnings +
+                  table.totalRecordsWithInfos),
+              table.totalRecords
+            )
+          );
+
+          tableById.tableStatisticPercentages[1].push(
+            getPercentageOfValue(table.totalRecordsWithInfos, table.totalRecords)
+          );
+
+          tableById.tableStatisticPercentages[2].push(
+            getPercentageOfValue(table.totalRecordsWithWarnings, table.totalRecords)
+          );
+
+          tableById.tableStatisticPercentages[3].push(
+            getPercentageOfValue(table.totalRecordsWithErrors, table.totalRecords)
+          );
+
+          tableById.tableStatisticPercentages[4].push(
+            getPercentageOfValue(table.totalRecordsWithBlockers, table.totalRecords)
+          );
+
+          tableById.tableStatisticValues[0].push(
+            table.totalRecords -
+              (table.totalRecordsWithBlockers +
+                table.totalRecordsWithErrors +
+                table.totalRecordsWithWarnings +
+                table.totalRecordsWithInfos)
+          );
+          tableById.tableStatisticValues[1].push(table.totalRecordsWithInfos);
+          tableById.tableStatisticValues[2].push(table.totalRecordsWithWarnings);
+          tableById.tableStatisticValues[3].push(table.totalRecordsWithErrors);
+          tableById.tableStatisticValues[4].push(table.totalRecordsWithBlockers);
+          tables[index] = tableById;
+        }
+      });
+    });
+    levelErrors = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
+
+    datasetsDashboardsData.datasetReporters = datasetReporters;
+    datasetsDashboardsData.levelErrors = levelErrors;
+    datasetsDashboardsData.tables = tables;
+
+    return datasetsDashboardsData;
+  },
+
+  getDatasetsFinalFeedback: async dataflowId => {
+    const datasetsFinalFeedbackDTO = await DataflowRepository.getDatasetsFinalFeedback(dataflowId);
+    return datasetsFinalFeedbackDTO.data.map(dataset => {
+      return {
+        dataProviderName: dataset.dataSetName,
+        datasetName: dataset.nameDatasetSchema,
+        datasetId: dataset.id,
+        isReleased: dataset.isReleased ?? false,
+        feedbackStatus: !isNil(dataset.status) && capitalize(dataset.status.split('_').join(' '))
+      };
+    });
+  },
+
+  getDatasetsReleasedStatus: async dataflowId => {
+    const datasetsReleasedStatusDTO = await DataflowRepository.getDatasetsReleasedStatus(dataflowId);
+    datasetsReleasedStatusDTO.data.sort((a, b) => {
+      let datasetName_A = a.dataSetName;
+      let datasetName_B = b.dataSetName;
+      return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
+    });
+
+    const reporters = datasetsReleasedStatusDTO.data.map(dataset => dataset.dataSetName);
+
+    const groupByReporter = CoreUtils.onGroupBy('dataSetName');
+
+    const isReleased = new Array(Object.values(groupByReporter(datasetsReleasedStatusDTO.data)).length).fill(0);
+    const isNotReleased = [...isReleased];
+
+    Object.values(groupByReporter(datasetsReleasedStatusDTO.data)).forEach((reporter, i) => {
+      reporter.forEach(dataset => {
+        dataset.isReleased ? (isReleased[i] += 1) : (isNotReleased[i] += 1);
+      });
+    });
+
+    return {
+      labels: Array.from(new Set(reporters)),
+      releasedData: isReleased,
+      unReleasedData: isNotReleased
+    };
+  },
+
+  getDataflowDetails: async dataflowId => {
+    const dataflowDetails = await DataflowRepository.getDataflowDetails(dataflowId);
+    return parseDataflowDTO(dataflowDetails.data);
+  },
+
+  delete: async dataflowId => await DataflowRepository.delete(dataflowId),
+
+  exportSchemas: async dataflowId => await DataflowRepository.exportSchemas(dataflowId),
+
+  getSchemas: async dataflowId => {
+    const datasetSchemasDTO = await DataflowRepository.getSchemas(dataflowId);
+    const datasetSchemas = datasetSchemasDTO.data.map(datasetSchemaDTO => {
+      const dataset = new Dataset({
+        datasetSchemaDescription: datasetSchemaDTO.description,
+        datasetSchemaId: datasetSchemaDTO.idDataSetSchema,
+        datasetSchemaName: datasetSchemaDTO.nameDatasetSchema,
+        referenceDataset: datasetSchemaDTO.referenceDataset
+        // levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : []
+      });
+
+      const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
+        const records = !isNull(datasetTableDTO.recordSchema)
+          ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
+              const fields = !isNull(dataTableRecordDTO.fieldSchema)
+                ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
+                    return new DatasetTableField({
+                      codelistItems: DataTableFieldDTO.codelistItems,
+                      description: DataTableFieldDTO.description,
+                      fieldId: DataTableFieldDTO.id,
+                      pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
+                      pkHasMultipleValues: !isNull(DataTableFieldDTO.pkHasMultipleValues)
+                        ? DataTableFieldDTO.pkHasMultipleValues
+                        : false,
+                      pkMustBeUsed: !isNull(DataTableFieldDTO.pkMustBeUsed) ? DataTableFieldDTO.pkMustBeUsed : false,
+                      pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
+                      name: DataTableFieldDTO.name,
+                      readOnly: DataTableFieldDTO.readOnly,
+                      recordId: DataTableFieldDTO.idRecord,
+                      referencedField: DataTableFieldDTO.referencedField,
+                      required: DataTableFieldDTO.required,
+                      type: DataTableFieldDTO.type
+                    });
+                  })
+                : null;
+              return new DatasetTableRecord({
+                datasetPartitionId: dataTableRecordDTO.id,
+                fields,
+                recordSchemaId: dataTableRecordDTO.idRecordSchema
+              });
+            })
+          : null;
+
+        return new DatasetTable({
+          hasPKReferenced: !isEmpty(
+            records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
+          ),
+          records: records,
+          recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null,
+          tableSchemaDescription: datasetTableDTO.description,
+          tableSchemaFixedNumber: datasetTableDTO.fixedNumber,
+          tableSchemaId: datasetTableDTO.idTableSchema,
+          tableSchemaName: datasetTableDTO.nameTableSchema,
+          tableSchemaNotEmpty: datasetTableDTO.notEmpty,
+          tableSchemaReadOnly: datasetTableDTO.readOnly,
+          tableSchemaToPrefill: datasetTableDTO.toPrefill
+        });
+      });
+
+      dataset.tables = tables;
+      return dataset;
+    });
+
+    datasetSchemas.sort((a, b) => {
+      const textA = a.datasetSchemaName.toUpperCase();
+      const textB = b.datasetSchemaName.toUpperCase();
+      return textA < textB ? -1 : textA > textB ? 1 : 0;
+    });
+
+    return datasetSchemas;
+  },
+
+  getApiKey: async (dataflowId, dataProviderId, isCustodian) =>
+    await DataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian),
+
+  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
+    const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
+      countryCode,
+      sortOrder,
+      pageNum,
+      numberRows,
+      sortField
+    );
+
+    const publicDataflowsByCountryCodeData = parseDataflowListDTO(
+      publicDataflowsByCountryCodeResponse.data.publicDataflows
+    );
+    publicDataflowsByCountryCodeResponse.data.publicDataflows = publicDataflowsByCountryCodeData;
+
+    return publicDataflowsByCountryCodeResponse.data;
+  },
+
+  getPublicDataflowData: async dataflowId => {
+    const publicDataflowDataDTO = await DataflowRepository.getPublicDataflowData(dataflowId);
+    const publicDataflowData = parseDataflowDTO(publicDataflowDataDTO.data);
+    publicDataflowData.datasets = orderBy(publicDataflowData.datasets, 'datasetSchemaName');
+    return publicDataflowData;
+  },
+
+  createApiKey: async (dataflowId, dataProviderId, isCustodian) =>
+    await DataflowRepository.createApiKey(dataflowId, dataProviderId, isCustodian),
+
+  getAllDataflowsUserList: async () => {
+    const usersListDTO = await DataflowRepository.getAllDataflowsUserList();
+    const usersList = parseAllDataflowsUserList(usersListDTO.data);
+    return sortBy(usersList, ['dataflowName', 'role']);
+  },
+
+  getRepresentativesUsersList: async dataflowId => {
+    const response = await DataflowRepository.getRepresentativesUsersList(dataflowId);
+    const usersList = parseCountriesUserList(response.data);
+    return sortBy(usersList, 'country');
+  },
+
+  getUserList: async (dataflowId, representativeId) => {
+    const response = await DataflowRepository.getUserList(dataflowId, representativeId);
+    const usersList = parseUsersList(response.data);
+    return sortBy(usersList, 'role');
+  },
+
+  createEmptyDatasetSchema: async (dataflowId, datasetSchemaName) =>
+    await DataflowRepository.createEmptyDatasetSchema(dataflowId, datasetSchemaName),
+
+  getPublicData: async () => {
+    const publicDataflows = await DataflowRepository.getPublicData();
+    return publicDataflows.data.map(
+      publicDataflow =>
+        new Dataflow({
+          description: publicDataflow.description,
+          expirationDate:
+            publicDataflow.deadlineDate > 0 ? dayjs(publicDataflow.deadlineDate).format('YYYY-MM-DD') : '-',
+          id: publicDataflow.id,
+          isReleasable: publicDataflow.releasable,
+          name: publicDataflow.name,
+          obligation: parseObligationDTO(publicDataflow.obligation),
+          status: publicDataflow.status
+        })
+    );
+  },
+
+  getReportingDatasets: async dataflowId => {
+    const reportingDataflowDTO = await DataflowRepository.getReportingDatasets(dataflowId);
+    const dataflow = parseDataflowDTO(reportingDataflowDTO.data);
+    dataflow.testDatasets.sort(sortDatasetTypeByName);
+    dataflow.datasets.sort(sortDatasetTypeByName);
+    dataflow.designDatasets.sort(sortDatasetTypeByName);
+    dataflow.referenceDatasets.sort(sortDatasetTypeByName);
+    return dataflow;
+  },
+
+  getSchemasValidation: async dataflowId => await DataflowRepository.getSchemasValidation(dataflowId),
+
+  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
+    await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo)
 };

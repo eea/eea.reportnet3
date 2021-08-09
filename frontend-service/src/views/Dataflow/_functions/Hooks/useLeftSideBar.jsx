@@ -17,7 +17,7 @@ export const useLeftSideBar = (
   const leftSideBarContext = useContext(LeftSideBarContext);
 
   useLayoutEffect(() => {
-    if (!isEmpty(dataflowState.userRoles)) {
+    if (!isEmpty(dataflowState.userRoles) || dataflowState.isAdmin) {
       const buttonsVisibility = getLeftSidebarButtonsVisibility();
 
       const apiKeyBtn = {
@@ -50,6 +50,7 @@ export const useLeftSideBar = (
       const manageRequestersBtn = {
         className: 'dataflow-manage-rights-help-step',
         icon: 'userConfig',
+
         isVisible: buttonsVisibility.manageRequestersBtn,
         label: 'manageRequestersRights',
         onClick: () => manageDialogs('isManageRequestersDialogVisible', true),
@@ -131,6 +132,7 @@ export const useLeftSideBar = (
     dataflowState.status,
     representativeId,
     dataflowState.datasetId,
-    dataflowState.designDatasetSchemas.length
+    dataflowState.designDatasetSchemas.length,
+    dataflowState.isAdmin
   ]);
 };

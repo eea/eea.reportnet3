@@ -164,7 +164,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         sortOrder = 0;
       }
       let pageNum = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
-      const { data } = await DataflowService.getPublicDataflowsByCountryCode(
+      const data = await DataflowService.getPublicDataflowsByCountryCode(
         countryCode,
         sortOrder,
         pageNum,
