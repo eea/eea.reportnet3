@@ -42,6 +42,8 @@ export const BusinessDataflowService = {
 
     const businessDataflows = !accessRole ? businessDataflowsDTO.data : [];
 
+    const isAdmin = accessRole.some(role => role === config.permissions.roles.ADMIN.key);
+
     const userRoles = [];
     if (contextRoles) {
       const dataflowsRoles = contextRoles.filter(role => role.includes(config.permissions.prefixes.DATAFLOW));
@@ -64,9 +66,8 @@ export const BusinessDataflowService = {
         businessDataflow.releasable ? (businessDataflow.status = 'OPEN') : (businessDataflow.status = 'CLOSED');
       }
 
-      if (contextRoles.length === 0) {
-        businessDataflow.userRole =
-          accessRole.some(role => role === config.permissions.roles.ADMIN.key) && config.permissions.roles.ADMIN.key; // TODO WITH TWO ROLES
+      if (isAdmin) {
+        businessDataflow.userRole = config.permissions.roles.ADMIN.key;
         businessDataflows.push({
           ...businessDataflow
         });
