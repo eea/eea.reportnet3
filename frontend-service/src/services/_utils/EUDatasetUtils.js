@@ -1,7 +1,6 @@
 import { EUDataset } from 'entities/EUDataset';
 
-const parseEUDatasetListDTO = (euDatasetsDTO = []) =>
-  euDatasetsDTO.map(euDatasetDTO => parseEUDatasetDTO(euDatasetDTO));
+const parseEUDatasetListDTO = euDatasetsDTO => euDatasetsDTO?.map(euDatasetDTO => parseEUDatasetDTO(euDatasetDTO));
 
 const parseEUDatasetDTO = euDatasetDTO => {
   return new EUDataset({

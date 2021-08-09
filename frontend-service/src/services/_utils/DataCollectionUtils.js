@@ -1,7 +1,8 @@
 import { DataCollection } from 'entities/DataCollection';
 
-const parseDataCollectionListDTO = (dataCollectionsDTO = []) =>
-  dataCollectionsDTO.map(dataCollectionDTO => parseDataCollectionDTO(dataCollectionDTO));
+const parseDataCollectionListDTO = dataCollectionsDTO => {
+  return dataCollectionsDTO?.map(dataCollectionDTO => parseDataCollectionDTO(dataCollectionDTO));
+};
 
 const parseDataCollectionDTO = dataCollectionDTO => {
   return new DataCollection({

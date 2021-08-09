@@ -20,10 +20,10 @@ const sortDataflowsByExpirationDate = dataflows =>
     return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
   });
 
-const parseDataflowListDTO = (dataflowsDTO = []) => dataflowsDTO.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
+const parseDataflowListDTO = dataflowsDTO => dataflowsDTO?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
 
-const parseSortedDataflowListDTO = (dataflowDTOs = []) => {
-  const dataflows = dataflowDTOs.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
+const parseSortedDataflowListDTO = dataflowDTOs => {
+  const dataflows = dataflowDTOs?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
   return sortDataflowsByExpirationDate(dataflows);
 };
 

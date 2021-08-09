@@ -13,7 +13,7 @@ const sortDatasetTypeByName = (a, b) => {
   return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
 };
 
-const parseDatasetListDTO = (datasetsDTO = []) => datasetsDTO.map(datasetDTO => parseDatasetDTO(datasetDTO));
+const parseDatasetListDTO = datasetsDTO => datasetsDTO?.map(datasetDTO => parseDatasetDTO(datasetDTO));
 
 const parseDatasetDTO = datasetDTO =>
   new Dataset({

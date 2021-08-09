@@ -8,15 +8,14 @@ import { LegalInstrument } from 'entities/LegalInstrument';
 import { Obligation } from 'entities/Obligation';
 import { Organization } from 'entities/Organization';
 
-const parseObligationList = (obligationsDTO = []) =>
-  obligationsDTO.map(obligationDTO => parseObligation(obligationDTO));
+const parseObligationList = obligationsDTO => obligationsDTO?.map(obligationDTO => parseObligation(obligationDTO));
 
-const parseCountryList = (countriesDTO = []) => countriesDTO.map(countryDTO => parseCountry(countryDTO));
+const parseCountryList = countriesDTO => countriesDTO?.map(countryDTO => parseCountry(countryDTO));
 
-const parseIssueList = (issuesDTO = []) => issuesDTO.map(issueDTO => parseIssue(issueDTO));
+const parseIssueList = issuesDTO => issuesDTO?.map(issueDTO => parseIssue(issueDTO));
 
-const parseOrganizationList = (organizationsDTO = []) =>
-  organizationsDTO.map(organizationDTO => parseOrganization(organizationDTO));
+const parseOrganizationList = organizationsDTO =>
+  organizationsDTO?.map(organizationDTO => parseOrganization(organizationDTO));
 
 const parseLegalInstrument = legalInstrumentDTO => {
   if (isNil(legalInstrumentDTO)) return;

@@ -1,6 +1,6 @@
 import { config } from 'conf';
 
-const parseDocumentListDTO = (documentsDTO = []) => documentsDTO.map(documentDTO => parseDocumentDTO(documentDTO));
+const parseDocumentListDTO = documentsDTO => documentsDTO?.map(documentDTO => parseDocumentDTO(documentDTO));
 
 const parseDocumentDTO = documentDTO => {
   return new Document({

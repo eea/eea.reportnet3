@@ -166,7 +166,7 @@ export const DatasetRepository = {
   getSchema: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getSchema, { datasetId }) }),
 
   getStatistics: async datasetId =>
-    await HTTPRequester.get({ url: getUrl(DatasetConfig.loadStatistics, { datasetId }) }),
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getStatistics, { datasetId }) }),
 
   getTableData: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError, ruleId, fieldSchemaId, value) =>
     await HTTPRequester.get({

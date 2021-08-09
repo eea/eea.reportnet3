@@ -21,6 +21,6 @@ const parseReferenceDataflowDTO = referenceDataflowDTO =>
     userRole: referenceDataflowDTO.userRole
   });
 
-export const DataflowUtils = {
+export const ReferenceDataflowUtils = {
   parseReferenceDataflowDTO
 };

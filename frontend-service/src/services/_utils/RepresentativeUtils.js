@@ -1,7 +1,7 @@
 import { Representative } from 'entities/Representative';
 
-const parseRepresentativeListDTO = (representativesDTO = []) =>
-  representativesDTO.map(representativeDTO => parseRepresentativeDTO(representativeDTO));
+const parseRepresentativeListDTO = representativesDTO =>
+  representativesDTO?.map(representativeDTO => parseRepresentativeDTO(representativeDTO));
 
 const parseRepresentativeDTO = representativeDTO => {
   return new Representative({
@@ -15,8 +15,8 @@ const parseRepresentativeDTO = representativeDTO => {
   });
 };
 
-const parseLeadReporters = (leadReporters = []) =>
-  leadReporters.map(leadReporter => ({
+const parseLeadReporters = leadReporters =>
+  leadReporters?.map(leadReporter => ({
     account: leadReporter.email,
     id: leadReporter.id,
     representativeId: leadReporter.representativeId
