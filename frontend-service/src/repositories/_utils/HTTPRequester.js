@@ -41,15 +41,11 @@ export const HTTPRequester = (() => {
     },
     postWithFiles: options => {
       const headers = options.headers;
-      return axios.post(`${baseURL}${options.url}`, options.data, {
-        headers
-      });
+      return axios.post(`${baseURL}${options.url}`, options.data, { headers });
     },
     putWithFiles: options => {
       const headers = options.headers;
-      return axios.put(`${baseURL}${options.url}`, options.data, {
-        headers
-      });
+      return axios.put(`${baseURL}${options.url}`, options.data, { headers });
     }
   };
   return HTTPRequesterAPI;

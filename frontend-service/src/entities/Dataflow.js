@@ -22,7 +22,7 @@ export class Dataflow {
     status,
     testDatasets,
     userRole,
-    weblinks,
+    webLinks,
     type
   } = {}) {
     this.anySchemaAvailableInPublic = anySchemaAvailableInPublic;
@@ -47,7 +47,7 @@ export class Dataflow {
     this.status = status;
     this.testDatasets = testDatasets;
     this.userRole = userRole;
-    this.weblinks = weblinks;
+    this.webLinks = webLinks;
     this.type = type;
   }
 }

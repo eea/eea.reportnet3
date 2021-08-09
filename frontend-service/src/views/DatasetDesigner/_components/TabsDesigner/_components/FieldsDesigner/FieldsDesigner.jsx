@@ -697,7 +697,7 @@ export const FieldsDesigner = ({
           }}
           onKeyDown={e => onKeyChange(e)}
           placeholder={resources.messages['newTableDescriptionPlaceHolder']}
-          value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
+          value={tableDescriptionValue}
         />
 
         <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>

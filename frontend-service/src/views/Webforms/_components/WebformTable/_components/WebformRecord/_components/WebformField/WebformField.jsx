@@ -96,12 +96,9 @@ export const WebformField = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
-      const { status } = await DatasetService.deleteFileData(datasetId, selectedFieldId);
-
-      if (status >= 200 && status <= 299) {
-        onFillField(record, selectedFieldSchemaId, '');
-        onToggleDeleteAttachmentDialogVisible(false);
-      }
+      await DatasetService.deleteFileData(datasetId, selectedFieldId);
+      onFillField(record, selectedFieldSchemaId, '');
+      onToggleDeleteAttachmentDialogVisible(false);
     } catch (error) {
       console.error('WebformField - onConfirmDeleteAttachment.', error);
     }

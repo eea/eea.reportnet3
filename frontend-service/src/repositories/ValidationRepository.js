@@ -2,38 +2,26 @@ import { ValidationConfig } from './config/ValidationConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const validationRepository = {
+export const ValidationRepository = {
   create: async (datasetSchemaId, validationRule) =>
     await HTTPRequester.update({
       url: getUrl(ValidationConfig.create, { datasetId: datasetSchemaId }),
       data: validationRule
     }),
 
-  deleteById: async (datasetSchemaId, ruleId) =>
-    await HTTPRequester.delete({
-      url: getUrl(ValidationConfig.delete, {
-        datasetSchemaId,
-        ruleId
-      })
+  delete: async (datasetSchemaId, ruleId) =>
+    await HTTPRequester.delete({ url: getUrl(ValidationConfig.delete, { datasetSchemaId, ruleId }) }),
+
+  downloadShowValidationsFile: async (datasetId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(ValidationConfig.downloadShowValidationsFile, { datasetId, fileName })
     }),
 
-  downloadFile: async (datasetId, fileName) =>
-    await HTTPRequester.get({
-      url: getUrl(ValidationConfig.downloadFile, { datasetId, fileName })
-    }),
-
-  generateFile: async datasetId => {
-    return await HTTPRequester.post({
-      url: getUrl(ValidationConfig.generateFile, { datasetId })
-    });
-  },
+  generateShowValidationsFile: async datasetId =>
+    await HTTPRequester.post({ url: getUrl(ValidationConfig.generateShowValidationsFile, { datasetId }) }),
 
   getAll: async datasetSchemaId =>
-    await HTTPRequester.get({
-      url: getUrl(ValidationConfig.getAll, {
-        datasetSchemaId
-      })
-    }),
+    await HTTPRequester.get({ url: getUrl(ValidationConfig.getAll, { datasetSchemaId }) }),
 
   update: async (datasetId, validation) => {
     let url = getUrl(ValidationConfig.update, { datasetId });

@@ -2,62 +2,34 @@ import { UserRightConfig } from './config/UserRightConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-const userRightRepository = {
-  allRequesters: async dataflowId => {
-    const response = await HTTPRequester.get({
-      url: getUrl(UserRightConfig.allRequesters, { dataflowId })
-    });
+export const UserRightRepository = {
+  getRequesters: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(UserRightConfig.getRequesters, { dataflowId }) }),
 
-    return response;
-  },
+  getReporters: async (dataflowId, dataProviderId) =>
+    await HTTPRequester.get({ url: getUrl(UserRightConfig.getReporters, { dataflowId, dataProviderId }) }),
 
-  allReporters: async (dataflowId, dataProviderId) => {
-    const response = await HTTPRequester.get({
-      url: getUrl(UserRightConfig.allReporters, { dataflowId, dataProviderId })
-    });
-
-    return response;
-  },
-
-  deleteRequester: async (userRight, dataflowId) => {
-    const response = await HTTPRequester.delete({
+  deleteRequester: async (userRight, dataflowId) =>
+    await HTTPRequester.delete({
       url: getUrl(UserRightConfig.deleteRequester, { dataflowId }),
       data: { account: userRight.account, role: userRight.role }
-    });
+    }),
 
-    return response;
-  },
-
-  deleteReporter: async (userRight, dataflowId, dataProviderId) => {
-    const response = await HTTPRequester.delete({
+  deleteReporter: async (userRight, dataflowId, dataProviderId) =>
+    await HTTPRequester.delete({
       url: getUrl(UserRightConfig.deleteReporter, { dataflowId, dataProviderId }),
       data: { account: userRight.account, role: userRight.role }
-    });
+    }),
 
-    return response;
-  },
-
-  updateRequester: async (userRight, dataflowId) => {
-    const response = await HTTPRequester.update({
+  updateRequester: async (userRight, dataflowId) =>
+    await HTTPRequester.update({
       url: getUrl(UserRightConfig.updateRequester, { dataflowId }),
-      data: {
-        account: userRight.account,
-        role: userRight.role
-      }
-    });
-    return response;
-  },
+      data: { account: userRight.account, role: userRight.role }
+    }),
 
-  updateReporter: async (userRight, dataflowId, dataProviderId) => {
-    const response = await HTTPRequester.update({
+  updateReporter: async (userRight, dataflowId, dataProviderId) =>
+    await HTTPRequester.update({
       url: getUrl(UserRightConfig.updateReporter, { dataflowId, dataProviderId }),
-      data: {
-        account: userRight.account,
-        role: userRight.role
-      }
-    });
-    return response;
-  }
+      data: { account: userRight.account, role: userRight.role }
+    })
 };
-
-export { userRightRepository };

@@ -87,7 +87,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const getDataflowName = async () => {
     try {
-      const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
+      const data = await DataflowService.getDataflowDetails(match.params.dataflowId);
       setDataflowName(data.name);
     } catch (error) {
       console.error('DataCollection - getDataflowName.', error);

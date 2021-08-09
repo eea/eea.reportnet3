@@ -121,7 +121,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const getDataflowName = async () => {
     try {
-      const { data } = await DataflowService.dataflowDetails(dataflowId);
+      const data = await DataflowService.getDataflowDetails(dataflowId);
       setDataflowName(data.name);
     } catch (error) {
       console.error('DataflowHelp - getDataflowName.', error);
@@ -148,7 +148,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const onLoadDatasetsSchemas = async () => {
     try {
-      const { data } = await DataflowService.reporting(dataflowId);
+      const data = await DataflowService.getReportingDatasets(dataflowId);
       setIsBusinessDataflow(false); // TODO WITH REAL DATA
       setIsLoading(false);
       if (!isCustodian) {
@@ -189,8 +189,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const onLoadDocuments = async () => {
     setIsLoadingDocuments(true);
     try {
-      const { data } = await DocumentService.all(`${dataflowId}`);
-      const loadedDocuments = data.documents.sort(sortByProperty('description'));
+      const documents = await DocumentService.getAll(`${dataflowId}`);
+      const loadedDocuments = documents.sort(sortByProperty('description'));
       setDocuments(loadedDocuments);
     } catch (error) {
       console.error('DataflowHelp - onLoadDocuments.', error);
@@ -206,8 +206,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const onLoadWebLinks = async () => {
     setIsLoadingWeblinks(true);
     try {
-      const { data } = await WebLinkService.all(dataflowId);
-      const loadedWebLinks = data.weblinks.sort(sortByProperty('description'));
+      const webLinks = await WebLinkService.getAll(dataflowId);
+      const loadedWebLinks = webLinks.sort(sortByProperty('description'));
       setWebLinks(loadedWebLinks);
     } catch (error) {
       console.error('DataflowHelp - onLoadWebLinks.', error);
@@ -245,7 +245,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
               sortOrderDocuments={sortOrderDocuments}
             />
           </TabPanel>
-          <TabPanel header={resources.messages['webLinks']} headerClassName="dataflowHelp-weblinks-help-step">
+          <TabPanel header={resources.messages['webLinks']} headerClassName="dataflowHelp-webLinks-help-step">
             <WebLinks
               dataflowId={dataflowId}
               isLoading={isLoadingWebLinks}

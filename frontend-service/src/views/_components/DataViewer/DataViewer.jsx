@@ -328,7 +328,7 @@ const DataViewer = withRouter(
 
     const getFileExtensions = async () => {
       try {
-        const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);
+        const allExtensions = await IntegrationService.getAllExtensionsOperations(dataflowId, datasetSchemaId);
         setExtensionsOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
       } catch (error) {
         console.error('DataViewer - getFileExtensions.', error);

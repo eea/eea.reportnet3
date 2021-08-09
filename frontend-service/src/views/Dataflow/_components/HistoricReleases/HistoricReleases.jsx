@@ -79,7 +79,7 @@ export const HistoricReleases = ({
       isLoading(true);
       let historicReleases = null;
       if (isNil(datasetId)) {
-        const { data } = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId);
+        const data = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId);
         historicReleases = uniqBy(
           data.map(historic => {
             return {
@@ -90,7 +90,7 @@ export const HistoricReleases = ({
           'releaseDate'
         );
       } else {
-        const { data } = await HistoricReleaseService.allHistoricReleases(datasetId);
+        const data = await HistoricReleaseService.allHistoricReleases(datasetId);
         historicReleases = data;
       }
 
@@ -195,7 +195,7 @@ export const HistoricReleases = ({
       type: 'checkbox',
       properties: [
         { name: 'isDataCollectionReleased', label: resources.messages['onlyReleasedDataCollectionCheckboxLabel'] },
-        { name: 'isEUReleased', label: resources.messages['onlyReleasedEuDatasetCheckboxLabel'] }
+        { name: 'isEUReleased', label: resources.messages['onlyReleasedEUDatasetCheckboxLabel'] }
       ]
     }
   ];

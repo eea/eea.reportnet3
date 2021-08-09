@@ -82,14 +82,14 @@ const Dataflow = withRouter(({ history, match }) => {
     id: dataflowId,
     isApiKeyDialogVisible: false,
     isBusinessDataflow: false,
-    isCopyDataCollectionToEuDatasetLoading: false,
+    isCopyDataCollectionToEUDatasetLoading: false,
     isCustodian: false,
     isDataSchemaCorrect: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isEditDialogVisible: false,
     isExportDialogVisible: false,
-    isExportEuDatasetLoading: false,
+    isExportEUDatasetLoading: false,
     isExporting: false,
     isFetchingData: false,
     isImportLeadReportersVisible: false,
@@ -335,11 +335,11 @@ const Dataflow = withRouter(({ history, match }) => {
       payload: { hasRepresentativesWithoutDatasets: value }
     });
 
-  const setIsCopyDataCollectionToEuDatasetLoading = value =>
+  const setIsCopyDataCollectionToEUDatasetLoading = value =>
     dataflowDispatch({ type: 'SET_IS_COPY_DATA_COLLECTION_TO_EU_DATASET_LOADING', payload: { isLoading: value } });
 
-  const setIsExportEuDatasetLoading = value =>
-    dataflowDispatch({ type: 'SET_IS_EXPORT_EU_DATASET', payload: { isExportEuDatasetLoading: value } });
+  const setIsExportEUDatasetLoading = value =>
+    dataflowDispatch({ type: 'SET_IS_EXPORT_EU_DATASET', payload: { isExportEUDatasetLoading: value } });
 
   const setIsReleaseable = isReleasable =>
     dataflowDispatch({ type: 'SET_IS_RELEASABLE', payload: { isReleasable: isReleasable } });
@@ -377,7 +377,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onExportLeadReporters = async () => {
     try {
-      const { data } = await RepresentativeService.downloadById(dataflowId);
+      const { data } = await RepresentativeService.exportFile(dataflowId);
       if (!isNil(data)) {
         DownloadFile(
           data,
@@ -477,13 +477,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onLoadReportingDataflow = async () => {
     try {
-      const dataflowResponse = await DataflowService.reporting(dataflowId);
-      const dataflow = dataflowResponse.data;
-
-      Promise.resolve(dataflow).then(res => {
-        dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
-      });
-
+      const dataflow = await DataflowService.getReportingDatasets(dataflowId);
+      dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       dataflowDispatch({
         type: 'INITIAL_LOAD',
         payload: {
@@ -598,8 +593,7 @@ const Dataflow = withRouter(({ history, match }) => {
   );
 
   const onLoadSchemasValidations = async () => {
-    const validationResult = await DataflowService.schemasValidation(dataflowId);
-
+    const validationResult = await DataflowService.getSchemasValidation(dataflowId);
     dataflowDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult: validationResult.data } });
   };
 
@@ -627,7 +621,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmExport = async () => {
     try {
       dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: true });
-      const { data } = await DataflowService.downloadById(dataflowId);
+      const { data } = await DataflowService.exportSchemas(dataflowId);
       if (!isNil(data)) {
         DownloadFile(data, `${dataflowState.data.name}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip`);
       }
@@ -643,7 +637,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmRelease = async () => {
     try {
       notificationContext.add({ type: 'RELEASE_START_EVENT' });
-      await SnapshotService.releaseDataflow(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
+      await SnapshotService.release(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
 
       dataflowState.data.datasets
         .filter(dataset => dataset.dataProviderId === dataProviderId)
@@ -820,8 +814,8 @@ const Dataflow = withRouter(({ history, match }) => {
           onSaveName={onSaveName}
           onShowManageReportersDialog={onShowManageReportersDialog}
           onUpdateData={setIsDataUpdated}
-          setIsCopyDataCollectionToEuDatasetLoading={setIsCopyDataCollectionToEuDatasetLoading}
-          setIsExportEuDatasetLoading={setIsExportEuDatasetLoading}
+          setIsCopyDataCollectionToEUDatasetLoading={setIsCopyDataCollectionToEUDatasetLoading}
+          setIsExportEUDatasetLoading={setIsExportEUDatasetLoading}
           setIsReceiptLoading={setIsReceiptLoading}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
         />

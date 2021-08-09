@@ -1,15 +1,6 @@
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 
-const getDataflowMetadata = async dataflowId => {
-  try {
-    const dataflowDetails = await DataflowService.dataflowDetails(dataflowId);
-    return dataflowDetails.data;
-  } catch (error) {
-    console.error('MetadataUtils - getDataflowMetadata.', error);
-    return {};
-  }
-};
 const getDatasetMetadata = async datasetId => {
   try {
     const datasetDetails = await DatasetService.getMetaData(datasetId);
@@ -23,7 +14,7 @@ const getDatasetMetadata = async datasetId => {
 const getMetadata = async ({ dataflowId, datasetId }) => {
   const metadata = {};
   if (dataflowId) {
-    const dataflowMetadata = await getDataflowMetadata(dataflowId);
+    const dataflowMetadata = await DataflowService.getDataflowDetails(dataflowId);
 
     metadata.dataflow = {
       dataflowId,
@@ -44,4 +35,4 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
   }
   return metadata;
 };
-export const MetadataUtils = { getDataflowMetadata, getDatasetMetadata, getMetadata };
+export const MetadataUtils = { getDatasetMetadata, getMetadata };

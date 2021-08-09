@@ -133,15 +133,8 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
 
     try {
       const pamsTableRecords = await getPamsTableRecords(tableSchemaId);
-      const response = await WebformService.addPamsRecords(
-        datasetId,
-        filteredTables,
-        generatePamId(pamsTableRecords),
-        capitalize(type)
-      );
-      if (response.status >= 200 && response.status <= 299) {
-        onUpdateData();
-      }
+      await WebformService.addPamsRecords(datasetId, filteredTables, generatePamId(pamsTableRecords), capitalize(type));
+      onUpdateData();
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
@@ -170,10 +163,8 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
     const newEmptyRecord = parseNewTableRecord(table, pamNumber);
 
     try {
-      const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
-      if (response.status >= 200 && response.status <= 299) {
-        onUpdateData();
-      }
+      await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
+      onUpdateData();
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
