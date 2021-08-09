@@ -515,6 +515,7 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId) {
 
+    boolean isDesign = false;
     // Rest API only: Check if the dataflow belongs to the dataset
     if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -524,8 +525,14 @@ public class DataSetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
 
-    // This method will release the lock
-    deleteHelper.executeDeleteDatasetProcess(datasetId);
+    // I have to check wich of the two type of dataset i'm using => REPORTING OR DESING
+    // isDesign =
+    if (isDesign) {
+      // I have to implements the delete in the case of the design delete dataset
+    } else {
+      // This method will release the lock
+      deleteHelper.executeDeleteDatasetProcess(datasetId);
+    }
   }
 
   /**
