@@ -34,6 +34,7 @@ import { ShareRights } from 'views/_components/ShareRights';
 import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
 import { UserList } from 'views/_components/UserList';
+import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
@@ -117,7 +118,8 @@ const Dataflow = withRouter(({ history, match }) => {
     updatedDatasetSchema: [],
     userRoles: [],
     isUserRightManagementDialogVisible: false,
-    isAdmin: false
+    isAdmin: false,
+    isBusinessDataflowDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -237,6 +239,7 @@ const Dataflow = withRouter(({ history, match }) => {
       return {
         apiKeyBtn: false,
         editBtn: false,
+        editBusinessBtn: false,
         exportBtn: false,
         manageReportersBtn: false,
         manageRequestersBtn: false,
@@ -248,7 +251,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
-      editBtn: isDesign && isLeadDesigner,
+      editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin,
+      editBusinessBtn: dataflowState.isAdmin,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
@@ -1091,6 +1095,22 @@ const Dataflow = withRouter(({ history, match }) => {
           setCheckedObligation={setCheckedObligation}
           state={dataflowState}
         />
+
+        {dataflowState.isBusinessDataflowDialogVisible && (
+          <ManageBusinessDataflow
+            isEditing
+            isVisible={dataflowState.isBusinessDataflowDialogVisible}
+            manageDialogs={manageDialogs}
+            metadata={{
+              name: dataflowState.name,
+              description: dataflowState.description,
+              status: dataflowState.status
+            }}
+            obligation={obligation}
+            onEditDataflow={onEditDataflow}
+            resetObligations={resetObligations}
+          />
+        )}
 
         {dataflowState.isReportingObligationsDialogVisible && (
           <Dialog
