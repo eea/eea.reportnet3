@@ -38,6 +38,7 @@ body .p-inputswitch:not(.p-disabled):hover .p-inputswitch-slider {
   background-color: #b7b7b7;
 }
 body .p-inputswitch.p-inputswitch-checked .p-inputswitch-slider {
+  min-width: 42px;
   background-color: var(--inputswitch-checked-bg);
 }
 body .p-inputswitch.p-inputswitch-checked:not(.p-disabled):hover .p-inputswitch-slider {

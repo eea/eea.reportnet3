@@ -123,7 +123,7 @@ const GlobalNotifications = () => {
     );
 
     try {
-      const { data } = await ValidationService.downloadFile(
+      const { data } = await ValidationService.downloadShowValidationsFile(
         notification.content.datasetId,
         notification.content.nameFile
       );

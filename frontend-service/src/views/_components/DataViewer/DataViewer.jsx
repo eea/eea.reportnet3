@@ -224,7 +224,6 @@ const DataViewer = withRouter(
     const onFileDownload = async (fileName, fieldId) => {
       try {
         const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
-
         DownloadFile(data, fileName);
       } catch (error) {
         console.error('DataViewer - onFileDownload.', error);
@@ -318,7 +317,7 @@ const DataViewer = withRouter(
 
     const getMetadata = async () => {
       try {
-        const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+        const metadata = await DatasetService.getMetaData(datasetId);
         setDatasetSchemaId(metadata.datasetSchemaId);
       } catch (error) {
         console.error('DataViewer - getMetadata.', error);
@@ -328,7 +327,7 @@ const DataViewer = withRouter(
 
     const getFileExtensions = async () => {
       try {
-        const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);
+        const allExtensions = await IntegrationService.getAllExtensionsOperations(dataflowId, datasetSchemaId);
         setExtensionsOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
       } catch (error) {
         console.error('DataViewer - getFileExtensions.', error);
@@ -365,7 +364,7 @@ const DataViewer = withRouter(
         if (!isUndefined(sField) && sField !== null) {
           fields = `${sField}:${sOrder}`;
         }
-        const { data } = await DatasetService.tableDataById({
+        const data = await DatasetService.getTableData({
           datasetId,
           tableSchemaId: tableId,
           pageNum: Math.floor(fRow / nRows),
@@ -550,7 +549,7 @@ const DataViewer = withRouter(
     const onConfirmDeleteTable = async () => {
       try {
         notificationContext.add({ type: 'DELETE_TABLE_DATA_INIT' });
-        await DatasetService.deleteTableDataById(datasetId, tableId);
+        await DatasetService.deleteTableData(datasetId, tableId);
         setFetchedData([]);
         dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
@@ -575,12 +574,9 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteAttachment = async () => {
       try {
-        const { status } = await DatasetService.deleteFileData(datasetId, records.selectedFieldId);
-
-        if (status >= 200 && status <= 299) {
-          RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
-          setIsDeleteAttachmentVisible(false);
-        }
+        await DatasetService.deleteAttachment(datasetId, records.selectedFieldId);
+        RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
+        setIsDeleteAttachmentVisible(false);
       } catch (error) {
         console.error('DataViewer - onConfirmDeleteAttachment.', error);
       }
@@ -588,8 +584,7 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteRow = async () => {
       try {
-        await DatasetService.deleteRecordById(datasetId, records.selectedRecord.recordId);
-
+        await DatasetService.deleteRecord(datasetId, records.selectedRecord.recordId);
         const calcRecords = records.totalFilteredRecords >= 0 ? records.totalFilteredRecords : records.totalRecords;
         const page =
           (calcRecords - 1) / records.recordsPerPage === 1
@@ -654,7 +649,7 @@ const DataViewer = withRouter(
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
         if (value !== initialCellValue && record.recordId === records.selectedRecord.recordId) {
           try {
-            const response = await DatasetService.updateFieldById(
+            const response = await DatasetService.updateField(
               datasetId,
               cell.field,
               field.id,
@@ -723,7 +718,7 @@ const DataViewer = withRouter(
     const onPasteAccept = async () => {
       try {
         setIsPasting(true);
-        const recordsAdded = await DatasetService.addRecordsById(
+        const recordsAdded = await DatasetService.createRecord(
           datasetId,
           tableId,
           MapUtils.parseGeometryData(records.pastedRecords)
@@ -792,7 +787,7 @@ const DataViewer = withRouter(
       if (isNewRecord) {
         try {
           setIsSaving(true);
-          await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(record)]);
+          await DatasetService.createRecord(datasetId, tableId, [parseMultiselect(record)]);
           onRefresh();
         } catch (error) {
           if (error.response.status === 423) {
@@ -818,7 +813,7 @@ const DataViewer = withRouter(
       } else {
         try {
           setIsSaving(true);
-          await DatasetService.updateRecordsById(datasetId, parseMultiselect(record));
+          await DatasetService.updateRecord(datasetId, parseMultiselect(record));
           onRefresh();
         } catch (error) {
           if (error.response.status === 423) {
@@ -1294,7 +1289,7 @@ const DataViewer = withRouter(
             name="file"
             onUpload={onAttach}
             operation="PUT"
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
               datasetId,
               fieldId: records.selectedFieldId
             })}`}

@@ -263,18 +263,15 @@ export const FieldsDesigner = ({
 
   const deleteField = async (deletedFieldIndex, deletedFieldType) => {
     try {
-      const { status } = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
-
-      if (status >= 200 && status <= 299) {
-        const inmFields = [...fields];
-        inmFields.splice(deletedFieldIndex, 1);
-        onChangeFields(
-          inmFields,
-          TextUtils.areEquals(deletedFieldType, 'LINK') || TextUtils.areEquals(deletedFieldType, 'EXTERNAL_LINK'),
-          table.tableSchemaId
-        );
-        setFields(inmFields);
-      }
+      await DatasetService.deleteFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
+      const inmFields = [...fields];
+      inmFields.splice(deletedFieldIndex, 1);
+      onChangeFields(
+        inmFields,
+        TextUtils.areEquals(deletedFieldType, 'LINK') || TextUtils.areEquals(deletedFieldType, 'EXTERNAL_LINK'),
+        table.tableSchemaId
+      );
+      setFields(inmFields);
     } catch (error) {
       console.error('FieldsDesigner - deleteField.', error);
       if (error.response.status === 423) {
@@ -545,7 +542,7 @@ export const FieldsDesigner = ({
     try {
       const inmFields = [...fields];
       const droppedFieldIdx = FieldsDesignerUtils.getIndexByFieldName(droppedFieldName, inmFields);
-      const fieldOrdered = await DatasetService.orderRecordFieldDesign(
+      const fieldOrdered = await DatasetService.updateFieldOrder(
         datasetId,
         droppedFieldIdx === -1
           ? inmFields.length
@@ -571,7 +568,7 @@ export const FieldsDesigner = ({
 
   const updateTableDesign = async ({ fixedNumber, notEmpty, readOnly, toPrefill }) => {
     try {
-      const { status } = await DatasetService.updateTableDescriptionDesign(
+      await DatasetService.updateTableDesign(
         toPrefill,
         table.tableSchemaId,
         tableDescriptionValue,
@@ -580,9 +577,7 @@ export const FieldsDesigner = ({
         notEmpty,
         fixedNumber
       );
-      if (status >= 200 && status <= 299) {
-        onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
-      }
+      onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
     } catch (error) {
       console.error('FieldsDesigner - updateTableDesign.', error);
     }
@@ -600,7 +595,7 @@ export const FieldsDesigner = ({
   const onExportTableSchema = async fileType => {
     try {
       setExportTableSchemaName(createTableName(table.tableSchemaName, fileType));
-      const { data } = await DatasetService.exportTableSchemaById(
+      const { data } = await DatasetService.exportTableSchema(
         datasetId,
         designerState.datasetSchemaId,
         table.tableSchemaId,
@@ -697,7 +692,7 @@ export const FieldsDesigner = ({
           }}
           onKeyDown={e => onKeyChange(e)}
           placeholder={resources.messages['newTableDescriptionPlaceHolder']}
-          value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
+          value={tableDescriptionValue}
         />
 
         <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>

@@ -1,7 +1,7 @@
 export const ReferenceDataflowConfig = {
-  all: '/dataflow/referenceDataflows',
-  createDataflow: '/dataflow',
-  deleteReferenceDataflow: '/dataflow/{:referenceDataflowId}',
+  createUpdateReferenceDataflow: '/dataflow',
+  delete: '/dataflow/{:referenceDataflowId}',
+  getAll: '/dataflow/referenceDataflows',
   getReferencingDataflows: '/referenceDataset/referenced/dataflow/{:referenceDataflowId}',
-  referenceDataflow: '/dataflow/{:referenceDataflowId}'
+  getReferenceDataflow: '/dataflow/{:referenceDataflowId}'
 };
