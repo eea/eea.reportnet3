@@ -162,7 +162,7 @@ const BigButtonListReference = withRouter(
 
       showLoading();
       try {
-        await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[deleteIndex].datasetId);
+        await DatasetService.deleteSchema(dataflowState.designDatasetSchemas[deleteIndex].datasetId);
         onUpdateData();
         setUpdatedDatasetSchema(remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex !== deleteIndex));
       } catch (error) {

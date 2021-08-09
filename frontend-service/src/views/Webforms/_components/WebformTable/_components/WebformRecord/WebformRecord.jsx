@@ -79,7 +79,7 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting: true } });
 
     try {
-      await DatasetService.deleteRecordById(
+      await DatasetService.deleteRecord(
         datasetId,
         selectedRecordId,
         webformRecordState.record?.elements?.some(element => element.deleteInCascade)
@@ -109,7 +109,7 @@ export const WebformRecord = ({
 
   const onSaveField = async () => {
     try {
-      await DatasetService.addRecordsById(datasetId, tableId, [parseMultiselect(webformRecordState.newRecord)]);
+      await DatasetService.createRecord(datasetId, tableId, [parseMultiselect(webformRecordState.newRecord)]);
     } catch (error) {
       console.error('WebformRecord - onSaveField.', error);
     }

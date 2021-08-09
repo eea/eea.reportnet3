@@ -4,7 +4,7 @@ import isUndefined from 'lodash/isUndefined';
 import isEmpty from 'lodash/isEmpty';
 import pick from 'lodash/pick';
 
-import { DatasetService } from 'services/DatasetService';
+import { ValidationUtils } from 'services/_utils/ValidationUtils';
 
 const editLargeStringWithDots = (string, length) => {
   if (string.length > length) {
@@ -97,7 +97,7 @@ const groupValidations = (recordData, blockerMessage, errorMessage, warningMessa
   );
 
   const getRecordValidationByErrorAndMessage = (levelError, message) => {
-    return DatasetService.createValidation('RECORD', 0, levelError, message);
+    return ValidationUtils.createValidation('RECORD', 0, levelError, message);
   };
 
   const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();

@@ -599,7 +599,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onSaveName = async (value, index) => {
     try {
-      await DatasetService.updateSchemaNameById(
+      await DatasetService.updateDatasetNameDesign(
         dataflowState.designDatasetSchemas[index].datasetId,
         encodeURIComponent(value)
       );
@@ -1050,7 +1050,7 @@ const Dataflow = withRouter(({ history, match }) => {
             isDialog={true}
             name="file"
             onUpload={onUploadLeadReporters}
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(RepresentativeConfig.importLeadReporters, {
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(RepresentativeConfig.importFile, {
               dataflowId,
               dataProviderGroupId: dataflowState.dataProviderSelected.dataProviderGroupId
             })}`}

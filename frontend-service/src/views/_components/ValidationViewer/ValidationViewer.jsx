@@ -303,7 +303,7 @@ const ValidationViewer = memo(
 
       let pageNums = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
 
-      const { data } = await DatasetService.groupedErrorsById(
+      const data = await DatasetService.getShowValidationErrors(
         datasetId,
         pageNums,
         numberRows,
