@@ -113,6 +113,7 @@ const Dataflow = withRouter(({ history, match }) => {
     obligations: {},
     representativesImport: false,
     restrictFromPublic: false,
+    shareRightsUpdated: false,
     showPublicInfo: false,
     status: '',
     updatedDatasetSchema: [],
@@ -307,6 +308,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const handleRedirect = target => history.push(target);
 
+  const setShareRightsUpdated = shareRightsUpdatedValue => {
+    dataflowDispatch({ type: 'SET_SHARE_RIGHTS_UPDATED', payload: { shareRightsUpdated: shareRightsUpdatedValue } });
+  };
+
   const setIsUserRightManagementDialogVisible = isVisible => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
   };
@@ -323,7 +328,14 @@ const Dataflow = withRouter(({ history, match }) => {
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() => manageDialogs(`isManage${userType}DialogVisible`, false)}
+        onClick={() => {
+          manageDialogs(`isManage${userType}DialogVisible`, false);
+          if (dataflowState.shareRightsUpdated) {
+            onLoadReportingDataflow();
+            setIsPageLoading(true);
+            onRefreshToken();
+          }
+        }}
       />
     </div>
   );
@@ -909,7 +921,14 @@ const Dataflow = withRouter(({ history, match }) => {
           <Dialog
             footer={shareRightsFooterDialogFooter('Requesters')}
             header={resources.messages['manageRequestersRights']}
-            onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isManageRequestersDialogVisible', false);
+              if (dataflowState.shareRightsUpdated) {
+                onLoadReportingDataflow();
+                setIsPageLoading(true);
+                onRefreshToken();
+              }
+            }}
             visible={dataflowState.isManageRequestersDialogVisible}>
             <ShareRights
               addConfirmHeader={resources.messages[`addRequesterConfirmHeader`]}
@@ -928,6 +947,7 @@ const Dataflow = withRouter(({ history, match }) => {
               representativeId={representativeId}
               roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
+              setShareRightsUpdated={setShareRightsUpdated}
               updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
               userType={'requester'}
             />
