@@ -11,7 +11,7 @@ import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
 import { Spinner } from 'views/_components/Spinner';
 
-import { UniqueConstraintsService } from 'services/UniqueConstraintsService';
+import { UniqueConstraintService } from 'services/UniqueConstraintService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -101,7 +101,7 @@ export const UniqueConstraints = ({
     setConstraintManagingId(uniqueId);
     constraintsDispatch({ type: 'IS_DELETING', payload: true });
     try {
-      await UniqueConstraintsService.delete(dataflowId, uniqueId);
+      await UniqueConstraintService.delete(dataflowId, uniqueId);
       onUpdateData();
       refreshList(true);
     } catch (error) {
@@ -119,7 +119,7 @@ export const UniqueConstraints = ({
       if (isUniqueConstraintCreating || isUniqueConstraintUpdating || constraintsState.isDeleting) {
         isLoading(false);
       }
-      const uniqueConstraintList = await UniqueConstraintsService.getAll(dataflowId, datasetSchemaId);
+      const uniqueConstraintList = await UniqueConstraintService.getAll(dataflowId, datasetSchemaId);
       const uniques = UniqueConstraintsUtils.parseConstraintsList(uniqueConstraintList, datasetSchemaAllTables);
       constraintsDispatch({ type: 'INITIAL_LOAD', payload: { data: uniques, filteredData: uniques } });
       setIsDuplicatedToManageUnique(false);
