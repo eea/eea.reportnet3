@@ -1,29 +1,29 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import { ObligationsUtils } from '_utils/ObligationUtils.js';
+import { ObligationUtils } from 'services/_utils/ObligationUtils';
 
 import { ObligationRepository } from 'repositories/ObligationRepository';
 
 export const ObligationService = {
   getCountries: async () => {
     const countriesDTO = await ObligationRepository.getCountries();
-    return ObligationsUtils.parseCountryList(countriesDTO.data);
+    return ObligationUtils.parseCountryList(countriesDTO.data);
   },
 
   getIssues: async () => {
     const issuesDTO = await ObligationRepository.getIssues();
-    return ObligationsUtils.parseIssueList(issuesDTO.data);
+    return ObligationUtils.parseIssueList(issuesDTO.data);
   },
 
   getOrganizations: async () => {
     const clientsDTO = await ObligationRepository.getOrganizations();
-    return ObligationsUtils.parseOrganizationList(clientsDTO.data);
+    return ObligationUtils.parseOrganizationList(clientsDTO.data);
   },
 
   get: async obligationId => {
     const obligationByIdDTO = await ObligationRepository.get(obligationId);
-    return ObligationsUtils.parseObligation(obligationByIdDTO.data);
+    return ObligationUtils.parseObligation(obligationByIdDTO.data);
   },
 
   getOpen: async filterData => {
@@ -40,10 +40,10 @@ export const ObligationService = {
         issueId,
         organizationId
       );
-      return ObligationsUtils.parseObligationList(openedObligationsDTO.data);
+      return ObligationUtils.parseObligationList(openedObligationsDTO.data);
     } else {
       const openedObligationsDTO = await ObligationRepository.getOpen();
-      return ObligationsUtils.parseObligationList(openedObligationsDTO.data);
+      return ObligationUtils.parseObligationList(openedObligationsDTO.data);
     }
   }
 };

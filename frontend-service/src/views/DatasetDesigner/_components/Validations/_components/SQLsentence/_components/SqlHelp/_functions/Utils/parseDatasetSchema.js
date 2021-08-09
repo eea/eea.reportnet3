@@ -1,4 +1,4 @@
-import { parseTables } from './parseTables.js';
+import { parseTables } from './parseTables';
 
 export const parseDatasetSchema = rawDatasetSchema => {
   const { datasetId, datasetSchemaName, tables: rawTables } = rawDatasetSchema;

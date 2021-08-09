@@ -28,8 +28,10 @@ const parseLegalInstrument = legalInstrumentDTO => {
   });
 };
 
-const parseObligation = obligationDTO =>
-  new Obligation({
+const parseObligation = obligationDTO => {
+  if (isNil(obligationDTO)) return;
+
+  return new Obligation({
     comment: obligationDTO.comment,
     countries: obligationDTO.countries,
     description: obligationDTO.description,
@@ -44,15 +46,19 @@ const parseObligation = obligationDTO =>
     validSince: obligationDTO.validSince,
     validTo: obligationDTO.validTo
   });
+};
 
-const parseCountry = countryDTO =>
-  new Country({
+const parseCountry = countryDTO => {
+  if (isNil(countryDTO)) return;
+
+  return new Country({
     countryCode: countryDTO.twoLetter,
     countryMember: countryDTO.memberCommunity,
     id: countryDTO.spatialId,
     name: countryDTO.name,
     type: countryDTO.type
   });
+};
 
 const parseOrganization = organizationDTO => {
   if (isNil(organizationDTO)) return;
@@ -72,9 +78,13 @@ const parseOrganization = organizationDTO => {
   });
 };
 
-const parseIssue = issueDTO => new Issue({ id: issueDTO.issueId, name: issueDTO.issueName });
+const parseIssue = issueDTO => {
+  if (isNil(issueDTO)) return;
 
-export const ObligationsUtils = {
+  return new Issue({ id: issueDTO.issueId, name: issueDTO.issueName });
+};
+
+export const ObligationUtils = {
   parseLegalInstrument,
   parseObligationList,
   parseObligation,

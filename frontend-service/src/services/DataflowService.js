@@ -11,6 +11,8 @@ import { config } from 'conf';
 
 import { DataflowRepository } from 'repositories/DataflowRepository';
 
+import { ObligationUtils } from 'services/_utils/ObligationUtils';
+
 import { DataCollection } from 'entities/DataCollection';
 import { Dataflow } from 'entities/Dataflow';
 import { Dataset } from 'entities/Dataset';
@@ -18,8 +20,6 @@ import { DatasetTable } from 'entities/DatasetTable';
 import { DatasetTableField } from 'entities/DatasetTableField';
 import { DatasetTableRecord } from 'entities/DatasetTableRecord';
 import { EUDataset } from 'entities/EUDataset';
-import { LegalInstrument } from 'entities/LegalInstrument';
-import { Obligation } from 'entities/Obligation';
 import { Representative } from 'entities/Representative';
 import { WebLink } from 'entities/WebLink';
 
@@ -71,7 +71,7 @@ const parseDataflowDTO = dataflowDTO =>
     isReleasable: dataflowDTO.releasable,
     manualAcceptance: dataflowDTO.manualAcceptance,
     name: dataflowDTO.name,
-    obligation: parseObligationDTO(dataflowDTO.obligation),
+    obligation: ObligationUtils.parseObligation(dataflowDTO.obligation),
     referenceDatasets: parseDatasetListDTO(dataflowDTO.referenceDatasets),
     reportingDatasetsStatus: dataflowDTO.reportingStatus,
     representatives: parseRepresentativeListDTO(dataflowDTO.representatives),
@@ -177,38 +177,6 @@ const parseDocumentDTO = documentDTO => {
     language: documentDTO.language,
     title: documentDTO.name
   });
-};
-
-const parseLegalInstrument = legalInstrumentDTO => {
-  if (!isNil(legalInstrumentDTO)) {
-    return new LegalInstrument({
-      alias: legalInstrumentDTO.sourceAlias,
-      id: legalInstrumentDTO.sourceId,
-      title: legalInstrumentDTO.sourceTitle
-    });
-  }
-  return;
-};
-
-const parseObligationDTO = obligationDTO => {
-  if (!isNil(obligationDTO)) {
-    return new Obligation({
-      comment: obligationDTO.comment,
-      countries: obligationDTO.countries,
-      description: obligationDTO.description,
-      expirationDate: !isNil(obligationDTO.nextDeadline)
-        ? dayjs(obligationDTO.nextDeadline).format('YYYY-MM-DD')
-        : null,
-      issues: obligationDTO.issues,
-      legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
-      obligationId: obligationDTO.obligationId,
-      reportingFrequency: obligationDTO.reportFreq,
-      reportingFrequencyDetail: obligationDTO.reportFreqDetail,
-      title: obligationDTO.oblTitle,
-      validSince: obligationDTO.validSince,
-      validTo: obligationDTO.validTo
-    });
-  }
 };
 
 const parseRepresentativeListDTO = representativesDTO => {
@@ -659,7 +627,7 @@ export const DataflowService = {
           id: publicDataflow.id,
           isReleasable: publicDataflow.releasable,
           name: publicDataflow.name,
-          obligation: parseObligationDTO(publicDataflow.obligation),
+          obligation: ObligationUtils.parseObligation(publicDataflow.obligation),
           status: publicDataflow.status
         })
     );

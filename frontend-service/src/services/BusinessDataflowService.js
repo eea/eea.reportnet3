@@ -4,13 +4,13 @@ import { config } from 'conf';
 
 import { BusinessDataflowRepository } from 'repositories/BusinessDataflowRepository';
 
+import { ObligationUtils } from 'services/_utils/ObligationUtils';
+
 import { BusinessDataflow } from 'entities/BusinessDataflow';
 
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
-
-import { ObligationUtils } from '_utils/ObligationUtils';
 
 const parseDataflowDTOs = dataflowDTOs => {
   const dataflows = dataflowDTOs.map(dataflowDTO => parseDataflowDTO(dataflowDTO));

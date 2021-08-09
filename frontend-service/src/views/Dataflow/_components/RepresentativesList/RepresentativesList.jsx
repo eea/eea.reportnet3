@@ -23,7 +23,7 @@ import { RepresentativeService } from 'services/RepresentativeService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { reducer } from './_functions/Reducers/representativeReducer.js';
+import { reducer } from './_functions/Reducers/representativeReducer';
 
 import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
 
