@@ -140,7 +140,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const onLoadDataflowData = async () => {
     try {
-      const { data } = await DataflowService.reporting(match.params.dataflowId);
+      const data = await DataflowService.getReportingDatasets(match.params.dataflowId);
       const dataCollection = data
         ? data.dataCollections.filter(dataset => dataset.dataCollectionId.toString() === datasetId)
         : [];
