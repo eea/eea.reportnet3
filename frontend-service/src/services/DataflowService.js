@@ -533,7 +533,6 @@ export const DataflowService = {
         datasetSchemaId: datasetSchemaDTO.idDataSetSchema,
         datasetSchemaName: datasetSchemaDTO.nameDatasetSchema,
         referenceDataset: datasetSchemaDTO.referenceDataset
-        // levelErrorTypes: !isUndefined(rulesDTO) && rulesDTO !== '' ? getAllLevelErrorsFromRuleValidations(rulesDTO) : []
       });
 
       const tables = datasetSchemaDTO.tableSchemas.map(datasetTableDTO => {
