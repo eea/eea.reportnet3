@@ -122,11 +122,8 @@ export const ManageReferenceDataflow = ({
         if (pinDataflow) {
           const inmUserProperties = { ...userContext.userProps };
           inmUserProperties.pinnedDataflows.push(data.toString());
-
-          const response = await UserService.updateAttributes(inmUserProperties);
-          if (!isNil(response) && response.status >= 200 && response.status <= 299) {
-            userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
-          }
+          await UserService.updateAttributes(inmUserProperties);
+          userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
         }
         onCreateDataflow('isReferencedDataflowDialogVisible');
       }

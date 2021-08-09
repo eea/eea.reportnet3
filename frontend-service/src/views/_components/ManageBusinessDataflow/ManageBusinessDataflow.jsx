@@ -143,11 +143,9 @@ export const ManageBusinessDataflow = ({
     setIsDeleteDialogVisible(false);
     showLoading();
     try {
-      const response = await DataflowService.delete(dataflowId);
-      if (response.status >= 200 && response.status <= 299) {
-        history.push(getUrl(routes.DATAFLOWS));
-        notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
-      }
+      await DataflowService.delete(dataflowId);
+      history.push(getUrl(routes.DATAFLOWS));
+      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
     } catch (error) {
       console.error('ManageBusinessDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
@@ -162,7 +160,7 @@ export const ManageBusinessDataflow = ({
     try {
       setIsSending(true);
       if (isEditing) {
-        const { status } = await BusinessDataflowService.update(
+        await BusinessDataflowService.update(
           dataflowId,
           description,
           obligation.id,
@@ -170,31 +168,24 @@ export const ManageBusinessDataflow = ({
           selectedGroup.dataProviderGroupId,
           selectedFmeUser.id
         );
-
-        if (status >= 200 && status <= 299) {
-          manageDialogs(dialogName, false);
-          onEditDataflow(name, description);
-        }
+        manageDialogs(dialogName, false);
+        onEditDataflow(name, description);
       } else {
-        const { data, status } = await BusinessDataflowService.create(
+        const { data } = await BusinessDataflowService.create(
           name,
           description,
           obligation.id,
           selectedGroup.dataProviderGroupId,
           selectedFmeUser.id
         );
-        if (status >= 200 && status <= 299) {
-          if (pinDataflow) {
-            const inmUserProperties = { ...userContext.userProps };
-            inmUserProperties.pinnedDataflows.push(data.toString());
+        if (pinDataflow) {
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.pinnedDataflows.push(data.toString());
 
-            const response = await UserService.updateAttributes(inmUserProperties);
-            if (!isNil(response) && response.status >= 200 && response.status <= 299) {
-              userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
-            }
-          }
-          onCreateDataflow('isBusinessDataflowDialogVisible');
+          await UserService.updateAttributes(inmUserProperties);
+          userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
         }
+        onCreateDataflow('isBusinessDataflowDialogVisible');
       }
     } catch (error) {
       if (TextUtils.areEquals(error?.response?.data, 'Dataflow name already exists')) {

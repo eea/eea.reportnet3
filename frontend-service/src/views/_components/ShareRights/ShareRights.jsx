@@ -264,10 +264,8 @@ export const ShareRights = ({
     setActions({ isDeleting: true, isEditing: false });
 
     try {
-      const response = await callEndPoint(methodTypes.DELETE);
-      if (response.status >= 200 && response.status <= 299) {
-        onDataChange();
-      }
+      await callEndPoint(methodTypes.DELETE);
+      onDataChange();
     } catch (error) {
       console.error('ShareRights - onDeleteUserRight.', error);
       notificationContext.add({ type: deleteErrorNotificationKey });
@@ -290,10 +288,8 @@ export const ShareRights = ({
       setLoadingStatus({ isActionButtonsLoading: true, isInitialLoading: false });
 
       try {
-        const response = await callEndPoint(methodTypes.UPDATE, userRight);
-        if (response.status >= 200 && response.status <= 299) {
-          onDataChange();
-        }
+        await callEndPoint(methodTypes.UPDATE, userRight);
+        onDataChange();
         onCloseManagementDialog();
       } catch (error) {
         if (error?.response?.status === 404) {

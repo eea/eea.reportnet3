@@ -649,7 +649,7 @@ const DataViewer = withRouter(
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
         if (value !== initialCellValue && record.recordId === records.selectedRecord.recordId) {
           try {
-            const response = await DatasetService.updateField(
+            await DatasetService.updateField(
               datasetId,
               cell.field,
               field.id,
@@ -659,12 +659,6 @@ const DataViewer = withRouter(
                 ? value.join(';')
                 : value
             );
-
-            const isFileUpdated = response.status >= 200 && response.status <= 299;
-
-            if (!isFileUpdated) {
-              throw new Error('UPDATE_FIELD_BY_ID_ERROR');
-            }
           } catch (error) {
             if (error.response.status === 423) {
               notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
