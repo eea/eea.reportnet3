@@ -49,7 +49,7 @@ const ManageReportingDataflowForm = forwardRef(
     const checkIsCorrectInputValue = (inputValue, inputName) => {
       let hasErrors = false;
       let message = '';
-      let maxLengthMessage = 'it must be 255 or lower.'
+      let maxLengthMessage = 'max allowed characters 255.'
 
       if (checkIsEmptyInput(inputValue)) {
         message = '';
