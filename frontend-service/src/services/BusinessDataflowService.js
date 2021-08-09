@@ -23,8 +23,8 @@ const parseDataflowDTOs = dataflowDTOs => {
   return dataflows;
 };
 
-const parseDataflowDTO = dataflowDTO => {
-  const dataflow = new BusinessDataflow({
+const parseDataflowDTO = dataflowDTO =>
+  new BusinessDataflow({
     creationDate: dataflowDTO.creationDate,
     description: dataflowDTO.description,
     expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
@@ -116,9 +116,7 @@ export const BusinessDataflowService = {
         });
       }
     }
-
-    businessDataflowsDTO.data = parseDataflowDTOs(businessDataflowsDTO.data);
-    return businessDataflowsDTO;
+    return parseDataflowDTOs(businessDataflows);
   },
 
   create: async (name, description, obligationId, dataProviderGroupId, fmeUserId) =>
