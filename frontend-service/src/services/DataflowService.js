@@ -418,6 +418,7 @@ const parseDataflowDTO = dataflowDTO =>
     requestId: dataflowDTO.requestId,
     showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
+    type: dataflowDTO.type,
     testDatasets: parseDatasetListDTO(dataflowDTO.testDatasets),
     userRole: dataflowDTO.userRole,
     weblinks: parseWebLinkListDTO(dataflowDTO.weblinks)
