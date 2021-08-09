@@ -1,7 +1,6 @@
 import React, { Fragment, useContext, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';

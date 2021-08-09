@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useLayoutEffect, useState } from 'reac
 
 import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 import orderBy from 'lodash/orderBy';
 import pull from 'lodash/pull';
 

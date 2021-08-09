@@ -788,7 +788,7 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
-      const { status } = await DatasetService.updateFieldDesign(datasetId, {
+      await DatasetService.updateFieldDesign(datasetId, {
         codelistItems,
         description,
         fieldSchemaId,
