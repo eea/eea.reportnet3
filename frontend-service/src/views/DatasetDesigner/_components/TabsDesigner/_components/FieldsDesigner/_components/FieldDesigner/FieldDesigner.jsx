@@ -470,7 +470,7 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
-      const response = await DatasetService.addRecordFieldDesign(datasetId, {
+      const response = await DatasetService.createRecordDesign(datasetId, {
         codelistItems,
         description,
         maxSize,
@@ -788,7 +788,7 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
-      const { status } = await DatasetService.updateRecordFieldDesign(datasetId, {
+      const { status } = await DatasetService.updateFieldDesign(datasetId, {
         codelistItems,
         description,
         fieldSchemaId,

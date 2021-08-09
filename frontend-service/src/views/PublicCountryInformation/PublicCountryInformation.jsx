@@ -138,9 +138,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       let fileContent;
 
       if (!isNil(dataProviderId)) {
-        fileContent = await DatasetService.downloadDatasetFileData(dataflowId, dataProviderId, fileName);
+        fileContent = await DatasetService.downloadPublicDatasetFile(dataflowId, dataProviderId, fileName);
       } else {
-        fileContent = await DatasetService.downloadReferenceDatasetFileData(dataflowId, fileName);
+        fileContent = await DatasetService.downloadPublicReferenceDatasetFileData(dataflowId, fileName);
       }
       DownloadFile(fileContent.data, fileName);
     } catch (error) {

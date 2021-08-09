@@ -125,7 +125,7 @@ export const WebformTable = ({
         : parseNewTableRecord(filteredTable, selectedTable.pamsId, sectorObjectivesTable);
 
       try {
-        await DatasetService.addRecordsById(datasetId, tableSchemaId, [newEmptyRecord]);
+        await DatasetService.createRecord(datasetId, tableSchemaId, [newEmptyRecord]);
         onUpdateData();
       } catch (error) {
         console.error('WebformTable - onAddMultipleWebform.', error);
@@ -156,7 +156,7 @@ export const WebformTable = ({
     try {
       const { fieldSchema, fieldId } = getFieldSchemaId([webform], webform.tableSchemaId);
 
-      const { data } = await DatasetService.tableDataById({
+      const data = await DatasetService.getTableData({
         datasetId,
         tableSchemaId: webform.tableSchemaId,
         pageNum: '',
@@ -174,14 +174,13 @@ export const WebformTable = ({
         for (let index = 0; index < tableSchemaIds.length; index++) {
           const tableSchemaId = tableSchemaIds[index];
           const { fieldSchema, fieldId } = getFieldSchemaId(tables, tableSchemaId);
-          const tableChildData = await DatasetService.tableDataById({
+          tableData[tableSchemaId] = await DatasetService.getTableData({
             datasetId,
             tableSchemaId,
             levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
             fieldSchemaId: fieldSchema || fieldId,
             value: selectedTable.pamsId
           });
-          tableData[tableSchemaId] = tableChildData.data;
         }
         const records = onParseWebformRecords(data.records, webform, tableData, data.totalRecords);
 
