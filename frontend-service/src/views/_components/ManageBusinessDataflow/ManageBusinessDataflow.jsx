@@ -71,7 +71,6 @@ export const ManageBusinessDataflow = ({
   useEffect(() => {
     if (isEditing) {
       setSelectedGroup(groupOfCompanies.filter(group => group.dataProviderGroupId === metadata.dataProviderGroupId)[0]);
-      console.log(`groupOfCompanies`, groupOfCompanies);
     }
   }, [groupOfCompanies]);
 
