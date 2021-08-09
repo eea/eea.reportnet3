@@ -1,7 +1,6 @@
 import React, { Fragment, useContext, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -19,6 +18,7 @@ import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
 
+import { DataflowService } from 'services/DataflowService';
 import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 
 import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
@@ -96,7 +96,7 @@ export const ManageReferenceDataflow = ({
     setIsDeleteDialogVisible(false);
     showLoading();
     try {
-      await ReferenceDataflowService.delete(dataflowId);
+      await DataflowService.delete(dataflowId);
       history.push(getUrl(routes.DATAFLOWS));
       notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
     } catch (error) {
@@ -121,11 +121,8 @@ export const ManageReferenceDataflow = ({
         if (pinDataflow) {
           const inmUserProperties = { ...userContext.userProps };
           inmUserProperties.pinnedDataflows.push(data.toString());
-
-          const response = await UserService.updateAttributes(inmUserProperties);
-          if (!isNil(response) && response.status >= 200 && response.status <= 299) {
-            userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
-          }
+          await UserService.updateAttributes(inmUserProperties);
+          userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
         }
         onCreateDataflow('isReferencedDataflowDialogVisible');
       }
