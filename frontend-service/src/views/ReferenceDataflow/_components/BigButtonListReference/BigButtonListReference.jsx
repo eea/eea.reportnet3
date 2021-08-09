@@ -128,7 +128,7 @@ const BigButtonListReference = withRouter(
       });
 
       try {
-        await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
+        await DataflowService.cloneSchemas(cloneDataflow.id, dataflowId);
       } catch (error) {
         if (error.response.status === 423) {
           notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -162,15 +162,9 @@ const BigButtonListReference = withRouter(
 
       showLoading();
       try {
-        const { status } = await DatasetService.deleteSchemaById(
-          dataflowState.designDatasetSchemas[deleteIndex].datasetId
-        );
-        if (status >= 200 && status <= 299) {
-          onUpdateData();
-          setUpdatedDatasetSchema(
-            remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex !== deleteIndex)
-          );
-        }
+        await DatasetService.deleteSchema(dataflowState.designDatasetSchemas[deleteIndex].datasetId);
+        onUpdateData();
+        setUpdatedDatasetSchema(remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex !== deleteIndex));
       } catch (error) {
         console.error('BigButtonListReference - onDeleteDatasetSchema.', error);
         if (error.response.status === 401) {
@@ -232,7 +226,7 @@ const BigButtonListReference = withRouter(
     };
 
     const onLoadSchemasValidations = async () => {
-      const { data } = await DataflowService.schemasValidation(dataflowId);
+      const { data } = await DataflowService.getSchemasValidation(dataflowId);
       referenceBigButtonsDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { data } });
     };
 

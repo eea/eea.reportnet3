@@ -13,12 +13,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
@@ -527,6 +529,35 @@ public class DataFlowControllerImplTest {
     assertEquals(EEAErrorMessage.DATE_AFTER_INCORRECT, result.getBody());
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
   }
+
+  @Test
+  public void testUpdateDataflowBusinessException() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    Date date = new Date();
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setType(TypeDataflowEnum.BUSINESS);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    dataflowVO.setObligation(obligation);
+    dataflowVO.setDataProviderGroupId(1L);
+    dataflowVO.setId(1L);
+    DataFlowVO dataFlowVO2 = new DataFlowVO();
+    dataFlowVO2.setId(1L);
+    dataFlowVO2.setDataProviderGroupId(2L);
+    List<RepresentativeVO> representatives = new ArrayList<>();
+    representatives.add(new RepresentativeVO());
+
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO2);
+    Mockito.when(representativeService.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(representatives);
+    ResponseEntity<?> value = dataFlowControllerImpl.updateDataFlow(dataflowVO);
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+    assertEquals(EEAErrorMessage.EXISTING_REPRESENTATIVES, value.getBody());
+  }
+
+
 
   /**
    * Test get metabase by id.

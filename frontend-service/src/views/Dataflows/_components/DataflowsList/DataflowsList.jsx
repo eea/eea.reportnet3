@@ -182,11 +182,13 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
   };
 
   const renderContent = () => {
+    if (isLoading) return <Spinner style={{ top: 0 }} />;
+
     if (isEmpty(content[visibleTab])) {
       const emptyDataflowsMessage = {
         business: 'thereAreNoBusinessDataflows',
         reference: 'thereAreNoReferenceDataflows',
-        dataflows: 'thereAreNoDataflows'
+        reporting: 'thereAreNoReportingDataflows'
       };
 
       return <div className={styles.noDataflows}>{resources.messages[emptyDataflowsMessage[visibleTab]]}</div>;
@@ -203,8 +205,6 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       <div className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</div>
     );
   };
-
-  if (isLoading) return <Spinner />;
 
   return (
     <div className={`${styles.wrap} ${className}`}>

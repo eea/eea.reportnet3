@@ -1,5 +1,4 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -16,12 +15,7 @@ import { DataflowService } from 'services/DataflowService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const UserList = ({
-  dataflowId,
-  areBusinessDataflows = false,
-  isBusinessDataflow = false,
-  representativeId
-}) => {
+export const UserList = ({ dataflowId, isBusinessDataflow = false, representativeId }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -42,18 +36,17 @@ export const UserList = ({
 
   const fetchData = async () => {
     try {
-      let response;
+      let userData;
       setIsLoading(true);
       if (isNil(representativeId) && isNil(dataflowId)) {
-        response = await DataflowService.getAllDataflowsUserList();
+        userData = await DataflowService.getAllDataflowsUserList();
       } else if (isNil(representativeId) && !isNil(dataflowId)) {
-        response = await DataflowService.getRepresentativesUsersList(dataflowId);
+        userData = await DataflowService.getRepresentativesUsersList(dataflowId);
       } else {
-        response = await DataflowService.getUserList(dataflowId, representativeId);
+        userData = await DataflowService.getUserList(dataflowId, representativeId);
       }
-
-      setUserListData(response.data);
-      setFilteredData(response.data);
+      setUserListData(userData);
+      setFilteredData(userData);
     } catch (error) {
       console.error('UserList - fetchData.', error);
       notificationContext.add({ type: 'LOAD_USERS_LIST_ERROR' });
@@ -170,9 +163,4 @@ export const UserList = ({
       )}
     </div>
   );
-};
-
-UserList.propTypes = {
-  dataflowId: PropTypes.number,
-  representativeId: PropTypes.number
 };

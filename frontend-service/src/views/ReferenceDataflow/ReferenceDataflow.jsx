@@ -135,7 +135,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const onSaveDatasetName = async (value, index) => {
     try {
-      await DatasetService.updateSchemaNameById(
+      await DatasetService.updateDatasetNameDesign(
         dataflowState.designDatasetSchemas[index].datasetId,
         encodeURIComponent(value)
       );
@@ -167,8 +167,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'LOADING_STARTED' });
 
     try {
-      const referenceDataflowResponse = await ReferenceDataflowService.referenceDataflow(referenceDataflowId);
-      const referenceDataflow = referenceDataflowResponse.data;
+      const referenceDataflow = await ReferenceDataflowService.getReferenceDataflow(referenceDataflowId);
 
       dataflowDispatch({
         type: 'LOADING_SUCCESS',

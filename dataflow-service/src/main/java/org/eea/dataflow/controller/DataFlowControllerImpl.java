@@ -396,6 +396,21 @@ public class DataFlowControllerImpl implements DataFlowController {
       message = EEAErrorMessage.DATAFLOW_OBLIGATION;
       status = HttpStatus.BAD_REQUEST;
     }
+    // If it's a Business Dataflow, check if there are representatives selected. If so, then deny
+    // the update
+    if (TypeDataflowEnum.BUSINESS.equals(dataFlowVO.getType()) && status == HttpStatus.OK) {
+      try {
+        DataFlowVO dataflow = dataflowService.getMetabaseById(dataFlowVO.getId());
+        if (!dataflow.getDataProviderGroupId().equals(dataFlowVO.getDataProviderGroupId())
+            && !representativeService.getRepresetativesByIdDataFlow(dataFlowVO.getId()).isEmpty()) {
+          message = EEAErrorMessage.EXISTING_REPRESENTATIVES;
+          status = HttpStatus.BAD_REQUEST;
+        }
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error finding the representatives from the dataflowId {}",
+            dataFlowVO.getId());
+      }
+    }
 
     if (status == HttpStatus.OK) {
       try {

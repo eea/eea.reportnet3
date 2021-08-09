@@ -236,21 +236,18 @@ export const TabsDesigner = withRouter(
 
     const addTable = async (header, tabIndex) => {
       try {
-        const { data, status } = await DatasetService.addTableDesign(datasetId, header);
-
-        if (status >= 200 && status <= 299) {
-          const inmTabs = [...tabs];
-          inmTabs[tabIndex].tableSchemaId = data.idTableSchema;
-          inmTabs[tabIndex].recordId = data.recordSchema.idRecordSchema;
-          inmTabs[tabIndex].recordSchemaId = data.recordSchema.idRecordSchema;
-          inmTabs[tabIndex].header = header;
-          inmTabs[tabIndex].tableSchemaName = header;
-          inmTabs[tabIndex].newTab = false;
-          inmTabs[tabIndex].showContextMenu = false;
-          setActiveTableSchemaId(data.idTableSchema);
-          setTabs(inmTabs);
-          getIsTableCreated(true);
-        }
+        const { data } = await DatasetService.createTableDesign(datasetId, header);
+        const inmTabs = [...tabs];
+        inmTabs[tabIndex].tableSchemaId = data.idTableSchema;
+        inmTabs[tabIndex].recordId = data.recordSchema.idRecordSchema;
+        inmTabs[tabIndex].recordSchemaId = data.recordSchema.idRecordSchema;
+        inmTabs[tabIndex].header = header;
+        inmTabs[tabIndex].tableSchemaName = header;
+        inmTabs[tabIndex].newTab = false;
+        inmTabs[tabIndex].showContextMenu = false;
+        setActiveTableSchemaId(data.idTableSchema);
+        setTabs(inmTabs);
+        getIsTableCreated(true);
       } catch (error) {
         console.error('TabsDesigner - addTable.', error);
         if (error?.response.status === 400) {
@@ -444,20 +441,19 @@ export const TabsDesigner = withRouter(
         const inmTabs = [...tabs];
         const draggedTabIdx = TabsUtils.getIndexByHeader(draggedTabHeader, inmTabs);
         const droppedTabIdx = TabsUtils.getIndexByHeader(droppedTabHeader, inmTabs);
-        const tableOrdered = await DatasetService.orderTableDesign(
+        await DatasetService.orderTableDesign(
           datasetId,
           draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1,
           tabs[draggedTabIdx].tableSchemaId
         );
-        if (tableOrdered.status >= 200 && tableOrdered.status <= 299) {
-          const shiftedTabs = arrayShift(inmTabs, draggedTabIdx, droppedTabIdx);
 
-          shiftedTabs.forEach((tab, i) => (tab.index = !tab.addTab ? i : -1));
-          setActiveTableSchemaId(
-            shiftedTabs[draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1].tableSchemaId
-          );
-          setTabs([...shiftedTabs]);
-        }
+        const shiftedTabs = arrayShift(inmTabs, draggedTabIdx, droppedTabIdx);
+
+        shiftedTabs.forEach((tab, i) => (tab.index = !tab.addTab ? i : -1));
+        setActiveTableSchemaId(
+          shiftedTabs[draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1].tableSchemaId
+        );
+        setTabs([...shiftedTabs]);
       } catch (error) {
         console.error('TabsDesigner - reorderTable.', error);
       }
@@ -469,8 +465,9 @@ export const TabsDesigner = withRouter(
         if (status >= 200 && status <= 299) {
           const inmTabs = [...tabs];
           inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
-          inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].tableSchemaName =
-            tableSchemaName;
+          inmTabs[
+            TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')
+          ].tableSchemaName = tableSchemaName;
           setTabs(inmTabs);
         }
       } catch (error) {

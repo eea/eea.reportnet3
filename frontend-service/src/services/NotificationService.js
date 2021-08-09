@@ -96,4 +96,12 @@ const getSectionValidationRedirectionUrl = sectionDTO => {
   }
 };
 
-export const NotificationService = { all, parse, parseHidden, removeAll, removeById, readAll, readById };
+export const NotificationService = {
+  all,
+  parse,
+  parseHidden,
+  readAll,
+  readById,
+  removeAll,
+  removeById
+};

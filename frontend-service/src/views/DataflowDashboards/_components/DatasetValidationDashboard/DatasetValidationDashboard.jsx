@@ -50,7 +50,7 @@ export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datase
 
   const onLoadDashboard = async () => {
     try {
-      const { data } = await DataflowService.datasetsValidationStatistics(dataflowId, datasetSchemaId);
+      const data = await DataflowService.getDatasetsValidationStatistics(dataflowId, datasetSchemaId);
       setLevelErrorTypes(data.levelErrors);
 
       if (!isUndefined(data.datasetId) && !isNull(data.datasetId)) {

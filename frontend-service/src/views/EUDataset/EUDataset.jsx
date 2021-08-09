@@ -31,6 +31,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const EUDataset = withRouter(({ history, match }) => {
   const {
@@ -104,14 +105,17 @@ export const EUDataset = withRouter(({ history, match }) => {
   const callSetMetaData = async () => {
     euDatasetDispatch({
       type: 'GET_METADATA',
-      payload: { metadata: await getMetadata({ dataflowId, datasetId }), isBusinessDataflow: false }
-    }); // TODO WITH REAL DATA
+      payload: { metadata: await getMetadata({ dataflowId, datasetId }) }
+    });
   };
 
   const getDataflowDetails = async () => {
     try {
-      const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
-      euDatasetDispatch({ type: 'GET_DATAFLOW_DETAILS', payload: { name: data.name, isBusinessDataflow: false } }); // TODO WITH REAL DATA
+      const data = await DataflowService.getDataflowDetails(match.params.dataflowId);
+      euDatasetDispatch({
+        type: 'GET_DATAFLOW_DETAILS',
+        payload: { name: data.name, isBusinessDataflow: TextUtils.areEquals(data.type, config.dataflowType.BUSINESS) }
+      }); // TODO TEST WITH REAL DATA
     } catch (error) {
       console.error('EUDataset - getDataflowName.', error);
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
@@ -120,17 +124,17 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const getDataSchema = async () => {
     try {
-      const datasetSchema = await DatasetService.schemaById(datasetId);
+      const datasetSchema = await DatasetService.getSchema(datasetId);
       euDatasetDispatch({
         type: 'GET_DATA_SCHEMA',
         payload: {
-          allTables: datasetSchema.data.tables,
-          errorTypes: datasetSchema.data.levelErrorTypes,
-          schemaId: datasetSchema.data.datasetSchemaId,
-          schemaName: datasetSchema.data.datasetSchemaName
+          allTables: datasetSchema.tables,
+          errorTypes: datasetSchema.levelErrorTypes,
+          schemaId: datasetSchema.datasetSchemaId,
+          schemaName: datasetSchema.datasetSchemaName
         }
       });
-      return datasetSchema.data;
+      return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
     }
@@ -167,8 +171,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
     try {
-      const statistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
-      return statistics.data;
+      return await DatasetService.getStatistics(datasetId, tableSchemaNames);
     } catch (error) {
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
     }
@@ -181,7 +184,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
-      await DatasetService.exportDataById(datasetId, fileType);
+      await DatasetService.exportDatasetData(datasetId, fileType);
     } catch (error) {
       console.error('EUDataset - onExportDataInternalExtension.', error);
       const {

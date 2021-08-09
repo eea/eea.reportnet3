@@ -96,11 +96,9 @@ export const ManageReferenceDataflow = ({
     setIsDeleteDialogVisible(false);
     showLoading();
     try {
-      const response = await ReferenceDataflowService.deleteReferenceDataflow(dataflowId);
-      if (response.status >= 200 && response.status <= 299) {
-        history.push(getUrl(routes.DATAFLOWS));
-        notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
-      }
+      await ReferenceDataflowService.delete(dataflowId);
+      history.push(getUrl(routes.DATAFLOWS));
+      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
     } catch (error) {
       console.error('ManageReferenceDataflows - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
@@ -115,26 +113,21 @@ export const ManageReferenceDataflow = ({
     try {
       setIsSending(true);
       if (isEditing) {
-        const { status } = await ReferenceDataflowService.edit(dataflowId, description, name, 'REFERENCE');
-
-        if (status >= 200 && status <= 299) {
-          manageDialogs(dialogName, false);
-          onEditDataflow(name, description);
-        }
+        await ReferenceDataflowService.update(dataflowId, description, name, 'REFERENCE');
+        manageDialogs(dialogName, false);
+        onEditDataflow(name, description);
       } else {
-        const { data, status } = await ReferenceDataflowService.create(name, description, 'REFERENCE');
-        if (status >= 200 && status <= 299) {
-          if (pinDataflow) {
-            const inmUserProperties = { ...userContext.userProps };
-            inmUserProperties.pinnedDataflows.push(data.toString());
+        const { data } = await ReferenceDataflowService.create(name, description, 'REFERENCE');
+        if (pinDataflow) {
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.pinnedDataflows.push(data.toString());
 
-            const response = await UserService.updateAttributes(inmUserProperties);
-            if (!isNil(response) && response.status >= 200 && response.status <= 299) {
-              userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
-            }
+          const response = await UserService.updateAttributes(inmUserProperties);
+          if (!isNil(response) && response.status >= 200 && response.status <= 299) {
+            userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
           }
-          onCreateDataflow('isReferencedDataflowDialogVisible');
         }
+        onCreateDataflow('isReferencedDataflowDialogVisible');
       }
     } catch (error) {
       if (TextUtils.areEquals(error?.response?.data, 'Dataflow name already exists')) {

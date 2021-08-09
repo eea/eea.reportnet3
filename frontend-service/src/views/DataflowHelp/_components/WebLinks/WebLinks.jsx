@@ -139,11 +139,8 @@ export const WebLinks = ({
     setDeletingId(id);
 
     try {
-      const { status } = await WebLinkService.deleteWebLink(webLinksState.webLink);
-
-      if (status >= 200 && status <= 299) {
-        onLoadWebLinks();
-      }
+      await WebLinkService.delete(id);
+      onLoadWebLinks();
     } catch (error) {
       console.error('WebLinks - onDeleteWebLink.', error);
       notificationContext.add({
@@ -190,12 +187,8 @@ export const WebLinks = ({
       webLinksDispatch({ type: 'ON_SAVE_RECORD', payload: { webLink: webLinksState.webLink } });
       if (isNil(webLinksState.webLink.id)) {
         try {
-          const { status } = await WebLinkService.create(dataflowId, webLinksState.webLink);
-
-          if (status >= 200 && status <= 299) {
-            onLoadWebLinks();
-          }
-
+          await WebLinkService.create(dataflowId, webLinksState.webLink);
+          onLoadWebLinks();
           onHideAddEditDialog();
         } catch (error) {
           console.error('WebLinks - onSaveRecord - add.', error);
@@ -218,12 +211,8 @@ export const WebLinks = ({
       } else {
         webLinksDispatch({ type: 'ON_EDIT_RECORD_START', payload: { editingId: webLinksState.webLink.id } });
         try {
-          const { status } = await WebLinkService.update(dataflowId, webLinksState.webLink);
-
-          if (status >= 200 && status <= 299) {
-            onLoadWebLinks();
-          }
-
+          await WebLinkService.update(dataflowId, webLinksState.webLink);
+          onLoadWebLinks();
           onHideAddEditDialog();
         } catch (error) {
           console.error('WebLinks - onSaveRecord - update.', error);
@@ -316,10 +305,10 @@ export const WebLinks = ({
   return (
     <Fragment>
       {isToolbarVisible && (
-        <Toolbar className={styles.weblinksToolbar}>
+        <Toolbar className={styles.webLinksToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataflowHelp-weblink-upload-help-step`}
+              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataflowHelp-webLink-upload-help-step`}
               icon="add"
               id="addWebLinkButton"
               label={resources.messages['add']}
