@@ -50,7 +50,6 @@ export const useLeftSideBar = (
       const manageRequestersBtn = {
         className: 'dataflow-manage-rights-help-step',
         icon: 'userConfig',
-
         isVisible: buttonsVisibility.manageRequestersBtn,
         label: 'manageRequestersRights',
         onClick: () => manageDialogs('isManageRequestersDialogVisible', true),
