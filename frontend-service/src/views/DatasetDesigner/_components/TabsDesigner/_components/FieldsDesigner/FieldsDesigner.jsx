@@ -542,7 +542,7 @@ export const FieldsDesigner = ({
     try {
       const inmFields = [...fields];
       const droppedFieldIdx = FieldsDesignerUtils.getIndexByFieldName(droppedFieldName, inmFields);
-      const fieldOrdered = await DatasetService.orderRecordFieldDesign(
+      const fieldOrdered = await DatasetService.updateFieldOrder(
         datasetId,
         droppedFieldIdx === -1
           ? inmFields.length
