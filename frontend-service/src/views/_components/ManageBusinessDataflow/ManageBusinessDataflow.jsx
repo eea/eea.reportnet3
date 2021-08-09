@@ -79,8 +79,8 @@ export const ManageBusinessDataflow = ({
 
   const getGroupOfCompaniesList = async () => {
     try {
-      const providerTypes = await RepresentativeService.getGroupCompanies();
-      setGroupOfCompanies(providerTypes.data);
+      const response = await RepresentativeService.getGroupCompanies();
+      setGroupOfCompanies(response.data);
     } catch (error) {
       console.error('ManageBusinessDataflow - getGroupOfCompaniesList.', error);
     }
@@ -88,8 +88,8 @@ export const ManageBusinessDataflow = ({
 
   const getFmeUsersList = async () => {
     try {
-      const fmeUsersList = await RepresentativeService.getFmeUsers();
-      setFmeUsers(fmeUsersList.data);
+      const response = await RepresentativeService.getFmeUsers();
+      setFmeUsers(response.data);
     } catch (error) {
       console.error('ManageBusinessDataflow - getFmeUsersList.', error);
     }

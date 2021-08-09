@@ -17,7 +17,7 @@ export const useLeftSideBar = (
   const leftSideBarContext = useContext(LeftSideBarContext);
 
   useLayoutEffect(() => {
-    if (!isEmpty(dataflowState.userRoles)) {
+    if (!isEmpty(dataflowState.userRoles) || dataflowState.isAdmin) {
       const buttonsVisibility = getLeftSidebarButtonsVisibility();
 
       const apiKeyBtn = {
@@ -131,6 +131,7 @@ export const useLeftSideBar = (
     dataflowState.status,
     representativeId,
     dataflowState.datasetId,
-    dataflowState.designDatasetSchemas.length
+    dataflowState.designDatasetSchemas.length,
+    dataflowState.isAdmin
   ]);
 };

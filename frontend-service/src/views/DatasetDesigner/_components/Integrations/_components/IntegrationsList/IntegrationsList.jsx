@@ -103,12 +103,10 @@ export const IntegrationsList = ({
         payload: { data: integrationListState.integrationId }
       });
       integrationListDispatch({ type: 'IS_DELETING', payload: true });
-      const response = await IntegrationService.deleteById(dataflowId, integrationListState.integrationId);
-      if (response.status >= 200 && response.status <= 299) {
-        onUpdateData();
-        onUpdateDesignData();
-        refreshList(true);
-      }
+      await IntegrationService.delete(dataflowId, integrationListState.integrationId);
+      onUpdateData();
+      onUpdateDesignData();
+      refreshList(true);
     } catch (error) {
       console.error('IntegrationsList - onDeleteIntegration.', error);
       notificationContext.add({ type: 'DELETE_INTEGRATION_ERROR' });
@@ -125,7 +123,7 @@ export const IntegrationsList = ({
       if (isCreating || isUpdating || integrationsList.isDeleting) {
         isLoading(false);
       }
-      const integrations = await IntegrationService.all(dataflowId, designerState.datasetSchemaId);
+      const integrations = await IntegrationService.getAll(dataflowId, designerState.datasetSchemaId);
       integrationListDispatch({ type: 'INITIAL_LOAD', payload: { data: integrations, filteredData: integrations } });
       integrationsList(integrations);
       refreshList(false);

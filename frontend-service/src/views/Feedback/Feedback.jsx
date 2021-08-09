@@ -18,6 +18,7 @@ import { ListMessages } from './_components/ListMessages';
 import { MainLayout } from 'views/_components/Layout';
 import { Title } from 'views/_components/Title';
 
+import { DataflowService } from 'services/DataflowService';
 import { FeedbackService } from 'services/FeedbackService';
 import { RepresentativeService } from 'services/RepresentativeService';
 
@@ -31,8 +32,8 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { feedbackReducer } from './_functions/Reducers/feedbackReducer';
 
 import { CurrentPage } from 'views/_functions/Utils';
-import { DataflowUtils } from 'views/_functions/Utils/DataflowUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const Feedback = withRouter(({ match, history }) => {
   const {
@@ -144,7 +145,7 @@ export const Feedback = withRouter(({ match, history }) => {
         .map(unreadMessage => ({ id: unreadMessage.id, read: true }));
 
       if (!isEmpty(unreadMessages)) {
-        await FeedbackService.markAsRead(dataflowId, unreadMessages);
+        await FeedbackService.markMessagesAsRead(dataflowId, unreadMessages);
       }
     }
   };
@@ -165,9 +166,9 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onGetDataflowDetails = async () => {
     try {
-      const data = await DataflowUtils.getDataflowDetails(dataflowId);
+      const data = await DataflowService.getDataflowDetails(dataflowId);
       const name = data.name;
-      const isBusinessDataflow = false; // TODO WITH REAL DATA
+      const isBusinessDataflow = TextUtils.areEquals(data.data.type, config.dataflowType.BUSINESS); // TODO TEST WITH REAL DATA
       dispatchFeedback({ type: 'SET_DATAFLOW_DETAILS', payload: { name, isBusinessDataflow } });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);
@@ -241,7 +242,7 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onLoadMessages = async (dataProviderId, page) => {
     try {
-      const { data } = await FeedbackService.loadMessages(dataflowId, page, dataProviderId);
+      const { data } = await FeedbackService.getAllMessages(dataflowId, page, dataProviderId);
       return { messages: data, unreadMessages: data.filter(msg => !msg.read) };
     } catch (error) {
       console.error('Feedback - onLoadMessages.', error);
@@ -249,11 +250,11 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onLoadDataProviders = async () => {
-    const allRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-    const responseAllDataProviders = await RepresentativeService.allDataProviders(allRepresentatives.group);
+    const responseRepresentatives = await RepresentativeService.getRepresentatives(dataflowId);
+    const responseDataProviders = await RepresentativeService.getDataProviders(responseRepresentatives.group);
 
-    const filteredDataProviders = responseAllDataProviders.filter(dataProvider =>
-      allRepresentatives.representatives.some(
+    const filteredDataProviders = responseDataProviders.filter(dataProvider =>
+      responseRepresentatives.representatives.some(
         representative => representative.dataProviderId === dataProvider.dataProviderId
       )
     );
@@ -265,7 +266,7 @@ export const Feedback = withRouter(({ match, history }) => {
     if (message.trim() !== '') {
       try {
         dispatchFeedback({ type: 'SET_IS_SENDING', payload: true });
-        const messageCreated = await FeedbackService.create(
+        const messageCreated = await FeedbackService.createMessage(
           dataflowId,
           message,
           isCustodian && !isEmpty(selectedDataProvider)

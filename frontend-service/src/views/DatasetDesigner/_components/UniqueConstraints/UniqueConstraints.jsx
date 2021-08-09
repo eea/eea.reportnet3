@@ -101,11 +101,9 @@ export const UniqueConstraints = ({
     setConstraintManagingId(uniqueId);
     constraintsDispatch({ type: 'IS_DELETING', payload: true });
     try {
-      const response = await UniqueConstraintsService.deleteById(dataflowId, uniqueId);
-      if (response.status >= 200 && response.status <= 299) {
-        onUpdateData();
-        refreshList(true);
-      }
+      await UniqueConstraintsService.delete(dataflowId, uniqueId);
+      onUpdateData();
+      refreshList(true);
     } catch (error) {
       console.error('UniqueConstraints - onDeleteConstraint.', error);
       notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
@@ -121,8 +119,8 @@ export const UniqueConstraints = ({
       if (isUniqueConstraintCreating || isUniqueConstraintUpdating || constraintsState.isDeleting) {
         isLoading(false);
       }
-      const response = await UniqueConstraintsService.all(dataflowId, datasetSchemaId);
-      const uniques = UniqueConstraintsUtils.parseConstraintsList(response.data, datasetSchemaAllTables);
+      const uniqueConstraintList = await UniqueConstraintsService.getAll(dataflowId, datasetSchemaId);
+      const uniques = UniqueConstraintsUtils.parseConstraintsList(uniqueConstraintList, datasetSchemaAllTables);
       constraintsDispatch({ type: 'INITIAL_LOAD', payload: { data: uniques, filteredData: uniques } });
       setIsDuplicatedToManageUnique(false);
       refreshList(false);

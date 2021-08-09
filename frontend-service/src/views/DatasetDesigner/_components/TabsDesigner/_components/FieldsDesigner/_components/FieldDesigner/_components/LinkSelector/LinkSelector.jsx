@@ -94,7 +94,7 @@ const LinkSelector = withRouter(
     useEffect(() => {
       setIsLoading(true);
       const getReferenceDataflows = async () => {
-        const { data } = await ReferenceDataflowService.all();
+        const data = await ReferenceDataflowService.getAll();
         const filteredDataflows = data.filter(
           dataflow => dataflow.id !== parseFloat(dataflowId) && TextUtils.areEquals(dataflow.status, 'DRAFT')
         );
@@ -129,16 +129,16 @@ const LinkSelector = withRouter(
       setIsLoading(true);
       let datasetSchemasDTO;
       if (isExternalLink && !isEmpty(linkSelectorState.selectedReferenceDataflow)) {
-        datasetSchemasDTO = await DataflowService.getAllSchemas(linkSelectorState.selectedReferenceDataflow.id);
+        datasetSchemasDTO = await DataflowService.getSchemas(linkSelectorState.selectedReferenceDataflow.id);
       } else {
-        datasetSchemasDTO = await DataflowService.getAllSchemas(dataflowId);
+        datasetSchemasDTO = await DataflowService.getSchemas(dataflowId);
       }
       setIsLoading(false);
       if (isReferenceDataset) {
-        const filteredDatasets = datasetSchemasDTO.data.filter(datasetSchemaDTO => datasetSchemaDTO.referenceDataset);
+        const filteredDatasets = datasetSchemasDTO.filter(datasetSchemaDTO => datasetSchemaDTO.referenceDataset);
         setDatasetSchemas(filteredDatasets);
       } else {
-        setDatasetSchemas(datasetSchemasDTO.data);
+        setDatasetSchemas(datasetSchemasDTO);
       }
     };
 

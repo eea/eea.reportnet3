@@ -534,7 +534,11 @@ const parseRowExpressionFromDTO = expression => {
   };
 };
 
+const createValidation = (entityType, id, levelError, message) =>
+  new Validation({ date: new Date(Date.now()).toString(), entityType, id, levelError, message });
+
 export const ValidationUtils = {
+  createValidation,
   getComparisonExpression,
   getCreationComparisonDTO,
   getCreationDTO,

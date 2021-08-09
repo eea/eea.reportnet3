@@ -61,8 +61,7 @@ export const ManualAcceptanceDatasets = ({
   const onLoadManualAcceptanceDatasets = async () => {
     try {
       isLoading(true);
-
-      const { data } = await DataflowService.datasetsFinalFeedback(dataflowId);
+      const data = await DataflowService.getDatasetsFinalFeedback(dataflowId);
       manualAcceptanceDatasetsDispatch({
         type: 'INITIAL_LOAD',
         payload: { data, filteredData: data, filtered: false }
