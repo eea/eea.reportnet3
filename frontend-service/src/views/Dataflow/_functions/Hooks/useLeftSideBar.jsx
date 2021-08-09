@@ -38,6 +38,15 @@ export const useLeftSideBar = (
         title: 'edit'
       };
 
+      const editBusinessBtn = {
+        className: 'dataflow-edit-help-step',
+        icon: 'edit',
+        isVisible: buttonsVisibility.editBusinessBtn,
+        label: 'edit',
+        onClick: () => manageDialogs('isBusinessDataflowDialogVisible', true),
+        title: 'edit'
+      };
+
       const exportSchemaBtn = {
         className: 'dataflow-export-schema-help-step',
         icon: 'download',
@@ -50,7 +59,6 @@ export const useLeftSideBar = (
       const manageRequestersBtn = {
         className: 'dataflow-manage-rights-help-step',
         icon: 'userConfig',
-
         isVisible: buttonsVisibility.manageRequestersBtn,
         label: 'manageRequestersRights',
         onClick: () => manageDialogs('isManageRequestersDialogVisible', true),
@@ -116,6 +124,7 @@ export const useLeftSideBar = (
       const allButtons = [
         propertiesBtn,
         editBtn,
+        editBusinessBtn,
         releaseableBtn,
         showPublicInfoBtn,
         exportSchemaBtn,

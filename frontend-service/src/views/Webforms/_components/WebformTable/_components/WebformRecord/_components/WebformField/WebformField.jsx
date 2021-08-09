@@ -25,7 +25,6 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { webformFieldReducer } from './_functions/Reducers/webformFieldReducer';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { MetadataUtils } from 'views/_functions/Utils';
 import { PaMsUtils } from './_functions/Utils/PaMsUtils';
 import { RecordUtils } from 'views/_functions/Utils';
 import { WebformRecordUtils } from 'views/Webforms/_components/WebformTable/_components/WebformRecord/_functions/Utils/WebformRecordUtils';
@@ -96,7 +95,7 @@ export const WebformField = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
-      await DatasetService.deleteFileData(datasetId, selectedFieldId);
+      await DatasetService.deleteAttachment(datasetId, selectedFieldId);
       onFillField(record, selectedFieldSchemaId, '');
       onToggleDeleteAttachmentDialogVisible(false);
     } catch (error) {
@@ -107,7 +106,6 @@ export const WebformField = ({
   const onFileDownload = async (fileName, fieldId) => {
     try {
       const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
-
       DownloadFile(data, fileName);
     } catch (error) {
       console.error('WebformField - onFileDownload.', error);
@@ -124,7 +122,7 @@ export const WebformField = ({
     );
 
     if (datasetSchemaId === '' || isNil(datasetSchemaId)) {
-      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+      const metadata = await DatasetService.getMetaData(datasetId);
       datasetSchemaId = metadata.datasetSchemaId;
     }
 
@@ -143,7 +141,7 @@ export const WebformField = ({
         100
       );
 
-      const linkItems = referencedFieldValues.data
+      const linkItems = referencedFieldValues
         .map(referencedField => {
           return {
             itemType: `${
@@ -165,7 +163,7 @@ export const WebformField = ({
         });
       }
 
-      if (referencedFieldValues.data.length > 99) {
+      if (referencedFieldValues.length > 99) {
         linkItems[linkItems.length - 1] = {
           disabled: true,
           itemType: resources.messages['moreElements'],
@@ -207,7 +205,7 @@ export const WebformField = ({
 
     try {
       if (!isSubmiting && initialFieldValue !== parsedValue) {
-        await DatasetService.updateFieldById(
+        await DatasetService.updateField(
           datasetId,
           option,
           field.fieldId,
@@ -584,7 +582,7 @@ export const WebformField = ({
           onError={onUploadFileError}
           onUpload={onAttach}
           operation="PUT"
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.addAttachment, {
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
             datasetId,
             fieldId: selectedFieldId
           })}`}
