@@ -349,6 +349,10 @@ public final class EEAErrorMessage {
   /** The Constant USERFME_NOTFOUND: {@value}. */
   public static final String USERFME_NOTFOUND = "The user for fme access is not found";
 
+  /** The Constant EXISTING_REPRESENTATIVES: {@value}. */
+  public static final String EXISTING_REPRESENTATIVES =
+      "There are existing representatives selected right now";
+
   /**
    * Instantiates a new EEA error message.
    */
