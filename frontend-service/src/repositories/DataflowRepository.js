@@ -30,8 +30,7 @@ export const DataflowRepository = {
       url: getUrl(DataflowConfig.getDatasetsValidationStatistics, { dataflowId, datasetSchemaId })
     }),
 
-  delete: async dataflowId =>
-    await HTTPRequester.delete({ url: getUrl(DataflowConfig.deleteDataflow, { dataflowId }) }),
+  delete: async dataflowId => await HTTPRequester.delete({ url: getUrl(DataflowConfig.delete, { dataflowId }) }),
 
   exportSchemas: async dataflowId =>
     await HTTPRequester.download({ url: getUrl(DataflowConfig.exportSchemas, { dataflowId }) }),
