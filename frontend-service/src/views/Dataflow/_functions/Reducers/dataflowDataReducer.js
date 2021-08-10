@@ -74,7 +74,6 @@ export const dataflowDataReducer = (state, { type, payload }) => {
       return { ...state, isPageLoading: payload.isPageLoading };
 
     case 'SET_IS_ADMIN_ASSIGNED_BUSINESS_DATAFLOW':
-      console.log('payload :>> ', payload);
       return {
         ...state,
         isAdminAssignedBusinessDataflow: payload.isAdminAssignedBusinessDataflow
