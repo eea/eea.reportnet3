@@ -88,7 +88,7 @@ export const DataflowRepository = {
 
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
     await HTTPRequester.update({
-      url: getUrl(DataflowConfig.createDataflow),
+      url: getUrl(DataflowConfig.create),
       data: {
         id: dataflowId,
         name,
