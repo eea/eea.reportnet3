@@ -12,7 +12,7 @@ export const DataflowRepository = {
 
   create: async (name, description, obligationId, type) =>
     await HTTPRequester.post({
-      url: getUrl(DataflowConfig.create),
+      url: getUrl(DataflowConfig.createUpdate),
       data: { name, description, obligation: { obligationId }, releasable: true, type }
     }),
 
@@ -80,15 +80,14 @@ export const DataflowRepository = {
 
   getPublicData: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicData) }),
 
-  getReportingDatasets: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getReportingDatasets, { dataflowId }) }),
+  getFullInfo: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getFullInfo, { dataflowId }) }),
 
   getSchemasValidation: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getSchemasValidation, { dataflowId }) }),
 
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
     await HTTPRequester.update({
-      url: getUrl(DataflowConfig.create),
+      url: getUrl(DataflowConfig.createUpdate),
       data: {
         id: dataflowId,
         name,

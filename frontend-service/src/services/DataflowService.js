@@ -376,8 +376,8 @@ export const DataflowService = {
     );
   },
 
-  getReportingDatasets: async dataflowId => {
-    const reportingDataflowDTO = await DataflowRepository.getReportingDatasets(dataflowId);
+  getFullInfo: async dataflowId => {
+    const reportingDataflowDTO = await DataflowRepository.getFullInfo(dataflowId);
     const dataflow = DataflowUtils.parseDataflowDTO(reportingDataflowDTO.data);
     dataflow.testDatasets.sort(DatasetUtils.sortDatasetTypeByName);
     dataflow.datasets.sort(DatasetUtils.sortDatasetTypeByName);
