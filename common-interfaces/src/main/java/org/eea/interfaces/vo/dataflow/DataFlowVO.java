@@ -77,7 +77,6 @@ public class DataFlowVO implements Serializable {
   /** The type. */
   private TypeDataflowEnum type;
 
-
   /** The request id. */
   private Long requestId;
 
@@ -104,6 +103,12 @@ public class DataFlowVO implements Serializable {
 
   /** The any schema available in public. */
   private boolean anySchemaAvailableInPublic;
+
+  /** The data provider group id. */
+  private Long dataProviderGroupId;
+
+  /** The fme user id. */
+  private Long fmeUserId;
 
   /**
    * Equals.

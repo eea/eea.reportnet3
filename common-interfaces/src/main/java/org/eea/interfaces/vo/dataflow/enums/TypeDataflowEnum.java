@@ -12,7 +12,13 @@ public enum TypeDataflowEnum {
 
 
   /** The reference. */
-  REFERENCE("REFERENCE");
+  REFERENCE("REFERENCE"),
+
+  /** The business. */
+  BUSINESS("BUSINESS"),
+
+  /** The citizen science. */
+  CITIZEN_SCIENCE("CITIZEN_SCIENCE");
 
   /** The value. */
   private final String value;
