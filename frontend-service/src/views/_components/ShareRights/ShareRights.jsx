@@ -137,7 +137,10 @@ export const ShareRights = ({
 
   const onDataChange = () => {
     shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: true } });
-    setShareRightsUpdated(true);
+    setIsAdminAssignedBusinessDataflow(
+      TextUtils.areEquals(userRight.account, userContext.email) ||
+        TextUtils.areEquals(shareRightsState.userRightToDelete.account, userContext.email)
+    );
   };
 
   const onEditUserRight = userRight => {
