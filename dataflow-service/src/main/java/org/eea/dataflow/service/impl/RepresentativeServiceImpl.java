@@ -345,7 +345,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    * Find data provider group by dataflow id.
    *
    * @param dataflowId the dataflow id
-   * @return the data provider group VO
+   * @return the data provider code VO
    * @throws EEAException the EEA exception
    */
   @Override
