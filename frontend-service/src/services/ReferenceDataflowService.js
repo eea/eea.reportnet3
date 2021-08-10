@@ -45,8 +45,8 @@ export const ReferenceDataflowService = {
   getReferencingDataflows: async referenceDataflowId =>
     await ReferenceDataflowRepository.getReferencingDataflows(referenceDataflowId),
 
-  getFullInfo: async referenceDataflowId => {
-    const referenceDataflowDTO = await DataflowRepository.getFullInfo(referenceDataflowId);
+  get: async referenceDataflowId => {
+    const referenceDataflowDTO = await DataflowRepository.get(referenceDataflowId);
     const dataflow = ReferenceDataflowUtils.parseReferenceDataflowDTO(referenceDataflowDTO.data);
     dataflow.datasets.sort(DatasetUtils.sortDatasetTypeByName);
     dataflow.designDatasets.sort(DatasetUtils.sortDatasetTypeByName);

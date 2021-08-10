@@ -16,8 +16,7 @@ export const DataflowRepository = {
       data: { name, description, obligation: { obligationId }, releasable: true, type }
     }),
 
-  getDataflowDetails: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDataflowDetails, { dataflowId }) }),
+  getDetails: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDetails, { dataflowId }) }),
 
   getDatasetsFinalFeedback: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsFinalFeedback, { dataflowId }) }),
@@ -80,7 +79,7 @@ export const DataflowRepository = {
 
   getPublicData: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicData) }),
 
-  getFullInfo: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getFullInfo, { dataflowId }) }),
+  get: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) }),
 
   getSchemasValidation: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getSchemasValidation, { dataflowId }) }),

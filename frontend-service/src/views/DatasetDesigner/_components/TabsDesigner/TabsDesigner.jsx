@@ -439,7 +439,7 @@ export const TabsDesigner = withRouter(
         const inmTabs = [...tabs];
         const draggedTabIdx = TabsUtils.getIndexByHeader(draggedTabHeader, inmTabs);
         const droppedTabIdx = TabsUtils.getIndexByHeader(droppedTabHeader, inmTabs);
-        await DatasetService.orderTableDesign(
+        await DatasetService.updateTableOrder(
           datasetId,
           draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1,
           tabs[draggedTabIdx].tableSchemaId
