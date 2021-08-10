@@ -34,7 +34,6 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
-import org.eea.interfaces.vo.dataflow.DataProviderGroupVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
@@ -237,18 +236,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Override
   public List<DataProviderCodeVO> getDataProviderGroupByType(TypeDataProviderEnum providerType) {
     LOG.info("obtaining the distinct representative types");
-    List<DataProviderGroup> dataProviderGroupCodes =
+    List<DataProviderGroup> dataProviderGroups =
         dataProviderGroupRepository.findDistinctCode(providerType);
-    List<DataProviderCodeVO> dataProviderCodeVOs = new ArrayList<>();
 
-    for (DataProviderGroup dataProviderGroupCode : dataProviderGroupCodes) {
-      DataProviderCodeVO item = new DataProviderCodeVO();
-      item.setDataProviderGroupId(dataProviderGroupCode.getId());
-      item.setLabel(dataProviderGroupCode.getName());
-      dataProviderCodeVOs.add(item);
-    }
-
-    return dataProviderCodeVOs;
+    return dataProviderGroupMapper.entityListToClass(dataProviderGroups);
   }
 
   /**
@@ -358,8 +349,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public DataProviderGroupVO findDataProviderGroupByDataflowId(Long dataflowId)
-      throws EEAException {
+  public DataProviderCodeVO findDataProviderGroupByDataflowId(Long dataflowId) throws EEAException {
     Dataflow dataflowFound = dataflowRepository.findById(dataflowId).orElse(null);
     DataProviderGroup dataProviderGroup;
 
