@@ -5,12 +5,12 @@ import { SnapshotUtils } from 'services/_utils/SnapshotUtils';
 export const SnapshotService = {
   getAllDesigner: async datasetSchemaId => {
     const snapshots = await SnapshotRepository.getAllDesigner(datasetSchemaId);
-    return SnapshotUtils.parseSnapshotList(snapshots.data);
+    return SnapshotUtils.parseSnapshotListDTO(snapshots.data);
   },
 
   getAllReporter: async datasetId => {
     const snapshots = await SnapshotRepository.getAllReporter(datasetId);
-    return SnapshotUtils.parseSnapshotList(snapshots.data);
+    return SnapshotUtils.parseSnapshotListDTO(snapshots.data);
   },
 
   createDesigner: async (datasetId, datasetSchemaId, description) =>
