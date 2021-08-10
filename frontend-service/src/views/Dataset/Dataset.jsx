@@ -408,7 +408,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onConfirmValidate = async () => {
     try {
       setValidateDialogVisible(false);
-      await DatasetService.validateDataById(datasetId);
+      await DatasetService.validate(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
         content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
