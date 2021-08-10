@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import first from 'lodash/first';
@@ -217,7 +217,7 @@ const Dataflow = withRouter(({ history, match }) => {
     if (!isNil(userContext.contextRoles)) onLoadPermission();
   }, [userContext, dataflowState.data]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (dataflowState.isCustodian) {
       if (isOpenStatus) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
@@ -908,6 +908,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <div className={styles.dialog}>
               <RepresentativesList
                 dataflowId={dataflowId}
+                isBusinessDataflow={dataflowState.isBusinessDataflow}
                 representativesImport={dataflowState.representativesImport}
                 setDataProviderSelected={setDataProviderSelected}
                 setFormHasRepresentatives={setFormHasRepresentatives}
