@@ -100,7 +100,7 @@ export const ManageBusinessDataflow = ({
       const responseFmeUsers = await RepresentativeService.getFmeUsers();
       setFmeUsers(responseFmeUsers.data);
     } catch (error) {
-      console.error('ManageBusinessDataflow - getGroupOfCompaniesList.', error);
+      console.error('ManageBusinessDataflow - getDropdownsOptions.', error);
     } finally {
       setIsLoading(false);
     }
@@ -290,7 +290,7 @@ export const ManageBusinessDataflow = ({
           {isLoading ? (
             <Spinner className={styles.spinnerCenter} />
           ) : (
-            <>
+            <Fragment>
               <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
                 <InputText
                   id="dataflowName"
@@ -360,7 +360,7 @@ export const ManageBusinessDataflow = ({
                   {resources.messages['searchObligations']}
                 </label>
               </div>
-            </>
+            </Fragment>
           )}
         </div>
       </Dialog>
