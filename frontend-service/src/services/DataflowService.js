@@ -228,8 +228,8 @@ export const DataflowService = {
     };
   },
 
-  getDataflowDetails: async dataflowId => {
-    const dataflowDetails = await DataflowRepository.getDataflowDetails(dataflowId);
+  getDetails: async dataflowId => {
+    const dataflowDetails = await DataflowRepository.getDetails(dataflowId);
     return DataflowUtils.parseDataflowDTO(dataflowDetails.data);
   },
 
@@ -376,8 +376,8 @@ export const DataflowService = {
     );
   },
 
-  getFullInfo: async dataflowId => {
-    const reportingDataflowDTO = await DataflowRepository.getFullInfo(dataflowId);
+  get: async dataflowId => {
+    const reportingDataflowDTO = await DataflowRepository.get(dataflowId);
     const dataflow = DataflowUtils.parseDataflowDTO(reportingDataflowDTO.data);
     dataflow.testDatasets.sort(DatasetUtils.sortDatasetTypeByName);
     dataflow.datasets.sort(DatasetUtils.sortDatasetTypeByName);
