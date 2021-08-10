@@ -27,6 +27,18 @@ const parseSortedDataflowListDTO = dataflowDTOs => {
   return sortDataflowsByExpirationDate(dataflows);
 };
 
+const parsePublicDataflowDTO = publicDataflowDTO =>
+  new Dataflow({
+    description: publicDataflowDTO.description,
+    expirationDate:
+      publicDataflowDTO.deadlineDate > 0 ? dayjs(publicDataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
+    id: publicDataflowDTO.id,
+    isReleasable: publicDataflowDTO.releasable,
+    name: publicDataflowDTO.name,
+    obligation: ObligationUtils.parseObligation(publicDataflowDTO.obligation),
+    status: publicDataflowDTO.status
+  });
+
 const parseDataflowDTO = dataflowDTO =>
   new Dataflow({
     anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
@@ -120,6 +132,7 @@ export const DataflowUtils = {
   sortDataflowsByExpirationDate,
   parseDataflowDTO,
   parseDataflowListDTO,
+  parsePublicDataflowDTO,
   parseSortedDataflowListDTO,
   parseAllDataflowsUserList,
   parseCountriesUserList,
