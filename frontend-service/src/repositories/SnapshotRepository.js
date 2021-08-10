@@ -41,6 +41,6 @@ export const SnapshotRepository = {
 
   release: async (dataflowId, dataProviderId, restrictFromPublic) =>
     await HTTPRequester.post({
-      url: getUrl(SnapshotConfig.releaseDataflow, { dataflowId, dataProviderId, restrictFromPublic })
+      url: getUrl(SnapshotConfig.release, { dataflowId, dataProviderId, restrictFromPublic })
     })
 };

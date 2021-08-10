@@ -100,7 +100,7 @@ const UserConfiguration = () => {
 
   const changeUserProperties = async userProperties => {
     try {
-      const response = await UserService.updateAttributes(userProperties);
+      const response = await UserService.updateConfiguration(userProperties);
       return response;
     } catch (error) {
       console.error('UserConfiguration - changeUserProperties.', error);

@@ -246,7 +246,7 @@ export const DatasetRepository = {
 
   updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) =>
     await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateTableNameDesign, { datasetId }),
+      url: getUrl(DatasetConfig.updateTableDesign, { datasetId }),
       data: { idTableSchema: tableSchemaId, nameTableSchema: tableSchemaName }
     }),
 

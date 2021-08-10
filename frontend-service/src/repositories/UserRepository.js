@@ -19,7 +19,7 @@ export const UserRepository = {
   oldLogin: async (userName, password) =>
     await HTTPRequester.post({ url: getUrl(UserConfig.oldLogin, { userName, password }) }),
 
-  updateAttributes: async userConfiguration =>
+  updateConfiguration: async userConfiguration =>
     await HTTPRequester.update({
       url: getUrl(UserConfig.updateConfiguration),
       headers: { 'Content-Type': 'application/json' },
