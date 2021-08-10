@@ -14,5 +14,8 @@ export const ReferenceDataflowRepository = {
     await HTTPRequester.update({
       url: getUrl(DataflowConfig.createUpdate),
       data: { description, id: dataflowId, name, type }
-    })
+    }),
+
+  getReferencingDataflows: async referenceDataflowId =>
+    await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.getReferencingDataflows, { referenceDataflowId }) })
 };

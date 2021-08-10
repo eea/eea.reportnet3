@@ -543,7 +543,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const onConfirmValidate = async () => {
     manageDialogs('validateDialogVisible', false);
     try {
-      await DatasetService.validateDataById(datasetId);
+      await DatasetService.validate(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
         content: {
