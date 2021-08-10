@@ -35,7 +35,6 @@ import { InfoTable } from './_components/InfoTable';
 import { Map } from 'views/_components/Map';
 
 import { DatasetService } from 'services/DatasetService';
-import { IntegrationService } from 'services/IntegrationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -48,7 +47,7 @@ import { sortReducer } from './_functions/Reducers/sortReducer';
 import { useContextMenu, useLoadColsSchemasAndColumnOptions, useSetColumns } from './_functions/Hooks/DataViewerHooks';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
-import { ExtensionUtils, MetadataUtils, RecordUtils } from 'views/_functions/Utils';
+import { MetadataUtils, RecordUtils } from 'views/_functions/Utils';
 import { MapUtils } from 'views/_functions/Utils/MapUtils';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
@@ -98,7 +97,6 @@ const DataViewer = withRouter(
     const [datasetSchemaId, setDatasetSchemaId] = useState(null);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editDialogVisible, setEditDialogVisible] = useState(false);
-    const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
     const [fetchedData, setFetchedData] = useState([]);
     const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
     const [importTableDialogVisible, setImportTableDialogVisible] = useState(false);
@@ -306,10 +304,6 @@ const DataViewer = withRouter(
     }, [records.mapGeoJson]);
 
     useEffect(() => {
-      if (datasetSchemaId) getFileExtensions();
-    }, [datasetSchemaId, isDataUpdated, importTableDialogVisible]);
-
-    useEffect(() => {
       if (isReportingWebform) {
         setHasWebformWritePermissions(false);
       }
@@ -322,16 +316,6 @@ const DataViewer = withRouter(
       } catch (error) {
         console.error('DataViewer - getMetadata.', error);
         notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
-      }
-    };
-
-    const getFileExtensions = async () => {
-      try {
-        const allExtensions = await IntegrationService.getAllExtensionsOperations(dataflowId, datasetSchemaId);
-        setExtensionsOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
-      } catch (error) {
-        console.error('DataViewer - getFileExtensions.', error);
-        notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
       }
     };
 
@@ -649,7 +633,7 @@ const DataViewer = withRouter(
         let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
         if (value !== initialCellValue && record.recordId === records.selectedRecord.recordId) {
           try {
-            const response = await DatasetService.updateField(
+            await DatasetService.updateField(
               datasetId,
               cell.field,
               field.id,
@@ -659,12 +643,6 @@ const DataViewer = withRouter(
                 ? value.join(';')
                 : value
             );
-
-            const isFileUpdated = response.status >= 200 && response.status <= 299;
-
-            if (!isFileUpdated) {
-              throw new Error('UPDATE_FIELD_BY_ID_ERROR');
-            }
           } catch (error) {
             if (error.response.status === 423) {
               notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -1094,7 +1072,6 @@ const DataViewer = withRouter(
           colsSchema={colsSchema}
           dataflowId={dataflowId}
           datasetId={datasetId}
-          fileExtensions={extensionsOperationsList.export}
           hasCountryCode={hasCountryCode}
           hasWritePermissions={
             (hasWritePermissions && !tableFixedNumber && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)

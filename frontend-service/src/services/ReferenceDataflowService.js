@@ -38,8 +38,6 @@ export const ReferenceDataflowService = {
 
   create: async (name, description, type) => ReferenceDataflowRepository.create(name, description, type),
 
-  delete: async referenceDataflowId => ReferenceDataflowRepository.delete(referenceDataflowId),
-
   update: async (dataflowId, description, name, type) =>
     ReferenceDataflowRepository.update(dataflowId, description, name, type),
 

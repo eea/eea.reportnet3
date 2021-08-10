@@ -798,10 +798,6 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const onEditBusinessDataflow = (name, description, obligation) => {
-    dataflowDispatch({ type: 'ON_EDIT_BUSINESS_DATAFLOW', payload: { description, name, obligation } });
-  };
-
   const reporterRoleOptions = [
     { label: config.permissions.roles.REPORTER_WRITE.label, role: config.permissions.roles.REPORTER_WRITE.key },
     { label: config.permissions.roles.REPORTER_READ.label, role: config.permissions.roles.REPORTER_READ.key }

@@ -17,5 +17,13 @@ public interface UserRoleService {
    */
   List<UserRoleVO> getUserRolesByDataflowCountry(Long dataflowId, Long dataProviderId);
 
+  /**
+   * Gets the user roles by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the user roles by dataflow
+   */
+  List<UserRoleVO> getUserRolesByDataflow(Long dataflowId);
+
 
 }

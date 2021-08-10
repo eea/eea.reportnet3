@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -73,6 +74,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -1042,6 +1044,46 @@ public class DataFlowServiceImplTest {
             .findReferenceByStatusInOrderByStatusDescCreationDateDesc(Mockito.any()))
         .thenReturn(dataflows);
     assertNotNull(dataflowServiceImpl.getReferenceDataflows(""));
+  }
+
+  @Test
+  public void getBusinessDataflowsTest() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    dataflowVO.setId(0L);
+    ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
+    resourceAccessVO.setId(0L);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
+        .thenReturn(Arrays.asList(resourceAccessVO));
+    Mockito.when(dataflowRepository.findBusinessInOrderByStatusDescCreationDateDesc())
+        .thenReturn(dataflows);
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
+
+    assertNotNull(dataflowServiceImpl.getBusinessDataflows(""));
+  }
+
+
+  @Test
+  public void getDataflowsByDataProviderIdsTest() {
+    when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
+        .thenReturn(new ArrayList<>());
+    when(dataflowRepository.findDataflowsByDataproviderIdsAndDataflowIds(Mockito.any(),
+        Mockito.any())).thenReturn(new ArrayList<>());
+    assertNotNull(dataflowServiceImpl.getDataflowsByDataProviderIds(new ArrayList<>()));
+  }
+
+  @Test
+  public void isAdminTest() {
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    assertTrue(dataflowServiceImpl.isAdmin());
   }
 
 }

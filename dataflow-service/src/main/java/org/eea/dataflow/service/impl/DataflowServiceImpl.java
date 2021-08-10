@@ -18,8 +18,10 @@ import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
+import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
+import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
@@ -156,6 +158,14 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
+  /** The data provider group repository. */
+  @Autowired
+  private DataProviderGroupRepository dataProviderGroupRepository;
+
+  /** The fme user repository. */
+  @Autowired
+  private FMEUserRepository fmeUserRepository;
+
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -287,6 +297,51 @@ public class DataflowServiceImpl implements DataflowService {
 
     return dataflowVOs;
   }
+
+
+  /**
+   * Gets the business dataflows.
+   *
+   * @param userId the user id
+   * @return the business dataflows
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<DataFlowVO> getBusinessDataflows(String userId) throws EEAException {
+
+    List<DataFlowVO> dataflowVOs = new ArrayList<>();
+
+    // Get user's datasets
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
+    boolean userAdmin = isAdmin();
+
+    // Get user's dataflows sorted by status and creation date
+    List<Long> idsResources =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if ((null != idsResources && !idsResources.isEmpty()) || userAdmin) {
+      List<Dataflow> dataflows = userAdmin
+          ? dataflowRepository.findBusinessInOrderByStatusDescCreationDateDesc()
+          : dataflowRepository.findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources);
+      dataflows.forEach(dataflow -> {
+        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+        if (!map.isEmpty() && null != datasetsStatusList) {
+          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+        }
+        dataflowVOs.add(dataflowVO);
+      });
+      try {
+        getOpenedObligations(dataflowVOs);
+      } catch (FeignException e) {
+        LOG_ERROR.error(
+            "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
+            e.getMessage(), e);
+      }
+    }
+    return dataflowVOs;
+  }
+
 
 
   /**
@@ -436,12 +491,22 @@ public class DataflowServiceImpl implements DataflowService {
     if (dataflowRepository.findByNameIgnoreCase(dataflowVO.getName()).isPresent()) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
-    } else {
-      dataflowVO.setCreationDate(new Date());
-      dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-      dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
-      LOG.info("The dataflow {} has been created.", dataFlowSaved.getName());
     }
+    if (TypeDataflowEnum.BUSINESS.equals(dataflowVO.getType())) {
+      if (!dataProviderGroupRepository.existsById(dataflowVO.getDataProviderGroupId())) {
+        LOG.info("The company group : {} don't exists.", dataflowVO.getDataProviderGroupId());
+        throw new EEAException(EEAErrorMessage.COMPANY_GROUP_NOTFOUND);
+      }
+      if (!fmeUserRepository.existsById(dataflowVO.getFmeUserId())) {
+        LOG.info("The User fme: {} don't exists.", dataflowVO.getFmeUserId());
+        throw new EEAException(EEAErrorMessage.USERFME_NOTFOUND);
+      }
+    }
+    dataflowVO.setCreationDate(new Date());
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
+    LOG.info("The dataflow {} has been created.", dataFlowSaved.getName());
+
     // With that method we create the group in keycloack
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN));
@@ -454,9 +519,10 @@ public class DataflowServiceImpl implements DataflowService {
 
     resourceManagementControllerZull.createResource(createGroup(dataFlowSaved.getId(),
         ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.EDITOR_WRITE));
-
-    userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
-        ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+    if (dataflowVO.getType() != TypeDataflowEnum.BUSINESS) {
+      userManagementControllerZull.addUserToResource(dataFlowSaved.getId(),
+          ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+    }
     return dataFlowSaved.getId();
   }
 
@@ -661,6 +727,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the user roles.
    *
    * @param dataProviderId the data provider id
+   * @param dataflowList the dataflow list
    * @return the user roles
    */
   @Override
@@ -778,6 +845,17 @@ public class DataflowServiceImpl implements DataflowService {
     return reference;
   }
 
+  /**
+   * Checks if is admin.
+   *
+   * @return true, if is admin
+   */
+  @Override
+  public boolean isAdmin() {
+    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
+    return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+        .anyMatch(role -> roleAdmin.equals(role.getAuthority()));
+  }
 
   /**
    * Sets the reportings.

@@ -485,14 +485,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onImportOtherSystems = async () => {
     try {
       cleanImportOtherSystemsDialog();
-      const dataImported = await IntegrationService.runIntegration(
-        importFromOtherSystemSelectedIntegrationId,
-        datasetId,
-        replaceData
-      );
-      if (dataImported.status >= 200 && dataImported.status <= 299) {
-        setIsDataLoaded(true);
-      }
+      await IntegrationService.runIntegration(importFromOtherSystemSelectedIntegrationId, datasetId, replaceData);
+      setIsDataLoaded(true);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }

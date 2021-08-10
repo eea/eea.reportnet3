@@ -268,7 +268,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         }
         LOG.info("Executing FME Export: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
-            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob, dataflowId);
         break;
       case IMPORT:
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
@@ -288,7 +288,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
         LOG.info("Executing FME Import: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
-            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob, dataflowId);
         break;
       case IMPORT_FROM_OTHER_SYSTEM:
         String countryCode = null != providerId
@@ -300,14 +300,14 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Import to other system: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
-            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob, dataflowId);
         break;
       case EXPORT_EU_DATASET:
         parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
         LOG.info("Executing FME Export EU Dataset: fmeAsyncJob={}", fmeAsyncJob);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
-            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob);
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob, dataflowId);
         break;
       default:
         fmeJobId = null;
@@ -391,19 +391,22 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     return parameter;
   }
 
+
   /**
    * Execute submit.
    *
    * @param repository the repository
    * @param workspace the workspace
    * @param fmeAsyncJob the fme async job
-   *
-   * @return the execution result VO
+   * @param dataflowId the dataflow id
+   * @return the integer
    */
-  private Integer executeSubmit(String repository, String workspace, FMEAsyncJob fmeAsyncJob) {
+  private Integer executeSubmit(String repository, String workspace, FMEAsyncJob fmeAsyncJob,
+      Long dataflowId) {
     Integer idFMEJob = null;
     try {
-      idFMEJob = fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob);
+      idFMEJob =
+          fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob, dataflowId);
     } catch (Exception e) {
       LOG_ERROR.error("Error invoking FME due to reason {}", e.getMessage());
     }

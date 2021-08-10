@@ -542,7 +542,7 @@ export const FieldsDesigner = ({
     try {
       const inmFields = [...fields];
       const droppedFieldIdx = FieldsDesignerUtils.getIndexByFieldName(droppedFieldName, inmFields);
-      const fieldOrdered = await DatasetService.updateFieldOrder(
+      await DatasetService.updateFieldOrder(
         datasetId,
         droppedFieldIdx === -1
           ? inmFields.length
@@ -551,10 +551,8 @@ export const FieldsDesigner = ({
           : droppedFieldIdx,
         inmFields[draggedFieldIdx].fieldId
       );
-      if (fieldOrdered.status >= 200 && fieldOrdered.status <= 299) {
-        setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
-        onChangeFields(inmFields, false, table.tableSchemaId);
-      }
+      setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
+      onChangeFields(inmFields, false, table.tableSchemaId);
     } catch (error) {
       console.error('FieldsDesigner - reorderField.', error);
     }

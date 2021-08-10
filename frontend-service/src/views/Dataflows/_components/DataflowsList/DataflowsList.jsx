@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useLayoutEffect, useState } from 'reac
 
 import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 import orderBy from 'lodash/orderBy';
 import pull from 'lodash/pull';
 
@@ -83,51 +82,48 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       inmPinnedDataflows.push(pinnedItem.id.toString());
     }
     inmUserProperties.pinnedDataflows = inmPinnedDataflows;
+    await changeUserProperties(inmUserProperties);
+    userContext.onChangePinnedDataflows(inmPinnedDataflows);
 
-    const response = await changeUserProperties(inmUserProperties);
-    if (!isNil(response) && response.status >= 200 && response.status <= 299) {
-      userContext.onChangePinnedDataflows(inmPinnedDataflows);
-
-      const inmfilteredData = [...filteredData];
-      const changedFilteredData = inmfilteredData.map(item => {
-        if (item.id === pinnedItem.id) {
-          item.pinned = isPinned ? 'pinned' : 'unpinned';
-        }
-        return item;
-      });
-
-      if (isPinned) {
-        notificationContext.add({ type: 'DATAFLOW_PINNED_INIT' });
-      } else {
-        notificationContext.add({ type: 'DATAFLOW_UNPINNED_INIT' });
+    const inmfilteredData = [...filteredData];
+    const changedFilteredData = inmfilteredData.map(item => {
+      if (item.id === pinnedItem.id) {
+        item.pinned = isPinned ? 'pinned' : 'unpinned';
       }
+      return item;
+    });
 
-      const orderedFilteredData = orderBy(
-        changedFilteredData,
+    if (isPinned) {
+      notificationContext.add({ type: 'DATAFLOW_PINNED_INIT' });
+    } else {
+      notificationContext.add({ type: 'DATAFLOW_UNPINNED_INIT' });
+    }
+
+    const orderedFilteredData = orderBy(
+      changedFilteredData,
+      ['pinned', 'expirationDate', 'status', 'id'],
+      ['asc', 'asc', 'asc', 'asc']
+    );
+
+    const orderedPinned = orderedFilteredData.map(el => el.pinned);
+    setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+
+    const inmDataToFilter = { ...dataToFilter };
+    const changedInitialData = inmDataToFilter[visibleTab].map(item => {
+      if (item.id === pinnedItem.id) {
+        item.pinned = isPinned ? 'pinned' : 'unpinned';
+      }
+      return item;
+    });
+
+    setDataToFilter({
+      ...dataToFilter,
+      [visibleTab]: orderBy(
+        changedInitialData,
         ['pinned', 'expirationDate', 'status', 'id'],
         ['asc', 'asc', 'asc', 'asc']
-      );
-
-      const orderedPinned = orderedFilteredData.map(el => el.pinned);
-      setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
-
-      const inmDataToFilter = { ...dataToFilter };
-      const changedInitialData = inmDataToFilter[visibleTab].map(item => {
-        if (item.id === pinnedItem.id) {
-          item.pinned = isPinned ? 'pinned' : 'unpinned';
-        }
-        return item;
-      });
-
-      setDataToFilter({
-        ...dataToFilter,
-        [visibleTab]: orderBy(
-          changedInitialData,
-          ['pinned', 'expirationDate', 'status', 'id'],
-          ['asc', 'asc', 'asc', 'asc']
-        )
-      });
-    }
+      )
+    });
   };
 
   const filterOptions = {
