@@ -166,8 +166,8 @@ export const DatasetService = {
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
     await DatasetRepository.exportTableSchema(datasetId, datasetSchemaId, tableSchemaId, fileType),
 
-  getMetaData: async datasetId => {
-    const datasetTableDataDTO = await DatasetRepository.getMetaData(datasetId);
+  getMetadata: async datasetId => {
+    const datasetTableDataDTO = await DatasetRepository.getMetadata(datasetId);
     return new Dataset({
       datasetFeedbackStatus:
         !isNil(datasetTableDataDTO.data.status) && capitalize(datasetTableDataDTO.data.status.split('_').join(' ')),

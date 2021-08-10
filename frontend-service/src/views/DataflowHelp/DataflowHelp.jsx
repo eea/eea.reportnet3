@@ -136,8 +136,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
       if (!isEmpty(datasetSchema)) {
         if (isCustodian) {
-          const datasetMetaData = await DatasetService.getMetaData(datasetId);
-          datasetSchema.datasetSchemaName = datasetMetaData.datasetSchemaName;
+          const datasetMetadata = await DatasetService.getMetadata(datasetId);
+          datasetSchema.datasetSchemaName = datasetMetadata.datasetSchemaName;
         }
         return datasetSchema;
       }
@@ -149,7 +149,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const onLoadDatasetsSchemas = async () => {
     try {
-      const data = await DataflowService.getReportingDatasets(dataflowId);
+      const data = await DataflowService.getFullInfo(dataflowId);
       setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS)); // TODO TEST WITH REAL DATA
       setIsLoading(false);
       if (!isCustodian) {

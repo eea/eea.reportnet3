@@ -101,7 +101,7 @@ export const DatasetRepository = {
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
-  getMetaData: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetaData, { datasetId }) }),
+  getMetadata: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetadata, { datasetId }) }),
 
   getReferencedFieldValues: async (
     datasetId,
