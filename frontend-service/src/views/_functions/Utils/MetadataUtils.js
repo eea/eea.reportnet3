@@ -16,7 +16,7 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
   }
 
   if (datasetId) {
-    const datasetMetadata = await DatasetService.getMetaData(datasetId);
+    const datasetMetadata = await DatasetService.getMetadata(datasetId);
     metadata.dataset = {
       dataProviderId: datasetMetadata.dataProviderId,
       datasetId,

@@ -53,7 +53,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [metaData, setMetaData] = useState(undefined);
+  const [metadata, setMetadata] = useState(undefined);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
 
@@ -71,15 +71,15 @@ export const DataCollection = withRouter(({ match, history }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
     setExportButtonsList(internalExtensions);
-    setMetadata();
+    getMetadata();
   }, []);
 
   useEffect(() => {
-    if (!isUndefined(metaData)) {
+    if (!isUndefined(metadata)) {
       onLoadDataflowData();
       onLoadDatasetSchema();
     }
-  }, [metaData]);
+  }, [metadata]);
 
   useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
@@ -87,10 +87,10 @@ export const DataCollection = withRouter(({ match, history }) => {
     }
   }, [notificationContext.hidden]);
 
-  const setMetadata = async () => {
+  const getMetadata = async () => {
     try {
       const metadata = await MetadataUtils.getMetadata({ datasetId, dataflowId });
-      setMetaData(metadata);
+      setMetadata(metadata);
       setDataflowName(metadata.dataflowName);
       setDatasetSchemaId(metadata.datasetSchemaId);
     } catch (error) {
@@ -123,7 +123,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = metaData;
+      } = metadata;
 
       notificationContext.add({
         type: 'EXPORT_DATA_BY_ID_ERROR',
@@ -150,7 +150,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = metaData;
+      } = metadata;
       notificationContext.add({
         type: 'REPORTING_ERROR',
         content: { dataflowId, datasetId, dataflowName, datasetName }
@@ -205,7 +205,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = metaData;
+      } = metadata;
       const {
         response,
         response: {

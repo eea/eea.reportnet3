@@ -111,7 +111,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
   const [isValidationsTabularView, setIsValidationsTabularView] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
-  const [metaData, setMetaData] = useState(undefined);
+  const [metadata, setMetadata] = useState(undefined);
   const [replaceData, setReplaceData] = useState(false);
   const [schemaTables, setSchemaTables] = useState([]);
   const [tableSchema, setTableSchema] = useState();
@@ -130,20 +130,20 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     history,
     isBusinessDataflow,
     isLoading,
-    metaData,
+    metaData: metadata,
     referenceDataflowId: dataflowId
   });
 
   useEffect(() => {
     leftSideBarContext.removeModels();
-    setMetadata();
+    getMetadata();
   }, []);
 
   useEffect(() => {
-    if (!isUndefined(metaData)) {
+    if (!isUndefined(metadata)) {
       onLoadDatasetSchema();
     }
-  }, [metaData]);
+  }, [metadata]);
 
   useEffect(() => {
     if (isCustodianOrSteward) {
@@ -369,14 +369,14 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     }
   };
 
-  const setMetadata = async () => {
+  const getMetadata = async () => {
     try {
-      const metadata = await MetadataUtils.getMetadata({ datasetId, dataflowId });
-      setMetaData(metadata);
-      setDataflowName(metadata.dataflowName);
-      setDatasetSchemaId(metadata.datasetSchemaId);
-      setDatasetFeedbackStatus(metadata.datasetFeedbackStatus);
-      setDataProviderId(metadata.dataProviderId);
+      const metaData = await MetadataUtils.getMetadata({ datasetId, dataflowId });
+      setMetadata(metaData);
+      setDataflowName(metaData.dataflowName);
+      setDatasetSchemaId(metaData.datasetSchemaId);
+      setDatasetFeedbackStatus(metaData.datasetFeedbackStatus);
+      setDataProviderId(metaData.dataProviderId);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
@@ -396,7 +396,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
-        } = metaData;
+        } = metadata;
         notificationContext.add({
           type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
           content: { dataflowId, datasetId, dataflowName, datasetName }
@@ -460,7 +460,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = metaData;
+      } = metadata;
       notificationContext.add({
         type: 'DATASET_IMPORT_INIT',
         content: { dataflowId, datasetId, dataflowName, datasetName }
@@ -520,7 +520,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
-    } = metaData;
+    } = metadata;
 
     notificationContext.add({
       type: exportNotification,
@@ -583,7 +583,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = metaData;
+      } = metadata;
       notificationContext.add({
         type: 'REPORTING_ERROR',
         content: { dataflowId, datasetId, dataflowName, datasetName }
@@ -685,7 +685,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = metaData;
+      } = metadata;
       setDatasetName(datasetName);
       const datasetError = {
         type: error.message,
@@ -780,7 +780,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
-    } = metaData;
+    } = metadata;
     notificationContext.add({
       type: 'DATASET_DATA_LOADING_INIT',
       content: {

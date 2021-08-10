@@ -58,7 +58,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     isRefreshHighlighted: false,
     isGroupedValidationSelected: false,
     levelErrorTypes: [],
-    metaData: undefined,
+    metadata: undefined,
     tableSchema: undefined,
     tableSchemaColumns: undefined,
     tableSchemaId: undefined,
@@ -73,7 +73,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     isLoading,
     isGroupedValidationSelected,
     levelErrorTypes,
-    metaData,
+    metadata,
     tableSchema,
     tableSchemaColumns
   } = euDatasetState;
@@ -97,15 +97,19 @@ export const EUDataset = withRouter(({ history, match }) => {
     }
   }, [notificationContext.hidden]);
 
-  useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, history, isBusinessDataflow, isLoading, metaData });
+  useBreadCrumbs({
+    currentPage: CurrentPage.EU_DATASET,
+    dataflowId,
+    history,
+    isBusinessDataflow,
+    isLoading,
+    metaData: metadata
+  });
 
   const setMetadata = async () => {
     try {
       const metadata = await MetadataUtils.getMetadata({ datasetId, dataflowId });
-      euDatasetDispatch({
-        type: 'GET_METADATA',
-        payload: { metadata }
-      });
+      euDatasetDispatch({ type: 'GET_METADATA', payload: { metadata } });
     } catch (error) {
       console.error('DataCollection - setMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });

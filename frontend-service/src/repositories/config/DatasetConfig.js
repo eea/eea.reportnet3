@@ -4,7 +4,7 @@ export const DatasetConfig = {
   createRecordDesign: '/dataschema/{:datasetId}/fieldSchema',
   createTableDesign: '/dataschema/{:datasetId}/tableSchema',
   getSchema: '/dataschema/datasetId/{:datasetId}',
-  getMetaData: '/datasetmetabase/{:datasetId}',
+  getMetadata: '/datasetmetabase/{:datasetId}',
   getTableData:
     '/dataset/TableValueDataset/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&idRules={:idRules}',
   deleteSchema: '/dataschema/dataset/{:datasetId}',
