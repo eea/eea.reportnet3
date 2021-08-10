@@ -98,7 +98,6 @@ const DataViewer = withRouter(
     const [datasetSchemaId, setDatasetSchemaId] = useState(null);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editDialogVisible, setEditDialogVisible] = useState(false);
-    const [extensionsOperationsList, setExtensionsOperationsList] = useState({ export: [], import: [] });
     const [fetchedData, setFetchedData] = useState([]);
     const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
     const [importTableDialogVisible, setImportTableDialogVisible] = useState(false);
@@ -306,10 +305,6 @@ const DataViewer = withRouter(
     }, [records.mapGeoJson]);
 
     useEffect(() => {
-      if (datasetSchemaId) getFileExtensions();
-    }, [datasetSchemaId, isDataUpdated, importTableDialogVisible]);
-
-    useEffect(() => {
       if (isReportingWebform) {
         setHasWebformWritePermissions(false);
       }
@@ -322,16 +317,6 @@ const DataViewer = withRouter(
       } catch (error) {
         console.error('DataViewer - getMetadata.', error);
         notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
-      }
-    };
-
-    const getFileExtensions = async () => {
-      try {
-        const allExtensions = await IntegrationService.getAllExtensionsOperations(dataflowId, datasetSchemaId);
-        setExtensionsOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
-      } catch (error) {
-        console.error('DataViewer - getFileExtensions.', error);
-        notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
       }
     };
 
@@ -1088,7 +1073,6 @@ const DataViewer = withRouter(
           colsSchema={colsSchema}
           dataflowId={dataflowId}
           datasetId={datasetId}
-          fileExtensions={extensionsOperationsList.export}
           hasCountryCode={hasCountryCode}
           hasWritePermissions={
             (hasWritePermissions && !tableFixedNumber && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)
