@@ -36,7 +36,6 @@ import { UserService } from 'services/UserService';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
-import { get } from 'lodash';
 
 export const ManageBusinessDataflow = ({
   dataflowId,
