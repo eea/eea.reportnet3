@@ -693,7 +693,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             availableInPublic: dataset.availableInPublic,
             datasetSchema: dataset,
             datasetStatistics: datasetStatisticsDTO,
-            description: dataset.datasetSchemaDescription,
+            description: dataset.datasetSchemaDescription || '',
             levelErrorTypes: dataset.levelErrorTypes,
             previousWebform: WebformsConfig.filter(item => item.value === dataset.webform)[0],
             referenceDataset: dataset.referenceDataset,
