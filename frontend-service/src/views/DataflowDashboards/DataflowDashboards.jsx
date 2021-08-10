@@ -69,7 +69,7 @@ export const DataflowDashboards = withRouter(
 
     const onLoadDataSchemas = async () => {
       try {
-        const data = await DataflowService.getReportingDatasets(dataflowId);
+        const data = await DataflowService.getFullInfo(dataflowId);
         setDataSchema(data.designDatasets);
         setDashboardInitialValues(
           data.designDatasets.forEach(schema => (dashboardInitialValues[schema.datasetSchemaId] = true))

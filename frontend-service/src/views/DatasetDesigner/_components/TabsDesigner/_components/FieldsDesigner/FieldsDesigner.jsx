@@ -365,6 +365,7 @@ export const FieldsDesigner = ({
     if (!isUndefined(table) && !isNil(table.records)) {
       return (
         <DataViewer
+          datasetSchemaId={datasetSchemaId}
           hasWritePermissions={true}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}

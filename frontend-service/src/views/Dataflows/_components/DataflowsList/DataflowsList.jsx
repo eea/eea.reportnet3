@@ -59,7 +59,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
 
   const changeUserProperties = async userProperties => {
     try {
-      return await UserService.updateAttributes(userProperties);
+      return await UserService.updateConfiguration(userProperties);
     } catch (error) {
       console.error('DataflowsList - changeUserProperties.', error);
       notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' });

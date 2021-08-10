@@ -1,6 +1,6 @@
 export const DataflowConfig = {
   cloneSchemas: '/dataschema/copy?sourceDataflow={:sourceDataflowId}&targetDataflow={:targetDataflowId}',
-  create: '/dataflow',
+  createUpdate: '/dataflow',
   createApiKey: '/user/createApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   createApiKeyCustodian: '/user/createApiKey?dataflowId={:dataflowId}',
   createEmptyDatasetSchema:
@@ -20,7 +20,7 @@ export const DataflowConfig = {
   getPublicDataflowData: '/dataflow/getPublicDataflow/{:dataflowId}',
   getPublicDataflowsByCountryCode:
     '/dataflow/public/country/{:country}?asc={:asc}&pageNum={:pageNum}&pageSize={:pageSize}&sortField={:sortField}',
-  getReportingDatasets: '/dataflow/{:dataflowId}',
+  getFullInfo: '/dataflow/{:dataflowId}',
   getRepresentativesUsersList: '/user/userRoles/dataflow/{:dataflowId}',
   getSchemas: '/dataschema/getSchemas/dataflow/{:dataflowId}',
   getSchemasValidation: '/dataschema/validate/dataflow/{:dataflowId}',
