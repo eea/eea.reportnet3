@@ -4,7 +4,7 @@ import { DatasetService } from 'services/DatasetService';
 const getMetadata = async ({ dataflowId, datasetId }) => {
   const metadata = {};
   if (dataflowId) {
-    const dataflowMetadata = await DataflowService.getDataflowDetails(dataflowId);
+    const dataflowMetadata = await DataflowService.getDetails(dataflowId);
 
     metadata.dataflow = {
       dataflowId,

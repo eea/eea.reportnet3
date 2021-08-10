@@ -251,8 +251,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
-      editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin,
-      editBusinessBtn: dataflowState.isAdmin,
+      editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin && !dataflowState.isBusinessDataflow,
+      editBusinessBtn: dataflowState.isAdmin && dataflowState.isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
@@ -481,7 +481,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onLoadReportingDataflow = async () => {
     try {
-      const dataflow = await DataflowService.getFullInfo(dataflowId);
+      const dataflow = await DataflowService.get(dataflowId);
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       dataflowDispatch({
         type: 'INITIAL_LOAD',

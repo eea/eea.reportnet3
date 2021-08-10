@@ -408,7 +408,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onConfirmValidate = async () => {
     try {
       setValidateDialogVisible(false);
-      await DatasetService.validateDataById(datasetId);
+      await DatasetService.validate(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
         content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
@@ -557,7 +557,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onLoadDataflow = async () => {
     try {
-      const data = await DataflowService.getFullInfo(match.params.dataflowId);
+      const data = await DataflowService.get(match.params.dataflowId);
       setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS)); // TODO TEST WITH REAL DATA
       let dataset = [];
       if (isTestDataset) {
