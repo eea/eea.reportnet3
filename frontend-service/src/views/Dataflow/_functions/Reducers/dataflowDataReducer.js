@@ -73,8 +73,12 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_IS_PAGE_LOADING':
       return { ...state, isPageLoading: payload.isPageLoading };
 
-    case 'SET_SHARE_RIGHTS_UPDATED':
-      return { ...state, shareRightsUpdated: payload.shareRightsUpdated };
+    case 'SET_IS_ADMIN_ASSIGNED_BUSINESS_DATAFLOW':
+      console.log('payload :>> ', payload);
+      return {
+        ...state,
+        isAdminAssignedBusinessDataflow: payload.isAdminAssignedBusinessDataflow
+      };
 
     case 'SET_UPDATED_DATASET_SCHEMA':
       return { ...state, updatedDatasetSchema: payload.updatedData };

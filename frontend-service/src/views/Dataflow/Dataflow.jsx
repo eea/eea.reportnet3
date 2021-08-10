@@ -81,6 +81,7 @@ const Dataflow = withRouter(({ history, match }) => {
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
+    isAdminAssignedBusinessDataflow: false,
     isApiKeyDialogVisible: false,
     isBusinessDataflow: false,
     isCopyDataCollectionToEUDatasetLoading: false,
@@ -113,7 +114,6 @@ const Dataflow = withRouter(({ history, match }) => {
     obligations: {},
     representativesImport: false,
     restrictFromPublic: false,
-    shareRightsUpdated: false,
     showPublicInfo: false,
     status: '',
     updatedDatasetSchema: [],
@@ -308,8 +308,11 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const handleRedirect = target => history.push(target);
 
-  const setShareRightsUpdated = shareRightsUpdatedValue => {
-    dataflowDispatch({ type: 'SET_SHARE_RIGHTS_UPDATED', payload: { shareRightsUpdated: shareRightsUpdatedValue } });
+  const setIsAdminAssignedBusinessDataflow = value => {
+    dataflowDispatch({
+      type: 'SET_IS_ADMIN_ASSIGNED_BUSINESS_DATAFLOW',
+      payload: { isAdminAssignedBusinessDataflow: value }
+    });
   };
 
   const setIsUserRightManagementDialogVisible = isVisible => {
@@ -330,7 +333,7 @@ const Dataflow = withRouter(({ history, match }) => {
         label={resources.messages['close']}
         onClick={() => {
           manageDialogs(`isManage${userType}DialogVisible`, false);
-          if (dataflowState.shareRightsUpdated) {
+          if (dataflowState.isAdminAssignedBusinessDataflow) {
             onLoadReportingDataflow();
             setIsPageLoading(true);
             onRefreshToken();
@@ -923,7 +926,7 @@ const Dataflow = withRouter(({ history, match }) => {
             header={resources.messages['manageRequestersRights']}
             onHide={() => {
               manageDialogs('isManageRequestersDialogVisible', false);
-              if (dataflowState.shareRightsUpdated) {
+              if (dataflowState.isAdminAssignedBusinessDataflow) {
                 onLoadReportingDataflow();
                 setIsPageLoading(true);
                 onRefreshToken();
@@ -946,8 +949,8 @@ const Dataflow = withRouter(({ history, match }) => {
               placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
+              setIsAdminAssignedBusinessDataflow={setIsAdminAssignedBusinessDataflow}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
-              setShareRightsUpdated={setShareRightsUpdated}
               updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
               userType={'requester'}
             />

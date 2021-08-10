@@ -47,7 +47,7 @@ export const ShareRights = ({
   placeholder,
   representativeId,
   roleOptions,
-  setShareRightsUpdated,
+  setIsAdminAssignedBusinessDataflow,
   setIsUserRightManagementDialogVisible,
   updateErrorNotificationKey,
   userType
