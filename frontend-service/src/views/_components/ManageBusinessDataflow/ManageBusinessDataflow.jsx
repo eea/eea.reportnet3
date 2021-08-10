@@ -182,7 +182,7 @@ export const ManageBusinessDataflow = ({
           const inmUserProperties = { ...userContext.userProps };
           inmUserProperties.pinnedDataflows.push(data.toString());
 
-          await UserService.updateAttributes(inmUserProperties);
+          await UserService.updateConfiguration(inmUserProperties);
           userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
         }
         onCreateDataflow('isBusinessDataflowDialogVisible');

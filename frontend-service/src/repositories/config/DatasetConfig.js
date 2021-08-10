@@ -48,7 +48,7 @@ export const DatasetConfig = {
   updateReferenceDatasetStatus: '/referenceDataset/{:datasetId}?updatable={:updatable}',
   updateField: '/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}',
   updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}',
-  updateTableNameDesign: '/dataschema/{:datasetId}/tableSchema',
+  updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
   validate: '/validation/dataset/{:datasetId}',
   validateSql: '/rules/validateSqlRules?datasetId={:datasetId}&datasetSchemaId={:datasetSchemaId}',
   validationViewer: '/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}'
