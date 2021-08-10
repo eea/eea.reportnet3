@@ -35,7 +35,6 @@ import { InfoTable } from './_components/InfoTable';
 import { Map } from 'views/_components/Map';
 
 import { DatasetService } from 'services/DatasetService';
-import { IntegrationService } from 'services/IntegrationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -48,7 +47,7 @@ import { sortReducer } from './_functions/Reducers/sortReducer';
 import { useContextMenu, useLoadColsSchemasAndColumnOptions, useSetColumns } from './_functions/Hooks/DataViewerHooks';
 
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
-import { ExtensionUtils, MetadataUtils, RecordUtils } from 'views/_functions/Utils';
+import { MetadataUtils, RecordUtils } from 'views/_functions/Utils';
 import { MapUtils } from 'views/_functions/Utils/MapUtils';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
