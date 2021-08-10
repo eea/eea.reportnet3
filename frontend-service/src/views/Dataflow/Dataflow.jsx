@@ -251,7 +251,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
-      editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin,
+      editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin && !dataflowState.isBusinessDataflow,
       editBusinessBtn: dataflowState.isAdmin,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
