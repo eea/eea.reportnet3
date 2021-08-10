@@ -53,7 +53,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [metaData, setMetaData] = useState({});
+  const [metaData, setMetaData] = useState(undefined);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
 
@@ -70,11 +70,16 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   useEffect(() => {
     leftSideBarContext.removeModels();
-    setMetadata();
     setExportButtonsList(internalExtensions);
-    onLoadDataflowData();
-    onLoadDatasetSchema();
+    setMetadata();
   }, []);
+
+  useEffect(() => {
+    if (!isUndefined(metaData)) {
+      onLoadDataflowData();
+      onLoadDatasetSchema();
+    }
+  }, [metaData]);
 
   useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
@@ -87,7 +92,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       const metadata = await MetadataUtils.getMetadata({ datasetId, dataflowId });
       setMetaData(metadata);
       setDataflowName(metadata.dataflowName);
-      setDatasetSchemaId(metaData.datasetSchemaId);
+      setDatasetSchemaId(metadata.datasetSchemaId);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });

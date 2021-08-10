@@ -111,7 +111,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
   const [isValidationsTabularView, setIsValidationsTabularView] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
-  const [metaData, setMetaData] = useState({});
+  const [metaData, setMetaData] = useState(undefined);
   const [replaceData, setReplaceData] = useState(false);
   const [schemaTables, setSchemaTables] = useState([]);
   const [tableSchema, setTableSchema] = useState();
@@ -137,8 +137,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
     setMetadata();
-    onLoadDatasetSchema();
   }, []);
+
+  useEffect(() => {
+    if (!isUndefined(metaData)) {
+      onLoadDatasetSchema();
+    }
+  }, [metaData]);
 
   useEffect(() => {
     if (isCustodianOrSteward) {
@@ -369,9 +374,9 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       const metadata = await MetadataUtils.getMetadata({ datasetId, dataflowId });
       setMetaData(metadata);
       setDataflowName(metadata.dataflowName);
-      setDatasetSchemaId(metaData.datasetSchemaId);
-      setDatasetFeedbackStatus(metaData.datasetFeedbackStatus);
-      setDataProviderId(metaData.dataProviderId);
+      setDatasetSchemaId(metadata.datasetSchemaId);
+      setDatasetFeedbackStatus(metadata.datasetFeedbackStatus);
+      setDataProviderId(metadata.dataProviderId);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });

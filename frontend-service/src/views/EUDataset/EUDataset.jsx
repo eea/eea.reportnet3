@@ -58,7 +58,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     isRefreshHighlighted: false,
     isGroupedValidationSelected: false,
     levelErrorTypes: [],
-    metaData: {},
+    metaData: undefined,
     tableSchema: undefined,
     tableSchemaColumns: undefined,
     tableSchemaId: undefined,
