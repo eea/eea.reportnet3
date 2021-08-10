@@ -47,6 +47,7 @@ export const ShareRights = ({
   placeholder,
   representativeId,
   roleOptions,
+  setIsAdminAssignedBusinessDataflow,
   setIsUserRightManagementDialogVisible,
   updateErrorNotificationKey,
   userType
@@ -134,7 +135,13 @@ export const ShareRights = ({
     shareRightsDispatch({ type: 'ON_CLOSE_MANAGEMENT_DIALOG' });
   };
 
-  const onDataChange = () => shareRightsDispatch({ type: 'ON_DATA_CHANGE' });
+  const onDataChange = () => {
+    shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: true } });
+    setIsAdminAssignedBusinessDataflow(
+      TextUtils.areEquals(userRight.account, userContext.email) ||
+        TextUtils.areEquals(shareRightsState.userRightToDelete.account, userContext.email)
+    );
+  };
 
   const onEditUserRight = userRight => {
     shareRightsDispatch({ type: 'ON_EDIT_USER_RIGHT', payload: { isEditingModal: true, userRight } });

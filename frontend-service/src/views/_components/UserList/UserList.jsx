@@ -79,7 +79,13 @@ export const UserList = ({ dataflowId, isBusinessDataflow = false, representativ
     { type: 'input', properties: [{ name: 'email' }] },
     {
       type: 'multiselect',
-      properties: [{ name: 'country', showInput: true, label: resources.messages['countries'] }]
+      properties: [
+        {
+          name: 'country',
+          showInput: true,
+          label: isBusinessDataflow ? resources.messages['company'] : resources.messages['countries']
+        }
+      ]
     }
   ];
 

@@ -81,6 +81,7 @@ const Dataflow = withRouter(({ history, match }) => {
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
+    isAdminAssignedBusinessDataflow: false,
     isApiKeyDialogVisible: false,
     isBusinessDataflow: false,
     isCopyDataCollectionToEUDatasetLoading: false,
@@ -307,6 +308,13 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const handleRedirect = target => history.push(target);
 
+  const setIsAdminAssignedBusinessDataflow = value => {
+    dataflowDispatch({
+      type: 'SET_IS_ADMIN_ASSIGNED_BUSINESS_DATAFLOW',
+      payload: { isAdminAssignedBusinessDataflow: value }
+    });
+  };
+
   const setIsUserRightManagementDialogVisible = isVisible => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
   };
@@ -323,7 +331,14 @@ const Dataflow = withRouter(({ history, match }) => {
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() => manageDialogs(`isManage${userType}DialogVisible`, false)}
+        onClick={() => {
+          manageDialogs(`isManage${userType}DialogVisible`, false);
+          if (dataflowState.isAdminAssignedBusinessDataflow) {
+            onLoadReportingDataflow();
+            setIsPageLoading(true);
+            onRefreshToken();
+          }
+        }}
       />
     </div>
   );
@@ -909,7 +924,14 @@ const Dataflow = withRouter(({ history, match }) => {
           <Dialog
             footer={shareRightsFooterDialogFooter('Requesters')}
             header={resources.messages['manageRequestersRights']}
-            onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isManageRequestersDialogVisible', false);
+              if (dataflowState.isAdminAssignedBusinessDataflow) {
+                onLoadReportingDataflow();
+                setIsPageLoading(true);
+                onRefreshToken();
+              }
+            }}
             visible={dataflowState.isManageRequestersDialogVisible}>
             <ShareRights
               addConfirmHeader={resources.messages[`addRequesterConfirmHeader`]}
@@ -927,6 +949,7 @@ const Dataflow = withRouter(({ history, match }) => {
               placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
+              setIsAdminAssignedBusinessDataflow={setIsAdminAssignedBusinessDataflow}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
               userType={'requester'}
