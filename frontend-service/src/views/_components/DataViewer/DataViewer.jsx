@@ -56,6 +56,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 const DataViewer = withRouter(
   ({
     dataProviderId,
+    datasetSchemaId,
     hasCountryCode,
     hasWritePermissions,
     isBusinessDataflow = false,
@@ -94,7 +95,6 @@ const DataViewer = withRouter(
     const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
-    const [datasetSchemaId, setDatasetSchemaId] = useState(null);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [editDialogVisible, setEditDialogVisible] = useState(false);
     const [fetchedData, setFetchedData] = useState([]);
@@ -291,10 +291,6 @@ const DataViewer = withRouter(
     }, [confirmDeleteVisible]);
 
     useEffect(() => {
-      getMetadata();
-    }, []);
-
-    useEffect(() => {
       if (records.mapGeoJson !== '' && areEquals(records.geometryType, 'POINT')) {
         onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
         const inmMapGeoJson = cloneDeep(records.mapGeoJson);
@@ -308,16 +304,6 @@ const DataViewer = withRouter(
         setHasWebformWritePermissions(false);
       }
     }, [isReportingWebform]);
-
-    const getMetadata = async () => {
-      try {
-        const metadata = await DatasetService.getMetaData(datasetId);
-        setDatasetSchemaId(metadata.datasetSchemaId);
-      } catch (error) {
-        console.error('DataViewer - getMetadata.', error);
-        notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
-      }
-    };
 
     const filterDataResponse = data => {
       const dataFiltered = DataViewerUtils.parseData(data);

@@ -82,17 +82,14 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   useEffect(() => {
     leftSideBarContext.removeModels();
-    callSetMetaData();
+    setMetadata();
     getDataflowDetails();
+    getExportExtensionsList();
   }, []);
 
   useEffect(() => {
     onLoadDatasetSchema();
   }, [euDatasetState.isDataUpdated]);
-
-  useEffect(() => {
-    getExportExtensionsList();
-  }, []);
 
   useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
@@ -102,11 +99,17 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, history, isBusinessDataflow, isLoading, metaData });
 
-  const callSetMetaData = async () => {
-    euDatasetDispatch({
-      type: 'GET_METADATA',
-      payload: { metadata: await getMetadata({ dataflowId, datasetId }) }
-    });
+  const setMetadata = async () => {
+    try {
+      const metadata = await MetadataUtils.getMetadata({ datasetId, dataflowId });
+      euDatasetDispatch({
+        type: 'GET_METADATA',
+        payload: { metadata }
+      });
+    } catch (error) {
+      console.error('DataCollection - setMetadata.', error);
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
+    }
   };
 
   const getDataflowDetails = async () => {
@@ -160,15 +163,6 @@ export const EUDataset = withRouter(({ history, match }) => {
     });
   };
 
-  const getMetadata = async ids => {
-    try {
-      return await MetadataUtils.getMetadata(ids);
-    } catch (error) {
-      console.error('EUDataset - getMetadata.', error);
-      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
-    }
-  };
-
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
     try {
       return await DatasetService.getStatistics(datasetId, tableSchemaNames);
@@ -190,7 +184,7 @@ export const EUDataset = withRouter(({ history, match }) => {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
+      } = euDatasetState.metaData;
 
       notificationContext.add({
         type: 'EXPORT_DATA_BY_ID_ERROR',
@@ -287,6 +281,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const renderTabsSchema = () => (
     <TabsSchema
+      datasetSchemaId={euDatasetState.metaData.datasetSchemaId}
       hasCountryCode={true}
       hasWritePermissions={false}
       isBusinessDataflow={euDatasetState.isBusinessDataflow}
