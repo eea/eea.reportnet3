@@ -305,6 +305,7 @@ const Dataflows = withRouter(({ history, match }) => {
 
       {dataflowsState.isBusinessDataflowDialogVisible && (
         <ManageBusinessDataflow
+          isAdmin={isAdmin}
           isVisible={dataflowsState.isBusinessDataflowDialogVisible}
           manageDialogs={manageDialogs}
           obligation={obligation}
