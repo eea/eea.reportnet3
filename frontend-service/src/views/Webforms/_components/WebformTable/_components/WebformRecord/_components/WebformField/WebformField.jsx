@@ -122,7 +122,7 @@ export const WebformField = ({
     );
 
     if (datasetSchemaId === '' || isNil(datasetSchemaId)) {
-      const metadata = await DatasetService.getMetaData(datasetId);
+      const metadata = await DatasetService.getMetadata(datasetId);
       datasetSchemaId = metadata.datasetSchemaId;
     }
 

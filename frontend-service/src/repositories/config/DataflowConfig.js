@@ -1,6 +1,6 @@
 export const DataflowConfig = {
   cloneSchemas: '/dataschema/copy?sourceDataflow={:sourceDataflowId}&targetDataflow={:targetDataflowId}',
-  create: '/dataflow',
+  createUpdate: '/dataflow',
   createApiKey: '/user/createApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   createApiKeyCustodian: '/user/createApiKey?dataflowId={:dataflowId}',
   createEmptyDatasetSchema:
@@ -11,7 +11,7 @@ export const DataflowConfig = {
   getAllDataflowsUserList: '/dataflow/getUserRolesAllDataflows',
   getApiKey: '/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   getApiKeyCustodian: '/user/getApiKey?dataflowId={:dataflowId}',
-  getDataflowDetails: '/dataflow/{:dataflowId}/getmetabase',
+  getDetails: '/dataflow/{:dataflowId}/getmetabase',
   getDatasetsFinalFeedback: '/datasetmetabase/dataflow/{:dataflowId}',
   getDatasetsReleasedStatus: '/datasetmetabase/dataflow/{:dataflowId}',
   getDatasetsValidationStatistics:
@@ -20,7 +20,7 @@ export const DataflowConfig = {
   getPublicDataflowData: '/dataflow/getPublicDataflow/{:dataflowId}',
   getPublicDataflowsByCountryCode:
     '/dataflow/public/country/{:country}?asc={:asc}&pageNum={:pageNum}&pageSize={:pageSize}&sortField={:sortField}',
-  getReportingDatasets: '/dataflow/{:dataflowId}',
+  get: '/dataflow/{:dataflowId}',
   getRepresentativesUsersList: '/user/userRoles/dataflow/{:dataflowId}',
   getSchemas: '/dataschema/getSchemas/dataflow/{:dataflowId}',
   getSchemasValidation: '/dataschema/validate/dataflow/{:dataflowId}',

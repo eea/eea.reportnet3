@@ -28,7 +28,7 @@ export class InputText extends Component {
     tooltip: null,
     tooltipOptions: null,
     validateOnly: false,
-    value: ''
+    value: undefined
   };
 
   static propTypes = {

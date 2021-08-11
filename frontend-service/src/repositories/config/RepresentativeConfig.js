@@ -6,10 +6,11 @@ export const RepresentativeConfig = {
   exportFile: '/representative/export/{:dataflowId}',
   exportTemplateFile: '/representative/exportTemplateReportersFile/{:dataProviderGroupId}',
   getDataProviders: '/representative/dataProvider/{:dataProviderGroupId}',
-  getRepresentatives: '/representative/dataflow/{:dataflowId}',
   getFmeUsers: '/representative/fmeUsers',
   getGroupCompanies: '/representative/dataProvider/companyGroups',
   getGroupCountries: '/representative/dataProvider/countryGroups',
+  getRepresentatives: '/representative/dataflow/{:dataflowId}',
+  getSelectedDataProviderGroup: '/representative/dataProviderGroup/dataflow/{:dataflowId}',
   importFile: '/representative/import/{:dataflowId}/group/{:dataProviderGroupId}',
   updateDataProviderId: '/representative/update',
   updateLeadReporter: '/representative/leadReporter/update/dataflow/{:dataflowId}'

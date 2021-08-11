@@ -365,6 +365,7 @@ export const FieldsDesigner = ({
     if (!isUndefined(table) && !isNil(table.records)) {
       return (
         <DataViewer
+          datasetSchemaId={datasetSchemaId}
           hasWritePermissions={true}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
@@ -484,7 +485,7 @@ export const FieldsDesigner = ({
                 codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
                 datasetId={datasetId}
                 datasetSchemaId={datasetSchemaId}
-                fieldDescription={field.description}
+                fieldDescription={field.description || ''}
                 fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
                 fieldHasMultipleValues={field.pkHasMultipleValues}
                 fieldId={field.fieldId}
@@ -542,7 +543,7 @@ export const FieldsDesigner = ({
     try {
       const inmFields = [...fields];
       const droppedFieldIdx = FieldsDesignerUtils.getIndexByFieldName(droppedFieldName, inmFields);
-      const fieldOrdered = await DatasetService.updateFieldOrder(
+      await DatasetService.updateFieldOrder(
         datasetId,
         droppedFieldIdx === -1
           ? inmFields.length
@@ -551,10 +552,8 @@ export const FieldsDesigner = ({
           : droppedFieldIdx,
         inmFields[draggedFieldIdx].fieldId
       );
-      if (fieldOrdered.status >= 200 && fieldOrdered.status <= 299) {
-        setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
-        onChangeFields(inmFields, false, table.tableSchemaId);
-      }
+      setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
+      onChangeFields(inmFields, false, table.tableSchemaId);
     } catch (error) {
       console.error('FieldsDesigner - reorderField.', error);
     }
