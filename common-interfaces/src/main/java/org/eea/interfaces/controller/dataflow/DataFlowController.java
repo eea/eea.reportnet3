@@ -5,6 +5,7 @@ import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
@@ -223,5 +224,18 @@ public interface DataFlowController {
   @GetMapping("/private/isReferenceDataflowDraft/entity/{entity}/{entityId}")
   boolean accessReferenceEntity(@PathVariable("entity") EntityClassEnum entity,
       @PathVariable("entityId") Long entityId);
+
+
+  /**
+   * Access entity.
+   *
+   * @param dataflowType the dataflow type
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if successful
+   */
+  @GetMapping("/private/isDataflowType/{type}/entity/{entity}/{entityId}")
+  boolean accessEntity(@PathVariable("type") TypeDataflowEnum dataflowType,
+      @PathVariable("entity") EntityClassEnum entity, @PathVariable("entityId") Long entityId);
 
 }
