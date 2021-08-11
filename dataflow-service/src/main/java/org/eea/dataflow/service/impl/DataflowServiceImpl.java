@@ -553,6 +553,8 @@ public class DataflowServiceImpl implements DataflowService {
         }
         dataflowSave.get().setReleasable(dataflowVO.isReleasable());
         dataflowSave.get().setShowPublicInfo(dataflowVO.isShowPublicInfo());
+        dataflowSave.get().setFmeUserId(dataflowVO.getFmeUserId());
+        dataflowSave.get().setDataProviderGroupId(dataflowVO.getDataProviderGroupId());
         dataflowRepository.save(dataflowSave.get());
         LOG.info("The dataflow {} has been updated.", dataflowSave.get().getName());
       }
