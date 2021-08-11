@@ -137,7 +137,7 @@ const RepresentativesList = ({
   const getDataProviderGroup = async () => {
     try {
       const response = await RepresentativeService.getSelectedDataProviderGroup(dataflowId);
-      formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: response });
+      formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: response.data });
     } catch (error) {
       console.error('RepresentativesList - getDataProviderGroup.', error);
     }
