@@ -145,9 +145,7 @@ export const WebLinks = ({
       onLoadWebLinks();
     } catch (error) {
       console.error('WebLinks - onDeleteWebLink.', error);
-      notificationContext.add({
-        type: 'DELETE_WEB_LINK_ERROR'
-      });
+      notificationContext.add({ type: 'DELETE_WEB_LINK_ERROR' });
     } finally {
       webLinksDispatch({ type: 'ON_DELETE_END' });
       setDeletingId('');

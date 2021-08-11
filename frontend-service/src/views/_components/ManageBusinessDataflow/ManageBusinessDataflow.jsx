@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -18,9 +18,11 @@ import { ErrorMessage } from 'views/_components/ErrorMessage';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
+import { Spinner } from 'views/_components/Spinner';
 import ReactTooltip from 'react-tooltip';
 
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
+import { DataflowService } from 'services/DataflowService';
 import { RepresentativeService } from 'services/RepresentativeService';
 
 import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
@@ -47,7 +49,7 @@ export const ManageBusinessDataflow = ({
   onEditDataflow,
   resetObligations
 }) => {
-  const dialogName = isEditing ? 'isEditDialogVisible' : 'isBusinessDataflowDialogVisible';
+  const dialogName = 'isBusinessDataflowDialogVisible';
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
   const { hideLoading, showLoading } = useContext(LoadingContext);
@@ -56,12 +58,12 @@ export const ManageBusinessDataflow = ({
   const userContext = useContext(UserContext);
 
   const [deleteInput, setDeleteInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState({});
   const [selectedFmeUser, setSelectedFmeUser] = useState({});
   const [description, setDescription] = useState(isEditing ? metadata.description : '');
   const [groupOfCompanies, setGroupOfCompanies] = useState([]);
   const [fmeUsers, setFmeUsers] = useState([]);
-
   const [errors, setErrors] = useState({
     description: { hasErrors: false, message: '' },
     name: { hasErrors: false, message: '' }
@@ -77,27 +79,35 @@ export const ManageBusinessDataflow = ({
   useInputTextFocus(isVisible, inputRef);
   useInputTextFocus(isDeleteDialogVisible, deleteInputRef);
 
-  const getGroupOfCompaniesList = async () => {
+  useLayoutEffect(() => {
+    if (isEditing) {
+      setSelectedFmeUser(fmeUsers.filter(user => user.id === metadata.fmeUserId)[0]);
+    }
+  }, [fmeUsers]);
+
+  useLayoutEffect(() => {
+    if (isEditing) {
+      setSelectedGroup(groupOfCompanies.filter(group => group.dataProviderGroupId === metadata.dataProviderGroupId)[0]);
+    }
+  }, [groupOfCompanies]);
+
+  const getDropdownsOptions = async () => {
+    setIsLoading(true);
     try {
-      const response = await RepresentativeService.getGroupCompanies();
-      setGroupOfCompanies(response.data);
+      const responseGroupOfCompanies = await RepresentativeService.getGroupCompanies();
+      setGroupOfCompanies(responseGroupOfCompanies.data);
+
+      const responseFmeUsers = await RepresentativeService.getFmeUsers();
+      setFmeUsers(responseFmeUsers.data);
     } catch (error) {
-      console.error('ManageBusinessDataflow - getGroupOfCompaniesList.', error);
+      console.error('ManageBusinessDataflow - getDropdownsOptions.', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const getFmeUsersList = async () => {
-    try {
-      const response = await RepresentativeService.getFmeUsers();
-      setFmeUsers(response.data);
-    } catch (error) {
-      console.error('ManageBusinessDataflow - getFmeUsersList.', error);
-    }
-  };
-
-  useEffect(() => {
-    getGroupOfCompaniesList();
-    getFmeUsersList();
+  useLayoutEffect(() => {
+    getDropdownsOptions();
   }, []);
 
   const checkErrors = () => {
@@ -130,11 +140,9 @@ export const ManageBusinessDataflow = ({
     setIsDeleteDialogVisible(false);
     showLoading();
     try {
-      const response = await BusinessDataflowService.deleteReferenceDataflow(dataflowId);
-      if (response.status >= 200 && response.status <= 299) {
-        history.push(getUrl(routes.DATAFLOWS));
-        notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
-      }
+      await DataflowService.delete(dataflowId);
+      history.push(getUrl(routes.DATAFLOWS));
+      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
     } catch (error) {
       console.error('ManageBusinessDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
@@ -149,7 +157,7 @@ export const ManageBusinessDataflow = ({
     try {
       setIsSending(true);
       if (isEditing) {
-        const { status } = await BusinessDataflowService.edit(
+        await BusinessDataflowService.update(
           dataflowId,
           description,
           obligation.id,
@@ -157,31 +165,24 @@ export const ManageBusinessDataflow = ({
           selectedGroup.dataProviderGroupId,
           selectedFmeUser.id
         );
-
-        if (status >= 200 && status <= 299) {
-          manageDialogs(dialogName, false);
-          onEditDataflow(name, description);
-        }
+        manageDialogs(dialogName, false);
+        onEditDataflow(name, description);
       } else {
-        const { data, status } = await BusinessDataflowService.create(
+        const { data } = await BusinessDataflowService.create(
           name,
           description,
           obligation.id,
           selectedGroup.dataProviderGroupId,
           selectedFmeUser.id
         );
-        if (status >= 200 && status <= 299) {
-          if (pinDataflow) {
-            const inmUserProperties = { ...userContext.userProps };
-            inmUserProperties.pinnedDataflows.push(data.toString());
+        if (pinDataflow) {
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.pinnedDataflows.push(data.toString());
 
-            const response = await UserService.updateAttributes(inmUserProperties);
-            if (!isNil(response) && response.status >= 200 && response.status <= 299) {
-              userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
-            }
-          }
-          onCreateDataflow('isBusinessDataflowDialogVisible');
+          await UserService.updateConfiguration(inmUserProperties);
+          userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
         }
+        onCreateDataflow('isBusinessDataflowDialogVisible');
       }
     } catch (error) {
       if (TextUtils.areEquals(error?.response?.data, 'Dataflow name already exists')) {
@@ -242,8 +243,8 @@ export const ManageBusinessDataflow = ({
           !isEmpty(name) &&
           !isEmpty(description) &&
           !isNil(obligation.id) &&
-          !isNil(selectedFmeUser.id) &&
-          !isNil(selectedGroup.dataProviderGroupId) &&
+          !isNil(selectedFmeUser?.id) &&
+          !isNil(selectedGroup?.dataProviderGroupId) &&
           !isSending &&
           'p-button-animated-blink'
         }`}
@@ -251,8 +252,8 @@ export const ManageBusinessDataflow = ({
           isEmpty(name) ||
           isEmpty(description) ||
           isNil(obligation.id) ||
-          isNil(selectedFmeUser.id) ||
-          isNil(selectedGroup.dataProviderGroupId) ||
+          isNil(selectedFmeUser?.id) ||
+          isNil(selectedGroup?.dataProviderGroupId) ||
           isSending
         }
         icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}
@@ -285,74 +286,82 @@ export const ManageBusinessDataflow = ({
           manageDialogs(dialogName, false);
         }}
         visible={isVisible}>
-        <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
-          <InputText
-            id="dataflowName"
-            onChange={event => setName(event.target.value)}
-            onFocus={() => handleErrors({ field: 'name', hasErrors: false, message: '' })}
-            placeholder={resources.messages['createDataflowName']}
-            ref={inputRef}
-            value={name}
-          />
-          {!isEmpty(errors.name.message) && <ErrorMessage message={errors.name.message} />}
-        </div>
+        <div className={styles.dialogContent}>
+          {isLoading ? (
+            <Spinner className={styles.spinnerCenter} />
+          ) : (
+            <Fragment>
+              <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
+                <InputText
+                  id="dataflowName"
+                  onChange={event => setName(event.target.value)}
+                  onFocus={() => handleErrors({ field: 'name', hasErrors: false, message: '' })}
+                  placeholder={resources.messages['createDataflowName']}
+                  ref={inputRef}
+                  value={name}
+                />
+                {!isEmpty(errors.name.message) && <ErrorMessage message={errors.name.message} />}
+              </div>
 
-        <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
-          <InputTextarea
-            className={styles.inputTextArea}
-            id="dataflowDescription"
-            onChange={event => setDescription(event.target.value)}
-            onFocus={() => handleErrors({ field: 'description', hasErrors: false, message: '' })}
-            placeholder={resources.messages['createDataflowDescription']}
-            rows={10}
-            value={description}
-          />
-          {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
-        </div>
-        <div className={styles.dropdownsWrapper}>
-          <Dropdown
-            appendTo={document.body}
-            ariaLabel="groupOfCompanies"
-            className={styles.groupOfCompaniesWrapper}
-            name="groupOfCompanies"
-            onChange={event => onSelectGroup(event.target.value)}
-            onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
-            optionLabel="label"
-            options={groupOfCompanies}
-            placeholder={resources.messages[`selectGroupOfCompanies`]}
-            value={selectedGroup}
-          />
+              <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
+                <InputTextarea
+                  className={styles.inputTextArea}
+                  id="dataflowDescription"
+                  onChange={event => setDescription(event.target.value)}
+                  onFocus={() => handleErrors({ field: 'description', hasErrors: false, message: '' })}
+                  placeholder={resources.messages['createDataflowDescription']}
+                  rows={10}
+                  value={description}
+                />
+                {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
+              </div>
+              <div className={styles.dropdownsWrapper}>
+                <Dropdown
+                  appendTo={document.body}
+                  ariaLabel="groupOfCompanies"
+                  className={styles.groupOfCompaniesWrapper}
+                  name="groupOfCompanies"
+                  onChange={event => onSelectGroup(event.target.value)}
+                  onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
+                  optionLabel="label"
+                  options={groupOfCompanies}
+                  placeholder={resources.messages[`selectGroupOfCompanies`]}
+                  value={selectedGroup}
+                />
 
-          <Dropdown
-            appendTo={document.body}
-            ariaLabel="fmeUsers"
-            className={styles.fmeUsersWrapper}
-            name="fmeUsers"
-            onChange={event => onSelectFmeUser(event.target.value)}
-            onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
-            optionLabel="username"
-            options={fmeUsers}
-            placeholder={resources.messages[`selectFmeUser`]}
-            value={selectedFmeUser}
-          />
-        </div>
-        <div className={`${styles.search}`}>
-          <Button
-            icon="search"
-            label={resources.messages['searchObligations']}
-            onClick={() => manageDialogs('isReportingObligationsDialogVisible', true)}
-          />
-          <InputText
-            className={`${styles.searchInput} ${errors?.obligation?.hasErrors ? styles.searchErrors : ''}`}
-            id="obligation"
-            placeholder={resources.messages['associatedObligation']}
-            readOnly={true}
-            type="text"
-            value={obligation.title}
-          />
-          <label className="srOnly" htmlFor="obligation">
-            {resources.messages['searchObligations']}
-          </label>
+                <Dropdown
+                  appendTo={document.body}
+                  ariaLabel="fmeUsers"
+                  className={styles.fmeUsersWrapper}
+                  name="fmeUsers"
+                  onChange={event => onSelectFmeUser(event.target.value)}
+                  onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
+                  optionLabel="username"
+                  options={fmeUsers}
+                  placeholder={resources.messages[`selectFmeUser`]}
+                  value={selectedFmeUser}
+                />
+              </div>
+              <div className={`${styles.search}`}>
+                <Button
+                  icon="search"
+                  label={resources.messages['searchObligations']}
+                  onClick={() => manageDialogs('isReportingObligationsDialogVisible', true)}
+                />
+                <InputText
+                  className={`${styles.searchInput} ${errors?.obligation?.hasErrors ? styles.searchErrors : ''}`}
+                  id="obligation"
+                  placeholder={resources.messages['associatedObligation']}
+                  readOnly={true}
+                  type="text"
+                  value={obligation.title}
+                />
+                <label className="srOnly" htmlFor="obligation">
+                  {resources.messages['searchObligations']}
+                </label>
+              </div>
+            </Fragment>
+          )}
         </div>
       </Dialog>
 

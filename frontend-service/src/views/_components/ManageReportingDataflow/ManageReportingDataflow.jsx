@@ -90,6 +90,7 @@ export const ManageReportingDataflow = ({
       history.push(getUrl(routes.DATAFLOWS));
       notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
     } catch (error) {
+      console.error('ManageReportingDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
     } finally {
       hideLoading();

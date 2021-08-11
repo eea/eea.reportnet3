@@ -5,7 +5,7 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const DocumentRepository = {
   getAll: async dataflowId => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.getReportingDatasets, { dataflowId }) });
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) });
   },
 
   delete: async documentId => {

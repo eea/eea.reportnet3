@@ -93,11 +93,8 @@ const ManageReportingDataflowForm = forwardRef(
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
               inmUserProperties.pinnedDataflows.push(creationResponse.data.toString());
-
-              const response = await UserService.updateAttributes(inmUserProperties);
-              if (!isNil(response) && response.status >= 200 && response.status <= 299) {
-                userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
-              }
+              await UserService.updateConfiguration(inmUserProperties);
+              userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
             }
             onCreate('isAddDialogVisible');
             onResetData();

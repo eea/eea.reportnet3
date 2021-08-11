@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -32,10 +34,6 @@ public class DataProvider {
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  /** The type. */
-  @Column(name = "type")
-  private String type;
-
   /** The label. */
   @Column(name = "label")
   private String label;
@@ -45,8 +43,9 @@ public class DataProvider {
   private String code;
 
   /** The group id. */
-  @Column(name = "group_id")
-  private Long groupId;
+  @ManyToOne
+  @JoinColumn(name = "group_id")
+  private DataProviderGroup dataProviderGroup;
 
   /** The representatives. */
   @OneToMany(mappedBy = "dataProvider")
@@ -80,6 +79,6 @@ public class DataProvider {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, type, label);
+    return Objects.hash(id, label);
   }
 }

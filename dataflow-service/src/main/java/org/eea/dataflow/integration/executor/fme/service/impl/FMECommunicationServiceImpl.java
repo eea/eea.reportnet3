@@ -2,6 +2,7 @@ package org.eea.dataflow.integration.executor.fme.service.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,13 +15,17 @@ import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
 import org.eea.dataflow.persistence.domain.FMEJob;
+import org.eea.dataflow.persistence.domain.FMEUser;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
+import org.eea.dataflow.persistence.repository.FMEUserRepository;
+import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
@@ -121,17 +126,27 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  /** The dataflow service. */
+  @Autowired
+  private DataflowService dataflowService;
+
+  /** The fme user repository. */
+  @Autowired
+  private FMEUserRepository fmeUserRepository;
+
+
   /**
    * Submit async job.
    *
    * @param repository the repository
    * @param workspace the workspace
    * @param fmeAsyncJob the fme async job
-   *
+   * @param dataflowId the dataflow id
    * @return the integer
    */
   @Override
-  public Integer submitAsyncJob(String repository, String workspace, FMEAsyncJob fmeAsyncJob) {
+  public Integer submitAsyncJob(String repository, String workspace, FMEAsyncJob fmeAsyncJob,
+      Long dataflowId) {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("repository", repository);
@@ -146,7 +161,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     ResponseEntity<SubmitResult> checkResult = null;
     Integer result = 0;
     try {
-      HttpEntity<FMEAsyncJob> request = createHttpRequest(fmeAsyncJob, uriParams, headerInfo);
+      HttpEntity<FMEAsyncJob> request =
+          createHttpRequest(fmeAsyncJob, uriParams, headerInfo, dataflowId);
       checkResult = this.restTemplate.exchange(uriComponentsBuilder.scheme(fmeScheme).host(fmeHost)
           .path("fmerest/v3/transformations/submit/{repository}/{workspace}")
           .buildAndExpand(uriParams).toString(), HttpMethod.POST, request, SubmitResult.class);
@@ -198,7 +214,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
     headerInfo.put(CONTENT_TYPE, "application/octet-stream");
     headerInfo.put(ACCEPT, APPLICATION_JSON);
-    HttpEntity<byte[]> request = createHttpRequest(file, uriParams, headerInfo);
+    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
+    HttpEntity<byte[]> request =
+        createHttpRequest(file, uriParams, headerInfo, dataset.getDataflowId());
     String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
         .buildAndExpand(uriParams).toString();
     ResponseEntity<FileSubmitResult> checkResult =
@@ -236,8 +254,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     headerInfo.put(ACCEPT, APPLICATION_JSON);
 
     String body = "directoryname=ExportFiles";
-
-    HttpEntity<byte[]> request = createHttpRequest(body.getBytes(), uriParams, headerInfo);
+    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
+    HttpEntity<byte[]> request =
+        createHttpRequest(body.getBytes(), uriParams, headerInfo, dataset.getDataflowId());
     String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
         .buildAndExpand(uriParams).toString();
 
@@ -281,8 +300,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
 
     headerInfo.put(ACCEPT, "application/octet-stream");
 
+    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
     HttpEntity<MultiValueMap<String, Object>> request =
-        createHttpRequest(null, uriParams, headerInfo);
+        createHttpRequest(null, uriParams, headerInfo, dataset.getDataflowId());
 
     ResponseEntity<byte[]> checkResult = null;
     try {
@@ -303,13 +323,15 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     return stream;
   }
 
+
   /**
    * Find repository.
    *
-   * @return the collection
+   * @param datasetId the dataset id
+   * @return the FME collection VO
    */
   @Override
-  public FMECollectionVO findRepository() {
+  public FMECollectionVO findRepository(Long datasetId) {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("limit", String.valueOf(-1));
@@ -318,7 +340,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     headerInfo.put(ACCEPT, APPLICATION_JSON);
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-    HttpEntity<Void> request = createHttpRequest(null, uriParams, headerInfo);
+    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    HttpEntity<Void> request =
+        createHttpRequest(null, uriParams, headerInfo, dataset.getDataflowId());
 
     ResponseEntity<FMECollection> responseEntity =
         this.restTemplate.exchange(
@@ -332,15 +356,16 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     return fmeCollectionMapper.entityToClass(result);
   }
 
+
   /**
    * Find items.
    *
    * @param repository the repository
-   *
-   * @return the collection
+   * @param datasetId the dataset id
+   * @return the FME collection VO
    */
   @Override
-  public FMECollectionVO findItems(String repository) {
+  public FMECollectionVO findItems(String repository, Long datasetId) {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("repository", repository);
@@ -349,7 +374,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     headerInfo.put(ACCEPT, APPLICATION_JSON);
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
-    HttpEntity<Void> request = createHttpRequest(null, uriParams, headerInfo);
+    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    HttpEntity<Void> request =
+        createHttpRequest(null, uriParams, headerInfo, dataset.getDataflowId());
 
     ResponseEntity<FMECollection> responseEntity = this.restTemplate.exchange(uriComponentsBuilder
         .scheme(fmeScheme).host(fmeHost).path("fmerest/v3/repositories/{repository}/items")
@@ -477,6 +504,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     fmeJobRepository.save(fmeJob);
   }
 
+
   /**
    * Creates the http request.
    *
@@ -484,12 +512,27 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    * @param body the body
    * @param uriParams the uri params
    * @param headerInfo the header info
-   *
+   * @param dataflowId the dataflow id
    * @return the http entity
    */
   private <T> HttpEntity<T> createHttpRequest(T body, Map<String, String> uriParams,
-      Map<String, String> headerInfo) {
-    headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER, fmeToken);
+      Map<String, String> headerInfo, Long dataflowId) {
+    DataFlowVO dataflowVO = null;
+    String token = fmeToken;
+    if (null != dataflowId) {
+      try {
+        dataflowVO = dataflowService.getMetabaseById(dataflowId);
+      } catch (EEAException e) {
+      }
+      if (null != dataflowVO && null != dataflowVO.getFmeUserId()) {
+        FMEUser fmeUser = fmeUserRepository.findById(dataflowVO.getFmeUserId()).orElse(null);
+        if (null != fmeUser) {
+          String userPass = fmeUser.getUsername() + ":" + fmeUser.getPassword();
+          token = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes());
+        }
+      }
+    }
+    headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER, token);
     HttpHeaders headers = createBasicHeaders(headerInfo);
     return new HttpEntity<>(body, headers);
   }

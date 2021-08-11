@@ -12,12 +12,11 @@ export const DataflowRepository = {
 
   create: async (name, description, obligationId, type) =>
     await HTTPRequester.post({
-      url: getUrl(DataflowConfig.create),
+      url: getUrl(DataflowConfig.createUpdate),
       data: { name, description, obligation: { obligationId }, releasable: true, type }
     }),
 
-  getDataflowDetails: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDataflowDetails, { dataflowId }) }),
+  getDetails: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDetails, { dataflowId }) }),
 
   getDatasetsFinalFeedback: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsFinalFeedback, { dataflowId }) }),
@@ -30,8 +29,7 @@ export const DataflowRepository = {
       url: getUrl(DataflowConfig.getDatasetsValidationStatistics, { dataflowId, datasetSchemaId })
     }),
 
-  delete: async dataflowId =>
-    await HTTPRequester.delete({ url: getUrl(DataflowConfig.deleteDataflow, { dataflowId }) }),
+  delete: async dataflowId => await HTTPRequester.delete({ url: getUrl(DataflowConfig.delete, { dataflowId }) }),
 
   exportSchemas: async dataflowId =>
     await HTTPRequester.download({ url: getUrl(DataflowConfig.exportSchemas, { dataflowId }) }),
@@ -81,15 +79,14 @@ export const DataflowRepository = {
 
   getPublicData: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicData) }),
 
-  getReportingDatasets: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getReportingDatasets, { dataflowId }) }),
+  get: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) }),
 
   getSchemasValidation: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getSchemasValidation, { dataflowId }) }),
 
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
     await HTTPRequester.update({
-      url: getUrl(DataflowConfig.createDataflow),
+      url: getUrl(DataflowConfig.createUpdate),
       data: {
         id: dataflowId,
         name,

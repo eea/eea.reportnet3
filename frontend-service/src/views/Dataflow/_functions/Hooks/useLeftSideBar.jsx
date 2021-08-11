@@ -38,6 +38,15 @@ export const useLeftSideBar = (
         title: 'edit'
       };
 
+      const editBusinessBtn = {
+        className: 'dataflow-edit-help-step',
+        icon: 'edit',
+        isVisible: buttonsVisibility.editBusinessBtn,
+        label: 'edit',
+        onClick: () => manageDialogs('isBusinessDataflowDialogVisible', true),
+        title: 'edit'
+      };
+
       const exportSchemaBtn = {
         className: 'dataflow-export-schema-help-step',
         icon: 'download',
@@ -100,14 +109,18 @@ export const useLeftSideBar = (
           ((isNil(dataProviderId) && dataflowState.isCustodian) ||
             (isNil(representativeId) && dataflowState.isObserver)) &&
           dataflowState.status === config.dataflowStatus.OPEN
-            ? 'dataflowUsersByCountryList'
+            ? dataflowState.isBusinessDataflow
+              ? 'dataflowUsersByCompanyList'
+              : 'dataflowUsersByCountryList'
             : 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
         title:
           ((isNil(dataProviderId) && dataflowState.isCustodian) ||
             (isNil(representativeId) && dataflowState.isObserver)) &&
           dataflowState.status === config.dataflowStatus.OPEN
-            ? 'dataflowUsersByCountryList'
+            ? dataflowState.isBusinessDataflow
+              ? 'dataflowUsersByCompanyList'
+              : 'dataflowUsersByCountryList'
             : 'dataflowUsersList'
       };
 
@@ -115,6 +128,7 @@ export const useLeftSideBar = (
       const allButtons = [
         propertiesBtn,
         editBtn,
+        editBusinessBtn,
         releaseableBtn,
         showPublicInfoBtn,
         exportSchemaBtn,

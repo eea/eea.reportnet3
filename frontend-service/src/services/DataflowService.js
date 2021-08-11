@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -12,9 +11,7 @@ import { DataflowRepository } from 'repositories/DataflowRepository';
 
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
-import { ObligationUtils } from 'services/_utils/ObligationUtils';
 
-import { Dataflow } from 'entities/Dataflow';
 import { Dataset } from 'entities/Dataset';
 import { DatasetTable } from 'entities/DatasetTable';
 import { DatasetTableField } from 'entities/DatasetTableField';
@@ -228,8 +225,8 @@ export const DataflowService = {
     };
   },
 
-  getDataflowDetails: async dataflowId => {
-    const dataflowDetails = await DataflowRepository.getDataflowDetails(dataflowId);
+  getDetails: async dataflowId => {
+    const dataflowDetails = await DataflowRepository.getDetails(dataflowId);
     return DataflowUtils.parseDataflowDTO(dataflowDetails.data);
   },
 
@@ -361,23 +358,11 @@ export const DataflowService = {
 
   getPublicData: async () => {
     const publicDataflows = await DataflowRepository.getPublicData();
-    return publicDataflows.data.map(
-      publicDataflow =>
-        new Dataflow({
-          description: publicDataflow.description,
-          expirationDate:
-            publicDataflow.deadlineDate > 0 ? dayjs(publicDataflow.deadlineDate).format('YYYY-MM-DD') : '-',
-          id: publicDataflow.id,
-          isReleasable: publicDataflow.releasable,
-          name: publicDataflow.name,
-          obligation: ObligationUtils.parseObligation(publicDataflow.obligation),
-          status: publicDataflow.status
-        })
-    );
+    return publicDataflows.data.map(publicDataflow => DataflowUtils.parsePublicDataflowDTO(publicDataflow));
   },
 
-  getReportingDatasets: async dataflowId => {
-    const reportingDataflowDTO = await DataflowRepository.getReportingDatasets(dataflowId);
+  get: async dataflowId => {
+    const reportingDataflowDTO = await DataflowRepository.get(dataflowId);
     const dataflow = DataflowUtils.parseDataflowDTO(reportingDataflowDTO.data);
     dataflow.testDatasets.sort(DatasetUtils.sortDatasetTypeByName);
     dataflow.datasets.sort(DatasetUtils.sortDatasetTypeByName);

@@ -84,7 +84,7 @@ const UserImage = () => {
     try {
       const inmUserProperties = { ...userContext.userProps };
       inmUserProperties.userImage = splittedBase64Image;
-      await UserService.updateAttributes(inmUserProperties);
+      await UserService.updateConfiguration(inmUserProperties);
       userContext.onUserFileUpload(splittedBase64Image);
     } catch (error) {
       console.error('UserImage - updateImage.', error);

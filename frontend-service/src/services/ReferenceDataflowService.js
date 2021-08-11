@@ -1,3 +1,4 @@
+import { DataflowRepository } from 'repositories/DataflowRepository';
 import { ReferenceDataflowRepository } from 'repositories/ReferenceDataflowRepository';
 
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
@@ -38,16 +39,14 @@ export const ReferenceDataflowService = {
 
   create: async (name, description, type) => ReferenceDataflowRepository.create(name, description, type),
 
-  delete: async referenceDataflowId => ReferenceDataflowRepository.delete(referenceDataflowId),
-
   update: async (dataflowId, description, name, type) =>
     ReferenceDataflowRepository.update(dataflowId, description, name, type),
 
   getReferencingDataflows: async referenceDataflowId =>
     await ReferenceDataflowRepository.getReferencingDataflows(referenceDataflowId),
 
-  getReferenceDataflow: async referenceDataflowId => {
-    const referenceDataflowDTO = await ReferenceDataflowRepository.referenceDataflow(referenceDataflowId);
+  get: async referenceDataflowId => {
+    const referenceDataflowDTO = await DataflowRepository.get(referenceDataflowId);
     const dataflow = ReferenceDataflowUtils.parseReferenceDataflowDTO(referenceDataflowDTO.data);
     dataflow.datasets.sort(DatasetUtils.sortDatasetTypeByName);
     dataflow.designDatasets.sort(DatasetUtils.sortDatasetTypeByName);

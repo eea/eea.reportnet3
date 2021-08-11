@@ -91,7 +91,7 @@ export const UserService = {
     return UserUtils.parseConfigurationDTO(userConfigurationDTO);
   },
 
-  updateAttributes: async attributes => await UserRepository.updateAttributes(attributes),
+  updateConfiguration: async attributes => await UserRepository.updateConfiguration(attributes),
 
   oldLogin: async (userName, password) => {
     const userDTO = await UserRepository.oldLogin(userName, password);

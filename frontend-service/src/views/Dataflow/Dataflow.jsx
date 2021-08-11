@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import first from 'lodash/first';
@@ -34,6 +34,7 @@ import { ShareRights } from 'views/_components/ShareRights';
 import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
 import { UserList } from 'views/_components/UserList';
+import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
@@ -80,6 +81,7 @@ const Dataflow = withRouter(({ history, match }) => {
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
+    isAdminAssignedBusinessDataflow: false,
     isApiKeyDialogVisible: false,
     isBusinessDataflow: false,
     isCopyDataCollectionToEUDatasetLoading: false,
@@ -117,7 +119,8 @@ const Dataflow = withRouter(({ history, match }) => {
     updatedDatasetSchema: [],
     userRoles: [],
     isUserRightManagementDialogVisible: false,
-    isAdmin: false
+    isAdmin: false,
+    isBusinessDataflowDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -214,7 +217,7 @@ const Dataflow = withRouter(({ history, match }) => {
     if (!isNil(userContext.contextRoles)) onLoadPermission();
   }, [userContext, dataflowState.data]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (dataflowState.isCustodian) {
       if (isOpenStatus) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
@@ -237,6 +240,7 @@ const Dataflow = withRouter(({ history, match }) => {
       return {
         apiKeyBtn: false,
         editBtn: false,
+        editBusinessBtn: false,
         exportBtn: false,
         manageReportersBtn: false,
         manageRequestersBtn: false,
@@ -248,7 +252,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
-      editBtn: isDesign && isLeadDesigner,
+      editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin && !dataflowState.isBusinessDataflow,
+      editBusinessBtn: dataflowState.isAdmin && dataflowState.isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
@@ -303,6 +308,13 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const handleRedirect = target => history.push(target);
 
+  const setIsAdminAssignedBusinessDataflow = value => {
+    dataflowDispatch({
+      type: 'SET_IS_ADMIN_ASSIGNED_BUSINESS_DATAFLOW',
+      payload: { isAdminAssignedBusinessDataflow: value }
+    });
+  };
+
   const setIsUserRightManagementDialogVisible = isVisible => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
   };
@@ -319,7 +331,14 @@ const Dataflow = withRouter(({ history, match }) => {
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={'cancel'}
         label={resources.messages['close']}
-        onClick={() => manageDialogs(`isManage${userType}DialogVisible`, false)}
+        onClick={() => {
+          manageDialogs(`isManage${userType}DialogVisible`, false);
+          if (dataflowState.isAdminAssignedBusinessDataflow) {
+            onLoadReportingDataflow();
+            setIsPageLoading(true);
+            onRefreshToken();
+          }
+        }}
       />
     </div>
   );
@@ -477,7 +496,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onLoadReportingDataflow = async () => {
     try {
-      const dataflow = await DataflowService.getReportingDatasets(dataflowId);
+      const dataflow = await DataflowService.get(dataflowId);
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       dataflowDispatch({
         type: 'INITIAL_LOAD',
@@ -889,6 +908,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <div className={styles.dialog}>
               <RepresentativesList
                 dataflowId={dataflowId}
+                isBusinessDataflow={dataflowState.isBusinessDataflow}
                 representativesImport={dataflowState.representativesImport}
                 setDataProviderSelected={setDataProviderSelected}
                 setFormHasRepresentatives={setFormHasRepresentatives}
@@ -905,7 +925,14 @@ const Dataflow = withRouter(({ history, match }) => {
           <Dialog
             footer={shareRightsFooterDialogFooter('Requesters')}
             header={resources.messages['manageRequestersRights']}
-            onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isManageRequestersDialogVisible', false);
+              if (dataflowState.isAdminAssignedBusinessDataflow) {
+                onLoadReportingDataflow();
+                setIsPageLoading(true);
+                onRefreshToken();
+              }
+            }}
             visible={dataflowState.isManageRequestersDialogVisible}>
             <ShareRights
               addConfirmHeader={resources.messages[`addRequesterConfirmHeader`]}
@@ -923,6 +950,7 @@ const Dataflow = withRouter(({ history, match }) => {
               placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
+              setIsAdminAssignedBusinessDataflow={setIsAdminAssignedBusinessDataflow}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
               userType={'requester'}
@@ -1064,7 +1092,9 @@ const Dataflow = withRouter(({ history, match }) => {
               ((isNil(dataProviderId) && dataflowState.isCustodian) ||
                 (isNil(representativeId) && dataflowState.isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
-                ? resources.messages['dataflowUsersByCountryList']
+                ? dataflowState.isBusinessDataflow
+                  ? resources.messages['dataflowUsersByCompanyList']
+                  : resources.messages['dataflowUsersByCountryList']
                 : resources.messages['dataflowUsersList']
             }
             onHide={() => manageDialogs('isUserListVisible', false)}
@@ -1091,6 +1121,26 @@ const Dataflow = withRouter(({ history, match }) => {
           setCheckedObligation={setCheckedObligation}
           state={dataflowState}
         />
+
+        {dataflowState.isBusinessDataflowDialogVisible && (
+          <ManageBusinessDataflow
+            dataflowId={dataflowId}
+            history={history}
+            isEditing
+            isVisible={dataflowState.isBusinessDataflowDialogVisible}
+            manageDialogs={manageDialogs}
+            metadata={{
+              name: dataflowState.name,
+              description: dataflowState.description,
+              status: dataflowState.status,
+              fmeUserId: dataflowState.data.fmeUserId,
+              dataProviderGroupId: dataflowState.data.dataProviderGroupId
+            }}
+            obligation={obligation}
+            onEditDataflow={onEditDataflow}
+            resetObligations={resetObligations}
+          />
+        )}
 
         {dataflowState.isReportingObligationsDialogVisible && (
           <Dialog
