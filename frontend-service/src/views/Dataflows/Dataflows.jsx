@@ -74,9 +74,9 @@ const Dataflows = withRouter(({ history, match }) => {
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
     useReportingObligations();
 
-  const { activeIndex, loadingStatus } = dataflowsState;
+  const { activeIndex, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
 
-  const tabMenuItems = dataflowsState.isCustodian
+  const tabMenuItems = isCustodian
     ? [
         { className: styles.flow_tab, id: 'reporting', label: resources.messages['reportingDataflowsListTab'] },
         { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] },
@@ -103,7 +103,7 @@ const Dataflows = withRouter(({ history, match }) => {
     const createReportingDataflowBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: tabId === 'reporting' && dataflowsState.isCustodian,
+      isVisible: tabId === 'reporting' && isCustodian,
       label: 'createNewDataflow',
       onClick: () => manageDialogs('isAddDialogVisible', true),
       title: 'createNewDataflow'
@@ -112,7 +112,7 @@ const Dataflows = withRouter(({ history, match }) => {
     const createReferenceDataflowBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: tabId === 'reference' && dataflowsState.isCustodian,
+      isVisible: tabId === 'reference' && isCustodian,
       label: 'createNewDataflow',
       onClick: () => manageDialogs('isReferencedDataflowDialogVisible', true),
       title: 'createNewDataflow'
@@ -121,7 +121,7 @@ const Dataflows = withRouter(({ history, match }) => {
     const createBusinessDataflowBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: tabId === 'business' && dataflowsState.isAdmin,
+      isVisible: tabId === 'business' && isAdmin,
       label: 'createNewDataflow',
       onClick: () => manageDialogs('isBusinessDataflowDialogVisible', true),
       title: 'createNewDataflow'
@@ -130,7 +130,7 @@ const Dataflows = withRouter(({ history, match }) => {
     const userListBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'users',
-      isVisible: dataflowsState.isNationalCoordinator,
+      isVisible: isNationalCoordinator,
       label: 'allDataflowsUserList',
       onClick: () => manageDialogs('isUserListVisible', true),
       title: 'allDataflowsUserList'
@@ -141,12 +141,12 @@ const Dataflows = withRouter(({ history, match }) => {
         button => button.isVisible
       )
     );
-  }, [dataflowsState.isAdmin, dataflowsState.isCustodian, dataflowsState.isNationalCoordinator, tabId]);
+  }, [isAdmin, isCustodian, isNationalCoordinator, tabId]);
 
   useEffect(() => {
-    const messageStep0 = dataflowsState.isCustodian ? 'dataflowListRequesterHelp' : 'dataflowListReporterHelp';
+    const messageStep0 = isCustodian ? 'dataflowListRequesterHelp' : 'dataflowListReporterHelp';
     leftSideBarContext.addHelpSteps(
-      dataflowsState.isCustodian ? DataflowsRequesterHelpConfig : DataflowsReporterHelpConfig,
+      isCustodian ? DataflowsRequesterHelpConfig : DataflowsReporterHelpConfig,
       messageStep0
     );
   }, [dataflowsState]);
