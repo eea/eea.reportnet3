@@ -48,7 +48,7 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
     } = match;
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'datasetSpinner', value: true } });
     const dataflowDetails = await DataflowService.getSchemas(dataflowId);
-    const designDatasets = await DataflowService.get(dataflowId);
+    const { designDatasets } = await DataflowService.get(dataflowId);
     dispatch({
       type: 'UPDATE_PROPERTY',
       payload: { key: 'rawDatasets', value: { dataflowDetails, designDatasets } }
