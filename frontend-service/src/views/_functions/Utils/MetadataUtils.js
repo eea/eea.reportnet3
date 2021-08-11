@@ -10,7 +10,7 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
       dataflowId,
       name: dataflowMetadata.name || '',
       description: dataflowMetadata.description || '',
-      type: dataflowMetadata.type, // TODO TEST WITH REAL DATA
+      type: dataflowMetadata.type,
       status: dataflowMetadata.status || ''
     };
   }

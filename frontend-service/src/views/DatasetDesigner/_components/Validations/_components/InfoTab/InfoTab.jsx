@@ -119,7 +119,7 @@ export const InfoTab = ({
             optionLabel="label"
             options={creationFormState.schemaTables}
             placeholder={tableFieldOptions.placeholder}
-            value={creationFormState.candidateRule.table}
+            value={creationFormState.candidateRule.table || ''}
           />
         </div>
 
@@ -147,7 +147,7 @@ export const InfoTab = ({
             maxLength={255}
             onChange={e => onInfoFieldChange('shortCode', e.target.value)}
             placeholder={resourcesContext.messages['ruleShortCode']}
-            value={creationFormState.candidateRule.shortCode}
+            value={creationFormState.candidateRule.shortCode || ''}
           />
         </div>
 
@@ -172,7 +172,7 @@ export const InfoTab = ({
             maxLength={255}
             onChange={e => onInfoFieldChange('name', e.target.value)}
             placeholder={resourcesContext.messages['ruleName']}
-            value={creationFormState.candidateRule.name}
+            value={creationFormState.candidateRule.name || ''}
           />
         </div>
 

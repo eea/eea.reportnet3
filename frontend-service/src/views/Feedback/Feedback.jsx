@@ -168,7 +168,7 @@ export const Feedback = withRouter(({ match, history }) => {
     try {
       const data = await DataflowService.getDetails(dataflowId);
       const name = data.name;
-      const isBusinessDataflow = TextUtils.areEquals(data.data.type, config.dataflowType.BUSINESS); // TODO TEST WITH REAL DATA
+      const isBusinessDataflow = TextUtils.areEquals(data.data.type, config.dataflowType.BUSINESS);
       dispatchFeedback({ type: 'SET_DATAFLOW_DETAILS', payload: { name, isBusinessDataflow } });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);

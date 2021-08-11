@@ -44,12 +44,16 @@ const parseDataflowDTO = dataflowDTO =>
     anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
     creationDate: dataflowDTO.creationDate,
     dataCollections: DataCollectionUtils.parseDataCollectionListDTO(dataflowDTO.dataCollections),
+    dataProviderGroupId: dataflowDTO.dataProviderGroupId,
+    dataProviderGroupName: dataflowDTO.dataProviderGroupName,
     datasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.reportingDatasets),
     description: dataflowDTO.description,
     designDatasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: DocumentUtils.parseDocumentListDTO(dataflowDTO.documents),
     euDatasets: EUDatasetUtils.parseEUDatasetListDTO(dataflowDTO.euDatasets),
     expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
+    fmeUserId: dataflowDTO.fmeUserId,
+    fmeUserName: dataflowDTO.fmeUserName,
     id: dataflowDTO.id,
     isReleasable: dataflowDTO.releasable,
     manualAcceptance: dataflowDTO.manualAcceptance,
@@ -64,9 +68,7 @@ const parseDataflowDTO = dataflowDTO =>
     testDatasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.testDatasets),
     type: dataflowDTO.type,
     userRole: dataflowDTO.userRole,
-    webLinks: WebLinksUtils.parseWebLinkListDTO(dataflowDTO.weblinks),
-    fmeUserId: dataflowDTO.fmeUserId,
-    dataProviderGroupId: dataflowDTO.dataProviderGroupId
+    webLinks: WebLinksUtils.parseWebLinkListDTO(dataflowDTO.weblinks)
   });
 
 const parseAllDataflowsUserList = allDataflowsUserListDTO => {
