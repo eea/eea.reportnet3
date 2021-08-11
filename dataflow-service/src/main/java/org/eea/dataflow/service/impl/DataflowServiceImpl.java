@@ -15,8 +15,10 @@ import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
+import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
+import org.eea.dataflow.persistence.domain.FMEUser;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
@@ -1112,7 +1114,13 @@ public class DataflowServiceImpl implements DataflowService {
 
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
 
+    if (TypeDataflowEnum.BUSINESS.equals(dataflowVO.getType())) {
+      dataflowVO.setDataProviderGroupName(dataProviderGroupRepository
+          .findById(dataflowVO.getDataProviderGroupId()).orElse(new DataProviderGroup()).getName());
+      dataflowVO.setFmeUserName(fmeUserRepository.findById(dataflowVO.getFmeUserId())
+          .orElse(new FMEUser()).getUsername());
 
+    }
     // filter design datasets (schemas) showed to the user depending on permissions
     List<ResourceAccessVO> datasets =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA);
