@@ -143,7 +143,7 @@ export const DataCollection = withRouter(({ match, history }) => {
         setDataCollectionName(firstDataCollection.dataCollectionName);
       }
 
-      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS)); // TODO TEST WITH REAL DATA
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
       setIsLoading(false);
     } catch (error) {
       console.error('DataCollection - onLoadDataflowData.', error);
