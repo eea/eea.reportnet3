@@ -1125,6 +1125,7 @@ const Dataflow = withRouter(({ history, match }) => {
         {dataflowState.isBusinessDataflowDialogVisible && (
           <ManageBusinessDataflow
             dataflowId={dataflowId}
+            hasRepresentatives={dataflowState.formHasRepresentatives}
             history={history}
             isAdmin={dataflowState.isAdmin}
             isEditing

@@ -39,6 +39,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageBusinessDataflow = ({
   dataflowId,
+  hasRepresentatives,
   history,
   isAdmin,
   isEditing = false,
@@ -323,13 +324,14 @@ export const ManageBusinessDataflow = ({
                   appendTo={document.body}
                   ariaLabel="groupOfCompanies"
                   className={styles.groupOfCompaniesWrapper}
-                  disabled={!isAdmin}
+                  disabled={!isAdmin || hasRepresentatives}
                   name="groupOfCompanies"
                   onChange={event => onSelectGroup(event.target.value)}
                   onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
                   optionLabel="label"
                   options={!isAdmin ? [selectedGroup] : groupOfCompanies}
                   placeholder={resources.messages[`selectGroupOfCompanies`]}
+                  tooltip={hasRepresentatives && resources.messages['groupOfCompaniesDisabledTooltip']}
                   value={selectedGroup}
                 />
 
