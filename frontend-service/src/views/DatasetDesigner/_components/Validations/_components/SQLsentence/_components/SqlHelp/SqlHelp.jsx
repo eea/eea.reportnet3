@@ -27,7 +27,7 @@ const sqlHelpReducer = (state, { type, payload }) => {
   }
 };
 
-export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSentence }) => {
+export const SqlHelp = withRouter(({ match, onSetSqlSentence, sqlSentence }) => {
   const initState = {
     rawDatasets: [],
     datasets: [],
@@ -79,9 +79,9 @@ export const SqlHelp = withRouter(({ history, match, onSetSqlSentence, sqlSenten
   };
 
   useEffect(() => {
-    const tablesOptions = state?.datasets?.datasetSchemas?.find(
-      dataset => dataset.datasetId === state.selectedDataset?.value
-    )?.tablesOptions;
+    const tablesOptions =
+      state?.datasets?.datasetSchemas?.find(dataset => dataset.datasetId === state.selectedDataset?.value)
+        ?.tablesOptions || [];
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'tables', value: tablesOptions } });
   }, [state.selectedDataset]);
 
