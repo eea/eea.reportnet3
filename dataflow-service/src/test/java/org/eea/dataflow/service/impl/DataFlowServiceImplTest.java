@@ -1135,4 +1135,43 @@ public class DataFlowServiceImplTest {
     assertTrue(dataflowServiceImpl.isAdmin());
   }
 
+
+  @Test
+  public void isDataflowTypeDataflowTest() {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    dataflow.setType(TypeDataflowEnum.REFERENCE);
+    dataflow.setId(1L);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    dataflowVO.setId(1L);
+    Mockito.when(dataflowRepository.findById(dataflow.getId())).thenReturn(Optional.of(dataflow));
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
+    assertTrue(dataflowServiceImpl.isDataflowType(TypeDataflowEnum.REFERENCE,
+        EntityClassEnum.DATAFLOW, 1L));
+  }
+
+  @Test
+  public void isDataflowTypeDatasetTest() {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    dataflow.setType(TypeDataflowEnum.REFERENCE);
+    dataflow.setId(1L);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    dataflowVO.setId(1L);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    dataset.setDataflowId(1L);
+    Mockito.when(dataflowRepository.findById(dataflow.getId())).thenReturn(Optional.of(dataflow));
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dataset);
+
+    assertTrue(dataflowServiceImpl.isDataflowType(TypeDataflowEnum.REFERENCE,
+        EntityClassEnum.DATASET, 1L));
+  }
+
 }
