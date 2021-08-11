@@ -127,7 +127,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const {
     obligation,
-    resetObligations,
     setCheckedObligation,
     setObligation,
     setObligationToPrevious,
@@ -393,6 +392,12 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onConfirmDeleteDataflow = event =>
     dataflowDispatch({ type: 'ON_CONFIRM_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
+
+  const resetObligations = () => {
+    setCheckedObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
+    setObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
+    setPreviousObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
+  };
 
   const onExportLeadReporters = async () => {
     try {
