@@ -1161,8 +1161,8 @@ public class DataflowServiceImpl implements DataflowService {
           .findById(dataflowVO.getDataProviderGroupId()).orElse(new DataProviderGroup()).getName());
       dataflowVO.setFmeUserName(fmeUserRepository.findById(dataflowVO.getFmeUserId())
           .orElse(new FMEUser()).getUsername());
-
     }
+
     // filter design datasets (schemas) showed to the user depending on permissions
     List<ResourceAccessVO> datasets =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA);
