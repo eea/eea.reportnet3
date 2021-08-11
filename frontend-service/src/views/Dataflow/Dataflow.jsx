@@ -1129,16 +1129,16 @@ const Dataflow = withRouter(({ history, match }) => {
             isEditing
             isVisible={dataflowState.isBusinessDataflowDialogVisible}
             manageDialogs={manageDialogs}
-            metadata={{
+            obligation={obligation}
+            onEditDataflow={onEditDataflow}
+            resetObligations={resetObligations}
+            state={{
               name: dataflowState.name,
               description: dataflowState.description,
               status: dataflowState.status,
               fmeUserId: dataflowState.data.fmeUserId,
               dataProviderGroupId: dataflowState.data.dataProviderGroupId
             }}
-            obligation={obligation}
-            onEditDataflow={onEditDataflow}
-            resetObligations={resetObligations}
           />
         )}
 

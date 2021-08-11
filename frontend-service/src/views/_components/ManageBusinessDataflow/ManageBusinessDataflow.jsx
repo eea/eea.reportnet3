@@ -43,14 +43,14 @@ export const ManageBusinessDataflow = ({
   isEditing = false,
   isVisible,
   manageDialogs,
-  metadata,
+  state,
   obligation,
   onCreateDataflow,
   onEditDataflow,
   resetObligations
 }) => {
   const dialogName = 'isBusinessDataflowDialogVisible';
-  const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
+  const isDesign = TextUtils.areEquals(state?.status, config.dataflowStatus.DESIGN);
 
   const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
@@ -61,7 +61,7 @@ export const ManageBusinessDataflow = ({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState({});
   const [selectedFmeUser, setSelectedFmeUser] = useState({});
-  const [description, setDescription] = useState(isEditing ? metadata.description : '');
+  const [description, setDescription] = useState(isEditing ? state.description : '');
   const [groupOfCompanies, setGroupOfCompanies] = useState([]);
   const [fmeUsers, setFmeUsers] = useState([]);
   const [errors, setErrors] = useState({
@@ -70,7 +70,7 @@ export const ManageBusinessDataflow = ({
   });
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [name, setName] = useState(isEditing ? metadata.name : '');
+  const [name, setName] = useState(isEditing ? state.name : '');
   const [pinDataflow, setPinDataflow] = useState(false);
 
   const deleteInputRef = useRef(null);
@@ -81,13 +81,13 @@ export const ManageBusinessDataflow = ({
 
   useLayoutEffect(() => {
     if (isEditing) {
-      setSelectedFmeUser(fmeUsers.filter(user => user.id === metadata.fmeUserId)[0]);
+      setSelectedFmeUser(fmeUsers.filter(user => user.id === state.fmeUserId)[0]);
     }
   }, [fmeUsers]);
 
   useLayoutEffect(() => {
     if (isEditing) {
-      setSelectedGroup(groupOfCompanies.filter(group => group.dataProviderGroupId === metadata.dataProviderGroupId)[0]);
+      setSelectedGroup(groupOfCompanies.filter(group => group.dataProviderGroupId === state.dataProviderGroupId)[0]);
     }
   }, [groupOfCompanies]);
 
@@ -368,7 +368,7 @@ export const ManageBusinessDataflow = ({
       {isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          disabledConfirm={!TextUtils.areEquals(deleteInput, metadata.name)}
+          disabledConfirm={!TextUtils.areEquals(deleteInput, state.name)}
           header={resources.messages['deleteBusinessDataflowDialogHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
@@ -379,7 +379,7 @@ export const ManageBusinessDataflow = ({
           <p
             dangerouslySetInnerHTML={{
               __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
-                dataflowName: metadata.name
+                dataflowName: state.name
               })
             }}></p>
           <p>
