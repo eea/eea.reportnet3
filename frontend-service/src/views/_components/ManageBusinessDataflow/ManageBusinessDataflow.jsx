@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useLayoutEffect, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -40,6 +40,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const ManageBusinessDataflow = ({
   dataflowId,
   history,
+  isAdmin,
   isEditing = false,
   isVisible,
   manageDialogs,
@@ -81,13 +82,13 @@ export const ManageBusinessDataflow = ({
 
   useLayoutEffect(() => {
     if (isEditing) {
-      setSelectedFmeUser(fmeUsers.filter(user => user.id === state.fmeUserId)[0]);
+      setSelectedFmeUser({ id: state.fmeUserId, username: state.fmeUserName });
     }
   }, [fmeUsers]);
 
   useLayoutEffect(() => {
     if (isEditing) {
-      setSelectedGroup(groupOfCompanies.filter(group => group.dataProviderGroupId === state.dataProviderGroupId)[0]);
+      setSelectedGroup({ dataProviderGroupId: state.dataProviderGroupId, label: state.dataProviderGroupName });
     }
   }, [groupOfCompanies]);
 
@@ -107,7 +108,9 @@ export const ManageBusinessDataflow = ({
   };
 
   useLayoutEffect(() => {
-    getDropdownsOptions();
+    if (isAdmin) {
+      getDropdownsOptions();
+    }
   }, []);
 
   const checkErrors = () => {
@@ -320,11 +323,12 @@ export const ManageBusinessDataflow = ({
                   appendTo={document.body}
                   ariaLabel="groupOfCompanies"
                   className={styles.groupOfCompaniesWrapper}
+                  disabled={!isAdmin}
                   name="groupOfCompanies"
                   onChange={event => onSelectGroup(event.target.value)}
                   onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
                   optionLabel="label"
-                  options={groupOfCompanies}
+                  options={!isAdmin ? [selectedGroup] : groupOfCompanies}
                   placeholder={resources.messages[`selectGroupOfCompanies`]}
                   value={selectedGroup}
                 />
@@ -333,11 +337,12 @@ export const ManageBusinessDataflow = ({
                   appendTo={document.body}
                   ariaLabel="fmeUsers"
                   className={styles.fmeUsersWrapper}
+                  disabled={!isAdmin}
                   name="fmeUsers"
                   onChange={event => onSelectFmeUser(event.target.value)}
                   onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
                   optionLabel="username"
-                  options={fmeUsers}
+                  options={!isAdmin ? [selectedFmeUser] : fmeUsers}
                   placeholder={resources.messages[`selectFmeUser`]}
                   value={selectedFmeUser}
                 />

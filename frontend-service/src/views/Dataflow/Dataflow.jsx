@@ -252,8 +252,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
-      editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin,
-      editBusinessBtn: dataflowState.isAdmin && dataflowState.isBusinessDataflow,
+      editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin && !dataflowState.isBusinessDataflow,
+      editBusinessBtn: (dataflowState.isAdmin || dataflowState.isCustodian) && dataflowState.isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
@@ -1126,6 +1126,7 @@ const Dataflow = withRouter(({ history, match }) => {
           <ManageBusinessDataflow
             dataflowId={dataflowId}
             history={history}
+            isAdmin={dataflowState.isAdmin}
             isEditing
             isVisible={dataflowState.isBusinessDataflowDialogVisible}
             manageDialogs={manageDialogs}
@@ -1137,7 +1138,9 @@ const Dataflow = withRouter(({ history, match }) => {
               description: dataflowState.description,
               status: dataflowState.status,
               fmeUserId: dataflowState.data.fmeUserId,
-              dataProviderGroupId: dataflowState.data.dataProviderGroupId
+              fmeUserName: dataflowState.data.fmeUserName,
+              dataProviderGroupId: dataflowState.data.dataProviderGroupId,
+              dataProviderGroupName: dataflowState.data.dataProviderGroupName
             }}
           />
         )}
