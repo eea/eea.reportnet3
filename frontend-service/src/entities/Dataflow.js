@@ -21,8 +21,11 @@ export class Dataflow {
     showPublicInfo,
     status,
     testDatasets,
+    type,
     userRole,
-    webLinks
+    webLinks,
+    fmeUserId,
+    dataProviderGroupId
   } = {}) {
     this.anySchemaAvailableInPublic = anySchemaAvailableInPublic;
     this.creationDate = creationDate;
@@ -45,7 +48,10 @@ export class Dataflow {
     this.showPublicInfo = showPublicInfo;
     this.status = status;
     this.testDatasets = testDatasets;
+    this.type = type;
     this.userRole = userRole;
     this.webLinks = webLinks;
+    this.fmeUserId = fmeUserId;
+    this.dataProviderGroupId = dataProviderGroupId;
   }
 }

@@ -190,7 +190,7 @@ export const TableManagement = ({
     const deleteCascade = true;
 
     try {
-      await DatasetService.deleteRecordById(datasetId, selectedRecord.recordId, deleteCascade);
+      await DatasetService.deleteRecord(datasetId, selectedRecord.recordId, deleteCascade);
       onRefresh();
     } catch (error) {
       if (error.response.status === 423) {
@@ -244,7 +244,7 @@ export const TableManagement = ({
     });
     const parentTablesDataPromises = parentTables.map(async parentTable => {
       const sortFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
-      const { data } = await DatasetService.tableDataById({
+      const data = await DatasetService.getTableData({
         datasetId,
         tableSchemaId: parentTable.tableSchemaId,
         pageSize: 300,
@@ -267,7 +267,7 @@ export const TableManagement = ({
     );
     try {
       tableManagementDispatch({ type: 'SET_IS_SAVING', payload: true });
-      await DatasetService.updateRecordsById(datasetId, record, updateInCascade);
+      await DatasetService.updateRecord(datasetId, record, updateInCascade);
     } catch (error) {
       console.error('TableManagement - onSaveRecord.', error);
       const {

@@ -1,23 +1,17 @@
 import { SnapshotRepository } from 'repositories/SnapshotRepository';
-import { Snapshot } from 'entities/Snapshot';
 
-const parseSnapshotList = response => {
-  return response.data.map(
-    snapshotDTO =>
-      new Snapshot({
-        creationDate: snapshotDTO.creationDate,
-        description: snapshotDTO.description,
-        id: snapshotDTO.id,
-        isAutomatic: snapshotDTO.automatic,
-        isReleased: snapshotDTO.release
-      })
-  );
-};
+import { SnapshotUtils } from 'services/_utils/SnapshotUtils';
 
 export const SnapshotService = {
-  getAllDesigner: async datasetSchemaId => parseSnapshotList(await SnapshotRepository.getAllDesigner(datasetSchemaId)),
+  getAllDesigner: async datasetSchemaId => {
+    const snapshots = await SnapshotRepository.getAllDesigner(datasetSchemaId);
+    return SnapshotUtils.parseSnapshotListDTO(snapshots.data);
+  },
 
-  getAllReporter: async datasetId => parseSnapshotList(await SnapshotRepository.getAllReporter(datasetId)),
+  getAllReporter: async datasetId => {
+    const snapshots = await SnapshotRepository.getAllReporter(datasetId);
+    return SnapshotUtils.parseSnapshotListDTO(snapshots.data);
+  },
 
   createDesigner: async (datasetId, datasetSchemaId, description) =>
     await SnapshotRepository.createDesigner(datasetId, datasetSchemaId, description),

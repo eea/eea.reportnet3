@@ -1,32 +1,22 @@
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 
-const getDatasetMetadata = async datasetId => {
-  try {
-    const datasetDetails = await DatasetService.getMetaData(datasetId);
-    return datasetDetails.data;
-  } catch (error) {
-    console.error('MetadataUtils - getDatasetMetadata.', error);
-    return {};
-  }
-};
-
 const getMetadata = async ({ dataflowId, datasetId }) => {
   const metadata = {};
   if (dataflowId) {
-    const dataflowMetadata = await DataflowService.getDataflowDetails(dataflowId);
+    const dataflowMetadata = await DataflowService.getDetails(dataflowId);
 
     metadata.dataflow = {
       dataflowId,
       name: dataflowMetadata.name || '',
       description: dataflowMetadata.description || '',
-      isBusinessDataflow: false, // TODO WITH REAL DATA
+      type: dataflowMetadata.type, // TODO TEST WITH REAL DATA
       status: dataflowMetadata.status || ''
     };
   }
 
   if (datasetId) {
-    const datasetMetadata = await getDatasetMetadata(datasetId);
+    const datasetMetadata = await DatasetService.getMetadata(datasetId);
     metadata.dataset = {
       dataProviderId: datasetMetadata.dataProviderId,
       datasetId,
@@ -35,4 +25,4 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
   }
   return metadata;
 };
-export const MetadataUtils = { getDatasetMetadata, getMetadata };
+export const MetadataUtils = { getMetadata };

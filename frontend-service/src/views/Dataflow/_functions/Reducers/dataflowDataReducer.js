@@ -17,14 +17,17 @@ export const dataflowDataReducer = (state, { type, payload }) => {
 
     case 'SET_REPRESENTATIVES_IMPORT':
       return { ...state, representativesImport: payload };
+
     case 'SET_SHOW_PUBLIC_INFO':
       return { ...state, showPublicInfo: payload.showPublicInfo };
+
     case 'LOAD_PERMISSIONS':
       return {
         ...state,
         hasWritePermissions: payload.hasWritePermissions,
         isCustodian: payload.isCustodian,
         isObserver: payload.isObserver,
+        isAdmin: payload.isAdmin,
         userRoles: payload.userRoles,
         isNationalCoordinator: payload.isNationalCoordinator
       };
@@ -69,6 +72,12 @@ export const dataflowDataReducer = (state, { type, payload }) => {
 
     case 'SET_IS_PAGE_LOADING':
       return { ...state, isPageLoading: payload.isPageLoading };
+
+    case 'SET_IS_ADMIN_ASSIGNED_BUSINESS_DATAFLOW':
+      return {
+        ...state,
+        isAdminAssignedBusinessDataflow: payload.isAdminAssignedBusinessDataflow
+      };
 
     case 'SET_UPDATED_DATASET_SCHEMA':
       return { ...state, updatedDatasetSchema: payload.updatedData };

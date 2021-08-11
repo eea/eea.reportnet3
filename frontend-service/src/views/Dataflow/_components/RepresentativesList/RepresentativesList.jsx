@@ -23,7 +23,7 @@ import { RepresentativeService } from 'services/RepresentativeService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { reducer } from './_functions/Reducers/representativeReducer.js';
+import { reducer } from './_functions/Reducers/representativeReducer';
 
 import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
 
@@ -31,11 +31,12 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const RepresentativesList = ({
   dataflowId,
+  isBusinessDataflow,
   representativesImport = false,
   setDataProviderSelected,
   setFormHasRepresentatives,
-  setRepresentativeImport,
-  setHasRepresentativesWithoutDatasets
+  setHasRepresentativesWithoutDatasets,
+  setRepresentativeImport
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -71,7 +72,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     getInitialData();
-  }, [formState.refresher]);
+  }, [formState.refresher, isBusinessDataflow]);
 
   useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
@@ -111,7 +112,7 @@ const RepresentativesList = ({
   const getAllDataProviders = async () => {
     const { representatives, selectedDataProviderGroup } = formState;
     try {
-      const responseAllDataProviders = await RepresentativeService.getAllDataProviders(selectedDataProviderGroup);
+      const responseAllDataProviders = await RepresentativeService.getDataProviders(selectedDataProviderGroup);
 
       const providersNoSelect = [...responseAllDataProviders];
       if (representatives.length <= responseAllDataProviders.length) {
@@ -127,8 +128,22 @@ const RepresentativesList = ({
     }
   };
 
+  const getDataProviderGroup = async () => {
+    try {
+      const response = await RepresentativeService.getSelectedDataProviderGroup(dataflowId);
+      formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: response.data });
+    } catch (error) {
+      console.error('RepresentativesList - getDataProviderGroup.', error);
+    }
+  };
+
   const getInitialData = async () => {
-    await getGroupCountries();
+    if (isBusinessDataflow) {
+      await getDataProviderGroup();
+    } else {
+      await getGroupCountries();
+    }
+
     await getRepresentatives();
 
     if (!isEmpty(formState.representatives)) {
@@ -423,17 +438,29 @@ const RepresentativesList = ({
         <div className={styles.title}>{resources.messages['manageRolesDialogHeader']}</div>
         <div>
           <label>{resources.messages['manageRolesDialogDropdownLabel']} </label>
-          <Dropdown
-            ariaLabel={'dataProviders'}
-            className={styles.dataProvidersDropdown}
-            disabled={formState.representatives.length > 1}
-            name="dataProvidersDropdown"
-            onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
-            optionLabel="label"
-            options={formState.dataProvidersTypesList}
-            placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-            value={formState.selectedDataProviderGroup}
-          />
+          {isBusinessDataflow ? (
+            <Dropdown
+              ariaLabel={'dataProviders'}
+              className={styles.dataProvidersDropdown}
+              disabled
+              name="dataProvidersDropdown"
+              optionLabel="label"
+              options={[formState.selectedDataProviderGroup]}
+              value={formState.selectedDataProviderGroup}
+            />
+          ) : (
+            <Dropdown
+              ariaLabel={'dataProviders'}
+              className={styles.dataProvidersDropdown}
+              disabled={formState.representatives.length > 1}
+              name="dataProvidersDropdown"
+              onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
+              optionLabel="label"
+              options={formState.dataProvidersTypesList}
+              placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
+              value={formState.selectedDataProviderGroup}
+            />
+          )}
           <Button
             className={`${styles.exportTemplate} p-button-secondary ${
               !isEmpty(formState.selectedDataProviderGroup) ? 'p-button-animated-blink' : ''

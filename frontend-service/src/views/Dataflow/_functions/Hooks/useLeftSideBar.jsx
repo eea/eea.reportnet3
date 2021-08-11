@@ -17,7 +17,7 @@ export const useLeftSideBar = (
   const leftSideBarContext = useContext(LeftSideBarContext);
 
   useLayoutEffect(() => {
-    if (!isEmpty(dataflowState.userRoles)) {
+    if (!isEmpty(dataflowState.userRoles) || dataflowState.isAdmin) {
       const buttonsVisibility = getLeftSidebarButtonsVisibility();
 
       const apiKeyBtn = {
@@ -35,6 +35,15 @@ export const useLeftSideBar = (
         isVisible: buttonsVisibility.editBtn,
         label: 'edit',
         onClick: () => manageDialogs('isEditDialogVisible', true),
+        title: 'edit'
+      };
+
+      const editBusinessBtn = {
+        className: 'dataflow-edit-help-step',
+        icon: 'edit',
+        isVisible: buttonsVisibility.editBusinessBtn,
+        label: 'edit',
+        onClick: () => manageDialogs('isBusinessDataflowDialogVisible', true),
         title: 'edit'
       };
 
@@ -100,14 +109,18 @@ export const useLeftSideBar = (
           ((isNil(dataProviderId) && dataflowState.isCustodian) ||
             (isNil(representativeId) && dataflowState.isObserver)) &&
           dataflowState.status === config.dataflowStatus.OPEN
-            ? 'dataflowUsersByCountryList'
+            ? dataflowState.isBusinessDataflow
+              ? 'dataflowUsersByCompanyList'
+              : 'dataflowUsersByCountryList'
             : 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
         title:
           ((isNil(dataProviderId) && dataflowState.isCustodian) ||
             (isNil(representativeId) && dataflowState.isObserver)) &&
           dataflowState.status === config.dataflowStatus.OPEN
-            ? 'dataflowUsersByCountryList'
+            ? dataflowState.isBusinessDataflow
+              ? 'dataflowUsersByCompanyList'
+              : 'dataflowUsersByCountryList'
             : 'dataflowUsersList'
       };
 
@@ -115,6 +128,7 @@ export const useLeftSideBar = (
       const allButtons = [
         propertiesBtn,
         editBtn,
+        editBusinessBtn,
         releaseableBtn,
         showPublicInfoBtn,
         exportSchemaBtn,
@@ -131,6 +145,7 @@ export const useLeftSideBar = (
     dataflowState.status,
     representativeId,
     dataflowState.datasetId,
-    dataflowState.designDatasetSchemas.length
+    dataflowState.designDatasetSchemas.length,
+    dataflowState.isAdmin
   ]);
 };

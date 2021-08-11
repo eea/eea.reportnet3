@@ -109,13 +109,12 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
 
   const getPamsTableRecords = async tableSchemaId => {
     if (!isNil(tableSchemaId[0])) {
-      const { data } = await DatasetService.tableDataById({
+      const data = await DatasetService.getTableData({
         datasetId,
         tableSchemaId: tableSchemaId[0],
         pageSize: 300,
         levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
       });
-
       return onParseWebformRecords(data.records, article13State.data[0], {}, data.totalRecords) || [];
     }
 
@@ -163,7 +162,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
     const newEmptyRecord = parseNewTableRecord(table, pamNumber);
 
     try {
-      await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
+      await DatasetService.createRecord(datasetId, table.tableSchemaId, [newEmptyRecord]);
       onUpdateData();
     } catch (error) {
       if (error.response.status === 423) {
@@ -207,7 +206,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
     const tableSchemaId = article13State.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
     try {
       if (!isNil(tableSchemaId[0])) {
-        const { data } = await DatasetService.tableDataById({
+        const data = await DatasetService.getTableData({
           datasetId,
           tableSchemaId: tableSchemaId[0],
           pageSize: 300,

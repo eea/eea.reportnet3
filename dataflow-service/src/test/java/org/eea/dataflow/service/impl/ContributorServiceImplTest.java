@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -67,6 +68,10 @@ public class ContributorServiceImplTest {
   /** The test dataset controller zuul. */
   @Mock
   private TestDatasetControllerZuul testDatasetControllerZuul;
+
+  /** The dataflow service. */
+  @Mock
+  private DataflowService dataflowService;
 
   @Mock
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
@@ -140,6 +145,25 @@ public class ContributorServiceImplTest {
         .removeContributorsFromResources(Mockito.any());
 
   }
+
+  @Test
+  public void deleteContributorCustodian() throws EEAException {
+    Mockito.when(dataflowService.isAdmin()).thenReturn(Boolean.TRUE);
+    contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "DATA_CUSTODIAN", 1L);
+    Mockito.verify(userManagementControllerZull, times(1))
+        .removeContributorsFromResources(Mockito.any());
+
+  }
+
+  @Test
+  public void deleteContributorSteward() throws EEAException {
+    Mockito.when(dataflowService.isAdmin()).thenReturn(Boolean.TRUE);
+    contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "DATA_STEWARD", 1L);
+    Mockito.verify(userManagementControllerZull, times(1))
+        .removeContributorsFromResources(Mockito.any());
+
+  }
+
 
   /**
    * Delete contributor report.

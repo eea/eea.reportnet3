@@ -88,6 +88,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
    * @param manualCheck enable the manual check for the custodian approval
    * @param showPublicInfo the show public info
    * @param dataCollectionVO the dataflow collection vo
+   * @param stopAndNotifyPKError the stop and notify PK error
    */
   @Override
   @HystrixCommand
@@ -108,7 +109,11 @@ public class DataCollectionControllerImpl implements DataCollectionController {
           example = "true") @RequestParam(value = "showPublicInfo",
               defaultValue = "true") boolean showPublicInfo,
       @ApiParam(value = "Dataflow Id", example = "0") @RequestBody @LockCriteria(
-          name = "dataflowId", path = "idDataflow") DataCollectionVO dataCollectionVO) {
+          name = "dataflowId", path = "idDataflow") DataCollectionVO dataCollectionVO,
+      @ApiParam(
+          value = "Stop And Notify PK Errors: If all tables in all schemas have PKs the process works.",
+          example = "true") @RequestParam(defaultValue = "true",
+              name = "stopAndNotifyPKError") boolean stopAndNotifyPKError) {
 
     Date date = dataCollectionVO.getDueDate();
     Long dataflowId = dataCollectionVO.getIdDataflow();
@@ -141,7 +146,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     // This method will release the lock
     dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
-        manualCheck, showPublicInfo, referenceDataflow);
+        manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError);
     LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
   }
 

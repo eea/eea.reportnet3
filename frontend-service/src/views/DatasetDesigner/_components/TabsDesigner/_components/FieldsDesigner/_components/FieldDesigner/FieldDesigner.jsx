@@ -470,7 +470,7 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
-      const response = await DatasetService.addRecordFieldDesign(datasetId, {
+      const response = await DatasetService.createRecordDesign(datasetId, {
         codelistItems,
         description,
         maxSize,
@@ -788,7 +788,7 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
-      const { status } = await DatasetService.updateRecordFieldDesign(datasetId, {
+      await DatasetService.updateFieldDesign(datasetId, {
         codelistItems,
         description,
         fieldSchemaId,
@@ -810,33 +810,28 @@ export const FieldDesigner = ({
         validExtensions
       });
 
-      if (status >= 200 && status <= 299) {
-        onFieldUpdate({
-          codelistItems,
-          description,
-          id: fieldId,
-          isLinkChange,
-          maxSize,
-          pk,
-          pkHasMultipleValues,
-          pkMustBeUsed,
-          name,
-          readOnly,
-          recordId,
-          referencedField:
-            TextUtils.areEquals(type, 'LINK') || TextUtils.areEquals(type, 'EXTERNAL_LINK')
-              ? !isNil(referencedField)
-                ? parseReferenceField(referencedField)
-                : fieldDesignerState.fieldLinkValue
-              : null,
-          required,
-          type,
-          validExtensions
-        });
-      } else {
-        console.error('FieldDesigner - fieldUpdate.');
-        dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
-      }
+      onFieldUpdate({
+        codelistItems,
+        description,
+        id: fieldId,
+        isLinkChange,
+        maxSize,
+        pk,
+        pkHasMultipleValues,
+        pkMustBeUsed,
+        name,
+        readOnly,
+        recordId,
+        referencedField:
+          TextUtils.areEquals(type, 'LINK') || TextUtils.areEquals(type, 'EXTERNAL_LINK')
+            ? !isNil(referencedField)
+              ? parseReferenceField(referencedField)
+              : fieldDesignerState.fieldLinkValue
+            : null,
+        required,
+        type,
+        validExtensions
+      });
     } catch (error) {
       console.error('FieldDesigner - fieldUpdate.', error);
       if (error?.response.status === 400) {

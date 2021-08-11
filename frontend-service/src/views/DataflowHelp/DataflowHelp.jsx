@@ -33,6 +33,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataflowHelp = withRouter(({ history, match }) => {
   const {
@@ -121,7 +122,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const getDataflowName = async () => {
     try {
-      const data = await DataflowService.getDataflowDetails(dataflowId);
+      const data = await DataflowService.getDetails(dataflowId);
       setDataflowName(data.name);
     } catch (error) {
       console.error('DataflowHelp - getDataflowName.', error);
@@ -131,14 +132,14 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const onLoadDatasetSchema = async datasetId => {
     try {
-      const datasetSchema = await DatasetService.schemaById(datasetId);
+      const datasetSchema = await DatasetService.getSchema(datasetId);
 
-      if (!isEmpty(datasetSchema.data)) {
+      if (!isEmpty(datasetSchema)) {
         if (isCustodian) {
-          const datasetMetaData = await DatasetService.getMetaData(datasetId);
-          datasetSchema.data.datasetSchemaName = datasetMetaData.data.datasetSchemaName;
+          const datasetMetadata = await DatasetService.getMetadata(datasetId);
+          datasetSchema.datasetSchemaName = datasetMetadata.datasetSchemaName;
         }
-        return datasetSchema.data;
+        return datasetSchema;
       }
     } catch (error) {
       console.error('DataflowHelp - onLoadDatasetSchema.', error);
@@ -148,8 +149,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const onLoadDatasetsSchemas = async () => {
     try {
-      const data = await DataflowService.getReportingDatasets(dataflowId);
-      setIsBusinessDataflow(false); // TODO WITH REAL DATA
+      const data = await DataflowService.get(dataflowId);
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS)); // TODO TEST WITH REAL DATA
       setIsLoading(false);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {

@@ -33,6 +33,7 @@ import { feedbackReducer } from './_functions/Reducers/feedbackReducer';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const Feedback = withRouter(({ match, history }) => {
   const {
@@ -165,9 +166,9 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onGetDataflowDetails = async () => {
     try {
-      const data = await DataflowService.getDataflowDetails(dataflowId);
+      const data = await DataflowService.getDetails(dataflowId);
       const name = data.name;
-      const isBusinessDataflow = false; // TODO WITH REAL DATA
+      const isBusinessDataflow = TextUtils.areEquals(data.data.type, config.dataflowType.BUSINESS); // TODO TEST WITH REAL DATA
       dispatchFeedback({ type: 'SET_DATAFLOW_DETAILS', payload: { name, isBusinessDataflow } });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);

@@ -19,7 +19,7 @@ export class InputTextarea extends Component {
     rows: 1,
     tooltip: null,
     tooltipOptions: null,
-    value: ''
+    value: undefined
   };
 
   static propTypes = {

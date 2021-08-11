@@ -115,7 +115,7 @@ const ActionsToolbar = ({
     setIsLoadingFile(true);
     try {
       setExportTableDataName(createTableName(tableName, fileType));
-      const { data } = await DatasetService.exportTableDataById(datasetId, tableId, fileType);
+      const { data } = await DatasetService.exportTableData(datasetId, tableId, fileType);
       setExportTableData(data);
     } catch (error) {
       console.error('ActionsToolbar - onExportTableData.', error);
@@ -345,7 +345,7 @@ const ActionsToolbar = ({
           <span className={`p-float-label ${styles.label}`}>
             <InputText
               className={styles.inputFilter}
-              id="value_filter_input"
+              id={`value_filter_input_${tableId}`}
               name={resources.messages['valueFilter']}
               onChange={event => dispatchFilter({ type: 'SET_VALUE_FILTER', payload: event.target.value })}
               onKeyDown={onSearchKeyEvent}
@@ -367,7 +367,7 @@ const ActionsToolbar = ({
             />
             <label
               className={`${styles.label} ${valueFilter !== '' && styles.labelFilled}`}
-              htmlFor="value_filter_input">
+              htmlFor={`value_filter_input_${tableId}`}>
               {resources.messages['valueFilter']}
             </label>
           </span>
