@@ -1123,6 +1123,7 @@ const Dataflow = withRouter(({ history, match }) => {
         {dataflowState.isBusinessDataflowDialogVisible && (
           <ManageBusinessDataflow
             dataflowId={dataflowId}
+            history={history}
             isEditing
             isVisible={dataflowState.isBusinessDataflowDialogVisible}
             manageDialogs={manageDialogs}
