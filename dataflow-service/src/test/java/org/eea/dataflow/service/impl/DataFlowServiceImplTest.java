@@ -23,10 +23,12 @@ import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
+import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
+import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
@@ -172,6 +174,12 @@ public class DataFlowServiceImplTest {
   @Mock
   private ReferenceDatasetControllerZuul referenceControllerZuul;
 
+  @Mock
+  private DataProviderGroupRepository dataProviderGroupRepository;
+
+  @Mock
+  private FMEUserRepository fmeUserRepository;
+
   /** The dataflows. */
   private List<Dataflow> dataflows;
 
@@ -233,7 +241,7 @@ public class DataFlowServiceImplTest {
     List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
     DesignDatasetVO designDatasetVO = new DesignDatasetVO();
     designDatasetVOs.add(designDatasetVO);
-    List<WeblinkVO> weblinks = new ArrayList();
+    List<WeblinkVO> weblinks = new ArrayList<>();
     WeblinkVO weblinkVO = new WeblinkVO();
     weblinkVO.setDescription("bbbb");
     WeblinkVO weblinkVO2 = new WeblinkVO();
@@ -262,6 +270,47 @@ public class DataFlowServiceImplTest {
     assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
   }
 
+  @Test
+  public void getByIdBusinessTest() throws EEAException {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
+    reportingDatasetVO.setId(1L);
+    List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
+    reportingDatasetVOs.add(reportingDatasetVO);
+    List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
+    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
+    designDatasetVOs.add(designDatasetVO);
+    List<WeblinkVO> weblinks = new ArrayList<>();
+    WeblinkVO weblinkVO = new WeblinkVO();
+    weblinkVO.setDescription("bbbb");
+    WeblinkVO weblinkVO2 = new WeblinkVO();
+    weblinkVO2.setDescription("aaa");
+    weblinks.add(weblinkVO);
+    weblinks.add(weblinkVO2);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataFlowVO.setType(TypeDataflowEnum.BUSINESS);
+
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(new ArrayList<>());
+    when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(reportingDatasetVOs);
+    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasetVOs);
+    RepresentativeVO representative = new RepresentativeVO();
+    representative.setDataProviderId(1L);
+    when(representativeService.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(Arrays.asList(representative));
+    when(dataProviderGroupRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    when(fmeUserRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    dataFlowVO.setReportingDatasets(reportingDatasetVOs);
+    dataFlowVO.setDesignDatasets(designDatasetVOs);
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    dataFlowVO.setObligation(obligation);
+    dataFlowVO.setWeblinks(weblinks);
+    assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
+  }
 
   /**
    * Gets the by status.
