@@ -396,6 +396,21 @@ public class DataFlowControllerImpl implements DataFlowController {
       message = EEAErrorMessage.DATAFLOW_OBLIGATION;
       status = HttpStatus.BAD_REQUEST;
     }
+    // If it's a Business Dataflow, check if there are representatives selected. If so, then deny
+    // the update
+    if (TypeDataflowEnum.BUSINESS.equals(dataFlowVO.getType()) && status == HttpStatus.OK) {
+      try {
+        DataFlowVO dataflow = dataflowService.getMetabaseById(dataFlowVO.getId());
+        if (!dataflow.getDataProviderGroupId().equals(dataFlowVO.getDataProviderGroupId())
+            && !representativeService.getRepresetativesByIdDataFlow(dataFlowVO.getId()).isEmpty()) {
+          message = EEAErrorMessage.EXISTING_REPRESENTATIVES;
+          status = HttpStatus.BAD_REQUEST;
+        }
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error finding the representatives from the dataflowId {}",
+            dataFlowVO.getId());
+      }
+    }
 
     if (status == HttpStatus.OK) {
       try {
@@ -446,7 +461,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @param dataflowId the dataflow id
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') OR (hasRole('ADMIN') AND checkAccessEntity('BUSINESS','DATAFLOW',#dataflowId))")
   @DeleteMapping("/{dataflowId}")
   @ApiOperation(value = "Delete a Dataflow by its Id")
   @ApiResponse(code = 500, message = "Internal Server Error")
@@ -594,6 +609,16 @@ public class DataFlowControllerImpl implements DataFlowController {
   public boolean accessReferenceEntity(@PathVariable("entity") EntityClassEnum entity,
       @PathVariable("entityId") Long entityId) {
     return dataflowService.isReferenceDataflowDraft(entity, entityId);
+  }
+
+
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/private/isDataflowType/{type}/entity/{entity}/{entityId}")
+  public boolean accessEntity(@PathVariable("type") TypeDataflowEnum dataflowType,
+      @PathVariable("entity") EntityClassEnum entity, @PathVariable("entityId") Long entityId) {
+    return dataflowService.isDataflowType(dataflowType, entity, entityId);
   }
 
 

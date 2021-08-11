@@ -5,10 +5,10 @@ import { Client } from '@stomp/stompjs';
 
 import { config } from 'conf';
 
+import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
+
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
-
-import { UserService } from 'services/UserService';
 
 const useSocket = () => {
   const notificationContext = useContext(NotificationContext);
@@ -25,7 +25,7 @@ const useSocket = () => {
         reconnectDelay: 1000,
         connectionTimeout: 30000,
         beforeConnect: () => {
-          const token = UserService.getToken();
+          const token = LocalUserStorageUtils?.getTokens()?.accessToken;
           stompClient.connectHeaders = { token };
         },
         onConnect: () => {
@@ -39,7 +39,6 @@ const useSocket = () => {
       });
 
       stompClient.activate();
-
       userContext.onAddSocket(stompClient);
     }
   }, []);

@@ -101,7 +101,7 @@ export const DatasetRepository = {
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
-  getMetaData: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetaData, { datasetId }) }),
+  getMetadata: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetadata, { datasetId }) }),
 
   getReferencedFieldValues: async (
     datasetId,
@@ -246,7 +246,7 @@ export const DatasetRepository = {
 
   updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) =>
     await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateTableNameDesign, { datasetId }),
+      url: getUrl(DatasetConfig.updateTableDesign, { datasetId }),
       data: { idTableSchema: tableSchemaId, nameTableSchema: tableSchemaName }
     }),
 

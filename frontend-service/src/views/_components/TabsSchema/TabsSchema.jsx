@@ -13,7 +13,7 @@ import { QuerystringUtils } from 'views/_functions/Utils/QuerystringUtils';
 import { TabsUtils } from 'views/_functions/Utils/TabsUtils';
 
 export const TabsSchema = ({
-  buttonsList = undefined,
+  datasetSchemaId,
   dataProviderId,
   hasWritePermissions = false,
   hasCountryCode,
@@ -45,8 +45,8 @@ export const TabsSchema = ({
             <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
               <div className={styles.tabsSchema}>
                 <DataViewer
-                  buttonsList={buttonsList}
                   dataProviderId={dataProviderId}
+                  datasetSchemaId={datasetSchemaId}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
                   isBusinessDataflow={isBusinessDataflow}
@@ -102,7 +102,6 @@ export const TabsSchema = ({
       }
       name="TabsSchema"
       onTabChange={onTabChange}
-      renderActiveOnly={false}
       tableSchemaId={tableSchemaId}>
       {tabs}
     </TabView>

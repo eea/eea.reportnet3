@@ -6,6 +6,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
@@ -226,6 +227,17 @@ public interface DataflowService {
    * @return true, if is reference dataflow draft
    */
   boolean isReferenceDataflowDraft(EntityClassEnum entity, Long entityId);
+
+
+  /**
+   * Checks if is dataflow type.
+   *
+   * @param dataflowType the dataflow type
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if is dataflow type
+   */
+  boolean isDataflowType(TypeDataflowEnum dataflowType, EntityClassEnum entity, Long entityId);
 
   /**
    * Checks if user is admin.

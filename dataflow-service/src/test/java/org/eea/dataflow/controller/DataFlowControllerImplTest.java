@@ -13,12 +13,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.security.jwt.utils.AuthenticationDetails;
@@ -304,6 +307,15 @@ public class DataFlowControllerImplTest {
     assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
   }
 
+  @Test
+  public void createDataFlowNotAdminThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setType(TypeDataflowEnum.BUSINESS);
+    ResponseEntity<?> value = dataFlowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.UNAUTHORIZED, value.getBody());
+    assertEquals(HttpStatus.UNAUTHORIZED, value.getStatusCode());
+  }
+
   /**
    * Creates the data flow date today throw.
    *
@@ -518,6 +530,36 @@ public class DataFlowControllerImplTest {
     assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
   }
 
+  @Test
+  public void testUpdateDataflowBusinessException() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setType(TypeDataflowEnum.BUSINESS);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    dataflowVO.setObligation(obligation);
+    dataflowVO.setDataProviderGroupId(1L);
+    dataflowVO.setId(1L);
+    DataFlowVO dataFlowVO2 = new DataFlowVO();
+    dataFlowVO2.setId(1L);
+    dataFlowVO2.setDataProviderGroupId(2L);
+    List<RepresentativeVO> representatives = new ArrayList<>();
+    representatives.add(new RepresentativeVO());
+
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO2);
+    Mockito.when(representativeService.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(representatives);
+    ResponseEntity<?> value = dataFlowControllerImpl.updateDataFlow(dataflowVO);
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+    assertEquals(EEAErrorMessage.EXISTING_REPRESENTATIVES, value.getBody());
+  }
+
+
+
   /**
    * Test get metabase by id.
    *
@@ -681,8 +723,25 @@ public class DataFlowControllerImplTest {
   @Test
   public void findReferenceDataflowsTest() throws EEAException {
     when(dataflowService.getReferenceDataflows(Mockito.any())).thenReturn(new ArrayList<>());
-    dataFlowControllerImpl.findReferenceDataflows();
-    assertEquals("fail", new ArrayList<>(), dataflowService.getReferenceDataflows(Mockito.any()));
+    assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findReferenceDataflows());
   }
 
+  @Test
+  public void findBusinessDataflowsTest() throws EEAException {
+    when(dataflowService.getBusinessDataflows(Mockito.any())).thenReturn(new ArrayList<>());
+    assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findBusinessDataflows());
+  }
+
+  @Test
+  public void findBusinessDataflowsExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).getBusinessDataflows(Mockito.any());
+    assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findBusinessDataflows());
+  }
+
+
+  @Test
+  public void accessEntityTest() {
+    assertFalse("reference not allowed", dataFlowControllerImpl
+        .accessEntity(TypeDataflowEnum.BUSINESS, EntityClassEnum.DATASET, 1L));
+  }
 }
