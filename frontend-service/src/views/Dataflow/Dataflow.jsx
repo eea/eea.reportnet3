@@ -504,7 +504,7 @@ const Dataflow = withRouter(({ history, match }) => {
           anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
           description: dataflow.description,
-          isBusinessDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.BUSINESS), // TODO TEST WITH REAL DATA
+          isBusinessDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.BUSINESS),
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,

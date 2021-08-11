@@ -122,7 +122,7 @@ export const EUDataset = withRouter(({ history, match }) => {
       euDatasetDispatch({
         type: 'GET_DATAFLOW_DETAILS',
         payload: { name: data.name, isBusinessDataflow: TextUtils.areEquals(data.type, config.dataflowType.BUSINESS) }
-      }); // TODO TEST WITH REAL DATA
+      });
     } catch (error) {
       console.error('EUDataset - getDataflowName.', error);
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
