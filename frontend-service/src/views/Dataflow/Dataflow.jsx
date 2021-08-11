@@ -1092,7 +1092,9 @@ const Dataflow = withRouter(({ history, match }) => {
               ((isNil(dataProviderId) && dataflowState.isCustodian) ||
                 (isNil(representativeId) && dataflowState.isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
-                ? resources.messages['dataflowUsersByCountryList']
+                ? dataflowState.isBusinessDataflow
+                  ? resources.messages['dataflowUsersByCompanyList']
+                  : resources.messages['dataflowUsersByCountryList']
                 : resources.messages['dataflowUsersList']
             }
             onHide={() => manageDialogs('isUserListVisible', false)}
@@ -1123,6 +1125,7 @@ const Dataflow = withRouter(({ history, match }) => {
         {dataflowState.isBusinessDataflowDialogVisible && (
           <ManageBusinessDataflow
             dataflowId={dataflowId}
+            history={history}
             isEditing
             isVisible={dataflowState.isBusinessDataflowDialogVisible}
             manageDialogs={manageDialogs}

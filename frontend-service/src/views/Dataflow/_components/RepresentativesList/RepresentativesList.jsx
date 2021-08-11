@@ -64,12 +64,6 @@ const RepresentativesList = ({
   const { isVisibleDialog } = formState;
 
   useEffect(() => {
-    if (isBusinessDataflow) {
-      getDataProviderGroup();
-    }
-  }, [isBusinessDataflow]);
-
-  useEffect(() => {
     if (representativesImport) {
       getInitialData(formDispatcher, dataflowId, formState);
       setRepresentativeImport(false);
@@ -78,7 +72,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     getInitialData();
-  }, [formState.refresher]);
+  }, [formState.refresher, isBusinessDataflow]);
 
   useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
@@ -137,14 +131,19 @@ const RepresentativesList = ({
   const getDataProviderGroup = async () => {
     try {
       const response = await RepresentativeService.getSelectedDataProviderGroup(dataflowId);
-      formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: response });
+      formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: response.data });
     } catch (error) {
       console.error('RepresentativesList - getDataProviderGroup.', error);
     }
   };
 
   const getInitialData = async () => {
-    await getGroupCountries();
+    if (isBusinessDataflow) {
+      await getDataProviderGroup();
+    } else {
+      await getGroupCountries();
+    }
+
     await getRepresentatives();
 
     if (!isEmpty(formState.representatives)) {
