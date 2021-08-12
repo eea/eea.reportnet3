@@ -123,6 +123,7 @@ public interface IntegrationController {
    * Find export EU dataset integration.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
    * @return the integration VO
    */
   @GetMapping("/findExportEUDatasetIntegration")
