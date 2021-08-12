@@ -59,7 +59,7 @@ export const DataflowDashboards = withRouter(
     const getDataflowDetails = async () => {
       try {
         const data = await DataflowService.getDetails(dataflowId);
-        setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS)); // TODO TEST WITH REAL DATA
+        setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
         setDataflowName(data.name);
         setIsLoading(false);
       } catch (error) {

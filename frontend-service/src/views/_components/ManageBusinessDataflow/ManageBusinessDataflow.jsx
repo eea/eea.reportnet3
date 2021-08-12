@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useLayoutEffect, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -39,18 +39,20 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageBusinessDataflow = ({
   dataflowId,
+  hasRepresentatives,
   history,
+  isAdmin,
   isEditing = false,
   isVisible,
   manageDialogs,
-  metadata,
+  state,
   obligation,
   onCreateDataflow,
   onEditDataflow,
   resetObligations
 }) => {
   const dialogName = 'isBusinessDataflowDialogVisible';
-  const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
+  const isDesign = TextUtils.areEquals(state?.status, config.dataflowStatus.DESIGN);
 
   const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
@@ -61,7 +63,7 @@ export const ManageBusinessDataflow = ({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState({});
   const [selectedFmeUser, setSelectedFmeUser] = useState({});
-  const [description, setDescription] = useState(isEditing ? metadata.description : '');
+  const [description, setDescription] = useState(isEditing ? state.description : '');
   const [groupOfCompanies, setGroupOfCompanies] = useState([]);
   const [fmeUsers, setFmeUsers] = useState([]);
   const [errors, setErrors] = useState({
@@ -70,7 +72,7 @@ export const ManageBusinessDataflow = ({
   });
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [name, setName] = useState(isEditing ? metadata.name : '');
+  const [name, setName] = useState(isEditing ? state.name : '');
   const [pinDataflow, setPinDataflow] = useState(false);
 
   const deleteInputRef = useRef(null);
@@ -81,13 +83,13 @@ export const ManageBusinessDataflow = ({
 
   useLayoutEffect(() => {
     if (isEditing) {
-      setSelectedFmeUser(fmeUsers.filter(user => user.id === metadata.fmeUserId)[0]);
+      setSelectedFmeUser({ id: state.fmeUserId, username: state.fmeUserName });
     }
   }, [fmeUsers]);
 
   useLayoutEffect(() => {
     if (isEditing) {
-      setSelectedGroup(groupOfCompanies.filter(group => group.dataProviderGroupId === metadata.dataProviderGroupId)[0]);
+      setSelectedGroup({ dataProviderGroupId: state.dataProviderGroupId, label: state.dataProviderGroupName });
     }
   }, [groupOfCompanies]);
 
@@ -107,11 +109,32 @@ export const ManageBusinessDataflow = ({
   };
 
   useLayoutEffect(() => {
-    getDropdownsOptions();
+    if (isAdmin) {
+      getDropdownsOptions();
+    }
   }, []);
 
   const checkErrors = () => {
     let hasErrors = false;
+
+    if (isEmpty(name.trim())) {
+      handleErrors({
+        field: 'name',
+        hasErrors: true,
+        message: resources.messages['emptyNameValidationError']
+      });
+      hasErrors = true;
+    }
+
+    if (isEmpty(description.trim())) {
+      handleErrors({
+        field: 'description',
+        hasErrors: true,
+        message: resources.messages['emptyDescriptionValidationError']
+      });
+      hasErrors = true;
+    }
+
     if (description.length > config.INPUT_MAX_LENGTH) {
       handleErrors({
         field: 'description',
@@ -320,12 +343,14 @@ export const ManageBusinessDataflow = ({
                   appendTo={document.body}
                   ariaLabel="groupOfCompanies"
                   className={styles.groupOfCompaniesWrapper}
+                  disabled={!isAdmin || hasRepresentatives}
                   name="groupOfCompanies"
                   onChange={event => onSelectGroup(event.target.value)}
                   onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
                   optionLabel="label"
-                  options={groupOfCompanies}
+                  options={!isAdmin ? [selectedGroup] : groupOfCompanies}
                   placeholder={resources.messages[`selectGroupOfCompanies`]}
+                  tooltip={isAdmin && hasRepresentatives && resources.messages['groupOfCompaniesDisabledTooltip']}
                   value={selectedGroup}
                 />
 
@@ -333,11 +358,12 @@ export const ManageBusinessDataflow = ({
                   appendTo={document.body}
                   ariaLabel="fmeUsers"
                   className={styles.fmeUsersWrapper}
+                  disabled={!isAdmin}
                   name="fmeUsers"
                   onChange={event => onSelectFmeUser(event.target.value)}
                   onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
                   optionLabel="username"
-                  options={fmeUsers}
+                  options={!isAdmin ? [selectedFmeUser] : fmeUsers}
                   placeholder={resources.messages[`selectFmeUser`]}
                   value={selectedFmeUser}
                 />
@@ -368,7 +394,7 @@ export const ManageBusinessDataflow = ({
       {isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          disabledConfirm={!TextUtils.areEquals(deleteInput, metadata.name)}
+          disabledConfirm={!TextUtils.areEquals(deleteInput, state.name)}
           header={resources.messages['deleteBusinessDataflowDialogHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
@@ -379,7 +405,7 @@ export const ManageBusinessDataflow = ({
           <p
             dangerouslySetInnerHTML={{
               __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
-                dataflowName: metadata.name
+                dataflowName: state.name
               })
             }}></p>
           <p>

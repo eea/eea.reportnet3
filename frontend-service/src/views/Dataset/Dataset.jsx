@@ -373,10 +373,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     try {
       const metaData = await MetadataUtils.getMetadata({ datasetId, dataflowId });
       setMetadata(metaData);
-      setDataflowName(metaData.dataflowName);
-      setDatasetSchemaId(metaData.datasetSchemaId);
-      setDatasetFeedbackStatus(metaData.datasetFeedbackStatus);
-      setDataProviderId(metaData.dataProviderId);
+      setDataflowName(metaData.dataflow.name);
+      setDatasetSchemaId(metaData.dataset.datasetSchemaId);
+      setDatasetFeedbackStatus(metaData.dataset.datasetFeedbackStatus);
+      setDataProviderId(metaData.dataset.dataProviderId);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
@@ -558,7 +558,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onLoadDataflow = async () => {
     try {
       const data = await DataflowService.get(match.params.dataflowId);
-      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS)); // TODO TEST WITH REAL DATA
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
       let dataset = [];
       if (isTestDataset) {
         dataset = data.testDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
