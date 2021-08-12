@@ -851,9 +851,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     if (null != tableSchemaId) {
       stringQuery.append(" where ")
-          .append(null != tableSchemaId
-              ? String.format(" id_table_schema like '%s' and ", tableSchemaId)
-              : "");
+          .append(String.format(" id_table_schema like '%s' and ", tableSchemaId));
       stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
     }
     stringQuery.append(") records group by id_table_schema,id_record,data_provider_code ");

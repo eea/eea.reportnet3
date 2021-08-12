@@ -15,8 +15,10 @@ import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
+import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
+import org.eea.dataflow.persistence.domain.FMEUser;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
@@ -551,6 +553,8 @@ public class DataflowServiceImpl implements DataflowService {
         }
         dataflowSave.get().setReleasable(dataflowVO.isReleasable());
         dataflowSave.get().setShowPublicInfo(dataflowVO.isShowPublicInfo());
+        dataflowSave.get().setFmeUserId(dataflowVO.getFmeUserId());
+        dataflowSave.get().setDataProviderGroupId(dataflowVO.getDataProviderGroupId());
         dataflowRepository.save(dataflowSave.get());
         LOG.info("The dataflow {} has been updated.", dataflowSave.get().getName());
       }
@@ -846,6 +850,48 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
+   * Checks if is dataflow type.
+   *
+   * @param dataflowType the dataflow type
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if is dataflow type
+   */
+  @Override
+  @Transactional
+  public boolean isDataflowType(TypeDataflowEnum dataflowType, EntityClassEnum entity,
+      Long entityId) {
+    boolean correctType = false;
+    DataFlowVO dataflow = new DataFlowVO();
+    try {
+      switch (entity) {
+        case DATAFLOW:
+          dataflow = getMetabaseById(entityId);
+          if (dataflowType.equals(dataflow.getType())) {
+            correctType = true;
+          }
+          break;
+        case DATASET:
+          DataSetMetabaseVO dataset =
+              datasetMetabaseControllerZuul.findDatasetMetabaseById(entityId);
+          Long dataflowId = dataset.getDataflowId();
+          dataflow = getMetabaseById(dataflowId);
+          if (dataflowType.equals(dataflow.getType())) {
+            correctType = true;
+          }
+          break;
+        default:
+          break;
+      }
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error knowing if the entity {} with id {} is a dataflow type {}. Message {}",
+          entity, entityId, dataflowType, e.getMessage(), e);
+    }
+    return correctType;
+  }
+
+
+  /**
    * Checks if is admin.
    *
    * @return true, if is admin
@@ -1112,6 +1158,12 @@ public class DataflowServiceImpl implements DataflowService {
 
     DataFlowVO dataflowVO = dataflowMapper.entityToClass(result);
 
+    if (TypeDataflowEnum.BUSINESS.equals(dataflowVO.getType())) {
+      dataflowVO.setDataProviderGroupName(dataProviderGroupRepository
+          .findById(dataflowVO.getDataProviderGroupId()).orElse(new DataProviderGroup()).getName());
+      dataflowVO.setFmeUserName(fmeUserRepository.findById(dataflowVO.getFmeUserId())
+          .orElse(new FMEUser()).getUsername());
+    }
 
     // filter design datasets (schemas) showed to the user depending on permissions
     List<ResourceAccessVO> datasets =

@@ -127,7 +127,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const {
     obligation,
-    resetObligations,
     setCheckedObligation,
     setObligation,
     setObligationToPrevious,
@@ -253,7 +252,7 @@ const Dataflow = withRouter(({ history, match }) => {
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin && !dataflowState.isBusinessDataflow,
-      editBusinessBtn: dataflowState.isAdmin && dataflowState.isBusinessDataflow,
+      editBusinessBtn: (dataflowState.isAdmin || dataflowState.isCustodian) && dataflowState.isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
@@ -394,6 +393,12 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmDeleteDataflow = event =>
     dataflowDispatch({ type: 'ON_CONFIRM_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
 
+  const resetObligations = () => {
+    setCheckedObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
+    setObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
+    setPreviousObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
+  };
+
   const onExportLeadReporters = async () => {
     try {
       const { data } = await RepresentativeService.exportFile(dataflowId);
@@ -504,7 +509,7 @@ const Dataflow = withRouter(({ history, match }) => {
           anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
           description: dataflow.description,
-          isBusinessDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.BUSINESS), // TODO TEST WITH REAL DATA
+          isBusinessDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.BUSINESS),
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
@@ -1125,20 +1130,24 @@ const Dataflow = withRouter(({ history, match }) => {
         {dataflowState.isBusinessDataflowDialogVisible && (
           <ManageBusinessDataflow
             dataflowId={dataflowId}
+            hasRepresentatives={dataflowState.formHasRepresentatives}
             history={history}
+            isAdmin={dataflowState.isAdmin}
             isEditing
             isVisible={dataflowState.isBusinessDataflowDialogVisible}
             manageDialogs={manageDialogs}
-            metadata={{
+            obligation={obligation}
+            onEditDataflow={onEditDataflow}
+            resetObligations={resetObligations}
+            state={{
               name: dataflowState.name,
               description: dataflowState.description,
               status: dataflowState.status,
               fmeUserId: dataflowState.data.fmeUserId,
-              dataProviderGroupId: dataflowState.data.dataProviderGroupId
+              fmeUserName: dataflowState.data.fmeUserName,
+              dataProviderGroupId: dataflowState.data.dataProviderGroupId,
+              dataProviderGroupName: dataflowState.data.dataProviderGroupName
             }}
-            obligation={obligation}
-            onEditDataflow={onEditDataflow}
-            resetObligations={resetObligations}
           />
         )}
 
