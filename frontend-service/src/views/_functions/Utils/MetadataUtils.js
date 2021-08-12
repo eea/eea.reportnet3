@@ -19,7 +19,9 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
     const datasetMetadata = await DatasetService.getMetadata(datasetId);
     metadata.dataset = {
       dataProviderId: datasetMetadata.dataProviderId,
+      datasetSchemaId: datasetMetadata.datasetSchemaId,
       datasetId,
+      datasetFeedbackStatus: datasetMetadata.datasetFeedbackStatus,
       name: datasetMetadata.datasetSchemaName || ''
     };
   }
