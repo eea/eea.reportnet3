@@ -1,7 +1,8 @@
 export const IntegrationConfig = {
   getAll: '/integration/listIntegrations',
   getAllExtensionsOperations: '/integration/listExtensionsOperations',
-  getEUDatasetIntegration: '/integration/findExportEUDatasetIntegration?datasetSchemaId={:datasetSchemaId}',
+  getEUDatasetIntegration:
+    '/integration/findExportEUDatasetIntegration?dataflowId={:dataflowId}&datasetSchemaId={:datasetSchemaId}',
   getFMEProcesses: '/fme/findItems?datasetId={:datasetId}&repository={:repositoryName}',
   getFMERepositories: '/fme/findRepositories?datasetId={:datasetId}',
   create: '/integration/create',

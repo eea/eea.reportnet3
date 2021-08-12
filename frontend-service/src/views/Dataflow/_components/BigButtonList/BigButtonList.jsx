@@ -326,7 +326,7 @@ export const BigButtonList = ({
 
   const onLoadEUDatasetIntegration = async datasetSchemaId => {
     try {
-      const euDatasetExportIntegration = await IntegrationService.getEUDatasetIntegration(datasetSchemaId);
+      const euDatasetExportIntegration = await IntegrationService.getEUDatasetIntegration(dataflowId, datasetSchemaId);
       setExportEUDatasetIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration));
     } catch (error) {
       console.error('BigButtonList - onLoadEUDatasetIntegration.', error);
@@ -655,6 +655,7 @@ export const BigButtonList = ({
           <ManualAcceptanceDatasets
             dataflowId={dataflowData.id}
             getManageAcceptanceDataset={getManageAcceptanceDataset}
+            isBusinessDataflow={isBusinessDataflow}
             isUpdatedManualAcceptanceDatasets={isUpdatedManualAcceptanceDatasets}
             manageDialogs={manageManualAcceptanceDatasetDialog}
             refreshManualAcceptanceDatasets={refreshManualAcceptanceDatasets}
