@@ -17,8 +17,8 @@ export const IntegrationService = {
     return IntegrationUtils.parseIntegrationsOperationsExtensionsList(integrationsDTO.data);
   },
 
-  getEUDatasetIntegration: async datasetSchemaId => {
-    const eUDatasetIntegrationsDTO = await IntegrationRepository.getEUDatasetIntegration(datasetSchemaId);
+  getEUDatasetIntegration: async (dataflowId, datasetSchemaId) => {
+    const eUDatasetIntegrationsDTO = await IntegrationRepository.getEUDatasetIntegration(dataflowId, datasetSchemaId);
     return IntegrationUtils.parseIntegration(eUDatasetIntegrationsDTO.data);
   },
 
