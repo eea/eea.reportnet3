@@ -49,7 +49,7 @@ const ManageReportingDataflowForm = forwardRef(
     const checkIsCorrectInputValue = (inputValue, inputName) => {
       let hasErrors = false;
       let message = '';
-      let maxLengthMessage = 'max allowed characters 255.'
+      let maxLengthMessage = ' max allowed characters 255.'
 
       if (checkIsEmptyInput(inputValue)) {
         message = '';
@@ -175,13 +175,14 @@ const ManageReportingDataflowForm = forwardRef(
               rows={10}
               value={description}
             />
+            
             <label className="srOnly" htmlFor="dataflowDescription">
               {resources.messages['createDataflowDescription']}
             </label>
-            <CharacterCounter currentLength={description.length} maxLength={config.INPUT_MAX_LENGTH}/>
+            
             {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
+            <CharacterCounter currentLength={description.length} maxLength={config.INPUT_MAX_LENGTH}/>
           </div>
-          <div></div>
           <div className={`${styles.search}`}>
             <Button icon="search" label={resources.messages['searchObligations']} onClick={onSearch} />
             <input
