@@ -39,6 +39,7 @@ import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
@@ -514,9 +515,17 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           }
         }
         if (!countryCodeList.contains(contryCode) && null == user) {
-          fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
+          if (TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
+            fieldsToWrite[2] = "KO imported company and user doesn't exist in reportnet";
+          } else {
+            fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
+          }
         } else if (!countryCodeList.contains(contryCode)) {
-          fieldsToWrite[2] = "KO imported country doesn't exist";
+          if (TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
+            fieldsToWrite[2] = "KO imported company doesn't exist";
+          } else {
+            fieldsToWrite[2] = "KO imported country doesn't exist";
+          }
         } else if (null == user && StringUtils.isNotBlank(email)) {
           fieldsToWrite[2] = "KO imported user doesn't exist in reportnet";
         } else {
