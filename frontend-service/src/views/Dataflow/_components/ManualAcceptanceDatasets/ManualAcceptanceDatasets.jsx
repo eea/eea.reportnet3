@@ -20,9 +20,12 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { manualAcceptanceDatasetsReducer } from './_functions/Reducers/manualAcceptanceDatasetsReducer';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
 export const ManualAcceptanceDatasets = ({
   dataflowId,
   getManageAcceptanceDataset,
+  isBusinessDataflow,
   isUpdatedManualAcceptanceDatasets,
   manageDialogs,
   refreshManualAcceptanceDatasets
@@ -120,7 +123,10 @@ export const ManualAcceptanceDatasets = ({
 
   const filterOptions = [
     { type: 'input', properties: [{ name: 'datasetName' }] },
-    { type: 'multiselect', properties: [{ name: 'dataProviderName' }, { name: 'feedbackStatus' }] },
+    {
+      type: 'multiselect',
+      properties: [{ name: isBusinessDataflow ? 'company' : 'dataProviderName' }, { name: 'feedbackStatus' }]
+    },
     { type: 'checkbox', properties: [{ name: 'isReleased', label: resources.messages['onlyReleasedCheckboxLabel'] }] }
   ];
 
@@ -133,7 +139,11 @@ export const ManualAcceptanceDatasets = ({
           body={template}
           columnResizeMode="expand"
           field={field}
-          header={resources.messages[field]}
+          header={
+            isBusinessDataflow && TextUtils.areEquals(field, 'dataProviderName')
+              ? resources.messages['company']
+              : resources.messages[field]
+          }
           key={field}
           sortable={true}
         />
