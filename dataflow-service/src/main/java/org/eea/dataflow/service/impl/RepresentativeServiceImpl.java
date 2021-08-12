@@ -502,7 +502,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
 
       List<Representative> representativeList = new ArrayList<>();
-
+      String dataProviderType =
+          TypeDataflowEnum.BUSINESS.equals(dataflow.getType()) ? "company" : "country";
       for (String representativeData : everyLines) {
         String[] dataLine = representativeData.split("[" + delimiter + "]");
         String contryCode = dataLine[0].replaceAll("\"", "");
@@ -515,17 +516,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           }
         }
         if (!countryCodeList.contains(contryCode) && null == user) {
-          if (TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
-            fieldsToWrite[2] = "KO imported company and user doesn't exist in reportnet";
-          } else {
-            fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
-          }
+          fieldsToWrite[2] =
+              "KO imported " + dataProviderType + " and user doesn't exist in reportnet";
         } else if (!countryCodeList.contains(contryCode)) {
-          if (TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
-            fieldsToWrite[2] = "KO imported company doesn't exist";
-          } else {
-            fieldsToWrite[2] = "KO imported country doesn't exist";
-          }
+          fieldsToWrite[2] = "KO imported " + dataProviderType + " doesn't exist";
         } else if (null == user && StringUtils.isNotBlank(email)) {
           fieldsToWrite[2] = "KO imported user doesn't exist in reportnet";
         } else {
