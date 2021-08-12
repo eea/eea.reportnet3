@@ -655,6 +655,7 @@ export const BigButtonList = ({
           <ManualAcceptanceDatasets
             dataflowId={dataflowData.id}
             getManageAcceptanceDataset={getManageAcceptanceDataset}
+            isBusinessDataflow={isBusinessDataflow}
             isUpdatedManualAcceptanceDatasets={isUpdatedManualAcceptanceDatasets}
             manageDialogs={manageManualAcceptanceDatasetDialog}
             refreshManualAcceptanceDatasets={refreshManualAcceptanceDatasets}
