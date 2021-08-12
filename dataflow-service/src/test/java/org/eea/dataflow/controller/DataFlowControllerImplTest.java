@@ -737,4 +737,11 @@ public class DataFlowControllerImplTest {
     doThrow(new EEAException()).when(dataflowService).getBusinessDataflows(Mockito.any());
     assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findBusinessDataflows());
   }
+
+
+  @Test
+  public void accessEntityTest() {
+    assertFalse("reference not allowed", dataFlowControllerImpl
+        .accessEntity(TypeDataflowEnum.BUSINESS, EntityClassEnum.DATASET, 1L));
+  }
 }

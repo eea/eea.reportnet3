@@ -3,12 +3,16 @@ export class Dataflow {
     anySchemaAvailableInPublic,
     creationDate,
     dataCollections,
+    dataProviderGroupId,
+    dataProviderGroupName,
     datasets,
     description,
     designDatasets,
     documents,
     euDatasets,
     expirationDate,
+    fmeUserId,
+    fmeUserName,
     id,
     isReleasable,
     manualAcceptance,
@@ -23,19 +27,21 @@ export class Dataflow {
     testDatasets,
     type,
     userRole,
-    webLinks,
-    fmeUserId,
-    dataProviderGroupId
+    webLinks
   } = {}) {
     this.anySchemaAvailableInPublic = anySchemaAvailableInPublic;
     this.creationDate = creationDate;
     this.dataCollections = dataCollections;
+    this.dataProviderGroupId = dataProviderGroupId;
+    this.dataProviderGroupName = dataProviderGroupName;
     this.datasets = datasets;
     this.description = description;
     this.designDatasets = designDatasets;
     this.documents = documents;
     this.euDatasets = euDatasets;
     this.expirationDate = expirationDate;
+    this.fmeUserId = fmeUserId;
+    this.fmeUserName = fmeUserName;
     this.id = id;
     this.isReleasable = isReleasable;
     this.manualAcceptance = manualAcceptance;
@@ -51,7 +57,5 @@ export class Dataflow {
     this.type = type;
     this.userRole = userRole;
     this.webLinks = webLinks;
-    this.fmeUserId = fmeUserId;
-    this.dataProviderGroupId = dataProviderGroupId;
   }
 }

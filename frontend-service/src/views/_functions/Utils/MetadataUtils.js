@@ -10,7 +10,7 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
       dataflowId,
       name: dataflowMetadata.name || '',
       description: dataflowMetadata.description || '',
-      type: dataflowMetadata.type, // TODO TEST WITH REAL DATA
+      type: dataflowMetadata.type,
       status: dataflowMetadata.status || ''
     };
   }
@@ -19,7 +19,9 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
     const datasetMetadata = await DatasetService.getMetadata(datasetId);
     metadata.dataset = {
       dataProviderId: datasetMetadata.dataProviderId,
+      datasetSchemaId: datasetMetadata.datasetSchemaId,
       datasetId,
+      datasetFeedbackStatus: datasetMetadata.datasetFeedbackStatus,
       name: datasetMetadata.datasetSchemaName || ''
     };
   }
