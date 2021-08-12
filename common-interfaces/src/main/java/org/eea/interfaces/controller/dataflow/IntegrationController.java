@@ -127,7 +127,8 @@ public interface IntegrationController {
    */
   @GetMapping("/findExportEUDatasetIntegration")
   IntegrationVO findExportEUDatasetIntegration(
-      @RequestParam("datasetSchemaId") String datasetSchemaId);
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("dataflowId") Long dataflowId);
 
 
   /**
