@@ -1,0 +1,13 @@
+import { EUDatasetConfig } from './config/EUDatasetConfigAux';
+import { getUrl } from './_utils/UrlUtils';
+import { HTTPRequester } from './_utils/HTTPRequester';
+
+export const EUDatasetRepository = {
+  copyFromDataCollection: async dataflowId => {
+    return await HTTPRequester.post({ url: getUrl(EUDatasetConfig.copyFromDataCollection, { dataflowId }) });
+  },
+
+  export: async dataflowId => {
+    return await HTTPRequester.post({ url: getUrl(EUDatasetConfig.export, { dataflowId }) });
+  }
+};

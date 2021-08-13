@@ -829,7 +829,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     String[] words = query.split("\\s+");
     for (String word : words) {
       if (word.contains(DATASET)) {
-        String datasetId = word.substring(word.indexOf('_') + 1, word.indexOf('.'));
+        String datasetId = word.substring(word.indexOf(DATASET) + 8, word.indexOf('.'));
         datasetsIdList.add(datasetId);
       }
     }

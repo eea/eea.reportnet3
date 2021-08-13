@@ -9,6 +9,10 @@
     "REFERENCEDATASET": "REFERENCEDATASET-"
   },
   "roles": {
+    "ADMIN": {
+      "key": "ADMIN",
+      "label": "ADMIN"
+    },
     "CUSTODIAN": {
       "key": "DATA_CUSTODIAN",
       "label": "CUSTODIAN"

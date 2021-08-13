@@ -65,6 +65,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
@@ -2452,6 +2453,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
 
       // After creating the datasets schemas on the DB, fill them and create the permissions
+      List<String> newDatasetSchemasIds = new ArrayList<>();
       for (Map.Entry<Long, DataSetSchema> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
           .entrySet()) {
         contributorControllerZuul.createAssociatedPermissions(dataflowId,
@@ -2461,6 +2463,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
                 .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema().toString()),
             dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey(),
             mapDatasetIdFKRelations);
+        newDatasetSchemasIds.add(dictionaryOriginTargetObjectId
+            .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema().toString()));
       }
 
       // Modify the FK, if the schemas copied have fields of type Link, to update the
@@ -2481,7 +2485,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       // Import the external integrations
       createExternalIntegrations(importClasses.getExternalIntegrations(), dataflowId,
-          dictionaryOriginTargetObjectId);
+          dictionaryOriginTargetObjectId, newDatasetSchemasIds);
 
       // Launch a SQL QC Validation
       mapDatasetsDestinyAndSchemasOrigin.forEach((Long datasetCreated, DataSetSchema schema) -> {
@@ -2610,22 +2614,29 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // Method to process the file
     String tableSchemaName = "";
     try {
-      Optional<TableSchema> tableSchema = datasetSchema.getTableSchemas().stream()
-          .filter(t -> t.getIdTableSchema().equals(new ObjectId(tableSchemaId))).findFirst();
+      if (datasetSchema != null) {
+        Optional<TableSchema> tableSchema = datasetSchema.getTableSchemas().stream()
+            .filter(t -> t.getIdTableSchema().equals(new ObjectId(tableSchemaId))).findFirst();
 
-      if (tableSchema.isPresent()) {
-        tableSchemaName = tableSchema.get().getNameTableSchema();
+        if (tableSchema.isPresent()) {
+          tableSchemaName = tableSchema.get().getNameTableSchema();
+        }
+
+        readFieldLines(file, tableSchemaId, datasetId, replace, datasetSchema);
+
+        // Success notification
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_COMPLETED_EVENT,
+            null,
+            NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .datasetId(datasetId).tableSchemaName(tableSchemaName).build());
+      } else {
+        LOG_ERROR.error("datasetSchema is null");
+        throw new EEAException("datasetSchema is null");
       }
+    } catch (
 
-      readFieldLines(file, tableSchemaId, datasetId, replace, datasetSchema);
-
-      // Success notification
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_COMPLETED_EVENT,
-          null,
-          NotificationVO.builder()
-              .user(SecurityContextHolder.getContext().getAuthentication().getName())
-              .datasetId(datasetId).tableSchemaName(tableSchemaName).build());
-    } catch (IOException e) {
+    IOException e) {
       LOG_ERROR.error("Problem with the file trying to import field schemas on datasetId {}",
           datasetId, e);
       try {
@@ -3269,15 +3280,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+
   /**
    * Creates the external integrations.
    *
    * @param extIntegrations the ext integrations
    * @param dataflowId the dataflow id
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param newDatasetSchemasIds the new dataset schemas ids
    */
   private void createExternalIntegrations(List<IntegrationVO> extIntegrations, Long dataflowId,
-      Map<String, String> dictionaryOriginTargetObjectId) {
+      Map<String, String> dictionaryOriginTargetObjectId, List<String> newDatasetSchemasIds) {
 
     // Create the structure of the external integrations on the import schema process and send them
     // all to the integrationController to be created
@@ -3289,9 +3302,23 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       integration.getInternalParameters().put("dataflowId", String.valueOf(dataflowId));
       integration.setId(null);
       integrations.add(integration);
-
+      // remove in the list of new schemas created the ones that have export eu dataset integration
+      if (IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(integration.getOperation())) {
+        newDatasetSchemasIds.remove(integration.getInternalParameters().get("datasetSchemaId"));
+      }
     }
     integrationControllerZuul.createIntegrations(integrations);
+
+    // if the list of schemasId has elements, that means that for any reason that schema it doesn't
+    // have export eu dataset,
+    // then we create it
+    if (!newDatasetSchemasIds.isEmpty()) {
+      LOG.info(
+          "In the import process, found schemas {} that not have export eu dataset integration. Create it",
+          newDatasetSchemasIds);
+      newDatasetSchemasIds.stream().forEach(datasetSchemaId -> integrationControllerZuul
+          .createDefaultIntegration(dataflowId, datasetSchemaId));
+    }
   }
 
 

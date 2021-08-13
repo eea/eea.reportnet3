@@ -748,6 +748,20 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   /**
+   * Gets the user roles by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the user roles by dataflow
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @GetMapping("/userRoles/dataflow/{dataflowId}")
+  public List<UserRoleVO> getUserRolesByDataflow(@PathVariable("dataflowId") Long dataflowId) {
+
+    return userRoleService.getUserRolesByDataflow(dataflowId);
+  }
+
+  /**
    * Gets the resources by user email.
    *
    * @param email the email
