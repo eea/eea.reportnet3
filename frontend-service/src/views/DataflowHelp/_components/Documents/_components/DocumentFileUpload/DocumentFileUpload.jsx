@@ -9,6 +9,7 @@ import { config } from 'conf';
 import { Button } from 'views/_components/Button';
 import { Dropdown } from 'views/_components/Dropdown';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 
 import { DocumentService } from 'services/DocumentService';
 
@@ -221,6 +222,7 @@ const DocumentFileUpload = ({
             type="text"
             value={inputs.description}
           />
+          <CharacterCounter currentLength={inputs.description.length} maxLength={config.INPUT_MAX_LENGTH} />
           <label className="srOnly" htmlFor="descriptionDocumentFileUpload">
             {resources.messages['description']}
           </label>

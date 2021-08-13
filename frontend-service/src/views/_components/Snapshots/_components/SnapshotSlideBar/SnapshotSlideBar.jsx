@@ -11,6 +11,7 @@ import ReactTooltip from 'react-tooltip';
 import { Sidebar } from 'primereact/sidebar';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'views/_components/Spinner';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 
 import { DialogContext } from 'views/_functions/Contexts/DialogContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -133,6 +134,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                 type="text"
                 value={inputValue}
               />
+              <CharacterCounter currentLength={inputValue.length} maxLength={config.INPUT_MAX_LENGTH} />
               <label className="srOnly" htmlFor="createSnapshotDescription">
                 {resources.messages['createSnapshotPlaceholder']}
               </label>
