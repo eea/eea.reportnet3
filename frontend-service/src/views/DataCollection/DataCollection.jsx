@@ -91,8 +91,8 @@ export const DataCollection = withRouter(({ match, history }) => {
     try {
       const metadata = await MetadataUtils.getMetadata({ datasetId, dataflowId });
       setMetadata(metadata);
-      setDataflowName(metadata.dataflowName);
-      setDatasetSchemaId(metadata.datasetSchemaId);
+      setDataflowName(metadata.dataflow.name);
+      setDatasetSchemaId(metadata.dataset.datasetSchemaId);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
