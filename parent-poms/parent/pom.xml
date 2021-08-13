@@ -13,20 +13,20 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>3.0-SNAPSHOT</api-gateway.version>
-    <communication.version>3.0-SNAPSHOT</communication.version>
-    <collaboration.version>3.0-SNAPSHOT</collaboration.version>
-    <dataflow.version>3.0-SNAPSHOT</dataflow.version>
-    <dataset.version>3.0-SNAPSHOT</dataset.version>
-    <document.version>3.0-SNAPSHOT</document.version>
-    <frontend.version>3.0-SNAPSHOT</frontend.version>
-    <indexsearch.version>3.0-SNAPSHOT</indexsearch.version>
-    <inspire.version>3.0-SNAPSHOT</inspire.version>
-    <recordstore.version>3.0-SNAPSHOT</recordstore.version>
-    <ums.version>3.0-SNAPSHOT</ums.version>
-    <validation.version>3.0-SNAPSHOT</validation.version>
-    <common-interfaces.version>3.0-SNAPSHOT</common-interfaces.version>
-    <common-utitlities.version>3.0-SNAPSHOT</common-utitlities.version>
-    <rod.version>3.0-SNAPSHOT</rod.version>
+    <api-gateway.version>v3.0.6.0</api-gateway.version>
+    <communication.version>v3.0.6.0</communication.version>
+    <collaboration.version>v3.0.6.0</collaboration.version>
+    <dataflow.version>v3.0.6.0</dataflow.version>
+    <dataset.version>v3.0.6.0</dataset.version>
+    <document.version>v3.0.6.0</document.version>
+    <frontend.version>v3.0.6.0</frontend.version>
+    <indexsearch.version>v3.0.6.0</indexsearch.version>
+    <inspire.version>v3.0.6.0</inspire.version>
+    <recordstore.version>v3.0.6.0</recordstore.version>
+    <ums.version>v3.0.6.0</ums.version>
+    <validation.version>v3.0.6.0</validation.version>
+    <common-interfaces.version>v3.0.6.0</common-interfaces.version>
+    <common-utitlities.version>v3.0.6.0</common-utitlities.version>
+    <rod.version>v3.0.6.0</rod.version>
   </properties>
 </project>
