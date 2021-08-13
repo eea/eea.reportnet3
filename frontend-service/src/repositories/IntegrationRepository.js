@@ -15,8 +15,10 @@ export const IntegrationRepository = {
   delete: async (dataflowId, integrationId) =>
     await HTTPRequester.delete({ url: getUrl(IntegrationConfig.delete, { dataflowId, integrationId }) }),
 
-  getEUDatasetIntegration: async datasetSchemaId =>
-    await HTTPRequester.get({ url: getUrl(IntegrationConfig.getEUDatasetIntegration, { datasetSchemaId }) }),
+  getEUDatasetIntegration: async (dataflowId, datasetSchemaId) =>
+    await HTTPRequester.get({
+      url: getUrl(IntegrationConfig.getEUDatasetIntegration, { dataflowId, datasetSchemaId })
+    }),
 
   getFMEProcesses: async (repositoryName, datasetId) =>
     await HTTPRequester.get({ url: getUrl(IntegrationConfig.getFMEProcesses, { datasetId, repositoryName }) }),

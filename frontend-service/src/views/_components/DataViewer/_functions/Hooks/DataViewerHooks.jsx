@@ -484,7 +484,8 @@ export const useSetColumns = (
     records.selectedRecord.recordId,
     initialCellValue,
     hasWebformWritePermissions,
-    hasWritePermissions
+    hasWritePermissions,
+    isBusinessDataflow
   ]);
 
   return {

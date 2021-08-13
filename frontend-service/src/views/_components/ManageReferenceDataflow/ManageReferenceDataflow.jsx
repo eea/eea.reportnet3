@@ -71,6 +71,25 @@ export const ManageReferenceDataflow = ({
 
   const checkErrors = () => {
     let hasErrors = false;
+
+    if (isEmpty(name.trim())) {
+      handleErrors({
+        field: 'name',
+        hasErrors: true,
+        message: resources.messages['emptyNameValidationError']
+      });
+      hasErrors = true;
+    }
+
+    if (isEmpty(description.trim())) {
+      handleErrors({
+        field: 'description',
+        hasErrors: true,
+        message: resources.messages['emptyDescriptionValidationError']
+      });
+      hasErrors = true;
+    }
+
     if (description.length > config.INPUT_MAX_LENGTH) {
       handleErrors({
         field: 'description',

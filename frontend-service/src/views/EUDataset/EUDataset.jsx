@@ -285,7 +285,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const renderTabsSchema = () => (
     <TabsSchema
-      datasetSchemaId={euDatasetState.metaData.datasetSchemaId}
+      datasetSchemaId={euDatasetState.metaData.dataset.datasetSchemaId}
       hasCountryCode={true}
       hasWritePermissions={false}
       isBusinessDataflow={euDatasetState.isBusinessDataflow}

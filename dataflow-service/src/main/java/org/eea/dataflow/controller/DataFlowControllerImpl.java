@@ -19,6 +19,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
@@ -630,6 +631,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return true, if is user requester
    */
   private boolean isUserRequester(Long dataflowId) {
+    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
     for (GrantedAuthority role : SecurityContextHolder.getContext().getAuthentication()
         .getAuthorities()) {
       if (ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)
@@ -637,7 +639,8 @@ public class DataFlowControllerImpl implements DataFlowController {
           || ObjectAccessRoleEnum.DATAFLOW_OBSERVER.getAccessRole(dataflowId)
               .equals(role.getAuthority())
           || ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)
-              .equals(role.getAuthority())) {
+              .equals(role.getAuthority())
+          || roleAdmin.equals(role.getAuthority())) {
         return true;
       }
     }

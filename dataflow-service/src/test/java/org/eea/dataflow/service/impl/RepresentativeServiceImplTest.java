@@ -35,6 +35,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
@@ -654,7 +655,10 @@ public class RepresentativeServiceImplTest {
     Mockito.when(dataProviderRepository.findAllByDataProviderGroup_id(Mockito.any()))
         .thenReturn(dataProviderList);
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(user);
-
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    dataflow.setType(TypeDataflowEnum.BUSINESS);
+    Mockito.when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataflow));
 
     representativeServiceImpl.importFile(1L, 2L, file);
     Mockito.verify(representativeRepository, times(1)).saveAll(Mockito.any());

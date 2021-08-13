@@ -5,6 +5,7 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import orderBy from 'lodash/orderBy';
+import uniq from 'lodash/uniq';
 
 import styles from './RepresentativesList.module.scss';
 
@@ -369,10 +370,9 @@ const RepresentativesList = ({
       option => option.dataProviderId === representative.dataProviderId
     );
 
-    const remainingOptionsAndSelectedOption = orderBy(
-      selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions),
-      ['label'],
-      ['asc']
+    const remainingOptionsAndSelectedOption = uniq(
+      orderBy(selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions), ['label'], ['asc']),
+      'label'
     );
 
     const labelId = `${representative.representativeId}-${representative.dataProviderId}`;

@@ -51,6 +51,7 @@ export const Feedback = withRouter(({ match, history }) => {
     dataProviders: [],
     draggedFiles: null,
     importFileDialogVisible: false,
+    isAdmin: false,
     isBusinessDataflow: false,
     isCustodian: undefined,
     isDragging: false,
@@ -70,6 +71,7 @@ export const Feedback = withRouter(({ match, history }) => {
     draggedFiles,
     importFileDialogVisible,
     isBusinessDataflow,
+    isAdmin,
     isCustodian,
     isDragging,
     isLoading,
@@ -105,18 +107,20 @@ export const Feedback = withRouter(({ match, history }) => {
           onGetInitialMessages(selectedDataProvider.dataProviderId);
         }
       } else {
-        onGetInitialMessages(representativeId);
+        if (!isAdmin) onGetInitialMessages(representativeId);
       }
     }
-  }, [selectedDataProvider, isCustodian]);
+  }, [selectedDataProvider, isCustodian, isAdmin]);
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
-      const isCustodian = userContext.hasPermission([
+      const isCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
         config.permissions.roles.CUSTODIAN.key,
         config.permissions.roles.STEWARD.key
       ]);
-      dispatchFeedback({ type: 'SET_IS_CUSTODIAN', payload: isCustodian });
+
+      const isAdmin = userContext.accessRole.some(role => role === config.permissions.roles.ADMIN.key);
+      dispatchFeedback({ type: 'SET_PERMISSIONS', payload: { isCustodian, isAdmin } });
     }
   }, [userContext]);
 
@@ -168,7 +172,7 @@ export const Feedback = withRouter(({ match, history }) => {
     try {
       const data = await DataflowService.getDetails(dataflowId);
       const name = data.name;
-      const isBusinessDataflow = TextUtils.areEquals(data.data.type, config.dataflowType.BUSINESS);
+      const isBusinessDataflow = TextUtils.areEquals(data.type, config.dataflowType.BUSINESS);
       dispatchFeedback({ type: 'SET_DATAFLOW_DETAILS', payload: { name, isBusinessDataflow } });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);

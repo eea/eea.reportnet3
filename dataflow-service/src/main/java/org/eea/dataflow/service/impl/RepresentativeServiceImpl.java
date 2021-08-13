@@ -39,6 +39,7 @@ import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
@@ -501,7 +502,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
 
       List<Representative> representativeList = new ArrayList<>();
-
+      String dataProviderType =
+          TypeDataflowEnum.BUSINESS.equals(dataflow.getType()) ? "company" : "country";
       for (String representativeData : everyLines) {
         String[] dataLine = representativeData.split("[" + delimiter + "]");
         String contryCode = dataLine[0].replaceAll("\"", "");
@@ -514,9 +516,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           }
         }
         if (!countryCodeList.contains(contryCode) && null == user) {
-          fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
+          fieldsToWrite[2] =
+              "KO imported " + dataProviderType + " and user doesn't exist in reportnet";
         } else if (!countryCodeList.contains(contryCode)) {
-          fieldsToWrite[2] = "KO imported country doesn't exist";
+          fieldsToWrite[2] = "KO imported " + dataProviderType + " doesn't exist";
         } else if (null == user && StringUtils.isNotBlank(email)) {
           fieldsToWrite[2] = "KO imported user doesn't exist in reportnet";
         } else {

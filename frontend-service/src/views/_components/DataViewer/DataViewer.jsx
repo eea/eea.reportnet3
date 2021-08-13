@@ -59,7 +59,7 @@ const DataViewer = withRouter(
     datasetSchemaId,
     hasCountryCode,
     hasWritePermissions,
-    isBusinessDataflow = false,
+    isBusinessDataflow,
     isDataflowOpen,
     isDesignDatasetEditorRead,
     isExportable,

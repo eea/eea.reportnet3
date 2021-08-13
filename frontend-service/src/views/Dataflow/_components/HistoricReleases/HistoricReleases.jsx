@@ -180,7 +180,11 @@ export const HistoricReleases = ({
             body={template}
             columnResizeMode="expand"
             field={field}
-            header={resources.messages[field]}
+            header={
+              isBusinessDataflow && TextUtils.areEquals(field, 'countryCode')
+                ? resources.messages['companyCode']
+                : resources.messages[field]
+            }
             key={field}
             sortable={true}
           />
@@ -190,7 +194,7 @@ export const HistoricReleases = ({
   };
 
   const filterOptionsDataCollection = [
-    { type: 'multiselect', properties: [{ name: 'countryCode' }] },
+    { type: 'multiselect', properties: [{ name: isBusinessDataflow ? 'company' : 'countryCode' }] },
     {
       type: 'checkbox',
       properties: [
@@ -200,7 +204,9 @@ export const HistoricReleases = ({
     }
   ];
 
-  const filterOptionsEUDataset = [{ type: 'multiselect', properties: [{ name: 'countryCode' }] }];
+  const filterOptionsEUDataset = [
+    { type: 'multiselect', properties: [{ name: isBusinessDataflow ? 'company' : 'countryCode' }] }
+  ];
 
   const renderReportingDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
