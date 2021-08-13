@@ -506,6 +506,7 @@ public class DataflowServiceImpl implements DataflowService {
     }
     dataflowVO.setCreationDate(new Date());
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    dataflowVO.setReleasable(true);
     dataFlowSaved = dataflowRepository.save(dataflowMapper.classToEntity(dataflowVO));
     LOG.info("The dataflow {} has been created.", dataFlowSaved.getName());
 

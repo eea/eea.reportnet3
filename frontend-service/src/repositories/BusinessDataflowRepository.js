@@ -8,7 +8,15 @@ export const BusinessDataflowRepository = {
   create: async (name, description, obligationId, dataProviderGroupId, fmeUserId) =>
     await HTTPRequester.post({
       url: getUrl(DataflowConfig.createUpdate),
-      data: { name, description, obligation: { obligationId }, type: 'BUSINESS', dataProviderGroupId, fmeUserId }
+      data: {
+        name,
+        description,
+        obligation: { obligationId },
+        releasable: true,
+        type: 'BUSINESS',
+        dataProviderGroupId,
+        fmeUserId
+      }
     }),
 
   getAll: async () => await HTTPRequester.get({ url: getUrl(BusinessDataflowConfig.getAll) }),
