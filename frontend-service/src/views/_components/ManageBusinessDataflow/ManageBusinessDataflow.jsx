@@ -49,7 +49,8 @@ export const ManageBusinessDataflow = ({
   obligation,
   onCreateDataflow,
   onEditDataflow,
-  resetObligations
+  resetObligations,
+  onLoadReportingDataflow
 }) => {
   const dialogName = 'isBusinessDataflowDialogVisible';
   const isDesign = TextUtils.areEquals(state?.status, config.dataflowStatus.DESIGN);
@@ -109,6 +110,10 @@ export const ManageBusinessDataflow = ({
   };
 
   useLayoutEffect(() => {
+    if (isEditing) {
+      onLoadReportingDataflow();
+    }
+
     if (isAdmin) {
       getDropdownsOptions();
     }
