@@ -1138,6 +1138,7 @@ const Dataflow = withRouter(({ history, match }) => {
             manageDialogs={manageDialogs}
             obligation={obligation}
             onEditDataflow={onEditDataflow}
+            onLoadReportingDataflow={onLoadReportingDataflow}
             resetObligations={resetObligations}
             state={{
               name: dataflowState.name,
