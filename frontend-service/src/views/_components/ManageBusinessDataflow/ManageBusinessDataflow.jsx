@@ -392,6 +392,7 @@ export const ManageBusinessDataflow = ({
           <p>
             <InputText
               className={`${styles.inputText}`}
+              hasMaxCharCounter={true}
               id="deleteDataflow"
               maxLength={config.INPUT_MAX_LENGTH}
               name={resources.messages['deleteDataflowButton']}

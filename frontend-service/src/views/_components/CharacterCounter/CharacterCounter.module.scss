@@ -1,12 +1,15 @@
 .characterCount{
-    display: flex;
     float:right;
+    text-align: right;
+    pointer-events: none;
+    
   }
 
   .redCharacterCount{
-    display: flex;
-    float:right;
     color:red;
+    float:right;
+    text-align: right;
+    pointer-events: none;
   }
 
   

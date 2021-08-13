@@ -254,6 +254,7 @@ export const ManageReferenceDataflow = ({
           <p>
             <InputText
               className={`${styles.inputText}`}
+              hasMaxCharCounter={true}
               id="deleteDataflow"
               maxLength={config.INPUT_MAX_LENGTH}
               name={resources.messages['deleteDataflowButton']}

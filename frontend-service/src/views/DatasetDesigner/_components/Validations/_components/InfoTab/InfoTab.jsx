@@ -142,6 +142,7 @@ export const InfoTab = ({
             <TooltipButton message={resourcesContext.messages['noQuotesQCTooltip']} uniqueIdentifier="shortCode" />
           </label>
           <InputText
+            hasMaxCharCounter={true}
             id={`${componentName}__shortCode`}
             keyfilter="noDoubleQuote"
             maxLength={config.INPUT_MAX_LENGTH}
@@ -168,6 +169,7 @@ export const InfoTab = ({
           onFocus={() => onDeleteFromClickedFields('name')}>
           <label htmlFor={`${componentName}__name`}>{resourcesContext.messages['ruleName']}</label>
           <InputText
+            hasMaxCharCounter={true}
             id={`${componentName}__name`}
             maxLength={config.INPUT_MAX_LENGTH}
             onChange={e => onInfoFieldChange('name', e.target.value)}
@@ -179,6 +181,7 @@ export const InfoTab = ({
         <div className={`${styles.field} ${styles.qcDescription} formField`}>
           <label htmlFor={`${componentName}__description`}>{resourcesContext.messages['description']}</label>
           <InputText
+            hasMaxCharCounter={true}
             id={`${componentName}__description`}
             maxLength={config.INPUT_MAX_LENGTH}
             onChange={e => onInfoFieldChange('description', e.target.value)}
@@ -215,6 +218,7 @@ export const InfoTab = ({
             <TooltipButton message={resourcesContext.messages['noQuotesQCTooltip']} parentName="errorMessage" />
           </label>
           <InputText
+            hasMaxCharCounter={true}
             id={`${componentName}__errorMessage`}
             keyfilter="noDoubleQuote"
             maxLength={config.INPUT_MAX_LENGTH}

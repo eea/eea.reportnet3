@@ -248,6 +248,7 @@ export const ManageReportingDataflow = ({
             <InputText
               autoFocus={true}
               className={`${styles.inputText}`}
+              hasMaxCharCounter={true}
               id={'deleteDataflow'}
               maxLength={config.INPUT_MAX_LENGTH}
               name={resources.messages['deleteDataflowButton']}
