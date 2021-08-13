@@ -45,12 +45,12 @@ export const ManageBusinessDataflow = ({
   isEditing = false,
   isVisible,
   manageDialogs,
-  state,
   obligation,
   onCreateDataflow,
   onEditDataflow,
+  onLoadReportingDataflow,
   resetObligations,
-  onLoadReportingDataflow
+  state
 }) => {
   const dialogName = 'isBusinessDataflowDialogVisible';
   const isDesign = TextUtils.areEquals(state?.status, config.dataflowStatus.DESIGN);
