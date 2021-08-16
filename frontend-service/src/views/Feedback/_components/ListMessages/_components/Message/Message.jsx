@@ -49,9 +49,9 @@ export const Message = ({
     }
   };
 
-  const onFileDownload = async (dataflowId, messageAttachmentId, dataProviderId) => {
+  const onFileDownload = async (dataflowId, messageId, dataProviderId) => {
     try {
-      const { data } = await FeedbackService.getMessageAttachment(dataflowId, messageAttachmentId, dataProviderId);
+      const { data } = await FeedbackService.getMessageAttachment(dataflowId, messageId, dataProviderId);
       DownloadFile(data, attachment.name);
     } catch (error) {
       console.error('Message - onFileDownload.', error);

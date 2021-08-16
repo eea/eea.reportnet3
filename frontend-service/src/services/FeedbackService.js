@@ -20,8 +20,8 @@ export const FeedbackService = {
     return response;
   },
 
-  getMessageAttachment: async (dataflowId, messageAttachmentId, dataProviderId) =>
-    await FeedbackRepository.getMessageAttachment(dataflowId, messageAttachmentId, dataProviderId),
+  getMessageAttachment: async (dataflowId, messageId, dataProviderId) =>
+    await FeedbackRepository.getMessageAttachment(dataflowId, messageId, dataProviderId),
 
   markMessagesAsRead: async (dataflowId, messages) => await FeedbackRepository.markMessagesAsRead(dataflowId, messages)
 };

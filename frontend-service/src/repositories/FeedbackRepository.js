@@ -16,10 +16,10 @@ export const FeedbackRepository = {
     });
   },
 
-  getMessageAttachment: async (dataflowId, messageAttachmentId, dataProviderId) => {
+  getMessageAttachment: async (dataflowId, messageId, dataProviderId) => {
     return await HTTPRequester.download({
       url: getUrl(FeedbackConfig.getMessageAttachment, { dataflowId }),
-      data: { messageAttachmentId, providerId: dataProviderId }
+      data: { messageId, providerId: dataProviderId }
     });
   },
 
