@@ -32,6 +32,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Footer } from './_components/Footer';
 import { IconTooltip } from 'views/_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
+import { InputText } from 'views/_components/InputText';
 import { Map } from 'views/_components/Map';
 
 import { DatasetService } from 'services/DatasetService';
@@ -58,6 +59,7 @@ const DataViewer = withRouter(
     dataProviderId,
     datasetSchemaId,
     hasCountryCode,
+    hasCurrentPage = false,
     hasWritePermissions,
     isBusinessDataflow,
     isDataflowOpen,
@@ -115,6 +117,7 @@ const DataViewer = withRouter(
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
       crs: 'EPSG:4326',
+      currentPage: 1,
       drawElements: {
         circle: false,
         circlemarker: false,
@@ -138,6 +141,7 @@ const DataViewer = withRouter(
       newPointCRS: 'EPSG:4326',
       newRecord: {},
       numCopiedRecords: undefined,
+      pageInputTooltip: '',
       pastedRecords: undefined,
       recordsPerPage: userContext.userProps.rowsPerPage,
       selectedFieldId: '',
@@ -174,6 +178,39 @@ const DataViewer = withRouter(
       setEditDialogVisible,
       setConfirmDeleteVisible
     );
+
+    const template = {
+      layout: `PrevPageLink PageLinks NextPageLink RowsPerPageDropdown ${hasCurrentPage && 'CurrentPageReport'}`,
+      CurrentPageReport: hasCurrentPage
+        ? options => {
+            return (
+              <span className={styles.currentPageWrapper} style={{ color: 'var(--white)', userSelect: 'none' }}>
+                <label>{resources.messages['goTo']}</label>
+                <InputText
+                  id="currentPageInput"
+                  keyfilter="pint"
+                  onChange={onPageInputChange}
+                  onKeyDown={e => onPageInputKeyDown(e, options)}
+                  style={{
+                    border:
+                      records.currentPage <= 0 || records.currentPage > options.totalPages
+                        ? '1px solid var(--errors)'
+                        : 'none',
+                    boxShadow:
+                      records.currentPage <= 0 || records.currentPage > options.totalPages
+                        ? 'var(--inputtext-box-shadow-focus-error)'
+                        : 'none',
+                    display: 'inline',
+                    width: '3rem'
+                  }}
+                  tooltip={records.pageInputTooltip}
+                  value={records.currentPage}
+                />
+              </span>
+            );
+          }
+        : null
+    };
 
     const cellDataEditor = (cells, record) => {
       return (
@@ -235,6 +272,38 @@ const DataViewer = withRouter(
     const onFileDeleteVisible = (fieldId, fieldSchemaId) => {
       dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
       setIsDeleteAttachmentVisible(true);
+    };
+
+    const onPageInputKeyDown = (event, options) => {
+      if (event.key === 'Enter' && records.currentPage !== '') {
+        const page = parseInt(records.currentPage);        
+        if (page <= 0 || page > options.totalPages) {
+          dispatchRecords({
+            type: 'SET_CURRENT_PAGE_INPUT_TOOLTIP',
+            payload: `${resources.messages['currentPageErrorMessage']} ${options.totalPages}.`
+          });
+        } else {
+          const first = records.currentPage ? options.rows * (page - 1) : 0;
+          dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: first });
+          onFetchData(
+            sort.sortField,
+            sort.sortOrder,
+            first,
+            records.recordsPerPage,
+            levelErrorValidations,
+            selectedRuleId,
+            valueFilter
+          );
+          dispatchRecords({
+            type: 'SET_CURRENT_PAGE_INPUT_TOOLTIP',
+            payload: resources.messages['currentPageInfoMessage']
+          });
+        }
+      }
+    };
+
+    const onPageInputChange = event => {
+      dispatchRecords({ type: 'SET_CURRENT_PAGE_RECORD', payload: event.target.value });
     };
 
     const onShowCoordinateError = errorCount =>
@@ -386,6 +455,7 @@ const DataViewer = withRouter(
     };
 
     useEffect(() => {
+      dispatchRecords({ type: 'SET_CURRENT_PAGE_RECORD', payload: 1 });
       onFetchData(
         sort.sortField,
         sort.sortOrder,
@@ -402,6 +472,7 @@ const DataViewer = withRouter(
 
     useEffect(() => {
       if (selectedRuleId !== '' || isGroupedValidationDeleted) {
+        dispatchRecords({ type: 'SET_CURRENT_PAGE_RECORD', payload: 1 });
         onFetchData(
           sort.sortField,
           sort.sortOrder,
@@ -490,8 +561,7 @@ const DataViewer = withRouter(
     };
 
     const onChangePage = event => {
-      dispatchRecords({ type: 'SET_RECORDS_PER_PAGE', payload: event.rows });
-      dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: event.first });
+      dispatchRecords({ type: 'ON_CHANGE_PAGE', payload: event });
       onFetchData(
         sort.sortField,
         sort.sortOrder,
@@ -720,6 +790,7 @@ const DataViewer = withRouter(
     };
 
     const onRefresh = () => {
+      dispatchRecords({ type: 'SET_CURRENT_PAGE_RECORD', payload: (records.firstPageRecord / records.recordsPerPage) + 1 });
       onFetchData(
         sort.sortField,
         sort.sortOrder,
@@ -819,6 +890,7 @@ const DataViewer = withRouter(
     const onSort = event => {
       dispatchSort({ type: 'SORT_TABLE', payload: { order: event.sortOrder, field: event.sortField } });
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
+      dispatchRecords({ type: 'SET_CURRENT_PAGE_RECORD', payload: 1 });
       onFetchData(
         event.sortField,
         event.sortOrder,
@@ -1138,6 +1210,7 @@ const DataViewer = withRouter(
             onSort={onSort}
             paginator={true}
             paginatorRight={getPaginatorRecordsCount()}
+            paginatorTemplate={template}
             ref={datatableRef}
             reorderableColumns={true}
             resizableColumns={true}

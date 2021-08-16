@@ -366,6 +366,7 @@ export const FieldsDesigner = ({
       return (
         <DataViewer
           datasetSchemaId={datasetSchemaId}
+          hasCurrentPage={true}
           hasWritePermissions={true}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}

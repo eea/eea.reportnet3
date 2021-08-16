@@ -165,7 +165,7 @@ export class DataTable extends Component {
     paginatorLeft: PropTypes.any,
     paginatorPosition: PropTypes.string,
     paginatorRight: PropTypes.any,
-    paginatorTemplate: PropTypes.string,
+    paginatorTemplate: PropTypes.any,
     reorderableColumns: PropTypes.bool,
     resizableColumns: PropTypes.bool,
     responsive: PropTypes.bool,
