@@ -164,6 +164,20 @@ const Dataflows = withRouter(({ history, match }) => {
     }
   }, [tabId]);
 
+  useEffect(() => {
+    setActiveIndexTabOnBack();
+  }, [isCustodian]);
+
+  const setActiveIndexTabOnBack = () => {
+    for (let tabItemIndex = 0; tabItemIndex < tabMenuItems.length; tabItemIndex++) {
+      const tabItem = tabMenuItems[tabItemIndex];
+
+      if (TextUtils.areEquals(tabItem.id, userContext.currentDataflowType)) {
+        onChangeTab(tabItemIndex);
+      }
+    }
+  };
+
   const getDataflows = async () => {
     setLoading(true);
 
