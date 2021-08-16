@@ -1,6 +1,6 @@
 username,password,dataflowId,dataProviderId
-provider1,1234,804,41
-provider2,1234,804,42
-provider3,1234,804,43
-provider4,1234,804,44
-provider5,1234,804,45
+*,****,804,41
+*,****,804,42
+*,****,804,43
+*,****,804,44
+*,****,804,45
