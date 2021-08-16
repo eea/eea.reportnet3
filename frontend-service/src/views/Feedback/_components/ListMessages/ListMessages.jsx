@@ -11,6 +11,8 @@ import { Spinner } from 'views/_components/Spinner';
 
 import { listMessagesReducer } from './_functions/Reducers/listMessagesReducer';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
 export const ListMessages = ({
   canLoad = true,
   className = '',
@@ -130,6 +132,7 @@ export const ListMessages = ({
               i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
             }
             // isAttachment={i % 2 === 1}
+            isAttachment={TextUtils.areEquals(message.type, 'ATTACHMENT')}
             key={uniqueId('message_')}
             message={message}
           />

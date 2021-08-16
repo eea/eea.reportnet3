@@ -391,7 +391,7 @@ export const Feedback = withRouter(({ match, history }) => {
                 }
                 value={messageToSend}
               />
-              {/* <Button
+              <Button
                 className={`${
                   (isCustodian && isEmpty(selectedDataProvider)) || isSending ? '' : 'p-button-animated-right-blink'
                 } p-button-secondary ${styles.attachFileMessageButton}`}
@@ -400,7 +400,7 @@ export const Feedback = withRouter(({ match, history }) => {
                 iconPos="right"
                 label={resources.messages['uploadAttachment']}
                 onClick={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: true })}
-              /> */}
+              />
               <Button
                 className={`${
                   messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending
