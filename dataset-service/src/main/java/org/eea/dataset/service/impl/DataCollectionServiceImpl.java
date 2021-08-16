@@ -366,7 +366,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void updateDataCollection(Long dataflowId, boolean referenceDataflow) {
-    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow);
+    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow, false);
   }
 
   /**
@@ -378,15 +378,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param manualCheck the manual check
    * @param showPublicInfo the show public info
    * @param referenceDataflow the reference dataflow
+   * @param stopAndNotifyPKError the stop and notify PK error
    */
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
-      boolean referenceDataflow) {
+      boolean referenceDataflow, boolean stopAndNotifyPKError) {
 
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck,
-        referenceDataflow);
+        referenceDataflow, stopAndNotifyPKError);
 
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
 
@@ -414,9 +415,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck the manual check
    * @param referenceDataflow the reference dataflow
+   * @param stopAndNotifyPKError the stop and notify PK error
    */
   private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
-      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow) {
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow,
+      boolean stopAndNotifyPKError) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
@@ -426,6 +429,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     // we look if all SQL QC's are working correctly, if not we disable it before do a dc
     if (isCreation) {
+      if (referenceDataflow && stopAndNotifyPKError) {
+        if (!checkIfSchemasHavePk(designs)) {
+          NotificationVO notificationVO = NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .dataflowId(dataflowId).build();
+          releaseNotification(EventType.NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT, notificationVO);
+          LOG_ERROR.error(
+              "No primary key in any schemas in the dataflow {}. So stop the process to create the reference dataset",
+              dataflowId);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.NO_PK_REFERENCE_DATAFLOW);
+        }
+      }
       LOG.info("Validate SQL Rules in Dataflow {}, Data Collection creation proccess.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       designs.stream().forEach(dataset -> {
@@ -1377,9 +1393,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       for (Map.Entry<Long, List<String>> entry : referenceDatasetIdsEmails.entrySet()) {
         if (null != entry.getValue()) {
           for (String email : entry.getValue()) {
-            LOG.info("Se asigna al usuario {} el reference {}", email, referenceDatasetId);
+            LOG.info("Assign to the user {} reference dataset {}", email, referenceDatasetId);
             assignments.add(createAssignments(referenceDatasetId, email,
-                ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+                ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
 
             // Assign Dataflow-%s-LEAD_REPORTER
             assignments.add(
@@ -1595,6 +1611,25 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     } catch (EEAException e) {
       LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
     }
+  }
+
+  /**
+   * Check if schemas have pk.
+   *
+   * @param designs the designs
+   * @return true, if successful
+   */
+  public boolean checkIfSchemasHavePk(List<DesignDatasetVO> designs) {
+    boolean hasPK = true;
+    for (DesignDatasetVO dataset : designs) {
+      for (TableSchemaVO tableSchemaVO : datasetSchemaService
+          .getDataSchemaById(dataset.getDatasetSchema()).getTableSchemas()) {
+        for (FieldSchemaVO fieldSchemaVO : tableSchemaVO.getRecordSchema().getFieldSchema()) {
+          hasPK = !Boolean.TRUE.equals(fieldSchemaVO.getPk()) ? false : hasPK;
+        }
+      }
+    }
+    return hasPK;
   }
 
 }

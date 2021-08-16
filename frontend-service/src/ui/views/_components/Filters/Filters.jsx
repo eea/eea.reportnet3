@@ -494,7 +494,7 @@ export const Filters = ({
       />
     );
 
-  const renderMultiselectSelectFilter = (property, showInput) => (
+  const renderMultiselectSelectFilter = (property, showInput, label = '') => (
     <span className={`${styles.input}`} key={property}>
       {renderOrderFilter(property)}
       <MultiSelect
@@ -508,7 +508,7 @@ export const Filters = ({
         inputId={`${property}_input`}
         isFilter
         itemTemplate={selectTemplate}
-        label={resources.messages[property]}
+        label={isEmpty(label) ? resources.messages[property] : label}
         notCheckAllHeader={resources.messages['uncheckAllFilter']}
         onChange={event => onFilterData(property, event.value)}
         optionLabel="type"
@@ -559,7 +559,7 @@ export const Filters = ({
 
         case 'multiselect':
           return filterOption.properties.map(property =>
-            renderMultiselectSelectFilter(property.name, property.showInput)
+            renderMultiselectSelectFilter(property.name, property.showInput, property.label)
           );
 
         case 'dropdown':

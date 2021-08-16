@@ -29,7 +29,7 @@ const UserData = () => {
       <div>
         <a
           disabled
-          href={getUrl(routes.PRIVACY_STATEMENT)}
+          href={getUrl(routes.PRIVACY_POLICY_EIONET)}
           rel="noopener noreferrer"
           style={{ cursor: 'pointer' }}
           target="_blank"

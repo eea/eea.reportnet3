@@ -15,6 +15,8 @@ export const DataflowRepository = {
   getAllSchemas: () => Promise.reject('[DataflowRepository#getAllSchemas] must be implemented'),
   getApiKey: () => Promise.reject('[DataflowRepository#getApiKey] must be implemented'),
   getAllDataflowsUserList: () => Promise.reject('[DataflowRepository#getAllDataflowsUserList] must be implement'),
+  getRepresentativesUsersList: () =>
+    Promise.reject('[DataflowRepository#getRepresentativesUsersList] must be implement'),
   getUserList: () => Promise.reject('[DataflowRepository#getUserlist] must be implement'),
   getPublicDataflowData: () => Promise.reject('[DataflowRepository#getPublicDataflowData] must be implemented'),
   getPublicDataflowsByCountryCode: () =>

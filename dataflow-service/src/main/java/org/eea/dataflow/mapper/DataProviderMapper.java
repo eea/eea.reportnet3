@@ -20,6 +20,7 @@ public interface DataProviderMapper extends IMapper<DataProvider, DataProviderVO
    */
   @Override
   @Mapping(source = "group", target = "type")
+  @Mapping(source = "groupId", target = "dataProviderGroup.id")
   DataProvider classToEntity(DataProviderVO model);
 
   /**
@@ -30,5 +31,6 @@ public interface DataProviderMapper extends IMapper<DataProvider, DataProviderVO
    */
   @Override
   @Mapping(source = "type", target = "group")
+  @Mapping(source = "dataProviderGroup.id", target = "groupId")
   DataProviderVO entityToClass(DataProvider entity);
 }

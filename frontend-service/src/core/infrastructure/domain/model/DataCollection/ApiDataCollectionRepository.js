@@ -9,8 +9,9 @@ const create = async (dataflowId, endDate, isManualTechnicalAcceptance, stopAndN
     showPublicInfo
   );
 };
-const createReference = async dataflowId => {
-  return await apiDataCollection.createReference(dataflowId);
+
+const createReference = async (dataflowId, stopAndNotifyPKError) => {
+  return await apiDataCollection.createReference(dataflowId, stopAndNotifyPKError);
 };
 
 const update = async dataflowId => {

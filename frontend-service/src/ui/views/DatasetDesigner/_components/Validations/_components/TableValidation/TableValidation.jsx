@@ -23,21 +23,21 @@ import { ValidationContext } from 'ui/views/_functions/Contexts/ValidationContex
 import {
   createValidationReducerInitState,
   createValidationReducer
-} from 'ui/views/DatasetDesigner/_components/Validations/_functions/reducers/CreateValidationReducer';
+} from 'ui/views/DatasetDesigner/_components/Validations/_functions/Reducers/CreateValidationReducer';
 
-import { checkComparisonRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonRelation';
-import { checkComparisonSQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonSQLsentence';
-import { checkComparisonValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/checkComparisonValidation';
-import { deleteLink } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/deleteLink';
-import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFields';
-import { getDatasetSchemaTableFieldsBySchema } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getDatasetSchemaTableFieldsBySchema';
-import { getEmptyLink } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getEmptyLink';
-import { getFieldType } from '../../_functions/utils/getFieldType';
-import { getReferencedTables } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getReferencedTables';
-import { getSelectedTableByTableSchemaId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/getSelectedTableByTableSchemaId';
-import { initValidationRuleRelationCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/initValidationRuleRelationCreation';
-import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/resetValidationRuleCreation';
-import { setValidationRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/utils/setValidationRelation';
+import { checkComparisonRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonRelation';
+import { checkComparisonSQLsentence } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonSQLsentence';
+import { checkComparisonValidation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonValidation';
+import { deleteLink } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/deleteLink';
+import { getDatasetSchemaTableFields } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getDatasetSchemaTableFields';
+import { getDatasetSchemaTableFieldsBySchema } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getDatasetSchemaTableFieldsBySchema';
+import { getEmptyLink } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getEmptyLink';
+import { getFieldType } from '../../_functions/Utils/getFieldType';
+import { getReferencedTables } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getReferencedTables';
+import { getSelectedTableByTableSchemaId } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/getSelectedTableByTableSchemaId';
+import { initValidationRuleRelationCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/initValidationRuleRelationCreation';
+import { resetValidationRuleCreation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/resetValidationRuleCreation';
+import { setValidationRelation } from 'ui/views/DatasetDesigner/_components/Validations/_functions/Utils/setValidationRelation';
 
 export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, tabs }) => {
   const notificationContext = useContext(NotificationContext);

@@ -7,6 +7,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.springframework.web.multipart.MultipartFile;
 
 /** The Interface RepresentativeService. */
@@ -39,11 +40,12 @@ public interface RepresentativeService {
   Long updateDataflowRepresentative(RepresentativeVO representativeVO);
 
   /**
-   * Gets the all data provider types.
+   * Gets DataProviderGroup names based on TypeDataProviderEnum
    *
-   * @return the all data provider types
+   * @param providerType Country or Company
+   * @return all dataProviders matching the TypeDataProviderEnum provided
    */
-  List<DataProviderCodeVO> getAllDataProviderTypes();
+  List<DataProviderCodeVO> getDataProviderGroupByType(TypeDataProviderEnum providerType);
 
   /**
    * Gets the all data provider by group id.

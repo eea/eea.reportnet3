@@ -879,7 +879,7 @@ export const FieldDesigner = ({
   );
 
   const renderCheckboxes = () => (
-    <div className="requiredAndPKCheckboxes">
+    <div className={styles.requiredAndPKCheckboxes}>
       {!addField ? (
         <FontAwesomeIcon
           aria-label={resources.messages['moveField']}
@@ -911,7 +911,6 @@ export const FieldDesigner = ({
             onPKChange(e.checked);
           }
         }}
-        style={{ width: '35px' }}
         tooltip={
           !isNil(fieldDesignerState.fieldTypeValue) &&
           !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
@@ -942,7 +941,6 @@ export const FieldDesigner = ({
         onChange={e => {
           onRequiredChange(e.checked);
         }}
-        style={{ width: '70px' }}
         tooltip={
           Boolean(fieldDesignerState.fieldPKValue)
             ? resources.messages['disabledRequiredPK']
@@ -965,7 +963,6 @@ export const FieldDesigner = ({
         inputId={`${fieldId}_check_readOnly`}
         label="Default"
         onChange={e => onReadOnlyChange(e.checked)}
-        style={{ width: '90px' }}
       />
     </div>
   );
@@ -1097,7 +1094,7 @@ export const FieldDesigner = ({
     <Fragment>
       <InputText
         autoFocus={false}
-        className={`${styles.inputField} ${
+        className={`${styles.inputField} ${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
         disabled={isDataflowOpen || isDesignDatasetEditorRead}
@@ -1158,7 +1155,7 @@ export const FieldDesigner = ({
       <Dropdown
         appendTo={document.body}
         ariaLabel={'fieldType'}
-        className={`${styles.dropdownFieldType} ${
+        className={`${styles.dropdownFieldType} ${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
         disabled={isDataflowOpen || isDesignDatasetEditorRead}

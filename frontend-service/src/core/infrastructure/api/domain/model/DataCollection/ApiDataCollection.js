@@ -17,9 +17,9 @@ const apiDataCollection = {
       }
     }),
 
-  createReference: async dataflowId => {
+  createReference: async (dataflowId, stopAndNotifyPKError) => {
     return await HTTPRequester.post({
-      url: getUrl(DataCollectionConfig.createReference),
+      url: getUrl(DataCollectionConfig.createReference, { stopAndNotifyPKError }),
       data: { idDataflow: dataflowId }
     });
   },

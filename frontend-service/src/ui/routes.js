@@ -17,6 +17,7 @@ export const routes = {
   EU_DATASET: '/dataflow/:dataflowId/euDataset/:datasetId',
   EULOGIN: '/eulogin',
   LOGIN: '/login',
+  PRIVACY_POLICY_EIONET: 'https://www.eionet.europa.eu/reportnet/platform/footer/privacypolicy',
   PRIVACY_STATEMENT: '/privacyPolicy',
   PUBLIC_COUNTRIES: '/public/countries',
   PUBLIC_COUNTRY_INFORMATION_ID: '/public/countries/:countryCode',

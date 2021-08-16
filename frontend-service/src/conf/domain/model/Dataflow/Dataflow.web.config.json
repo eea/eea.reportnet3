@@ -14,6 +14,7 @@
   "getApiKeyCustodian": "/user/getApiKey?dataflowId={:dataflowId}",
   "getDataflows": "/dataflow/getDataflows",
   "getAllDataflowsUserList": "/dataflow/getUserRolesAllDataflows",
+  "getRepresentativesUsersList": "/user/userRoles/dataflow/{:dataflowId}",
   "getUserList": "/user/getUserRolesByDataflow/{:dataflowId}/dataProviderId/{:representativeId}",
   "getPublicDataflowData": "/dataflow/getPublicDataflow/{:dataflowId}",
   "getPublicDataflowsByCountryCode": "/dataflow/public/country/{:country}?asc={:asc}&pageNum={:pageNum}&pageSize={:pageSize}&sortField={:sortField}",

@@ -19,6 +19,7 @@ import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'ui/views/_components/UserList';
 
 import { DataflowService } from 'core/services/Dataflow';
+import { BusinessDataflowService } from 'core/services/BusinessDataflow';
 import { ReferenceDataflowService } from 'core/services/ReferenceDataflow';
 import { UserService } from 'core/services/User';
 
@@ -50,8 +51,10 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
     activeIndex: 0,
+    business: [],
     dataflows: [],
     isAddDialogVisible: false,
+    isAdmin: null,
     isCustodian: null,
     isNationalCoordinator: false,
     isReferencedDataflowDialogVisible: false,
@@ -66,9 +69,13 @@ const Dataflows = withRouter(({ history, match }) => {
   const tabMenuItems = isCustodian
     ? [
         { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] },
         { className: styles.flow_tab, id: 'reference', label: resources.messages['referenceDataflowsListTab'] }
       ]
-    : [{ className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] }];
+    : [
+        { className: styles.flow_tab, id: 'dataflows', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] }
+      ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
@@ -86,10 +93,13 @@ const Dataflows = withRouter(({ history, match }) => {
     const createBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: dataflowsState.isCustodian,
+      isVisible: tabId === 'business' ? dataflowsState.isAdmin : dataflowsState.isCustodian,
       label: 'createNewDataflow',
       onClick: () =>
-        manageDialogs(tabId === 'dataflows' ? 'isAddDialogVisible' : 'isReferencedDataflowDialogVisible', true),
+        manageDialogs(
+          tabId === 'dataflows' || tabId === 'business' ? 'isAddDialogVisible' : 'isReferencedDataflowDialogVisible',
+          true
+        ),
       title: 'createNewDataflow'
     };
 
@@ -128,13 +138,21 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const getDataflows = async () => {
     setLoading(true);
+
     try {
       if (TextUtils.areEquals(tabId, 'dataflows')) {
         const { data } = await DataflowService.all(userContext.contextRoles);
-        dataflowsDispatch({ type: 'GET_DATAFLOWS', payload: { data, type: 'dataflows' } });
-      } else {
+        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'dataflows' } });
+      }
+
+      if (TextUtils.areEquals(tabId, 'reference')) {
         const { data } = await ReferenceDataflowService.all(userContext.contextRoles);
-        dataflowsDispatch({ type: 'GET_DATAFLOWS', payload: { data, type: 'reference' } });
+        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reference' } });
+      }
+
+      if (TextUtils.areEquals(tabId, 'business')) {
+        const { data } = await BusinessDataflowService.all(userContext.contextRoles);
+        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } });
       }
     } catch (error) {
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
@@ -158,6 +176,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const onChangeTab = index => dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
 
   const onLoadPermissions = () => {
+    const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
     const isCustodian = userContext.hasPermission([permissions.roles.CUSTODIAN.key, permissions.roles.STEWARD.key]);
 
     const isNationalCoordinator = userContext.hasContextAccessPermission(
@@ -166,7 +185,7 @@ const Dataflows = withRouter(({ history, match }) => {
       [permissions.roles.NATIONAL_COORDINATOR.key]
     );
 
-    dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isCustodian, isNationalCoordinator } });
+    dataflowsDispatch({ type: 'HAS_PERMISSION', payload: { isAdmin, isCustodian, isNationalCoordinator } });
   };
 
   const onRefreshToken = async () => {
@@ -202,7 +221,11 @@ const Dataflows = withRouter(({ history, match }) => {
         <TabMenu activeIndex={activeIndex} model={tabMenuItems} onTabChange={event => onChangeTab(event.index)} />
         <DataflowsList
           className="dataflowList-accepted-help-step"
-          content={{ dataflows: dataflowsState['dataflows'], reference: dataflowsState['reference'] }}
+          content={{
+            dataflows: dataflowsState['dataflows'],
+            business: dataflowsState['business'],
+            reference: dataflowsState['reference']
+          }}
           isLoading={loadingStatus[tabId]}
           visibleTab={tabId}
         />

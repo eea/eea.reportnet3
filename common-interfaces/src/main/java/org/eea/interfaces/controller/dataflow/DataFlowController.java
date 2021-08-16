@@ -215,4 +215,5 @@ public interface DataFlowController {
   @GetMapping("/private/isReferenceDataflowDraft/entity/{entity}/{entityId}")
   boolean accessReferenceEntity(@PathVariable("entity") EntityClassEnum entity,
       @PathVariable("entityId") Long entityId);
+
 }

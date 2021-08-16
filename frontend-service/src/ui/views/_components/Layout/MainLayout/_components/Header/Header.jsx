@@ -249,7 +249,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       }}>
       <FontAwesomeIcon
         aria-hidden={false}
-        ariaLabel="Logout"
+        aria-label="Logout"
         className={styles.logoutButton}
         icon={AwesomeIcons('logout')}
         role="presentation"

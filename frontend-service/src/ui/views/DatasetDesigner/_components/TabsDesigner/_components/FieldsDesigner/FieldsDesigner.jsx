@@ -808,7 +808,9 @@ export const FieldsDesigner = ({
           </span>
           <label className={styles.requiredWrap}>{resources.messages['required']}</label>
           <label className={styles.readOnlyWrap}>{resources.messages['readOnly']}</label>
-          <label>{resources.messages['newFieldPlaceHolder']}</label>
+          <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}>
+            {resources.messages['newFieldPlaceHolder']}
+          </label>
           <label>{resources.messages['newFieldDescriptionPlaceHolder']}</label>
           <label>{resources.messages['newFieldTypePlaceHolder']}</label>
         </div>

@@ -661,6 +661,7 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the user roles.
    *
    * @param dataProviderId the data provider id
+   * @param dataflowList the dataflow list
    * @return the user roles
    */
   @Override
@@ -777,7 +778,6 @@ public class DataflowServiceImpl implements DataflowService {
     }
     return reference;
   }
-
 
   /**
    * Sets the reportings.

@@ -25,7 +25,7 @@ public class ValidationSchemaIntegrityCommand implements ValidationSchemaCommand
     Boolean isValid = true;
     if (!TypeDataflowEnum.REFERENCE.equals(dataflowType)
         && Boolean.TRUE.equals(schema.getReferenceDataset())) {
-      isValid = false;
+      isValid = null;
     } else {
       // This validation consists in: the schema has to have at least one table, and for each table,
       // it's need to be at least one field

@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -38,8 +39,10 @@ export const UserList = ({ dataflowId, representativeId }) => {
     try {
       let response;
       setIsLoading(true);
-      if (isNil(representativeId)) {
+      if (isNil(representativeId) && isNil(dataflowId)) {
         response = await DataflowService.getAllDataflowsUserList();
+      } else if (isNil(representativeId) && !isNil(dataflowId)) {
+        response = await DataflowService.getRepresentativesUsersList(dataflowId);
       } else {
         response = await DataflowService.getUserList(dataflowId, representativeId);
       }
@@ -69,6 +72,18 @@ export const UserList = ({ dataflowId, representativeId }) => {
 
   const onLoadFilteredData = value => setFilteredData(value);
 
+  const filterOptionsWithDataflowIdRepresentativeId = [
+    {
+      type: 'multiselect',
+      properties: [{ name: 'role' }]
+    },
+    { type: 'input', properties: [{ name: 'email' }] },
+    {
+      type: 'multiselect',
+      properties: [{ name: 'country', showInput: true, label: resources.messages['countries'] }]
+    }
+  ];
+
   const filterOptionsNoRepresentative = [
     { type: 'input', properties: [{ name: 'dataflowName' }] },
     { type: 'multiselect', properties: [{ name: 'role' }] },
@@ -80,6 +95,37 @@ export const UserList = ({ dataflowId, representativeId }) => {
     { type: 'input', properties: [{ name: 'email' }] }
   ];
 
+  const renderFilters = () => {
+    if (isNil(representativeId) && isNil(dataflowId)) {
+      return (
+        <Filters
+          data={userListData}
+          getFilteredData={onLoadFilteredData}
+          getFilteredSearched={getFilteredState}
+          options={filterOptionsNoRepresentative}
+        />
+      );
+    } else if (isNil(representativeId) && !isNil(dataflowId)) {
+      return (
+        <Filters
+          data={userListData}
+          getFilteredData={onLoadFilteredData}
+          getFilteredSearched={getFilteredState}
+          options={filterOptionsWithDataflowIdRepresentativeId}
+        />
+      );
+    } else {
+      return (
+        <Filters
+          data={userListData}
+          getFilteredData={onLoadFilteredData}
+          getFilteredSearched={getFilteredState}
+          options={filterOptionsHasRepresentativeId}
+        />
+      );
+    }
+  };
+
   return (
     <div className={styles.container}>
       {isLoading ? (
@@ -88,22 +134,7 @@ export const UserList = ({ dataflowId, representativeId }) => {
         <div className={styles.noUsers}>{resources.messages['noUsers']}</div>
       ) : (
         <div className={styles.users}>
-          {isNil(representativeId) ? (
-            <Filters
-              data={userListData}
-              getFilteredData={onLoadFilteredData}
-              getFilteredSearched={getFilteredState}
-              options={filterOptionsNoRepresentative}
-            />
-          ) : (
-            <Filters
-              data={userListData}
-              getFilteredData={onLoadFilteredData}
-              getFilteredSearched={getFilteredState}
-              options={filterOptionsHasRepresentativeId}
-            />
-          )}
-
+          {renderFilters()}
           {!isEmpty(filteredData) ? (
             <DataTable
               paginator={true}
@@ -113,11 +144,14 @@ export const UserList = ({ dataflowId, representativeId }) => {
               summary="usersList"
               totalRecords={userListData.length}
               value={filteredData}>
-              {isNil(representativeId) && (
+              {isNil(representativeId) && isNil(dataflowId) && (
                 <Column field="dataflowName" header={resources.messages['dataflowName']} sortable={true} />
               )}
               <Column field="role" header={resources.messages['role']} sortable={true} />
               <Column field="email" header={resources.messages['user']} sortable={true} />
+              {isNil(representativeId) && !isNil(dataflowId) && (
+                <Column field="country" header={resources.messages['countries']} sortable={true} />
+              )}
             </DataTable>
           ) : (
             <div className={styles.emptyFilteredData}>{resources.messages['noUsersWithSelectedParameters']}</div>
@@ -126,4 +160,9 @@ export const UserList = ({ dataflowId, representativeId }) => {
       )}
     </div>
   );
+};
+
+UserList.propTypes = {
+  dataflowId: PropTypes.number,
+  representativeId: PropTypes.number
 };

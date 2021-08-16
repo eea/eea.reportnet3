@@ -596,17 +596,17 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       if (isTestDataset) {
         dataset = data.testDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
       } else if (isReferenceDataset) {
-        dataset = data.referenceDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
-        setIsDatasetUpdatable(dataset[0]?.updatable);
+        dataset = data.referenceDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
+        setIsDatasetUpdatable(dataset.updatable);
       } else {
-        dataset = data.datasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+        dataset = data.datasets.find(dataset => dataset.datasetId.toString() === datasetId);
         if (!isEmpty(dataset)) {
-          setIsDatasetReleased(dataset[0]?.isReleased);
+          setIsDatasetReleased(dataset.isReleased);
         } else {
-          dataset = data.referenceDatasets.filter(dataset => dataset.datasetId.toString() === datasetId);
+          dataset = data.referenceDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
           setIsReferenceDatasetRegularDataflow(true);
-          setIsDatasetReleased(dataset[0]?.isReleased);
-          setIsDatasetUpdatable(dataset[0]?.updatable);
+          setIsDatasetReleased(dataset.isReleased);
+          setIsDatasetUpdatable(dataset.updatable);
         }
       }
 
@@ -783,7 +783,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     });
 
   const datasetInsideTitle = () => {
-    if (dataset.isReleasing) {
+    if (dataset?.isReleasing) {
       return `${resources.messages['isReleasing']} `;
     } else if (!isEmpty(datasetFeedbackStatus)) {
       return `${datasetFeedbackStatus} `;
