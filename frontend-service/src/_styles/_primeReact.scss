@@ -1261,7 +1261,14 @@ body .p-card {
 body .p-paginator {
   background-color: var(--paginator-bg);
   border: var(--paginator-border);
-  padding: 0;
+  padding: 2px;
+}
+body .p-paginator .p-component .p-unselectable-text .p-paginator-bottom {
+  &:not(body.p-paginator-right-content) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 }
 body .p-paginator .p-paginator-first,
 body .p-paginator .p-paginator-prev,
@@ -1291,7 +1298,7 @@ body .p-paginator .p-paginator-last:not(.p-disabled):not(.p-highlight):hover {
   color: var(--paginator-color-hover);
 }
 body .p-paginator .p-dropdown {
-  border: 1 none;
+  border: 1px none;
 }
 body .p-paginator .p-dropdown .p-dropdown-trigger,
 body .p-paginator .p-dropdown .p-dropdown-label {
@@ -1361,6 +1368,16 @@ body .p-paginator .p-dropdown {
   margin-left: 0.5em;
   height: 2.286em;
   min-width: auto;
+}
+
+body .p-paginator .p-paginator-page,
+.p-paginator .p-paginator-pages,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-last,
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-current {
+  height: auto;
 }
 
 body .p-datagrid .p-datagrid-header {

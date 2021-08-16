@@ -193,9 +193,8 @@ const DataViewer = withRouter(
                   onKeyDown={e => onPageInputKeyDown(e, options)}
                   style={{
                     border:
-                      records.currentPage <= 0 || records.currentPage > options.totalPages
-                        ? '1px solid var(--errors)'
-                        : 'none',
+                      (records.currentPage <= 0 || records.currentPage > options.totalPages) &&
+                      '1px solid var(--errors)',
                     boxShadow:
                       records.currentPage <= 0 || records.currentPage > options.totalPages
                         ? 'var(--inputtext-box-shadow-focus-error)'
@@ -276,7 +275,7 @@ const DataViewer = withRouter(
 
     const onPageInputKeyDown = (event, options) => {
       if (event.key === 'Enter' && records.currentPage !== '') {
-        const page = parseInt(records.currentPage);        
+        const page = parseInt(records.currentPage);
         if (page <= 0 || page > options.totalPages) {
           dispatchRecords({
             type: 'SET_CURRENT_PAGE_INPUT_TOOLTIP',
@@ -790,7 +789,10 @@ const DataViewer = withRouter(
     };
 
     const onRefresh = () => {
-      dispatchRecords({ type: 'SET_CURRENT_PAGE_RECORD', payload: (records.firstPageRecord / records.recordsPerPage) + 1 });
+      dispatchRecords({
+        type: 'SET_CURRENT_PAGE_RECORD',
+        payload: records.firstPageRecord / records.recordsPerPage + 1
+      });
       onFetchData(
         sort.sortField,
         sort.sortOrder,
