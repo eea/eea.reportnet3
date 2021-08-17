@@ -107,21 +107,13 @@ export const PublicCard = ({
         <div className={`${styles.footer}`}>
           {externalCard ? (
             <span>
-              {
-                <Fragment>
-                  <strong>Frequency: </strong>
-                  {frequency}
-                </Fragment>
-              }
+              <strong>Frequency: </strong>
+              {frequency}
             </span>
           ) : (
             <span>
-              {
-                <Fragment>
-                  <strong>Status: </strong>
-                  {`${isReleasable ? 'OPEN' : 'CLOSED'}`}
-                </Fragment>
-              }
+              <strong>Status: </strong>
+              {`${isReleasable ? 'OPEN' : 'CLOSED'}`}
             </span>
           )}
           <span>
