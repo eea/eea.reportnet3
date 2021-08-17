@@ -1,4 +1,4 @@
-CREATE TABLE public.data_provider_group (
+CREATE TABLE IF NOT EXISTS public.data_provider_group (
 	id int8 NOT NULL,
 	"name" varchar(255) NULL,
 	"type" varchar(255) NULL,

@@ -1,0 +1,28 @@
+@import '_styles/mixins';
+
+.expression {
+  --tableFieldWidth: 200px;
+
+  align-items: flex-end;
+  display: flex;
+  justify-content: flex-start;
+
+  .tableField {
+    width: var(--tableFieldWidth);
+    :global .p-dropdown {
+      width: 100%;
+    }
+    margin-right: 16px;
+  }
+
+  .deleteButtonWrap {
+    margin-bottom: 1rem;
+
+    .deleteButton {
+      border: 1px solid var(--c-custom-gray) !important;
+      @include shadow-0em;
+      color: var(--errors) !important;
+      margin: 0 !important;
+    }
+  }
+}

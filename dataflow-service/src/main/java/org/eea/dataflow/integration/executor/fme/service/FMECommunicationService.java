@@ -14,16 +14,18 @@ import org.springframework.http.HttpStatus;
  */
 public interface FMECommunicationService {
 
+
   /**
    * Submit async job.
    *
    * @param repository the repository
    * @param workspace the workspace
    * @param fmeAsyncJob the fme async job
-   *
+   * @param dataflowId the dataflow id
    * @return the integer
    */
-  Integer submitAsyncJob(String repository, String workspace, FMEAsyncJob fmeAsyncJob);
+  Integer submitAsyncJob(String repository, String workspace, FMEAsyncJob fmeAsyncJob,
+      Long dataflowId);
 
   /**
    * Send file.
@@ -57,21 +59,24 @@ public interface FMECommunicationService {
    */
   InputStream receiveFile(Long idDataset, Long providerId, String fileName);
 
+
   /**
    * Find repository.
    *
-   * @return the collection
+   * @param datasetId the dataset id
+   * @return the FME collection VO
    */
-  FMECollectionVO findRepository();
+  FMECollectionVO findRepository(Long datasetId);
+
 
   /**
    * Find items.
    *
    * @param repository the repository
-   *
-   * @return the collection
+   * @param datasetId the dataset id
+   * @return the FME collection VO
    */
-  FMECollectionVO findItems(String repository);
+  FMECollectionVO findItems(String repository, Long datasetId);
 
   /**
    * Authenticate and authorize.

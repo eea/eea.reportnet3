@@ -1,0 +1,27 @@
+.checkboxWrapper {
+  margin-top: 0.2rem;
+  user-select: none;
+  :global .p-checkbox {
+    margin-left: 0 !important;
+  }
+  label {
+    margin-left: 0.5rem !important;
+    span {
+      cursor: pointer;
+      font-weight: bold;
+      color: var(--main-font-color);
+    }
+  }
+}
+.infoButton {
+  background-color: var(--white);
+  border-radius: 50%;
+  color: var(--datatable-header-info-button-color);
+  font-size: 12pt;
+  margin-bottom: 0.2rem;
+  cursor: pointer;
+}
+
+.cancelButton {
+  margin-right: 0px !important;
+}

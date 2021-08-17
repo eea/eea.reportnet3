@@ -1,0 +1,107 @@
+@import '_styles/mixins';
+
+.expression {
+  display: flex;
+  --unionWidth: 78px;
+  --operatorsWidth: 130px;
+  --operatorValueWidth: 120px;
+  --valueFieldTypeWidth: 80px;
+  --fieldsGap: 0.5rem;
+  list-style: none !important;
+  :global .p-dropdown {
+    padding-bottom: 2px;
+  }
+  .group {
+    display: flex;
+    align-self: baseline;
+    align-items: center;
+    margin-right: 1rem;
+    :global .p-checkbox {
+      width: 33px !important;
+      height: 33px !important;
+    }
+    :global .p-checkbox-box {
+      width: 33px !important;
+      height: 33px !important;
+      :global .p-checkbox-icon {
+        font-size: 27px;
+      }
+    }
+  }
+  .union {
+    width: var(--unionWidth);
+    :global .p-dropdown {
+      width: var(--unionWidth);
+    }
+  }
+  .operatorType {
+    width: var(--operatorsWidth);
+    :global .p-dropdown {
+      width: var(--operatorsWidth);
+    }
+  }
+  .operatorValue {
+    width: var(--operatorValueWidth);
+    :global .p-dropdown {
+      width: var(--operatorValueWidth);
+    }
+  }
+  .valueFieldType {
+    width: var(--valueFieldTypeWidth);
+    :global .p-dropdown {
+      width: var(--valueFieldTypeWidth);
+    }
+  }
+  .expressionValue {
+    flex: 1 auto;
+    width: 100%;
+    :global .p-dropdown {
+      width: 100%;
+      height: 35px !important;
+    }
+    button {
+      height: 35px !important;
+    }
+    input {
+      width: 100%;
+      height: 35px !important;
+    }
+    :global .p-calendar {
+      :global .p-inputtext {
+        height: 35px !important;
+      }
+    }
+    > span {
+      width: 100%;
+      input {
+        width: 100%;
+      }
+    }
+  }
+  > span {
+    margin-right: var(--fieldsGap);
+  }
+
+  .deleteButtonWrap {
+    margin-right: 0 auto;
+  }
+
+  .deleteButton {
+    border: 1px solid var(--c-custom-gray) !important;
+    @include shadow-0em;
+    color: var(--errors) !important;
+    margin: 0 !important;
+  }
+}
+
+.inputStringMatch {
+  display: flex;
+  align-items: flex-start;
+  flex: auto;
+  .ccButton {
+    margin: 0 !important;
+    margin-left: 0.4rem !important;
+    border: 1px solid var(--c-custom-gray) !important;
+    padding: 0.37rem 0.45rem;
+  }
+}

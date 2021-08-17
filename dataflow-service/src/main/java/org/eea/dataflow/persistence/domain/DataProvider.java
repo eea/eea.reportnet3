@@ -34,10 +34,6 @@ public class DataProvider {
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  /** The type. */
-  @Column(name = "type")
-  private String type;
-
   /** The label. */
   @Column(name = "label")
   private String label;
@@ -83,6 +79,6 @@ public class DataProvider {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, type, label);
+    return Objects.hash(id, label);
   }
 }

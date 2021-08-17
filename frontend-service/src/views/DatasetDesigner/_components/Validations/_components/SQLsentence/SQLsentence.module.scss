@@ -1,0 +1,68 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin: 2rem 0;
+  .content {
+    display: flex;
+    justify-content: space-between;
+    .helpSideBar {
+      width: 30%;
+    }
+    .sqlSentence {
+      margin-top: -1rem !important;
+      display: flex;
+      flex-direction: column;
+      width: 66%;
+      .title {
+        font-size: 1rem;
+        color: var(--title-color);
+        margin-bottom: 0.6rem;
+        .sqlSentenceInfoBtn {
+          background-color: var(--white) !important;
+          border-radius: 50% !important;
+          color: var(--datatable-header-info-button-color) !important;
+          font-size: 12pt !important;
+          height: 0.7em !important;
+          width: 0.7em !important;
+          margin-left: 0.4rem !important;
+          margin-right: 0.9rem !important;
+          margin-top: -1rem !important;
+          :global .pi-info-circle {
+            padding: 0 !important;
+            top: 40%;
+          }
+          > span {
+            left: 46% !important;
+            margin-left: -0.48em !important;
+            margin-top: -0.5em !important;
+          }
+          &:focus {
+            box-shadow: none !important;
+          }
+        }
+        .ccButton {
+          margin-top: -0.9em;
+          margin-left: 0.4rem !important;
+          border: 1px solid var(--c-custom-gray) !important;
+          padding: 0.37rem 0.45rem;
+          float: right;
+        }
+      }
+      textarea {
+        flex: auto;
+      }
+    }
+  }
+}
+.levelHelp {
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--main-font-color);
+}
+.note {
+  font-style: italic;
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--main-font-color);
+}

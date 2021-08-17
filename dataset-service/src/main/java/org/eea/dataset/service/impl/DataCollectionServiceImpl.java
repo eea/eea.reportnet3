@@ -306,7 +306,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   public void undoDataCollectionCreation(List<Long> datasetIds, Long dataflowId,
       boolean isCreation) {
 
-    releaseLockAndNotification(dataflowId, "Error creating schemas", isCreation);
+    releaseLockAndNotification(dataflowId, "Error creating schemas", isCreation, true);
 
     int size = datasetIds.size();
     for (int i = 0; i < size; i += CHUNK_SIZE) {
@@ -323,9 +323,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dataflowId the dataflow id
    * @param errorMessage the error message
    * @param isCreation the is creation
+   * @param hasPk the has pk
    */
-  private void releaseLockAndNotification(Long dataflowId, String errorMessage,
-      boolean isCreation) {
+  private void releaseLockAndNotification(Long dataflowId, String errorMessage, boolean isCreation,
+      boolean hasPk) {
     String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
         : LockSignature.UPDATE_DATA_COLLECTION.getValue();
     DataFlowVO dataflow = getDataflowMetabase(dataflowId);
@@ -337,8 +338,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     if (!referenceDataflow) {
       failEvent = isCreation ? EventType.ADD_DATACOLLECTION_FAILED_EVENT
           : EventType.UPDATE_DATACOLLECTION_FAILED_EVENT;
+    } else if (!hasPk && isCreation) {
+      failEvent = EventType.NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT;
     }
-
 
     // Release the lock
     Map<String, Object> lockCriteria = new HashMap<>();
@@ -423,6 +425,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
+    boolean hasPk = true;
 
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
@@ -430,14 +433,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     // we look if all SQL QC's are working correctly, if not we disable it before do a dc
     if (isCreation) {
       if (referenceDataflow && stopAndNotifyPKError) {
-        if (!checkIfSchemasHavePk(designs)) {
-          NotificationVO notificationVO = NotificationVO.builder()
-              .user(SecurityContextHolder.getContext().getAuthentication().getName())
-              .dataflowId(dataflowId).build();
-          releaseNotification(EventType.NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT, notificationVO);
+        hasPk = checkIfSchemasHavePk(designs);
+        if (!hasPk) {
           LOG_ERROR.error(
               "No primary key in any schemas in the dataflow {}. So stop the process to create the reference dataset",
               dataflowId);
+          releaseLockAndNotification(dataflowId, "No primary key in any schemas in the dataflow",
+              isCreation, hasPk);
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               EEAErrorMessage.NO_PK_REFERENCE_DATAFLOW);
         }
@@ -510,7 +512,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           .filter(representative -> !representative.getHasDatasets()).collect(Collectors.toList());
 
       if (representatives.isEmpty() && !referenceDataflow) {
-        releaseLockAndNotification(dataflowId, "No representatives without datasets", isCreation);
+        releaseLockAndNotification(dataflowId, "No representatives without datasets", isCreation,
+            hasPk);
         return;
       }
 
@@ -1054,7 +1057,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private void releaseLockAndRollback(Connection connection, Long dataflowId, boolean isCreation)
       throws SQLException {
 
-    releaseLockAndNotification(dataflowId, "Error creating datasets on the metabase", isCreation);
+    releaseLockAndNotification(dataflowId, "Error creating datasets on the metabase", isCreation,
+        true);
     connection.rollback();
   }
 
@@ -1620,16 +1624,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @return true, if successful
    */
   public boolean checkIfSchemasHavePk(List<DesignDatasetVO> designs) {
-    boolean hasPK = true;
-    for (DesignDatasetVO dataset : designs) {
-      for (TableSchemaVO tableSchemaVO : datasetSchemaService
-          .getDataSchemaById(dataset.getDatasetSchema()).getTableSchemas()) {
-        for (FieldSchemaVO fieldSchemaVO : tableSchemaVO.getRecordSchema().getFieldSchema()) {
-          hasPK = !Boolean.TRUE.equals(fieldSchemaVO.getPk()) ? false : hasPK;
-        }
-      }
-    }
-    return hasPK;
+    return designs.stream()
+        .allMatch(design -> datasetSchemaService.getDataSchemaById(design.getDatasetSchema())
+            .getTableSchemas().stream()
+            .allMatch(tableSchema -> tableSchema.getRecordSchema().getFieldSchema().stream()
+                .anyMatch(fieldSchema -> Boolean.TRUE.equals(fieldSchema.getPk()))));
   }
 
 }

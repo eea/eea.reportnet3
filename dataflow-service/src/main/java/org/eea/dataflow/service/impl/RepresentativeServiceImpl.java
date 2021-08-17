@@ -11,7 +11,9 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataflow.mapper.DataProviderGroupMapper;
 import org.eea.dataflow.mapper.DataProviderMapper;
+import org.eea.dataflow.mapper.FMEUserMapper;
 import org.eea.dataflow.mapper.LeadReporterMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.DataProvider;
@@ -22,6 +24,7 @@ import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.LeadReporterRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.service.RepresentativeService;
@@ -32,9 +35,11 @@ import org.eea.interfaces.controller.dataset.ReferenceDatasetController.Referenc
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
@@ -92,6 +97,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Autowired
   private LeadReporterMapper leadReporterMapper;
 
+  /** The data provider group mapper. */
+  @Autowired
+  private DataProviderGroupMapper dataProviderGroupMapper;
+
   /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
@@ -112,7 +121,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Autowired
   private EntityAccessService entityAccessService;
 
+  /** The FME user repository. */
+  @Autowired
+  private FMEUserRepository fmeUserRepository;
 
+  /** The FME user mapper. */
+  @Autowired
+  private FMEUserMapper fmeUserMapper;
 
   /**
    * The delimiter.
@@ -222,18 +237,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Override
   public List<DataProviderCodeVO> getDataProviderGroupByType(TypeDataProviderEnum providerType) {
     LOG.info("obtaining the distinct representative types");
-    List<DataProviderGroup> dataProviderGroupCodes =
+    List<DataProviderGroup> dataProviderGroups =
         dataProviderGroupRepository.findDistinctCode(providerType);
-    List<DataProviderCodeVO> dataProviderCodeVOs = new ArrayList<>();
 
-    for (DataProviderGroup dataProviderGroupCode : dataProviderGroupCodes) {
-      DataProviderCodeVO item = new DataProviderCodeVO();
-      item.setDataProviderGroupId(dataProviderGroupCode.getId());
-      item.setLabel(dataProviderGroupCode.getName());
-      dataProviderCodeVOs.add(item);
-    }
-
-    return dataProviderCodeVOs;
+    return dataProviderGroupMapper.entityListToClass(dataProviderGroups);
   }
 
   /**
@@ -332,6 +339,40 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       List<Long> dataProviderIdList) {
     return representativeMapper.entityListToClass(representativeRepository
         .findByDataflowIdAndDataProviderIdIn(dataflowId, dataProviderIdList));
+  }
+
+
+  /**
+   * Find data provider group by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data provider code VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public DataProviderCodeVO findDataProviderGroupByDataflowId(Long dataflowId) throws EEAException {
+    Dataflow dataflowFound = dataflowRepository.findById(dataflowId).orElse(null);
+    DataProviderGroup dataProviderGroup;
+
+    if (dataflowFound != null) {
+      try {
+        dataProviderGroup = dataProviderGroupRepository
+            .findById(dataflowFound.getDataProviderGroupId()).orElse(new DataProviderGroup());
+      } catch (Exception e) {
+        LOG.error("Cannot find Data provider group for Dataflow with provided Id: {}", dataflowId);
+        throw new EEAException(
+            "Data provider group associated with the provided Dataflow id is null. "
+                + e.getMessage());
+      }
+    }
+
+    else {
+      LOG.error(
+          "Cannot find Dataflow with dataflowId: {} when trying to find its Data provider group.",
+          dataflowId);
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+    return dataProviderGroupMapper.entityToClass(dataProviderGroup);
   }
 
   /**
@@ -461,7 +502,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
 
       List<Representative> representativeList = new ArrayList<>();
-
+      String dataProviderType =
+          TypeDataflowEnum.BUSINESS.equals(dataflow.getType()) ? "company" : "country";
       for (String representativeData : everyLines) {
         String[] dataLine = representativeData.split("[" + delimiter + "]");
         String contryCode = dataLine[0].replaceAll("\"", "");
@@ -474,9 +516,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           }
         }
         if (!countryCodeList.contains(contryCode) && null == user) {
-          fieldsToWrite[2] = "KO imported country and user doesn't exist in reportnet";
+          fieldsToWrite[2] =
+              "KO imported " + dataProviderType + " and user doesn't exist in reportnet";
         } else if (!countryCodeList.contains(contryCode)) {
-          fieldsToWrite[2] = "KO imported country doesn't exist";
+          fieldsToWrite[2] = "KO imported " + dataProviderType + " doesn't exist";
         } else if (null == user && StringUtils.isNotBlank(email)) {
           fieldsToWrite[2] = "KO imported user doesn't exist in reportnet";
         } else {
@@ -715,7 +758,18 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     } else {
       throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
     }
-    return dataProviders.stream().map(provider -> provider.getId()).collect(Collectors.toList());
+    return dataProviders.stream().map(DataProviderVO::getId).collect(Collectors.toList());
+  }
+
+
+  /**
+   * Find fme users.
+   *
+   * @return the list
+   */
+  @Override
+  public List<FMEUserVO> findFmeUsers() {
+    return fmeUserMapper.entityListToClass(fmeUserRepository.findAll());
   }
 
   /**
@@ -795,4 +849,5 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     }
     return countryCode;
   }
+
 }

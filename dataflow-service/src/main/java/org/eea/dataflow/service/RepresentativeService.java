@@ -5,6 +5,7 @@ import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
@@ -54,6 +55,16 @@ public interface RepresentativeService {
    * @return the all data provider by group id
    */
   List<DataProviderVO> getAllDataProviderByGroupId(Long groupId);
+
+
+  /**
+   * Find data provider group by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data provider group VO
+   * @throws EEAException the EEA exception
+   */
+  DataProviderCodeVO findDataProviderGroupByDataflowId(Long dataflowId) throws EEAException;
 
   /**
    * Gets the represetatives by id data flow.
@@ -196,4 +207,11 @@ public interface RepresentativeService {
    */
   List<RepresentativeVO> findRepresentativesByDataflowIdAndDataproviderList(Long dataflowId,
       List<Long> dataProviderIdList);
+
+  /**
+   * Find fme users.
+   *
+   * @return the list
+   */
+  List<FMEUserVO> findFmeUsers();
 }
