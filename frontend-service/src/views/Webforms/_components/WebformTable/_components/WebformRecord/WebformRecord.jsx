@@ -122,7 +122,7 @@ export const WebformRecord = ({
     if (isNil(dependency)) return true;
     const filteredDependency = fields
       .filter(field => TextUtils.areEquals(field.name, dependency.field))
-      .map(filtered => (Array.isArray(filtered?.value) ? filtered?.value : filtered?.value?.split(', ')));
+      .map(filtered => (Array.isArray(filtered?.value) ? filtered?.value : filtered?.value?.split('; ')));
 
     return filteredDependency
       .flat()
