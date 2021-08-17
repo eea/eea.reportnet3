@@ -9,6 +9,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 
@@ -59,5 +61,16 @@ public interface ReferenceDatasetController {
    */
   @GetMapping(value = "/referenced/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   Set<DataFlowVO> findDataflowsReferencedByDataflowId(@PathVariable("id") Long dataflowId);
+
+
+  /**
+   * Update reference dataset if it is marked as updateable.
+   *
+   * @param datasetId the dataset id
+   * @param updatable the updatable
+   */
+  @PutMapping("/{datasetId}")
+  void updateReferenceDataset(@PathVariable Long datasetId,
+      @RequestParam("updatable") Boolean updatable);
 
 }

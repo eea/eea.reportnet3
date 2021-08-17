@@ -293,7 +293,7 @@ public class IntegrationControllerImplTest {
     Mockito.when(integrationService.getExportEUDatasetIntegration(Mockito.anyString()))
         .thenReturn(null);
     Assert.assertNull(
-        integrationControllerImpl.findExportEUDatasetIntegration("5ce524fad31fc52540abae73"));
+        integrationControllerImpl.findExportEUDatasetIntegration("5ce524fad31fc52540abae73", 0L));
   }
 
   /**

@@ -11,8 +11,10 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -116,12 +118,28 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataProvider/types", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataProvider/countryGroups", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Find all DataProvider types", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataProviderVO.class, responseContainer = "List")
-  public List<DataProviderCodeVO> findAllDataProviderTypes() {
-    return representativeService.getAllDataProviderTypes();
+  public List<DataProviderCodeVO> findAllDataProviderCountryType() {
+    return representativeService.getDataProviderGroupByType(TypeDataProviderEnum.COUNTRY);
+  }
+
+  /**
+   * Find all data provider business types.
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/dataProvider/companyGroups", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Find all DataProvider business types",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
+      responseContainer = "List")
+  public List<DataProviderCodeVO> findAllDataProviderCompanyType() {
+    return representativeService.getDataProviderGroupByType(TypeDataProviderEnum.COMPANY);
   }
 
   /**
@@ -133,7 +151,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_OBSERVER','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE')")
   @ApiOperation(value = "Find Representatives by Dataflow Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = RepresentativeVO.class,
       responseContainer = "List")
@@ -233,6 +251,26 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   public List<DataProviderVO> findDataProvidersByIds(@ApiParam(value = "Dataproviders List",
       type = "Long List") @RequestParam("id") List<Long> dataProviderIds) {
     return representativeService.findDataProvidersByIds(dataProviderIds);
+  }
+
+
+  /**
+   * Find data provider group by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data provider code VO
+   */
+  @Override
+  @GetMapping(value = "/dataProviderGroup/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataProviderCodeVO findDataProviderGroupByDataflowId(
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+
+    try {
+      return representativeService.findDataProviderGroupByDataflowId(dataflowId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+    }
   }
 
   /**
@@ -440,6 +478,20 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
   /**
+   * Find fme users.
+   *
+   * @return the list
+   */
+  @Override
+  @GetMapping(value = "/fmeUsers", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Find all the fme users for business dataflow",
+      response = RepresentativeControllerZuul.class, responseContainer = "List", hidden = true)
+  public List<FMEUserVO> findFmeUsers() {
+    return representativeService.findFmeUsers();
+  }
+
+  /**
    * Update internal representative.
    *
    * @param representativeVO the representative VO
@@ -485,4 +537,5 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     return representativeService.findRepresentativesByDataflowIdAndDataproviderList(dataflowId,
         providerIdList);
   }
+
 }

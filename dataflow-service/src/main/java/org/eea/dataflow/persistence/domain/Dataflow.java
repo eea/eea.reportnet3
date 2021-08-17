@@ -105,6 +105,13 @@ public class Dataflow {
   @OneToMany(mappedBy = "dataflow", cascade = CascadeType.ALL, orphanRemoval = false)
   private Set<Integration> integrations;
 
+  /** The data provider group id. */
+  @Column(name = "DATAPROVIDER_GROUP_ID")
+  private Long dataProviderGroupId;
+
+  /** The fme user. */
+  @Column(name = "FME_USER_ID")
+  private Long fmeUserId;
 
   /**
    * Equals.

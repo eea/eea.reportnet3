@@ -66,6 +66,7 @@ public class ImportFieldSchemaFailedEvent implements NotificableEventHandler {
     notification.put("dataflowName", dataflowName);
     notification.put("datasetId", notificationVO.getDatasetId());
     notification.put("datasetName", datasetMetabase.getDataSetName());
+    notification.put("tableSchemaName", notificationVO.getTableSchemaName());
     notification.put("error", notificationVO.getError());
     return notification;
   }

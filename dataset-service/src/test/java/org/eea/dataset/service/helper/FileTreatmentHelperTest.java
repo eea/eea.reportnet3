@@ -482,42 +482,7 @@ public class FileTreatmentHelperTest {
     }
   }
 
-  /**
-   * Import file data folder exception test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void importFileDataFolderExceptionTest() throws EEAException {
-    TableSchema tableSchema = new TableSchema();
-    tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
-    tableSchema.setFixedNumber(Boolean.FALSE);
 
-    List<TableSchema> tableSchemas = new ArrayList<>();
-    tableSchemas.add(tableSchema);
-
-    DataSetSchema datasetSchema = new DataSetSchema();
-    datasetSchema.setTableSchemas(tableSchemas);
-
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-
-    Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.anyString()))
-        .thenReturn(datasetSchema);
-    MultipartFile multipartFile =
-        new MockMultipartFile("file", "file.xls", "application/vnd.ms-excel", "".getBytes());
-    File folder = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
-    folder.mkdirs();
-    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
-        .thenReturn(new DataSetMetabaseVO());
-    try {
-      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true, 1L,
-          null);
-    } catch (EEAException e) {
-      Assert.assertEquals("Folder for dataset 1 already exists", e.getCause().getMessage());
-      throw e;
-    }
-  }
 
   /**
    * Import file data IO exception test.

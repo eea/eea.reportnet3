@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
@@ -171,6 +172,19 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
    */
   public boolean checkAccessReferenceEntity(EntityClassEnum entity, Long entityId) {
     return entityAccessService.isReferenceDataflowDraft(entity, entityId) && !isApiKey();
+  }
+
+  /**
+   * Check access entity.
+   *
+   * @param dataflowType the dataflow type
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if successful
+   */
+  public boolean checkAccessEntity(TypeDataflowEnum dataflowType, EntityClassEnum entity,
+      Long entityId) {
+    return entityAccessService.isDataflowType(dataflowType, entity, entityId) && !isApiKey();
   }
 
 

@@ -1,6 +1,7 @@
 import avatarImages from './avatarImages.json';
 import countryByGroup from './countriesByGroup.json';
 import dataflowStatus from './dataflowStatus.json';
+import dataflowType from './dataflowType.json';
 import exportTypeCode from './exportType.code.json';
 import footer from './footer.config.json';
 import importTypeCode from './importType.code.json';
@@ -16,17 +17,21 @@ import webforms from './webforms.config.json';
 
 const config = {};
 
+config.COMPANY_CODE_KEYWORD = '{%R3_COMPANY_CODE%}';
+config.COUNTRY_CODE_KEYWORD = '{%R3_COUNTRY_CODE%}';
 config.MAX_FILE_EXTENSION_LENGTH = 10;
 config.MAX_FILE_SIZE = 100000000;
 config.MAX_INTEGRATION_NAME_LENGTH = 50;
+config.INPUT_MAX_LENGTH = 255;
 
 config.MAX_ATTACHMENT_SIZE = 20 * 1000 * 1024;
 
-config.IMPORT_FILE_DELIMITER = '%2C';
+config.IMPORT_FILE_DELIMITER = ',';
 
 config.avatars = avatarImages;
 config.countriesByGroup = countryByGroup;
 config.dataflowStatus = dataflowStatus;
+config.dataflowType = dataflowType;
 config.exportTypes = exportTypeCode;
 config.footer = footer;
 config.icons = primeIcons;

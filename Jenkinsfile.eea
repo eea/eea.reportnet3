@@ -28,8 +28,9 @@ pipeline {
                     agent { node { label 'eea'} }
                     steps {
                         sh 'rm -rf frontend-service/node_modules/'
+                        sh 'rm -f frontend-service/package-lock.json'
                         sh '''
-                            npm install frontend-service/
+                            npm install --no-cache frontend-service/
                         '''
                     }
                 }

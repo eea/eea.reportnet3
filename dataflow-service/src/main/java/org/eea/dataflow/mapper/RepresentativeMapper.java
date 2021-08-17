@@ -19,8 +19,8 @@ public interface RepresentativeMapper extends IMapper<Representative, Representa
    * @return the representative VO
    */
   @Override
-  @Mapping(source = "dataProvider.groupId", target = "dataProviderGroupId")
   @Mapping(source = "dataProvider.id", target = "dataProviderId")
+  @Mapping(source = "dataProvider.dataProviderGroup.id", target = "dataProviderGroupId")
   RepresentativeVO entityToClass(Representative entity);
 
   /**
@@ -30,8 +30,8 @@ public interface RepresentativeMapper extends IMapper<Representative, Representa
    * @return the representative
    */
   @Override
-  @Mapping(source = "dataProviderGroupId", target = "dataProvider.groupId")
   @Mapping(source = "dataProviderId", target = "dataProvider.id")
+  @Mapping(source = "dataProviderGroupId", target = "dataProvider.dataProviderGroup.id")
   Representative classToEntity(RepresentativeVO model);
 
 }

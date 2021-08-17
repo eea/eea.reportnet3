@@ -3,6 +3,7 @@ package org.eea.dataset.validate.commands;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -37,8 +38,7 @@ public class ValidationSchemaIntegrityTest {
   @Test
   public void testExecuteValidationEmpty() {
     DataSetSchemaVO schema = new DataSetSchemaVO();
-    validationIntegrity.execute(schema);
-    assertFalse("its valid", validationIntegrity.execute(schema));
+    assertFalse("its valid", validationIntegrity.execute(schema, TypeDataflowEnum.REGULAR));
   }
 
 
@@ -48,7 +48,7 @@ public class ValidationSchemaIntegrityTest {
     schema.setTableSchemas(new ArrayList<>());
     TableSchemaVO table = new TableSchemaVO();
     schema.getTableSchemas().add(table);
-    assertFalse("its valid", validationIntegrity.execute(schema));
+    assertFalse("its valid", validationIntegrity.execute(schema, TypeDataflowEnum.REGULAR));
   }
 
   @Test
@@ -59,7 +59,7 @@ public class ValidationSchemaIntegrityTest {
     RecordSchemaVO record = new RecordSchemaVO();
     table.setRecordSchema(record);
     schema.getTableSchemas().add(table);
-    assertFalse("its valid", validationIntegrity.execute(schema));
+    assertFalse("its valid", validationIntegrity.execute(schema, TypeDataflowEnum.REGULAR));
   }
 
   @Test
@@ -73,7 +73,7 @@ public class ValidationSchemaIntegrityTest {
     record.getFieldSchema().add(field);
     table.setRecordSchema(record);
     schema.getTableSchemas().add(table);
-    assertTrue("its valid", validationIntegrity.execute(schema));
+    assertTrue("its valid", validationIntegrity.execute(schema, TypeDataflowEnum.REGULAR));
   }
 
 

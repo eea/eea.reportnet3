@@ -9,6 +9,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -214,10 +215,10 @@ public interface DatasetSchemaService {
    * Validate schema.
    *
    * @param datasetSchemaId the dataset schema id
-   *
+   * @param dataflowType the dataflow type
    * @return the boolean
    */
-  Boolean validateSchema(String datasetSchemaId);
+  Boolean validateSchema(String datasetSchemaId, TypeDataflowEnum dataflowType);
 
 
   /**

@@ -34,9 +34,11 @@ pipeline {
                         }
                     }
                 }
-                /*
-                stage('Compile NPM') {
+                
+                /*stage('Compile NPM') {
                     steps {
+                    	sh 'rm -rf /node_modules/'
+                        sh 'rm -f package-lock.json'
                         sh '''
                             npm install --no-cache frontend-service/
                         '''
@@ -45,78 +47,7 @@ pipeline {
                 }*/
             }
         }
-        stage('Static Code Analysis') {
-            steps {
-                withSonarQubeEnv('Altia SonarQube') {
-                    // requires SonarQube Scanner for Maven 3.2+
-                  	sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -P sonar -Dsonar.java.source=1.8 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
-
-                    // sh 'cd frontend-service && npm install sonar-scanner && npm run sonar-scanner && cd ..'
-                }
-            }
-        }
-
-       stage("Quality Gate"){
-       when {
-                       branch 'develop1'
-                   }
-           steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    retry(3) {
-                        script {
-                            def props = readProperties  file: 'target/sonar/report-task.txt'
-                            echo "properties=${props}"
-                            def sonarServerUrl=props['serverUrl']
-                            def ceTaskUrl= props['ceTaskUrl']
-                            def ceTask
-                            timeout(time: 1, unit: 'MINUTES') {
-                                waitUntil {
-                                    def response = httpRequest ceTaskUrl
-                                    ceTask = readJSON text: response.content
-                                    echo ceTask.toString()
-                                    return "SUCCESS".equals(ceTask["task"]["status"])
-                                }
-                            }
-                            def response2 = httpRequest url : sonarServerUrl + "/api/qualitygates/project_status?analysisId=" + ceTask["task"]["analysisId"], authentication: 'jenkins_scanner'
-                            def qualitygate =  readJSON text: response2.content
-                            echo qualitygate.toString()
-                            if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
-                                error  "Quality Gate Failure"
-                            }
-                            if ("WARN".equals(qualitygate["projectStatus"]["status"])) {
-                                currentBuild.result = 'UNSTABLE'
-                                slackSend baseUrl: 'https://altia-alicante.slack.com/services/hooks/jenkins-ci/', channel: 'reportnet3', message: 'New Build Done - Quality Gate in WARNING (marked as UNSTABLE) https://sonar-oami.altia.es/dashboard?id=org.eea%3Areportnet%3A' + env.BRANCH_NAME.replace('/', '_') + '&did=1', token: 'HRvukH8087RNW9NYQ3fd6jtM'
-                            }
-                            // Frontend
-                            /*props = readProperties  file: 'frontend-service/.scannerwork/report-task.txt'
-                            echo "properties=${props}"
-                            sonarServerUrl=props['serverUrl']
-                            ceTaskUrl= props['ceTaskUrl']
-                            ceTask
-                            timeout(time: 1, unit: 'MINUTES') {
-                                waitUntil {
-                                    def response = httpRequest ceTaskUrl
-                                    ceTask = readJSON text: response.content
-                                    echo ceTask.toString()
-                                    return "SUCCESS".equals(ceTask["task"]["status"])
-                                }
-                            }
-                            response2 = httpRequest url : sonarServerUrl + "/api/qualitygates/project_status?analysisId=" + ceTask["task"]["analysisId"], authentication: 'jenkins_scanner'
-                            qualitygate =  readJSON text: response2.content
-                            echo qualitygate.toString()
-                            if ("WARN".equals(qualitygate["projectStatus"]["status"]) || "ERROR".equals(qualitygate["projectStatus"]["status"])) {
-                                def output = ""
-                                qualitygate["conditions"].each{ gate ->
-                                  output += "\nStatus for " + gate["metricKey"] + " is " + gate["status"]
-                                }
-                                emailext body: 'New Build Done - Quality Gate is ' + qualitygate["status"] + " at https://sonar-oami.altia.es/dashboard?id=Reportnet-sonar-frontend\nOverview" + output, subject: 'SonarQube Frontend FAIL Notification', to: 'fjlabiano@itracasa.es; ext.jose.luis.anton@altia.es; ealfaro@tracasa.es; marina.montoro@altia.es'
-                            }*/
-                        }
-                    }
-                }
-
-            }
-        }
+       
 
         stage('Install in Nexus') {
             when {
@@ -142,14 +73,14 @@ pipeline {
 
         stage('Push to EEA GitHub') {
             when {
-                branch 'develop1'
+                branch 'sandbox'
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'jenkins-eea-altia', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh('git config --global user.email "ext.jose.luis.anton@altia.es"')
                     sh('git config --global user.name "Jose Luis Anton (ALTIA)"')
-                    sh('git pull https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git develop --allow-unrelated-histories')
-                    sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git HEAD:develop')
+                    sh('git pull https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git sandbox --allow-unrelated-histories')
+                    sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git HEAD:sandbox')
                 }
             }
         }
@@ -182,7 +113,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
+                   return BRANCH_NAME == "develop" 
                 }
             }
             parallel {
@@ -301,7 +232,7 @@ pipeline {
         stage('Cleaning docker images'){
           when {
             expression {
-              return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
+              return BRANCH_NAME == "develop" 
             }
           }
           steps {

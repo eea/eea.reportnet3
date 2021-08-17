@@ -1,0 +1,19 @@
+.container {
+  margin-top: 65px;
+  @media (max-width: 767px) {
+    margin-top: 2rem;
+    padding-bottom: 4rem;
+  }
+}
+
+.p-menuitem-link:focus {
+  box-shadow: none !important;
+}
+
+.dataflowsActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 1rem;
+  padding-top: 1rem;
+}
