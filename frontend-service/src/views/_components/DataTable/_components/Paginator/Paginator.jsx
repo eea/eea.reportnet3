@@ -9,6 +9,8 @@ import { PageLinks } from './_components/PageLinks';
 import { RowsPerPageDropdown } from './_components/RowsPerPageDropdown';
 import { CurrentPageReport } from './_components/CurrentPageReport';
 
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
 export class Paginator extends Component {
   static defaultProps = {
     alwaysShow: true,
@@ -41,6 +43,8 @@ export class Paginator extends Component {
     template: PropTypes.any,
     totalRecords: PropTypes.number
   };
+
+  static contextType = ResourcesContext;
 
   constructor(props) {
     super(props);
@@ -105,8 +109,8 @@ export class Paginator extends Component {
         pageCount: pc,
         pageInputTooltip:
           p >= 0 && p < pc
-            ? 'Press Enter key to go to this page'
-            : `Value must be between 1 and ${Math.ceil(this.props.totalRecords / rows)}`
+            ? this.context.messages['currentPageInfoMessage']
+            : `${this.context.messages['currentPageErrorMessage']} ${Math.ceil(this.props.totalRecords / rows)}`
       };
 
       if (this.props.onPageChange) {

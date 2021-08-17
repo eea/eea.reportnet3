@@ -14,6 +14,8 @@ import { TableFooter } from './_components/TableFooter';
 import { TableHeader } from './_components/TableHeader';
 import { TableLoadingBody } from './_components/TableLoadingBody';
 
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 
@@ -202,11 +204,12 @@ export class DataTable extends Component {
     virtualScrollDelay: PropTypes.number
   };
 
+  static contextType = ResourcesContext;
+
   constructor(props) {
     super(props);
     this.state = {
-      currentPage: 1,
-      pageInputTooltip: 'Press Enter key to go to this page'
+      currentPage: 1
     };
 
     if (!this.props.onPage) {
@@ -451,8 +454,10 @@ export class DataTable extends Component {
           pageCount: pc,
           pageInputTooltip:
             p >= 0 && p < pc
-              ? 'Press Enter key to go to this page'
-              : `Value must be between 1 and ${Math.ceil(this.props.totalRecords / this.getRows())}`
+              ? this.context.messages['currentPageInfoMessage']
+              : `${this.context.messages['currentPageErrorMessage']} ${Math.ceil(
+                  this.props.totalRecords / this.getRows()
+                )}`
         };
         this.onPageChange(newPageState);
       }
@@ -462,10 +467,12 @@ export class DataTable extends Component {
       });
       if (event.target.value <= 0 || event.target.value > Math.ceil(this.props.totalRecords / this.getRows())) {
         this.setState({
-          pageInputTooltip: `Value must be between 1 and ${Math.ceil(this.props.totalRecords / this.getRows())}`
+          pageInputTooltip: `${this.context.messages['currentPageErrorMessage']} ${Math.ceil(
+            this.props.totalRecords / this.getRows()
+          )}`
         });
       } else {
-        this.setState({ pageInputTooltip: 'Press Enter key to go to this page' });
+        this.setState({ pageInputTooltip: this.context.messages['currentPageInfoMessage'] });
       }
     }
   }
@@ -1419,6 +1426,7 @@ export class DataTable extends Component {
   }
 
   componentDidMount() {
+    this.setState({ pageInputTooltip: this.context.messages['currentPageInfoMessage'] });
     if (this.isStateful() && this.props.resizableColumns) {
       this.restoreColumnWidths();
     }
