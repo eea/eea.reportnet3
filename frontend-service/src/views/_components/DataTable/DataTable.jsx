@@ -5,7 +5,9 @@ import classNames from 'classnames';
 
 import './DataTable.css';
 
+import { InputText } from 'views/_components/InputText';
 import { Paginator } from './_components/Paginator';
+import ReactTooltip from 'react-tooltip';
 import { ScrollableView } from './_components/ScrollableView';
 import { TableBody } from './_components/TableBody';
 import { TableFooter } from './_components/TableFooter';
@@ -41,6 +43,7 @@ export class DataTable extends Component {
     frozenWidth: null,
     getPageChange: null,
     globalFilter: null,
+    hasDefaultCurrentPage: false,
     header: null,
     headerColumnGroup: null,
     id: null,
@@ -132,6 +135,7 @@ export class DataTable extends Component {
     frozenWidth: PropTypes.string,
     getPageChange: PropTypes.func,
     globalFilter: PropTypes.any,
+    hasDefaultCurrentPage: PropTypes.bool,
     header: PropTypes.any,
     headerColumnGroup: PropTypes.any,
     id: PropTypes.string,
@@ -200,7 +204,10 @@ export class DataTable extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      currentPage: 1,
+      pageInputTooltip: 'Press Enter key to go to this page'
+    };
 
     if (!this.props.onPage) {
       this.state.first = props.first;
@@ -221,6 +228,7 @@ export class DataTable extends Component {
       this.restoreState(this.state);
     }
 
+    this.onChangeCurrentPage = this.onChangeCurrentPage.bind(this);
     this.onPageChange = this.onPageChange.bind(this);
     this.onSort = this.onSort.bind(this);
     this.onFilter = this.onFilter.bind(this);
@@ -429,9 +437,37 @@ export class DataTable extends Component {
     }
   }
 
+  onChangeCurrentPage(event) {
+    if (event.key === 'Enter' && this.state.currentPage !== '') {
+      var pc = Math.ceil(this.props.totalRecords / this.getRows()) || 1;
+      var p = Math.floor(event.target.value - 1);
+
+      if (p >= 0 && p < pc) {
+        var newPageState = {
+          first: (event.target.value - 1) * this.getRows(),
+          rows: this.getRows(),
+          page: p,
+          pageCount: pc
+        };
+        this.onPageChange(newPageState);
+      }
+    } else {
+      this.setState({
+        currentPage: event.target.value
+      });
+      if (event.target.value <= 0 || event.target.value > Math.ceil(this.props.totalRecords / this.getRows())) {
+        this.setState({
+          pageInputTooltip: `Value must be between 1 and ${Math.ceil(this.props.totalRecords / this.getRows())}`
+        });
+      } else {
+        this.setState({ pageInputTooltip: 'Press Enter key to go to this page' });
+      }
+    }
+  }
+
   onPageChange(event) {
     if (this.props.onPage) this.props.onPage(event);
-    else this.setState({ first: event.first, rows: event.rows });
+    else this.setState({ currentPage: event.currentPage, first: event.first, rows: event.rows });
 
     if (this.props.getPageChange) this.props.getPageChange(event);
 
@@ -455,7 +491,45 @@ export class DataTable extends Component {
         rightContent={this.props.paginatorRight}
         rows={this.getRows()}
         rowsPerPageOptions={this.props.rowsPerPageOptions}
-        template={this.props.paginatorTemplate}
+        template={
+          !this.props.hasDefaultCurrentPage
+            ? this.props.paginatorTemplate
+            : {
+                layout: `PrevPageLink PageLinks NextPageLink RowsPerPageDropdown CurrentPageReport`,
+                CurrentPageReport: options => {
+                  return (
+                    <span style={{ color: 'var(--white)', userSelect: 'none' }}>
+                      <label style={{ margin: '0 0.5rem' }}>Go to </label>
+                      <InputText
+                        data-for="pageInputTooltip"
+                        data-tip
+                        id="currentPageInput"
+                        keyfilter="pint"
+                        onChange={this.onChangeCurrentPage}
+                        onKeyDown={this.onChangeCurrentPage}
+                        style={{
+                          border:
+                            (this.state.currentPage <= 0 || this.state.currentPage > options.totalPages) &&
+                            '1px solid var(--errors)',
+                          boxShadow:
+                            this.state.currentPage <= 0 || this.state.currentPage > options.totalPages
+                              ? 'var(--inputtext-box-shadow-focus-error)'
+                              : 'none',
+                          display: 'inline',
+                          height: '1.75rem',
+                          width: '3rem'
+                        }}
+                        // tooltip={this.state.pageInputTooltip}
+                        value={this.state.currentPage}
+                      />
+                      <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="right">
+                        {this.state.pageInputTooltip}
+                      </ReactTooltip>
+                    </span>
+                  );
+                }
+              }
+        }
         totalRecords={totalRecords}
       />
     );

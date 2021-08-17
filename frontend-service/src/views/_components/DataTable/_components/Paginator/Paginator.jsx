@@ -98,6 +98,7 @@ export class Paginator extends Component {
 
     if (p >= 0 && p < pc) {
       var newPageState = {
+        currentPage: p + 1,
         first: first,
         rows: rows,
         page: p,
@@ -252,9 +253,9 @@ export class Paginator extends Component {
 
       return (
         <div className={className} style={this.props.style}>
-          {leftContent}
-          {paginatorElements}
-          {rightContent}
+          <div>{leftContent}</div>
+          <div>{paginatorElements}</div>
+          <div>{rightContent}</div>
         </div>
       );
     }

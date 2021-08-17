@@ -4,23 +4,23 @@ import PropTypes from 'prop-types';
 
 export class CurrentPageReport extends Component {
   static defaultProps = {
-    pageCount: null,
-    page: null,
     first: null,
-    rows: null,
-    totalRecords: null,
+    page: null,
+    pageCount: null,
     reportTemplate: '({currentPage} of {totalPages})',
-    template: null
+    rows: null,
+    template: null,
+    totalRecords: null
   };
 
   static propTypes = {
-    pageCount: PropTypes.number,
-    page: PropTypes.number,
     first: PropTypes.number,
-    rows: PropTypes.number,
-    totalRecords: PropTypes.number,
+    page: PropTypes.number,
+    pageCount: PropTypes.number,
     reportTemplate: PropTypes.string,
-    template: PropTypes.any
+    rows: PropTypes.number,
+    template: PropTypes.any,
+    totalRecords: PropTypes.number
   };
 
   render() {

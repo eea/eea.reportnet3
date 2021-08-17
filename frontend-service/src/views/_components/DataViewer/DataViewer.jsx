@@ -34,6 +34,7 @@ import { IconTooltip } from 'views/_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 import { InputText } from 'views/_components/InputText';
 import { Map } from 'views/_components/Map';
+import ReactTooltip from 'react-tooltip';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -59,7 +60,6 @@ const DataViewer = withRouter(
     dataProviderId,
     datasetSchemaId,
     hasCountryCode,
-    hasCurrentPage = false,
     hasWritePermissions,
     isBusinessDataflow,
     isDataflowOpen,
@@ -180,35 +180,36 @@ const DataViewer = withRouter(
     );
 
     const template = {
-      layout: `PrevPageLink PageLinks NextPageLink RowsPerPageDropdown ${hasCurrentPage && 'CurrentPageReport'}`,
-      CurrentPageReport: hasCurrentPage
-        ? options => {
-            return (
-              <span className={styles.currentPageWrapper} style={{ color: 'var(--white)', userSelect: 'none' }}>
-                <label>{resources.messages['goTo']}</label>
-                <InputText
-                  id="currentPageInput"
-                  keyfilter="pint"
-                  onChange={onPageInputChange}
-                  onKeyDown={e => onPageInputKeyDown(e, options)}
-                  style={{
-                    border:
-                      (records.currentPage <= 0 || records.currentPage > options.totalPages) &&
-                      '1px solid var(--errors)',
-                    boxShadow:
-                      records.currentPage <= 0 || records.currentPage > options.totalPages
-                        ? 'var(--inputtext-box-shadow-focus-error)'
-                        : 'none',
-                    display: 'inline',
-                    width: '3rem'
-                  }}
-                  tooltip={records.pageInputTooltip}
-                  value={records.currentPage}
-                />
-              </span>
-            );
-          }
-        : null
+      layout: `PrevPageLink PageLinks NextPageLink RowsPerPageDropdown CurrentPageReport`,
+      CurrentPageReport: options => {
+        return (
+          <span className={styles.currentPageWrapper} style={{ color: 'var(--white)', userSelect: 'none' }}>
+            <label>{resources.messages['goTo']}</label>
+            <InputText
+              data-for="pageInputTooltip"
+              data-tip
+              id="currentPageInput"
+              keyfilter="pint"
+              onChange={e => onPageInputChange(e, options)}
+              onKeyDown={e => onPageInputKeyDown(e, options)}
+              style={{
+                border:
+                  (records.currentPage <= 0 || records.currentPage > options.totalPages) && '1px solid var(--errors)',
+                boxShadow:
+                  records.currentPage <= 0 || records.currentPage > options.totalPages
+                    ? 'var(--inputtext-box-shadow-focus-error)'
+                    : 'none',
+                display: 'inline',
+                width: '3rem'
+              }}
+              value={records.currentPage}
+            />
+            <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="right">
+              {records.pageInputTooltip}
+            </ReactTooltip>
+          </span>
+        );
+      }
     };
 
     const cellDataEditor = (cells, record) => {
@@ -276,12 +277,7 @@ const DataViewer = withRouter(
     const onPageInputKeyDown = (event, options) => {
       if (event.key === 'Enter' && records.currentPage !== '') {
         const page = parseInt(records.currentPage);
-        if (page <= 0 || page > options.totalPages) {
-          dispatchRecords({
-            type: 'SET_CURRENT_PAGE_INPUT_TOOLTIP',
-            payload: `${resources.messages['currentPageErrorMessage']} ${options.totalPages}.`
-          });
-        } else {
+        if (page > 0 && page <= options.totalPages) {
           const first = records.currentPage ? options.rows * (page - 1) : 0;
           dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: first });
           onFetchData(
@@ -293,16 +289,24 @@ const DataViewer = withRouter(
             selectedRuleId,
             valueFilter
           );
-          dispatchRecords({
-            type: 'SET_CURRENT_PAGE_INPUT_TOOLTIP',
-            payload: resources.messages['currentPageInfoMessage']
-          });
         }
       }
     };
 
-    const onPageInputChange = event => {
+    const onPageInputChange = (event, options) => {
       dispatchRecords({ type: 'SET_CURRENT_PAGE_RECORD', payload: event.target.value });
+      const page = parseInt(event.target.value);
+      if (page > 0 && page <= options.totalPages) {
+        dispatchRecords({
+          type: 'SET_CURRENT_PAGE_INPUT_TOOLTIP',
+          payload: resources.messages['currentPageInfoMessage']
+        });
+      } else {
+        dispatchRecords({
+          type: 'SET_CURRENT_PAGE_INPUT_TOOLTIP',
+          payload: `${resources.messages['currentPageErrorMessage']} ${options.totalPages}.`
+        });
+      }
     };
 
     const onShowCoordinateError = errorCount =>

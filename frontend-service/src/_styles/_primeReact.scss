@@ -1262,14 +1262,11 @@ body .p-paginator {
   background-color: var(--paginator-bg);
   border: var(--paginator-border);
   padding: 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-body .p-paginator .p-component .p-unselectable-text .p-paginator-bottom {
-  &:not(body.p-paginator-right-content) {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-}
+
 body .p-paginator .p-paginator-first,
 body .p-paginator .p-paginator-prev,
 body .p-paginator .p-paginator-next,

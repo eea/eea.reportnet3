@@ -48,7 +48,6 @@ export const TabsSchema = ({
                   dataProviderId={dataProviderId}
                   datasetSchemaId={datasetSchemaId}
                   hasCountryCode={hasCountryCode}
-                  hasCurrentPage={true}
                   hasWritePermissions={hasWritePermissions}
                   isBusinessDataflow={isBusinessDataflow}
                   isExportable={isExportable}
