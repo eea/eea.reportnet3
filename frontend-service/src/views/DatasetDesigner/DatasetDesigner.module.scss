@@ -16,7 +16,7 @@
   width: 50vw;
   margin-bottom: 1rem !important;
   transition: 0.5s !important;
-  @include for-desktop-up{
+  @include for-desktop-up {
     flex: auto;
   }
 }
@@ -130,4 +130,28 @@
 .validationsFooter {
   display: flex;
   justify-content: space-between;
+}
+
+.deleteDatasetFooter {
+  float: left !important;
+}
+
+.checkboxWrapper {
+  float: left !important;
+  // margin-top: 0.4em;
+  // vertical-align: middle !important;
+  :global .p-checkbox {
+    margin-left: 0 !important;
+  }
+  label {
+    margin-left: 0.5rem !important;
+    user-select: none;
+    cursor: pointer;
+    span {
+      color: var(--main-font-color);
+    }
+    span:hover {
+      color: var(--main-font-color);
+    }
+  }
 }
