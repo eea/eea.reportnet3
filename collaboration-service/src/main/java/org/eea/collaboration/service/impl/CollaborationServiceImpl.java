@@ -33,13 +33,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class CollaborationServiceImpl.
@@ -132,20 +130,18 @@ public class CollaborationServiceImpl implements CollaborationService {
    * @return the message VO
    * @throws EEAForbiddenException the EEA forbidden exception
    * @throws EEAIllegalArgumentException the EEA illegal argument exception
+   * @throws IOException
    */
   @Override
   public MessageVO createMessageAttachment(Long dataflowId, Long providerId,
-      MultipartFile fileAttachment) throws EEAForbiddenException, EEAIllegalArgumentException {
+      MultipartFile fileAttachment)
+      throws EEAForbiddenException, EEAIllegalArgumentException, IOException {
 
     // Remove comma "," character to avoid error with special characters
     String fileName = fileAttachment.getOriginalFilename().replace(",", "");
 
     String userName = SecurityContextHolder.getContext().getAuthentication().getName();
     boolean direction = authorizeAndGetDirection(dataflowId, providerId);
-
-    if (fileName.length() > maxMessageLength) {
-      fileName = fileName.substring(0, maxMessageLength);
-    }
 
     Message message = new Message();
     message.setContent(fileName);
@@ -158,23 +154,17 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setType(MessageTypeEnum.ATTACHMENT);
     message = messageRepository.save(message);
 
-    try {
-      String fileSize = String.valueOf(fileAttachment.getSize());
-      InputStream is = fileAttachment.getInputStream();
-      byte[] fileContent;
-      fileContent = IOUtils.toByteArray(is);
-      is.close();
-      MessageAttachment messageAttachment = new MessageAttachment();
-      messageAttachment.setFileName(fileName);
-      messageAttachment.setFileSize(fileSize);
-      messageAttachment.setContent(fileContent);
-      messageAttachment.setMessage(message);
-      messageAttachmentRepository.save(messageAttachment);
-    } catch (IOException e) {
-      LOG_ERROR.error("Error saving message attachment from the dataflowId {}, with message: {}",
-          dataflowId, e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
+    String fileSize = String.valueOf(fileAttachment.getSize());
+    InputStream is = fileAttachment.getInputStream();
+    byte[] fileContent;
+    fileContent = IOUtils.toByteArray(is);
+    is.close();
+    MessageAttachment messageAttachment = new MessageAttachment();
+    messageAttachment.setFileName(fileName);
+    messageAttachment.setFileSize(fileSize);
+    messageAttachment.setContent(fileContent);
+    messageAttachment.setMessage(message);
+    messageAttachmentRepository.save(messageAttachment);
 
     String eventType = EventType.RECEIVED_MESSAGE.toString();
     collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null,

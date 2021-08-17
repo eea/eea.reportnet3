@@ -1,5 +1,7 @@
 package org.eea.collaboration.service.impl;
 
+import static org.mockito.Mockito.times;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import org.eea.collaboration.mapper.MessageMapper;
 import org.eea.collaboration.persistence.domain.Message;
+import org.eea.collaboration.persistence.repository.MessageAttachmentRepository;
 import org.eea.collaboration.persistence.repository.MessageRepository;
 import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAErrorMessage;
@@ -27,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -52,6 +56,9 @@ public class CollaborationServiceImplTest {
 
   @Mock
   private MessageRepository messageRepository;
+
+  @Mock
+  private MessageAttachmentRepository messageAttachmentRepository;
 
   @Mock
   private MessageMapper messageMapper;
@@ -123,6 +130,61 @@ public class CollaborationServiceImplTest {
     collaborationServiceImpl.createMessage(1L, messageVO);
     Mockito.verify(messageMapper, Mockito.times(1)).entityToClass(Mockito.any());
   }
+
+  @Test
+  public void createMessageAttachmentTest()
+      throws EEAForbiddenException, EEAIllegalArgumentException, IOException {
+
+    List<Long> datasetIds = new ArrayList<>();
+    datasetIds.add(1L);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(
+        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE.getAccessRole(1L)));
+    authorities.add(
+        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(1L)));
+    Mockito
+        .when(dataSetMetabaseControllerZuul
+            .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
+        .thenReturn(datasetIds);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    collaborationServiceImpl.createMessageAttachment(1L, 1L,
+        new MockMultipartFile("file.csv", "content".getBytes()));
+    Mockito.verify(messageMapper, Mockito.times(1)).entityToClass(Mockito.any());
+  }
+  //
+  // @Test(expected = ResponseStatusException.class)
+  // public void createMessageAttachmentIOExceptionTest()
+  // throws EEAForbiddenException, EEAIllegalArgumentException, IOException {
+  //
+  // List<Long> datasetIds = new ArrayList<>();
+  // datasetIds.add(1L);
+  // Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+  // authorities.add(
+  // new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE.getAccessRole(1L)));
+  // authorities.add(
+  // new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(1L)));
+  // Mockito
+  // .when(dataSetMetabaseControllerZuul
+  // .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
+  // .thenReturn(datasetIds);
+  // Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+  // Mockito.doReturn(authorities).when(authentication).getAuthorities();
+  // byte[] arrayByte = null;
+  // MultipartFile fileMock = Mockito.mock(MultipartFile.class);
+  // fileMock = new MockMultipartFile("file.csv", "content", "typ", arrayByte);
+  // // Mockito.when(fileMock.getInputStream()).thenThrow(IOException.class);
+  //
+  // try {
+  // collaborationServiceImpl.createMessageAttachment(1L, 1L,
+  // // new MockMultipartFile("file.csv", "content".getBytes()));
+  // // new MockMultipartFile("file.csv", "content", "typ", arrayByte));
+  // fileMock);
+  // } catch (ResponseStatusException e) {
+  // Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+  // throw e;
+  // }
+  // }
 
   @Test(expected = EEAIllegalArgumentException.class)
   public void updateMessageReadStatusEEAIllegalArgumentExceptionTest()
@@ -265,5 +327,11 @@ public class CollaborationServiceImplTest {
     Mockito.when(messageMapper.entityListToClass(Mockito.any()))
         .thenReturn(new ArrayList<MessageVO>());
     Assert.assertNotNull(collaborationServiceImpl.findMessages(1L, 1L, null, 1));
+  }
+
+  @Test
+  public void getMessageAttachmentTest() throws EEAException {
+    collaborationServiceImpl.getMessageAttachment(1L);
+    Mockito.verify(messageAttachmentRepository, times(1)).findByMessageId(Mockito.any());
   }
 }

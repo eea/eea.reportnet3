@@ -1,5 +1,6 @@
 package org.eea.collaboration.controller;
 
+import java.io.IOException;
 import java.util.List;
 import org.eea.collaboration.persistence.domain.MessageAttachment;
 import org.eea.collaboration.service.CollaborationService;
@@ -107,6 +108,10 @@ public class CollaborationControllerImpl implements CollaborationController {
     } catch (EEAForbiddenException e) {
       LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+    } catch (IOException e) {
+      LOG_ERROR.error("Error saving message attachment from the dataflowId {}, with message: {}",
+          dataflowId, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 
@@ -190,8 +195,7 @@ public class CollaborationControllerImpl implements CollaborationController {
   @GetMapping("/findMessages/dataflow/{dataflowId}/getMessageAttachment")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public ResponseEntity<byte[]> getMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId,
-      @RequestParam("messageAttachmentId") Long messageId) {
+      @RequestParam("providerId") Long providerId, @RequestParam("messageId") Long messageId) {
 
 
     LOG.info("Downloading message attachment from the dataflowId {}", dataflowId);

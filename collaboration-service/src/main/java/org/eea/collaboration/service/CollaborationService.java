@@ -1,5 +1,6 @@
 package org.eea.collaboration.service;
 
+import java.io.IOException;
 import java.util.List;
 import org.eea.collaboration.persistence.domain.MessageAttachment;
 import org.eea.exception.EEAException;
@@ -36,7 +37,7 @@ public interface CollaborationService {
    * @throws EEAForbiddenException the EEA forbidden exception
    */
   MessageVO createMessageAttachment(Long dataflowId, Long providerId, MultipartFile fileAttachment)
-      throws EEAIllegalArgumentException, EEAForbiddenException;
+      throws EEAIllegalArgumentException, EEAForbiddenException, IOException;
 
   /**
    * Update message read status.
