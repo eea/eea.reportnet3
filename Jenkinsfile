@@ -73,7 +73,7 @@ pipeline {
 
         stage('Push to EEA GitHub') {
             when {
-                branch 'release/v3.0.6.0-RC1'
+                branch 'release/v3.0.6.0-RC2'
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'jenkins-eea-altia', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
