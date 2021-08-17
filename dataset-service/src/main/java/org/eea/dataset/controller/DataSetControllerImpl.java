@@ -504,6 +504,7 @@ public class DataSetControllerImpl implements DatasetController {
    * @param datasetId the data set id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param deletePrefilledTables the delete prefilled tables
    */
   @Override
   @HystrixCommand
@@ -513,9 +514,10 @@ public class DataSetControllerImpl implements DatasetController {
   public void deleteImportData(
       @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId) {
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
+          required = false) Boolean deletePrefilledTables) {
 
-    boolean isDesign = false;
     // Rest API only: Check if the dataflow belongs to the dataset
     if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -524,15 +526,7 @@ public class DataSetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
-
-    // I have to check wich of the two type of dataset i'm using => REPORTING OR DESING
-    // isDesign =
-    if (isDesign) {
-      // I have to implements the delete in the case of the design delete dataset
-    } else {
-      // This method will release the lock
-      deleteHelper.executeDeleteDatasetProcess(datasetId);
-    }
+    deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables);
   }
 
   /**
