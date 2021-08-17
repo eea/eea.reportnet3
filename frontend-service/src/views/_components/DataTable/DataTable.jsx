@@ -5,12 +5,16 @@ import classNames from 'classnames';
 
 import './DataTable.css';
 
+import { InputText } from 'views/_components/InputText';
 import { Paginator } from './_components/Paginator';
+import ReactTooltip from 'react-tooltip';
 import { ScrollableView } from './_components/ScrollableView';
 import { TableBody } from './_components/TableBody';
 import { TableFooter } from './_components/TableFooter';
 import { TableHeader } from './_components/TableHeader';
 import { TableLoadingBody } from './_components/TableLoadingBody';
+
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
@@ -41,6 +45,7 @@ export class DataTable extends Component {
     frozenWidth: null,
     getPageChange: null,
     globalFilter: null,
+    hasDefaultCurrentPage: false,
     header: null,
     headerColumnGroup: null,
     id: null,
@@ -132,6 +137,7 @@ export class DataTable extends Component {
     frozenWidth: PropTypes.string,
     getPageChange: PropTypes.func,
     globalFilter: PropTypes.any,
+    hasDefaultCurrentPage: PropTypes.bool,
     header: PropTypes.any,
     headerColumnGroup: PropTypes.any,
     id: PropTypes.string,
@@ -165,7 +171,7 @@ export class DataTable extends Component {
     paginatorLeft: PropTypes.any,
     paginatorPosition: PropTypes.string,
     paginatorRight: PropTypes.any,
-    paginatorTemplate: PropTypes.string,
+    paginatorTemplate: PropTypes.any,
     reorderableColumns: PropTypes.bool,
     resizableColumns: PropTypes.bool,
     responsive: PropTypes.bool,
@@ -198,9 +204,13 @@ export class DataTable extends Component {
     virtualScrollDelay: PropTypes.number
   };
 
+  static contextType = ResourcesContext;
+
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      currentPage: 1
+    };
 
     if (!this.props.onPage) {
       this.state.first = props.first;
@@ -221,6 +231,7 @@ export class DataTable extends Component {
       this.restoreState(this.state);
     }
 
+    this.onChangeCurrentPage = this.onChangeCurrentPage.bind(this);
     this.onPageChange = this.onPageChange.bind(this);
     this.onSort = this.onSort.bind(this);
     this.onFilter = this.onFilter.bind(this);
@@ -429,9 +440,48 @@ export class DataTable extends Component {
     }
   }
 
+  onChangeCurrentPage(event) {
+    if (event.key === 'Enter' && this.state.currentPage !== '' && this.state.currentPage !== this.props.first) {
+      var pc = Math.ceil(this.props.totalRecords / this.getRows()) || 1;
+      var p = Math.floor(event.target.value - 1);
+
+      if (p >= 0 && p < pc) {
+        var newPageState = {
+          currentPage: p + 1,
+          first: (event.target.value - 1) * this.getRows(),
+          rows: this.getRows(),
+          page: p,
+          pageCount: pc,
+          pageInputTooltip:
+            p >= 0 && p < pc
+              ? this.context.messages['currentPageInfoMessage']
+              : `${this.context.messages['currentPageErrorMessage']} ${Math.ceil(
+                  this.props.totalRecords / this.getRows()
+                )}`
+        };
+        this.onPageChange(newPageState);
+      }
+    } else {
+      this.setState({
+        currentPage: event.target.value
+      });
+      if (event.target.value <= 0 || event.target.value > Math.ceil(this.props.totalRecords / this.getRows())) {
+        this.setState({
+          pageInputTooltip: `${this.context.messages['currentPageErrorMessage']} ${Math.ceil(
+            this.props.totalRecords / this.getRows()
+          )}`
+        });
+      } else {
+        this.setState({ pageInputTooltip: this.context.messages['currentPageInfoMessage'] });
+      }
+    }
+  }
+
   onPageChange(event) {
+    this.setState({ currentPage: event.currentPage, pageInputTooltip: event.pageInputTooltip });
+
     if (this.props.onPage) this.props.onPage(event);
-    else this.setState({ first: event.first, rows: event.rows });
+    else this.setState({ currentPage: event.currentPage, first: event.first, rows: event.rows });
 
     if (this.props.getPageChange) this.props.getPageChange(event);
 
@@ -455,7 +505,44 @@ export class DataTable extends Component {
         rightContent={this.props.paginatorRight}
         rows={this.getRows()}
         rowsPerPageOptions={this.props.rowsPerPageOptions}
-        template={this.props.paginatorTemplate}
+        template={
+          !this.props.hasDefaultCurrentPage
+            ? this.props.paginatorTemplate
+            : {
+                layout: `PrevPageLink PageLinks NextPageLink RowsPerPageDropdown CurrentPageReport`,
+                CurrentPageReport: options => {
+                  return (
+                    <span style={{ color: 'var(--white)', userSelect: 'none' }}>
+                      <label style={{ margin: '0 0.5rem' }}>Go to </label>
+                      <InputText
+                        data-for="pageInputTooltip"
+                        data-tip
+                        id="currentPageInput"
+                        keyfilter="pint"
+                        onChange={this.onChangeCurrentPage}
+                        onKeyDown={this.onChangeCurrentPage}
+                        style={{
+                          border:
+                            (this.state.currentPage <= 0 || this.state.currentPage > options.totalPages) &&
+                            '1px solid var(--errors)',
+                          boxShadow:
+                            this.state.currentPage <= 0 || this.state.currentPage > options.totalPages
+                              ? 'var(--inputtext-box-shadow-focus-error)'
+                              : 'none',
+                          display: 'inline',
+                          height: '1.75rem',
+                          width: '3rem'
+                        }}
+                        value={this.state.currentPage}
+                      />
+                      <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="right">
+                        {this.state.pageInputTooltip}
+                      </ReactTooltip>
+                    </span>
+                  );
+                }
+              }
+        }
         totalRecords={totalRecords}
       />
     );
@@ -1339,6 +1426,7 @@ export class DataTable extends Component {
   }
 
   componentDidMount() {
+    this.setState({ pageInputTooltip: this.context.messages['currentPageInfoMessage'] });
     if (this.isStateful() && this.props.resizableColumns) {
       this.restoreColumnWidths();
     }
