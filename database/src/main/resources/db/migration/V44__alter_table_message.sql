@@ -1,0 +1,3 @@
+--ADD COLUMN TYPE IN TABLE MESSAGE
+
+ALTER TABLE public.message ADD COLUMN "type" text NULL;
