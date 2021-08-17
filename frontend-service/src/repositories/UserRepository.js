@@ -6,6 +6,32 @@ import { UserConfig } from './config/UserConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
+export const UserRepository = {
+  getConfiguration: async () => {
+    const response = await HTTPRequester.get({ url: getUrl(UserConfig.getConfiguration) });
+    return parseUserImage(response.data);
+  },
+
+  getUserInfo: async userId => await HTTPRequester.get({ url: getUrl(UserConfig.getUserInfo, { userId }) }),
+
+  login: async code => await HTTPRequester.post({ url: getUrl(UserConfig.login, { code }) }),
+
+  oldLogin: async (userName, password) =>
+    await HTTPRequester.post({ url: getUrl(UserConfig.oldLogin, { userName, password }) }),
+
+  updateConfiguration: async userConfiguration =>
+    await HTTPRequester.update({
+      url: getUrl(UserConfig.updateConfiguration),
+      headers: { 'Content-Type': 'application/json' },
+      data: parseUserConfiguration(userConfiguration)
+    }),
+
+  logout: async refreshToken => await HTTPRequester.post({ url: getUrl(UserConfig.logout, { refreshToken }) }),
+
+  refreshToken: async refreshToken =>
+    await HTTPRequester.post({ url: getUrl(UserConfig.refreshToken, { refreshToken }) })
+};
+
 const parseUserConfiguration = userConfiguration => {
   userConfiguration.userImage = userConfiguration.userImage.map((token, i) => `${('000' + i).substr(-3)}~${token}`);
   Object.keys(userConfiguration).forEach(
@@ -38,57 +64,4 @@ const parseUserImage = data => {
       return data;
     }
   }
-};
-
-export const userRepository = {
-  login: async code =>
-    await HTTPRequester.post({
-      url: getUrl(UserConfig.login, {
-        code
-      })
-    }),
-
-  oldLogin: async (userName, password) =>
-    await HTTPRequester.post({
-      url: getUrl(UserConfig.oldLogin, {
-        userName,
-        password
-      })
-    }),
-
-  configuration: async () => {
-    const response = await HTTPRequester.get({
-      url: getUrl(UserConfig.configuration)
-    });
-    return parseUserImage(response.data);
-  },
-
-  updateAttributes: async userConfiguration =>
-    await HTTPRequester.update({
-      url: getUrl(UserConfig.updateConfiguration),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      data: parseUserConfiguration(userConfiguration)
-    }),
-  logout: async refreshToken =>
-    await HTTPRequester.post({
-      url: getUrl(UserConfig.logout, {
-        refreshToken
-      })
-    }),
-
-  refreshToken: async refreshToken =>
-    await HTTPRequester.post({
-      url: getUrl(UserConfig.refreshToken, {
-        refreshToken
-      })
-    }),
-
-  userInfo: async userId =>
-    await HTTPRequester.get({
-      url: getUrl(UserConfig.userInfo, {
-        userId
-      })
-    })
 };

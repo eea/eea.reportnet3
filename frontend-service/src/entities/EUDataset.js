@@ -1,13 +1,5 @@
-export class EuDataset {
-  constructor({
-    creationDate,
-    euDatasetId,
-    euDatasetName,
-    dataflowId,
-    datasetSchemaId,
-    expirationDate,
-    status
-  } = {}) {
+export class EUDataset {
+  constructor({ creationDate, euDatasetId, euDatasetName, dataflowId, datasetSchemaId, expirationDate, status } = {}) {
     this.creationDate = creationDate;
     this.euDatasetId = euDatasetId;
     this.euDatasetName = euDatasetName;

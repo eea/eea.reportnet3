@@ -73,9 +73,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [dataViewerOptions, setDataViewerOptions] = useState({
     isGroupedValidationDeleted: false,
     isGroupedValidationSelected: false,
-    isValidationSelected: false,
-    recordPositionId: -1,
-    selectedRecordErrorId: -1,
     selectedRuleId: '',
     selectedRuleLevelError: '',
     selectedRuleMessage: '',
@@ -114,7 +111,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
   const [isValidationsTabularView, setIsValidationsTabularView] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
-  const [metaData, setMetaData] = useState({});
+  const [metadata, setMetadata] = useState(undefined);
   const [replaceData, setReplaceData] = useState(false);
   const [schemaTables, setSchemaTables] = useState([]);
   const [tableSchema, setTableSchema] = useState();
@@ -127,23 +124,26 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
 
-  const callSetMetaData = async () => {
-    setMetaData(await getMetadata({ datasetId, dataflowId }));
-  };
-
   useBreadCrumbs({
     currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET : CurrentPage.DATASET,
     dataflowId,
     history,
     isBusinessDataflow,
     isLoading,
-    metaData,
+    metaData: metadata,
     referenceDataflowId: dataflowId
   });
 
   useEffect(() => {
     leftSideBarContext.removeModels();
+    getMetadata();
   }, []);
+
+  useEffect(() => {
+    if (!isUndefined(metadata)) {
+      onLoadDatasetSchema();
+    }
+  }, [metadata]);
 
   useEffect(() => {
     if (isCustodianOrSteward) {
@@ -209,10 +209,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   }, [webformData]);
 
   useEffect(() => {
-    onLoadDatasetSchema();
-  }, []);
-
-  useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       leftSideBarContext.addHelpSteps(DatasetSchemaReporterHelpConfig, 'datasetSchemaReporterHelpConfig');
     }
@@ -248,12 +244,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     snapshotListData,
     snapshotState
   } = useReporterDataset(datasetId, dataflowId);
-
-  useEffect(() => {
-    callSetMetaData();
-    getDataflowName();
-    getDatasetData();
-  }, []);
 
   useEffect(() => {
     if (!isUndefined(isTestDataset)) {
@@ -371,7 +361,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getFileExtensions = async () => {
     try {
-      const allExtensions = await IntegrationService.allExtensionsOperations(dataflowId, datasetSchemaId);
+      const allExtensions = await IntegrationService.getAllExtensionsOperations(dataflowId, datasetSchemaId);
       setExternalOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
     } catch (error) {
       console.error('Dataset - getFileExtensions.', error);
@@ -379,56 +369,25 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     }
   };
 
-  const getDatasetData = async () => {
+  const getMetadata = async () => {
     try {
-      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
-      setDatasetSchemaId(metadata.datasetSchemaId);
-      setDatasetFeedbackStatus(metadata.datasetFeedbackStatus);
-      setDataProviderId(metadata.dataProviderId);
+      const metaData = await MetadataUtils.getMetadata({ datasetId, dataflowId });
+      setMetadata(metaData);
+      setDataflowName(metaData.dataflow.name);
+      setDatasetSchemaId(metaData.dataset.datasetSchemaId);
+      setDatasetFeedbackStatus(metaData.dataset.datasetFeedbackStatus);
+      setDataProviderId(metaData.dataset.dataProviderId);
     } catch (error) {
-      console.error('Dataset - getDatasetData.', error);
+      console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
     }
-  };
-
-  const getMetadata = async ids => {
-    try {
-      return await MetadataUtils.getMetadata(ids);
-    } catch (error) {
-      console.error('Dataset - getMetadata.', error);
-      notificationContext.add({
-        type: 'GET_METADATA_ERROR',
-        content: {
-          dataflowId,
-          datasetId
-        }
-      });
-    }
-  };
-
-  const getDataflowName = async () => {
-    try {
-      const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
-      setDataflowName(data.name);
-    } catch (error) {
-      console.error('Dataset - getDataflowName.', error);
-      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
-    }
-  };
-
-  const onChangeIsValidationSelected = options => {
-    setDataViewerOptions({
-      ...dataViewerOptions,
-      isGroupedValidationSelected: options.isGroupedValidationSelected,
-      isValidationSelected: options.isValidationSelected
-    });
   };
 
   const onConfirmDelete = async () => {
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
       setDeleteDialogVisible(false);
-      await DatasetService.deleteDataById(datasetId);
+      await DatasetService.deleteData(datasetId);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -437,7 +396,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
-        } = await getMetadata({ dataflowId, datasetId });
+        } = metadata;
         notificationContext.add({
           type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
           content: { dataflowId, datasetId, dataflowName, datasetName }
@@ -449,7 +408,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onConfirmValidate = async () => {
     try {
       setValidateDialogVisible(false);
-      await DatasetService.validateDataById(datasetId);
+      await DatasetService.validate(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
         content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
@@ -496,18 +455,12 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onImportOtherSystems = async () => {
     try {
       cleanImportOtherSystemsDialog();
-      const dataImported = await IntegrationService.runIntegration(
-        importFromOtherSystemSelectedIntegrationId,
-        datasetId,
-        replaceData
-      );
-      if (dataImported.status >= 200 && dataImported.status <= 299) {
-        setIsDataLoaded(true);
-      }
+      await IntegrationService.runIntegration(importFromOtherSystemSelectedIntegrationId, datasetId, replaceData);
+      setIsDataLoaded(true);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      } = metadata;
       notificationContext.add({
         type: 'DATASET_IMPORT_INIT',
         content: { dataflowId, datasetId, dataflowName, datasetName }
@@ -567,7 +520,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
-    } = await getMetadata({ dataflowId, datasetId });
+    } = metadata;
 
     notificationContext.add({
       type: exportNotification,
@@ -595,7 +548,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
-      await DatasetService.exportDataById(datasetId, fileType);
+      await DatasetService.exportDatasetData(datasetId, fileType);
     } catch (error) {
       console.error('Dataset - onExportDataInternalExtension.', error);
       onExportError('EXPORT_DATA_BY_ID_ERROR');
@@ -604,8 +557,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onLoadDataflow = async () => {
     try {
-      const { data } = await DataflowService.reporting(match.params.dataflowId);
-      setIsBusinessDataflow(false); // TODO WITH REAL DATA
+      const data = await DataflowService.get(match.params.dataflowId);
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
       let dataset = [];
       if (isTestDataset) {
         dataset = data.testDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
@@ -630,7 +583,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
+      } = metadata;
       notificationContext.add({
         type: 'REPORTING_ERROR',
         content: { dataflowId, datasetId, dataflowName, datasetName }
@@ -656,13 +609,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getDataSchema = async () => {
     try {
-      const datasetSchema = await DatasetService.schemaById(datasetId);
-      setDatasetSchemaAllTables(datasetSchema.data.tables);
-      setDatasetSchemaName(datasetSchema.data.datasetSchemaName);
-      setLevelErrorTypes(datasetSchema.data.levelErrorTypes);
-      setWebformData(datasetSchema.data.webform);
-      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.data.webform));
-      return datasetSchema.data;
+      const datasetSchema = await DatasetService.getSchema(datasetId);
+      setDatasetSchemaAllTables(datasetSchema.tables);
+      setDatasetSchemaName(datasetSchema.datasetSchemaName);
+      setLevelErrorTypes(datasetSchema.levelErrorTypes);
+      setWebformData(datasetSchema.webform);
+      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.webform));
+      return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
     }
@@ -670,8 +623,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
     try {
-      const datasetStatistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
-      return datasetStatistics.data;
+      return await DatasetService.getStatistics(datasetId, tableSchemaNames);
     } catch (error) {
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
     }
@@ -733,7 +685,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
+      } = metadata;
       setDatasetName(datasetName);
       const datasetError = {
         type: error.message,
@@ -758,8 +710,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       ...dataViewerOptions,
       isGroupedValidationDeleted: true,
       isGroupedValidationSelected: false,
-      isValidationSelected: false,
-      recordPositionId: -1,
       selectedRuleMessage: '',
       selectedRuleLevelError: '',
       selectedRuleId: ''
@@ -775,8 +725,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       ...dataViewerOptions,
       isGroupedValidationDeleted: false,
       isGroupedValidationSelected: true,
-      recordPositionId: -1,
-      selectedRecordErrorId: -1,
       selectedRuleId,
       selectedRuleLevelError,
       selectedRuleMessage,
@@ -832,7 +780,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
-    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+    } = metadata;
     notificationContext.add({
       type: 'DATASET_DATA_LOADING_INIT',
       content: {
@@ -897,7 +845,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
 
     try {
-      await ValidationService.generateFile(datasetId);
+      await ValidationService.generateShowValidationsFile(datasetId);
     } catch (error) {
       console.error('Dataset - onDownloadValidations.', error);
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' });
@@ -1071,20 +1019,17 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       {isTableView ? (
         <TabsSchema
           dataProviderId={dataProviderId}
+          datasetSchemaId={datasetSchemaId}
           hasWritePermissions={hasWritePermissions}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
           isReferenceDataset={isReferenceDataset || isReferenceDatasetRegularDataflow}
           isReportingWebform={isReportingWebform}
-          isValidationSelected={dataViewerOptions.isValidationSelected}
           levelErrorTypes={levelErrorTypes}
-          onChangeIsValidationSelected={onChangeIsValidationSelected}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
           onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-          recordPositionId={dataViewerOptions.recordPositionId}
           reporting={true}
-          selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
           selectedRuleId={dataViewerOptions.selectedRuleId}
           selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
           selectedRuleMessage={dataViewerOptions.selectedRuleMessage}

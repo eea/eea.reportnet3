@@ -21,7 +21,7 @@ import { DatasetService } from 'services/DatasetService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { MetadataUtils, RecordUtils } from 'views/_functions/Utils';
+import { RecordUtils } from 'views/_functions/Utils';
 import { MapUtils } from 'views/_functions/Utils/MapUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -134,7 +134,7 @@ const FieldEditor = ({
     }
 
     if (isNil(datasetSchemaId)) {
-      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+      const metadata = await DatasetService.getMetadata(datasetId);
       datasetSchemaId = metadata.datasetSchemaId;
     }
 
@@ -158,7 +158,7 @@ const FieldEditor = ({
         100
       );
 
-      const linkItems = referencedFieldValues.data
+      const linkItems = referencedFieldValues
         .map(referencedField => {
           return {
             itemType: `${referencedField.value}${
@@ -180,7 +180,7 @@ const FieldEditor = ({
         });
       }
 
-      if (referencedFieldValues.data.length > 99) {
+      if (referencedFieldValues.length > 99) {
         linkItems[linkItems.length - 1] = {
           disabled: true,
           itemType: resources.messages['moreElements'],

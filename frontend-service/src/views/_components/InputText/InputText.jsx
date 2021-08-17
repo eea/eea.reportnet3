@@ -27,7 +27,8 @@ export class InputText extends Component {
     required: false,
     tooltip: null,
     tooltipOptions: null,
-    validateOnly: false
+    validateOnly: false,
+    value: undefined
   };
 
   static propTypes = {
@@ -42,7 +43,8 @@ export class InputText extends Component {
     required: PropTypes.bool,
     tooltip: PropTypes.string,
     tooltipOptions: PropTypes.object,
-    validateOnly: PropTypes.bool
+    validateOnly: PropTypes.bool,
+    value: PropTypes.string
   };
 
   constructor(props) {
@@ -125,6 +127,7 @@ export class InputText extends Component {
           id={this.props.id}
           onInput={this.onInput}
           onKeyPress={this.onKeyPress}
+          value={this.props.value}
         />
         {this.props.required ? (
           <div style={{ position: relative, width: 0, height: 0 }}>

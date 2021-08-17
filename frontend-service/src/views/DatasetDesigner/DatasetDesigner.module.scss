@@ -16,6 +16,9 @@
   width: 50vw;
   margin-bottom: 1rem !important;
   transition: 0.5s !important;
+  @include for-desktop-up{
+    flex: auto;
+  }
 }
 
 .Dialog {
@@ -76,6 +79,7 @@
     align-items: center;
     margin-left: 1rem;
     > div {
+      display: flex;
       margin-right: 1rem;
     }
     button:last-child {

@@ -1,27 +1,36 @@
 import { BusinessDataflowConfig } from './config/BusinessDataflowConfig';
+import { DataflowConfig } from './config/DataflowConfig';
+
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const businessDataflowRepository = {
-  all: async () => await HTTPRequester.get({ url: getUrl(BusinessDataflowConfig.all) }),
+export const BusinessDataflowRepository = {
+  create: async (name, description, obligationId, dataProviderGroupId, fmeUserId) =>
+    await HTTPRequester.post({
+      url: getUrl(DataflowConfig.createUpdate),
+      data: {
+        name,
+        description,
+        obligation: { obligationId },
+        releasable: true,
+        type: 'BUSINESS',
+        dataProviderGroupId,
+        fmeUserId
+      }
+    }),
 
-  create: async (name, description, obligationId, groupCompaniesId, fmeUserId) => {
-    return await HTTPRequester.post({
-      url: getUrl(BusinessDataflowConfig.createDataflow),
-      data: { name, description, obligation: { obligationId }, type: 'BUSINESS', groupCompaniesId, fmeUserId }
-    });
-  },
+  getAll: async () => await HTTPRequester.get({ url: getUrl(BusinessDataflowConfig.getAll) }),
 
-  edit: async (dataflowId, description, obligationId, name, groupCompaniesId, fmeUserId) =>
+  update: async (dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId) =>
     await HTTPRequester.update({
-      url: getUrl(BusinessDataflowConfig.createDataflow),
+      url: getUrl(DataflowConfig.createUpdate),
       data: {
         description,
         id: dataflowId,
         obligation: { obligationId },
         name,
         type: 'BUSINESS',
-        groupCompaniesId,
+        dataProviderGroupId,
         fmeUserId
       }
     })

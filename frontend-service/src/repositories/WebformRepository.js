@@ -2,12 +2,10 @@ import { WebformConfig } from './config/WebformConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const webformRepository = {
-  addPamsRecords: async (datasetId, pamsRecord) => {
-    return await HTTPRequester.post({ url: getUrl(WebformConfig.createPamsRecords, { datasetId }), data: pamsRecord });
-  },
+export const WebformRepository = {
+  addPamsRecords: async (datasetId, pamsRecord) =>
+    await HTTPRequester.post({ url: getUrl(WebformConfig.createPamsRecords, { datasetId }), data: pamsRecord }),
 
-  singlePamData: async (datasetId, groupPaMId) => {
-    return await HTTPRequester.get({ url: getUrl(WebformConfig.singlePamData, { datasetId, groupPaMId }) });
-  }
+  getSinglePamData: async (datasetId, groupPaMId) =>
+    await HTTPRequester.get({ url: getUrl(WebformConfig.getSinglePamData, { datasetId, groupPaMId }) })
 };

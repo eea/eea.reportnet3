@@ -1,7 +1,6 @@
 import React, { Fragment, useContext, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -19,6 +18,7 @@ import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
 
+import { DataflowService } from 'services/DataflowService';
 import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 
 import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
@@ -71,6 +71,25 @@ export const ManageReferenceDataflow = ({
 
   const checkErrors = () => {
     let hasErrors = false;
+
+    if (isEmpty(name.trim())) {
+      handleErrors({
+        field: 'name',
+        hasErrors: true,
+        message: resources.messages['emptyNameValidationError']
+      });
+      hasErrors = true;
+    }
+
+    if (isEmpty(description.trim())) {
+      handleErrors({
+        field: 'description',
+        hasErrors: true,
+        message: resources.messages['emptyDescriptionValidationError']
+      });
+      hasErrors = true;
+    }
+
     if (description.length > config.INPUT_MAX_LENGTH) {
       handleErrors({
         field: 'description',
@@ -96,13 +115,11 @@ export const ManageReferenceDataflow = ({
     setIsDeleteDialogVisible(false);
     showLoading();
     try {
-      const response = await ReferenceDataflowService.deleteReferenceDataflow(dataflowId);
-      if (response.status >= 200 && response.status <= 299) {
-        history.push(getUrl(routes.DATAFLOWS));
-        notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
-      }
+      await DataflowService.delete(dataflowId);
+      history.push(getUrl(routes.DATAFLOWS));
+      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
     } catch (error) {
-      console.error('ManageReferenceDataflows - onDeleteDataflow.', error);
+      console.error('ManageReferenceDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
     } finally {
       hideLoading();
@@ -115,26 +132,18 @@ export const ManageReferenceDataflow = ({
     try {
       setIsSending(true);
       if (isEditing) {
-        const { status } = await ReferenceDataflowService.edit(dataflowId, description, name, 'REFERENCE');
-
-        if (status >= 200 && status <= 299) {
-          manageDialogs(dialogName, false);
-          onEditDataflow(name, description);
-        }
+        await ReferenceDataflowService.update(dataflowId, description, name, 'REFERENCE');
+        manageDialogs(dialogName, false);
+        onEditDataflow(name, description);
       } else {
-        const { data, status } = await ReferenceDataflowService.create(name, description, 'REFERENCE');
-        if (status >= 200 && status <= 299) {
-          if (pinDataflow) {
-            const inmUserProperties = { ...userContext.userProps };
-            inmUserProperties.pinnedDataflows.push(data.toString());
-
-            const response = await UserService.updateAttributes(inmUserProperties);
-            if (!isNil(response) && response.status >= 200 && response.status <= 299) {
-              userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
-            }
-          }
-          onCreateDataflow('isReferencedDataflowDialogVisible');
+        const { data } = await ReferenceDataflowService.create(name, description, 'REFERENCE');
+        if (pinDataflow) {
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.pinnedDataflows.push(data.toString());
+          await UserService.updateConfiguration(inmUserProperties);
+          userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
         }
+        onCreateDataflow('isReferencedDataflowDialogVisible');
       }
     } catch (error) {
       if (TextUtils.areEquals(error?.response?.data, 'Dataflow name already exists')) {

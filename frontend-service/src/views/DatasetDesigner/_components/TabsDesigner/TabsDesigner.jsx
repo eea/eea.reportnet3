@@ -43,20 +43,16 @@ export const TabsDesigner = withRouter(
     isGroupedValidationDeleted,
     isGroupedValidationSelected,
     isReferenceDataset,
-    isValidationSelected,
     manageDialogs,
     manageUniqueConstraint,
     match,
-    onChangeIsValidationSelected,
     onChangeReference,
     onHideSelectGroupedValidation,
     onLoadTableData,
     onTabChange,
     onUpdateSchema,
     onUpdateTable,
-    recordPositionId,
     schemaImported = false,
-    selectedRecordErrorId,
     selectedRuleId,
     selectedRuleLevelError,
     selectedRuleMessage,
@@ -191,7 +187,6 @@ export const TabsDesigner = withRouter(
     const onTabClicked = event => {
       if (event.header !== '') {
         setActiveTableSchemaId(event.tableSchemaId);
-        onChangeIsValidationSelected({ isValidationSelected: false, isGroupedValidationSelected });
       }
     };
 
@@ -241,21 +236,18 @@ export const TabsDesigner = withRouter(
 
     const addTable = async (header, tabIndex) => {
       try {
-        const { data, status } = await DatasetService.addTableDesign(datasetId, header);
-
-        if (status >= 200 && status <= 299) {
-          const inmTabs = [...tabs];
-          inmTabs[tabIndex].tableSchemaId = data.idTableSchema;
-          inmTabs[tabIndex].recordId = data.recordSchema.idRecordSchema;
-          inmTabs[tabIndex].recordSchemaId = data.recordSchema.idRecordSchema;
-          inmTabs[tabIndex].header = header;
-          inmTabs[tabIndex].tableSchemaName = header;
-          inmTabs[tabIndex].newTab = false;
-          inmTabs[tabIndex].showContextMenu = false;
-          setActiveTableSchemaId(data.idTableSchema);
-          setTabs(inmTabs);
-          getIsTableCreated(true);
-        }
+        const { data } = await DatasetService.createTableDesign(datasetId, header);
+        const inmTabs = [...tabs];
+        inmTabs[tabIndex].tableSchemaId = data.idTableSchema;
+        inmTabs[tabIndex].recordId = data.recordSchema.idRecordSchema;
+        inmTabs[tabIndex].recordSchemaId = data.recordSchema.idRecordSchema;
+        inmTabs[tabIndex].header = header;
+        inmTabs[tabIndex].tableSchemaName = header;
+        inmTabs[tabIndex].newTab = false;
+        inmTabs[tabIndex].showContextMenu = false;
+        setActiveTableSchemaId(data.idTableSchema);
+        setTabs(inmTabs);
+        getIsTableCreated(true);
       } catch (error) {
         console.error('TabsDesigner - addTable.', error);
         if (error?.response.status === 400) {
@@ -313,23 +305,21 @@ export const TabsDesigner = withRouter(
 
     const deleteTable = async deletedTableSchemaId => {
       try {
-        const response = await DatasetService.deleteTableDesign(datasetId, deletedTableSchemaId);
-        if (response.status >= 200 && response.status <= 299) {
-          const inmTabs = [...tabs];
-          const deletedTabIndx = TabsUtils.getIndexByTableProperty(deletedTableSchemaId, inmTabs, 'tableSchemaId');
-          inmTabs.splice(deletedTabIndx, 1);
-          inmTabs.forEach(tab => {
-            if (tab.addTab) {
-              tab.index = -1;
-              tab.tableSchemaId = '';
-            }
-          });
-          if (tableSchemaId === deletedTableSchemaId) {
-            setActiveTableSchemaId(inmTabs[0].tableSchemaId);
+        await DatasetService.deleteTableDesign(datasetId, deletedTableSchemaId);
+        const inmTabs = [...tabs];
+        const deletedTabIndx = TabsUtils.getIndexByTableProperty(deletedTableSchemaId, inmTabs, 'tableSchemaId');
+        inmTabs.splice(deletedTabIndx, 1);
+        inmTabs.forEach(tab => {
+          if (tab.addTab) {
+            tab.index = -1;
+            tab.tableSchemaId = '';
           }
-          onChangeReference(inmTabs, datasetSchema.datasetSchemaId);
-          setTabs(inmTabs);
+        });
+        if (tableSchemaId === deletedTableSchemaId) {
+          setActiveTableSchemaId(inmTabs[0].tableSchemaId);
         }
+        onChangeReference(inmTabs, datasetSchema.datasetSchemaId);
+        setTabs(inmTabs);
       } catch (error) {
         console.error('TabsDesigner - deleteTable.', error);
       }
@@ -418,18 +408,14 @@ export const TabsDesigner = withRouter(
                         isGroupedValidationDeleted={isGroupedValidationDeleted}
                         isGroupedValidationSelected={isGroupedValidationSelected}
                         isReferenceDataset={isReferenceDataset}
-                        isValidationSelected={isValidationSelected}
                         key={tab.index}
                         manageDialogs={manageDialogs}
                         manageUniqueConstraint={manageUniqueConstraint}
                         onChangeFields={onChangeFields}
-                        onChangeIsValidationSelected={onChangeIsValidationSelected}
                         onChangeReference={onChangeReference}
                         onChangeTableProperties={onChangeTableProperties}
                         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                         onLoadTableData={onLoadTableData}
-                        recordPositionId={tab.tableSchemaId === tableSchemaId ? recordPositionId : -1}
-                        selectedRecordErrorId={tab.tableSchemaId === tableSchemaId ? selectedRecordErrorId : -1}
                         selectedRuleId={selectedRuleId}
                         selectedRuleLevelError={selectedRuleLevelError}
                         selectedRuleMessage={selectedRuleMessage}
@@ -453,20 +439,19 @@ export const TabsDesigner = withRouter(
         const inmTabs = [...tabs];
         const draggedTabIdx = TabsUtils.getIndexByHeader(draggedTabHeader, inmTabs);
         const droppedTabIdx = TabsUtils.getIndexByHeader(droppedTabHeader, inmTabs);
-        const tableOrdered = await DatasetService.orderTableDesign(
+        await DatasetService.updateTableOrder(
           datasetId,
           draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1,
           tabs[draggedTabIdx].tableSchemaId
         );
-        if (tableOrdered.status >= 200 && tableOrdered.status <= 299) {
-          const shiftedTabs = arrayShift(inmTabs, draggedTabIdx, droppedTabIdx);
 
-          shiftedTabs.forEach((tab, i) => (tab.index = !tab.addTab ? i : -1));
-          setActiveTableSchemaId(
-            shiftedTabs[draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1].tableSchemaId
-          );
-          setTabs([...shiftedTabs]);
-        }
+        const shiftedTabs = arrayShift(inmTabs, draggedTabIdx, droppedTabIdx);
+
+        shiftedTabs.forEach((tab, i) => (tab.index = !tab.addTab ? i : -1));
+        setActiveTableSchemaId(
+          shiftedTabs[draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1].tableSchemaId
+        );
+        setTabs([...shiftedTabs]);
       } catch (error) {
         console.error('TabsDesigner - reorderTable.', error);
       }
@@ -474,14 +459,12 @@ export const TabsDesigner = withRouter(
 
     const updateTableName = async (tableSchemaId, tableSchemaName) => {
       try {
-        const { status } = await DatasetService.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
-        if (status >= 200 && status <= 299) {
-          const inmTabs = [...tabs];
-          inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
-          inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].tableSchemaName =
-            tableSchemaName;
-          setTabs(inmTabs);
-        }
+        await DatasetService.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
+        const inmTabs = [...tabs];
+        inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
+        inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].tableSchemaName =
+          tableSchemaName;
+        setTabs(inmTabs);
       } catch (error) {
         console.error('TabsDesigner - updateTableName.', error);
         if (error?.response.status === 400) {

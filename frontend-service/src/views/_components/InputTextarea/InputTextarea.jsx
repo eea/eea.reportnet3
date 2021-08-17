@@ -18,7 +18,8 @@ export class InputTextarea extends Component {
     onInput: null,
     rows: 1,
     tooltip: null,
-    tooltipOptions: null
+    tooltipOptions: null,
+    value: undefined
   };
 
   static propTypes = {
@@ -30,7 +31,8 @@ export class InputTextarea extends Component {
     cols: PropTypes.number,
     rows: PropTypes.number,
     tooltip: PropTypes.string,
-    tooltipOptions: PropTypes.object
+    tooltipOptions: PropTypes.object,
+    value: PropTypes.string
   };
 
   constructor(props) {
@@ -191,7 +193,8 @@ export class InputTextarea extends Component {
           onInput={this.onInput}
           onKeyUp={this.onKeyUp}
           ref={input => (this.element = input)}
-          rows={this.props.rows}></textarea>
+          rows={this.props.rows}
+          value={this.props.value}></textarea>
         <label className="srOnly" htmlFor={this.props.id}>
           {this.props.placeholder || this.props.id}
         </label>

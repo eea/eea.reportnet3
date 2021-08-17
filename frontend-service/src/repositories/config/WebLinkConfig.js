@@ -1,6 +1,5 @@
 export const WebLinkConfig = {
-  all: '/document/{:documentId}',
   create: '/weblink?dataflowId={:dataflowId}',
-  delete: '/weblink/{:weblinkId}',
+  delete: '/weblink/{:webLinkId}',
   update: '/weblink'
 };

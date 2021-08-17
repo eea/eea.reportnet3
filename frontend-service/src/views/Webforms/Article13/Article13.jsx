@@ -109,13 +109,12 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
 
   const getPamsTableRecords = async tableSchemaId => {
     if (!isNil(tableSchemaId[0])) {
-      const { data } = await DatasetService.tableDataById({
+      const data = await DatasetService.getTableData({
         datasetId,
         tableSchemaId: tableSchemaId[0],
         pageSize: 300,
         levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
       });
-
       return onParseWebformRecords(data.records, article13State.data[0], {}, data.totalRecords) || [];
     }
 
@@ -133,15 +132,8 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
 
     try {
       const pamsTableRecords = await getPamsTableRecords(tableSchemaId);
-      const response = await WebformService.addPamsRecords(
-        datasetId,
-        filteredTables,
-        generatePamId(pamsTableRecords),
-        capitalize(type)
-      );
-      if (response.status >= 200 && response.status <= 299) {
-        onUpdateData();
-      }
+      await WebformService.addPamsRecords(datasetId, filteredTables, generatePamId(pamsTableRecords), capitalize(type));
+      onUpdateData();
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
@@ -170,10 +162,8 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
     const newEmptyRecord = parseNewTableRecord(table, pamNumber);
 
     try {
-      const response = await DatasetService.addRecordsById(datasetId, table.tableSchemaId, [newEmptyRecord]);
-      if (response.status >= 200 && response.status <= 299) {
-        onUpdateData();
-      }
+      await DatasetService.createRecord(datasetId, table.tableSchemaId, [newEmptyRecord]);
+      onUpdateData();
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({
@@ -216,7 +206,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
     const tableSchemaId = article13State.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
     try {
       if (!isNil(tableSchemaId[0])) {
-        const { data } = await DatasetService.tableDataById({
+        const data = await DatasetService.getTableData({
           datasetId,
           tableSchemaId: tableSchemaId[0],
           pageSize: 300,

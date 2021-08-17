@@ -79,7 +79,7 @@ export class DataTable extends Component {
     reorderableColumns: false,
     resizableColumns: false,
     responsive: false,
-    rowClassName: null,
+    rowClassName: () => ({ 'p-highlight-contextmenu': '' }),
     rowEditorValidator: null,
     rowExpansionTemplate: null,
     rowGroupFooterTemplate: null,

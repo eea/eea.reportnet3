@@ -26,7 +26,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { mapReducer } from './_functions/Reducers/mapReducer';
 
-import { MapUtils, MetadataUtils, RecordUtils } from 'views/_functions/Utils';
+import { MapUtils, RecordUtils } from 'views/_functions/Utils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -224,7 +224,7 @@ const DataFormFieldEditor = ({
     }
 
     if (isNil(datasetSchemaId)) {
-      const metadata = await MetadataUtils.getDatasetMetadata(datasetId);
+      const metadata = await DatasetService.getMetadata(datasetId);
       datasetSchemaId = metadata.datasetSchemaId;
     }
 
@@ -254,7 +254,7 @@ const DataFormFieldEditor = ({
         100
       );
 
-      const linkItems = referencedFieldValues.data
+      const linkItems = referencedFieldValues
         .map(referencedField => {
           return {
             itemType: `${referencedField.value}${
@@ -275,7 +275,7 @@ const DataFormFieldEditor = ({
           value: ''
         });
       }
-      if (referencedFieldValues.data.length > 99) {
+      if (referencedFieldValues.length > 99) {
         linkItems[linkItems.length - 1] = {
           disabled: true,
           itemType: resources.messages['moreElements'],

@@ -164,18 +164,15 @@ const Documents = ({
     setIsUploadDialogVisible(false);
   };
 
-  const onDeleteDocument = async documentData => {
-    setFileDeletingId(documentData.id);
+  const onDeleteDocument = async document => {
+    setFileDeletingId(document.id);
     notificationContext.add({ type: 'DELETE_DOCUMENT_INIT_INFO' });
 
     try {
-      await DocumentService.deleteDocument(documentData.id);
+      await DocumentService.delete(document.id);
     } catch (error) {
       console.error('Documents - onDeleteDocument.', error);
-      notificationContext.add({
-        type: 'DELETE_DOCUMENT_ERROR',
-        content: {}
-      });
+      notificationContext.add({ type: 'DELETE_DOCUMENT_ERROR', content: {} });
       setIsDeletingDocument(false);
       setFileDeletingId('');
     } finally {
@@ -183,11 +180,11 @@ const Documents = ({
     }
   };
 
-  const onDownloadDocument = async rowData => {
+  const onDownloadDocument = async document => {
     try {
-      setDownloadingId(rowData.id);
-      setFileName(createFileName(rowData.title));
-      const { data } = await DocumentService.downloadDocumentById(rowData.id);
+      setDownloadingId(document.id);
+      setFileName(createFileName(document.title));
+      const { data } = await DocumentService.download(document.id);
       setFileToDownload(data);
     } catch (error) {
       console.error('Documents - onDownloadDocument.', error);

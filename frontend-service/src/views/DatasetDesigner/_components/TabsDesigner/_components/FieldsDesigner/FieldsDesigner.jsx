@@ -43,16 +43,12 @@ export const FieldsDesigner = ({
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isReferenceDataset,
-  isValidationSelected,
   manageDialogs,
   manageUniqueConstraint,
   onChangeFields,
-  onChangeIsValidationSelected,
   onChangeTableProperties,
   onHideSelectGroupedValidation,
   onLoadTableData,
-  recordPositionId,
-  selectedRecordErrorId,
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
@@ -76,7 +72,6 @@ export const FieldsDesigner = ({
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [notEmpty, setNotEmpty] = useState(true);
   const [fixedNumber, setFixedNumber] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
@@ -268,18 +263,15 @@ export const FieldsDesigner = ({
 
   const deleteField = async (deletedFieldIndex, deletedFieldType) => {
     try {
-      const { status } = await DatasetService.deleteRecordFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
-
-      if (status >= 200 && status <= 299) {
-        const inmFields = [...fields];
-        inmFields.splice(deletedFieldIndex, 1);
-        onChangeFields(
-          inmFields,
-          TextUtils.areEquals(deletedFieldType, 'LINK') || TextUtils.areEquals(deletedFieldType, 'EXTERNAL_LINK'),
-          table.tableSchemaId
-        );
-        setFields(inmFields);
-      }
+      await DatasetService.deleteFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
+      const inmFields = [...fields];
+      inmFields.splice(deletedFieldIndex, 1);
+      onChangeFields(
+        inmFields,
+        TextUtils.areEquals(deletedFieldType, 'LINK') || TextUtils.areEquals(deletedFieldType, 'EXTERNAL_LINK'),
+        table.tableSchemaId
+      );
+      setFields(inmFields);
     } catch (error) {
       console.error('FieldsDesigner - deleteField.', error);
       if (error.response.status === 423) {
@@ -373,21 +365,18 @@ export const FieldsDesigner = ({
     if (!isUndefined(table) && !isNil(table.records)) {
       return (
         <DataViewer
+          datasetSchemaId={datasetSchemaId}
           hasWritePermissions={true}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
-          isValidationSelected={isValidationSelected}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
-          onChangeIsValidationSelected={onChangeIsValidationSelected}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
-          recordPositionId={recordPositionId}
           reporting={false}
-          selectedRecordErrorId={selectedRecordErrorId}
           selectedRuleId={selectedRuleId}
           selectedRuleLevelError={selectedRuleLevelError}
           selectedRuleMessage={selectedRuleMessage}
@@ -496,7 +485,7 @@ export const FieldsDesigner = ({
                 codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
                 datasetId={datasetId}
                 datasetSchemaId={datasetSchemaId}
-                fieldDescription={field.description}
+                fieldDescription={field.description || ''}
                 fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
                 fieldHasMultipleValues={field.pkHasMultipleValues}
                 fieldId={field.fieldId}
@@ -554,7 +543,7 @@ export const FieldsDesigner = ({
     try {
       const inmFields = [...fields];
       const droppedFieldIdx = FieldsDesignerUtils.getIndexByFieldName(droppedFieldName, inmFields);
-      const fieldOrdered = await DatasetService.orderRecordFieldDesign(
+      await DatasetService.updateFieldOrder(
         datasetId,
         droppedFieldIdx === -1
           ? inmFields.length
@@ -563,10 +552,8 @@ export const FieldsDesigner = ({
           : droppedFieldIdx,
         inmFields[draggedFieldIdx].fieldId
       );
-      if (fieldOrdered.status >= 200 && fieldOrdered.status <= 299) {
-        setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
-        onChangeFields(inmFields, false, table.tableSchemaId);
-      }
+      setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
+      onChangeFields(inmFields, false, table.tableSchemaId);
     } catch (error) {
       console.error('FieldsDesigner - reorderField.', error);
     }
@@ -580,7 +567,7 @@ export const FieldsDesigner = ({
 
   const updateTableDesign = async ({ fixedNumber, notEmpty, readOnly, toPrefill }) => {
     try {
-      const { status } = await DatasetService.updateTableDescriptionDesign(
+      await DatasetService.updateTableDesign(
         toPrefill,
         table.tableSchemaId,
         tableDescriptionValue,
@@ -589,9 +576,7 @@ export const FieldsDesigner = ({
         notEmpty,
         fixedNumber
       );
-      if (status >= 200 && status <= 299) {
-        onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
-      }
+      onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
     } catch (error) {
       console.error('FieldsDesigner - updateTableDesign.', error);
     }
@@ -607,10 +592,9 @@ export const FieldsDesigner = ({
   const createTableName = (tableName, fileType) => `${tableName}.${fileType}`;
 
   const onExportTableSchema = async fileType => {
-    setIsLoadingFile(true);
     try {
       setExportTableSchemaName(createTableName(table.tableSchemaName, fileType));
-      const { data } = await DatasetService.exportTableSchemaById(
+      const { data } = await DatasetService.exportTableSchema(
         datasetId,
         designerState.datasetSchemaId,
         table.tableSchemaId,
@@ -633,8 +617,6 @@ export const FieldsDesigner = ({
           tableName: designerState.tableName
         }
       });
-    } finally {
-      setIsLoadingFile(false);
     }
   };
 
@@ -709,7 +691,7 @@ export const FieldsDesigner = ({
           }}
           onKeyDown={e => onKeyChange(e)}
           placeholder={resources.messages['newTableDescriptionPlaceHolder']}
-          value={!isUndefined(tableDescriptionValue) ? tableDescriptionValue : ''}
+          value={tableDescriptionValue}
         />
 
         <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>

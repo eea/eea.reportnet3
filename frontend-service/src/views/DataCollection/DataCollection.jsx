@@ -32,6 +32,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataCollection = withRouter(({ match, history }) => {
   const {
@@ -43,6 +44,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [dataCollectionName, setDataCollectionName] = useState();
+  const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [dataflowName, setDataflowName] = useState('');
   const [dataViewerOptions, setDataViewerOptions] = useState({ activeIndex: null });
   const [exportButtonsList, setExportButtonsList] = useState([]);
@@ -51,6 +53,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [metadata, setMetadata] = useState(undefined);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
 
@@ -67,17 +70,16 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   useEffect(() => {
     leftSideBarContext.removeModels();
-    onLoadDatasetSchema();
-  }, []);
-
-  useEffect(() => {
-    getDataflowName();
-    onLoadDataflowData();
-  }, []);
-
-  useEffect(() => {
     setExportButtonsList(internalExtensions);
+    getMetadata();
   }, []);
+
+  useEffect(() => {
+    if (!isUndefined(metadata)) {
+      onLoadDataflowData();
+      onLoadDatasetSchema();
+    }
+  }, [metadata]);
 
   useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
@@ -85,19 +87,12 @@ export const DataCollection = withRouter(({ match, history }) => {
     }
   }, [notificationContext.hidden]);
 
-  const getDataflowName = async () => {
+  const getMetadata = async () => {
     try {
-      const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
-      setDataflowName(data.name);
-    } catch (error) {
-      console.error('DataCollection - getDataflowName.', error);
-      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
-    }
-  };
-
-  const getMetadata = async ids => {
-    try {
-      return await MetadataUtils.getMetadata(ids);
+      const metadata = await MetadataUtils.getMetadata({ datasetId, dataflowId });
+      setMetadata(metadata);
+      setDataflowName(metadata.dataflow.name);
+      setDatasetSchemaId(metadata.dataset.datasetSchemaId);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
@@ -122,13 +117,13 @@ export const DataCollection = withRouter(({ match, history }) => {
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
-      await DatasetService.exportDataById(datasetId, fileType);
+      await DatasetService.exportDatasetData(datasetId, fileType);
     } catch (error) {
       console.error('DataCollection - onExportDataInternalExtension.', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
+      } = metadata;
 
       notificationContext.add({
         type: 'EXPORT_DATA_BY_ID_ERROR',
@@ -139,7 +134,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const onLoadDataflowData = async () => {
     try {
-      const { data } = await DataflowService.reporting(match.params.dataflowId);
+      const data = await DataflowService.get(match.params.dataflowId);
       const dataCollection = data
         ? data.dataCollections.filter(dataset => dataset.dataCollectionId.toString() === datasetId)
         : [];
@@ -147,14 +142,15 @@ export const DataCollection = withRouter(({ match, history }) => {
       if (!isEmpty(firstDataCollection)) {
         setDataCollectionName(firstDataCollection.dataCollectionName);
       }
-      setIsBusinessDataflow(false); // TODO WITH REAL DATA
+
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
       setIsLoading(false);
     } catch (error) {
       console.error('DataCollection - onLoadDataflowData.', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
+      } = metadata;
       notificationContext.add({
         type: 'REPORTING_ERROR',
         content: { dataflowId, datasetId, dataflowName, datasetName }
@@ -170,11 +166,11 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async () => {
     try {
       setLoading(true);
-      const datasetSchema = await DatasetService.schemaById(datasetId);
-      setLevelErrorTypes(datasetSchema.data.levelErrorTypes);
+      const datasetSchema = await DatasetService.getSchema(datasetId);
+      setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const tableSchemaNamesList = [];
       setTableSchema(
-        datasetSchema.data.tables.map(tableSchema => {
+        datasetSchema.tables.map(tableSchema => {
           tableSchemaNamesList.push(tableSchema.tableSchemaName);
           return {
             id: tableSchema['tableSchemaId'],
@@ -184,7 +180,7 @@ export const DataCollection = withRouter(({ match, history }) => {
         })
       );
       setTableSchemaColumns(
-        datasetSchema.data.tables.map(table => {
+        datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
             return {
               codelistItems: field['codelistItems'],
@@ -206,7 +202,6 @@ export const DataCollection = withRouter(({ match, history }) => {
       );
     } catch (error) {
       console.error('DataCollection - onLoadDatasetSchema.', error);
-      const metadata = await getMetadata({ dataflowId, datasetId });
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -218,7 +213,7 @@ export const DataCollection = withRouter(({ match, history }) => {
         }
       } = error;
       const datasetError = { type: '', content: { dataflowId, datasetId, dataflowName, datasetName } };
-      if (!isUndefined(path) && path.includes(getUrl(DatasetConfig.dataSchema, { datasetId }))) {
+      if (!isUndefined(path) && path.includes(getUrl(DatasetConfig.getSchema, { datasetId }))) {
         datasetError.type = 'SCHEMA_BY_ID_ERROR';
       } else {
         datasetError.type = 'ERROR_STATISTICS_BY_ID_ERROR';
@@ -233,6 +228,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const onRenderTabsSchema = (
     <TabsSchema
+      datasetSchemaId={datasetSchemaId}
       hasCountryCode={true}
       hasWritePermissions={false}
       isBusinessDataflow={isBusinessDataflow}

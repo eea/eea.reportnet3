@@ -15,12 +15,6 @@ export const filterReducer = (state, { type, payload }) => {
         ...state,
         groupedFilter: payload.groupedFilter
       };
-
-    case 'SET_VALIDATION_FILTER':
-      return {
-        ...state,
-        validationDropdown: payload.levelErrors
-      };
     case 'SET_VALUE_FILTER':
       return {
         ...state,

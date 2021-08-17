@@ -5,6 +5,8 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataflowDashboards.module.css';
 
+import { config } from 'conf';
+
 import { routes } from 'conf/routes';
 
 import { Button } from 'views/_components/Button';
@@ -22,6 +24,7 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataflowDashboards = withRouter(
   ({
@@ -55,8 +58,8 @@ export const DataflowDashboards = withRouter(
 
     const getDataflowDetails = async () => {
       try {
-        const { data } = await DataflowService.dataflowDetails(dataflowId);
-        setIsBusinessDataflow(false); //TODO WITH REAL DATA
+        const data = await DataflowService.getDetails(dataflowId);
+        setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
         setDataflowName(data.name);
         setIsLoading(false);
       } catch (error) {
@@ -66,7 +69,7 @@ export const DataflowDashboards = withRouter(
 
     const onLoadDataSchemas = async () => {
       try {
-        const { data } = await DataflowService.reporting(dataflowId);
+        const data = await DataflowService.get(dataflowId);
         setDataSchema(data.designDatasets);
         setDashboardInitialValues(
           data.designDatasets.forEach(schema => (dashboardInitialValues[schema.datasetSchemaId] = true))

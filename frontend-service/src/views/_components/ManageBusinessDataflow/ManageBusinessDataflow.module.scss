@@ -72,3 +72,11 @@
 .fmeUsersWrapper {
   margin-left: 1rem;
 }
+
+.spinnerCenter {
+  top: calc(20vh - calc(var(--spinner-width) / 2)) !important;
+}
+
+.dialogContent {
+  min-height: 360px;
+}

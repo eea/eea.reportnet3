@@ -1,22 +1,16 @@
-import { webLinkRepository } from 'repositories/WebLinkRepository';
+import { WebLinkRepository } from 'repositories/WebLinkRepository';
 
-import { WebLink } from 'entities/WebLink';
-
-const all = async dataflowId => {
-  const webLinksDTO = await webLinkRepository.all(dataflowId);
-  webLinksDTO.data.weblinks = webLinksDTO.data.weblinks.map(webLinkDTO => new WebLink(webLinkDTO));
-  return webLinksDTO;
-};
-
-const create = async (dataflowId, weblinkToCreate) => await webLinkRepository.create(dataflowId, weblinkToCreate);
-
-const deleteWebLink = async weblinkToDelete => await webLinkRepository.deleteWebLink(weblinkToDelete);
-
-const update = async (dataflowId, weblinkToUpdate) => await webLinkRepository.update(dataflowId, weblinkToUpdate);
+import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 
 export const WebLinkService = {
-  all,
-  create,
-  deleteWebLink,
-  update
+  getAll: async dataflowId => {
+    const response = await WebLinkRepository.getAll(dataflowId);
+    return WebLinksUtils.parseWebLinkListDTO(response.data.weblinks);
+  },
+
+  create: async (dataflowId, webLinkToCreate) => await WebLinkRepository.create(dataflowId, webLinkToCreate),
+
+  delete: async webLinkId => await WebLinkRepository.delete(webLinkId),
+
+  update: async (dataflowId, webLinkToUpdate) => await WebLinkRepository.update(dataflowId, webLinkToUpdate)
 };

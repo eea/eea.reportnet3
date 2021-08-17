@@ -1,6 +1,5 @@
-import { confirmationReceiptRepository } from 'repositories/ConfirmationReceiptRepository';
+import { ConfirmationReceiptRepository } from 'repositories/ConfirmationReceiptRepository';
 
-const download = async (dataflowId, dataProviderId) =>
-  confirmationReceiptRepository.download(dataflowId, dataProviderId);
-
-export const ConfirmationReceiptService = { download };
+export const ConfirmationReceiptService = {
+  download: async (dataflowId, dataProviderId) => ConfirmationReceiptRepository.download(dataflowId, dataProviderId)
+};

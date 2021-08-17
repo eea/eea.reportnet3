@@ -5,6 +5,7 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import orderBy from 'lodash/orderBy';
+import uniq from 'lodash/uniq';
 
 import styles from './RepresentativesList.module.scss';
 
@@ -23,7 +24,7 @@ import { RepresentativeService } from 'services/RepresentativeService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { reducer } from './_functions/Reducers/representativeReducer.js';
+import { reducer } from './_functions/Reducers/representativeReducer';
 
 import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
 
@@ -31,11 +32,12 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const RepresentativesList = ({
   dataflowId,
+  isBusinessDataflow,
   representativesImport = false,
   setDataProviderSelected,
   setFormHasRepresentatives,
-  setRepresentativeImport,
-  setHasRepresentativesWithoutDatasets
+  setHasRepresentativesWithoutDatasets,
+  setRepresentativeImport
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
@@ -71,7 +73,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     getInitialData();
-  }, [formState.refresher]);
+  }, [formState.refresher, isBusinessDataflow]);
 
   useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
@@ -111,7 +113,7 @@ const RepresentativesList = ({
   const getAllDataProviders = async () => {
     const { representatives, selectedDataProviderGroup } = formState;
     try {
-      const responseAllDataProviders = await RepresentativeService.allDataProviders(selectedDataProviderGroup);
+      const responseAllDataProviders = await RepresentativeService.getDataProviders(selectedDataProviderGroup);
 
       const providersNoSelect = [...responseAllDataProviders];
       if (representatives.length <= responseAllDataProviders.length) {
@@ -127,9 +129,23 @@ const RepresentativesList = ({
     }
   };
 
+  const getDataProviderGroup = async () => {
+    try {
+      const response = await RepresentativeService.getSelectedDataProviderGroup(dataflowId);
+      formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: response.data });
+    } catch (error) {
+      console.error('RepresentativesList - getDataProviderGroup.', error);
+    }
+  };
+
   const getInitialData = async () => {
-    await getGroupProviders();
-    await getAllRepresentatives();
+    if (isBusinessDataflow) {
+      await getDataProviderGroup();
+    } else {
+      await getGroupCountries();
+    }
+
+    await getRepresentatives();
 
     if (!isEmpty(formState.representatives)) {
       await getAllDataProviders();
@@ -137,28 +153,27 @@ const RepresentativesList = ({
     }
   };
 
-  const getAllRepresentatives = async () => {
+  const getRepresentatives = async () => {
     try {
-      let responseAllRepresentatives = await RepresentativeService.allRepresentatives(dataflowId);
-
-      const parsedLeadReporters = parseLeadReporters(responseAllRepresentatives.representatives);
+      let responseRepresentatives = await RepresentativeService.getRepresentatives(dataflowId);
+      const parsedLeadReporters = parseLeadReporters(responseRepresentatives.representatives);
 
       formDispatcher({
         type: 'INITIAL_LOAD',
-        payload: { response: responseAllRepresentatives, parsedLeadReporters }
+        payload: { response: responseRepresentatives, parsedLeadReporters }
       });
     } catch (error) {
-      console.error('RepresentativesList - getAllRepresentatives.', error);
+      console.error('RepresentativesList - getRepresentatives.', error);
       notificationContext.add({ type: 'GET_REPRESENTATIVES_ERROR' });
     }
   };
 
-  const getGroupProviders = async () => {
+  const getGroupCountries = async () => {
     try {
-      const providerTypes = await RepresentativeService.getGroupProviders();
-      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: providerTypes.data } });
+      const response = await RepresentativeService.getGroupCountries();
+      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: response.data } });
     } catch (error) {
-      console.error('RepresentativesList - getGroupProviders.', error);
+      console.error('RepresentativesList - getGroupCountries.', error);
     }
   };
 
@@ -173,7 +188,7 @@ const RepresentativesList = ({
     if (!isEmpty(newRepresentative[0].dataProviderId)) {
       formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
       try {
-        await RepresentativeService.add(
+        await RepresentativeService.createDataProvider(
           dataflowId,
           formState.selectedDataProviderGroup.dataProviderGroupId,
           parseInt(newRepresentative[0].dataProviderId)
@@ -232,7 +247,7 @@ const RepresentativesList = ({
   const onDeleteConfirm = async () => {
     setIsDeleting(true);
     try {
-      await RepresentativeService.deleteById(formState.representativeIdToDelete, dataflowId);
+      await RepresentativeService.deleteRepresentative(formState.representativeIdToDelete, dataflowId);
 
       const updatedList = formState.representatives.filter(
         representative => representative.representativeId !== formState.representativeIdToDelete
@@ -251,11 +266,8 @@ const RepresentativesList = ({
   const onDeleteLeadReporter = async () => {
     setIsDeleting(true);
     try {
-      const response = await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId, dataflowId);
-
-      if (response.status >= 200 && response.status <= 299) {
-        formDispatcher({ type: 'REFRESH' });
-      }
+      await RepresentativeService.deleteLeadReporter(formState.deleteLeadReporterId, dataflowId);
+      formDispatcher({ type: 'REFRESH' });
     } catch (error) {
       console.error('RepresentativesList - onDeleteLeadReporter.', error);
       notificationContext.add({ type: 'DELETE_LEAD_REPORTER_ERROR' });
@@ -267,7 +279,7 @@ const RepresentativesList = ({
 
   const onExportLeadReportersTemplate = async () => {
     try {
-      const { data } = await RepresentativeService.downloadTemplateById(
+      const { data } = await RepresentativeService.exportTemplateFile(
         formState.selectedDataProviderGroup?.dataProviderGroupId
       );
       if (!isNil(data)) {
@@ -288,19 +300,16 @@ const RepresentativesList = ({
   };
 
   const onSubmitLeadReporter = async (inputValue, representativeId, dataProviderId, leadReporter) => {
-    const { addLeadReporter, updateLeadReporter } = RepresentativeService;
     const hasErrors = true;
 
     if (!TextUtils.areEquals(inputValue, leadReporter.account)) {
       if (isValidEmail(inputValue) && !isDuplicatedLeadReporter(inputValue, dataProviderId, formState.leadReporters)) {
         try {
-          const response = TextUtils.areEquals(leadReporter.id, 'empty')
-            ? await addLeadReporter(inputValue, representativeId, dataflowId)
-            : await updateLeadReporter(inputValue, leadReporter.id, representativeId, dataflowId);
+          TextUtils.areEquals(leadReporter.id, 'empty')
+            ? await RepresentativeService.createLeadReporter(inputValue, representativeId, dataflowId)
+            : await RepresentativeService.updateLeadReporter(inputValue, leadReporter.id, representativeId, dataflowId);
 
-          if (response.status >= 200 && response.status <= 299) {
-            formDispatcher({ type: 'REFRESH' });
-          }
+          formDispatcher({ type: 'REFRESH' });
         } catch (error) {
           console.error('RepresentativesList - onSubmitLeadReporter.', error);
           onCreateError(dataProviderId, hasErrors, leadReporter.id);
@@ -361,10 +370,9 @@ const RepresentativesList = ({
       option => option.dataProviderId === representative.dataProviderId
     );
 
-    const remainingOptionsAndSelectedOption = orderBy(
-      selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions),
-      ['label'],
-      ['asc']
+    const remainingOptionsAndSelectedOption = uniq(
+      orderBy(selectedOptionForThisSelect.concat(formState.unusedDataProvidersOptions), ['label'], ['asc']),
+      'label'
     );
 
     const labelId = `${representative.representativeId}-${representative.dataProviderId}`;
@@ -430,17 +438,29 @@ const RepresentativesList = ({
         <div className={styles.title}>{resources.messages['manageRolesDialogHeader']}</div>
         <div>
           <label>{resources.messages['manageRolesDialogDropdownLabel']} </label>
-          <Dropdown
-            ariaLabel={'dataProviders'}
-            className={styles.dataProvidersDropdown}
-            disabled={formState.representatives.length > 1}
-            name="dataProvidersDropdown"
-            onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
-            optionLabel="label"
-            options={formState.dataProvidersTypesList}
-            placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
-            value={formState.selectedDataProviderGroup}
-          />
+          {isBusinessDataflow ? (
+            <Dropdown
+              ariaLabel={'dataProviders'}
+              className={styles.dataProvidersDropdown}
+              disabled
+              name="dataProvidersDropdown"
+              optionLabel="label"
+              options={[formState.selectedDataProviderGroup]}
+              value={formState.selectedDataProviderGroup}
+            />
+          ) : (
+            <Dropdown
+              ariaLabel={'dataProviders'}
+              className={styles.dataProvidersDropdown}
+              disabled={formState.representatives.length > 1}
+              name="dataProvidersDropdown"
+              onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
+              optionLabel="label"
+              options={formState.dataProvidersTypesList}
+              placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
+              value={formState.selectedDataProviderGroup}
+            />
+          )}
           <Button
             className={`${styles.exportTemplate} p-button-secondary ${
               !isEmpty(formState.selectedDataProviderGroup) ? 'p-button-animated-blink' : ''

@@ -64,6 +64,16 @@ public interface RepresentativeController {
   List<DataProviderCodeVO> findAllDataProviderCompanyType();
 
 
+  /**
+   * Find data provider group by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data provider code VO
+   */
+  @GetMapping(value = "/dataProviderGroup/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  DataProviderCodeVO findDataProviderGroupByDataflowId(@PathVariable("dataflowId") Long dataflowId);
+
 
   /**
    * Find representatives by id data flow.

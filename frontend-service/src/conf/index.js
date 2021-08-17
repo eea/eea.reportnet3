@@ -1,6 +1,7 @@
 import avatarImages from './avatarImages.json';
 import countryByGroup from './countriesByGroup.json';
 import dataflowStatus from './dataflowStatus.json';
+import dataflowType from './dataflowType.json';
 import exportTypeCode from './exportType.code.json';
 import footer from './footer.config.json';
 import importTypeCode from './importType.code.json';
@@ -30,6 +31,7 @@ config.IMPORT_FILE_DELIMITER = ',';
 config.avatars = avatarImages;
 config.countriesByGroup = countryByGroup;
 config.dataflowStatus = dataflowStatus;
+config.dataflowType = dataflowType;
 config.exportTypes = exportTypeCode;
 config.footer = footer;
 config.icons = primeIcons;

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -22,10 +23,12 @@ import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
+import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
+import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
@@ -73,6 +76,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -170,6 +174,12 @@ public class DataFlowServiceImplTest {
   @Mock
   private ReferenceDatasetControllerZuul referenceControllerZuul;
 
+  @Mock
+  private DataProviderGroupRepository dataProviderGroupRepository;
+
+  @Mock
+  private FMEUserRepository fmeUserRepository;
+
   /** The dataflows. */
   private List<Dataflow> dataflows;
 
@@ -231,7 +241,7 @@ public class DataFlowServiceImplTest {
     List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
     DesignDatasetVO designDatasetVO = new DesignDatasetVO();
     designDatasetVOs.add(designDatasetVO);
-    List<WeblinkVO> weblinks = new ArrayList();
+    List<WeblinkVO> weblinks = new ArrayList<>();
     WeblinkVO weblinkVO = new WeblinkVO();
     weblinkVO.setDescription("bbbb");
     WeblinkVO weblinkVO2 = new WeblinkVO();
@@ -260,6 +270,47 @@ public class DataFlowServiceImplTest {
     assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
   }
 
+  @Test
+  public void getByIdBusinessTest() throws EEAException {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
+    reportingDatasetVO.setId(1L);
+    List<ReportingDatasetVO> reportingDatasetVOs = new ArrayList<>();
+    reportingDatasetVOs.add(reportingDatasetVO);
+    List<DesignDatasetVO> designDatasetVOs = new ArrayList<>();
+    DesignDatasetVO designDatasetVO = new DesignDatasetVO();
+    designDatasetVOs.add(designDatasetVO);
+    List<WeblinkVO> weblinks = new ArrayList<>();
+    WeblinkVO weblinkVO = new WeblinkVO();
+    weblinkVO.setDescription("bbbb");
+    WeblinkVO weblinkVO2 = new WeblinkVO();
+    weblinkVO2.setDescription("aaa");
+    weblinks.add(weblinkVO);
+    weblinks.add(weblinkVO2);
+    dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataFlowVO.setType(TypeDataflowEnum.BUSINESS);
+
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(new ArrayList<>());
+    when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+        .thenReturn(reportingDatasetVOs);
+    when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
+        .thenReturn(designDatasetVOs);
+    RepresentativeVO representative = new RepresentativeVO();
+    representative.setDataProviderId(1L);
+    when(representativeService.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(Arrays.asList(representative));
+    when(dataProviderGroupRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    when(fmeUserRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    dataFlowVO.setReportingDatasets(reportingDatasetVOs);
+    dataFlowVO.setDesignDatasets(designDatasetVOs);
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    dataFlowVO.setObligation(obligation);
+    dataFlowVO.setWeblinks(weblinks);
+    assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
+  }
 
   /**
    * Gets the by status.
@@ -1044,6 +1095,83 @@ public class DataFlowServiceImplTest {
     assertNotNull(dataflowServiceImpl.getReferenceDataflows(""));
   }
 
+  @Test
+  public void getBusinessDataflowsTest() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    dataflowVO.setId(0L);
+    ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
+    resourceAccessVO.setId(0L);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
+        .thenReturn(Arrays.asList(resourceAccessVO));
+    Mockito.when(dataflowRepository.findBusinessInOrderByStatusDescCreationDateDesc())
+        .thenReturn(dataflows);
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
 
+    assertNotNull(dataflowServiceImpl.getBusinessDataflows(""));
+  }
+
+
+  @Test
+  public void getDataflowsByDataProviderIdsTest() {
+    when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
+        .thenReturn(new ArrayList<>());
+    when(dataflowRepository.findDataflowsByDataproviderIdsAndDataflowIds(Mockito.any(),
+        Mockito.any())).thenReturn(new ArrayList<>());
+    assertNotNull(dataflowServiceImpl.getDataflowsByDataProviderIds(new ArrayList<>()));
+  }
+
+  @Test
+  public void isAdminTest() {
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    assertTrue(dataflowServiceImpl.isAdmin());
+  }
+
+
+  @Test
+  public void isDataflowTypeDataflowTest() {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    dataflow.setType(TypeDataflowEnum.REFERENCE);
+    dataflow.setId(1L);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    dataflowVO.setId(1L);
+    Mockito.when(dataflowRepository.findById(dataflow.getId())).thenReturn(Optional.of(dataflow));
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
+    assertTrue(dataflowServiceImpl.isDataflowType(TypeDataflowEnum.REFERENCE,
+        EntityClassEnum.DATAFLOW, 1L));
+  }
+
+  @Test
+  public void isDataflowTypeDatasetTest() {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    dataflow.setType(TypeDataflowEnum.REFERENCE);
+    dataflow.setId(1L);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    dataflowVO.setId(1L);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    dataset.setDataflowId(1L);
+    Mockito.when(dataflowRepository.findById(dataflow.getId())).thenReturn(Optional.of(dataflow));
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dataset);
+
+    assertTrue(dataflowServiceImpl.isDataflowType(TypeDataflowEnum.REFERENCE,
+        EntityClassEnum.DATASET, 1L));
+  }
 
 }

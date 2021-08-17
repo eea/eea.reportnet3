@@ -26,7 +26,7 @@ import { ConfirmationReceiptService } from 'services/ConfirmationReceiptService'
 import { DataCollectionService } from 'services/DataCollectionService';
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
-import { EuDatasetService } from 'services/EuDatasetService';
+import { EUDatasetService } from 'services/EUDatasetService';
 import { IntegrationService } from 'services/IntegrationService';
 import { ManageIntegrations } from 'views/_components/ManageIntegrations/ManageIntegrations';
 
@@ -55,8 +55,8 @@ export const BigButtonList = ({
   onShowManageReportersDialog,
   onOpenReleaseConfirmDialog,
   onUpdateData,
-  setIsCopyDataCollectionToEuDatasetLoading,
-  setIsExportEuDatasetLoading,
+  setIsCopyDataCollectionToEUDatasetLoading,
+  setIsExportEUDatasetLoading,
   setIsReceiptLoading,
   setUpdatedDatasetSchema
 }) => {
@@ -76,15 +76,15 @@ export const BigButtonList = ({
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [deleteSchemaIndex, setDeleteSchemaIndex] = useState();
-  const [euDatasetExportIntegration, setEuDatasetExportIntegration] = useState({});
+  const [exportEUDatasetIntegration, setExportEUDatasetIntegration] = useState({});
   const [historicReleasesDialogHeader, setHistoricReleasesDialogHeader] = useState([]);
   const [historicReleasesView, setHistoricReleasesView] = useState('');
   const [isActiveButton, setIsActiveButton] = useState(true);
   const [isCloningDataflow, setIsCloningDataflow] = useState(false);
   const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
-  const [isCopyDataCollectionToEuDatasetDialogVisible, setIsCopyDataCollectionToEuDatasetDialogVisible] =
+  const [isCopyDataCollectionToEUDatasetDialogVisible, setIsCopyDataCollectionToEUDatasetDialogVisible] =
     useState(false);
-  const [isExportEuDatasetDialogVisible, setIsExportEuDatasetDialogVisible] = useState(false);
+  const [isExportEUDatasetDialogVisible, setIsExportEUDatasetDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isImportingDataflow, setIsImportingDataflow] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
@@ -120,12 +120,12 @@ export const BigButtonList = ({
   useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(
     ['COPY_DATA_TO_EUDATASET_COMPLETED_EVENT', 'COPY_DATA_TO_EUDATASET_FAILED_EVENT'],
-    setIsCopyDataCollectionToEuDatasetLoading,
+    setIsCopyDataCollectionToEUDatasetLoading,
     false
   );
   useCheckNotifications(
     ['EXTERNAL_EXPORT_EUDATASET_COMPLETED_EVENT', 'EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT'],
-    setIsExportEuDatasetLoading,
+    setIsExportEUDatasetLoading,
     false
   );
   useCheckNotifications(
@@ -181,7 +181,7 @@ export const BigButtonList = ({
     setIsCloningDataflow(true);
 
     try {
-      await DataflowService.cloneDatasetSchemas(cloneDataflow.id, dataflowId);
+      await DataflowService.cloneSchemas(cloneDataflow.id, dataflowId);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -246,7 +246,7 @@ export const BigButtonList = ({
     }
   };
 
-  const handleExportEuDataset = value => setIsIntegrationManageDialogVisible(value);
+  const handleExportEUDataset = value => setIsIntegrationManageDialogVisible(value);
 
   const manageManualAcceptanceDatasetDialog = value => setIsManageManualAcceptanceDatasetDialogVisible(value);
 
@@ -269,7 +269,7 @@ export const BigButtonList = ({
         getDate(),
         isManualTechnicalAcceptance,
         true,
-        showPublicInfo
+        isBusinessDataflow ? false : showPublicInfo
       );
     } catch (error) {
       console.error('BigButtonList - onCreateDataCollections.', error);
@@ -324,12 +324,12 @@ export const BigButtonList = ({
     });
   };
 
-  const onLoadEuDatasetIntegration = async datasetSchemaId => {
+  const onLoadEUDatasetIntegration = async datasetSchemaId => {
     try {
-      const euDatasetExportIntegration = await IntegrationService.findEUDatasetIntegration(datasetSchemaId);
-      setEuDatasetExportIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration));
+      const euDatasetExportIntegration = await IntegrationService.getEUDatasetIntegration(dataflowId, datasetSchemaId);
+      setExportEUDatasetIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration));
     } catch (error) {
-      console.error('BigButtonList - onLoadEuDatasetIntegration.', error);
+      console.error('BigButtonList - onLoadEUDatasetIntegration.', error);
       notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
     }
   };
@@ -351,11 +351,9 @@ export const BigButtonList = ({
 
     showLoading();
     try {
-      const { status } = await DatasetService.deleteSchemaById(dataflowState.designDatasetSchemas[index].datasetId);
-      if (status >= 200 && status <= 299) {
-        onUpdateData();
-        setUpdatedDatasetSchema(remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex !== index));
-      }
+      await DatasetService.deleteSchema(dataflowState.designDatasetSchemas[index].datasetId);
+      onUpdateData();
+      setUpdatedDatasetSchema(remove(dataflowState.updatedDatasetSchema, event => event.schemaIndex !== index));
     } catch (error) {
       console.error('BigButtonList - onDeleteDatasetSchema.', error);
       if (error.response.status === 401) {
@@ -370,43 +368,39 @@ export const BigButtonList = ({
     setErrorDialogData({ isVisible: false, message: '' });
   };
 
-  const onCopyDataCollectionToEuDataset = async () => {
-    setIsCopyDataCollectionToEuDatasetDialogVisible(false);
-    setIsCopyDataCollectionToEuDatasetLoading(true);
+  const onCopyDataCollectionToEUDataset = async () => {
+    setIsCopyDataCollectionToEUDatasetDialogVisible(false);
+    setIsCopyDataCollectionToEUDatasetLoading(true);
 
     try {
-      const response = await EuDatasetService.copyDataCollection(dataflowId);
-      if (response.status >= 200 && response.status <= 299) {
-        notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
-      }
+      await EUDatasetService.copyFromDataCollection(dataflowId);
+      notificationContext.add({ type: 'COPY_TO_EU_DATASET_INIT' });
     } catch (error) {
-      setIsCopyDataCollectionToEuDatasetLoading(false);
+      setIsCopyDataCollectionToEUDatasetLoading(false);
 
       if (error.response.status === 423) {
         notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
       } else {
-        console.error('BigButtonList - onCopyDataCollectionToEuDataset.', error);
+        console.error('BigButtonList - onCopyDataCollectionToEUDataset.', error);
         notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
       }
     }
   };
 
-  const onExportEuDataset = async () => {
-    setIsExportEuDatasetDialogVisible(false);
-    setIsExportEuDatasetLoading(true);
+  const onExportEUDataset = async () => {
+    setIsExportEUDatasetDialogVisible(false);
+    setIsExportEUDatasetLoading(true);
 
     try {
-      const response = await EuDatasetService.exportEuDataset(dataflowId);
-      if (response.status >= 200 && response.status <= 299) {
-        notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' });
-      }
+      await EUDatasetService.export(dataflowId);
+      notificationContext.add({ type: 'EXPORT_EU_DATASET_INIT' });
     } catch (error) {
-      setIsExportEuDatasetLoading(false);
+      setIsExportEUDatasetLoading(false);
 
       if (error.response.status === 423) {
         notificationContext.add({ type: 'EU_DATASET_LOCKED_ERROR' });
       } else {
-        console.error('BigButtonList - onExportEuDataset.', error);
+        console.error('BigButtonList - onExportEUDataset.', error);
         notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
       }
     }
@@ -429,11 +423,11 @@ export const BigButtonList = ({
     }
   };
 
-  const onShowCopyDataCollectionToEuDatasetModal = () => setIsCopyDataCollectionToEuDatasetDialogVisible(true);
+  const onShowCopyDataCollectionToEUDatasetModal = () => setIsCopyDataCollectionToEUDatasetDialogVisible(true);
 
   const onShowDataCollectionModal = () => setDataCollectionDialog(true);
 
-  const onShowExportEuDatasetModal = () => setIsExportEuDatasetDialogVisible(true);
+  const onShowExportEUDatasetModal = () => setIsExportEUDatasetDialogVisible(true);
 
   const onShowNewSchemaDialog = () => setNewDatasetDialog(true);
 
@@ -536,20 +530,21 @@ export const BigButtonList = ({
     getDataHistoricReleasesByRepresentatives,
     getDatasetData,
     getDeleteSchemaIndex,
-    handleExportEuDataset,
+    handleExportEUDataset,
     handleRedirect,
     isActiveButton,
     isCloningDataflow,
+    isImportingDataflow,
     isLeadReporterOfCountry,
     onCloneDataflow,
     onImportSchema,
-    onLoadEuDatasetIntegration,
+    onLoadEUDatasetIntegration,
     onLoadReceiptData,
     onOpenReleaseConfirmDialog,
     onSaveName,
-    onShowCopyDataCollectionToEuDatasetModal,
+    onShowCopyDataCollectionToEUDatasetModal,
     onShowDataCollectionModal,
-    onShowExportEuDatasetModal,
+    onShowExportEUDatasetModal,
     onShowHistoricReleases,
     onShowManageReportersDialog,
     onShowManualTechnicalAcceptanceDialog,
@@ -575,9 +570,9 @@ export const BigButtonList = ({
           dataflowId={dataflowId}
           datasetId={datasetId}
           datasetType={'dataflow'}
-          manageDialogs={handleExportEuDataset}
+          manageDialogs={handleExportEUDataset}
           state={{ datasetSchemaId, isIntegrationManageDialogVisible }}
-          updatedData={euDatasetExportIntegration}
+          updatedData={exportEUDatasetIntegration}
         />
       )}
 
@@ -660,6 +655,7 @@ export const BigButtonList = ({
           <ManualAcceptanceDatasets
             dataflowId={dataflowData.id}
             getManageAcceptanceDataset={getManageAcceptanceDataset}
+            isBusinessDataflow={isBusinessDataflow}
             isUpdatedManualAcceptanceDatasets={isUpdatedManualAcceptanceDatasets}
             manageDialogs={manageManualAcceptanceDatasetDialog}
             refreshManualAcceptanceDatasets={refreshManualAcceptanceDatasets}
@@ -730,27 +726,27 @@ export const BigButtonList = ({
         </ConfirmDialog>
       )}
 
-      {isCopyDataCollectionToEuDatasetDialogVisible && (
+      {isCopyDataCollectionToEUDatasetDialogVisible && (
         <ConfirmDialog
-          header={resources.messages['copyDataCollectionToEuDatasetHeader']}
+          header={resources.messages['copyDataCollectionToEUDatasetHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={() => onCopyDataCollectionToEuDataset()}
-          onHide={() => setIsCopyDataCollectionToEuDatasetDialogVisible(false)}
-          visible={isCopyDataCollectionToEuDatasetDialogVisible}>
-          <p>{resources.messages['copyDataCollectionToEuDatasetMessage']}</p>
+          onConfirm={() => onCopyDataCollectionToEUDataset()}
+          onHide={() => setIsCopyDataCollectionToEUDatasetDialogVisible(false)}
+          visible={isCopyDataCollectionToEUDatasetDialogVisible}>
+          <p>{resources.messages['copyDataCollectionToEUDatasetMessage']}</p>
         </ConfirmDialog>
       )}
 
-      {isExportEuDatasetDialogVisible && (
+      {isExportEUDatasetDialogVisible && (
         <ConfirmDialog
-          header={resources.messages['exportEuDatasetHeader']}
+          header={resources.messages['exportEUDatasetHeader']}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
-          onConfirm={() => onExportEuDataset()}
-          onHide={() => setIsExportEuDatasetDialogVisible(false)}
-          visible={isExportEuDatasetDialogVisible}>
-          <p>{resources.messages['exportEuDatasetMessage']}</p>
+          onConfirm={() => onExportEUDataset()}
+          onHide={() => setIsExportEUDatasetDialogVisible(false)}
+          visible={isExportEUDatasetDialogVisible}>
+          <p>{resources.messages['exportEUDatasetMessage']}</p>
         </ConfirmDialog>
       )}
 

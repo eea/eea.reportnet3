@@ -2,58 +2,45 @@ import { SnapshotConfig } from './config/SnapshotConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const snapshotRepository = {
-  allDesigner: async datasetSchemaId => {
-    return await HTTPRequester.get({ url: getUrl(SnapshotConfig.loadSnapshotsListDesigner, { datasetSchemaId }) });
-  },
+export const SnapshotRepository = {
+  getAllDesigner: async datasetSchemaId =>
+    await HTTPRequester.get({ url: getUrl(SnapshotConfig.getAllDesigner, { datasetSchemaId }) }),
 
-  createByIdDesigner: async (datasetId, datasetSchemaId, description) => {
-    return await HTTPRequester.post({
-      url: getUrl(SnapshotConfig.createSnapshotDesigner, { datasetId, datasetSchemaId, description }),
+  getAllReporter: async datasetId =>
+    await HTTPRequester.get({ url: getUrl(SnapshotConfig.getAllReporter, { datasetId }) }),
+
+  createDesigner: async (datasetId, datasetSchemaId, description) =>
+    await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.createDesigner, { datasetId, datasetSchemaId, description }),
       data: { description }
-    });
-  },
+    }),
 
-  deleteByIdDesigner: async (datasetSchemaId, snapshotId) => {
-    return await HTTPRequester.delete({
-      url: getUrl(SnapshotConfig.deleteSnapshotByIdDesigner, { datasetSchemaId, snapshotId })
-    });
-  },
-
-  restoreByIdDesigner: async (datasetSchemaId, snapshotId) => {
-    return await HTTPRequester.post({
-      url: getUrl(SnapshotConfig.restoreSnapshotDesigner, { datasetSchemaId, snapshotId }),
-      data: { snapshotId }
-    });
-  },
-
-  allReporter: async datasetId => {
-    return await HTTPRequester.get({ url: getUrl(SnapshotConfig.loadSnapshotsListReporter, { datasetId }) });
-  },
-
-  createByIdReporter: async (datasetId, description, isReleased) => {
-    return await HTTPRequester.post({
-      url: getUrl(SnapshotConfig.createSnapshotReporter, { datasetId }),
+  createReporter: async (datasetId, description, isReleased) =>
+    await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.createReporter, { datasetId }),
       data: { description, released: isReleased }
-    });
-  },
+    }),
 
-  deleteByIdReporter: async (datasetId, snapshotId) => {
-    return await HTTPRequester.delete({
-      url: getUrl(SnapshotConfig.deleteSnapshotByIdReporter, { datasetId, snapshotId })
-    });
-  },
+  deleteDesigner: async (datasetSchemaId, snapshotId) =>
+    await HTTPRequester.delete({ url: getUrl(SnapshotConfig.deleteDesigner, { datasetSchemaId, snapshotId }) }),
 
-  restoreByIdReporter: async (dataflowId, datasetId, snapshotId) => {
-    return await HTTPRequester.post({
-      url: getUrl(SnapshotConfig.restoreSnapshotReporter, { dataflowId, datasetId, snapshotId }),
+  deleteReporter: async (datasetId, snapshotId) =>
+    await HTTPRequester.delete({ url: getUrl(SnapshotConfig.deleteReporter, { datasetId, snapshotId }) }),
+
+  restoreDesigner: async (datasetSchemaId, snapshotId) =>
+    await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.restoreDesigner, { datasetSchemaId, snapshotId }),
       data: { snapshotId }
-    });
-  },
+    }),
 
-  releaseDataflow: async (dataflowId, dataProviderId, restrictFromPublic) => {
-    return await HTTPRequester.post({
-      url: getUrl(SnapshotConfig.releaseDataflow, { dataflowId, dataProviderId, restrictFromPublic })
-    });
-  }
+  restoreReporter: async (dataflowId, datasetId, snapshotId) =>
+    await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.restoreReporter, { dataflowId, datasetId, snapshotId }),
+      data: { snapshotId }
+    }),
+
+  release: async (dataflowId, dataProviderId, restrictFromPublic) =>
+    await HTTPRequester.post({
+      url: getUrl(SnapshotConfig.release, { dataflowId, dataProviderId, restrictFromPublic })
+    })
 };

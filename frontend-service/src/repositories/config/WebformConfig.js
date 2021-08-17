@@ -1,4 +1,4 @@
 export const WebformConfig = {
   createPamsRecords: '/dataset/{:datasetId}/insertRecordsMultiTable',
-  singlePamData: '/pam/{:datasetId}/getListSinglePaM/{:groupPaMId}'
+  getSinglePamData: '/pam/{:datasetId}/getListSinglePaM/{:groupPaMId}'
 };

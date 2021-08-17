@@ -1,6 +1,6 @@
 export const DataCollectionConfig = {
-  createDataCollection:
+  create:
     '/datacollection/create?manualCheck={:isManualTechnicalAcceptance}&stopAndNotifySQLErrors={:stopAndNotifySQLErrors}&showPublicInfo={:showPublicInfo}',
   createReference: '/datacollection/create?stopAndNotifyPKError={:stopAndNotifyPKError}',
-  updateDataCollectionNewRepresentatives: '/datacollection/update/{:dataflowId}'
+  update: '/datacollection/update/{:dataflowId}'
 };

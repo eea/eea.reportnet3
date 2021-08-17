@@ -1,7 +1,7 @@
 import { useContext, useReducer } from 'react';
 import isNil from 'lodash/isNil';
 
-import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext.js';
+import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 const leftSideBarReducer = (state, { type, payload }) => {

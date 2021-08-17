@@ -85,10 +85,8 @@ const UserConfiguration = () => {
         onChange={async e => {
           const inmUserProperties = { ...userContext.userProps };
           inmUserProperties.basemapLayer = e.target.value;
-          const response = await changeUserProperties(inmUserProperties);
-          if (response.status >= 200 && response.status <= 299) {
-            userContext.onChangeBasemapLayer(e.target.value);
-          }
+          await changeUserProperties(inmUserProperties);
+          userContext.onChangeBasemapLayer(e.target.value);
         }}
         options={resources.userParameters['defaultBasemapLayer']}
         placeholder="select"
@@ -102,7 +100,7 @@ const UserConfiguration = () => {
 
   const changeUserProperties = async userProperties => {
     try {
-      const response = await UserService.updateAttributes(userProperties);
+      const response = await UserService.updateConfiguration(userProperties);
       return response;
     } catch (error) {
       console.error('UserConfiguration - changeUserProperties.', error);
@@ -220,6 +218,7 @@ const UserConfiguration = () => {
       <InputSwitch
         aria-label="pushNotifications"
         checked={userContext.userProps.pushNotifications}
+        className={styles.inputSwitchWrapper}
         onChange={async e => {
           userContext.onTogglePushNotifications(e.value);
           const inmUserProperties = { ...userContext.userProps };
@@ -273,10 +272,8 @@ const UserConfiguration = () => {
         onChange={async e => {
           const inmUserProperties = { ...userContext.userProps };
           inmUserProperties.rowsPerPage = e.target.value;
-          const response = await changeUserProperties(inmUserProperties);
-          if (response.status >= 200 && response.status <= 299) {
-            userContext.onChangeRowsPerPage(e.target.value);
-          }
+          await changeUserProperties(inmUserProperties);
+          userContext.onChangeRowsPerPage(e.target.value);
         }}
         options={resources.userParameters['defaultRowsPage']}
         placeholder="select"
@@ -295,10 +292,8 @@ const UserConfiguration = () => {
       onChange={async e => {
         const inmUserProperties = { ...userContext.userProps };
         inmUserProperties.dateFormat = e.target.value;
-        const response = await changeUserProperties(inmUserProperties);
-        if (response.status >= 200 && response.status <= 299) {
-          userContext.onChangeDateFormat(e.target.value);
-        }
+        await changeUserProperties(inmUserProperties);
+        userContext.onChangeDateFormat(e.target.value);
       }}
       options={resources.userParameters['dateFormat']}
       placeholder="select"

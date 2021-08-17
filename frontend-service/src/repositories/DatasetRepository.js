@@ -2,71 +2,56 @@ import { DatasetConfig } from './config/DatasetConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const datasetRepository = {
-  addRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
-    return await HTTPRequester.post({
-      url: getUrl(DatasetConfig.addNewRecordFieldDesign, { datasetId }),
+export const DatasetRepository = {
+  createRecordDesign: async (datasetId, datasetTableRecordField) =>
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.createRecordDesign, { datasetId }),
       data: datasetTableRecordField
-    });
-  },
+    }),
 
-  addRecordsById: async (datasetId, tableSchemaId, datasetTableRecords) => {
-    return await HTTPRequester.post({
-      url: getUrl(DatasetConfig.addNewRecord, { datasetId, tableSchemaId }),
+  createRecord: async (datasetId, tableSchemaId, datasetTableRecords) =>
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.createRecord, { datasetId, tableSchemaId }),
       data: datasetTableRecords
-    });
-  },
+    }),
 
-  addTableDesign: async (datasetId, tableSchemaName) => {
-    return await HTTPRequester.post({
-      url: getUrl(DatasetConfig.addTableDesign, { datasetId }),
+  createTableDesign: async (datasetId, tableSchemaName) =>
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.createTableDesign, { datasetId }),
       data: { nameTableSchema: tableSchemaName, notEmpty: true }
-    });
-  },
+    }),
 
-  deleteDataById: async datasetId => {
-    return await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteImportData, { datasetId }) });
-  },
+  deleteData: async datasetId => await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteData, { datasetId }) }),
 
-  deleteFileData: async (datasetId, fieldId) => {
-    return await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteFileData, { datasetId, fieldId }) });
-  },
+  deleteAttachment: async (datasetId, fieldId) =>
+    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteAttachment, { datasetId, fieldId }) }),
 
-  deleteRecordById: async (datasetId, recordId, deleteInCascade = false) => {
-    return await HTTPRequester.delete({
+  deleteRecord: async (datasetId, recordId, deleteInCascade = false) =>
+    await HTTPRequester.delete({
       url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId })
-    });
-  },
+    }),
 
-  deleteRecordFieldDesign: async (datasetId, fieldSchemaId) => {
-    return await HTTPRequester.delete({
-      url: getUrl(DatasetConfig.deleteRecordFieldDesign, { datasetId, fieldSchemaId })
-    });
-  },
+  deleteFieldDesign: async (datasetId, fieldSchemaId) =>
+    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteFieldDesign, { datasetId, fieldSchemaId }) }),
 
-  deleteSchemaById: async datasetId => {
-    return await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteDataSchema, { datasetId }) });
-  },
+  deleteSchema: async datasetId =>
+    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteSchema, { datasetId }) }),
 
-  deleteTableDataById: async (datasetId, tableId) => {
-    return await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteImportTable, { datasetId, tableId }) });
-  },
+  deleteTableData: async (datasetId, tableId) =>
+    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteTableData, { datasetId, tableId }) }),
 
-  deleteTableDesign: async (datasetId, tableSchemaId) => {
-    return await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteTableDesign, { datasetId, tableSchemaId }) });
-  },
+  deleteTableDesign: async (datasetId, tableSchemaId) =>
+    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteTableDesign, { datasetId, tableSchemaId }) }),
 
-  downloadDatasetFileData: async (dataflowId, dataProviderId, fileName) => {
-    return await HTTPRequester.download({
-      url: getUrl(DatasetConfig.downloadDatasetFileData, { dataflowId, dataProviderId, fileName })
-    });
-  },
+  downloadPublicDatasetFile: async (dataflowId, dataProviderId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadPublicDatasetFile, { dataflowId, dataProviderId, fileName })
+    }),
 
-  downloadExportDatasetFile: async (datasetId, fileName) => {
-    return await HTTPRequester.download({
+  downloadExportDatasetFile: async (datasetId, fileName) =>
+    await HTTPRequester.download({
       url: getUrl(DatasetConfig.downloadExportDatasetFile, { datasetId, fileName })
-    });
-  },
+    }),
 
   downloadExportFile: async (datasetId, fileName, providerId = null) => {
     const url = providerId
@@ -87,43 +72,36 @@ export const datasetRepository = {
     return await HTTPRequester.download({ url });
   },
 
-  downloadReferenceDatasetFileData: async (dataflowId, fileName) => {
-    return await HTTPRequester.download({
-      url: getUrl(DatasetConfig.downloadReferenceDatasetFileData, { dataflowId, fileName })
-    });
-  },
+  downloadPublicReferenceDatasetFileData: async (dataflowId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadPublicReferenceDatasetFileData, { dataflowId, fileName })
+    }),
 
-  exportDataById: async (datasetId, fileType) => {
-    return await HTTPRequester.download({
+  exportDatasetData: async (datasetId, fileType) =>
+    await HTTPRequester.download({
       url: getUrl(DatasetConfig.exportDatasetData, { datasetId, fileType }),
       headers: { 'Content-Type': 'application/octet-stream' }
-    });
-  },
+    }),
 
-  exportDatasetDataExternal: async (datasetId, integrationId) => {
-    return await HTTPRequester.download({
+  exportDatasetDataExternal: async (datasetId, integrationId) =>
+    await HTTPRequester.download({
       url: getUrl(DatasetConfig.exportDatasetDataExternal, { datasetId, integrationId }),
       headers: { 'Content-Type': 'application/octet-stream' }
-    });
-  },
+    }),
 
-  exportTableDataById: async (datasetId, tableSchemaId, fileType) => {
-    return await HTTPRequester.download({
-      url: getUrl(DatasetConfig.exportDatasetTableData, { datasetId, fileType, tableSchemaId }),
+  exportTableData: async (datasetId, tableSchemaId, fileType) =>
+    await HTTPRequester.download({
+      url: getUrl(DatasetConfig.exportTableData, { datasetId, fileType, tableSchemaId }),
       headers: { 'Content-Type': 'application/octet-stream' }
-    });
-  },
+    }),
 
-  exportTableSchemaById: async (datasetId, datasetSchemaId, tableSchemaId, fileType) => {
-    return await HTTPRequester.download({
+  exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
+    await HTTPRequester.download({
       url: getUrl(DatasetConfig.exportTableSchema, { datasetId, datasetSchemaId, fileType, tableSchemaId }),
       headers: { 'Content-Type': 'application/octet-stream' }
-    });
-  },
+    }),
 
-  getMetaData: async datasetId => {
-    return await HTTPRequester.get({ url: getUrl(DatasetConfig.datasetMetaData, { datasetId }) });
-  },
+  getMetadata: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetadata, { datasetId }) }),
 
   getReferencedFieldValues: async (
     datasetId,
@@ -132,9 +110,9 @@ export const datasetRepository = {
     conditionalValue = '',
     datasetSchemaId = '',
     resultsNumber = ''
-  ) => {
-    return await HTTPRequester.get({
-      url: getUrl(DatasetConfig.referencedFieldValues, {
+  ) =>
+    await HTTPRequester.get({
+      url: getUrl(DatasetConfig.getReferencedFieldValues, {
         conditionalValue,
         datasetId,
         datasetSchemaId,
@@ -142,10 +120,9 @@ export const datasetRepository = {
         resultsNumber: resultsNumber !== '' ? resultsNumber : undefined,
         searchToken: searchToken !== '' ? searchToken : undefined
       })
-    });
-  },
+    }),
 
-  groupedErrorsById: async (
+  getShowValidationErrors: async (
     datasetId,
     pageNum,
     pageSize,
@@ -160,7 +137,7 @@ export const datasetRepository = {
       asc = 0;
     }
     return await HTTPRequester.get({
-      url: getUrl(DatasetConfig.listGroupedValidations, {
+      url: getUrl(DatasetConfig.getShowValidationErrors, {
         datasetId,
         pageNum,
         pageSize,
@@ -174,39 +151,26 @@ export const datasetRepository = {
     });
   },
 
-  orderFieldSchema: async (datasetId, position, fieldSchemaId) => {
-    return await HTTPRequester.update({
-      url: getUrl(DatasetConfig.orderFieldSchemaDesign, { datasetId, position }),
+  updateFieldOrder: async (datasetId, position, fieldSchemaId) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateFieldOrder, { datasetId, position }),
       data: { id: fieldSchemaId, position }
-    });
-  },
+    }),
 
-  orderTableSchema: async (datasetId, position, tableSchemaId) => {
-    return await HTTPRequester.update({
-      url: getUrl(DatasetConfig.orderTableSchemaDesign, { datasetId, position }),
+  updateTableOrder: async (datasetId, position, tableSchemaId) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateTableOrder, { datasetId, position }),
       data: { id: tableSchemaId, position }
-    });
-  },
+    }),
 
-  schemaById: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.dataSchema, { datasetId }) }),
+  getSchema: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getSchema, { datasetId }) }),
 
-  statisticsById: async datasetId => {
-    return await HTTPRequester.get({ url: getUrl(DatasetConfig.loadStatistics, { datasetId }) });
-  },
+  getStatistics: async datasetId =>
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getStatistics, { datasetId }) }),
 
-  tableDataById: async (
-    datasetId,
-    tableSchemaId,
-    pageNum,
-    pageSize,
-    fields,
-    levelError,
-    ruleId,
-    fieldSchemaId,
-    value
-  ) => {
-    return await HTTPRequester.get({
-      url: getUrl(DatasetConfig.loadTableData, {
+  getTableData: async (datasetId, tableSchemaId, pageNum, pageSize, fields, levelError, ruleId, fieldSchemaId, value) =>
+    await HTTPRequester.get({
+      url: getUrl(DatasetConfig.getTableData, {
         datasetId,
         fields,
         fieldSchemaId,
@@ -217,57 +181,49 @@ export const datasetRepository = {
         tableSchemaId,
         value
       })
-    });
-  },
+    }),
 
-  updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) => {
-    return await HTTPRequester.update({
+  updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) =>
+    await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateDatasetFeedbackStatus),
       data: { dataflowId, datasetId, message, status: feedbackStatus }
-    });
-  },
+    }),
 
-  updateDatasetSchemaById: async (datasetId, datasetSchema) => {
-    return await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateDatasetSchemaDesign, { datasetId }),
+  updateDatasetDesign: async (datasetId, datasetSchema) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateDatasetDesign, { datasetId }),
       data: datasetSchema
-    });
-  },
+    }),
 
-  updateFieldById: async (datasetId, datasetTableRecords, updateInCascade = false) => {
-    return await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateTableDataField, { datasetId, updateInCascade }),
+  updateField: async (datasetId, datasetTableRecords, updateInCascade = false) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateField, { datasetId, updateInCascade }),
       data: datasetTableRecords
-    });
-  },
+    }),
 
-  updateRecordFieldDesign: async (datasetId, datasetTableRecordField) => {
-    return await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateRecordFieldDesign, { datasetId }),
+  updateFieldDesign: async (datasetId, datasetTableRecordField) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateFieldDesign, { datasetId }),
       data: datasetTableRecordField
-    });
-  },
+    }),
 
-  updateRecordsById: async (datasetId, datasetTableRecords, updateInCascade = false) => {
-    return await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateTableDataRecord, { datasetId, updateInCascade }),
+  updateRecord: async (datasetId, datasetTableRecords, updateInCascade = false) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateRecord, { datasetId, updateInCascade }),
       data: datasetTableRecords
-    });
-  },
+    }),
 
-  updateReferenceDatasetStatus: async (datasetId, updatable) => {
-    return await HTTPRequester.update({
+  updateReferenceDatasetStatus: async (datasetId, updatable) =>
+    await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateReferenceDatasetStatus, { datasetId, updatable })
-    });
-  },
+    }),
 
-  updateSchemaNameById: async (datasetId, datasetSchemaName) => {
-    return await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateDataSchemaName, { datasetId, datasetSchemaName })
-    });
-  },
+  updateDatasetNameDesign: async (datasetId, datasetSchemaName) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateDatasetNameDesign, { datasetId, datasetSchemaName })
+    }),
 
-  updateTableDescriptionDesign: async (
+  updateTableDesign: async (
     tableSchemaToPrefill,
     tableSchemaId,
     tableSchemaDescription,
@@ -275,8 +231,8 @@ export const datasetRepository = {
     datasetId,
     tableSchemaNotEmpty,
     tableSchemaFixedNumber
-  ) => {
-    return await HTTPRequester.update({
+  ) =>
+    await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateTableDesign, { datasetId }),
       data: {
         description: tableSchemaDescription,
@@ -286,21 +242,16 @@ export const datasetRepository = {
         readOnly: tableSchemaIsReadOnly,
         toPrefill: tableSchemaToPrefill
       }
-    });
-  },
+    }),
 
-  updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) => {
-    return await HTTPRequester.update({
+  updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) =>
+    await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateTableDesign, { datasetId }),
       data: { idTableSchema: tableSchemaId, nameTableSchema: tableSchemaName }
-    });
-  },
+    }),
 
-  validateById: async datasetId => {
-    return await HTTPRequester.update({ url: getUrl(DatasetConfig.validateDataset, { datasetId }) });
-  },
+  validate: async datasetId => await HTTPRequester.update({ url: getUrl(DatasetConfig.validate, { datasetId }) }),
 
-  validateSqlRules: async (datasetId, datasetSchemaId) => {
-    return await HTTPRequester.post({ url: getUrl(DatasetConfig.validateSql, { datasetId, datasetSchemaId }) });
-  }
+  validateSqlRules: async (datasetId, datasetSchemaId) =>
+    await HTTPRequester.post({ url: getUrl(DatasetConfig.validateSql, { datasetId, datasetSchemaId }) })
 };

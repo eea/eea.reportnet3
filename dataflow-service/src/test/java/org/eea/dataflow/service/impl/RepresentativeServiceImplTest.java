@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import org.eea.dataflow.mapper.DataProviderGroupMapper;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.LeadReporterMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
@@ -30,11 +31,11 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
@@ -81,6 +82,9 @@ public class RepresentativeServiceImplTest {
 
   @Mock
   private DataProviderGroupRepository dataProviderGroupRepository;
+
+  @Mock
+  private DataProviderGroupMapper dataProviderGroupMapper;
 
   @Mock
   private LeadReporterRepository leadReporterRepository;
@@ -224,7 +228,6 @@ public class RepresentativeServiceImplTest {
   @Test
   public void getDataProviderGroupByCountryTypeSuccessTest() throws EEAException {
 
-    List<DataProviderCodeVO> dataProviderCodeVOs = new ArrayList<>();
     DataProviderGroup dataProviderGroup = new DataProviderGroup();
     dataProviderGroup.setId(1L);
     dataProviderGroup.setType(TypeDataProviderEnum.COUNTRY);
@@ -233,14 +236,10 @@ public class RepresentativeServiceImplTest {
     when(dataProviderGroupRepository.findDistinctCode(TypeDataProviderEnum.COUNTRY))
         .thenReturn(dataProviderGroups);
 
-    for (DataProviderGroup providerGroup : dataProviderGroups) {
-      DataProviderCodeVO dataProviderCodeVO = new DataProviderCodeVO();
-      dataProviderCodeVO.setLabel(providerGroup.getType().toString());
-      dataProviderCodeVO.setDataProviderGroupId(providerGroup.getId());
-      dataProviderCodeVOs.add(dataProviderCodeVO);
-    }
 
-    assertEquals("error in the message", dataProviderCodeVOs,
+
+    assertEquals("error in the message",
+        dataProviderGroupMapper.entityListToClass(dataProviderGroups),
         representativeServiceImpl.getDataProviderGroupByType(TypeDataProviderEnum.COUNTRY));
   }
 
@@ -656,7 +655,10 @@ public class RepresentativeServiceImplTest {
     Mockito.when(dataProviderRepository.findAllByDataProviderGroup_id(Mockito.any()))
         .thenReturn(dataProviderList);
     Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(user);
-
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    dataflow.setType(TypeDataflowEnum.BUSINESS);
+    Mockito.when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataflow));
 
     representativeServiceImpl.importFile(1L, 2L, file);
     Mockito.verify(representativeRepository, times(1)).saveAll(Mockito.any());

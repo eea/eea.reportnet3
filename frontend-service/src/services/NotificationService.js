@@ -9,91 +9,78 @@ import { config as generalConfig } from 'conf';
 
 import { Notification } from 'entities/Notification';
 
+import { NotificationUtils } from 'services/_utils/NotificationUtils';
+
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-const all = async () => {};
-const removeById = async () => {};
-const removeAll = async () => {};
-const readById = async () => {};
-const readAll = async () => {};
-const parse = ({ config, content = {}, message, onClick, routes, type }) => {
-  if (type === 'UPDATED_DATASET_STATUS') {
-    getUpdatedDatasetStatusNotificationContent(content);
-  }
+export const NotificationService = {
+  // all: async () => {},
+  // removeById: async () => {},
+  // removeAll: async () => {},
+  // readById: async () => {},
+  // readAll: async () => {},
+  parse: ({ config, content = {}, message, onClick, routes, type }) => {
+    if (type === 'UPDATED_DATASET_STATUS') {
+      content.datasetStatus = capitalize(content.datasetStatus.split('_').join(' '));
+    }
 
-  const notificationDTO = {};
-  config.forEach(notificationGeneralTypeConfig => {
-    const notificationTypeConfig = notificationGeneralTypeConfig.types.find(configType => configType.key === type);
-    if (notificationTypeConfig) {
-      const { key, fixed, lifeTime } = notificationGeneralTypeConfig;
-      const { fixed: typeFixed, lifeTime: typeLifeTime, navigateTo } = notificationTypeConfig;
-      notificationDTO.content = content;
-      notificationDTO.fixed = !isUndefined(typeFixed) ? typeFixed : fixed;
-      notificationDTO.key = type;
-      notificationDTO.lifeTime = typeLifeTime || lifeTime;
-      notificationDTO.message = message;
-      notificationDTO.onClick = onClick;
-      notificationDTO.type = key;
-      const contentKeys = Object.keys(content);
+    const notificationDTO = {};
+    config.forEach(notificationGeneralTypeConfig => {
+      const notificationTypeConfig = notificationGeneralTypeConfig.types.find(configType => configType.key === type);
+      if (notificationTypeConfig) {
+        const { key, fixed, lifeTime } = notificationGeneralTypeConfig;
+        const { fixed: typeFixed, lifeTime: typeLifeTime, navigateTo } = notificationTypeConfig;
+        notificationDTO.content = content;
+        notificationDTO.fixed = !isUndefined(typeFixed) ? typeFixed : fixed;
+        notificationDTO.key = type;
+        notificationDTO.lifeTime = typeLifeTime || lifeTime;
+        notificationDTO.message = message;
+        notificationDTO.onClick = onClick;
+        notificationDTO.type = key;
+        const contentKeys = Object.keys(content);
 
-      if (!isUndefined(navigateTo) && !isNull(navigateTo)) {
-        const urlParameters = {};
-        navigateTo.parameters.forEach(parameter => {
-          urlParameters[parameter] = content[parameter];
-        });
-        const section =
-          type.toString() !== 'VALIDATION_FINISHED_EVENT'
-            ? routes[navigateTo.section]
-            : routes[getSectionValidationRedirectionUrl(content.type)];
-        notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
+        if (!isUndefined(navigateTo) && !isNull(navigateTo)) {
+          const urlParameters = {};
+          navigateTo.parameters.forEach(parameter => {
+            urlParameters[parameter] = content[parameter];
+          });
+          const section =
+            type.toString() !== 'VALIDATION_FINISHED_EVENT'
+              ? routes[navigateTo.section]
+              : routes[NotificationUtils.getSectionValidationRedirectionUrl(content.type)];
+          notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
 
-        if (!isNil(navigateTo.hasQueryString) && navigateTo.hasQueryString) {
-          notificationDTO.redirectionUrl = `${notificationDTO.redirectionUrl}${window.location.search}`;
+          if (!isNil(navigateTo.hasQueryString) && navigateTo.hasQueryString) {
+            notificationDTO.redirectionUrl = `${notificationDTO.redirectionUrl}${window.location.search}`;
+          }
+          notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
+            navigateTo: notificationDTO.redirectionUrl
+          });
         }
-        notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
-          navigateTo: notificationDTO.redirectionUrl
+        contentKeys.forEach(key => {
+          if (isUndefined(navigateTo) || !navigateTo.parameters.includes(key)) {
+            const shortKey = camelCase(`short-${kebabCase(key)}`);
+            content[shortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
+          }
         });
+        notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);
+        notificationDTO.date = new Date();
       }
-      contentKeys.forEach(key => {
-        if (isUndefined(navigateTo) || !navigateTo.parameters.includes(key)) {
-          const shortKey = camelCase(`short-${kebabCase(key)}`);
-          content[shortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
-        }
-      });
-      notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);
-      notificationDTO.date = new Date();
-    }
-  });
-  return new Notification(notificationDTO);
-};
-const parseHidden = ({ type, content = {}, config }) => {
-  const notificationDTO = {};
-  const notificationTypeConfig = config.filter(notificationGeneralTypeConfig => notificationGeneralTypeConfig === type);
+    });
+    return new Notification(notificationDTO);
+  },
+  parseHidden: ({ type, content = {}, config }) => {
+    const notificationDTO = {};
+    const notificationTypeConfig = config.filter(
+      notificationGeneralTypeConfig => notificationGeneralTypeConfig === type
+    );
 
-  if (notificationTypeConfig) {
-    notificationDTO.key = type;
-    notificationDTO.content = content;
-  }
-
-  return new Notification(notificationDTO);
-};
-
-const getUpdatedDatasetStatusNotificationContent = content =>
-  (content.datasetStatus = capitalize(content.datasetStatus.split('_').join(' ')));
-
-const getSectionValidationRedirectionUrl = sectionDTO => {
-  if (!isNil(sectionDTO)) {
-    if (sectionDTO === 'REPORTING') {
-      return 'DATASET';
+    if (notificationTypeConfig) {
+      notificationDTO.key = type;
+      notificationDTO.content = content;
     }
 
-    if (sectionDTO === 'DESIGN') {
-      return 'DATASET_SCHEMA';
-    }
-
-    return 'EU_DATASET';
+    return new Notification(notificationDTO);
   }
 };
-
-export const NotificationService = { all, parse, parseHidden, removeAll, removeById, readAll, readById };

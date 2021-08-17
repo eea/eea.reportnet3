@@ -7,7 +7,7 @@ import styles from './Message.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
-import { DownloadFile } from 'views/_components/DownloadFile';
+//import { DownloadFile } from 'views/_components/DownloadFile';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactTooltip from 'react-tooltip';
 

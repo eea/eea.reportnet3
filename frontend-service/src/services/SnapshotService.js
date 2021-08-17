@@ -1,61 +1,35 @@
-import { snapshotRepository } from 'repositories/SnapshotRepository';
-import { Snapshot } from 'entities/Snapshot';
+import { SnapshotRepository } from 'repositories/SnapshotRepository';
 
-const allDesigner = async datasetSchemaId => parseSnapshotList(await snapshotRepository.allDesigner(datasetSchemaId));
-
-const createByIdDesigner = async (datasetId, datasetSchemaId, description) => {
-  return await snapshotRepository.createByIdDesigner(datasetId, datasetSchemaId, description);
-};
-
-const deleteByIdDesigner = async (datasetSchemaId, snapshotId) => {
-  return await snapshotRepository.deleteByIdDesigner(datasetSchemaId, snapshotId);
-};
-
-const restoreByIdDesigner = async (datasetSchemaId, snapshotId) => {
-  return await snapshotRepository.restoreByIdDesigner(datasetSchemaId, snapshotId);
-};
-
-const allReporter = async datasetId => parseSnapshotList(await snapshotRepository.allReporter(datasetId));
-
-const createByIdReporter = async (datasetId, description, isReleased) => {
-  return await snapshotRepository.createByIdReporter(datasetId, description, isReleased);
-};
-
-const deleteByIdReporter = async (datasetId, snapshotId) => {
-  return await snapshotRepository.deleteByIdReporter(datasetId, snapshotId);
-};
-
-const restoreByIdReporter = async (dataflowId, datasetId, snapshotId) => {
-  return await snapshotRepository.restoreByIdReporter(dataflowId, datasetId, snapshotId);
-};
-
-const releaseDataflow = async (dataflowId, dataProviderId, restrictFromPublic) => {
-  return await snapshotRepository.releaseDataflow(dataflowId, dataProviderId, restrictFromPublic);
-};
-
-const parseSnapshotList = response => {
-  response.data = response.data.map(
-    snapshotDTO =>
-      new Snapshot({
-        creationDate: snapshotDTO.creationDate,
-        description: snapshotDTO.description,
-        id: snapshotDTO.id,
-        isAutomatic: snapshotDTO.automatic,
-        isReleased: snapshotDTO.release
-      })
-  );
-
-  return response;
-};
+import { SnapshotUtils } from 'services/_utils/SnapshotUtils';
 
 export const SnapshotService = {
-  allDesigner,
-  allReporter,
-  createByIdDesigner,
-  createByIdReporter,
-  deleteByIdDesigner,
-  deleteByIdReporter,
-  releaseDataflow,
-  restoreByIdDesigner,
-  restoreByIdReporter
+  getAllDesigner: async datasetSchemaId => {
+    const snapshots = await SnapshotRepository.getAllDesigner(datasetSchemaId);
+    return SnapshotUtils.parseSnapshotListDTO(snapshots.data);
+  },
+
+  getAllReporter: async datasetId => {
+    const snapshots = await SnapshotRepository.getAllReporter(datasetId);
+    return SnapshotUtils.parseSnapshotListDTO(snapshots.data);
+  },
+
+  createDesigner: async (datasetId, datasetSchemaId, description) =>
+    await SnapshotRepository.createDesigner(datasetId, datasetSchemaId, description),
+
+  createReporter: async (datasetId, description, isReleased) =>
+    await SnapshotRepository.createReporter(datasetId, description, isReleased),
+
+  deleteDesigner: async (datasetSchemaId, snapshotId) =>
+    await SnapshotRepository.deleteDesigner(datasetSchemaId, snapshotId),
+
+  deleteReporter: async (datasetId, snapshotId) => await SnapshotRepository.deleteReporter(datasetId, snapshotId),
+
+  restoreDesigner: async (datasetSchemaId, snapshotId) =>
+    await SnapshotRepository.restoreDesigner(datasetSchemaId, snapshotId),
+
+  restoreReporter: async (dataflowId, datasetId, snapshotId) =>
+    await SnapshotRepository.restoreReporter(dataflowId, datasetId, snapshotId),
+
+  release: async (dataflowId, dataProviderId, restrictFromPublic) =>
+    await SnapshotRepository.release(dataflowId, dataProviderId, restrictFromPublic)
 };

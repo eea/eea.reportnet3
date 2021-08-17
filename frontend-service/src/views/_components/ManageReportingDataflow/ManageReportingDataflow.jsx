@@ -3,7 +3,7 @@ import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import styles from './DataflowManagement.module.scss';
+import styles from './ManageReportingDataflow.module.scss';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -12,7 +12,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
-import { DataflowManagementForm } from './_components/DataflowManagementForm';
+import { ManageReportingDataflowForm } from './_components/ManageReportingDataflowForm';
 import { Dialog } from 'views/_components/Dialog';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
@@ -24,12 +24,12 @@ import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { dataflowManagementReducer } from './_functions/Reducers/dataflowManagementReducer';
+import { reportingDataflowReducer } from './_functions/Reducers/reportingDataflowReducer';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const DataflowManagement = ({
+export const ManageReportingDataflow = ({
   dataflowId,
   history,
   isEditForm,
@@ -49,7 +49,7 @@ export const DataflowManagement = ({
   const deleteInputRef = useRef(null);
   const formRef = useRef(null);
 
-  const dataflowManagementInitialState = {
+  const manageReportingDataflowInitialState = {
     description: isEditForm ? state.description : '',
     isSubmitting: false,
     name: isEditForm ? state.name : '',
@@ -58,9 +58,9 @@ export const DataflowManagement = ({
     isReleasable: state.isReleasable
   };
 
-  const [dataflowManagementState, dataflowManagementDispatch] = useReducer(
-    dataflowManagementReducer,
-    dataflowManagementInitialState
+  const [reportingDataflowState, manageReportingDataflowDispatch] = useReducer(
+    reportingDataflowReducer,
+    manageReportingDataflowInitialState
   );
 
   useEffect(() => {
@@ -80,20 +80,17 @@ export const DataflowManagement = ({
 
   const secondaryDialog = isEditForm ? 'isEditDialogVisible' : 'isAddDialogVisible';
 
-  const onSubmit = value => dataflowManagementDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
+  const onSubmit = value => manageReportingDataflowDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
   const onDeleteDataflow = async () => {
     manageDialogs('isDeleteDialogVisible', false);
     showLoading();
     try {
-      const response = await DataflowService.deleteById(dataflowId);
-      if (response.status >= 200 && response.status <= 299) {
-        history.push(getUrl(routes.DATAFLOWS));
-        notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
-      } else {
-        throw new Error(`Delete dataflow error with this status: ', ${response.status}`);
-      }
+      await DataflowService.delete(dataflowId);
+      history.push(getUrl(routes.DATAFLOWS));
+      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
     } catch (error) {
+      console.error('ManageReportingDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
     } finally {
       hideLoading();
@@ -107,17 +104,19 @@ export const DataflowManagement = ({
   };
 
   const onLoadData = ({ name, description }) =>
-    dataflowManagementDispatch({ type: 'ON_LOAD_DATA', payload: { name, description } });
+    manageReportingDataflowDispatch({ type: 'ON_LOAD_DATA', payload: { name, description } });
 
   const onLoadObligation = ({ id, title }) =>
-    dataflowManagementDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
+    manageReportingDataflowDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
 
   const onResetData = () =>
-    dataflowManagementDispatch({ type: 'RESET_STATE', payload: { resetData: dataflowManagementInitialState } });
+    manageReportingDataflowDispatch({
+      type: 'RESET_STATE',
+      payload: { resetData: manageReportingDataflowInitialState }
+    });
 
   const onSave = () => {
-    if (formRef.current) formRef.current.handleSubmit(dataflowManagementState.pinDataflow);
-    manageDialogs(secondaryDialog, false);
+    if (formRef.current) formRef.current.handleSubmit(reportingDataflowState.pinDataflow);
   };
 
   const renderCancelButton = action => (
@@ -144,18 +143,24 @@ export const DataflowManagement = ({
           <div className={styles.checkboxWrapper}>
             <Checkbox
               ariaLabel={resources.messages['pinDataflow']}
-              checked={dataflowManagementState.pinDataflow}
+              checked={reportingDataflowState.pinDataflow}
               id="replaceCheckbox"
               inputId="replaceCheckbox"
               onChange={() =>
-                dataflowManagementDispatch({ type: 'TOGGLE_PIN', payload: !dataflowManagementState.pinDataflow })
+                manageReportingDataflowDispatch({
+                  type: 'TOGGLE_PIN',
+                  payload: !reportingDataflowState.pinDataflow
+                })
               }
               role="checkbox"
             />
             <label>
               <span
                 onClick={() =>
-                  dataflowManagementDispatch({ type: 'TOGGLE_PIN', payload: !dataflowManagementState.pinDataflow })
+                  manageReportingDataflowDispatch({
+                    type: 'TOGGLE_PIN',
+                    payload: !reportingDataflowState.pinDataflow
+                  })
                 }>
                 {resources.messages['pinDataflow']}
               </span>
@@ -175,22 +180,22 @@ export const DataflowManagement = ({
       </div>
       <Button
         className={`p-button-primary ${
-          !isEmpty(dataflowManagementState.name) &&
-          !isEmpty(dataflowManagementState.description) &&
-          !isNil(dataflowManagementState.obligation?.id) &&
-          !dataflowManagementState.isSubmitting
+          !isEmpty(reportingDataflowState.name) &&
+          !isEmpty(reportingDataflowState.description) &&
+          !isNil(reportingDataflowState.obligation?.id) &&
+          !reportingDataflowState.isSubmitting
             ? 'p-button-animated-blink'
             : ''
         }`}
         disabled={
-          isEmpty(dataflowManagementState.name) ||
-          isEmpty(dataflowManagementState.description) ||
-          isNil(dataflowManagementState.obligation?.id) ||
-          dataflowManagementState.isSubmitting
+          isEmpty(reportingDataflowState.name) ||
+          isEmpty(reportingDataflowState.description) ||
+          isNil(reportingDataflowState.obligation?.id) ||
+          reportingDataflowState.isSubmitting
         }
-        icon={dataflowManagementState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'check' : 'add'}
+        icon={reportingDataflowState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'check' : 'add'}
         label={isEditForm ? resources.messages['save'] : resources.messages['create']}
-        onClick={() => (dataflowManagementState.isSubmitting ? {} : onSave())}
+        onClick={() => (reportingDataflowState.isSubmitting ? {} : onSave())}
       />
       {renderCancelButton(onHideDataflowDialog)}
     </Fragment>
@@ -205,12 +210,12 @@ export const DataflowManagement = ({
           header={resources.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow']}
           onHide={() => onHideDataflowDialog()}
           visible={state.isAddDialogVisible || state.isEditDialogVisible}>
-          <DataflowManagementForm
-            data={dataflowManagementState}
+          <ManageReportingDataflowForm
+            data={reportingDataflowState}
             dataflowId={dataflowId}
             getData={onLoadData}
             isEditForm={isEditForm}
-            obligation={dataflowManagementState.obligation}
+            obligation={reportingDataflowState.obligation}
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
             onResetData={onResetData}

@@ -13,27 +13,22 @@ import { QuerystringUtils } from 'views/_functions/Utils/QuerystringUtils';
 import { TabsUtils } from 'views/_functions/Utils/TabsUtils';
 
 export const TabsSchema = ({
-  activeIndex = 0,
-  buttonsList = undefined,
+  datasetSchemaId,
   dataProviderId,
   hasWritePermissions = false,
   hasCountryCode,
-  isBusinessDataflow = false,
+  isBusinessDataflow,
   isExportable = true,
   isFilterable,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
   isReferenceDataset,
   isReportingWebform,
-  isValidationSelected,
   levelErrorTypes,
-  onChangeIsValidationSelected,
   onHideSelectGroupedValidation,
   onLoadTableData,
   onTabChange,
-  recordPositionId,
   reporting,
-  selectedRecordErrorId,
   selectedRuleId,
   selectedRuleLevelError,
   selectedTableSchemaId,
@@ -50,8 +45,8 @@ export const TabsSchema = ({
             <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
               <div className={styles.tabsSchema}>
                 <DataViewer
-                  buttonsList={buttonsList}
                   dataProviderId={dataProviderId}
+                  datasetSchemaId={datasetSchemaId}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
                   isBusinessDataflow={isBusinessDataflow}
@@ -61,15 +56,11 @@ export const TabsSchema = ({
                   isGroupedValidationSelected={isGroupedValidationSelected}
                   isReferenceDataset={isReferenceDataset}
                   isReportingWebform={isReportingWebform}
-                  isValidationSelected={isValidationSelected}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
-                  onChangeIsValidationSelected={onChangeIsValidationSelected}
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
-                  recordPositionId={table.id === tableSchemaId ? recordPositionId : -1}
                   reporting={reporting}
-                  selectedRecordErrorId={table.id === tableSchemaId ? selectedRecordErrorId : -1}
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}
                   selectedRuleMessage={selectedRuleMessage}
@@ -111,7 +102,6 @@ export const TabsSchema = ({
       }
       name="TabsSchema"
       onTabChange={onTabChange}
-      renderActiveOnly={false}
       tableSchemaId={tableSchemaId}>
       {tabs}
     </TabView>

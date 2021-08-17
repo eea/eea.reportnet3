@@ -21,7 +21,7 @@ const useBigButtonList = ({
   getDataHistoricReleasesByRepresentatives,
   getDatasetData,
   getDeleteSchemaIndex,
-  handleExportEuDataset,
+  handleExportEUDataset,
   handleRedirect,
   isActiveButton,
   isCloningDataflow,
@@ -29,13 +29,13 @@ const useBigButtonList = ({
   isLeadReporterOfCountry,
   onCloneDataflow,
   onImportSchema,
-  onLoadEuDatasetIntegration,
+  onLoadEUDatasetIntegration,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
   onSaveName,
-  onShowCopyDataCollectionToEuDatasetModal,
+  onShowCopyDataCollectionToEUDatasetModal,
   onShowDataCollectionModal,
-  onShowExportEuDatasetModal,
+  onShowExportEUDatasetModal,
   onShowHistoricReleases,
   onShowManageReportersDialog,
   onShowManualTechnicalAcceptanceDialog,
@@ -74,8 +74,8 @@ const useBigButtonList = ({
     return {
       createDataCollection: isLeadDesigner && isDesignStatus,
       cloneSchemasFromDataflow: isLeadDesigner && isDesignStatus,
-      copyDataCollectionToEuDataset: isLeadDesigner && isDraftStatus,
-      exportEuDataset: isLeadDesigner && isDraftStatus,
+      copyDataCollectionToEUDataset: isLeadDesigner && isDraftStatus,
+      exportEUDataset: isLeadDesigner && isDraftStatus,
       dashboard: (isLeadDesigner || isObserver) && isDraftStatus,
       designDatasets:
         (isLeadDesigner ||
@@ -491,21 +491,21 @@ const useBigButtonList = ({
     ];
   };
 
-  const copyDataCollectionToEuDatasetBigButton = [
+  const copyDataCollectionToEUDatasetBigButton = [
     {
       buttonClass: 'schemaDataset',
-      buttonIcon: dataflowState.isCopyDataCollectionToEuDatasetLoading ? 'spinner' : 'angleDoubleRight',
-      buttonIconClass: dataflowState.isCopyDataCollectionToEuDatasetLoading ? 'spinner' : '',
+      buttonIcon: dataflowState.isCopyDataCollectionToEUDatasetLoading ? 'spinner' : 'angleDoubleRight',
+      buttonIconClass: dataflowState.isCopyDataCollectionToEUDatasetLoading ? 'spinner' : '',
       caption: 'Copy Data Collections to EU Datasets',
-      handleRedirect: dataflowState.isCopyDataCollectionToEuDatasetLoading
+      handleRedirect: dataflowState.isCopyDataCollectionToEUDatasetLoading
         ? () => {}
-        : () => onShowCopyDataCollectionToEuDatasetModal(),
+        : () => onShowCopyDataCollectionToEUDatasetModal(),
       layout: 'defaultBigButton',
-      visibility: buttonsVisibility.copyDataCollectionToEuDataset
+      visibility: buttonsVisibility.copyDataCollectionToEUDataset
     }
   ];
 
-  const exportEuDatasetModel = !isNil(dataflowState.data.euDatasets)
+  const exportEUDatasetModel = !isNil(dataflowState.data.euDatasets)
     ? [
         {
           label: resources.messages['updateConfigurations'],
@@ -515,8 +515,8 @@ const useBigButtonList = ({
         dataflowState.data.euDatasets.map(dataset => ({
           command: () => {
             getDatasetData(dataset.euDatasetId, dataset.datasetSchemaId);
-            handleExportEuDataset(true);
-            onLoadEuDatasetIntegration(dataset.datasetSchemaId);
+            handleExportEUDataset(true);
+            onLoadEUDatasetIntegration(dataset.datasetSchemaId);
           },
           icon: 'export',
           iconStyle: { transform: 'rotate(-90deg)' },
@@ -525,16 +525,16 @@ const useBigButtonList = ({
       )
     : [];
 
-  const exportEuDatasetBigButton = [
+  const exportEUDatasetBigButton = [
     {
       buttonClass: 'schemaDataset',
-      buttonIcon: dataflowState.isExportEuDatasetLoading ? 'spinner' : 'fileExport',
-      buttonIconClass: dataflowState.isExportEuDatasetLoading ? 'spinner' : '',
+      buttonIcon: dataflowState.isExportEUDatasetLoading ? 'spinner' : 'fileExport',
+      buttonIconClass: dataflowState.isExportEUDatasetLoading ? 'spinner' : '',
       caption: 'Export EU Datasets',
-      handleRedirect: dataflowState.isExportEuDatasetLoading ? () => {} : () => onShowExportEuDatasetModal(),
+      handleRedirect: dataflowState.isExportEUDatasetLoading ? () => {} : () => onShowExportEUDatasetModal(),
       layout: 'defaultBigButton',
-      model: exportEuDatasetModel,
-      visibility: buttonsVisibility.exportEuDataset
+      model: exportEUDatasetModel,
+      visibility: buttonsVisibility.exportEUDataset
     }
   ];
 
@@ -575,9 +575,9 @@ const useBigButtonList = ({
     ...referenceDatasetModels,
     ...dataCollectionModels,
     ...manualTechnicalAcceptanceBigButton,
-    ...copyDataCollectionToEuDatasetBigButton,
+    ...copyDataCollectionToEUDatasetBigButton,
     ...euDatasetModels,
-    ...exportEuDatasetBigButton,
+    ...exportEUDatasetBigButton,
     ...testDatasetBigButton,
     ...newSchemaBigButton,
     ...createDataCollection,

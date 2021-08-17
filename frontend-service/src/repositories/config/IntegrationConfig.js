@@ -1,11 +1,12 @@
 export const IntegrationConfig = {
-  all: '/integration/listIntegrations',
-  allExtensionsOperations: '/integration/listExtensionsOperations',
+  getAll: '/integration/listIntegrations',
+  getAllExtensionsOperations: '/integration/listExtensionsOperations',
+  getEUDatasetIntegration:
+    '/integration/findExportEUDatasetIntegration?dataflowId={:dataflowId}&datasetSchemaId={:datasetSchemaId}',
+  getFMEProcesses: '/fme/findItems?datasetId={:datasetId}&repository={:repositoryName}',
+  getFMERepositories: '/fme/findRepositories?datasetId={:datasetId}',
   create: '/integration/create',
   delete: '/integration/{:integrationId}/dataflow/{:dataflowId}',
-  euDatasetIntegration: '/integration/findExportEUDatasetIntegration?datasetSchemaId={:datasetSchemaId}',
-  getProcesses: '/fme/findItems?datasetId={:datasetId}&repository={:repositoryName}',
-  getRepositories: '/fme/findRepositories?datasetId={:datasetId}',
   runIntegration: '/integration/{:integrationId}/runIntegration/dataset/{:datasetId}',
   runIntegrationWithReplace: '/integration/{:integrationId}/runIntegration/dataset/{:datasetId}?replace={:replaceData}',
   update: '/integration/update'

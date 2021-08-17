@@ -19,6 +19,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
@@ -79,7 +80,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find a Dataflow by its Id", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataFlowVO.class)
@@ -188,7 +189,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("isAuthenticated()")
   @GetMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Business Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
@@ -248,7 +249,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
   @PostMapping("/{dataflowId}/contributor/add")
   @ApiOperation(value = "Add one Contributor to a Dataflow")
   @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
@@ -272,7 +273,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
   @DeleteMapping("{dataflowId}/contributor/remove")
   @ApiOperation(value = "Remove one Contributor from a Dataflow")
   @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
@@ -363,7 +364,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Update a Dataflow", produces = MediaType.APPLICATION_JSON_VALUE,
       response = ResponseEntity.class)
@@ -396,6 +397,21 @@ public class DataFlowControllerImpl implements DataFlowController {
       message = EEAErrorMessage.DATAFLOW_OBLIGATION;
       status = HttpStatus.BAD_REQUEST;
     }
+    // If it's a Business Dataflow, check if there are representatives selected. If so, then deny
+    // the update
+    if (TypeDataflowEnum.BUSINESS.equals(dataFlowVO.getType()) && status == HttpStatus.OK) {
+      try {
+        DataFlowVO dataflow = dataflowService.getMetabaseById(dataFlowVO.getId());
+        if (!dataflow.getDataProviderGroupId().equals(dataFlowVO.getDataProviderGroupId())
+            && !representativeService.getRepresetativesByIdDataFlow(dataFlowVO.getId()).isEmpty()) {
+          message = EEAErrorMessage.EXISTING_REPRESENTATIVES;
+          status = HttpStatus.BAD_REQUEST;
+        }
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error finding the representatives from the dataflowId {}",
+            dataFlowVO.getId());
+      }
+    }
 
     if (status == HttpStatus.OK) {
       try {
@@ -419,7 +435,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
   @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get meta information from a Dataflow based on its Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class)
@@ -446,7 +462,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @param dataflowId the dataflow id
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') OR (hasRole('ADMIN') AND checkAccessEntity('BUSINESS','DATAFLOW',#dataflowId))")
   @DeleteMapping("/{dataflowId}")
   @ApiOperation(value = "Delete a Dataflow by its Id")
   @ApiResponse(code = 500, message = "Internal Server Error")
@@ -597,6 +613,16 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/private/isDataflowType/{type}/entity/{entity}/{entityId}")
+  public boolean accessEntity(@PathVariable("type") TypeDataflowEnum dataflowType,
+      @PathVariable("entity") EntityClassEnum entity, @PathVariable("entityId") Long entityId) {
+    return dataflowService.isDataflowType(dataflowType, entity, entityId);
+  }
+
+
 
   /**
    * Checks if is user requester.
@@ -605,6 +631,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return true, if is user requester
    */
   private boolean isUserRequester(Long dataflowId) {
+    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
     for (GrantedAuthority role : SecurityContextHolder.getContext().getAuthentication()
         .getAuthorities()) {
       if (ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)
@@ -612,7 +639,8 @@ public class DataFlowControllerImpl implements DataFlowController {
           || ObjectAccessRoleEnum.DATAFLOW_OBSERVER.getAccessRole(dataflowId)
               .equals(role.getAuthority())
           || ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)
-              .equals(role.getAuthority())) {
+              .equals(role.getAuthority())
+          || roleAdmin.equals(role.getAuthority())) {
         return true;
       }
     }

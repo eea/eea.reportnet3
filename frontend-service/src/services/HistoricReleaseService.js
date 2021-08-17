@@ -1,38 +1,15 @@
-import isNil from 'lodash/isNil';
+import { HistoricReleaseRepository } from 'repositories/HistoricReleaseRepository';
 
-import { historicReleaseRepository } from 'repositories/HistoricReleaseRepository';
-import { HistoricRelease } from 'entities/HistoricRelease';
+import { HistoricReleaseUtils } from 'services/_utils/HistoricReleaseUtils';
 
-const allHistoricReleases = async datasetId => {
-  const response = await historicReleaseRepository.allHistoricReleases(datasetId);
-  response.data = parseReleases(response.data);
+export const HistoricReleaseService = {
+  getAll: async datasetId => {
+    const response = await HistoricReleaseRepository.getAll(datasetId);
+    return HistoricReleaseUtils.parseHistoricReleaseListDTO(response.data);
+  },
 
-  return response;
-};
-
-const allRepresentativeHistoricReleases = async (dataflowId, dataProviderId) => {
-  const response = await historicReleaseRepository.allRepresentativeHistoricReleases(dataflowId, dataProviderId);
-  response.data = parseReleases(response.data);
-
-  return response;
-};
-
-const parseReleases = historicReleasesDTO => {
-  if (!isNil(historicReleasesDTO)) {
-    return historicReleasesDTO.map(
-      historicReleaseDTO =>
-        new HistoricRelease({
-          countryCode: historicReleaseDTO.countryCode,
-          datasetId: historicReleaseDTO.datasetId,
-          datasetName: historicReleaseDTO.datasetName,
-          id: historicReleaseDTO.id,
-          isDataCollectionReleased: historicReleaseDTO.dcrelease,
-          isEUReleased: historicReleaseDTO.eurelease,
-          releaseDate: historicReleaseDTO.dateReleased
-        })
-    );
+  getAllRepresentative: async (dataflowId, dataProviderId) => {
+    const response = await HistoricReleaseRepository.getAllRepresentative(dataflowId, dataProviderId);
+    return HistoricReleaseUtils.parseHistoricReleaseListDTO(response.data);
   }
-  return;
 };
-
-export const HistoricReleaseService = { allHistoricReleases, allRepresentativeHistoricReleases };

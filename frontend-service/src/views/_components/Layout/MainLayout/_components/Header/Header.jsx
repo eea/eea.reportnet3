@@ -190,9 +190,9 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       const inmUserProperties = { ...userContext.userProps };
       inmUserProperties.showLogoutConfirmation = false;
       try {
-        await UserService.updateAttributes(inmUserProperties);
+        await UserService.updateConfiguration(inmUserProperties);
       } catch (error) {
-        console.error('Header - userLogout - updateAttributes.', error);
+        console.error('Header - userLogout - updateConfiguration.', error);
         notificationContext.add({
           type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
         });

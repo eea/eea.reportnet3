@@ -91,7 +91,7 @@ export const useBreadCrumbs = ({
     icon: 'howTo'
   });
 
-  const getEuDatasetCrumb = () => {
+  const getEUDatasetCrumb = () => {
     return { label: resources.messages['euDataset'], icon: 'euDataset' };
   };
 
@@ -243,7 +243,7 @@ export const useBreadCrumbs = ({
     }
 
     if (currentPage === CurrentPage.EU_DATASET) {
-      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getEuDatasetCrumb()]);
+      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getEUDatasetCrumb()]);
     }
 
     if (currentPage === CurrentPage.USER_SETTINGS) {

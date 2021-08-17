@@ -1,3 +1,4 @@
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 export const CoreUtils = (() => {
@@ -70,6 +71,8 @@ export const CoreUtils = (() => {
       return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
     },
 
+    getPercentageOfValue: (val, total) => (total === 0 ? '0.00' : ((val / total) * 100).toFixed(2)),
+
     isDuplicatedInObject: (array, property) => {
       let isDuplicated = false,
         testObject = {};
@@ -119,7 +122,7 @@ export const CoreUtils = (() => {
         });
       });
       valuesWithValidations.forEach(item => {
-        if (item != null && item != undefined && !item.every(value => value === 0)) {
+        if (!isNil(item) && !item.every(value => value === 0)) {
           tableStatisticValuesWithSomeError.push(item);
         }
       });

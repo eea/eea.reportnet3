@@ -1,101 +1,63 @@
 import isEmpty from 'lodash/isEmpty';
 import sortBy from 'lodash/sortBy';
 
-import { representativeRepository } from 'repositories/RepresentativeRepository';
-import { Representative } from 'entities/Representative';
-import { LeadReporter } from 'entities/LeadReporter';
+import { RepresentativeRepository } from 'repositories/RepresentativeRepository';
 
-const add = async (dataflowId, providerAccount, dataProviderId) => {
-  return await representativeRepository.add(dataflowId, providerAccount, dataProviderId);
-};
-
-const addLeadReporter = async (leadReporterAccount, representativeId, dataflowId) => {
-  return await representativeRepository.addLeadReporter(leadReporterAccount, representativeId, dataflowId);
-};
-
-const allDataProviders = async dataProviderGroup => {
-  let response = [];
-  const dataProvidersDTO = await representativeRepository.allDataProviders(dataProviderGroup.dataProviderGroupId);
-  response = dataProvidersDTO.data.map(dataProvider => {
-    return { dataProviderId: dataProvider.id, label: dataProvider.label };
-  });
-  return response;
-};
-
-const allRepresentatives = async dataflowId => {
-  const representativesDTO = await representativeRepository.allRepresentatives(dataflowId);
-
-  const representativesList = !isEmpty(representativesDTO.data)
-    ? representativesDTO.data.map(
-        representativeDTO =>
-          new Representative({
-            dataProviderGroupId: representativeDTO.dataProviderGroupId,
-            dataProviderId: representativeDTO.dataProviderId,
-            hasDatasets: representativeDTO.hasDatasets,
-            id: representativeDTO.id,
-            isReceiptDownloaded: representativeDTO.receiptDownloaded,
-            isReceiptOutdated: representativeDTO.receiptOutdated,
-            leadReporters: parseLeadReporters(representativeDTO.leadReporters)
-          })
-      )
-    : [];
-
-  const dataToConsume = {
-    group: !isEmpty(representativesDTO.data)
-      ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId }
-      : { dataProviderGroupId: null },
-    representatives: sortBy(representativesList, ['representativeId'])
-  };
-  return dataToConsume;
-};
-
-const parseLeadReporters = (leadReporters = []) =>
-  leadReporters.map(
-    leadReporter =>
-      new LeadReporter({
-        account: leadReporter.email,
-        id: leadReporter.id,
-        representativeId: leadReporter.representativeId
-      })
-  );
-
-const deleteById = async (representativeId, dataflowId) =>
-  await representativeRepository.deleteById(representativeId, dataflowId);
-
-const deleteLeadReporter = async (leadReporterId, dataflowId) =>
-  await representativeRepository.deleteLeadReporter(leadReporterId, dataflowId);
-
-const downloadById = async dataflowId => {
-  return await representativeRepository.downloadById(dataflowId);
-};
-
-const downloadTemplateById = async dataProviderGroupId =>
-  await representativeRepository.downloadTemplateById(dataProviderGroupId);
-
-const getFmeUsers = async () => await representativeRepository.getFmeUsers();
-
-const getGroupCompanies = async () => await representativeRepository.getGroupCompanies();
-
-const getGroupProviders = async () => await representativeRepository.getGroupProviders();
-
-const updateDataProviderId = async (representativeId, dataProviderId) =>
-  await representativeRepository.updateDataProviderId(representativeId, dataProviderId);
-
-const updateLeadReporter = async (leadReporterAccount, leadReporterId, representativeId, dataflowId) =>
-  await representativeRepository.updateLeadReporter(leadReporterAccount, leadReporterId, representativeId, dataflowId);
+import { RepresentativeUtils } from 'services/_utils/RepresentativeUtils';
 
 export const RepresentativeService = {
-  add,
-  addLeadReporter,
-  allDataProviders,
-  allRepresentatives,
-  deleteById,
-  deleteLeadReporter,
-  downloadById,
-  downloadTemplateById,
-  getFmeUsers,
-  getGroupCompanies,
-  getGroupProviders,
-  updateDataProviderId,
-  updateLeadReporter
+  createDataProvider: async (dataflowId, providerAccount, dataProviderId) =>
+    await RepresentativeRepository.createDataProvider(dataflowId, providerAccount, dataProviderId),
+
+  createLeadReporter: async (leadReporterAccount, representativeId, dataflowId) =>
+    await RepresentativeRepository.createLeadReporter(leadReporterAccount, representativeId, dataflowId),
+
+  getDataProviders: async dataProviderGroup => {
+    let response = [];
+    const dataProvidersDTO = await RepresentativeRepository.getDataProviders(dataProviderGroup.dataProviderGroupId);
+    response = dataProvidersDTO.data.map(dataProvider => {
+      return { dataProviderId: dataProvider.id, label: dataProvider.label };
+    });
+    return response;
+  },
+
+  getSelectedDataProviderGroup: async dataflowId =>
+    await RepresentativeRepository.getSelectedDataProviderGroup(dataflowId),
+
+  getRepresentatives: async dataflowId => {
+    const representativesDTO = await RepresentativeRepository.getRepresentatives(dataflowId);
+
+    const representativesList = RepresentativeUtils.parseRepresentativeListDTO(representativesDTO.data);
+
+    const dataToConsume = {
+      group: !isEmpty(representativesDTO.data)
+        ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId }
+        : { dataProviderGroupId: null },
+      representatives: sortBy(representativesList, ['representativeId'])
+    };
+    return dataToConsume;
+  },
+
+  deleteRepresentative: async (representativeId, dataflowId) =>
+    await RepresentativeRepository.deleteRepresentative(representativeId, dataflowId),
+
+  deleteLeadReporter: async (leadReporterId, dataflowId) =>
+    await RepresentativeRepository.deleteLeadReporter(leadReporterId, dataflowId),
+
+  exportFile: async dataflowId => await RepresentativeRepository.exportFile(dataflowId),
+
+  exportTemplateFile: async dataProviderGroupId =>
+    await RepresentativeRepository.exportTemplateFile(dataProviderGroupId),
+
+  getFmeUsers: async () => await RepresentativeRepository.getFmeUsers(),
+
+  getGroupCompanies: async () => await RepresentativeRepository.getGroupCompanies(),
+
+  getGroupCountries: async () => await RepresentativeRepository.getGroupCountries(),
+
+  updateDataProviderId: async (representativeId, dataProviderId) =>
+    await RepresentativeRepository.updateDataProviderId(representativeId, dataProviderId),
+
+  updateLeadReporter: async (leadReporterAccount, leadReporterId, representativeId, dataflowId) =>
+    await RepresentativeRepository.updateLeadReporter(leadReporterAccount, leadReporterId, representativeId, dataflowId)
 };

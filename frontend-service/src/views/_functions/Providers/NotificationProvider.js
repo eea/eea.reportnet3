@@ -7,7 +7,7 @@ import camelCase from 'lodash/camelCase';
 
 import { NotificationService } from 'services/NotificationService';
 
-import { NotificationContext } from 'views/_functions/Contexts/NotificationContext.js';
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { notificationReducer } from 'views/_functions/Reducers/notificationReducer';

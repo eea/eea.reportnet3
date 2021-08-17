@@ -16,7 +16,7 @@ export const euDatasetReducer = (state, { type, payload }) => {
       return { ...state, exportExtensionsList: payload.internalExtensionList };
 
     case 'GET_METADATA':
-      return { ...state, metaData: payload.metadata, isBusinessDataflow: payload.isBusinessDataflow };
+      return { ...state, metaData: payload.metadata };
 
     case 'HANDLE_DIALOGS':
       return { ...state, isDialogVisible: { ...state.isDialogVisible, [payload.dialog]: payload.value } };
@@ -29,9 +29,6 @@ export const euDatasetReducer = (state, { type, payload }) => {
 
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
-
-    case 'IS_VALIDATION_SELECTED':
-      return { ...state, isValidationSelected: payload.value };
 
     case 'ON_HIGHLIGHT_REFRESH':
       return { ...state, isRefreshHighlighted: payload.value };

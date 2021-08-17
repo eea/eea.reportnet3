@@ -1,5 +1,5 @@
 export const HistoricReleaseConfig = {
-  loadAllHistoricReleases: '/snapshot/historicReleases?datasetId={:datasetId}',
-  loadAllRepresentativeHistoricReleases:
+  getAll: '/snapshot/historicReleases?datasetId={:datasetId}',
+  getAllRepresentative:
     '/snapshot/historicReleasesRepresentative?dataflowId={:dataflowId}&representativeId={:representativeId}'
 };

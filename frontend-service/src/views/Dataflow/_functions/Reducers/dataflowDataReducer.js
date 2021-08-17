@@ -17,14 +17,17 @@ export const dataflowDataReducer = (state, { type, payload }) => {
 
     case 'SET_REPRESENTATIVES_IMPORT':
       return { ...state, representativesImport: payload };
+
     case 'SET_SHOW_PUBLIC_INFO':
       return { ...state, showPublicInfo: payload.showPublicInfo };
+
     case 'LOAD_PERMISSIONS':
       return {
         ...state,
         hasWritePermissions: payload.hasWritePermissions,
         isCustodian: payload.isCustodian,
         isObserver: payload.isObserver,
+        isAdmin: payload.isAdmin,
         userRoles: payload.userRoles,
         isNationalCoordinator: payload.isNationalCoordinator
       };
@@ -56,7 +59,7 @@ export const dataflowDataReducer = (state, { type, payload }) => {
       return { ...state, designDatasetSchemas: payload.designDatasets };
 
     case 'SET_IS_COPY_DATA_COLLECTION_TO_EU_DATASET_LOADING':
-      return { ...state, isCopyDataCollectionToEuDatasetLoading: payload.isLoading };
+      return { ...state, isCopyDataCollectionToEUDatasetLoading: payload.isLoading };
 
     case 'SET_IS_DATA_SCHEMA_CORRECT':
       return { ...state, isDataSchemaCorrect: payload.validationResult };
@@ -65,10 +68,16 @@ export const dataflowDataReducer = (state, { type, payload }) => {
       return { ...state, isDataUpdated: !state.isDataUpdated };
 
     case 'SET_IS_EXPORT_EU_DATASET':
-      return { ...state, isExportEuDatasetLoading: payload.isExportEuDatasetLoading };
+      return { ...state, isExportEUDatasetLoading: payload.isExportEUDatasetLoading };
 
     case 'SET_IS_PAGE_LOADING':
       return { ...state, isPageLoading: payload.isPageLoading };
+
+    case 'SET_IS_ADMIN_ASSIGNED_BUSINESS_DATAFLOW':
+      return {
+        ...state,
+        isAdminAssignedBusinessDataflow: payload.isAdminAssignedBusinessDataflow
+      };
 
     case 'SET_UPDATED_DATASET_SCHEMA':
       return { ...state, updatedDatasetSchema: payload.updatedData };

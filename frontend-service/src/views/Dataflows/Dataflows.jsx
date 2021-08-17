@@ -11,7 +11,7 @@ import { DataflowsReporterHelpConfig } from 'conf/help/dataflows/reporter';
 import { DataflowsRequesterHelpConfig } from 'conf/help/dataflows/requester';
 
 import { Button } from 'views/_components/Button';
-import { DataflowManagement } from 'views/_components/DataflowManagement';
+import { ManageReportingDataflow } from 'views/_components/ManageReportingDataflow';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'views/_components/Dialog';
 import { MainLayout } from 'views/_components/Layout';
@@ -57,7 +57,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
     activeIndex: 0,
     business: [],
-    dataflows: [],
+    reporting: [],
     isAddDialogVisible: false,
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
@@ -67,16 +67,16 @@ const Dataflows = withRouter(({ history, match }) => {
     isRepObDialogVisible: false,
     isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
-    loadingStatus: { dataflows: true, reference: true },
+    loadingStatus: { reporting: true, business: true, reference: true },
     reference: []
   });
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
     useReportingObligations();
 
-  const { activeIndex, loadingStatus } = dataflowsState;
+  const { activeIndex, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
 
-  const tabMenuItems = dataflowsState.isCustodian
+  const tabMenuItems = isCustodian
     ? [
         { className: styles.flow_tab, id: 'reporting', label: resources.messages['reportingDataflowsListTab'] },
         { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] },
@@ -103,7 +103,7 @@ const Dataflows = withRouter(({ history, match }) => {
     const createReportingDataflowBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: tabId === 'reporting' && dataflowsState.isCustodian,
+      isVisible: tabId === 'reporting' && isCustodian,
       label: 'createNewDataflow',
       onClick: () => manageDialogs('isAddDialogVisible', true),
       title: 'createNewDataflow'
@@ -112,7 +112,7 @@ const Dataflows = withRouter(({ history, match }) => {
     const createReferenceDataflowBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: tabId === 'reference' && dataflowsState.isCustodian,
+      isVisible: tabId === 'reference' && isCustodian,
       label: 'createNewDataflow',
       onClick: () => manageDialogs('isReferencedDataflowDialogVisible', true),
       title: 'createNewDataflow'
@@ -121,7 +121,7 @@ const Dataflows = withRouter(({ history, match }) => {
     const createBusinessDataflowBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
-      isVisible: tabId === 'business' && dataflowsState.isAdmin,
+      isVisible: tabId === 'business' && isAdmin,
       label: 'createNewDataflow',
       onClick: () => manageDialogs('isBusinessDataflowDialogVisible', true),
       title: 'createNewDataflow'
@@ -130,7 +130,7 @@ const Dataflows = withRouter(({ history, match }) => {
     const userListBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'users',
-      isVisible: dataflowsState.isNationalCoordinator,
+      isVisible: isNationalCoordinator,
       label: 'allDataflowsUserList',
       onClick: () => manageDialogs('isUserListVisible', true),
       title: 'allDataflowsUserList'
@@ -141,12 +141,12 @@ const Dataflows = withRouter(({ history, match }) => {
         button => button.isVisible
       )
     );
-  }, [dataflowsState.isAdmin, dataflowsState.isCustodian, dataflowsState.isNationalCoordinator, tabId]);
+  }, [isAdmin, isCustodian, isNationalCoordinator, tabId]);
 
   useEffect(() => {
-    const messageStep0 = dataflowsState.isCustodian ? 'dataflowListRequesterHelp' : 'dataflowListReporterHelp';
+    const messageStep0 = isCustodian ? 'dataflowListRequesterHelp' : 'dataflowListReporterHelp';
     leftSideBarContext.addHelpSteps(
-      dataflowsState.isCustodian ? DataflowsRequesterHelpConfig : DataflowsReporterHelpConfig,
+      isCustodian ? DataflowsRequesterHelpConfig : DataflowsReporterHelpConfig,
       messageStep0
     );
   }, [dataflowsState]);
@@ -164,22 +164,36 @@ const Dataflows = withRouter(({ history, match }) => {
     }
   }, [tabId]);
 
+  useEffect(() => {
+    setActiveIndexTabOnBack();
+  }, [isCustodian]);
+
+  const setActiveIndexTabOnBack = () => {
+    for (let tabItemIndex = 0; tabItemIndex < tabMenuItems.length; tabItemIndex++) {
+      const tabItem = tabMenuItems[tabItemIndex];
+
+      if (TextUtils.areEquals(tabItem.id, userContext.currentDataflowType)) {
+        onChangeTab(tabItemIndex);
+      }
+    }
+  };
+
   const getDataflows = async () => {
     setLoading(true);
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
-        const { data } = await DataflowService.all(userContext.contextRoles);
+        const data = await DataflowService.getAll(userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reporting' } });
       }
 
       if (TextUtils.areEquals(tabId, 'reference')) {
-        const { data } = await ReferenceDataflowService.all(userContext.contextRoles);
+        const data = await ReferenceDataflowService.getAll(userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reference' } });
       }
 
       if (TextUtils.areEquals(tabId, 'business')) {
-        const { data } = await BusinessDataflowService.getAll(userContext.contextRoles);
+        const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } });
       }
     } catch (error) {
@@ -305,6 +319,7 @@ const Dataflows = withRouter(({ history, match }) => {
 
       {dataflowsState.isBusinessDataflowDialogVisible && (
         <ManageBusinessDataflow
+          isAdmin={isAdmin}
           isVisible={dataflowsState.isBusinessDataflowDialogVisible}
           manageDialogs={manageDialogs}
           obligation={obligation}
@@ -313,7 +328,7 @@ const Dataflows = withRouter(({ history, match }) => {
         />
       )}
 
-      <DataflowManagement
+      <ManageReportingDataflow
         isEditForm={false}
         manageDialogs={manageDialogs}
         obligation={obligation}

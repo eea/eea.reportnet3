@@ -8,6 +8,9 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class NoPkReferenceDataflowErrorEvent.
+ */
 @Component
 public class NoPkReferenceDataflowErrorEvent implements NotificableEventHandler {
 

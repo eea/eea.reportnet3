@@ -161,6 +161,7 @@ public class SQLValidationUtils {
       String preparedquery = query.contains(";") ? query.replace(";", "") : query;
       if (dataProviderCode != null) {
         preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", dataProviderCode);
+        preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", dataProviderCode);
       }
       table = sqlRulesService.retrieveTableData(preparedquery, datasetId, rule, Boolean.FALSE);
     } catch (EEAInvalidSQLException e) {

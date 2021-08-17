@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
@@ -50,6 +51,9 @@ public class DataflowPublicVO implements Serializable {
 
   /** The releasable. */
   private boolean releasable;
+
+  /** The type. */
+  private TypeDataflowEnum type;
 
 
   /**

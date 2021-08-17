@@ -279,7 +279,7 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     try {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
-      await ValidationService.create(datasetId, candidateRule);
+      await ValidationService.createFieldRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
       console.error('FieldValidation - onCreateValidationRule.', error);
@@ -295,7 +295,7 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     try {
       setIsSubmitDisabled(true);
       const { candidateRule } = creationFormState;
-      await ValidationService.update(datasetId, candidateRule);
+      await ValidationService.updateFieldRule(datasetId, candidateRule);
       if (!isNil(candidateRule) && candidateRule.automatic) {
         validationContext.onAutomaticRuleIsUpdated(true);
       }

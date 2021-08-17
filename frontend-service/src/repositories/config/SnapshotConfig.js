@@ -1,13 +1,12 @@
 export const SnapshotConfig = {
-  createSnapshotDesigner:
-    '/snapshot/dataschema/{:datasetSchemaId}/dataset/{:datasetId}/create?description={:description}',
-  createSnapshotReporter: '/snapshot/dataset/{:datasetId}/create',
-  deleteSnapshotByIdDesigner: '/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/delete',
-  deleteSnapshotByIdReporter: '/snapshot/{:snapshotId}/dataset/{:datasetId}/delete',
-  loadSnapshotsListDesigner: '/snapshot/dataschema/{:datasetSchemaId}/listSnapshots ',
-  loadSnapshotsListReporter: '/snapshot/dataset/{:datasetId}/listSnapshots',
-  releaseDataflow:
+  createDesigner: '/snapshot/dataschema/{:datasetSchemaId}/dataset/{:datasetId}/create?description={:description}',
+  createReporter: '/snapshot/dataset/{:datasetId}/create',
+  deleteDesigner: '/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/delete',
+  deleteReporter: '/snapshot/{:snapshotId}/dataset/{:datasetId}/delete',
+  getAllDesigner: '/snapshot/dataschema/{:datasetSchemaId}/listSnapshots',
+  getAllReporter: '/snapshot/dataset/{:datasetId}/listSnapshots',
+  release:
     '/snapshot/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}/release?restrictFromPublic={:restrictFromPublic}',
-  restoreSnapshotDesigner: '/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/restore',
-  restoreSnapshotReporter: '/snapshot/{:snapshotId}/dataset/{:datasetId}/restore'
+  restoreDesigner: '/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/restore',
+  restoreReporter: '/snapshot/{:snapshotId}/dataset/{:datasetId}/restore'
 };

@@ -478,14 +478,14 @@ export const useSetColumns = (
 
     setColumns(columnsArr);
     setOriginalColumns(columnsArr);
-    // }
   }, [
     colsSchema,
     columnOptions,
     records.selectedRecord.recordId,
     initialCellValue,
     hasWebformWritePermissions,
-    hasWritePermissions
+    hasWritePermissions,
+    isBusinessDataflow
   ]);
 
   return {
@@ -496,39 +496,4 @@ export const useSetColumns = (
     selectedHeader,
     setColumns
   };
-};
-
-export const useRecordErrorPosition = (
-  recordErrorPositionId,
-  dispatchRecords,
-  records,
-  dispatchSort,
-  onFetchData,
-  levelErrorTypesWithCorrects
-) => {
-  useEffect(() => {
-    if (isUndefined(recordErrorPositionId) || recordErrorPositionId === -1) {
-      return;
-    }
-
-    dispatchRecords({
-      type: 'SET_FIRST_PAGE_RECORD',
-      payload:
-        recordErrorPositionId !== -1
-          ? Math.floor(recordErrorPositionId / records.recordsPerPage) * records.recordsPerPage
-          : 0
-    });
-
-    dispatchSort({ type: 'SORT_TABLE', payload: { order: undefined, field: undefined } });
-
-    onFetchData(
-      undefined,
-      undefined,
-      recordErrorPositionId !== -1
-        ? Math.floor(recordErrorPositionId / records.recordsPerPage) * records.recordsPerPage
-        : 0,
-      records.recordsPerPage,
-      levelErrorTypesWithCorrects
-    );
-  }, [recordErrorPositionId]);
 };

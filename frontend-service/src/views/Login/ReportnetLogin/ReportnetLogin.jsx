@@ -18,14 +18,15 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 
 const ReportnetLogin = ({ history }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
-  const notificationContext = useContext(NotificationContext);
-  const [loginError, setLoginError] = useState();
-  const [userName, setUserName] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [errors, setErrors] = useState({ userName: '', password: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginError, setLoginError] = useState();
+  const [password, setPassword] = useState('');
+  const [userName, setUserName] = useState('');
 
   const checkIsEmptyUserName = () =>
     userName.length === 0
@@ -69,8 +70,8 @@ const ReportnetLogin = ({ history }) => {
         if (!isUndefined(errorResponse) && errorResponse.status === 500) {
           setLoginError(resources.messages['loginFormError']);
         }
+        setIsSubmitting(false);
       }
-      setIsSubmitting(false);
     }
   };
 

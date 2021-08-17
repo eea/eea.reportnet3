@@ -2,59 +2,47 @@ import { DataflowConfig } from './config/DataflowConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const dataflowRepository = {
-  all: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDataflows) }),
+export const DataflowRepository = {
+  getAll: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getAll) }),
 
-  allSchemas: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.allSchemas, { dataflowId }) }),
+  getSchemas: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getSchemas, { dataflowId }) }),
 
-  cloneDatasetSchemas: async (sourceDataflowId, targetDataflowId) => {
-    return await HTTPRequester.post({
-      url: getUrl(DataflowConfig.cloneDatasetSchemas, { sourceDataflowId, targetDataflowId })
-    });
-  },
+  cloneSchemas: async (sourceDataflowId, targetDataflowId) =>
+    await HTTPRequester.post({ url: getUrl(DataflowConfig.cloneSchemas, { sourceDataflowId, targetDataflowId }) }),
 
-  create: async (name, description, obligationId, type) => {
-    return await HTTPRequester.post({
-      url: getUrl(DataflowConfig.createDataflow),
+  create: async (name, description, obligationId, type) =>
+    await HTTPRequester.post({
+      url: getUrl(DataflowConfig.createUpdate),
       data: { name, description, obligation: { obligationId }, releasable: true, type }
-    });
-  },
+    }),
 
-  dataflowDetails: async dataflowId => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.dataflowDetails, { dataflowId }) });
-  },
+  getDetails: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDetails, { dataflowId }) }),
 
-  datasetsFinalFeedback: async dataflowId => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.datasetsFinalFeedback, { dataflowId }) });
-  },
+  getDatasetsFinalFeedback: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsFinalFeedback, { dataflowId }) }),
 
-  datasetsReleasedStatus: async dataflowId => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.datasetsReleasedStatus, { dataflowId }) });
-  },
+  getDatasetsReleasedStatus: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsReleasedStatus, { dataflowId }) }),
 
-  datasetsValidationStatistics: async (dataflowId, datasetSchemaId) => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.globalStatistics, { dataflowId, datasetSchemaId }) });
-  },
+  getDatasetsValidationStatistics: async (dataflowId, datasetSchemaId) =>
+    await HTTPRequester.get({
+      url: getUrl(DataflowConfig.getDatasetsValidationStatistics, { dataflowId, datasetSchemaId })
+    }),
 
-  deleteById: async dataflowId => {
-    return await HTTPRequester.delete({ url: getUrl(DataflowConfig.deleteDataflow, { dataflowId }) });
-  },
+  delete: async dataflowId => await HTTPRequester.delete({ url: getUrl(DataflowConfig.delete, { dataflowId }) }),
 
-  downloadById: async dataflowId => {
-    return await HTTPRequester.download({ url: getUrl(DataflowConfig.exportSchema, { dataflowId }) });
-  },
+  exportSchemas: async dataflowId =>
+    await HTTPRequester.download({ url: getUrl(DataflowConfig.exportSchemas, { dataflowId }) }),
 
-  generateApiKey: async (dataflowId, dataProviderId, isCustodian) => {
+  createApiKey: async (dataflowId, dataProviderId, isCustodian) => {
     const url = isCustodian
-      ? getUrl(DataflowConfig.generateApiKeyCustodian, { dataflowId })
-      : getUrl(DataflowConfig.generateApiKey, { dataflowId, dataProviderId });
+      ? getUrl(DataflowConfig.createApiKeyCustodian, { dataflowId })
+      : getUrl(DataflowConfig.createApiKey, { dataflowId, dataProviderId });
 
     return await HTTPRequester.post({ url });
   },
 
-  getAllDataflowsUserList: async () => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.getAllDataflowsUserList) });
-  },
+  getAllDataflowsUserList: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getAllDataflowsUserList) }),
 
   getApiKey: async (dataflowId, dataProviderId, isCustodian) => {
     const url = isCustodian
@@ -64,16 +52,14 @@ export const dataflowRepository = {
     return await HTTPRequester.get({ url });
   },
 
-  getRepresentativesUsersList: async dataflowId => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.getRepresentativesUsersList, { dataflowId }) });
-  },
+  getRepresentativesUsersList: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getRepresentativesUsersList, { dataflowId }) }),
 
-  getPublicDataflowData: async dataflowId => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId }) });
-  },
+  getPublicDataflowData: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId }) }),
 
-  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
-    return await HTTPRequester.get({
+  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) =>
+    await HTTPRequester.get({
       url: getUrl(DataflowConfig.getPublicDataflowsByCountryCode, {
         country: countryCode,
         pageNum,
@@ -81,32 +67,26 @@ export const dataflowRepository = {
         sortField,
         asc: sortOrder
       })
-    });
-  },
+    }),
 
-  getUserList: async (dataflowId, representativeId) => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.getUserList, { dataflowId, representativeId }) });
-  },
+  getUserList: async (dataflowId, representativeId) =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getUserList, { dataflowId, representativeId }) }),
 
-  newEmptyDatasetSchema: async (dataflowId, datasetSchemaName) => {
-    return await HTTPRequester.post({
-      url: getUrl(DataflowConfig.newEmptyDatasetSchema, { dataflowId, datasetSchemaName })
-    });
-  },
+  createEmptyDatasetSchema: async (dataflowId, datasetSchemaName) =>
+    await HTTPRequester.post({
+      url: getUrl(DataflowConfig.createEmptyDatasetSchema, { dataflowId, datasetSchemaName })
+    }),
 
-  publicData: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.publicData) }),
+  getPublicData: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicData) }),
 
-  reporting: async dataflowId => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.loadDatasetsByDataflowId, { dataflowId }) });
-  },
+  get: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) }),
 
-  schemasValidation: async dataflowId => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.dataSchemasValidation, { dataflowId }) });
-  },
+  getSchemasValidation: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getSchemasValidation, { dataflowId }) }),
 
-  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) => {
-    return await HTTPRequester.update({
-      url: getUrl(DataflowConfig.createDataflow),
+  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
+    await HTTPRequester.update({
+      url: getUrl(DataflowConfig.createUpdate),
       data: {
         id: dataflowId,
         name,
@@ -115,6 +95,5 @@ export const dataflowRepository = {
         releasable: isReleasable,
         showPublicInfo
       }
-    });
-  }
+    })
 };

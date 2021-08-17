@@ -84,10 +84,8 @@ const UserImage = () => {
     try {
       const inmUserProperties = { ...userContext.userProps };
       inmUserProperties.userImage = splittedBase64Image;
-      const response = await UserService.updateAttributes(inmUserProperties);
-      if (response.status >= 200 && response.status <= 299) {
-        userContext.onUserFileUpload(splittedBase64Image);
-      }
+      await UserService.updateConfiguration(inmUserProperties);
+      userContext.onUserFileUpload(splittedBase64Image);
     } catch (error) {
       console.error('UserImage - updateImage.', error);
       notificationContext.add({
@@ -137,7 +135,7 @@ const UserImage = () => {
       {isAvatarDialogVisible && (
         <Dialog
           header={resources.messages['selectImage']}
-          onHide={e => setIsAvatarDialogVisible(false)}
+          onHide={() => setIsAvatarDialogVisible(false)}
           style={{ width: '80%' }}
           visible={isAvatarDialogVisible}>
           <div className={styles.gridContainer}>{listOfImages()}</div>

@@ -59,7 +59,7 @@ const ApiKeyDialog = ({
   const onGenerateApiKey = async () => {
     setIsKeyLoading(true);
     try {
-      const { data } = await DataflowService.generateApiKey(dataflowId, dataProviderId, isCustodian);
+      const { data } = await DataflowService.createApiKey(dataflowId, dataProviderId, isCustodian);
       setApiKey(data);
     } catch (error) {
       console.error('ApiKeyDialog - onGenerateApiKey.', error);

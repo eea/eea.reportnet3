@@ -79,7 +79,7 @@ export const HistoricReleases = ({
       isLoading(true);
       let historicReleases = null;
       if (isNil(datasetId)) {
-        const { data } = await HistoricReleaseService.allRepresentativeHistoricReleases(dataflowId, dataProviderId);
+        const data = await HistoricReleaseService.getAllRepresentative(dataflowId, dataProviderId);
         historicReleases = uniqBy(
           data.map(historic => {
             return {
@@ -90,7 +90,7 @@ export const HistoricReleases = ({
           'releaseDate'
         );
       } else {
-        const { data } = await HistoricReleaseService.allHistoricReleases(datasetId);
+        const data = await HistoricReleaseService.getAll(datasetId);
         historicReleases = data;
       }
 
@@ -180,7 +180,11 @@ export const HistoricReleases = ({
             body={template}
             columnResizeMode="expand"
             field={field}
-            header={resources.messages[field]}
+            header={
+              isBusinessDataflow && TextUtils.areEquals(field, 'countryCode')
+                ? resources.messages['companyCode']
+                : resources.messages[field]
+            }
             key={field}
             sortable={true}
           />
@@ -190,17 +194,19 @@ export const HistoricReleases = ({
   };
 
   const filterOptionsDataCollection = [
-    { type: 'multiselect', properties: [{ name: 'countryCode' }] },
+    { type: 'multiselect', properties: [{ name: isBusinessDataflow ? 'company' : 'countryCode' }] },
     {
       type: 'checkbox',
       properties: [
         { name: 'isDataCollectionReleased', label: resources.messages['onlyReleasedDataCollectionCheckboxLabel'] },
-        { name: 'isEUReleased', label: resources.messages['onlyReleasedEuDatasetCheckboxLabel'] }
+        { name: 'isEUReleased', label: resources.messages['onlyReleasedEUDatasetCheckboxLabel'] }
       ]
     }
   ];
 
-  const filterOptionsEUDataset = [{ type: 'multiselect', properties: [{ name: 'countryCode' }] }];
+  const filterOptionsEUDataset = [
+    { type: 'multiselect', properties: [{ name: isBusinessDataflow ? 'company' : 'countryCode' }] }
+  ];
 
   const renderReportingDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])

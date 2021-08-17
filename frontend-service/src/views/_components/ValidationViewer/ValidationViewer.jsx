@@ -2,8 +2,6 @@
 import { Fragment, memo, useContext, useEffect, useReducer, useState } from 'react';
 import ReactDOMServer from 'react-dom/server';
 
-import PropTypes from 'prop-types';
-
 import concat from 'lodash/concat';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -32,7 +30,6 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const ValidationViewer = memo(
   ({
-    buttonsList = undefined,
     datasetId,
     datasetSchemaId,
     isWebformView,
@@ -57,7 +54,6 @@ const ValidationViewer = memo(
       levelError: []
     });
     const [filtered, setFiltered] = useState(false);
-    const [filteredData, setFilteredData] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
@@ -304,7 +300,7 @@ const ValidationViewer = memo(
 
       let pageNums = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
 
-      const { data } = await DatasetService.groupedErrorsById(
+      const data = await DatasetService.getShowValidationErrors(
         datasetId,
         pageNums,
         numberRows,
@@ -338,10 +334,6 @@ const ValidationViewer = memo(
       onLoadTablesTypes();
       onLoadFieldsTypes();
       onLoadEntitiesTypes();
-    };
-
-    const onLoadFilteredData = fetchedData => {
-      setFilteredData(fetchedData);
     };
 
     const onLoadLevelErrorsTypes = () => {
@@ -552,21 +544,16 @@ const ValidationViewer = memo(
 
     return (
       <div className={styles.validationWrapper}>
-        {!isUndefined(buttonsList) ? (
-          buttonsList
-        ) : (
-          <Toolbar className={styles.validationToolbar}>
-            <Filters
-              data={fetchedData}
-              filterByList={filterBy}
-              getFilteredData={onLoadFilteredData}
-              options={filterOptions}
-              sendData={onLoadFilteredValidations}
-              validations
-              validationsAllTypesFilters={validationsAllTypesFilters}
-            />
-          </Toolbar>
-        )}
+        <Toolbar className={styles.validationToolbar}>
+          <Filters
+            data={fetchedData}
+            filterByList={filterBy}
+            options={filterOptions}
+            sendData={onLoadFilteredValidations}
+            validations
+            validationsAllTypesFilters={validationsAllTypesFilters}
+          />
+        </Toolbar>
         {!isEmpty(fetchedData) ? (
           <DataTable
             autoLayout={true}
@@ -600,9 +587,5 @@ const ValidationViewer = memo(
     );
   }
 );
-
-ValidationViewer.propTypes = {
-  buttonsList: PropTypes.array
-};
 
 export { ValidationViewer };

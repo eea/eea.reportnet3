@@ -35,7 +35,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
 
   const onCreateSnapshot = async () => {
     try {
-      await SnapshotService.createByIdReporter(datasetId, snapshotState.description);
+      await SnapshotService.createReporter(datasetId, snapshotState.description);
       snapshotDispatch({ type: 'ON_SNAPSHOT_RESET' });
       onLoadSnapshotList();
     } catch (error) {
@@ -52,7 +52,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
 
   const onDeleteSnapshot = async () => {
     try {
-      await SnapshotService.deleteByIdReporter(datasetId, snapshotState.snapShotId);
+      await SnapshotService.deleteReporter(datasetId, snapshotState.snapShotId);
       onLoadSnapshotList();
     } catch (error) {
       if (error.response.status === 423) {
@@ -72,10 +72,8 @@ const useReporterDataset = (datasetId, dataflowId) => {
 
       //SetTimeout for avoiding the overlapping between the slidebar transition and the api call
       setTimeout(async () => {
-        const snapshotsData = await SnapshotService.allReporter(datasetId);
-
-        setSnapshotListData(snapshotsData.data);
-
+        const snapshotsData = await SnapshotService.getAllReporter(datasetId);
+        setSnapshotListData(snapshotsData);
         setIsLoadingSnapshotListData(false);
       }, 500);
     } catch (error) {
@@ -88,7 +86,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
   const onRestoreSnapshot = async () => {
     try {
       notificationContext.add({ type: 'RESTORE_DATASET_SNAPSHOT_INIT_INFO' });
-      await SnapshotService.restoreByIdReporter(dataflowId, datasetId, snapshotState.snapShotId);
+      await SnapshotService.restoreReporter(dataflowId, datasetId, snapshotState.snapShotId);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });

@@ -1,31 +1,21 @@
+import { DataflowConfig } from './config/DataflowConfig';
 import { ReferenceDataflowConfig } from './config/ReferenceDataflowConfig';
+
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const referenceDataflowRepository = {
-  all: async () => await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.all) }),
+export const ReferenceDataflowRepository = {
+  getAll: async () => await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.getAll) }),
 
-  create: async (name, description, type) => {
-    return await HTTPRequester.post({
-      url: getUrl(ReferenceDataflowConfig.createDataflow),
-      data: { name, description, type }
-    });
-  },
+  create: async (name, description, type) =>
+    await HTTPRequester.post({ url: getUrl(DataflowConfig.createUpdate), data: { name, description, type } }),
 
-  edit: async (dataflowId, description, name, type) =>
+  update: async (dataflowId, description, name, type) =>
     await HTTPRequester.update({
-      url: getUrl(ReferenceDataflowConfig.createDataflow),
+      url: getUrl(DataflowConfig.createUpdate),
       data: { description, id: dataflowId, name, type }
     }),
 
-  deleteReferenceDataflow: async referenceDataflowId =>
-    await HTTPRequester.delete({
-      url: getUrl(ReferenceDataflowConfig.deleteReferenceDataflow, { referenceDataflowId })
-    }),
-
   getReferencingDataflows: async referenceDataflowId =>
-    await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.getReferencingDataflows, { referenceDataflowId }) }),
-
-  referenceDataflow: async referenceDataflowId =>
-    await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.referenceDataflow, { referenceDataflowId }) })
+    await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.getReferencingDataflows, { referenceDataflowId }) })
 };

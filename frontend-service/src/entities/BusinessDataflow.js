@@ -19,8 +19,9 @@ export class BusinessDataflow {
     requestId,
     status,
     testDatasets,
+    type,
     userRole,
-    weblinks
+    webLinks
   } = {}) {
     this.creationDate = creationDate;
     this.dataCollections = dataCollections;
@@ -41,7 +42,8 @@ export class BusinessDataflow {
     this.requestId = requestId;
     this.status = status;
     this.testDatasets = testDatasets;
+    this.type = type;
     this.userRole = userRole;
-    this.weblinks = weblinks;
+    this.webLinks = webLinks;
   }
 }

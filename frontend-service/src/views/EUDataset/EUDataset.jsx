@@ -31,6 +31,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const EUDataset = withRouter(({ history, match }) => {
   const {
@@ -49,16 +50,15 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetSchemaAllTables: [],
     datasetSchemaId: null,
     datasetSchemaName: '',
-    dataViewerOptions: { activeIndex: null, recordPositionId: -1, selectedRecordErrorId: -1 },
+    dataViewerOptions: { activeIndex: null },
     exportExtensionsList: [],
     isBusinessDataflow: false,
     isDataUpdated: false,
     isLoading: true,
     isRefreshHighlighted: false,
     isGroupedValidationSelected: false,
-    isValidationSelected: false,
     levelErrorTypes: [],
-    metaData: {},
+    metadata: undefined,
     tableSchema: undefined,
     tableSchemaColumns: undefined,
     tableSchemaId: undefined,
@@ -72,9 +72,8 @@ export const EUDataset = withRouter(({ history, match }) => {
     isBusinessDataflow,
     isLoading,
     isGroupedValidationSelected,
-    isValidationSelected,
     levelErrorTypes,
-    metaData,
+    metadata,
     tableSchema,
     tableSchemaColumns
   } = euDatasetState;
@@ -83,8 +82,9 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   useEffect(() => {
     leftSideBarContext.removeModels();
-    callSetMetaData();
+    setMetadata();
     getDataflowDetails();
+    getExportExtensionsList();
   }, []);
 
   useEffect(() => {
@@ -92,28 +92,37 @@ export const EUDataset = withRouter(({ history, match }) => {
   }, [euDatasetState.isDataUpdated]);
 
   useEffect(() => {
-    getExportExtensionsList();
-  }, []);
-
-  useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
       setIsLoadingFile(false);
     }
   }, [notificationContext.hidden]);
 
-  useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, history, isBusinessDataflow, isLoading, metaData });
+  useBreadCrumbs({
+    currentPage: CurrentPage.EU_DATASET,
+    dataflowId,
+    history,
+    isBusinessDataflow,
+    isLoading,
+    metaData: metadata
+  });
 
-  const callSetMetaData = async () => {
-    euDatasetDispatch({
-      type: 'GET_METADATA',
-      payload: { metadata: await getMetadata({ dataflowId, datasetId }), isBusinessDataflow: false }
-    }); // TODO WITH REAL DATA
+  const setMetadata = async () => {
+    try {
+      const metadata = await MetadataUtils.getMetadata({ datasetId, dataflowId });
+      euDatasetDispatch({ type: 'GET_METADATA', payload: { metadata } });
+    } catch (error) {
+      console.error('DataCollection - setMetadata.', error);
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
+    }
   };
 
   const getDataflowDetails = async () => {
     try {
-      const { data } = await DataflowService.dataflowDetails(match.params.dataflowId);
-      euDatasetDispatch({ type: 'GET_DATAFLOW_DETAILS', payload: { name: data.name, isBusinessDataflow: false } }); // TODO WITH REAL DATA
+      const data = await DataflowService.getDetails(match.params.dataflowId);
+      euDatasetDispatch({
+        type: 'GET_DATAFLOW_DETAILS',
+        payload: { name: data.name, isBusinessDataflow: TextUtils.areEquals(data.type, config.dataflowType.BUSINESS) }
+      });
     } catch (error) {
       console.error('EUDataset - getDataflowName.', error);
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
@@ -122,17 +131,17 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const getDataSchema = async () => {
     try {
-      const datasetSchema = await DatasetService.schemaById(datasetId);
+      const datasetSchema = await DatasetService.getSchema(datasetId);
       euDatasetDispatch({
         type: 'GET_DATA_SCHEMA',
         payload: {
-          allTables: datasetSchema.data.tables,
-          errorTypes: datasetSchema.data.levelErrorTypes,
-          schemaId: datasetSchema.data.datasetSchemaId,
-          schemaName: datasetSchema.data.datasetSchemaName
+          allTables: datasetSchema.tables,
+          errorTypes: datasetSchema.levelErrorTypes,
+          schemaId: datasetSchema.datasetSchemaId,
+          schemaName: datasetSchema.datasetSchemaName
         }
       });
-      return datasetSchema.data;
+      return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
     }
@@ -158,19 +167,9 @@ export const EUDataset = withRouter(({ history, match }) => {
     });
   };
 
-  const getMetadata = async ids => {
-    try {
-      return await MetadataUtils.getMetadata(ids);
-    } catch (error) {
-      console.error('EUDataset - getMetadata.', error);
-      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
-    }
-  };
-
   const getStatisticsById = async (datasetId, tableSchemaNames) => {
     try {
-      const statistics = await DatasetService.errorStatisticsById(datasetId, tableSchemaNames);
-      return statistics.data;
+      return await DatasetService.getStatistics(datasetId, tableSchemaNames);
     } catch (error) {
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
     }
@@ -183,13 +182,13 @@ export const EUDataset = withRouter(({ history, match }) => {
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
-      await DatasetService.exportDataById(datasetId, fileType);
+      await DatasetService.exportDatasetData(datasetId, fileType);
     } catch (error) {
       console.error('EUDataset - onExportDataInternalExtension.', error);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
-      } = await getMetadata({ dataflowId, datasetId });
+      } = euDatasetState.metaData;
 
       notificationContext.add({
         type: 'EXPORT_DATA_BY_ID_ERROR',
@@ -270,8 +269,6 @@ export const EUDataset = withRouter(({ history, match }) => {
   const onTabChange = table =>
     euDatasetDispatch({ type: 'ON_TAB_CHANGE', payload: { tableSchemaId: table.tableSchemaId } });
 
-  const onSetIsValidationSelected = value => euDatasetDispatch({ type: 'IS_VALIDATION_SELECTED', payload: { value } });
-
   const renderLayout = children => (
     <MainLayout>
       <div className="rep-container">{children}</div>
@@ -288,19 +285,16 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const renderTabsSchema = () => (
     <TabsSchema
+      datasetSchemaId={euDatasetState.metaData.dataset.datasetSchemaId}
       hasCountryCode={true}
       hasWritePermissions={false}
       isBusinessDataflow={euDatasetState.isBusinessDataflow}
       isExportable={false}
       isFilterable={false}
       isGroupedValidationSelected={isGroupedValidationSelected}
-      isValidationSelected={isValidationSelected}
       levelErrorTypes={levelErrorTypes}
       onLoadTableData={onLoadTableData}
       onTabChange={table => onTabChange(table)}
-      recordPositionId={dataViewerOptions.recordPositionId}
-      selectedRecordErrorId={dataViewerOptions.selectedRecordErrorId}
-      setIsValidationSelected={onSetIsValidationSelected}
       showWriteButtons={false}
       tableSchemaColumns={tableSchemaColumns}
       tableSchemaId={dataViewerOptions.tableSchemaId}

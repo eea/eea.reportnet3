@@ -1,5 +1,4 @@
 export { CurrentPage } from './CurrentPage';
-export { DataflowUtils } from './DataflowUtils';
 export { ErrorUtils } from './ErrorUtils';
 export { ExtensionUtils } from './ExtensionUtils';
 export { MapUtils } from './MapUtils';

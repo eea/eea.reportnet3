@@ -47,6 +47,7 @@ export const ShareRights = ({
   placeholder,
   representativeId,
   roleOptions,
+  setIsAdminAssignedBusinessDataflow,
   setIsUserRightManagementDialogVisible,
   updateErrorNotificationKey,
   userType
@@ -134,7 +135,13 @@ export const ShareRights = ({
     shareRightsDispatch({ type: 'ON_CLOSE_MANAGEMENT_DIALOG' });
   };
 
-  const onDataChange = () => shareRightsDispatch({ type: 'ON_DATA_CHANGE' });
+  const onDataChange = () => {
+    shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: true } });
+    setIsAdminAssignedBusinessDataflow(
+      TextUtils.areEquals(userRight.account, userContext.email) ||
+        TextUtils.areEquals(shareRightsState.userRightToDelete.account, userContext.email)
+    );
+  };
 
   const onEditUserRight = userRight => {
     shareRightsDispatch({ type: 'ON_EDIT_USER_RIGHT', payload: { isEditingModal: true, userRight } });
@@ -197,7 +204,7 @@ export const ShareRights = ({
           return await UserRightService.deleteReporter(shareRightsState.userRightToDelete, dataflowId, dataProvider);
 
         case methodTypes.GET_ALL:
-          return await UserRightService.allReporters(dataflowId, dataProvider);
+          return await UserRightService.getReporters(dataflowId, dataProvider);
 
         case methodTypes.UPDATE:
           return await UserRightService.updateReporter(userRight, dataflowId, dataProvider);
@@ -213,7 +220,7 @@ export const ShareRights = ({
           return await UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
 
         case methodTypes.GET_ALL:
-          return await UserRightService.allRequesters(dataflowId);
+          return await UserRightService.getRequesters(dataflowId);
 
         case methodTypes.UPDATE:
           return await UserRightService.updateRequester(userRight, dataflowId);
@@ -264,10 +271,8 @@ export const ShareRights = ({
     setActions({ isDeleting: true, isEditing: false });
 
     try {
-      const response = await callEndPoint(methodTypes.DELETE);
-      if (response.status >= 200 && response.status <= 299) {
-        onDataChange();
-      }
+      await callEndPoint(methodTypes.DELETE);
+      onDataChange();
     } catch (error) {
       console.error('ShareRights - onDeleteUserRight.', error);
       notificationContext.add({ type: deleteErrorNotificationKey });
@@ -290,10 +295,8 @@ export const ShareRights = ({
       setLoadingStatus({ isActionButtonsLoading: true, isInitialLoading: false });
 
       try {
-        const response = await callEndPoint(methodTypes.UPDATE, userRight);
-        if (response.status >= 200 && response.status <= 299) {
-          onDataChange();
-        }
+        await callEndPoint(methodTypes.UPDATE, userRight);
+        onDataChange();
         onCloseManagementDialog();
       } catch (error) {
         if (error?.response?.status === 404) {

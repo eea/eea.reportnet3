@@ -33,6 +33,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataflowHelp = withRouter(({ history, match }) => {
   const {
@@ -121,7 +122,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const getDataflowName = async () => {
     try {
-      const { data } = await DataflowService.dataflowDetails(dataflowId);
+      const data = await DataflowService.getDetails(dataflowId);
       setDataflowName(data.name);
     } catch (error) {
       console.error('DataflowHelp - getDataflowName.', error);
@@ -131,14 +132,14 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const onLoadDatasetSchema = async datasetId => {
     try {
-      const datasetSchema = await DatasetService.schemaById(datasetId);
+      const datasetSchema = await DatasetService.getSchema(datasetId);
 
-      if (!isEmpty(datasetSchema.data)) {
+      if (!isEmpty(datasetSchema)) {
         if (isCustodian) {
-          const datasetMetaData = await DatasetService.getMetaData(datasetId);
-          datasetSchema.data.datasetSchemaName = datasetMetaData.data.datasetSchemaName;
+          const datasetMetadata = await DatasetService.getMetadata(datasetId);
+          datasetSchema.datasetSchemaName = datasetMetadata.datasetSchemaName;
         }
-        return datasetSchema.data;
+        return datasetSchema;
       }
     } catch (error) {
       console.error('DataflowHelp - onLoadDatasetSchema.', error);
@@ -148,8 +149,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const onLoadDatasetsSchemas = async () => {
     try {
-      const { data } = await DataflowService.reporting(dataflowId);
-      setIsBusinessDataflow(false); // TODO WITH REAL DATA
+      const data = await DataflowService.get(dataflowId);
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
       setIsLoading(false);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {
@@ -189,8 +190,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const onLoadDocuments = async () => {
     setIsLoadingDocuments(true);
     try {
-      const { data } = await DocumentService.all(`${dataflowId}`);
-      const loadedDocuments = data.documents.sort(sortByProperty('description'));
+      const documents = await DocumentService.getAll(`${dataflowId}`);
+      const loadedDocuments = documents.sort(sortByProperty('description'));
       setDocuments(loadedDocuments);
     } catch (error) {
       console.error('DataflowHelp - onLoadDocuments.', error);
@@ -206,8 +207,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const onLoadWebLinks = async () => {
     setIsLoadingWeblinks(true);
     try {
-      const { data } = await WebLinkService.all(dataflowId);
-      const loadedWebLinks = data.weblinks.sort(sortByProperty('description'));
+      const webLinks = await WebLinkService.getAll(dataflowId);
+      const loadedWebLinks = webLinks.sort(sortByProperty('description'));
       setWebLinks(loadedWebLinks);
     } catch (error) {
       console.error('DataflowHelp - onLoadWebLinks.', error);
@@ -245,7 +246,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
               sortOrderDocuments={sortOrderDocuments}
             />
           </TabPanel>
-          <TabPanel header={resources.messages['webLinks']} headerClassName="dataflowHelp-weblinks-help-step">
+          <TabPanel header={resources.messages['webLinks']} headerClassName="dataflowHelp-webLinks-help-step">
             <WebLinks
               dataflowId={dataflowId}
               isLoading={isLoadingWebLinks}

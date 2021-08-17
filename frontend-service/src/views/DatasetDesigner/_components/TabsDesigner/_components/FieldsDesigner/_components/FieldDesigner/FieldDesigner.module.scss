@@ -31,7 +31,7 @@
 .draggableFieldDiv {
   display: flex;
   justify-items: center;
-  flex-flow: wrap-reverse;
+  flex-flow: wrap;
   align-items: baseline;
   margin: 0px 0 5px 0;
   width: 100%;
@@ -59,8 +59,10 @@
   margin-left: 0.4rem;
   width: 20%;
   height: 33px;
+  min-width: 188px;
   &.withCodeListOrLink {
     width: 20%;
+    min-width: 188px;
   }
 }
 

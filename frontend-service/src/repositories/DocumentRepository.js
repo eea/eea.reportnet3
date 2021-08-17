@@ -3,23 +3,23 @@ import { DocumentConfig } from './config/DocumentConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
-export const documentRepository = {
-  all: async dataflowId => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.loadDatasetsByDataflowId, { dataflowId }) });
+export const DocumentRepository = {
+  getAll: async dataflowId => {
+    return await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) });
   },
 
-  deleteDocument: async documentId => {
-    return await HTTPRequester.delete({ url: getUrl(DocumentConfig.deleteDocument, { documentId }) });
+  delete: async documentId => {
+    return await HTTPRequester.delete({ url: getUrl(DocumentConfig.delete, { documentId }) });
   },
 
-  downloadById: async documentId => {
+  download: async documentId => {
     return await HTTPRequester.download({
-      url: getUrl(DocumentConfig.downloadDocumentById, { documentId }),
+      url: getUrl(DocumentConfig.download, { documentId }),
       headers: { 'Content-Type': 'application/octet-stream' }
     });
   },
 
-  editDocument: async (dataflowId, description, language, file, isPublic, documentId) => {
+  update: async (dataflowId, description, language, file, isPublic, documentId) => {
     const formData = new FormData();
     if (file?.name) {
       formData.append('file', file, file.name);
@@ -27,7 +27,7 @@ export const documentRepository = {
       formData.append('file', null);
     }
     return await HTTPRequester.putWithFiles({
-      url: getUrl(DocumentConfig.editDocument, {
+      url: getUrl(DocumentConfig.update, {
         dataflowId,
         description: encodeURIComponent(description),
         documentId,
@@ -44,7 +44,7 @@ export const documentRepository = {
     formData.append('file', file, file.name);
 
     return await HTTPRequester.postWithFiles({
-      url: getUrl(DocumentConfig.uploadDocument, {
+      url: getUrl(DocumentConfig.upload, {
         dataflowId,
         description: encodeURIComponent(description),
         isPublic,

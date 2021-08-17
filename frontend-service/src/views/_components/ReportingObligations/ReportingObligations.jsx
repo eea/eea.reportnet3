@@ -136,7 +136,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   const onLoadReportingObligations = async filterData => {
     isLoading(true);
     try {
-      const response = await ObligationService.opened(filterData);
+      const response = await ObligationService.getOpen(filterData);
       reportingObligationDispatch({
         type: 'INITIAL_LOAD',
         payload: {

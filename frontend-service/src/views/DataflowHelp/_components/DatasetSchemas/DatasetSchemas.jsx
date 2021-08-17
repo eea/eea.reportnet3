@@ -21,7 +21,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 
 import { IntegrationService } from 'services/IntegrationService';
-import { UniqueConstraintsService } from 'services/UniqueConstraintsService';
+import { UniqueConstraintService } from 'services/UniqueConstraintService';
 import { ValidationService } from 'services/ValidationService';
 
 const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
@@ -144,7 +144,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   const getExtensionsOperations = async datasetsSchemas => {
     try {
       const datasetExtensionsOperations = datasetsSchemas.map(async datasetSchema => {
-        return await IntegrationService.allExtensionsOperations(dataflowId, datasetSchema.datasetSchemaId);
+        return await IntegrationService.getAllExtensionsOperations(dataflowId, datasetSchema.datasetSchemaId);
       });
 
       Promise.all(datasetExtensionsOperations).then(allExtensionsOperations => {
@@ -193,8 +193,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   const getUniqueList = async datasetsSchemas => {
     try {
       const datasetUniques = datasetsSchemas.map(async datasetSchema => {
-        const response = await UniqueConstraintsService.all(dataflowId, datasetSchema.datasetSchemaId);
-        return response.data;
+        return await UniqueConstraintService.getAll(dataflowId, datasetSchema.datasetSchemaId);
       });
 
       Promise.all(datasetUniques).then(allUniques => {

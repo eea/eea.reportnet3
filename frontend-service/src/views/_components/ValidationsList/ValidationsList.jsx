@@ -96,15 +96,12 @@ const ValidationsList = withRouter(
         payload: { isDeletingRule: true }
       });
       try {
-        const response = await ValidationService.deleteById(dataset.datasetId, tabsValidationsState.validationId);
-        if (response.status >= 200 && response.status <= 299) {
-          tabsValidationsDispatch({
-            type: 'SET_DELETED_RULE_ID',
-            payload: { deletedRuleId: tabsValidationsState.validationId }
-          });
-
-          onUpdateData();
-        }
+        await ValidationService.delete(dataset.datasetId, tabsValidationsState.validationId);
+        tabsValidationsDispatch({
+          type: 'SET_DELETED_RULE_ID',
+          payload: { deletedRuleId: tabsValidationsState.validationId }
+        });
+        onUpdateData();
       } catch (error) {
         console.error('ValidationsList - onDeleteValidation.', error);
         notificationContext.add({ type: 'DELETE_RULE_ERROR' });
