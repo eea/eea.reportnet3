@@ -102,7 +102,11 @@ export class Paginator extends Component {
         first: first,
         rows: rows,
         page: p,
-        pageCount: pc
+        pageCount: pc,
+        pageInputTooltip:
+          p >= 0 && p < pc
+            ? 'Press Enter key to go to this page'
+            : `Value must be between 1 and ${Math.ceil(this.props.totalRecords / rows)}`
       };
 
       if (this.props.onPageChange) {

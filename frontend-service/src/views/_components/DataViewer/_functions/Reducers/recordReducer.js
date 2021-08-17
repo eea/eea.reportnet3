@@ -58,7 +58,7 @@ export const recordReducer = (state, { type, payload }) => {
       return { ...state, isRecordDeleted: payload };
 
     case 'ON_CHANGE_PAGE':
-      return { ...state, recordsPerPage: payload.rows, firstPageRecord: payload.first, currentPage: payload.page + 1 };
+      return { ...state, recordsPerPage: payload.rows, firstPageRecord: payload.first };
 
     case 'RESET_CONDITIONAL_FIELDS':
       const inmRecord = payload.isNewRecord ? { ...state.newRecord } : { ...state.editedRecord };
@@ -94,10 +94,6 @@ export const recordReducer = (state, { type, payload }) => {
         }
       };
 
-    case 'SET_CURRENT_PAGE_RECORD':
-      return { ...state, currentPage: payload };
-    case 'SET_CURRENT_PAGE_INPUT_TOOLTIP':
-      return { ...state, pageInputTooltip: payload };
     case 'SET_EDITED_RECORD':
       if (!isUndefined(payload.property)) {
         let updatedRecord = RecordUtils.changeRecordValue({ ...state.editedRecord }, payload.property, payload.value);

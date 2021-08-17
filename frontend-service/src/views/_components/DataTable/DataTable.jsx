@@ -438,16 +438,21 @@ export class DataTable extends Component {
   }
 
   onChangeCurrentPage(event) {
-    if (event.key === 'Enter' && this.state.currentPage !== '') {
+    if (event.key === 'Enter' && this.state.currentPage !== '' && this.state.currentPage !== this.props.first) {
       var pc = Math.ceil(this.props.totalRecords / this.getRows()) || 1;
       var p = Math.floor(event.target.value - 1);
 
       if (p >= 0 && p < pc) {
         var newPageState = {
+          currentPage: p + 1,
           first: (event.target.value - 1) * this.getRows(),
           rows: this.getRows(),
           page: p,
-          pageCount: pc
+          pageCount: pc,
+          pageInputTooltip:
+            p >= 0 && p < pc
+              ? 'Press Enter key to go to this page'
+              : `Value must be between 1 and ${Math.ceil(this.props.totalRecords / this.getRows())}`
         };
         this.onPageChange(newPageState);
       }
@@ -466,6 +471,8 @@ export class DataTable extends Component {
   }
 
   onPageChange(event) {
+    this.setState({ currentPage: event.currentPage, pageInputTooltip: event.pageInputTooltip });
+
     if (this.props.onPage) this.props.onPage(event);
     else this.setState({ currentPage: event.currentPage, first: event.first, rows: event.rows });
 
@@ -519,7 +526,6 @@ export class DataTable extends Component {
                           height: '1.75rem',
                           width: '3rem'
                         }}
-                        // tooltip={this.state.pageInputTooltip}
                         value={this.state.currentPage}
                       />
                       <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="right">
