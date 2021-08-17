@@ -102,6 +102,13 @@ export const userReducer = (state, { type, payload }) => {
           settingsLoaded: payload
         }
       };
+
+    case 'SET_CURRENT_DATAFLOW_TYPE':
+      return {
+        ...state,
+        currentDataflowType: payload.currentDataflowType
+      };
+
     case 'USER_AVATAR_IMAGE':
       return {
         ...state,
