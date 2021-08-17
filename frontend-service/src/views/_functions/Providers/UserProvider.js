@@ -3,12 +3,15 @@ import { useContext, useReducer } from 'react';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { config } from 'conf';
+
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { userReducer } from 'views/_functions/Reducers/userReducer';
 
 const userSettingsDefaultState = {
+  currentDataflowType: config.dataflowType.REPORTING,
   userProps: {
     amPm24h: true,
     basemapLayer: { label: 'Topographic', value: 'Topographic' },
@@ -53,6 +56,9 @@ export const UserProvider = ({ children }) => {
             }
           });
         },
+
+        setCurrentDataflowType: currentDataflowType =>
+          userDispatcher({ type: 'SET_CURRENT_DATAFLOW_TYPE', payload: { currentDataflowType } }),
 
         getUserRole: entity => {
           const userRole = userState.contextRoles.filter(role => role.includes(entity));
