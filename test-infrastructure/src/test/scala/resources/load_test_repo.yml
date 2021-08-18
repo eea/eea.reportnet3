@@ -91,7 +91,7 @@ gatling_config:
     - requestName: getDataGrid
       endpoint: /dataset/TableValueDataset/${datasetId}?fieldValue=&idTableSchema=${tableSchemaId}&pageNum=1&pageSize=100&levelError=CORRECT,INFO,WARNING,ERROR,BLOCKER
       usersNumber: 5
-      numberExecutions: 100
+      numberExecutions: 10
       useFeeder: true
       requireAuth: true
       method: get
@@ -104,7 +104,7 @@ gatling_config:
     - requestName: addRecordsCustodian_one
       endpoint: /dataset/${datasetId}/table/${tableSchemaId}/record
       usersNumber: 1
-      numberExecutions: 100000
+      numberExecutions: 100
       useFeeder: true
       requireAuth: true
       method: post
@@ -117,7 +117,7 @@ gatling_config:
     - requestName: addRecordsCustodian_two
       endpoint: /dataset/${datasetId}/table/${tableSchemaId}/record
       usersNumber: 1
-      numberExecutions: 100000
+      numberExecutions: 100
       useFeeder: true
       requireAuth: true
       method: post
@@ -130,7 +130,7 @@ gatling_config:
     - requestName: addRecordsCustodian_three
       endpoint: /dataset/${datasetId}/table/${tableSchemaId}/record
       usersNumber: 1
-      numberExecutions: 100000
+      numberExecutions: 100
       useFeeder: true
       requireAuth: true
       method: post
@@ -143,7 +143,7 @@ gatling_config:
     - requestName: addRecordsCustodian_four
       endpoint: /dataset/${datasetId}/table/${tableSchemaId}/record
       usersNumber: 1
-      numberExecutions: 100000
+      numberExecutions: 100
       useFeeder: true
       requireAuth: true
       method: post
@@ -156,7 +156,7 @@ gatling_config:
     - requestName: addRecordsCustodian_five
       endpoint: /dataset/${datasetId}/table/${tableSchemaId}/record
       usersNumber: 1
-      numberExecutions: 100000
+      numberExecutions: 100
       useFeeder: true
       requireAuth: true
       method: post
