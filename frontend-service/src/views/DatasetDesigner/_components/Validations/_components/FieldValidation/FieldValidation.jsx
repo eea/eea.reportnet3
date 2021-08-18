@@ -107,7 +107,7 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
             onExpressionTypeToggle={onExpressionTypeToggle}
             onExpressionsErrors={onExpressionsErrors}
             onGetFieldType={onGetFieldType}
-            onSetSQLsentence={onSetSQLsentence}
+            onSetSqlSentence={onSetSqlSentence}
             tabsChanges={tabsChanges}
           />
         </TabPanel>
@@ -455,7 +455,7 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     });
   };
 
-  const onSetSQLsentence = (key, value) => {
+  const onSetSqlSentence = (key, value) => {
     creationFormDispatch({
       type: 'SET_FORM_FIELD',
       payload: {

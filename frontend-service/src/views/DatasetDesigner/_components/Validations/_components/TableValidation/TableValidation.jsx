@@ -105,7 +105,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
             onRelationDelete={onRelationDelete}
             onRelationFieldUpdate={onRelationFieldUpdate}
             onRelationsErrors={onRelationsErrors}
-            onSetSQLsentence={onSetSQLsentence}
+            onSetSqlSentence={onSetSqlSentence}
             showRequiredFields={tabsChanges.expression}
             tabsChanges={tabsChanges}
           />
@@ -542,7 +542,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
     return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
   };
 
-  const onSetSQLsentence = (key, value) => {
+  const onSetSqlSentence = (key, value) => {
     creationFormDispatch({
       type: 'SET_FORM_FIELD',
       payload: {

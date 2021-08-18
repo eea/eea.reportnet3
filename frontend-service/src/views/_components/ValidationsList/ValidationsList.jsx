@@ -181,17 +181,21 @@ const ValidationsList = withRouter(
       </div>
     );
 
-    const correctTemplate = rowData => (
-      <div className={styles.checkedValueColumn}>
-        {!isNil(rowData.isCorrect) ? (
-          rowData.isCorrect ? (
-            <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />
-          ) : null
-        ) : (
-          <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />
-        )}
-      </div>
-    );
+    const correctTemplate = rowData => <div className={styles.checkedValueColumn}>{getCorrectTemplate(rowData)}</div>;
+
+    const getCorrectTemplate = rowData => {
+      console.log({ rowData });
+      rowData.sqlError = 'HOLA';
+      if (isNil(rowData.isCorrect)) {
+        return <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />;
+      } else {
+        if (rowData.isCorrect) {
+          return <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />;
+        } else if (!isNil(rowData.sqlError)) {
+          return rowData.sqlError;
+        }
+      }
+    };
 
     const enabledTemplate = rowData => (
       <div className={styles.checkedValueColumn}>
