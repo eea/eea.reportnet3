@@ -1,6 +1,10 @@
 package org.eea.collaboration.service;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import org.eea.collaboration.persistence.domain.MessageAttachment;
+import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.vo.dataflow.MessageVO;
@@ -21,6 +25,20 @@ public interface CollaborationService {
    */
   MessageVO createMessage(Long dataflowId, MessageVO messageVO)
       throws EEAIllegalArgumentException, EEAForbiddenException;
+
+  /**
+   * Creates the message attachment.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param fileAttachment the file attachment
+   * @return the message VO
+   * @throws EEAIllegalArgumentException the EEA illegal argument exception
+   * @throws EEAForbiddenException the EEA forbidden exception
+   */
+  MessageVO createMessageAttachment(Long dataflowId, Long providerId, InputStream is,
+      String fileName, String fileSize)
+      throws EEAIllegalArgumentException, EEAForbiddenException, IOException;
 
   /**
    * Update message read status.
@@ -45,4 +63,13 @@ public interface CollaborationService {
    */
   List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
       throws EEAForbiddenException;
+
+  /**
+   * Gets the message attachment.
+   *
+   * @param messageAttachmentId the message attachment id
+   * @return the message attachment
+   * @throws EEAException the EEA exception
+   */
+  MessageAttachment getMessageAttachment(Long messageAttachmentId) throws EEAException;
 }
