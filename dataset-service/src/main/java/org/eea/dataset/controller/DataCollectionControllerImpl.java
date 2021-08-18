@@ -126,6 +126,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       manualCheck = false;
       stopAndNotifySQLErrors = false;
     }
+    if (null != dataflow && TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
+      showPublicInfo = false;
+    }
 
     // Continue if the dataflow exists and is DESIGN
     if (dataflow == null || (date == null && !referenceDataflow) || dataflowId == null

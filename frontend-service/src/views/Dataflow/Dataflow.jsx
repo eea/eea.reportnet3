@@ -125,6 +125,12 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
+  useEffect(() => {
+    if (!isEmpty(dataflowState.data)) {
+      userContext.setCurrentDataflowType(dataflowState.data.type);
+    }
+  }, [dataflowState.data]);
+
   const {
     obligation,
     setCheckedObligation,
@@ -389,9 +395,6 @@ const Dataflow = withRouter(({ history, match }) => {
     });
     onLoadReportingDataflow();
   };
-
-  const onConfirmDeleteDataflow = event =>
-    dataflowDispatch({ type: 'ON_CONFIRM_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
 
   const resetObligations = () => {
     setCheckedObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
@@ -1120,7 +1123,6 @@ const Dataflow = withRouter(({ history, match }) => {
           isEditForm={true}
           manageDialogs={manageDialogs}
           obligation={obligation}
-          onConfirmDeleteDataflow={onConfirmDeleteDataflow}
           onEditDataflow={onEditDataflow}
           resetObligations={resetObligations}
           setCheckedObligation={setCheckedObligation}

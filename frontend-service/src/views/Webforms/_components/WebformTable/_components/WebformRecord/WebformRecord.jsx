@@ -1,9 +1,11 @@
+/* eslint-disable react/no-array-index-key */
 import { Fragment, useContext, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqBy from 'lodash/uniqBy';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './WebformRecord.module.scss';
 
@@ -120,7 +122,7 @@ export const WebformRecord = ({
     if (isNil(dependency)) return true;
     const filteredDependency = fields
       .filter(field => TextUtils.areEquals(field.name, dependency.field))
-      .map(filtered => (Array.isArray(filtered?.value) ? filtered?.value : filtered?.value?.split(', ')));
+      .map(filtered => (Array.isArray(filtered?.value) ? filtered?.value : filtered?.value?.split('; ')));
 
     return filteredDependency
       .flat()
@@ -181,7 +183,7 @@ export const WebformRecord = ({
   };
 
   const renderElements = (elements = [], fieldsBlock = false) => {
-    return elements.map(element => {
+    return elements.map((element, i) => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
       if (element.type === 'BLOCK') {
@@ -189,7 +191,7 @@ export const WebformRecord = ({
 
         if (isSubTable()) {
           return (
-            <div className={styles.fieldsBlock} key={element.recordId}>
+            <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
               {element.elementsRecords
                 .filter(record => elements[0].recordId === record.recordId)
                 .map(record => renderElements(record.elements, true))}
@@ -198,7 +200,7 @@ export const WebformRecord = ({
         }
 
         return (
-          <div className={styles.fieldsBlock} key={element.recordId}>
+          <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
             {element.elementsRecords.map(record => renderElements(record.elements))}
           </div>
         );
@@ -216,7 +218,7 @@ export const WebformRecord = ({
           checkLabelVisibility(element) &&
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div className={styles.field} key={element.recordId} style={fieldStyle}>
+            <div className={styles.field} key={element.fieldId} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
@@ -284,7 +286,7 @@ export const WebformRecord = ({
       } else if (element.type === 'LABEL') {
         return (
           checkLabelVisibility(element) && (
-            <div key={element.title}>
+            <div key={uniqueId(element.title)}>
               {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
               {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
               {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
@@ -306,9 +308,9 @@ export const WebformRecord = ({
           onToggleFieldVisibility(element.dependency, elements, element) && (
             <div
               className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable}
-              key={element.recordId}>
+              key={element.recordSchemaId}>
               {!element.showInsideParentTable && (
-                <div className={styles.title}>
+                <div className={styles.title} key={element.recordSchemaId}>
                   <h3>
                     {element.title ? element.title : element.name}
                     {<span style={{ color: 'var(--errors)' }}>{element.showRequiredCharacter ? ' *' : ''}</span>}
@@ -351,7 +353,7 @@ export const WebformRecord = ({
 
               {checkCalculatedTableVisibility(element)
                 ? calculateSingle(element)
-                : filterRecords(element, elements).map(record => {
+                : filterRecords(element, elements).map((record, i) => {
                     return (
                       <WebformRecord
                         addingOnTableSchemaId={addingOnTableSchemaId}
@@ -363,7 +365,7 @@ export const WebformRecord = ({
                         datasetSchemaId={datasetSchemaId}
                         isAddingMultiple={isAddingMultiple}
                         isGroup={isGroup}
-                        key={element.recordId}
+                        key={i}
                         multipleRecords={element.multipleRecords}
                         newRecord={webformRecordState.newRecord}
                         onAddMultipleWebform={onAddMultipleWebform}
