@@ -280,6 +280,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_VALIDATIONS_FAILED_EVENT')) {
       setIsDownloadingValidations(false);
     }
+
+    if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_QC_RULES_FAILED_EVENT')) {
+      setIsDownloadingQCRules(false);
+    }
   }, [notificationContext.hidden]);
 
   const refreshUniqueList = value => setNeedsRefreshUnique(value);

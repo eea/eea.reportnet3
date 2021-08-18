@@ -233,6 +233,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_VALIDATIONS_FAILED_EVENT')) {
       setIsDownloadingValidations(false);
     }
+
+    if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_QC_RULES_FAILED_EVENT')) {
+      setIsDownloadingQCRules(false);
+    }
   }, [notificationContext.hidden]);
 
   const {
