@@ -1,6 +1,7 @@
 package org.eea.collaboration.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import org.eea.collaboration.persistence.domain.MessageAttachment;
 import org.eea.collaboration.service.CollaborationService;
@@ -101,7 +102,12 @@ public class CollaborationControllerImpl implements CollaborationController {
       if (fileAttachment.getSize() > 20971520) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
       }
-      return collaborationService.createMessageAttachment(dataflowId, providerId, fileAttachment);
+      InputStream is = fileAttachment.getInputStream();
+      // Remove comma "," character to avoid error with special characters
+      String fileName = fileAttachment.getOriginalFilename().replace(",", "");
+      String fileSize = String.valueOf(fileAttachment.getSize());
+      return collaborationService.createMessageAttachment(dataflowId, providerId, is, fileName,
+          fileSize);
     } catch (EEAIllegalArgumentException e) {
       LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);

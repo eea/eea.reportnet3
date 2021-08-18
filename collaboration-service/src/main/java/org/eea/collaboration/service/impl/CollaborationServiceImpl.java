@@ -37,7 +37,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The Class CollaborationServiceImpl.
@@ -133,12 +132,9 @@ public class CollaborationServiceImpl implements CollaborationService {
    * @throws IOException
    */
   @Override
-  public MessageVO createMessageAttachment(Long dataflowId, Long providerId,
-      MultipartFile fileAttachment)
+  public MessageVO createMessageAttachment(Long dataflowId, Long providerId, InputStream is,
+      String fileName, String fileSize)
       throws EEAForbiddenException, EEAIllegalArgumentException, IOException {
-
-    // Remove comma "," character to avoid error with special characters
-    String fileName = fileAttachment.getOriginalFilename().replace(",", "");
 
     String userName = SecurityContextHolder.getContext().getAuthentication().getName();
     boolean direction = authorizeAndGetDirection(dataflowId, providerId);
@@ -154,8 +150,6 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setType(MessageTypeEnum.ATTACHMENT);
     message = messageRepository.save(message);
 
-    String fileSize = String.valueOf(fileAttachment.getSize());
-    InputStream is = fileAttachment.getInputStream();
     byte[] fileContent;
     fileContent = IOUtils.toByteArray(is);
     is.close();

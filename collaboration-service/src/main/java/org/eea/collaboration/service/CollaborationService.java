@@ -1,13 +1,13 @@
 package org.eea.collaboration.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import org.eea.collaboration.persistence.domain.MessageAttachment;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.vo.dataflow.MessageVO;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The Interface CollaborationService.
@@ -36,7 +36,8 @@ public interface CollaborationService {
    * @throws EEAIllegalArgumentException the EEA illegal argument exception
    * @throws EEAForbiddenException the EEA forbidden exception
    */
-  MessageVO createMessageAttachment(Long dataflowId, Long providerId, MultipartFile fileAttachment)
+  MessageVO createMessageAttachment(Long dataflowId, Long providerId, InputStream is,
+      String fileName, String fileSize)
       throws EEAIllegalArgumentException, EEAForbiddenException, IOException;
 
   /**

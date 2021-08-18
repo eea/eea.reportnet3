@@ -149,7 +149,8 @@ public class CollaborationServiceImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     collaborationServiceImpl.createMessageAttachment(1L, 1L,
-        new MockMultipartFile("file.csv", "content".getBytes()));
+        new MockMultipartFile("file.csv", "content".getBytes()).getInputStream(), "fileName",
+        "fileSize");
     Mockito.verify(messageMapper, Mockito.times(1)).entityToClass(Mockito.any());
   }
 

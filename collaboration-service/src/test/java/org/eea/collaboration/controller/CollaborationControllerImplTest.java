@@ -73,7 +73,7 @@ public class CollaborationControllerImplTest {
   public void createMessageAttachmentTest()
       throws EEAIllegalArgumentException, EEAForbiddenException, IOException {
     Mockito.when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
-        Mockito.any())).thenReturn(new MessageVO());
+        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new MessageVO());
     Assert.assertNotNull(collaborationControllerImpl.createMessageAttachment(1L, 1L,
         new MockMultipartFile("file.csv", "content".getBytes())));
   }
@@ -81,8 +81,10 @@ public class CollaborationControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentEEAIllegalArgumentExceptionTest()
       throws EEAIllegalArgumentException, EEAForbiddenException, IOException {
-    Mockito.when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
-        Mockito.any())).thenThrow(EEAIllegalArgumentException.class);
+    Mockito
+        .when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenThrow(EEAIllegalArgumentException.class);
     try {
       collaborationControllerImpl.createMessageAttachment(1L, 1L,
           new MockMultipartFile("file.csv", "content".getBytes()));
@@ -96,7 +98,7 @@ public class CollaborationControllerImplTest {
   public void createMessageAttachmentEEAForbiddenExceptionTest()
       throws EEAIllegalArgumentException, EEAForbiddenException, IOException {
     Mockito.when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
-        Mockito.any())).thenThrow(EEAForbiddenException.class);
+        Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(EEAForbiddenException.class);
     try {
       collaborationControllerImpl.createMessageAttachment(1L, 1L,
           new MockMultipartFile("file.csv", "content".getBytes()));
@@ -110,7 +112,7 @@ public class CollaborationControllerImplTest {
   public void createMessageAttachmentIOExceptionTest()
       throws EEAIllegalArgumentException, EEAForbiddenException, IOException {
     Mockito.when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
-        Mockito.any())).thenThrow(IOException.class);
+        Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(IOException.class);
     try {
       collaborationControllerImpl.createMessageAttachment(1L, 1L,
           new MockMultipartFile("file.csv", "content".getBytes()));
