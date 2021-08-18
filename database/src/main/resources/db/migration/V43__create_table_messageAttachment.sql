@@ -1,4 +1,4 @@
-CREATE TABLE public.message_attachment (
+CREATE TABLE IF NOT EXISTS public.message_attachment (
 	id bigserial NOT NULL,
 	file_name text NULL,
 	file_size text NULL,
