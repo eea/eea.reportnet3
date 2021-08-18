@@ -78,6 +78,7 @@ public class DataFlowControllerImplTest {
   /** The authentication. */
   private Authentication authentication;
 
+  /** The details. */
   private Map<String, String> details;
 
 

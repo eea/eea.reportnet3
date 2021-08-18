@@ -124,7 +124,6 @@ public interface DataflowService {
    * Delete data flow.
    *
    * @param idDataflow the id dataflow
-   * @throws Exception the exception
    */
   void deleteDataFlow(Long idDataflow);
 

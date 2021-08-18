@@ -625,7 +625,6 @@ public class DataflowServiceImpl implements DataflowService {
    * Delete data flow.
    *
    * @param idDataflow the id dataflow
-   * @throws Exception the exception
    */
   @Override
   @Transactional
@@ -1346,6 +1345,12 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
+  /**
+   * Delete dataflow resources.
+   *
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
   private void deleteDataflowResources(Long dataflowId) throws EEAException {
     // add resource to delete(DATAFLOW PART)
     try {
@@ -1362,6 +1367,12 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
+  /**
+   * Delete dataflow metabase info.
+   *
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
   private void deleteDataflowMetabaseInfo(Long dataflowId) throws EEAException {
     try {
       dataflowRepository.deleteNativeDataflow(dataflowId);
