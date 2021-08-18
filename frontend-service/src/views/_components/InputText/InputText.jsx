@@ -1,10 +1,9 @@
 import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import isNil from 'lodash/isNil';
 
 import './InputText.scss';
-
-import { config } from 'conf';
 
 import KeyFilter from 'views/_functions/PrimeReact/KeyFilter';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
@@ -148,7 +147,7 @@ export class InputText extends Component {
             />
           </div>
         ) : null}
-        {this.props.maxCharCounter !== false && this.props.maxLength === config.INPUT_MAX_LENGTH ? (
+        {this.props.hasMaxCharCounter && !isNil(this.props.maxLength) ? (
           <CharacterCounter currentLength={this.props.value.length} maxLength={this.props.maxLength} />
         ) : null}
         <label className="srOnly" htmlFor={this.props.id}>
