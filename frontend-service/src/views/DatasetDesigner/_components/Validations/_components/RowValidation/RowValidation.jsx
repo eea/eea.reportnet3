@@ -196,7 +196,12 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
       type: 'SET_EXPRESSIONS_STRING',
       payload: formula
     });
-  }, [creationFormState.candidateRule]);
+  }, [
+    creationFormState.candidateRule.expressions,
+    creationFormState.candidateRule.expressionType,
+    creationFormState.candidateRule.expressionsIf,
+    creationFormState.candidateRule.expressionsThen
+  ]);
 
   useEffect(() => {
     if (checkActivateRules()) {

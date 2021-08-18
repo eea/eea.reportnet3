@@ -197,7 +197,7 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
       type: 'SET_EXPRESSIONS_STRING',
       payload: getFieldExpressionString(expressions, field)
     });
-  }, [creationFormState.candidateRule]);
+  }, [creationFormState.candidateRule.field, creationFormState.candidateRule.expressions]);
 
   useEffect(() => {
     if (checkActivateRules()) {
