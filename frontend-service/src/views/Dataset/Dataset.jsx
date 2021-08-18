@@ -745,6 +745,11 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       tableSchemaId: table.tableSchemaId
     });
 
+  const onDownloadQCRules = async () => {
+    console.log(`onDownloadQCRules dataset`);
+
+  };
+
   const datasetInsideTitle = () => {
     if (dataset?.isReleasing) {
       return `${resources.messages['isReleasing']} `;
@@ -758,12 +763,20 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   };
 
   const validationListFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => onSetVisible(setValidationListDialogVisible, false)}
-    />
+    <Fragment>
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'export'}
+        label={resources.messages['downloadQCsButtonLabel']}
+        onClick={() => onDownloadQCRules()}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => onSetVisible(setValidationListDialogVisible, false)}
+      />
+    </Fragment>
   );
 
   const layout = children => {

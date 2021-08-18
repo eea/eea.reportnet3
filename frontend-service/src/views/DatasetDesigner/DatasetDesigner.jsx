@@ -919,6 +919,12 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         tooltipOptions={{ position: 'top' }}
       />
       <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'export'}
+        label={resources.messages['downloadQCsButtonLabel']}
+        onClick={() => onDownloadQCRules()}
+      />
+      <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['close']}
@@ -960,6 +966,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   function setIsValidationsTabularView(isValidationsTabularView) {
     designerDispatch({ type: 'SET_IS_VALIDATIONS_TABULAR_VIEW', payload: { isValidationsTabularView } });
   }
+
+  const onDownloadQCRules = async () => {
+    console.log(`onDownloadQCRules`);
+  };
 
   const onDownloadValidations = async () => {
     setIsDownloadingValidations(true);
