@@ -1215,6 +1215,10 @@
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "Invalid URL. Please check it.",
-    "yes": "Yes"
+    "yes": "Yes",
+    "goTo": "Go to",
+    "currentPageErrorMessage": "Value must be between 1 and",
+    "currentPageInfoMessage": "Press 'Enter' key to go to this page.",
+    "of": "of"
   }
 }
