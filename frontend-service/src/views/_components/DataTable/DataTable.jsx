@@ -513,7 +513,7 @@ export class DataTable extends Component {
                 CurrentPageReport: options => {
                   return (
                     <span style={{ color: 'var(--white)', userSelect: 'none' }}>
-                      <label style={{ margin: '0 0.5rem' }}>Go to </label>
+                      <label style={{ margin: '0 0.5rem' }}>{this.context.messages['goTo']}</label>
                       <InputText
                         data-for="pageInputTooltip"
                         data-tip
@@ -531,13 +531,16 @@ export class DataTable extends Component {
                               : 'none',
                           display: 'inline',
                           height: '1.75rem',
-                          width: '3rem'
+                          width: '2.5rem'
                         }}
                         value={this.state.currentPage}
                       />
-                      <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="right">
+                      <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="bottom">
                         {this.state.pageInputTooltip}
                       </ReactTooltip>
+                      <label style={{ fontWeight: 'bold', margin: '0 0 0 0.5rem' }}>{`${
+                        this.context.messages['of']
+                      } ${Math.ceil(this.props.totalRecords / this.getRows())}`}</label>
                     </span>
                   );
                 }

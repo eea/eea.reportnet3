@@ -1218,6 +1218,7 @@
     "yes": "Yes",
     "goTo": "Go to",
     "currentPageErrorMessage": "Value must be between 1 and",
-    "currentPageInfoMessage": "Press 'Enter' key to go to this page."
+    "currentPageInfoMessage": "Press 'Enter' key to go to this page.",
+    "of": "of"
   }
 }
