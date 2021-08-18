@@ -507,6 +507,7 @@ const ValidationsList = withRouter(
             <DataTable
               autoLayout={true}
               className={styles.paginatorValidationViewer}
+              hasDefaultCurrentPage={true}
               loading={false}
               onRowClick={event => validationId(event.data.id)}
               paginator={true}
