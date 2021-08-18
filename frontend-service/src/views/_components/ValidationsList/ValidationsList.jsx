@@ -184,8 +184,6 @@ const ValidationsList = withRouter(
     const correctTemplate = rowData => <div className={styles.checkedValueColumn}>{getCorrectTemplate(rowData)}</div>;
 
     const getCorrectTemplate = rowData => {
-      console.log({ rowData });
-      rowData.sqlError = 'HOLA';
       if (isNil(rowData.isCorrect)) {
         return <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />;
       } else {
