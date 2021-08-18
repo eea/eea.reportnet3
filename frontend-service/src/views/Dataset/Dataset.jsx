@@ -99,6 +99,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
   const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
+  const [isDownloadingQCRules, setIsDownloadingQCRules] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -746,7 +747,9 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     });
 
   const onDownloadQCRules = async () => {
+    setIsDownloadingQCRules(true);
     console.log(`onDownloadQCRules dataset`);
+    setIsDownloadingQCRules(false);
 
   };
 
@@ -766,7 +769,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     <Fragment>
       <Button
         className="p-button-secondary p-button-animated-blink"
-        icon={'export'}
+        icon={isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
         label={resources.messages['downloadQCsButtonLabel']}
         onClick={() => onDownloadQCRules()}
       />

@@ -114,6 +114,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     isDataflowOpen: false,
     isDataUpdated: false,
     isDuplicatedToManageUnique: false,
+    isDownloadingQCRules: false,
     isDownloadingValidations: false,
     isExportTableSchemaDialogVisible: false,
     isImportDatasetDialogVisible: false,
@@ -959,6 +960,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     </Fragment>
   );
 
+  function setIsDownloadingQCRules(isDownloadingQCRules) {
+    designerDispatch({ type: 'SET_IS_DOWNLOADING_QC_RULES', payload: { isDownloadingQCRules } });
+  }
+
   function setIsDownloadingValidations(isDownloadingValidations) {
     designerDispatch({ type: 'SET_IS_DOWNLOADING_VALIDATIONS', payload: { isDownloadingValidations } });
   }
@@ -968,7 +973,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   }
 
   const onDownloadQCRules = async () => {
+    setIsDownloadingQCRules(true);
     console.log(`onDownloadQCRules`);
+    setIsDownloadingQCRules(false);
   };
 
   const onDownloadValidations = async () => {
