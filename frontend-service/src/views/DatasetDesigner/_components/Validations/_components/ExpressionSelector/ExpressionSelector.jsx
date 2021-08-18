@@ -188,7 +188,7 @@ export const ExpressionSelector = ({
         />
       );
     }
-    return <div />;
+    return null;
   };
   return (
     <Fragment>
