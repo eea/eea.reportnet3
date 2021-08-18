@@ -152,39 +152,6 @@ public class CollaborationServiceImplTest {
         new MockMultipartFile("file.csv", "content".getBytes()));
     Mockito.verify(messageMapper, Mockito.times(1)).entityToClass(Mockito.any());
   }
-  //
-  // @Test(expected = ResponseStatusException.class)
-  // public void createMessageAttachmentIOExceptionTest()
-  // throws EEAForbiddenException, EEAIllegalArgumentException, IOException {
-  //
-  // List<Long> datasetIds = new ArrayList<>();
-  // datasetIds.add(1L);
-  // Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
-  // authorities.add(
-  // new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE.getAccessRole(1L)));
-  // authorities.add(
-  // new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(1L)));
-  // Mockito
-  // .when(dataSetMetabaseControllerZuul
-  // .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
-  // .thenReturn(datasetIds);
-  // Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-  // Mockito.doReturn(authorities).when(authentication).getAuthorities();
-  // byte[] arrayByte = null;
-  // MultipartFile fileMock = Mockito.mock(MultipartFile.class);
-  // fileMock = new MockMultipartFile("file.csv", "content", "typ", arrayByte);
-  // // Mockito.when(fileMock.getInputStream()).thenThrow(IOException.class);
-  //
-  // try {
-  // collaborationServiceImpl.createMessageAttachment(1L, 1L,
-  // // new MockMultipartFile("file.csv", "content".getBytes()));
-  // // new MockMultipartFile("file.csv", "content", "typ", arrayByte));
-  // fileMock);
-  // } catch (ResponseStatusException e) {
-  // Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-  // throw e;
-  // }
-  // }
 
   @Test(expected = EEAIllegalArgumentException.class)
   public void updateMessageReadStatusEEAIllegalArgumentExceptionTest()
