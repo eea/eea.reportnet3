@@ -748,7 +748,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onDownloadQCRules = async () => {
     setIsDownloadingQCRules(true);
-    console.log(`onDownloadQCRules dataset`);
+    notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
     setIsDownloadingQCRules(false);
 
   };

@@ -1013,6 +1013,9 @@
           "key": "DOWNLOAD_VALIDATIONS_START"
         },
         {
+          "key": "DOWNLOAD_QC_RULES_START"
+        },
+        {
           "key": "DATASET_IMPORT_INIT"
         },
         {
