@@ -149,10 +149,12 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setDirection(direction);
     message.setType(MessageTypeEnum.ATTACHMENT);
     message = messageRepository.save(message);
-
     byte[] fileContent;
-    fileContent = IOUtils.toByteArray(is);
-    is.close();
+    try {
+      fileContent = IOUtils.toByteArray(is);
+    } finally {
+      is.close();
+    }
     MessageAttachment messageAttachment = new MessageAttachment();
     messageAttachment.setFileName(fileName);
     messageAttachment.setFileSize(fileSize);
