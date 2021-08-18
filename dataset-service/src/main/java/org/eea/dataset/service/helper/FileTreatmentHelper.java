@@ -304,6 +304,9 @@ public class FileTreatmentHelper implements DisposableBean {
       String originalFileName = multipartFile.getOriginalFilename();
       String multipartFileMimeType = datasetService.getMimetype(originalFileName);
 
+      // Delete dataset temporary folder first in case that for any reason still exists before
+      // creating again
+      FileUtils.deleteQuietly(folder);
       if (!folder.mkdirs()) {
         releaseLock(datasetId);
         throw new EEAException("Folder for dataset " + datasetId + " already exists");
@@ -433,7 +436,7 @@ public class FileTreatmentHelper implements DisposableBean {
           rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace,
               delimiter);
         } catch (Exception e) {
-          LOG_ERROR.error("RN3-Import: Unexpected error", e);
+          LOG_ERROR.error("RN3-Import: Unexpected error. {}", e.getMessage(), e);
         }
       });
     }

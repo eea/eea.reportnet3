@@ -40,7 +40,10 @@ public enum SecurityRoleEnum {
   REPORTER_PARTITIONED("REPORTER_PARTITIONED"),
 
   /** The national coordinator. */
-  NATIONAL_COORDINATOR("NATIONAL_COORDINATOR");
+  NATIONAL_COORDINATOR("NATIONAL_COORDINATOR"),
+
+  /** The admin. */
+  ADMIN("ADMIN");
 
   /** The role. */
   private final String role;

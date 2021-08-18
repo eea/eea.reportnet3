@@ -496,7 +496,7 @@ public class DatasetServiceImpl implements DatasetService {
       // Table with out values
       if (null == result.getRecords() || result.getRecords().isEmpty()) {
         result.setRecords(new ArrayList<>());
-        LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
+        LOG.info("No records found in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
 
       } else {
         List<RecordVO> recordVOs = result.getRecords();

@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.io.input.BOMInputStream;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
@@ -145,8 +146,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
     table.setDatasetId(dataset);
     tables.add(table);
 
-    try (Reader buf =
-        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+    try (Reader buf = new BufferedReader(
+        new InputStreamReader(new BOMInputStream(inputStream), StandardCharsets.UTF_8))) {
 
       // Init de library of reader file
       final CSVReader reader = initReader(buf);

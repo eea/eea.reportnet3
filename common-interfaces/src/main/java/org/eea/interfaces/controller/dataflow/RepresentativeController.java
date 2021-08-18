@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataflow;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -51,8 +52,27 @@ public interface RepresentativeController {
    *
    * @return the list
    */
-  @GetMapping(value = "/dataProvider/types", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataProviderCodeVO> findAllDataProviderTypes();
+  @GetMapping(value = "/dataProvider/countryGroups", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataProviderCodeVO> findAllDataProviderCountryType();
+
+  /**
+   * Find all data provider business types.
+   *
+   * @return the list
+   */
+  @GetMapping(value = "/dataProvider/companyGroups", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataProviderCodeVO> findAllDataProviderCompanyType();
+
+
+  /**
+   * Find data provider group by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data provider code VO
+   */
+  @GetMapping(value = "/dataProviderGroup/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  DataProviderCodeVO findDataProviderGroupByDataflowId(@PathVariable("dataflowId") Long dataflowId);
 
 
   /**
@@ -188,6 +208,14 @@ public interface RepresentativeController {
       @PathVariable("dataflowId") Long dataflowId);
 
   /**
+   * Find fme users.
+   *
+   * @return the list
+   */
+  @GetMapping(value = "/fmeUsers", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<FMEUserVO> findFmeUsers();
+
+  /**
    * Update internal representative.
    *
    * @param dataflowRepresentativeVO the dataflow representative VO
@@ -216,4 +244,5 @@ public interface RepresentativeController {
   List<RepresentativeVO> findRepresentativesByDataFlowIdAndProviderIdList(
       @PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerIdList") List<Long> providerIdList);
+
 }

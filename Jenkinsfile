@@ -113,7 +113,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   return BRANCH_NAME == "sandbox" 
+                   return BRANCH_NAME == "develop" 
                 }
             }
             parallel {
@@ -232,7 +232,7 @@ pipeline {
         stage('Cleaning docker images'){
           when {
             expression {
-              return BRANCH_NAME == "develop" || BRANCH_NAME == "sandbox"
+              return BRANCH_NAME == "develop" 
             }
           }
           steps {

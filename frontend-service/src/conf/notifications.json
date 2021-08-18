@@ -88,6 +88,9 @@
           "key": "REFERENCE_DATAFLOW_CREATION_ERROR"
         },
         {
+          "key": "BUSINESS_DATAFLOW_CREATION_ERROR"
+        },
+        {
           "key": "SNAPSHOT_CREATION_ERROR",
           "navigateTo": {
             "section": "DATASET",
@@ -228,6 +231,13 @@
         },
         {
           "key": "REFERENCE_DATAFLOW_UPDATING_ERROR",
+          "navigateTo": {
+            "section": "DATAFLOWS",
+            "parameters": ["dataflowName"]
+          }
+        },
+        {
+          "key": "BUSINESS_DATAFLOW_UPDATING_ERROR",
           "navigateTo": {
             "section": "DATAFLOWS",
             "parameters": ["dataflowName"]
@@ -1045,6 +1055,7 @@
     "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
     "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
     "DISABLE_RULES_ERROR_EVENT",
-    "RECEIVED_MESSAGE"
+    "RECEIVED_MESSAGE",
+    "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT"
   ]
 }

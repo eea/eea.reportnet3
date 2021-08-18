@@ -38,6 +38,7 @@ public interface DataCollectionController {
    * @param manualCheck the manual check
    * @param showPublicInfo the show public info
    * @param dataCollectionVO the data collection VO
+   * @param stopAndNotifyPKError the stop and notify PK error
    */
   @PostMapping("/create")
   void createEmptyDataCollection(
@@ -45,7 +46,8 @@ public interface DataCollectionController {
           name = "stopAndNotifySQLErrors") boolean stopAndNotifySQLErrors,
       @RequestParam(value = "manualCheck", required = false) boolean manualCheck,
       @RequestParam(value = "showPublicInfo", defaultValue = "true") boolean showPublicInfo,
-      @RequestBody DataCollectionVO dataCollectionVO);
+      @RequestBody DataCollectionVO dataCollectionVO, @RequestParam(defaultValue = "true",
+          name = "stopAndNotifyPKError") boolean stopAndNotifyPKError);
 
 
   /**

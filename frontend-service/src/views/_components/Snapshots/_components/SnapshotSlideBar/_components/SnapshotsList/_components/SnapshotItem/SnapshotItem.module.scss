@@ -1,0 +1,77 @@
+.listItem {
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  .listItemData {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin: 0;
+    width: 70%;
+    h5 {
+      font-size: 1rem;
+      margin: 0;
+    }
+    p {
+      margin: 0.25rem 0 0 0;
+      word-break: break-all;
+    }
+  }
+  .listActions {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    .btn {
+      padding: 0;
+      margin: 0 3.5px;
+      border-radius: 5px;
+
+      width: 32px;
+      height: 32px;
+      border-color: transparent;
+      &:focus {
+        box-shadow: none;
+      }
+    }
+  }
+}
+.itemBox {
+  margin: 0;
+}
+p {
+  margin: 0 0 1em 0;
+}
+
+.is_released_snapshot {
+  color: green;
+}
+h5.is_released_snapshot {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+.listItemData .listActions button:nth-last-of-type(1) {
+  margin-right: 0;
+}
+
+.hasBlockers {
+  background-color: transparent !important;
+  color: black !important;
+  font-size: 2rem;
+  border: none !important;
+  padding: 0 !important;
+  &:enabled:focus {
+    box-shadow: 0 0 0 0 var(--white) !important;
+  }
+  &:enabled:active,
+  :enabled:hover {
+    background-color: transparent !important;
+    border-color: transparent !important;
+  }
+}
