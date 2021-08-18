@@ -18,6 +18,7 @@ const parseReferenceDataflowDTO = referenceDataflowDTO =>
     showPublicInfo: referenceDataflowDTO.showPublicInfo,
     status: referenceDataflowDTO.status,
     testDatasets: DatasetUtils.parseDatasetListDTO(referenceDataflowDTO.testDatasets),
+    type: referenceDataflowDTO.type,
     userRole: referenceDataflowDTO.userRole
   });
 

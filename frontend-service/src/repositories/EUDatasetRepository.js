@@ -1,4 +1,4 @@
-import { EUDatasetConfig } from './config/EUDatasetConfigAux';
+import { EUDatasetConfig } from './config/EUDatasetConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 

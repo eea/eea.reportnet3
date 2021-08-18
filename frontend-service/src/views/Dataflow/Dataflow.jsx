@@ -125,6 +125,12 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
+  useEffect(() => {
+    if (!isEmpty(dataflowState.data)) {
+      userContext.setCurrentDataflowType(dataflowState.data.type);
+    }
+  }, [dataflowState.data]);
+
   const {
     obligation,
     setCheckedObligation,
@@ -1138,6 +1144,7 @@ const Dataflow = withRouter(({ history, match }) => {
             manageDialogs={manageDialogs}
             obligation={obligation}
             onEditDataflow={onEditDataflow}
+            onLoadReportingDataflow={onLoadReportingDataflow}
             resetObligations={resetObligations}
             state={{
               name: dataflowState.name,

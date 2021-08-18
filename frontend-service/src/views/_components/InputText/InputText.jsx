@@ -49,7 +49,7 @@ export class InputText extends Component {
     tooltip: PropTypes.string,
     tooltipOptions: PropTypes.object,
     validateOnly: PropTypes.bool,
-    value: PropTypes.string
+    value: PropTypes.any
   };
 
   constructor(props) {
