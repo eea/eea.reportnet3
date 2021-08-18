@@ -262,7 +262,7 @@ export class Paginator extends Component {
       return (
         <div className={className} style={this.props.style}>
           <div>{leftContent}</div>
-          <div>{paginatorElements}</div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>{paginatorElements}</div>
           <div>{rightContent}</div>
         </div>
       );

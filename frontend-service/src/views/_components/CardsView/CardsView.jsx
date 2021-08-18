@@ -77,7 +77,7 @@ export const CardsView = ({
     CurrentPageReport: options => {
       return (
         <span style={{ color: 'var(--white)', userSelect: 'none' }}>
-          <label style={{ fontWeight: 'bold', margin: '0 0.5rem' }}>{resources.messages['goTo']}</label>
+          <label style={{ fontWeight: 'bold', margin: '0 0.25rem 0 1rem' }}>{resources.messages['goTo']}</label>
           <InputText
             data-for="pageInputTooltip"
             data-tip

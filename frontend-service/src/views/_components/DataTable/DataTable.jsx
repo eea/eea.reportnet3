@@ -513,7 +513,7 @@ export class DataTable extends Component {
                 CurrentPageReport: options => {
                   return (
                     <span style={{ color: 'var(--white)', userSelect: 'none' }}>
-                      <label style={{ margin: '0 0.5rem' }}>{this.context.messages['goTo']}</label>
+                      <label style={{ margin: '0 0.25rem 0 1rem' }}>{this.context.messages['goTo']}</label>
                       <InputText
                         data-for="pageInputTooltip"
                         data-tip

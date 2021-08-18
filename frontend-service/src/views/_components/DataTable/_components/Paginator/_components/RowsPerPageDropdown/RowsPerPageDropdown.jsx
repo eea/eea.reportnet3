@@ -30,6 +30,7 @@ export class RowsPerPageDropdown extends Component {
           name={uniqueId('rowsPerPage')}
           onChange={this.props.onChange}
           options={options}
+          style={{ marginLeft: '0.75rem' }}
           value={this.props.value}
         />
       );
