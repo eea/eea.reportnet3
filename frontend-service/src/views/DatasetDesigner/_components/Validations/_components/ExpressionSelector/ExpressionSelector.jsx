@@ -11,7 +11,7 @@ import { ExpressionsTab } from 'views/DatasetDesigner/_components/Validations/_c
 import { FieldComparison } from 'views/DatasetDesigner/_components/Validations/_components/FieldComparison';
 import { IfThenClause } from 'views/DatasetDesigner/_components/Validations/_components/IfThenClause';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { SqlSentence } from 'views/DatasetDesigner/_components/Validations/_components/SqlSentenceAux';
+import { SqlSentence } from 'views/DatasetDesigner/_components/Validations/_components/SqlSentence';
 import { TableRelationsSelector } from 'views/DatasetDesigner/_components/Validations/_components/TableRelationsSelector';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
