@@ -1,8 +1,17 @@
 import styles from './CharacterCounter.module.scss';
 
-const CharacterCounter = ({ currentLength, maxLength }) => {
+const CharacterCounter = ({ currentLength, inputRef, maxLength, style }) => {
   return (
-    <p className={currentLength > 245 ? styles.redCharacterCount : styles.characterCount}>
+    <p
+      className={`${styles.characterCount} ${
+        currentLength > maxLength
+          ? styles.errorCharacterCount
+          : maxLength - currentLength <= 10
+          ? styles.warningCharacterCount
+          : ''
+      }`}
+      ref={inputRef}
+      style={style}>
       {`${currentLength}/${maxLength}`}
     </p>
   );

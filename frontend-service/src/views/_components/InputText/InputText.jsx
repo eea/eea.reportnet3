@@ -87,6 +87,9 @@ export class InputText extends Component {
     if (this.props.tooltip) {
       this.renderTooltip();
     }
+    if (this.props.hasMaxCharCounter && !isNil(this.props.maxLength) && !isNil(this.inputElement)) {
+      this.element.style.paddingRight = `${Number(this.inputElement.getBoundingClientRect().width) + 25}px`;
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -148,7 +151,12 @@ export class InputText extends Component {
           </div>
         ) : null}
         {this.props.hasMaxCharCounter && !isNil(this.props.maxLength) ? (
-          <CharacterCounter currentLength={this.props.value.length} maxLength={this.props.maxLength} />
+          <CharacterCounter
+            currentLength={this.props.value.length}
+            inputRef={el => (this.inputElement = el)}
+            maxLength={this.props.maxLength}
+            style={{ top: '-30px' }}
+          />
         ) : null}
         <label className="srOnly" htmlFor={this.props.id}>
           {this.props.name !== '' ? this.props.name : this.props.placeholder || this.props.id}

@@ -1,14 +1,15 @@
-import { forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
-
-import isNil from 'lodash/isNil';
+import { forwardRef, useContext, useImperativeHandle, useRef, useState } from 'react';
 
 import styles from './ManageReportingDataflowForm.module.scss';
 
 import { config } from 'conf';
 
 import { Button } from 'views/_components/Button';
-import { ErrorMessage } from 'views/_components/ErrorMessage';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
+import { ErrorMessage } from 'views/_components/ErrorMessage';
+import { InputText } from 'views/_components/InputText';
+
+import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { DataflowService } from 'services/DataflowService';
 import { UserService } from 'services/UserService';
@@ -34,13 +35,11 @@ const ManageReportingDataflowForm = forwardRef(
     const form = useRef(null);
     const inputRef = useRef(null);
 
-    useEffect(() => {
-      if (!isNil(inputRef) && refresh) inputRef.current.focus();
-    }, [refresh]);
-
     useImperativeHandle(ref, () => ({
       handleSubmit: onConfirm
     }));
+
+    useInputTextFocus(refresh, inputRef);
 
     const checkIsCorrectLength = inputValue => inputValue.length <= config.INPUT_MAX_LENGTH;
 
@@ -49,16 +48,15 @@ const ManageReportingDataflowForm = forwardRef(
     const checkIsCorrectInputValue = (inputValue, inputName) => {
       let hasErrors = false;
       let message = '';
-      let maxLengthMessage = ' max allowed characters 255.'
 
       if (checkIsEmptyInput(inputValue)) {
         message = '';
         hasErrors = true;
       } else if (inputName === 'description' && !checkIsCorrectLength(inputValue)) {
-        message = resources.messages['dataflowDescriptionValidationMax'] + maxLengthMessage;
+        message = `${resources.messages['dataflowDescriptionValidationMax']} (${resources.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`;
         hasErrors = true;
       } else if (inputName === 'name' && !checkIsCorrectLength(inputValue)) {
-        message = resources.messages['dataflowNameValidationMax'];
+        message = `${resources.messages['dataflowNameValidationMax']} (${resources.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`;
         hasErrors = true;
       }
 
@@ -127,9 +125,11 @@ const ManageReportingDataflowForm = forwardRef(
       <form ref={form}>
         <fieldset className={styles.fieldset}>
           <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
-            <input
+            <InputText
               autoComplete="off"
+              hasMaxCharCounter={true}
               id="dataflowName"
+              maxLength={config.INPUT_MAX_LENGTH}
               name="name"
               onBlur={() => checkIsCorrectInputValue(name, 'name')}
               onChange={event => {
@@ -175,13 +175,19 @@ const ManageReportingDataflowForm = forwardRef(
               rows={10}
               value={description}
             />
-            
+
             <label className="srOnly" htmlFor="dataflowDescription">
               {resources.messages['createDataflowDescription']}
             </label>
-            
-            {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
-            <CharacterCounter currentLength={description.length} maxLength={config.INPUT_MAX_LENGTH}/>
+
+            <div className={styles.errorAndCounterWrapper}>
+              <CharacterCounter
+                currentLength={description.length}
+                maxLength={config.INPUT_MAX_LENGTH}
+                style={{ marginTop: '0.25rem' }}
+              />
+              {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
+            </div>
           </div>
           <div className={`${styles.search}`}>
             <Button icon="search" label={resources.messages['searchObligations']} onClick={onSearch} />

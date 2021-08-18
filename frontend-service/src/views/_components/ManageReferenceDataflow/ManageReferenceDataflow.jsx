@@ -9,6 +9,7 @@ import styles from './ManageReferenceDataflow.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Dialog } from 'views/_components/Dialog';
@@ -94,13 +95,17 @@ export const ManageReferenceDataflow = ({
       handleErrors({
         field: 'description',
         hasErrors: true,
-        message: resources.messages['dataflowDescriptionValidationMax']
+        message: `${resources.messages['dataflowDescriptionValidationMax']} (${resources.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`
       });
       hasErrors = true;
     }
 
     if (name.length > config.INPUT_MAX_LENGTH) {
-      handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameValidationMax'] });
+      handleErrors({
+        field: 'name',
+        hasErrors: true,
+        message: `${resources.messages['dataflowNameValidationMax']} (${resources.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`
+      });
       hasErrors = true;
     }
 
@@ -230,7 +235,10 @@ export const ManageReferenceDataflow = ({
         visible={isVisible}>
         <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
           <InputText
+            hasMaxCharCounter={true}
             id="dataflowName"
+            maxLength={config.INPUT_MAX_LENGTH}
+            onBlur={checkErrors}
             onChange={event => setName(event.target.value)}
             onFocus={() => handleErrors({ field: 'name', hasErrors: false, message: '' })}
             placeholder={resources.messages['createDataflowName']}
@@ -243,13 +251,21 @@ export const ManageReferenceDataflow = ({
           <InputTextarea
             className={styles.inputTextArea}
             id="dataflowDescription"
+            onBlur={checkErrors}
             onChange={event => setDescription(event.target.value)}
             onFocus={() => handleErrors({ field: 'description', hasErrors: false, message: '' })}
             placeholder={resources.messages['createDataflowDescription']}
             rows={10}
             value={description}
           />
-          {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
+          <div className={styles.errorAndCounterWrapper}>
+            <CharacterCounter
+              currentLength={description.length}
+              maxLength={config.INPUT_MAX_LENGTH}
+              style={{ marginTop: '0.25rem' }}
+            />
+            {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
+          </div>
         </div>
       </Dialog>
 
@@ -270,18 +286,15 @@ export const ManageReferenceDataflow = ({
                 dataflowName: metadata.name
               })
             }}></p>
-          <p>
-            <InputText
-              className={`${styles.inputText}`}
-              hasMaxCharCounter={true}
-              id="deleteDataflow"
-              maxLength={config.INPUT_MAX_LENGTH}
-              name={resources.messages['deleteDataflowButton']}
-              onChange={event => setDeleteInput(event.target.value)}
-              ref={deleteInputRef}
-              value={deleteInput}
-            />
-          </p>
+          <InputText
+            className={`${styles.inputText}`}
+            id="deleteDataflow"
+            maxLength={config.INPUT_MAX_LENGTH}
+            name={resources.messages['deleteDataflowButton']}
+            onChange={event => setDeleteInput(event.target.value)}
+            ref={deleteInputRef}
+            value={deleteInput}
+          />
         </ConfirmDialog>
       )}
     </Fragment>

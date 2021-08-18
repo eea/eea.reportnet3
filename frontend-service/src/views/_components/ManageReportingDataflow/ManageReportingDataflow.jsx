@@ -233,7 +233,7 @@ export const ManageReportingDataflow = ({
       {state.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          disabledConfirm={!TextUtils.areEquals(state.deleteInput, state.name)}
+          disabledConfirm={!TextUtils.areEquals(reportingDataflowState.deleteInput, state.name)}
           header={resources.messages['delete'].toUpperCase()}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
@@ -247,19 +247,16 @@ export const ManageReportingDataflow = ({
                 dataflowName: state.name
               })
             }}></p>
-          <p>
-            <InputText
-              autoFocus={true}
-              className={`${styles.inputText}`}
-              hasMaxCharCounter={true}
-              id={'deleteDataflow'}
-              maxLength={config.INPUT_MAX_LENGTH}
-              name={resources.messages['deleteDataflowButton']}
-              onChange={event => onDeleteInputChange(event.target.value)}
-              ref={deleteInputRef}
-              value={reportingDataflowState.deleteInput}
-            />
-          </p>
+          <InputText
+            autoFocus={true}
+            className={styles.inputText}
+            id={'deleteDataflow'}
+            maxLength={config.INPUT_MAX_LENGTH}
+            name={resources.messages['deleteDataflowButton']}
+            onChange={event => onDeleteInputChange(event.target.value)}
+            ref={deleteInputRef}
+            value={reportingDataflowState.deleteInput}
+          />
         </ConfirmDialog>
       )}
     </Fragment>

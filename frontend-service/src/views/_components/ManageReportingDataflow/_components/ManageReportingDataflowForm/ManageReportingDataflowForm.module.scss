@@ -1,9 +1,11 @@
+.errorAndCounterWrapper {
+  height: 40px;
+}
 .search {
   --searchButtonWidth: 170px;
   cursor: pointer !important;
   display: flex;
   justify-content: space-between;
-  padding-top: 1rem;
 
   .searchInput {
     background-color: var(--form-field-bg);
