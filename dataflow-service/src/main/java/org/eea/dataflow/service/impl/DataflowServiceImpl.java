@@ -636,7 +636,7 @@ public class DataflowServiceImpl implements DataflowService {
     try {
       DataFlowVO dataflowVO = getById(idDataflow);
 
-      // use it to take all datasets Desing
+      // use it to take all datasets Design
 
 
       LOG.info("Get the dataflow metabase with id {}", idDataflow);
@@ -656,38 +656,24 @@ public class DataflowServiceImpl implements DataflowService {
       if (null != dataflowVO.getRepresentatives() && !dataflowVO.getRepresentatives().isEmpty()) {
         deleteRepresentatives(dataflowVO);
       }
-      try {
-        // Delete the dataflow metabase info. Also by the foreign keys of the database, entities
-        // like
-        // weblinks are also deleted
-        dataflowRepository.deleteNativeDataflow(idDataflow);
-        LOG.info("Delete full dataflow with id: {}", idDataflow);
-      } catch (Exception e) {
-        LOG_ERROR.error("Error deleting native dataflow with id: {}", idDataflow, e);
-        throw new EEAException(
-            String.format("Error deleting native dataflow with id: %s", idDataflow), e);
-      }
+
+      // Delete the dataflow metabase info. Also by the foreign keys of the database, entities
+      // like weblinks are also deleted
+      deleteDataflowMetabaseInfo(idDataflow);
 
       // add resource to delete(DATAFLOW PART)
-      try {
-        List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
-            .getGroupsByIdResourceType(idDataflow, ResourceTypeEnum.DATAFLOW);
-        resourceManagementControllerZull.deleteResource(resourceCustodian);
+      deleteDataflowResources(idDataflow);
 
-        LOG.info("Delete full keycloack data to dataflow with id: {}", idDataflow);
-      } catch (Exception e) {
-        LOG.error("Error deleting resources in keycloak, group with the id: {}", idDataflow, e);
-        throw new EEAException("Error deleting resource in keycloak ", e);
-      }
     } catch (Exception e) {
       NotificationVO notificationVO = NotificationVO.builder().dataflowId(idDataflow)
           .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_FAILED_EVENT, null,
             notificationVO);
-        throw new EEAException("Error deleting dataflow ", e);
+        throw new EEAException(String.format("Error deleting dataflow with id: %s", idDataflow), e);
       } catch (EEAException e1) {
-        LOG.error("Failed sending kafka delete dataflow failed event notification");
+        LOG.error("Failed sending kafka delete dataflow failed event notification. DataflowId: {}",
+            idDataflow);
       }
     }
 
@@ -698,7 +684,8 @@ public class DataflowServiceImpl implements DataflowService {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_COMPLETED_EVENT, null,
           notificationVO);
     } catch (EEAException e) {
-      LOG.error("Failed sending kafka delete dataflow completed event notification");
+      LOG.error("Failed sending kafka delete dataflow completed event notification. DataflowId: {}",
+          idDataflow);
     }
 
   }
@@ -1359,4 +1346,30 @@ public class DataflowServiceImpl implements DataflowService {
     }
   }
 
+  private void deleteDataflowResources(Long dataflowId) throws EEAException {
+    // add resource to delete(DATAFLOW PART)
+    try {
+      List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
+          .getGroupsByIdResourceType(dataflowId, ResourceTypeEnum.DATAFLOW);
+      resourceManagementControllerZull.deleteResource(resourceCustodian);
+
+      LOG.info("Delete full keycloak data to dataflow with id: {}", dataflowId);
+
+    } catch (Exception e) {
+      LOG.error("Error deleting resources in keycloak, group with the id: {}, and exception {}",
+          dataflowId, e.getMessage());
+      throw new EEAException("Error deleting resource in keycloak ", e);
+    }
+  }
+
+  private void deleteDataflowMetabaseInfo(Long dataflowId) throws EEAException {
+    try {
+      dataflowRepository.deleteNativeDataflow(dataflowId);
+      LOG.info("Delete full dataflow with id: {}", dataflowId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error deleting native dataflow with id: {}", dataflowId, e);
+      throw new EEAException(
+          String.format("Error deleting native dataflow with id: %s", dataflowId), e);
+    }
+  }
 }
