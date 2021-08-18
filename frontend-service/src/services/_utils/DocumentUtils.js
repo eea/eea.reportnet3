@@ -1,5 +1,7 @@
 import { config } from 'conf';
 
+import { Document } from 'entities/Document';
+
 const parseDocumentListDTO = documentsDTO => documentsDTO?.map(documentDTO => parseDocumentDTO(documentDTO));
 
 const parseDocumentDTO = documentDTO => {
