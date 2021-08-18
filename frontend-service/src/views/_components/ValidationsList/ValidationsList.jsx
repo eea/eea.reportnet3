@@ -7,7 +7,6 @@ import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-import upperFirst from 'lodash/upperFirst';
 
 import styles from './ValidationsList.module.scss';
 
@@ -260,11 +259,8 @@ const ValidationsList = withRouter(
         case 'isCorrect':
           header = resources.messages['valid'];
           break;
-        case 'entityType':
-          header = resources.messages['entityType'];
-          break;
         default:
-          header = upperFirst(fieldHeader);
+          header = resources.messages[fieldHeader];
           break;
       }
 

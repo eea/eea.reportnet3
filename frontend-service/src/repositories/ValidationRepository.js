@@ -31,9 +31,6 @@ export const ValidationRepository = {
     if (validationRule.automatic) {
       url = getUrl(ValidationConfig.updateAutomatic, { datasetId });
     }
-    return await HTTPRequester.update({
-      url: url,
-      data: validationRule
-    });
+    return await HTTPRequester.update({ url: url, data: validationRule });
   }
 };
