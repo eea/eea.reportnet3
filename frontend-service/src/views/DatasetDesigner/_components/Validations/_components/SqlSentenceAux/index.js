@@ -1,1 +1,1 @@
-export { SqlSentence } from './SqlSentenceAux';
+export { SqlSentence } from './SqlSentence';
