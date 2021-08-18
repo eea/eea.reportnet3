@@ -200,9 +200,14 @@ const ValidationsList = withRouter(
     );
 
     const expressionsTemplate = rowData => {
+      if (!isNil(rowData.expressionText)) {
+        return rowData.expressionText;
+      }
+
       if (!isNil(rowData.sqlSentence)) {
         return rowData.sqlSentence;
       }
+
       return getExpressionString(rowData, datasetSchemaAllTables);
     };
 
@@ -276,7 +281,7 @@ const ValidationsList = withRouter(
         { id: 'name', index: 4 },
         { id: 'description', index: 5 },
         { id: 'message', index: 6 },
-        { id: 'expressions', index: 7 },
+        { id: 'expressionText', index: 7 },
         { id: 'entityType', index: 8 },
         { id: 'levelError', index: 9 },
         { id: 'automatic', index: 10 },
@@ -383,15 +388,14 @@ const ValidationsList = withRouter(
     const columnStyles = field => {
       const style = {};
       const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date'];
-      const fieldUppercase = field.toUpperCase();
       if (reporting) {
         invisibleFields.push('enabled', 'automatic', 'isCorrect');
       }
-      if (fieldUppercase === 'DESCRIPTION') {
+      if (field === 'description') {
         style.width = '23%';
       }
 
-      if (fieldUppercase === 'ENTITYTYPE' || fieldUppercase === 'LEVELERROR') {
+      if (field === 'entityType' || field === 'levelError') {
         style.minWidth = '6rem';
       }
 
@@ -427,7 +431,7 @@ const ValidationsList = withRouter(
         if (field === 'enabled') template = enabledTemplate;
         if (field === 'isCorrect') template = correctTemplate;
         if (field === 'levelError') template = levelErrorTemplate;
-        if (field === 'expressions') template = expressionsTemplate;
+        if (field === 'expressionText') template = expressionsTemplate;
         return (
           <Column
             body={template}
