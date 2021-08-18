@@ -23,14 +23,14 @@ export const ValidationRepository = {
   getAll: async datasetSchemaId =>
     await HTTPRequester.get({ url: getUrl(ValidationConfig.getAll, { datasetSchemaId }) }),
 
-  update: async (datasetId, validation) => {
+  update: async (datasetId, validationRule) => {
     let url = getUrl(ValidationConfig.update, { datasetId });
-    if (validation.automatic) {
+    if (validationRule.automatic) {
       url = getUrl(ValidationConfig.updateAutomatic, { datasetId });
     }
     return await HTTPRequester.update({
       url: url,
-      data: validation
+      data: validationRule
     });
   }
 };
