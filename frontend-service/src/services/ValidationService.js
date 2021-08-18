@@ -110,6 +110,8 @@ export const ValidationService = {
     return validationsList;
   },
 
+  generateQCRulesFile: async datasetId => await ValidationRepository.generateQCRulesFile(datasetId),
+
   generateShowValidationsFile: async datasetId => await ValidationRepository.generateShowValidationsFile(datasetId),
 
   updateFieldRule: async (datasetId, validationRule) => {

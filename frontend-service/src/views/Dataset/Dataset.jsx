@@ -749,8 +749,14 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onDownloadQCRules = async () => {
     setIsDownloadingQCRules(true);
     notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
-    setIsDownloadingQCRules(false);
 
+    try {
+      await ValidationService.generateQCRulesFile(datasetId);
+    } catch (error) {
+      console.error('DatasetDesigner - onDownloadQCRules.', error);
+
+      setIsDownloadingQCRules(false);
+    }
   };
 
   const datasetInsideTitle = () => {

@@ -921,7 +921,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
-        icon={'export'}
+        icon={designerState.isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
         label={resources.messages['downloadQCsButtonLabel']}
         onClick={() => onDownloadQCRules()}
       />
@@ -975,7 +975,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const onDownloadQCRules = async () => {
     setIsDownloadingQCRules(true);
     notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
-    setIsDownloadingQCRules(false);
+
+    try {
+      await ValidationService.generateQCRulesFile(datasetId);
+    } catch (error) {
+      console.error('DatasetDesigner - onDownloadQCRules.', error);
+      setIsDownloadingQCRules(false);
+    }
   };
 
   const onDownloadValidations = async () => {
