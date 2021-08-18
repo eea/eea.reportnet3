@@ -1,15 +1,15 @@
-.characterCount{
-    float:right;
-    text-align: right;
-    pointer-events: none;
-    
-  }
+.characterCount {
+  position: relative;
+  padding-right: 10px;
+  top: -1.7rem;
+  padding-right: 5px;
+  text-align: right;
+}
 
-  .redCharacterCount{
-    color:red;
-    float:right;
-    text-align: right;
-    pointer-events: none;
-  }
-
-  
+.redCharacterCount {
+  color: red;
+  position: relative;
+  top: -1.7rem;
+  padding-right: 10px;
+  text-align: right;
+}
