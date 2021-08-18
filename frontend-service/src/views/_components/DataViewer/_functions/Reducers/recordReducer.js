@@ -57,6 +57,9 @@ export const recordReducer = (state, { type, payload }) => {
     case 'IS_RECORD_DELETED':
       return { ...state, isRecordDeleted: payload };
 
+    case 'ON_CHANGE_PAGE':
+      return { ...state, recordsPerPage: payload.rows, firstPageRecord: payload.first };
+
     case 'RESET_CONDITIONAL_FIELDS':
       const inmRecord = payload.isNewRecord ? { ...state.newRecord } : { ...state.editedRecord };
       let recordChanged = false;

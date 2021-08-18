@@ -526,22 +526,6 @@ const ValidationViewer = memo(
       }
     ];
 
-    if (isLoading) {
-      return (
-        <div className={styles.spinner}>
-          <Spinner className={styles.spinnerPosition} />
-        </div>
-      );
-    }
-
-    if (isEmpty(fetchedData) && !filtered) {
-      return (
-        <div className={styles.emptyValidationsWrapper}>
-          <h3>{resources.messages['emptyValidations']}</h3>
-        </div>
-      );
-    }
-
     return (
       <div className={styles.validationWrapper}>
         <Toolbar className={styles.validationToolbar}>
@@ -559,6 +543,7 @@ const ValidationViewer = memo(
             autoLayout={true}
             className={isWebformView ? styles.tableWebform : undefined}
             first={firstRow}
+            hasDefaultCurrentPage={true}
             lazy={true}
             loading={isLoading}
             onPage={onChangePage}
@@ -578,9 +563,17 @@ const ValidationViewer = memo(
             value={fetchedData}>
             {columns}
           </DataTable>
+        ) : isLoading ? (
+          <div className={styles.spinner}>
+            <Spinner className={styles.spinnerPosition} />
+          </div>
         ) : (
           <div className={styles.emptyFilteredData}>
-            <h3>{resources.messages['noValidationsWithSelectedParameters']}</h3>
+            {!filtered ? (
+              <h3>{resources.messages['emptyValidations']}</h3>
+            ) : (
+              <h3>{resources.messages['noValidationsWithSelectedParameters']}</h3>
+            )}
           </div>
         )}
       </div>
