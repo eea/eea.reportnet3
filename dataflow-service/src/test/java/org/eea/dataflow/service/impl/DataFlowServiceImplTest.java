@@ -301,6 +301,8 @@ public class DataFlowServiceImplTest {
     dataFlowVO.setStatus(TypeStatusEnum.DRAFT);
     dataFlowVO.setType(TypeDataflowEnum.BUSINESS);
 
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("name");
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(new ArrayList<>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -314,6 +316,7 @@ public class DataFlowServiceImplTest {
         .thenReturn(Arrays.asList(representative));
     when(dataProviderGroupRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     when(fmeUserRepository.findById(Mockito.any())).thenReturn(Optional.empty());
+    when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(new Dataflow()));
     dataFlowVO.setReportingDatasets(reportingDatasetVOs);
     dataFlowVO.setDesignDatasets(designDatasetVOs);
     ObligationVO obligation = new ObligationVO();
@@ -1137,8 +1140,8 @@ public class DataFlowServiceImplTest {
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     assertTrue(dataflowServiceImpl.isAdmin());
   }
-  
-    @Test
+
+  @Test
   public void getEmptyDataflowByIDTest() throws EEAException {
 
 
@@ -1161,7 +1164,7 @@ public class DataFlowServiceImplTest {
     DataFlowVO searchDataflow = dataflowServiceImpl.getById(1L);
 
     assertEquals("Datasets don't match when using getDataflowByID", emptyDataflow, searchDataflow);
-}
+  }
 
 
   @Test
