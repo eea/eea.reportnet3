@@ -1221,5 +1221,6 @@
     "currentPageInfoMessage": "Press 'Enter' key to go to this page.",
     "downloadQCsButtonLabel": "Download QCs",
     "downloadQcRulesStart": "Generating QCs rules file",
+    "downloadQcRulesError": "Failed downloading QCs rules"
   }
 }
