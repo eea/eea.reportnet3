@@ -138,6 +138,10 @@ export default class ObjectUtils {
     return index;
   }
 
+  static getJSXElement(obj, ...params) {
+    return this.isFunction(obj) ? obj(...params) : obj;
+  }
+
   static filterConstraints = {
     startsWith(value, filter) {
       if (filter === undefined || filter === null || filter.trim() === '') {
