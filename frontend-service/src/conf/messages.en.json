@@ -190,8 +190,7 @@
     "dataflowAcceptedPendingTab": "Pending & Accepted",
     "dataflowCompletedTab": "Completed",
     "dataflowCreationError": "Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> dataflow",
-    "dataflowDeleteByIdError": "Dataflow delete error",
-    "dataflowDeleteSuccess": "Dataflow deleted successfully",
+    "dataflowDeleteByIdError": "Error deleting the dataflow",
     "dataflowDescriptionValidationMax": "Dataflow description is too long",
     "dataflowDetails": "Dataflow details",
     "dataflowDetailsError": "Failed loading dataflow information",
@@ -1046,7 +1045,7 @@
     "tableWithNoPKWarningTitle": "There are tables with no primary keys (PK)",
     "tabMenuConstraintData": "Info",
     "tabMenuExpression": "Expression",
-    "tabMenuExpressions": "Expressions",
+    "expressionText": "Expression",
     "tabMenuTableRelations": "Table relations",
     "tabularDataView": "Tabular data",
     "targetDatasetSchema": "Reference schema",
@@ -1220,6 +1219,15 @@
     "currentPageErrorMessage": "Value must be between 1 and",
     "currentPageInfoMessage": "Press 'Enter' key to go to this page.",
     "of": "of",
-    "percentSignSqlQCTooltip": "You can use fields from the SQL sentence writing the field name inside {% ... %}"
+    "percentSignSqlQCTooltip": "You can use fields from the SQL sentence writing the field name inside {% ... %}",
+    "deleteDataflowCompletedEvent": "Dataflow deleted successfully",
+    "deleteDataflowFailedEvent": "Error deleting the dataflow",
+    "downloadQCsButtonLabel": "Download QCs",
+    "downloadQcRulesStart": "Generating QCs rules file",
+    "generateQcRulesFileError": "Failed generating QCs rules file",
+    "downloadQcRulesFileError": "Failed downloading QC rules file",
+    "automaticallyDownloadQcRulesFile": "QC rules file generated successfully",
+    "if": "IF",
+    "then": "THEN"
   }
 }

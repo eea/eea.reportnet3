@@ -32,7 +32,7 @@ public class RuleExpressionServiceTest {
 
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   public RuleExpressionServiceTest(RuleExpressionDTO ruleExpressionDTO, String ruleExpressionString,

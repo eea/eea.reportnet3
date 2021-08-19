@@ -24,7 +24,7 @@ public class TestDatasetServiceImplTest {
 
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
 

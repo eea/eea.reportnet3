@@ -41,7 +41,7 @@ public class CommandKafkaReceiverTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     ReflectionTestUtils.setField(kafkaReceiver, "handler", eEAEventHandler);
     message = new Message<EEAEventVO>() {
 

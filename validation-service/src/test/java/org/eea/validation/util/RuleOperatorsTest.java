@@ -36,7 +36,7 @@ public class RuleOperatorsTest {
    */
   @Before
   public void initMocks() throws IOException {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     List<FieldValue> fields = new ArrayList<>();
     fieldValue1 = new FieldValue();
     fieldValue1.setIdFieldSchema("1");

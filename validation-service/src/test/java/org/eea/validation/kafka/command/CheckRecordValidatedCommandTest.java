@@ -60,7 +60,7 @@ public class CheckRecordValidatedCommandTest {
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
     eeaEventVO.setData(data);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

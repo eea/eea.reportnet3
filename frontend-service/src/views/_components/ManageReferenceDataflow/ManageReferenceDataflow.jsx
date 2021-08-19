@@ -3,7 +3,6 @@ import React, { Fragment, useContext, useRef, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 
 import { config } from 'conf';
-import { routes } from 'conf/routes';
 
 import styles from './ManageReferenceDataflow.module.scss';
 
@@ -21,7 +20,6 @@ import ReactTooltip from 'react-tooltip';
 import { DataflowService } from 'services/DataflowService';
 import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 
-import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
@@ -30,12 +28,10 @@ import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { UserService } from 'services/UserService';
 
-import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageReferenceDataflow = ({
   dataflowId,
-  history,
   isEditing = false,
   isVisible,
   manageDialogs,
@@ -47,7 +43,6 @@ export const ManageReferenceDataflow = ({
 
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
-  const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -59,6 +54,7 @@ export const ManageReferenceDataflow = ({
     name: { hasErrors: false, message: '' }
   });
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [name, setName] = useState(isEditing ? metadata.name : '');
   const [pinDataflow, setPinDataflow] = useState(false);
@@ -112,17 +108,15 @@ export const ManageReferenceDataflow = ({
   };
 
   const onDeleteDataflow = async () => {
-    setIsDeleteDialogVisible(false);
-    showLoading();
+    setIsDeleting(true);
     try {
       await DataflowService.delete(dataflowId);
-      history.push(getUrl(routes.DATAFLOWS));
-      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
+      manageDialogs(dialogName, false);
     } catch (error) {
       console.error('ManageReferenceDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
     } finally {
-      hideLoading();
+      setIsDeleting(false);
     }
   };
 
@@ -256,8 +250,9 @@ export const ManageReferenceDataflow = ({
       {isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          disabledConfirm={!TextUtils.areEquals(deleteInput, metadata.name)}
+          disabledConfirm={!TextUtils.areEquals(deleteInput, metadata.name) || isDeleting}
           header={resources.messages['deleteReferenceDataflowDialogHeader']}
+          iconConfirm={isDeleting && 'spinnerAnimate'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={onDeleteDataflow}

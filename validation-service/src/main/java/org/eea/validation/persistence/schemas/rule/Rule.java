@@ -89,6 +89,10 @@ public class Rule {
   @Field(value = "sqlSentence")
   private String sqlSentence;
 
+  /** The expression text. */
+  @Field(value = "expressionText")
+  private String expressionText;
+
   /**
    * Hash code.
    *

@@ -28,7 +28,7 @@ public class ExternalIntegrationReportingFailedEventTest {
 
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

@@ -24,6 +24,9 @@ export const reportingDataflowReducer = (state, { type, payload }) => {
     case 'TOGGLE_PIN':
       return { ...state, pinDataflow: payload };
 
+    case 'SET_IS_DELETING':
+      return { ...state, isDeleting: payload.isDeleting };
+
     default:
       return state;
   }

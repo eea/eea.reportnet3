@@ -33,7 +33,7 @@ public class TenantResolverTest {
    */
   @Before
   public void initMocks() throws IOException {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

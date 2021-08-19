@@ -43,7 +43,7 @@ public class DataFlowDocumentControllerImplTest {
   @Before
   public void initMocks() {
     document = new DocumentVO();
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

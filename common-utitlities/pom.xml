@@ -17,6 +17,7 @@
 		<spring.security.version>5.1.4.RELEASE</spring.security.version>
 		<aspectj.version>1.9.2</aspectj.version>
 		<sonar.moduleKey>org.eea:reportnet:common-utitlities:${sonar.jenkins.branch}</sonar.moduleKey>
+		<mockito.version>3.11.2</mockito.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -92,9 +93,11 @@
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjweaver</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
+			<artifactId>mockito-inline</artifactId>
+			<version>${mockito.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -110,6 +113,12 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.mockito</groupId>
+					<artifactId>mockito-core</artifactId>
+				</exclusion>
+			</exclusions>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -140,8 +149,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.mapstruct</groupId>
