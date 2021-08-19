@@ -173,8 +173,9 @@ export const ManageBusinessDataflow = ({
       onHideDataflowDialog();
     } catch (error) {
       console.error('ManageBusinessDataflow - onDeleteDataflow.', error);
-      setIsDeleting(false);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
+    } finally {
+      setIsDeleting(false);
     }
   };
 

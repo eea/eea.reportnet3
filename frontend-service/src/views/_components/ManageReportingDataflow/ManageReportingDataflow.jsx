@@ -95,6 +95,7 @@ export const ManageReportingDataflow = ({
     } catch (error) {
       console.error('ManageReportingDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
+    } finally {
       setIsDeleting(false);
     }
   };
