@@ -316,7 +316,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       {dataflowState.isEditDialogVisible && (
         <ManageReferenceDataflow
           dataflowId={referenceDataflowId}
-          history={history}
+          // history={history}
           isEditing
           isVisible={dataflowState.isEditDialogVisible}
           manageDialogs={manageDialogs}

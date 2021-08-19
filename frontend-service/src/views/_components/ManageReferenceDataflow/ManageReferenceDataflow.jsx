@@ -21,7 +21,7 @@ import ReactTooltip from 'react-tooltip';
 import { DataflowService } from 'services/DataflowService';
 import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 
-import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
+// import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
@@ -30,12 +30,12 @@ import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { UserService } from 'services/UserService';
 
-import { getUrl } from 'repositories/_utils/UrlUtils';
+// import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageReferenceDataflow = ({
   dataflowId,
-  history,
+  // history,
   isEditing = false,
   isVisible,
   manageDialogs,
@@ -47,7 +47,7 @@ export const ManageReferenceDataflow = ({
 
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
-  const { hideLoading, showLoading } = useContext(LoadingContext);
+  // const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);

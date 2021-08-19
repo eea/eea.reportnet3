@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
-import { routes } from 'conf/routes';
+// import { routes } from 'conf/routes';
 
 import styles from './ManageBusinessDataflow.module.scss';
 
@@ -25,7 +25,7 @@ import { BusinessDataflowService } from 'services/BusinessDataflowService';
 import { DataflowService } from 'services/DataflowService';
 import { RepresentativeService } from 'services/RepresentativeService';
 
-import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
+// import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
@@ -34,13 +34,13 @@ import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { UserService } from 'services/UserService';
 
-import { getUrl } from 'repositories/_utils/UrlUtils';
+// import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageBusinessDataflow = ({
   dataflowId,
   hasRepresentatives,
-  history,
+  // history,
   isAdmin,
   isEditing = false,
   isVisible,
@@ -55,7 +55,7 @@ export const ManageBusinessDataflow = ({
   const dialogName = 'isBusinessDataflowDialogVisible';
   const isDesign = TextUtils.areEquals(state?.status, config.dataflowStatus.DESIGN);
 
-  const { hideLoading, showLoading } = useContext(LoadingContext);
+  // const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
