@@ -93,11 +93,12 @@ public class DeleteHelper {
    * Execute delete dataset process.
    *
    * @param datasetId the dataset id
+   * @param deletePrefilledTables the delete prefilled tables
    */
   @Async
-  public void executeDeleteDatasetProcess(final Long datasetId) {
+  public void executeDeleteDatasetProcess(final Long datasetId, Boolean deletePrefilledTables) {
     LOG.info("Deleting data from dataset {}", datasetId);
-    datasetService.deleteImportData(datasetId);
+    datasetService.deleteImportData(datasetId, deletePrefilledTables);
 
     // Release the lock manually
     Map<String, Object> deleteDatasetValues = new HashMap<>();
@@ -132,7 +133,7 @@ public class DeleteHelper {
   @Async
   public void executeDeleteImportDataAsyncBeforeReplacing(Long datasetId, Long integrationId,
       IntegrationOperationTypeEnum operation) {
-    datasetService.deleteImportData(datasetId);
+    datasetService.deleteImportData(datasetId, false);
     LOG.info("All data value deleted from datasetId {}. Next step call the FME by the kafka event",
         datasetId);
     // Send the kafka event after deleting to call FME

@@ -1150,22 +1150,24 @@ public class DataSetControllerImplTest {
 
   @Test
   public void deleteImportDataTest() {
-    dataSetControllerImpl.deleteImportData(1L, null, null);
-    Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong());
+    dataSetControllerImpl.deleteImportData(1L, null, null, false);
+    Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
+        Mockito.anyBoolean());
   }
 
   @Test
   public void deleteImportDataRestApiTest() {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
-    dataSetControllerImpl.deleteImportData(1L, 1L, 1L);
-    Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong());
+    dataSetControllerImpl.deleteImportData(1L, 1L, 1L, false);
+    Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
+        Mockito.anyBoolean());
   }
 
   @Test(expected = ResponseStatusException.class)
   public void deleteImportDataRestApiForbiddenTest() {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(2L);
     try {
-      dataSetControllerImpl.deleteImportData(1L, 1L, null);
+      dataSetControllerImpl.deleteImportData(1L, 1L, null, false);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;

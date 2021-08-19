@@ -20,65 +20,65 @@ object ExecutionConfiguration {
   
   def getExecutionConfigurations(): MMap[String, (String, String, Map[String, String], Integer, String, String, String, Integer, Boolean) => io.gatling.core.structure.ScenarioBuilder] = {
     val executionFunctions: MMap[String, (String, String, Map[String, String], Integer, String, String, String, Integer, Boolean) => io.gatling.core.structure.ScenarioBuilder] = collection.mutable.Map.empty
-    executionFunctions.put("get_noBody_noFile_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+    executionFunctions.put("get_noBody_noFile_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       scenario(requestName)
         .repeat(getExpresionOutOfInteger(numberExecutions)) {
           exec(http(requestName)
             .get(endpoint)
             .headers(requestHeaders))
-            .pause(requestPauseTime)
+            .pause(pauseTime)
         }
     })
-    executionFunctions.put("get_noBody_file_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+    executionFunctions.put("get_noBody_file_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       scenario(requestName)
         .repeat(getExpresionOutOfInteger(numberExecutions)) {
           exec(http(requestName)
             .get(endpoint)
             .formUpload(keyFileName, fileName)
             .headers(requestHeaders))
-            .pause(requestPauseTime)
+            .pause(pauseTime)
         }
     })
-    executionFunctions.put("get_bodyJson_noFile_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+    executionFunctions.put("get_bodyJson_noFile_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       scenario(requestName)
         .repeat(getExpresionOutOfInteger(numberExecutions)) {
           exec(http(requestName)
             .get(endpoint)
             .body(if (requestBody.startsWith("file://")) RawFileBody(requestBody.substring(6)) else StringBody(requestBody)).asJSON
             .headers(requestHeaders))
-            .pause(requestPauseTime)
+            .pause(pauseTime)
         }
     })
-    executionFunctions.put("post_noBody_noFile_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+    executionFunctions.put("post_noBody_noFile_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       scenario(requestName)
         .repeat(getExpresionOutOfInteger(numberExecutions)) {
           exec(http(requestName)
             .post(endpoint)
             .headers(requestHeaders))
-            .pause(requestPauseTime)
+            .pause(pauseTime)
         }
     })
-    executionFunctions.put("post_noBody_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+    executionFunctions.put("post_noBody_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       val feeder = new CSVFeeder("../test-infrastructure/feeder/" + requestName + "_param.csv", requireAuth)
       scenario(requestName)
         .repeat(getExpresionOutOfInteger(numberExecutions)) {
           feed(feeder.apply()).exec(http(requestName)
             .post(endpoint)
             .headers(requestHeaders))
-            .pause(requestPauseTime)
+            .pause(pauseTime)
         }
     })
-    executionFunctions.put("post_noBody_file_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+    executionFunctions.put("post_noBody_file_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       scenario(requestName)
         .repeat(getExpresionOutOfInteger(numberExecutions)) {
           exec(http(requestName)
             .post(endpoint)
             .formUpload(keyFileName, fileName)
             .headers(requestHeaders))
-            .pause(requestPauseTime)
+            .pause(pauseTime)
         }
     })
-    executionFunctions.put("post_noBody_file_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+    executionFunctions.put("post_noBody_file_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       val feeder = new CSVFeeder("../test-infrastructure/feeder/" + requestName + "_param.csv", requireAuth)
       scenario(requestName)
         .repeat(getExpresionOutOfInteger(numberExecutions)) {
@@ -86,65 +86,66 @@ object ExecutionConfiguration {
             .post(endpoint)
             .formUpload(keyFileName, fileName)
             .headers(requestHeaders))
-            .pause(requestPauseTime)
+            .pause(pauseTime)
         }
     })
-    executionFunctions.put("post_bodyJson_noFile_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+    executionFunctions.put("post_bodyJson_noFile_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       scenario(requestName)
         .repeat(getExpresionOutOfInteger(numberExecutions)) {
           exec(http(requestName)
             .post(endpoint)
             .body(if (requestBody.startsWith("file://")) RawFileBody(requestBody.substring(6)) else StringBody(requestBody)).asJSON
             .headers(requestHeaders))
-            .pause(requestPauseTime)
+            .pause(pauseTime)
         }
     })
-    executionFunctions.put("get_noBody_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
-      //val param_feeder=Iterator.continually(getRandomValue(getDataFeeder("../"+requestName+"_param.csv")))
+    executionFunctions.put("get_noBody_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       val feeder = new CSVFeeder("../test-infrastructure/feeder/" + requestName + "_param.csv", requireAuth)
       scenario(requestName).repeat(getExpresionOutOfInteger(numberExecutions)) {
         feed(feeder.apply()).exec(http(requestName)
           .get(endpoint)
           .headers(requestHeaders))
-          .pause(requestPauseTime)
+          .pause(pauseTime)
       }
     })
-    executionFunctions.put("post_bodyJson_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+    executionFunctions.put("post_bodyJson_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       val feeder = new CSVFeeder("../test-infrastructure/feeder/" + requestName + "_param.csv", requireAuth)
+      println(requestHeaders)
+      println(pauseTime)
       scenario(requestName).repeat(getExpresionOutOfInteger(numberExecutions)) {
         feed(feeder.apply()).exec(http(requestName)
           .post(endpoint)
           .body(if (requestBody.startsWith("file://")) RawFileBody(requestBody.substring(6)) else StringBody(requestBody)).asJSON
           .headers(requestHeaders))
-          .pause(requestPauseTime)
+          .pause(pauseTime)
       }
     })
-    executionFunctions.put("put_noBody_noFile_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+    executionFunctions.put("put_noBody_noFile_noFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       scenario(requestName)
         .repeat(getExpresionOutOfInteger(numberExecutions)) {
           exec(http(requestName)
             .put(endpoint)
             .headers(requestHeaders))
-            .pause(requestPauseTime)
+            .pause(pauseTime)
         }
     })
-    executionFunctions.put("put_noBody_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+    executionFunctions.put("put_noBody_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       val feeder = new CSVFeeder("../test-infrastructure/feeder/" + requestName + "_param.csv", requireAuth)
       scenario(requestName).repeat(getExpresionOutOfInteger(numberExecutions)) {
         feed(feeder.apply()).exec(http(requestName)
           .put(endpoint)
           .headers(requestHeaders))
-          .pause(requestPauseTime)
+          .pause(pauseTime)
       }
     })
-    executionFunctions.put("delete_noBody_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], requestPauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
+    executionFunctions.put("delete_noBody_noFile_useFeeder", (requestName: String, endpoint: String, requestHeaders: Map[String, String], pauseTime: Integer, requestBody: String, fileName: String, keyFileName: String, numberExecutions: Integer, requireAuth: Boolean) => {
       //val param_feeder=Iterator.continually(getRandomValue(getDataFeeder("../"+requestName+"_param.csv")))
       val feeder = new CSVFeeder("../test-infrastructure/feeder/" + requestName + "_param.csv", requireAuth)
       scenario(requestName).repeat(getExpresionOutOfInteger(numberExecutions)) {
         feed(feeder.apply()).exec(http(requestName)
           .delete(endpoint)
           .headers(requestHeaders))
-          .pause(requestPauseTime)
+          .pause(pauseTime)
       }
     })
 
