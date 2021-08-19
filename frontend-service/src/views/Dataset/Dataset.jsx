@@ -764,7 +764,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await ValidationService.generateQCRulesFile(datasetId);
     } catch (error) {
       console.error('DatasetDesigner - onDownloadQCRules.', error);
-      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_ERROR' });
+      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' });
       setIsDownloadingQCRules(false);
     }
   };

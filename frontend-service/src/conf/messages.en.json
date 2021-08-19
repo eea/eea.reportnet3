@@ -1224,7 +1224,7 @@
     "deleteDataflowFailedEvent": "Error deleting the dataflow",
     "downloadQCsButtonLabel": "Download QCs",
     "downloadQcRulesStart": "Generating QCs rules file",
-    "downloadQcRulesError": "Failed downloading QCs rules",
+    "generateQcRulesFileError": "Failed generating QCs rules file",
     "downloadQcRulesFileError": "Failed downloading QC rules file",
     "automaticallyDownloadQcRulesFile": "QC rules file generated successfully",
     "if": "IF",

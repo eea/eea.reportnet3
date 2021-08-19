@@ -309,7 +309,7 @@
           "key": "DOWNLOAD_VALIDATIONS_ERROR"
         },
         {
-          "key": "DOWNLOAD_QC_RULES_ERROR"
+          "key": "GENERATE_QC_RULES_FILE_ERROR"
         },
         {
           "key": "CREATE_DATA_COLLECTION_ERROR"
