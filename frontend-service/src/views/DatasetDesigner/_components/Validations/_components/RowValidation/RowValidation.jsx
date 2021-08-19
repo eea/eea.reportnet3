@@ -27,7 +27,7 @@ import {
 } from 'views/DatasetDesigner/_components/Validations/_functions/Reducers/CreateValidationReducer';
 
 import { checkComparisonExpressions } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonExpressions';
-import { checkComparisonSQLsentence } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonSQLsentence';
+import { checkComparisonSqlSentence } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonSqlSentenceA';
 import { checkComparisonValidation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonValidation';
 import { checkComparisonValidationIfThen } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonValidationIfThen';
 import { deleteExpression } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/deleteExpression';
@@ -647,7 +647,7 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
       return (
         creationFormState.isValidationCreationDisabled ||
         isSubmitDisabled ||
-        !checkComparisonSQLsentence(creationFormState?.candidateRule?.sqlSentence)
+        !checkComparisonSqlSentence(creationFormState?.candidateRule?.sqlSentence)
       );
     }
 

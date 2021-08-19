@@ -26,7 +26,7 @@ import {
 } from 'views/DatasetDesigner/_components/Validations/_functions/Reducers/CreateValidationReducer';
 
 import { checkComparisonRelation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonRelation';
-import { checkComparisonSQLsentence } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonSQLsentence';
+import { checkComparisonSqlSentence } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonSqlSentenceA';
 import { checkComparisonValidation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonValidation';
 import { deleteLink } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/deleteLink';
 import { getDatasetSchemaTableFields } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/getDatasetSchemaTableFields';
@@ -576,7 +576,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
       return (
         creationFormState.isValidationCreationDisabled ||
         isSubmitDisabled ||
-        !checkComparisonSQLsentence(creationFormState?.candidateRule?.sqlSentence)
+        !checkComparisonSqlSentence(creationFormState?.candidateRule?.sqlSentence)
       );
     }
     return (
