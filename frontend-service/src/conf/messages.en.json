@@ -190,7 +190,7 @@
     "dataflowAcceptedPendingTab": "Pending & Accepted",
     "dataflowCompletedTab": "Completed",
     "dataflowCreationError": "Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> dataflow",
-    "dataflowDeleteByIdError": "Dataflow delete error",
+    "dataflowDeleteByIdError": "Error deleting the dataflow",
     "dataflowDescriptionValidationMax": "Dataflow description is too long",
     "dataflowDetails": "Dataflow details",
     "dataflowDetailsError": "Failed loading dataflow information",
@@ -1221,6 +1221,6 @@
     "of": "of",
     "percentSignSqlQCTooltip": "You can use fields from the SQL sentence writing the field name inside {% ... %}",
     "deleteDataflowCompletedEvent": "Dataflow deleted successfully",
-    "deleteDataflowFailedEvent": "Dataflow delete error"
+    "deleteDataflowFailedEvent": "Error deleting the dataflow"
   }
 }
