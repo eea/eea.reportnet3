@@ -1,3 +1,4 @@
+import isNil from 'lodash/isNil';
 import reverse from 'lodash/reverse';
 
 import { FeedbackRepository } from 'repositories/FeedbackRepository';
@@ -14,7 +15,12 @@ export const FeedbackService = {
     response.data = reverse(
       response.data.map(
         message =>
-          new Feedback({ ...message, messageAttachment: new FeedbackMessageAttachment(...message.messageAttachmentVO) })
+          new Feedback({
+            ...message,
+            messageAttachment: !isNil(message.messageAttachmentVO)
+              ? new FeedbackMessageAttachment(...message.messageAttachmentVO)
+              : null
+          })
       )
     );
     return response;
