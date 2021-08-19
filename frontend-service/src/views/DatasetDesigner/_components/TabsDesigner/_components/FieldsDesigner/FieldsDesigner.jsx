@@ -698,7 +698,7 @@ export const FieldsDesigner = ({
           />
           <CharacterCounter
             currentLength={tableDescriptionValue.length}
-            maxLength={config.INPUT_MAX_LENGTH}
+            maxLength={config.DESCRIPTION_MAX_LENGTH}
             style={{ position: 'relative', top: '4px' }}
           />
         </div>

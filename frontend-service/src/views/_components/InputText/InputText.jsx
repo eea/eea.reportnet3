@@ -88,7 +88,7 @@ export class InputText extends Component {
       this.renderTooltip();
     }
     if (this.props.hasMaxCharCounter && !isNil(this.props.maxLength) && !isNil(this.inputElement)) {
-      this.element.style.paddingRight = `${Number(this.inputElement.getBoundingClientRect().width) + 25}px`;
+      this.element.style.paddingRight = `${this.inputElement.getBoundingClientRect().width + 30}px`;
     }
   }
 

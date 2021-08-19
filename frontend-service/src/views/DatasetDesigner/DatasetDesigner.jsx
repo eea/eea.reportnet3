@@ -1210,8 +1210,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             />
             <CharacterCounter
               currentLength={datasetDescription.length}
-              maxLength={config.INPUT_MAX_LENGTH}
-              style={{ position: 'relative', right: '62px', top: '52px' }}
+              maxLength={config.DESCRIPTION_MAX_LENGTH}
+              style={{ position: 'relative', right: '75px', top: '52px' }}
             />
             <div className={styles.datasetConfigurationButtons}>
               <div>
