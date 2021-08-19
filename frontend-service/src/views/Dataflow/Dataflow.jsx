@@ -607,6 +607,7 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   useCheckNotifications(['RELEASE_COMPLETED_EVENT', 'RELEASE_PROVIDER_COMPLETED_EVENT'], onLoadReportingDataflow);
+  useCheckNotifications(['DELETE_DATAFLOW_COMPLETED_EVENT'], goToDataflowsPage);
 
   useCheckNotifications(
     [
@@ -623,6 +624,10 @@ const Dataflow = withRouter(({ history, match }) => {
     const validationResult = await DataflowService.getSchemasValidation(dataflowId);
     dataflowDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult: validationResult.data } });
   };
+
+  function goToDataflowsPage() {
+    history.push(getUrl(routes.DATAFLOWS));
+  }
 
   const onSaveName = async (value, index) => {
     try {

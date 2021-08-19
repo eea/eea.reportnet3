@@ -4,7 +4,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
-import { routes } from 'conf/routes';
+// import { routes } from 'conf/routes';
 
 import styles from './ManageReportingDataflow.module.scss';
 
@@ -20,18 +20,18 @@ import ReactTooltip from 'react-tooltip';
 
 import { DataflowService } from 'services/DataflowService';
 
-import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
+// import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { reportingDataflowReducer } from './_functions/Reducers/reportingDataflowReducer';
 
-import { getUrl } from 'repositories/_utils/UrlUtils';
+// import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageReportingDataflow = ({
   dataflowId,
-  history,
+  // history,
   isEditForm,
   manageDialogs,
   obligation,
@@ -41,7 +41,7 @@ export const ManageReportingDataflow = ({
   setCheckedObligation,
   state
 }) => {
-  const { showLoading, hideLoading } = useContext(LoadingContext);
+  // const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -82,25 +82,27 @@ export const ManageReportingDataflow = ({
 
   const onSubmit = value => manageReportingDataflowDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
-  const onDeleteDataflow = async () => {
-    manageDialogs('isDeleteDialogVisible', false);
-    showLoading();
-    try {
-      await DataflowService.delete(dataflowId);
-      history.push(getUrl(routes.DATAFLOWS));
-      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
-    } catch (error) {
-      console.error('ManageReportingDataflow - onDeleteDataflow.', error);
-      notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
-    } finally {
-      hideLoading();
-    }
-  };
-
   const onHideDataflowDialog = () => {
     onResetData();
     resetObligations();
     manageDialogs(secondaryDialog, false);
+  };
+
+  const onDeleteDataflow = async () => {
+    manageDialogs('isDeleteDialogVisible', false);
+    // showLoading();
+    try {
+      await DataflowService.delete(dataflowId);
+      onHideDataflowDialog();
+      // history.push(getUrl(routes.DATAFLOWS));
+      notificationContext.add({ type: 'DATAFLOW_DELETE_INIT' });
+    } catch (error) {
+      console.error('ManageReportingDataflow - onDeleteDataflow.', error);
+      notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
+    }
+    // finally {
+    //   hideLoading();
+    // }
   };
 
   const onLoadData = ({ name, description }) =>

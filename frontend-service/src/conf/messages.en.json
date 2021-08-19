@@ -191,7 +191,6 @@
     "dataflowCompletedTab": "Completed",
     "dataflowCreationError": "Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> dataflow",
     "dataflowDeleteByIdError": "Dataflow delete error",
-    "dataflowDeleteSuccess": "Dataflow deleted successfully",
     "dataflowDescriptionValidationMax": "Dataflow description is too long",
     "dataflowDetails": "Dataflow details",
     "dataflowDetailsError": "Failed loading dataflow information",
@@ -1220,6 +1219,9 @@
     "currentPageErrorMessage": "Value must be between 1 and",
     "currentPageInfoMessage": "Press 'Enter' key to go to this page.",
     "of": "of",
-    "percentSignSqlQCTooltip": "You can use fields from the SQL sentence writing the field name inside {% ... %}"
+    "percentSignSqlQCTooltip": "You can use fields from the SQL sentence writing the field name inside {% ... %}",
+    "dataflowDeleteInit": "Dataflow delete started",
+    "deleteDataflowCompletedEvent": "Dataflow deleted successfully",
+    "deleteDataflowFailedEvent": "Dataflow delete error"
   }
 }

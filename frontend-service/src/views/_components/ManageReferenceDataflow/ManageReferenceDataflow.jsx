@@ -113,17 +113,19 @@ export const ManageReferenceDataflow = ({
 
   const onDeleteDataflow = async () => {
     setIsDeleteDialogVisible(false);
-    showLoading();
+    // showLoading();
     try {
       await DataflowService.delete(dataflowId);
-      history.push(getUrl(routes.DATAFLOWS));
-      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
+      // history.push(getUrl(routes.DATAFLOWS));
+      manageDialogs(dialogName, false);
+      notificationContext.add({ type: 'DATAFLOW_DELETE_INIT' });
     } catch (error) {
       console.error('ManageReferenceDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
-    } finally {
-      hideLoading();
     }
+    //  finally {
+    //   hideLoading();
+    // }
   };
 
   const onManageReferenceDataflow = async () => {

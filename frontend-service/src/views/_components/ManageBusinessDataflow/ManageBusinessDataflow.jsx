@@ -164,19 +164,26 @@ export const ManageBusinessDataflow = ({
   const onSelectGroup = group => setSelectedGroup(group);
   const onSelectFmeUser = fmeUser => setSelectedFmeUser(fmeUser);
 
+  const onHideDataflowDialog = () => {
+    resetObligations();
+    manageDialogs(dialogName, false);
+  };
+
   const onDeleteDataflow = async () => {
     setIsDeleteDialogVisible(false);
-    showLoading();
+    // showLoading();
     try {
       await DataflowService.delete(dataflowId);
-      history.push(getUrl(routes.DATAFLOWS));
-      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
+      // history.push(getUrl(routes.DATAFLOWS));
+      onHideDataflowDialog();
+      notificationContext.add({ type: 'DATAFLOW_DELETE_INIT' });
     } catch (error) {
       console.error('ManageBusinessDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
-    } finally {
-      hideLoading();
     }
+    //  finally {
+    //    hideLoading();
+    // }
   };
 
   const onManageBusinessDataflow = async () => {
@@ -292,10 +299,7 @@ export const ManageBusinessDataflow = ({
         className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
         icon={'cancel'}
         label={isEditing ? resources.messages['cancel'] : resources.messages['close']}
-        onClick={() => {
-          resetObligations();
-          manageDialogs(dialogName, false);
-        }}
+        onClick={onHideDataflowDialog()}
       />
     </Fragment>
   );
@@ -309,10 +313,7 @@ export const ManageBusinessDataflow = ({
             ? resources.messages['editBusinessDataflowDialogHeader']
             : resources.messages['createBusinessDataflowDialogHeader']
         }
-        onHide={() => {
-          resetObligations();
-          manageDialogs(dialogName, false);
-        }}
+        onHide={onHideDataflowDialog()}
         visible={isVisible}>
         <div className={styles.dialogContent}>
           {isLoading ? (
