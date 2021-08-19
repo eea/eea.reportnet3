@@ -114,11 +114,9 @@ export const ManageReferenceDataflow = ({
     setIsDeleting(true);
     try {
       await DataflowService.delete(dataflowId);
-      manageDialogs(dialogName, false);
     } catch (error) {
       console.error('ManageReferenceDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
-    } finally {
       setIsDeleting(false);
     }
   };

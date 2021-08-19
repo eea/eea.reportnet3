@@ -94,11 +94,9 @@ export const ManageReportingDataflow = ({
     setIsDeleting(true);
     try {
       await DataflowService.delete(dataflowId);
-      onHideDataflowDialog();
     } catch (error) {
       console.error('ManageReportingDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
-    } finally {
       setIsDeleting(false);
     }
   };
