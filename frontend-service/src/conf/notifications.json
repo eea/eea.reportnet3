@@ -986,9 +986,6 @@
           "key": "DELETE_DOCUMENT_INIT_INFO"
         },
         {
-          "key": "DATAFLOW_DELETE_INIT"
-        },
-        {
           "key": "VALIDATE_DATA_INIT",
           "navigateTo": {
             "section": "DATASET",

@@ -51,6 +51,7 @@ export const ManageReportingDataflow = ({
   const manageReportingDataflowInitialState = {
     deleteInput: '',
     description: isEditForm ? state.description : '',
+    isDeleting: false,
     isSubmitting: false,
     name: isEditForm ? state.name : '',
     obligation,
@@ -82,6 +83,9 @@ export const ManageReportingDataflow = ({
 
   const onSubmit = value => manageReportingDataflowDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
+  const setIsDeleting = isDeleting =>
+    manageReportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
+
   const onHideDataflowDialog = () => {
     onResetData();
     resetObligations();
@@ -89,20 +93,15 @@ export const ManageReportingDataflow = ({
   };
 
   const onDeleteDataflow = async () => {
-    manageDialogs('isDeleteDialogVisible', false);
-    // showLoading();
+    setIsDeleting(true);
     try {
       await DataflowService.delete(dataflowId);
       onHideDataflowDialog();
-      // history.push(getUrl(routes.DATAFLOWS));
-      notificationContext.add({ type: 'DATAFLOW_DELETE_INIT' });
     } catch (error) {
       console.error('ManageReportingDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
+      setIsDeleting(false);
     }
-    // finally {
-    //   hideLoading();
-    // }
   };
 
   const onLoadData = ({ name, description }) =>
@@ -235,8 +234,11 @@ export const ManageReportingDataflow = ({
       {state.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          disabledConfirm={!TextUtils.areEquals(state.deleteInput, state.name)}
+          disabledConfirm={
+            !TextUtils.areEquals(reportingDataflowState.deleteInput, state.name) || reportingDataflowState.isDeleting
+          }
           header={resources.messages['delete'].toUpperCase()}
+          iconConfirm={reportingDataflowState.isDeleting && 'spinnerAnimate'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteDataflow()}

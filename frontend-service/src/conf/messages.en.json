@@ -1220,7 +1220,6 @@
     "currentPageInfoMessage": "Press 'Enter' key to go to this page.",
     "of": "of",
     "percentSignSqlQCTooltip": "You can use fields from the SQL sentence writing the field name inside {% ... %}",
-    "dataflowDeleteInit": "Dataflow delete started",
     "deleteDataflowCompletedEvent": "Dataflow deleted successfully",
     "deleteDataflowFailedEvent": "Dataflow delete error"
   }
