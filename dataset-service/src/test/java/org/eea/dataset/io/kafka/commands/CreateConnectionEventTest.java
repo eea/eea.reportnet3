@@ -62,7 +62,7 @@ public class CreateConnectionEventTest {
   @Before
   public void initMocks() {
     eeaEventVO = new EEAEventVO();
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

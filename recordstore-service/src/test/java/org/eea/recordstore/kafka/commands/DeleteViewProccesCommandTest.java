@@ -38,7 +38,7 @@ public class DeleteViewProccesCommandTest {
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.DELETE_VIEW_PROCCES_EVENT);
     eeaEventVO.setData(data);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

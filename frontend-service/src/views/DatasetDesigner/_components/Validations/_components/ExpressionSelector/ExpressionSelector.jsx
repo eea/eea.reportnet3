@@ -11,7 +11,7 @@ import { ExpressionsTab } from 'views/DatasetDesigner/_components/Validations/_c
 import { FieldComparison } from 'views/DatasetDesigner/_components/Validations/_components/FieldComparison';
 import { IfThenClause } from 'views/DatasetDesigner/_components/Validations/_components/IfThenClause';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { SQLsentence } from 'views/DatasetDesigner/_components/Validations/_components/SQLsentence';
+import { SqlSentence } from 'views/DatasetDesigner/_components/Validations/_components/SqlSentence';
 import { TableRelationsSelector } from 'views/DatasetDesigner/_components/Validations/_components/TableRelationsSelector';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
@@ -44,7 +44,7 @@ export const ExpressionSelector = ({
   onRelationDelete,
   onRelationFieldUpdate,
   onRelationsErrors,
-  onSetSQLsentence,
+  onSetSqlSentence,
   tabsChanges
 }) => {
   const resources = useContext(ResourcesContext);
@@ -180,15 +180,15 @@ export const ExpressionSelector = ({
 
     if (!isEmpty(expressionType) && expressionType === 'sqlSentence') {
       return (
-        <SQLsentence
+        <SqlSentence
           creationFormState={creationFormState}
           isBusinessDataflow={isBusinessDataflow}
           level={validationContext.level}
-          onSetSQLsentence={onSetSQLsentence}
+          onSetSqlSentence={onSetSqlSentence}
         />
       );
     }
-    return <div />;
+    return null;
   };
   return (
     <Fragment>

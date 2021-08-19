@@ -162,7 +162,7 @@ public class FileCommonTest {
     tableSchema.setFixedNumber(false);
     tableSchemas.add(tableSchema);
     dataset.setTableSchemas(tableSchemas);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
 

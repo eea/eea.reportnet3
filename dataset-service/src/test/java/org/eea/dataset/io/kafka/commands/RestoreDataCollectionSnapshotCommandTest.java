@@ -69,7 +69,7 @@ public class RestoreDataCollectionSnapshotCommandTest {
     SecurityContextHolder.setContext(securityContext);
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.RESTORE_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

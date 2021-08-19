@@ -63,7 +63,7 @@ public class ContributorControllerImplTest {
 
     userRepresentationVO = new UserRepresentationVO();
     userRepresentationVO.setEmail("write@reportnet.net");
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

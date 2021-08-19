@@ -3,10 +3,9 @@ import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import styles from './ManageReportingDataflow.module.scss';
-
 import { config } from 'conf';
-import { routes } from 'conf/routes';
+
+import styles from './ManageReportingDataflow.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
@@ -20,29 +19,24 @@ import ReactTooltip from 'react-tooltip';
 
 import { DataflowService } from 'services/DataflowService';
 
-import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { reportingDataflowReducer } from './_functions/Reducers/reportingDataflowReducer';
 
-import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageReportingDataflow = ({
   dataflowId,
-  history,
   isEditForm,
   manageDialogs,
   obligation,
-  onConfirmDeleteDataflow,
   onCreateDataflow,
   onEditDataflow,
   resetObligations,
   setCheckedObligation,
   state
 }) => {
-  const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -50,7 +44,9 @@ export const ManageReportingDataflow = ({
   const formRef = useRef(null);
 
   const manageReportingDataflowInitialState = {
+    deleteInput: '',
     description: isEditForm ? state.description : '',
+    isDeleting: false,
     isSubmitting: false,
     name: isEditForm ? state.name : '',
     obligation,
@@ -82,25 +78,26 @@ export const ManageReportingDataflow = ({
 
   const onSubmit = value => manageReportingDataflowDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
-  const onDeleteDataflow = async () => {
-    manageDialogs('isDeleteDialogVisible', false);
-    showLoading();
-    try {
-      await DataflowService.delete(dataflowId);
-      history.push(getUrl(routes.DATAFLOWS));
-      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
-    } catch (error) {
-      console.error('ManageReportingDataflow - onDeleteDataflow.', error);
-      notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
-    } finally {
-      hideLoading();
-    }
-  };
+  const setIsDeleting = isDeleting =>
+    manageReportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
 
   const onHideDataflowDialog = () => {
     onResetData();
     resetObligations();
     manageDialogs(secondaryDialog, false);
+  };
+
+  const onDeleteDataflow = async () => {
+    setIsDeleting(true);
+    try {
+      await DataflowService.delete(dataflowId);
+      onHideDataflowDialog();
+    } catch (error) {
+      console.error('ManageReportingDataflow - onDeleteDataflow.', error);
+      notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const onLoadData = ({ name, description }) =>
@@ -114,6 +111,9 @@ export const ManageReportingDataflow = ({
       type: 'RESET_STATE',
       payload: { resetData: manageReportingDataflowInitialState }
     });
+
+  const onDeleteInputChange = value =>
+    manageReportingDataflowDispatch({ type: 'ON_DELETE_INPUT_CHANGE', payload: { deleteInput: value } });
 
   const onSave = () => {
     if (formRef.current) formRef.current.handleSubmit(reportingDataflowState.pinDataflow);
@@ -230,8 +230,11 @@ export const ManageReportingDataflow = ({
       {state.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          disabledConfirm={!TextUtils.areEquals(state.deleteInput, state.name)}
+          disabledConfirm={
+            !TextUtils.areEquals(reportingDataflowState.deleteInput, state.name) || reportingDataflowState.isDeleting
+          }
           header={resources.messages['delete'].toUpperCase()}
+          iconConfirm={reportingDataflowState.isDeleting && 'spinnerAnimate'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteDataflow()}
@@ -251,9 +254,9 @@ export const ManageReportingDataflow = ({
               id={'deleteDataflow'}
               maxLength={255}
               name={resources.messages['deleteDataflowButton']}
-              onChange={event => onConfirmDeleteDataflow(event)}
+              onChange={event => onDeleteInputChange(event.target.value)}
               ref={deleteInputRef}
-              value={state.deleteInput}
+              value={reportingDataflowState.deleteInput}
             />
           </p>
         </ConfirmDialog>

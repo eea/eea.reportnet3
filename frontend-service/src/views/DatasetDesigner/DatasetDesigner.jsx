@@ -114,6 +114,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     isDataflowOpen: false,
     isDataUpdated: false,
     isDuplicatedToManageUnique: false,
+    isDownloadingQCRules: false,
     isDownloadingValidations: false,
     isExportTableSchemaDialogVisible: false,
     isImportDatasetDialogVisible: false,
@@ -278,6 +279,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
     if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_VALIDATIONS_FAILED_EVENT')) {
       setIsDownloadingValidations(false);
+    }
+
+    if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_QC_RULES_FAILED_EVENT')) {
+      setIsDownloadingQCRules(false);
     }
   }, [notificationContext.hidden]);
 
@@ -636,6 +641,12 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   );
 
   useCheckNotifications(
+    ['AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE', 'DOWNLOAD_QC_RULES_FILE_ERROR'],
+    setIsDownloadingQCRules,
+    false
+  );
+
+  useCheckNotifications(
     ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR'],
     setIsDownloadingValidations,
     false
@@ -919,6 +930,12 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         tooltipOptions={{ position: 'top' }}
       />
       <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={designerState.isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
+        label={resources.messages['downloadQCsButtonLabel']}
+        onClick={() => onDownloadQCRules()}
+      />
+      <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
         label={resources.messages['close']}
@@ -953,6 +970,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     </Fragment>
   );
 
+  function setIsDownloadingQCRules(isDownloadingQCRules) {
+    designerDispatch({ type: 'SET_IS_DOWNLOADING_QC_RULES', payload: { isDownloadingQCRules } });
+  }
+
   function setIsDownloadingValidations(isDownloadingValidations) {
     designerDispatch({ type: 'SET_IS_DOWNLOADING_VALIDATIONS', payload: { isDownloadingValidations } });
   }
@@ -960,6 +981,19 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   function setIsValidationsTabularView(isValidationsTabularView) {
     designerDispatch({ type: 'SET_IS_VALIDATIONS_TABULAR_VIEW', payload: { isValidationsTabularView } });
   }
+
+  const onDownloadQCRules = async () => {
+    setIsDownloadingQCRules(true);
+    notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
+
+    try {
+      await ValidationService.generateQCRulesFile(datasetId);
+    } catch (error) {
+      console.error('DatasetDesigner - onDownloadQCRules.', error);
+      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' });
+      setIsDownloadingQCRules(false);
+    }
+  };
 
   const onDownloadValidations = async () => {
     setIsDownloadingValidations(true);

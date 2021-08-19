@@ -91,6 +91,9 @@
           "key": "BUSINESS_DATAFLOW_CREATION_ERROR"
         },
         {
+          "key": "DELETE_DATAFLOW_FAILED_EVENT"
+        },
+        {
           "key": "SNAPSHOT_CREATION_ERROR",
           "navigateTo": {
             "section": "DATASET",
@@ -304,6 +307,9 @@
         },
         {
           "key": "DOWNLOAD_VALIDATIONS_ERROR"
+        },
+        {
+          "key": "GENERATE_QC_RULES_FILE_ERROR"
         },
         {
           "key": "CREATE_DATA_COLLECTION_ERROR"
@@ -672,6 +678,9 @@
           "key": "DOWNLOAD_EXPORT_DATASET_FILE_ERROR"
         },
         {
+          "key": "DOWNLOAD_QC_RULES_FILE_ERROR"
+        },
+        {
           "key": "DOWNLOAD_VALIDATIONS_FILE_ERROR"
         },
         {
@@ -893,7 +902,7 @@
           "key": "REFERENCE_DATAFLOW_PROCESSED_EVENT"
         },
         {
-          "key": "DATAFLOW_DELETE_SUCCESS"
+          "key": "DELETE_DATAFLOW_COMPLETED_EVENT"
         },
         {
           "key": "COPY_TO_CLIPBOARD_SUCCESS"
@@ -957,6 +966,9 @@
           "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD"
         },
         {
+          "key": "AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE"
+        },
+        {
           "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE"
         },
         {
@@ -1013,6 +1025,9 @@
           "key": "DOWNLOAD_VALIDATIONS_START"
         },
         {
+          "key": "DOWNLOAD_QC_RULES_START"
+        },
+        {
           "key": "DATASET_IMPORT_INIT"
         },
         {
@@ -1050,6 +1065,8 @@
   "hiddenNotifications": [
     "EXPORT_DATASET_COMPLETED_EVENT",
     "EXPORT_DATASET_FAILED_EVENT",
+    "DOWNLOAD_QC_RULES_COMPLETED_EVENT",
+    "DOWNLOAD_QC_RULES_FAILED_EVENT",
     "DOWNLOAD_VALIDATIONS_COMPLETED_EVENT",
     "DOWNLOAD_VALIDATIONS_FAILED_EVENT",
     "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",

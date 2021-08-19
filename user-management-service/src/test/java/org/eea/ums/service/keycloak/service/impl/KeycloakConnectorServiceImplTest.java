@@ -69,7 +69,7 @@ public class KeycloakConnectorServiceImplTest {
     ReflectionTestUtils.setField(keycloakConnectorService, "realmName", "Reportnet");
     ReflectionTestUtils.setField(keycloakConnectorService, "clientId", "reportnet");
 
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

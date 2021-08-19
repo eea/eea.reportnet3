@@ -40,7 +40,7 @@ public class CSVWriterStrategyTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     ReflectionTestUtils.setField(csvWriterStrategy, "delimiter", ',');
   }
 

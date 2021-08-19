@@ -60,7 +60,7 @@ public class EUDatasetControllerImplTest {
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
 
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

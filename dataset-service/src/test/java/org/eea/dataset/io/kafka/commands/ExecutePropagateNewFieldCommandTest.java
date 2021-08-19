@@ -55,7 +55,7 @@ public class ExecutePropagateNewFieldCommandTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     ReflectionTestUtils.setField(executePropagateCommand, "fieldBatchSize", 1);
   }
 

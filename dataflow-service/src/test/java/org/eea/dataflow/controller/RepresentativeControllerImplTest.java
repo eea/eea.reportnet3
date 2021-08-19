@@ -85,7 +85,7 @@ public class RepresentativeControllerImplTest {
     representativeVO.setLeadReporters(leadReporters);
     representativeVOs = new ArrayList<>();
     representativeVOs.add(representativeVO);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**
