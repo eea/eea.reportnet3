@@ -4,7 +4,6 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
-// import { routes } from 'conf/routes';
 
 import styles from './ManageBusinessDataflow.module.scss';
 

@@ -4,7 +4,6 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
-// import { routes } from 'conf/routes';
 
 import styles from './ManageReportingDataflow.module.scss';
 
@@ -20,18 +19,15 @@ import ReactTooltip from 'react-tooltip';
 
 import { DataflowService } from 'services/DataflowService';
 
-// import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { reportingDataflowReducer } from './_functions/Reducers/reportingDataflowReducer';
 
-// import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageReportingDataflow = ({
   dataflowId,
-  // history,
   isEditForm,
   manageDialogs,
   obligation,
@@ -41,7 +37,6 @@ export const ManageReportingDataflow = ({
   setCheckedObligation,
   state
 }) => {
-  // const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 

@@ -1124,7 +1124,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <ManageReportingDataflow
           dataflowId={dataflowId}
-          // history={history}
           isEditForm={true}
           manageDialogs={manageDialogs}
           obligation={obligation}
@@ -1138,7 +1137,6 @@ const Dataflow = withRouter(({ history, match }) => {
           <ManageBusinessDataflow
             dataflowId={dataflowId}
             hasRepresentatives={dataflowState.data.representatives.length !== 0}
-            // history={history}
             isAdmin={dataflowState.isAdmin}
             isEditing
             isVisible={dataflowState.isBusinessDataflowDialogVisible}
