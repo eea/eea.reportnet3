@@ -13,20 +13,20 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>1.0-OPEN_JDK</api-gateway.version>
-    <communication.version>1.0-OPEN_JDK</communication.version>
-    <collaboration.version>1.0-OPEN_JDK</collaboration.version>
-    <dataflow.version>1.0-OPEN_JDK</dataflow.version>
-    <dataset.version>1.0-OPEN_JDK</dataset.version>
-    <document.version>1.0-OPEN_JDK</document.version>
-    <frontend.version>1.0</frontend.version>
-    <indexsearch.version>1.0-OPEN_JDK</indexsearch.version>
-    <inspire.version>1.0-OPEN_JDK</inspire.version>
-    <recordstore.version>1.0-OPEN_JDK</recordstore.version>
-    <ums.version>1.0-OPEN_JDK</ums.version>
-    <validation.version>1.0-OPEN_JDK</validation.version>
-    <common-interfaces.version>1.0-OPEN_JDK</common-interfaces.version>
-    <common-utitlities.version>1.0-OPEN_JDK</common-utitlities.version>
-    <rod.version>1.0-OPEN_JDK</rod.version>
+    <api-gateway.version>3.0-SNAPSHOT</api-gateway.version>
+    <communication.version>3.0-SNAPSHOT</communication.version>
+    <collaboration.version>3.0-SNAPSHOT</collaboration.version>
+    <dataflow.version>3.0-SNAPSHOT</dataflow.version>
+    <dataset.version>3.0-SNAPSHOT</dataset.version>
+    <document.version>3.0-SNAPSHOT</document.version>
+    <frontend.version>3.0-SNAPSHOT</frontend.version>
+    <indexsearch.version>3.0-SNAPSHOT</indexsearch.version>
+    <inspire.version>3.0-SNAPSHOT</inspire.version>
+    <recordstore.version>3.0-SNAPSHOT</recordstore.version>
+    <ums.version>3.0-SNAPSHOT</ums.version>
+    <validation.version>3.0-SNAPSHOT</validation.version>
+    <common-interfaces.version>3.0-SNAPSHOT</common-interfaces.version>
+    <common-utitlities.version>3.0-SNAPSHOT</common-utitlities.version>
+    <rod.version>3.0-SNAPSHOT</rod.version>
   </properties>
 </project>

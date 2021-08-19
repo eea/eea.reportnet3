@@ -327,4 +327,36 @@ public interface DatasetSchemaController {
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
 
+
+  /**
+   * Export field schemas.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @return the response entity
+   */
+  @GetMapping(value = "/{datasetSchemaId}/exportFieldSchemas",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<byte[]> exportFieldSchemas(
+      @PathVariable("datasetSchemaId") String datasetSchemaId,
+      @RequestParam(value = "datasetId") final Long datasetId,
+      @RequestParam(value = "tableSchemaId", required = false) final String tableSchemaId);
+
+  /**
+   * Import field schemas.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   */
+  @PostMapping(value = "/{datasetSchemaId}/importFieldSchemas")
+  public void importFieldSchemas(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @RequestParam(value = "datasetId") Long datasetId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) Boolean replace);
+
 }

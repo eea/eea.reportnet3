@@ -66,6 +66,13 @@
           }
         },
         {
+          "key": "ADD_RECORDS_PASTING_ERROR",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "ADD_RECORDS_ERROR"
         },
         {
@@ -79,6 +86,9 @@
         },
         {
           "key": "REFERENCE_DATAFLOW_CREATION_ERROR"
+        },
+        {
+          "key": "BUSINESS_DATAFLOW_CREATION_ERROR"
         },
         {
           "key": "SNAPSHOT_CREATION_ERROR",
@@ -221,6 +231,13 @@
         },
         {
           "key": "REFERENCE_DATAFLOW_UPDATING_ERROR",
+          "navigateTo": {
+            "section": "DATAFLOWS",
+            "parameters": ["dataflowName"]
+          }
+        },
+        {
+          "key": "BUSINESS_DATAFLOW_UPDATING_ERROR",
           "navigateTo": {
             "section": "DATAFLOWS",
             "parameters": ["dataflowName"]
@@ -703,6 +720,16 @@
         },
         {
           "key": "DATASET_SCHEMA_FIELD_INVALID_NAME"
+        },
+        {
+          "key": "IMPORT_FIELD_SCHEMA_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId", "datasetName"]
+          }
+        },
+        {
+          "key": "UNLOCK_DATASET_ERROR"
         }
       ]
     },
@@ -931,6 +958,13 @@
         },
         {
           "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE"
+        },
+        {
+          "key": "IMPORT_FIELD_SCHEMA_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },
@@ -1006,6 +1040,9 @@
         },
         {
           "key": "RELEASE_START_EVENT"
+        },
+        {
+          "key": "IMPORT_TABLE_SCHEMA_INIT"
         }
       ]
     }
@@ -1018,6 +1055,7 @@
     "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
     "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
     "DISABLE_RULES_ERROR_EVENT",
-    "RECEIVED_MESSAGE"
+    "RECEIVED_MESSAGE",
+    "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT"
   ]
 }

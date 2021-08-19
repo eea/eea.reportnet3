@@ -1,0 +1,1 @@
+ALTER TABLE public.reference_dataset ADD column if not exists "updatable" bool NULL;

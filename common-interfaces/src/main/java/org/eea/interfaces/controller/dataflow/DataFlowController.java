@@ -5,6 +5,7 @@ import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
@@ -35,7 +36,6 @@ public interface DataFlowController {
   /**
    * Find by id.
    *
-   * @param dataflowId the dataflow id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @return the data flow VO
@@ -81,6 +81,15 @@ public interface DataFlowController {
    */
   @GetMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findReferenceDataflows();
+
+
+  /**
+   * Find business dataflows.
+   *
+   * @return the list
+   */
+  @GetMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataFlowVO> findBusinessDataflows();
 
   /**
    * Adds the contributor.
@@ -196,7 +205,7 @@ public interface DataFlowController {
    * @return the public dataflows by country
    */
   @GetMapping("/public/country/{countryCode}")
-  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(
+  DataflowPublicPaginatedVO getPublicDataflowsByCountry(
       @PathVariable("countryCode") String countryCode,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
@@ -215,4 +224,18 @@ public interface DataFlowController {
   @GetMapping("/private/isReferenceDataflowDraft/entity/{entity}/{entityId}")
   boolean accessReferenceEntity(@PathVariable("entity") EntityClassEnum entity,
       @PathVariable("entityId") Long entityId);
+
+
+  /**
+   * Access entity.
+   *
+   * @param dataflowType the dataflow type
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if successful
+   */
+  @GetMapping("/private/isDataflowType/{type}/entity/{entity}/{entityId}")
+  boolean accessEntity(@PathVariable("type") TypeDataflowEnum dataflowType,
+      @PathVariable("entity") EntityClassEnum entity, @PathVariable("entityId") Long entityId);
+
 }

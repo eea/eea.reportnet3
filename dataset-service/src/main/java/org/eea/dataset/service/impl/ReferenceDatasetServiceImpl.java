@@ -12,6 +12,8 @@ import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferenced
 import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.ReferenceDatasetService;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
@@ -113,4 +115,21 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
     }
     return dataflows;
   }
+
+  /**
+   * Update updatable.
+   *
+   * @param datasetId the dataset id
+   * @param updatable the updatable
+   */
+  public void updateUpdatable(Long datasetId, Boolean updatable) throws EEAException {
+
+    ReferenceDataset referenceDataset = referenceDatasetRepository.findById(datasetId).orElse(null);
+    if (null == referenceDataset) {
+      throw new EEAException(String.format(EEAErrorMessage.DATASET_NOTFOUND, datasetId));
+    }
+    referenceDataset.setUpdatable(updatable);
+    referenceDatasetRepository.save(referenceDataset);
+  }
+
 }

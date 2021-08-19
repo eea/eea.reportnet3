@@ -10,15 +10,19 @@ import javax.transaction.Transactional;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
+import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -100,6 +104,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private TestDatasetControllerZuul testDatasetControllerZuul;
 
+  /** The dataflow controller. */
+  @Autowired
+  private DataFlowControllerZuul dataFlowController;
+
+  /** The reference dataset controller. */
+  @Autowired
+  private ReferenceDatasetControllerZuul referenceDatasetController;
+
   /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
@@ -143,7 +155,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     rule.setWhenCondition(new StringBuilder().append("isSQLSentenceWithCode(this.datasetId.id, '")
         .append(rule.getRuleId().toString())
         .append(
-            "', this.records.size > 0 && this.records.get(0) != null ? this.records.get(0).dataProviderCode : null")
+            "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
         .append(")").toString());
 
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
@@ -172,7 +184,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     }
     rule.setVerified(verifAndEnabled);
     rule.setWhenCondition(new StringBuilder().append("isSQLSentenceWithCode(this.datasetId.id,'")
-        .append(rule.getRuleId().toString()).append("', 'XX'").append(")").toString());
+        .append(rule.getRuleId().toString())
+        .append(
+            "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
+        .append(")").toString());
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
 
     return verifAndEnabled;
@@ -271,7 +286,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             .append("isSQLSentenceWithCode(this.datasetId.id, '")
             .append(rule.getRuleId().toString())
             .append(
-                "', this.records.size > 0 && this.records.get(0) != null ? this.records.get(0).dataProviderCode : null")
+                "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
             .append(")").toString());
         rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
       });
@@ -334,10 +349,21 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (!StringUtils.isBlank(query)) {
       // validate query sintax
       if (checkQuerySyntax(query)) {
-        try {
-          checkQueryTestExecution(query.replace(";", ""), datasetId, rule);
-        } catch (EEAInvalidSQLException e) {
-          LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
+        List<String> ids = getListOfDatasetsOnQuery(query);
+        checkDatasetFromSameDataflow(datasetId, ids);
+        if (!ids.isEmpty()) {
+          checkDatasetFromReferenceDataflow(ids);
+        }
+        // all the dataset ids present on the query exists on the dataflow, or are inside reference
+        // dataflows
+        if (ids.isEmpty()) {
+          try {
+            checkQueryTestExecution(query.replace(";", ""), datasetId, rule);
+          } catch (EEAInvalidSQLException e) {
+            LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
+            isSQLCorrect = false;
+          }
+        } else {
           isSQLCorrect = false;
         }
       } else {
@@ -598,7 +624,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   private String proccessQuery(Long datasetId, String query) {
 
     if (query.contains(DATASET)) {
-      Map<String, Long> datasetSchemasMap = getListOfDatasetsOnQuery(query);
+      Map<String, Long> datasetSchemasMap = getMapOfDatasetsOnQuery(query);
       DatasetTypeEnum datasetType = datasetMetabaseController.getType(datasetId);
       Long dataflowId =
           datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
@@ -770,14 +796,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param query the query
    * @return the list of datasets on query
    */
-  private Map<String, Long> getListOfDatasetsOnQuery(String query) {
+  private Map<String, Long> getMapOfDatasetsOnQuery(String query) {
     Map<String, Long> datasetSchamasMap = new HashMap<>();
-    String[] palabras = query.split("\\s+");
-    for (String palabra : palabras) {
-      if (palabra.contains(DATASET)) {
+    String[] words = query.split("\\s+");
+    for (String word : words) {
+      if (word.contains(DATASET)) {
         try {
           String datasetIdFromotherSchemas =
-              palabra.substring(palabra.indexOf('_') + 1, palabra.indexOf('.'));
+              word.substring(word.indexOf('_') + 1, word.indexOf('.'));
 
           datasetSchamasMap.put(
               datasetMetabaseController
@@ -791,4 +817,75 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     }
     return datasetSchamasMap;
   }
+
+  /**
+   * Gets a list with the id of the query datasets
+   * 
+   * @param query the query
+   * @return Gets a list with the id of the query datasets
+   */
+  private List<String> getListOfDatasetsOnQuery(String query) {
+    List<String> datasetsIdList = new ArrayList<>();
+    String[] words = query.split("\\s+");
+    for (String word : words) {
+      if (word.contains(DATASET)) {
+        String datasetId = word.substring(word.indexOf(DATASET) + 8, word.indexOf('.'));
+        datasetsIdList.add(datasetId);
+      }
+    }
+    return datasetsIdList;
+  }
+
+
+  /**
+   * Check dataset from same dataflow.
+   *
+   * @param datasetId the dataset id
+   * @param ids the ids
+   * @return the list
+   */
+  private List<String> checkDatasetFromSameDataflow(Long datasetId, List<String> ids) {
+
+    List<String> idsFound = new ArrayList<>();
+    Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
+    for (String id : ids) {
+      Long idDataFlowFromDatasetOnQuery =
+          datasetMetabaseController.findDatasetMetabaseById(Long.parseLong(id)).getDataflowId();
+      if (dataflowId.equals(idDataFlowFromDatasetOnQuery)) {
+        idsFound.add(id);
+      }
+    }
+    ids.removeAll(idsFound);
+    return ids;
+  }
+
+
+  /**
+   * Check dataset from reference dataflow.
+   *
+   * @param ids the ids
+   * @return the list
+   */
+  private List<String> checkDatasetFromReferenceDataflow(List<String> ids) {
+
+    List<String> referenceDatasetsId = new ArrayList<>();
+    List<DataFlowVO> referencesDataflow = dataFlowController.findReferenceDataflows();
+
+    for (DataFlowVO referenceDataflow : referencesDataflow) {
+      List<ReferenceDatasetVO> referenceDatasets =
+          referenceDatasetController.findReferenceDatasetByDataflowId(referenceDataflow.getId());
+      for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+        referenceDatasetsId.add(referenceDataset.getId().toString());
+      }
+    }
+    List<String> idsFound = new ArrayList<>();
+    for (String id : ids) {
+      if (referenceDatasetsId.contains(id)) {
+        idsFound.add(id);
+      }
+    }
+    ids.removeAll(idsFound);
+    return ids;
+  }
+
 }

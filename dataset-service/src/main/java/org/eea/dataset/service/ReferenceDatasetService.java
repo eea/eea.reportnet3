@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import java.util.List;
 import java.util.Set;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
@@ -40,4 +41,13 @@ public interface ReferenceDatasetService {
    */
   Set<DataFlowVO> getDataflowsReferenced(Long dataflowId);
 
+
+  /**
+   * Update updatable.
+   *
+   * @param datasetId the dataset id
+   * @param updatable the updatable
+   * @throws EEAException the EEA exception
+   */
+  void updateUpdatable(Long datasetId, Boolean updatable) throws EEAException;
 }

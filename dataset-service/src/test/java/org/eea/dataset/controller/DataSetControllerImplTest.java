@@ -414,11 +414,8 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testUpdateRecordsReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
-          .thenReturn(DatasetTypeEnum.REPORTING);
-      Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
-          .thenReturn(true);
-
+      Mockito.when(datasetService.checkIfDatasetLockedOrReadOnly(Mockito.anyLong(), Mockito.any(),
+          Mockito.any())).thenReturn(true);
       dataSetControllerImpl.updateRecords(1L, records, false);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
@@ -461,10 +458,8 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testDeleteRecordReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
-          .thenReturn(DatasetTypeEnum.REPORTING);
-      Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
-          .thenReturn(true);
+      Mockito.when(datasetService.checkIfDatasetLockedOrReadOnly(Mockito.anyLong(), Mockito.any(),
+          Mockito.any())).thenReturn(true);
 
       dataSetControllerImpl.deleteRecord(1L, recordId, false);
     } catch (ResponseStatusException e) {
@@ -541,10 +536,8 @@ public class DataSetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testUpdateFieldReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
-          .thenReturn(DatasetTypeEnum.REPORTING);
-      Mockito.when(datasetService.getTableReadOnly(Mockito.anyLong(), Mockito.any(), Mockito.any()))
-          .thenReturn(true);
+      Mockito.when(datasetService.checkIfDatasetLockedOrReadOnly(Mockito.anyLong(), Mockito.any(),
+          Mockito.any())).thenReturn(true);
 
       dataSetControllerImpl.updateField(1L, new FieldVO(), false);
     } catch (ResponseStatusException e) {
@@ -1042,7 +1035,11 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void insertRecordsTest() throws EEAException {
-    dataSetControllerImpl.insertRecords(1L, "", new ArrayList<RecordVO>());
+    ArrayList<RecordVO> records = new ArrayList<RecordVO>();
+    RecordVO record = new RecordVO();
+    record.setId(recordId);
+    records.add(record);
+    dataSetControllerImpl.insertRecords(1L, "", records);
     Mockito.verify(updateRecordHelper, times(1)).executeCreateProcess(Mockito.anyLong(),
         Mockito.any(), Mockito.any());
   }
@@ -1057,7 +1054,11 @@ public class DataSetControllerImplTest {
     Mockito.doThrow(EEAException.class).when(updateRecordHelper)
         .executeCreateProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
     try {
-      dataSetControllerImpl.insertRecords(1L, "", new ArrayList<RecordVO>());
+      ArrayList<RecordVO> records = new ArrayList<RecordVO>();
+      RecordVO record = new RecordVO();
+      record.setId(recordId);
+      records.add(record);
+      dataSetControllerImpl.insertRecords(1L, "", records);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;

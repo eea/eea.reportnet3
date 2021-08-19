@@ -1,5 +1,0 @@
-{
-  "createDataCollection": "/datacollection/create?manualCheck={:isManualTechnicalAcceptance}&stopAndNotifySQLErrors={:stopAndNotifySQLErrors}&showPublicInfo={:showPublicInfo}",
-  "createReference": "/datacollection/create",
-  "updateDataCollectionNewRepresentatives": "/datacollection/update/{:dataflowId}"
-}

@@ -334,6 +334,18 @@ public class FileCommonUtils {
     return dataSetSchema;
   }
 
+
+  /**
+   * Gets the data set schema VO.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the data set schema VO
+   * @throws EEAException the EEA exception
+   */
+  public DataSetSchemaVO getDataSetSchemaVO(String datasetSchemaId) throws EEAException {
+    return dataSetSchemaService.getDataSchemaById(datasetSchemaId);
+  }
+
   /**
    * Gets the table name.
    *

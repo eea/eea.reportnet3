@@ -1,0 +1,51 @@
+.basemapLayer {
+  width: 12rem;
+}
+
+.basemapItem {
+  display: flex;
+  align-items: center;
+}
+
+.basemapItem span {
+  width: 60%;
+}
+
+.inputSwitchWrapper {
+  min-width: 42px;
+}
+
+.pushNotificationsImgInfo {
+  float: right;
+}
+
+.switchDiv {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.switchTextInput {
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  padding: 5px;
+  color: var(--main-font-color);
+}
+.themeSwitcherInputSwitch:before {
+  background-color: var(--black);
+  box-shadow: var(--inputswitch-dark-theme-checked);
+}
+
+.userConfiguration {
+  margin: 3rem 0rem;
+}
+
+.dateFormatWarning {
+  font-style: italic;
+  font-size: 0.8rem;
+  font-weight: bold;
+}

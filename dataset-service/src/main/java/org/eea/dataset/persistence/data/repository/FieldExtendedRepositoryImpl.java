@@ -8,7 +8,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -76,7 +75,8 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   /**
    * The Constant SORT_DATE_QUERY.
    */
-  private static final String SORT_DATE_QUERY = ", CASE WHEN is_date(fv.value)= true THEN CAST(fv.value as java.sql.Date) END as orden ";
+  private static final String SORT_DATE_QUERY =
+      ", CASE WHEN is_date(fv.value)= true THEN CAST(fv.value as java.sql.Date) END as orden ";
 
   /**
    * The Constant SORT_STRING_QUERY.
@@ -165,7 +165,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
       queryBuilder.append(QUERY_2_WITHOUT_CONDITIONAL).append(QUERY_3);
     }
     queryBuilder.append(QUERY_ORDER);
-    
+
     Query query = entityManager.createQuery(queryBuilder.toString());
     query.setParameter("fieldSchemaId", idPk);
     query.setParameter("labelId", labelSchemaId);
@@ -275,6 +275,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
 
   /**
    * Check if a String is Numeric
+   * 
    * @param strNum String to check
    * @return true if is numeric
    */
@@ -292,6 +293,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
 
   /**
    * Check if a String is Date
+   * 
    * @param dateStr String to check
    * @return true if is Date
    */

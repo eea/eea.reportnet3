@@ -3,7 +3,7 @@ pipeline {
     agent { node { label 'docker' } }
     tools {
         maven 'maven3'
-        jdk 'Java8'
+        jdk 'Java11'
     }
     options {
         disableConcurrentBuilds()
@@ -28,8 +28,9 @@ pipeline {
                     agent { node { label 'eea'} }
                     steps {
                         sh 'rm -rf frontend-service/node_modules/'
+                        sh 'rm -f frontend-service/package-lock.json'
                         sh '''
-                            npm install frontend-service/
+                            npm install --no-cache frontend-service/
                         '''
                     }
                 }
@@ -160,7 +161,7 @@ pipeline {
                         image.push()
                         image.push(date)
                     }
-                  }
+                 }
 
             }
         }

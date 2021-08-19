@@ -96,7 +96,8 @@ import {
   faUpload,
   faFile,
   faClock,
-  faMeteor
+  faMeteor,
+  faSearch
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -355,6 +356,8 @@ export const AwesomeIcons = icon => {
       return faReply;
     case 'representative':
       return faCoins;
+    case 'search':
+      return faSearch;
     case 'settings':
       return faCog;
     case 'share':

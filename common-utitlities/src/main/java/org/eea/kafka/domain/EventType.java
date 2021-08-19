@@ -381,11 +381,11 @@ public enum EventType {
   /** The export dataset completed event. */
   EXPORT_DATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "export_dataset_completed_event", true),
-  
+
   /** The download dataset validations completed event. */
   DOWNLOAD_VALIDATIONS_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "download_validations_completed_event", true),
-  
+
   /** The download dataset validations failed event. */
   DOWNLOAD_VALIDATIONS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "download_validations_failed_event", true),
@@ -400,7 +400,20 @@ public enum EventType {
 
   /** The reference dataflow process failed event. */
   REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "reference_dataflow_process_failed_event", true);
+      "reference_dataflow_process_failed_event", true),
+
+  /** The import field schema completed event. */
+  IMPORT_FIELD_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_field_schema_completed_event", true),
+
+  /** The import field schema failed event. */
+  IMPORT_FIELD_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_field_schema_failed_event", true),
+
+  /** The no pk reference dataflow error event. */
+  NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "no_pk_reference_dataflow_error_event", true);
+
 
   /** The topic. */
   private String topic;

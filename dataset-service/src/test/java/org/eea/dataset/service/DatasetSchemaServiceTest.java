@@ -28,8 +28,10 @@ import org.eea.dataset.mapper.UniqueConstraintMapper;
 import org.eea.dataset.mapper.WebFormMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
@@ -43,6 +45,7 @@ import org.eea.dataset.persistence.schemas.repository.DataflowReferencedReposito
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
+import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.file.ZipUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
@@ -60,6 +63,8 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -265,6 +270,12 @@ public class DatasetSchemaServiceTest {
 
   @Mock
   private DataflowReferencedRepository dataflowReferencedRepository;
+
+  @Mock
+  private ReferenceDatasetRepository referenceDatasetRepository;
+
+  @Mock
+  private FileCommonUtils fileCommon;
 
   /** The security context. */
   private SecurityContext securityContext;
@@ -1107,7 +1118,8 @@ public class DatasetSchemaServiceTest {
   @Test
   public void validateSchemaTest() {
 
-    Assert.assertFalse(dataSchemaServiceImpl.validateSchema("5ce524fad31fc52540abae73"));
+    Assert.assertFalse(
+        dataSchemaServiceImpl.validateSchema("5ce524fad31fc52540abae73", TypeDataflowEnum.REGULAR));
   }
 
 
@@ -1420,6 +1432,7 @@ public class DatasetSchemaServiceTest {
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("5ce524fad31fc52540abae73");
     fieldSchemaVO.setPk(false);
+    fieldSchemaVO.setType(DataType.LINK);
     ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
     referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
     referenced.setIdPk("5ce524fad31fc52540abae73");
@@ -1429,6 +1442,29 @@ public class DatasetSchemaServiceTest {
 
     Mockito.when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(design));
+    Mockito.doNothing().when(datasetMetabaseService).addForeignRelation(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+    dataSchemaServiceImpl.addForeignRelation(1L, fieldSchemaVO);
+    Mockito.verify(datasetMetabaseService, times(1)).addForeignRelation(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void testAddForeignRelationExtLink() {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(false);
+    fieldSchemaVO.setType(DataType.EXTERNAL_LINK);
+    ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+    referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    referenced.setIdPk("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setReferencedField(referenced);
+    ReferenceDataset reference = new ReferenceDataset();
+    reference.setId(1L);
+
+    Mockito.when(referenceDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(reference));
     Mockito.doNothing().when(datasetMetabaseService).addForeignRelation(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
     dataSchemaServiceImpl.addForeignRelation(1L, fieldSchemaVO);
@@ -1446,6 +1482,7 @@ public class DatasetSchemaServiceTest {
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("5ce524fad31fc52540abae73");
     fieldSchemaVO.setPk(false);
+    fieldSchemaVO.setType(DataType.LINK);
     ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
     referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
     referenced.setIdPk("5ce524fad31fc52540abae73");
@@ -1455,6 +1492,29 @@ public class DatasetSchemaServiceTest {
 
     Mockito.when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(design));
+    Mockito.doNothing().when(datasetMetabaseService).deleteForeignRelation(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+    dataSchemaServiceImpl.deleteForeignRelation(1L, fieldSchemaVO);
+    Mockito.verify(datasetMetabaseService, times(1)).deleteForeignRelation(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void testDeleteForeignRelationExtLink() {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setRequired(true);
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(false);
+    fieldSchemaVO.setType(DataType.EXTERNAL_LINK);
+    ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+    referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    referenced.setIdPk("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setReferencedField(referenced);
+    ReferenceDataset reference = new ReferenceDataset();
+    reference.setId(1L);
+
+    Mockito.when(referenceDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+        .thenReturn(Optional.of(reference));
     Mockito.doNothing().when(datasetMetabaseService).deleteForeignRelation(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
     dataSchemaServiceImpl.deleteForeignRelation(1L, fieldSchemaVO);
@@ -2468,4 +2528,210 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(schemasRepository, times(1)).updateDatasetSchemaExportable(Mockito.any(),
         Mockito.anyBoolean());
   }
+
+
+  @Test
+  public void testExportFieldSchemas() throws IOException, EEAException {
+
+    FieldSchemaVO fieldVO = new FieldSchemaVO();
+    fieldVO.setType(DataType.TEXT);
+    Mockito
+        .when(fileCommon.getFieldSchemas(Mockito.anyString(), Mockito.any(DataSetSchemaVO.class)))
+        .thenReturn(Arrays.asList(fieldVO));
+
+    dataSchemaServiceImpl.exportFieldsSchema(1L, new ObjectId().toString(),
+        new ObjectId().toString());
+    Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.anyString(),
+        Mockito.any(DataSetSchemaVO.class));
+  }
+
+  @Test
+  public void testImportFieldSchemasSave() throws EEAException, IOException {
+
+    String csv =
+        "Field name,PK,Required,ReadOnly,Field description,Field type,Extra information\r\n"
+            + "countryCode,false,false,false,descripcion1,TEXT,";
+    MultipartFile multipartFile =
+        new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", csv.getBytes());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setIdDataFlow(1L);
+    datasetSchema.setIdDataSetSchema(new ObjectId());
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId());
+    tableSchema.setNameTableSchema("Tabla1");
+    RecordSchema recordSchema = new RecordSchema();
+    FieldSchema fieldSchema2 = new FieldSchema();
+    fieldSchema2.setHeaderName("countryCode");
+    fieldSchema2.setIdFieldSchema(new ObjectId());
+    fieldSchema2.setType(DataType.TEXT);
+    recordSchema.setFieldSchema(Arrays.asList(fieldSchema2));
+    tableSchema.setRecordSchema(recordSchema);
+    datasetSchema.setTableSchemas(Arrays.asList(tableSchema));
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
+    ReflectionTestUtils.setField(dataSchemaServiceImpl, "delimiter", ',');
+
+    Mockito.when(fileCommon.isDesignDataset(Mockito.anyLong())).thenReturn(true);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setId(1L);
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
+
+    List<FieldSchema> fields = new ArrayList<>();
+    fields.add(fieldSchema2);
+    Mockito.when(fileCommon.findFieldSchemas(Mockito.anyString(), Mockito.any(DataSetSchema.class)))
+        .thenReturn(fields);
+
+    FieldSchemaVO fieldVO = new FieldSchemaVO();
+    fieldVO.setId(new ObjectId().toString());
+    Mockito.when(fieldSchemaNoRulesMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
+    PkCatalogueSchema catalogue = new PkCatalogueSchema();
+    catalogue.setIdPk(new ObjectId());
+    catalogue.setReferenced(Arrays.asList(new ObjectId()));
+
+
+    Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Mockito.when(schemasRepository.deleteFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+
+    dataSchemaServiceImpl.importFieldsSchema(new ObjectId().toString(), new ObjectId().toString(),
+        1L, multipartFile.getInputStream(), true);
+    Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
+  }
+
+  @Test
+  public void testImportFieldSchemasUpdate() throws EEAException, IOException {
+
+    String csv =
+        "Field name,PK,Required,ReadOnly,Field description,Field type,Extra information\r\n"
+            + "countryCode,false,false,false,descripcion1,TEXT,";
+    MultipartFile multipartFile =
+        new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", csv.getBytes());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setIdDataFlow(1L);
+    datasetSchema.setIdDataSetSchema(new ObjectId());
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId());
+    tableSchema.setNameTableSchema("Tabla1");
+    RecordSchema recordSchema = new RecordSchema();
+    FieldSchema fieldSchema2 = new FieldSchema();
+    fieldSchema2.setHeaderName("countryCode");
+    fieldSchema2.setIdFieldSchema(new ObjectId());
+    fieldSchema2.setType(DataType.TEXT);
+    recordSchema.setFieldSchema(Arrays.asList(fieldSchema2));
+    tableSchema.setRecordSchema(recordSchema);
+    datasetSchema.setTableSchemas(Arrays.asList(tableSchema));
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
+    ReflectionTestUtils.setField(dataSchemaServiceImpl, "delimiter", ',');
+
+    Mockito.when(fileCommon.isDesignDataset(Mockito.anyLong())).thenReturn(true);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setId(1L);
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
+
+    Mockito.when(fileCommon.findFieldSchemas(Mockito.anyString(), Mockito.any(DataSetSchema.class)))
+        .thenReturn(Arrays.asList(fieldSchema2));
+
+    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchema);
+    Mockito.when(schemasRepository.updateFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
+
+    Mockito.when(fieldSchema.put(Mockito.any(), Mockito.any()))
+        .thenReturn(DataType.TEXT.getValue());
+
+    dataSchemaServiceImpl.importFieldsSchema(new ObjectId().toString(), new ObjectId().toString(),
+        1L, multipartFile.getInputStream(), false);
+    Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
+  }
+
+  @Test
+  public void testImportFieldSchemasExceptionWrongStatus() throws EEAException, IOException {
+
+    String csv =
+        "Field name,PK,Required,ReadOnly,Field description,Field type,Extra information\r\n"
+            + "countryCode,false,false,false,descripcion1,TEXT,";
+    MultipartFile multipartFile =
+        new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", csv.getBytes());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setIdDataFlow(1L);
+    datasetSchema.setIdDataSetSchema(new ObjectId());
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId());
+    tableSchema.setNameTableSchema("Tabla1");
+    RecordSchema recordSchema = new RecordSchema();
+    FieldSchema fieldSchema2 = new FieldSchema();
+    fieldSchema2.setHeaderName("countryCode");
+    fieldSchema2.setIdFieldSchema(new ObjectId());
+    fieldSchema2.setType(DataType.TEXT);
+    recordSchema.setFieldSchema(Arrays.asList(fieldSchema2));
+    tableSchema.setRecordSchema(recordSchema);
+    datasetSchema.setTableSchemas(Arrays.asList(tableSchema));
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
+    ReflectionTestUtils.setField(dataSchemaServiceImpl, "delimiter", ',');
+
+    Mockito.when(fileCommon.isDesignDataset(Mockito.anyLong())).thenReturn(true);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setId(1L);
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
+
+    Mockito.when(fileCommon.findFieldSchemas(Mockito.anyString(), Mockito.any(DataSetSchema.class)))
+        .thenReturn(Arrays.asList(fieldSchema2));
+
+    dataSchemaServiceImpl.importFieldsSchema(new ObjectId().toString(), new ObjectId().toString(),
+        1L, multipartFile.getInputStream(), false);
+    Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
+  }
+
+
+  @Test
+  public void testImportFieldSchemasEmptyField() throws EEAException, IOException {
+
+    String csv = "\n";
+    MultipartFile multipartFile =
+        new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", csv.getBytes());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setIdDataFlow(1L);
+    datasetSchema.setIdDataSetSchema(new ObjectId());
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId());
+    tableSchema.setNameTableSchema("Tabla1");
+    RecordSchema recordSchema = new RecordSchema();
+    FieldSchema fieldSchema2 = new FieldSchema();
+    fieldSchema2.setHeaderName("countryCode");
+    fieldSchema2.setIdFieldSchema(new ObjectId());
+    fieldSchema2.setType(DataType.TEXT);
+    recordSchema.setFieldSchema(Arrays.asList(fieldSchema2));
+    tableSchema.setRecordSchema(recordSchema);
+    datasetSchema.setTableSchemas(Arrays.asList(tableSchema));
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
+    ReflectionTestUtils.setField(dataSchemaServiceImpl, "delimiter", ',');
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setId(1L);
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+
+
+    dataSchemaServiceImpl.importFieldsSchema(new ObjectId().toString(), new ObjectId().toString(),
+        1L, multipartFile.getInputStream(), true);
+    Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
+  }
+
 }
