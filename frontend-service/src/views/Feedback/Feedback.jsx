@@ -433,6 +433,7 @@ export const Feedback = withRouter(({ match, history }) => {
           name="file"
           onError={onImportFileError}
           onUpload={onUpload}
+          operation="PUT"
           url={`${window.env.REACT_APP_BACKEND}${getUrl(FeedbackConfig.importFile, {
             dataflowId
           })}`}
