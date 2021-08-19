@@ -3,10 +3,10 @@ import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import styles from './ManageReportingDataflow.module.scss';
-
 import { config } from 'conf';
 import { routes } from 'conf/routes';
+
+import styles from './ManageReportingDataflow.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
@@ -35,7 +35,6 @@ export const ManageReportingDataflow = ({
   isEditForm,
   manageDialogs,
   obligation,
-  onConfirmDeleteDataflow,
   onCreateDataflow,
   onEditDataflow,
   resetObligations,
@@ -50,6 +49,7 @@ export const ManageReportingDataflow = ({
   const formRef = useRef(null);
 
   const manageReportingDataflowInitialState = {
+    deleteInput: '',
     description: isEditForm ? state.description : '',
     isSubmitting: false,
     name: isEditForm ? state.name : '',
@@ -114,6 +114,9 @@ export const ManageReportingDataflow = ({
       type: 'RESET_STATE',
       payload: { resetData: manageReportingDataflowInitialState }
     });
+
+  const onDeleteInputChange = value =>
+    manageReportingDataflowDispatch({ type: 'ON_DELETE_INPUT_CHANGE', payload: { deleteInput: value } });
 
   const onSave = () => {
     if (formRef.current) formRef.current.handleSubmit(reportingDataflowState.pinDataflow);
@@ -230,7 +233,7 @@ export const ManageReportingDataflow = ({
       {state.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          disabledConfirm={!TextUtils.areEquals(state.deleteInput, state.name)}
+          disabledConfirm={!TextUtils.areEquals(reportingDataflowState.deleteInput, state.name)}
           header={resources.messages['delete'].toUpperCase()}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
@@ -251,9 +254,9 @@ export const ManageReportingDataflow = ({
               id={'deleteDataflow'}
               maxLength={255}
               name={resources.messages['deleteDataflowButton']}
-              onChange={event => onConfirmDeleteDataflow(event)}
+              onChange={event => onDeleteInputChange(event.target.value)}
               ref={deleteInputRef}
-              value={state.deleteInput}
+              value={reportingDataflowState.deleteInput}
             />
           </p>
         </ConfirmDialog>
