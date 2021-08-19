@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * The Class ResourceManagementControllerImplTest.
@@ -37,6 +39,8 @@ public class ResourceManagementControllerImplTest {
    */
   @Before
   public void setUp() throws Exception {
+
+
     MockitoAnnotations.initMocks(this);
   }
 
@@ -74,6 +78,9 @@ public class ResourceManagementControllerImplTest {
    */
   @Test
   public void deleteResource() {
+    UsernamePasswordAuthenticationToken authenticationToken =
+        new UsernamePasswordAuthenticationToken("user", null, null);
+    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     resourceManagementControllerImpl.deleteResource(new ArrayList<>());
     Mockito.verify(securityProviderInterfaceService, times(1))
         .deleteResourceInstances(Mockito.any());
