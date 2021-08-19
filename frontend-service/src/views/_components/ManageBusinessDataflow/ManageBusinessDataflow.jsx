@@ -29,6 +29,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { UserService } from 'services/UserService';
 
@@ -114,6 +115,8 @@ export const ManageBusinessDataflow = ({
       getDropdownsOptions();
     }
   }, []);
+
+  useCheckNotifications('DELETE_DATAFLOW_FAILED_EVENT', setIsDeleting, false);
 
   const checkErrors = () => {
     let hasErrors = false;
