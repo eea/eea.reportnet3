@@ -233,7 +233,7 @@ export const ManageReportingDataflow = ({
       {state.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          disabledConfirm={!TextUtils.areEquals(state.deleteInput, state.name)}
+          disabledConfirm={!TextUtils.areEquals(reportingDataflowState.deleteInput, state.name)}
           header={resources.messages['delete'].toUpperCase()}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
