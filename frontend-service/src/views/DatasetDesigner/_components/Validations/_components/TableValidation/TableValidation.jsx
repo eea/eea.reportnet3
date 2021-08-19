@@ -26,7 +26,7 @@ import {
 } from 'views/DatasetDesigner/_components/Validations/_functions/Reducers/CreateValidationReducer';
 
 import { checkComparisonRelation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonRelation';
-import { checkComparisonSqlSentence } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonSqlSentenceA';
+import { checkComparisonSqlSentence } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonSqlSentence';
 import { checkComparisonValidation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonValidation';
 import { deleteLink } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/deleteLink';
 import { getDatasetSchemaTableFields } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/getDatasetSchemaTableFields';
