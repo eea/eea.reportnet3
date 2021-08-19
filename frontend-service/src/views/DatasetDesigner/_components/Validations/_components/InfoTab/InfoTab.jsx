@@ -1,4 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
+
+import ReactDOMServer from 'react-dom/server';
 
 import isNil from 'lodash/isNil';
 
@@ -97,6 +99,25 @@ export const InfoTab = ({
     creationFormState.tableSqlFields,
     validationContext.isVisible
   ]);
+
+  const getTooltipMessage = () => (
+    <Fragment>
+      <span>{resourcesContext.messages['noQuotesQCTooltip']}</span>
+      <br /> <span>{resourcesContext.messages['percentSignSqlQCTooltip']}</span>
+    </Fragment>
+  );
+
+  const getTooltipContent = () =>
+    ReactDOMServer.renderToStaticMarkup(
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start'
+        }}>
+        {getTooltipMessage()}
+      </div>
+    );
 
   return (
     <div className={styles.section}>
@@ -212,7 +233,7 @@ export const InfoTab = ({
           onFocus={() => onDeleteFromClickedFields('errorMessage')}>
           <label htmlFor={`${componentName}__errorMessage`}>
             {resourcesContext.messages['ruleErrorMessage']}
-            <TooltipButton message={resourcesContext.messages['noQuotesQCTooltip']} parentName="errorMessage" />
+            <TooltipButton getContent={getTooltipContent} parentName="errorMessage" />
           </label>
           <InputText
             id={`${componentName}__errorMessage`}
