@@ -15,6 +15,7 @@ import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchem
 import WebformsConfig from 'conf/webforms.config.json';
 
 import { Button } from 'views/_components/Button';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
@@ -223,7 +224,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         leftSideBarContext.removeHelpSteps();
       }
     }
-  }, [userContext, designerState, designerState.areLoadingSchemas, designerState.areUpdatingTables]);
+  }, [userContext, designerState.areLoadingSchemas, designerState.areUpdatingTables]);
 
   useEffect(() => {
     if (designerState.validationListDialogVisible) {
@@ -1194,9 +1195,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           <div className={styles.datasetDescriptionRow}>
             <InputTextarea
               className={`${styles.datasetDescription} datasetSchema-metadata-help-step`}
-              collapsedHeight={55}
+              collapsedHeight={75}
               disabled={isDataflowOpen || isDesignDatasetEditorRead}
-              expandableOnClick={true}
               id="datasetDescription"
               key="datasetDescription"
               onBlur={e => onBlurDescription(e.target.value)}
@@ -1208,7 +1208,11 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               placeholder={resources.messages['newDatasetSchemaDescriptionPlaceHolder']}
               value={datasetDescription}
             />
-
+            <CharacterCounter
+              currentLength={datasetDescription.length}
+              maxLength={config.INPUT_MAX_LENGTH}
+              style={{ position: 'relative', right: '62px', top: '52px' }}
+            />
             <div className={styles.datasetConfigurationButtons}>
               <div>
                 <Checkbox
