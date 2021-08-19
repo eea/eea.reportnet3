@@ -396,9 +396,6 @@ const Dataflow = withRouter(({ history, match }) => {
     onLoadReportingDataflow();
   };
 
-  const onConfirmDeleteDataflow = event =>
-    dataflowDispatch({ type: 'ON_CONFIRM_DELETE_DATAFLOW', payload: { deleteInput: event.target.value } });
-
   const resetObligations = () => {
     setCheckedObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
     setObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
@@ -610,6 +607,7 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   useCheckNotifications(['RELEASE_COMPLETED_EVENT', 'RELEASE_PROVIDER_COMPLETED_EVENT'], onLoadReportingDataflow);
+  useCheckNotifications(['DELETE_DATAFLOW_COMPLETED_EVENT'], goToDataflowsPage);
 
   useCheckNotifications(
     [
@@ -626,6 +624,10 @@ const Dataflow = withRouter(({ history, match }) => {
     const validationResult = await DataflowService.getSchemasValidation(dataflowId);
     dataflowDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult: validationResult.data } });
   };
+
+  function goToDataflowsPage() {
+    history.push(getUrl(routes.DATAFLOWS));
+  }
 
   const onSaveName = async (value, index) => {
     try {
@@ -1122,11 +1124,9 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <ManageReportingDataflow
           dataflowId={dataflowId}
-          history={history}
           isEditForm={true}
           manageDialogs={manageDialogs}
           obligation={obligation}
-          onConfirmDeleteDataflow={onConfirmDeleteDataflow}
           onEditDataflow={onEditDataflow}
           resetObligations={resetObligations}
           setCheckedObligation={setCheckedObligation}
@@ -1137,7 +1137,6 @@ const Dataflow = withRouter(({ history, match }) => {
           <ManageBusinessDataflow
             dataflowId={dataflowId}
             hasRepresentatives={dataflowState.data.representatives.length !== 0}
-            history={history}
             isAdmin={dataflowState.isAdmin}
             isEditing
             isVisible={dataflowState.isBusinessDataflowDialogVisible}

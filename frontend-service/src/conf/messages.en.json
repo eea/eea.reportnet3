@@ -190,8 +190,7 @@
     "dataflowAcceptedPendingTab": "Pending & Accepted",
     "dataflowCompletedTab": "Completed",
     "dataflowCreationError": "Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> dataflow",
-    "dataflowDeleteByIdError": "Dataflow delete error",
-    "dataflowDeleteSuccess": "Dataflow deleted successfully",
+    "dataflowDeleteByIdError": "Error deleting the dataflow",
     "dataflowDescriptionValidationMax": "Dataflow description is too long",
     "dataflowDetails": "Dataflow details",
     "dataflowDetailsError": "Failed loading dataflow information",
@@ -741,7 +740,7 @@
     "noPK": "No PK",
     "noPushNotifications": "No push notifications",
     "noQCRulesWithSelectedParameters": "There are no QC rules with the selected parameters",
-    "noQuotesQCTooltip": "Double quotes (&quot&quot) cannot be used",
+    "noQuotesQCTooltip": "Double quotes (\"\") cannot be used",
     "noReferencingDataflows": "There are no referencing dataflows",
     "noSelectablePK": "No selectable PK",
     "noSound": "No sound",
@@ -1219,6 +1218,9 @@
     "goTo": "Go to",
     "currentPageErrorMessage": "Value must be between 1 and",
     "currentPageInfoMessage": "Press 'Enter' key to go to this page.",
-    "of": "of"
+    "of": "of",
+    "percentSignSqlQCTooltip": "You can use fields from the SQL sentence writing the field name inside {% ... %}",
+    "deleteDataflowCompletedEvent": "Dataflow deleted successfully",
+    "deleteDataflowFailedEvent": "Error deleting the dataflow"
   }
 }
