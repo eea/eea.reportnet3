@@ -65,6 +65,9 @@ public class RuleVO {
   /** The SQLSentence. */
   private String sqlSentence;
 
+  /** The sql error. */
+  private String sqlError;
+
   /**
    * Hash code.
    *
