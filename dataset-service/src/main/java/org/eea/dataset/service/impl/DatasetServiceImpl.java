@@ -377,7 +377,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteTableBySchema(final String tableSchemaId, final Long datasetId) {
-    deleteRecords(datasetId, tableSchemaId);
+    deleteRecords(datasetId, tableSchemaId, true);
   }
 
   /**
@@ -385,8 +385,9 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
+   * @param deletePrefilledTables the delete prefilled tables
    */
-  private void deleteRecords(Long datasetId, String tableSchemaId) {
+  private void deleteRecords(Long datasetId, String tableSchemaId, Boolean deletePrefilledTables) {
 
     boolean singleTable = null != tableSchemaId;
     Long dataflowId = getDataFlowIdById(datasetId);
@@ -405,8 +406,11 @@ public class DatasetServiceImpl implements DatasetService {
         continue;
       }
 
-      if (TypeStatusEnum.DESIGN.equals(dataflowStatus)) {
-        deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
+      if (TypeStatusEnum.DESIGN.equals(dataflowStatus)
+          && Boolean.FALSE.equals(deletePrefilledTables)) {
+        if (Boolean.FALSE.equals(tableSchema.getToPrefill())) {
+          deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
+        }
       } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())
           && !(DatasetTypeEnum.REFERENCE.equals(datasetType)
               && Boolean.TRUE.equals(referenceUpdateable))) {
@@ -446,11 +450,12 @@ public class DatasetServiceImpl implements DatasetService {
    * Delete import data.
    *
    * @param datasetId the data set id
+   * @param deletePrefilledTables the delete prefilled tables
    */
   @Override
   @Transactional
-  public void deleteImportData(final Long datasetId) {
-    deleteRecords(datasetId, null);
+  public void deleteImportData(final Long datasetId, Boolean deletePrefilledTables) {
+    deleteRecords(datasetId, null, deletePrefilledTables);
   }
 
   /**

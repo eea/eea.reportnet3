@@ -475,7 +475,7 @@ public class DatasetServiceTest {
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5cf0e9b3b793310e9ceca190");
-    datasetService.deleteImportData(1L);
+    datasetService.deleteImportData(1L, false);
     Mockito.verify(recordRepository, times(0)).deleteRecordWithIdTableSchema(Mockito.any());
   }
 
@@ -507,7 +507,7 @@ public class DatasetServiceTest {
     table.setRecordSchema(record);
     schema.setTableSchemas(Arrays.asList(table));
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-    datasetService.deleteImportData(1L);
+    datasetService.deleteImportData(1L, false);
     Mockito.verify(fieldRepository, times(1)).saveAll(Mockito.any());
   }
 

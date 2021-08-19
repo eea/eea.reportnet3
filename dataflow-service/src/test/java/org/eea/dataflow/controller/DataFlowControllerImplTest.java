@@ -5,14 +5,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.service.DataflowService;
@@ -24,6 +27,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +40,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
@@ -67,6 +72,15 @@ public class DataFlowControllerImplTest {
   @Mock
   private RepresentativeService representativeService;
 
+  /** The security context. */
+  private SecurityContext securityContext;
+
+  /** The authentication. */
+  private Authentication authentication;
+
+  /** The details. */
+  private Map<String, String> details;
+
 
   /**
    * Inits the mocks.
@@ -75,6 +89,13 @@ public class DataFlowControllerImplTest {
   public void initMocks() {
     dataflowVO = new DataFlowVO();
     dataflowVO.setId(1L);
+
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+
+
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     MockitoAnnotations.initMocks(this);
   }
 
@@ -100,6 +121,11 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void testFindByIdEEAExcep() throws EEAException {
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
     when(dataflowService.getByIdWithRepresentativesFilteredByUserEmail(Mockito.any()))
         .thenThrow(EEAException.class);
     dataFlowControllerImpl.findById(1L, null);
@@ -113,9 +139,16 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void testFindById() throws EEAException {
-    when(dataflowService.getByIdWithRepresentativesFilteredByUserEmail(Mockito.any()))
-        .thenReturn(dataflowVO);
-    dataFlowControllerImpl.findById(1L, null);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities
+        .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(1L)));
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    doReturn(authorities).when(authentication).getAuthorities();
+    when(dataflowService.getById(Mockito.anyLong())).thenReturn(dataflowVO);
     assertEquals("fail", dataflowVO, dataFlowControllerImpl.findById(1L, null));
   }
 
@@ -171,6 +204,14 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void findDataflows() throws EEAException {
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+
     when(dataflowService.getDataflows(Mockito.any())).thenReturn(new ArrayList<>());
     dataFlowControllerImpl.findDataflows();
     assertEquals("fail", new ArrayList<>(), dataflowService.getDataflows(Mockito.any()));
@@ -183,6 +224,14 @@ public class DataFlowControllerImplTest {
    */
   @Test
   public void findCompletedThrows() throws EEAException {
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+
     when(dataflowService.getCompleted(Mockito.any(), Mockito.any())).thenThrow(EEAException.class);
     dataFlowControllerImpl.findCompleted(1, 1);
     Mockito.verify(dataflowService, times(1)).getCompleted(Mockito.any(), Mockito.any());
@@ -569,7 +618,7 @@ public class DataFlowControllerImplTest {
   public void testGetMetabaseById() throws EEAException {
     when(dataflowService.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     dataFlowControllerImpl.getMetabaseById(1L);
-    Mockito.verify(dataflowService, times(1)).getMetabaseById(1L);
+    Mockito.verify(dataflowService, times(1)).getMetabaseById(Mockito.anyLong());
   }
 
   /**
@@ -581,7 +630,7 @@ public class DataFlowControllerImplTest {
   public void testGetMetabaseByIdException() throws EEAException {
     when(dataflowService.getMetabaseById(Mockito.any())).thenThrow(EEAException.class);
     dataFlowControllerImpl.getMetabaseById(1L);
-    Mockito.verify(dataflowService, times(1)).getMetabaseById(1L);
+    Mockito.verify(dataflowService, times(1)).getMetabaseById(Mockito.anyLong());
   }
 
   /**
@@ -598,23 +647,6 @@ public class DataFlowControllerImplTest {
     }
   }
 
-  /**
-   * Delete dataflow throw.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void deleteDataflowThrow() throws Exception {
-    EEAException Exception = new EEAException(EEAErrorMessage.DATAFLOW_INCORRECT_ID);
-    doThrow(Exception).when(dataflowService).deleteDataFlow(Mockito.anyLong());
-    try {
-      dataFlowControllerImpl.deleteDataFlow(Mockito.anyLong());
-    } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, ex.getReason());
-      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
-      throw ex;
-    }
-  }
 
   /**
    * Delete dataflow.
@@ -622,8 +654,11 @@ public class DataFlowControllerImplTest {
    * @throws Exception the exception
    */
   @Test
-  public void deleteDataflow() throws Exception {
-    dataFlowControllerImpl.deleteDataFlow(Mockito.anyLong());
+  public void deleteDataflow() {
+
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("name");
+    dataFlowControllerImpl.deleteDataFlow(1L);
     Mockito.verify(dataflowService, times(1)).deleteDataFlow(Mockito.anyLong());
   }
 
@@ -722,18 +757,50 @@ public class DataFlowControllerImplTest {
 
   @Test
   public void findReferenceDataflowsTest() throws EEAException {
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+
     when(dataflowService.getReferenceDataflows(Mockito.any())).thenReturn(new ArrayList<>());
-    assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findReferenceDataflows());
+    when(authentication.getDetails()).thenReturn(details);
+    dataFlowControllerImpl.findReferenceDataflows();
+    assertEquals("fail", new ArrayList<>(), dataflowService.getReferenceDataflows(Mockito.any()));
+
   }
 
   @Test
   public void findBusinessDataflowsTest() throws EEAException {
+
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+
+    when(authentication.getDetails()).thenReturn(details);
     when(dataflowService.getBusinessDataflows(Mockito.any())).thenReturn(new ArrayList<>());
     assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findBusinessDataflows());
   }
 
   @Test
   public void findBusinessDataflowsExceptionTest() throws EEAException {
+
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+
+    when(authentication.getDetails()).thenReturn(details);
+
     doThrow(new EEAException()).when(dataflowService).getBusinessDataflows(Mockito.any());
     assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findBusinessDataflows());
   }

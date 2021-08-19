@@ -91,6 +91,9 @@
           "key": "BUSINESS_DATAFLOW_CREATION_ERROR"
         },
         {
+          "key": "DELETE_DATAFLOW_FAILED_EVENT"
+        },
+        {
           "key": "SNAPSHOT_CREATION_ERROR",
           "navigateTo": {
             "section": "DATASET",
@@ -899,7 +902,7 @@
           "key": "REFERENCE_DATAFLOW_PROCESSED_EVENT"
         },
         {
-          "key": "DATAFLOW_DELETE_SUCCESS"
+          "key": "DELETE_DATAFLOW_COMPLETED_EVENT"
         },
         {
           "key": "COPY_TO_CLIPBOARD_SUCCESS"

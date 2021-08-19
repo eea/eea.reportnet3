@@ -44,8 +44,9 @@ public interface DatasetService {
    * Delete import data.
    *
    * @param datasetId the data set id
+   * @param deletePrefilledTables the delete prefilled tables
    */
-  void deleteImportData(@DatasetId Long datasetId);
+  void deleteImportData(@DatasetId Long datasetId, Boolean deletePrefilledTables);
 
   /**
    * Gets the table values by id.
