@@ -28,13 +28,11 @@ const GlobalNotifications = () => {
     findHiddenExportDatasetNotification();
   }, [notificationContext.hidden]);
 
-  const hasHiddenDownloadQCRulesNotification = () => {
-    return notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_QC_RULES_COMPLETED_EVENT');
-  };
+  const hasHiddenDownloadQCRulesNotification = () =>
+    notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_QC_RULES_COMPLETED_EVENT');
 
-  const hasHiddenDownloadValidationsNotification = () => {
-    return notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_VALIDATIONS_COMPLETED_EVENT');
-  };
+  const hasHiddenDownloadValidationsNotification = () =>
+    notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_VALIDATIONS_COMPLETED_EVENT');
 
   const findHiddenExportFMENotification = () => {
     return notificationContext.hidden.find(
