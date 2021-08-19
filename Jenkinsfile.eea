@@ -3,7 +3,7 @@ pipeline {
     agent { node { label 'docker' } }
     tools {
         maven 'maven3'
-        jdk 'Java8'
+        jdk 'Java11'
     }
     options {
         disableConcurrentBuilds()
@@ -161,7 +161,7 @@ pipeline {
                         image.push()
                         image.push(date)
                     }
-                  }
+                 }
 
             }
         }
