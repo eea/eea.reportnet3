@@ -98,9 +98,9 @@ export const CardsView = ({
           <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="bottom">
             {pageInputTooltip}
           </ReactTooltip>
-          <label style={{ fontWeight: 'bold', margin: '0 0 0 0.5rem' }}>{`${resources.messages['of']} ${Math.ceil(
-            data.length / cardsPerPage
-          )}`}</label>
+          <label style={{ fontWeight: 'bold', margin: '0 0 0 0.5rem' }}>
+            {data.length > 0 ? `${resources.messages['of']} ${Math.ceil(data.length / cardsPerPage)}` : 1}
+          </label>
         </span>
       );
     }

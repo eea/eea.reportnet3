@@ -11,6 +11,7 @@ export class Validation {
     description,
     enabled,
     entityType,
+    expressionText,
     expressions,
     expressionsIf,
     expressionsThen,
@@ -23,6 +24,7 @@ export class Validation {
     relations,
     ruleId,
     shortCode,
+    sqlError,
     sqlSentence
   } = {}) {
     this.activationGroup = activationGroup;
@@ -36,6 +38,7 @@ export class Validation {
     this.description = description;
     this.enabled = enabled;
     this.entityType = entityType;
+    this.expressionText = expressionText;
     this.expressions = expressions;
     this.expressionsIf = expressionsIf;
     this.expressionsThen = expressionsThen;
@@ -48,6 +51,7 @@ export class Validation {
     this.relations = relations;
     this.ruleId = ruleId;
     this.shortCode = shortCode;
+    this.sqlError = sqlError;
     this.sqlSentence = sqlSentence;
   }
 }

@@ -46,7 +46,7 @@ const ValidationExpressionGroup = ({
       return (
         <FontAwesomeIcon
           icon={AwesomeIcons('expanded')}
-          onClick={e => expressionsVisibilityToggle()}
+          onClick={() => expressionsVisibilityToggle()}
           style={btnStyle}
         />
       );
@@ -54,7 +54,7 @@ const ValidationExpressionGroup = ({
       return (
         <FontAwesomeIcon
           icon={AwesomeIcons('collapsed')}
-          onClick={e => expressionsVisibilityToggle()}
+          onClick={() => expressionsVisibilityToggle()}
           style={btnStyle}
         />
       );
@@ -79,7 +79,7 @@ const ValidationExpressionGroup = ({
         />
       ));
     }
-    return <div />;
+    return null;
   };
 
   // layouts
@@ -122,7 +122,7 @@ const ValidationExpressionGroup = ({
                 className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton} p-button-animated-blink`}
                 disabled={isDisabled}
                 icon="trash"
-                onClick={e => {
+                onClick={() => {
                   onExpressionDelete(expressionId);
                 }}
                 type="button"

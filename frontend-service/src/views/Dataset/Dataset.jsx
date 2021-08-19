@@ -99,6 +99,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
   const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
+  const [isDownloadingQCRules, setIsDownloadingQCRules] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -231,6 +232,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
     if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_VALIDATIONS_FAILED_EVENT')) {
       setIsDownloadingValidations(false);
+    }
+
+    if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_QC_RULES_FAILED_EVENT')) {
+      setIsDownloadingQCRules(false);
     }
   }, [notificationContext.hidden]);
 
@@ -507,6 +512,12 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   );
 
   useCheckNotifications(
+    ['AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE', 'DOWNLOAD_QC_RULES_FILE_ERROR'],
+    setIsDownloadingQCRules,
+    false
+  );
+
+  useCheckNotifications(
     ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR'],
     setIsDownloadingValidations,
     false
@@ -745,6 +756,19 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       tableSchemaId: table.tableSchemaId
     });
 
+  const onDownloadQCRules = async () => {
+    setIsDownloadingQCRules(true);
+    notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
+
+    try {
+      await ValidationService.generateQCRulesFile(datasetId);
+    } catch (error) {
+      console.error('DatasetDesigner - onDownloadQCRules.', error);
+      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' });
+      setIsDownloadingQCRules(false);
+    }
+  };
+
   const datasetInsideTitle = () => {
     if (dataset?.isReleasing) {
       return `${resources.messages['isReleasing']} `;
@@ -758,12 +782,20 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   };
 
   const validationListFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon={'cancel'}
-      label={resources.messages['close']}
-      onClick={() => onSetVisible(setValidationListDialogVisible, false)}
-    />
+    <Fragment>
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
+        label={resources.messages['downloadQCsButtonLabel']}
+        onClick={() => onDownloadQCRules()}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon={'cancel'}
+        label={resources.messages['close']}
+        onClick={() => onSetVisible(setValidationListDialogVisible, false)}
+      />
+    </Fragment>
   );
 
   const layout = children => {
