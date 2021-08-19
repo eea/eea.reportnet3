@@ -349,9 +349,9 @@ export const Feedback = withRouter(({ match, history }) => {
           className={`${styles.listMessagesWrapper} ${
             isCustodian ? styles.flexBasisCustodian : styles.flexBasisProvider
           }`}
-          onDragLeave={isCustodian && !isEmpty(selectedDataProvider) && onDragLeave}
-          onDragOver={isCustodian && !isEmpty(selectedDataProvider) && onDragOver}
-          onDrop={isCustodian && !isEmpty(selectedDataProvider) && onDrop}
+          onDragLeave={isCustodian && !isEmpty(selectedDataProvider) ? onDragLeave : () => {}}
+          onDragOver={isCustodian && !isEmpty(selectedDataProvider) ? onDragOver : () => {}}
+          onDrop={isCustodian && !isEmpty(selectedDataProvider) ? onDrop : () => {}}
           // onDragStart={onDragStart}
         >
           <ListMessages

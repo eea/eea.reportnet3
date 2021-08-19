@@ -1210,7 +1210,7 @@
     "webformView": "Webform",
     "webLinkDescriptionValidationMax": "Web link description is too long",
     "webLinks": "Web links",
-    "writeMessagePlaceholder": "Write your message",
+    "writeMessagePlaceholder": "Write your message or drag here a file",
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
