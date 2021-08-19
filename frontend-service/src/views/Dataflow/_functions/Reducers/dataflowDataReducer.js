@@ -40,9 +40,6 @@ export const dataflowDataReducer = (state, { type, payload }) => {
         deleteInput: payload.deleteInput
       };
 
-    case 'ON_CONFIRM_DELETE_DATAFLOW':
-      return { ...state, deleteInput: payload.deleteInput };
-
     case 'ON_EDIT_DATA':
       return {
         ...state,
