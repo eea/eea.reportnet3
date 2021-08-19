@@ -639,7 +639,7 @@ public class FileTreatmentHelper implements DisposableBean {
       if (null != tableSchemaId) {
         datasetService.deleteTableBySchema(tableSchemaId, datasetId);
       } else {
-        datasetService.deleteImportData(datasetId);
+        datasetService.deleteImportData(datasetId, false);
       }
     }
   }

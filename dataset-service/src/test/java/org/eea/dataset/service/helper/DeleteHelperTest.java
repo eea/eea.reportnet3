@@ -67,7 +67,7 @@ public class DeleteHelperTest {
         Mockito.any());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    deleteHelper.executeDeleteDatasetProcess(1L);
+    deleteHelper.executeDeleteDatasetProcess(1L, false);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
