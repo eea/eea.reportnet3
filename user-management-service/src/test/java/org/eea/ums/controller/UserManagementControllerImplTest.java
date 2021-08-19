@@ -70,7 +70,7 @@ public class UserManagementControllerImplTest {
   @Before
   public void setUp() throws Exception {
 
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
 

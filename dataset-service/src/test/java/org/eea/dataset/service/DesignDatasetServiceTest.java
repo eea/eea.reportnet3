@@ -127,7 +127,7 @@ public class DesignDatasetServiceTest {
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
     ReflectionTestUtils.setField(designDatasetService, "timeToWaitBeforeContinueCopy", 3000L);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

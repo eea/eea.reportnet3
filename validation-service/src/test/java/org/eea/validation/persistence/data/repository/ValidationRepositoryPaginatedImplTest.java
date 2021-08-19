@@ -62,7 +62,7 @@ public class ValidationRepositoryPaginatedImplTest {
     levelErrorsFilter = new ArrayList<>();
     typeEntityEnum.add(EntityTypeEnum.DATASET);
     levelErrorsFilter.add(ErrorTypeEnum.ERROR);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

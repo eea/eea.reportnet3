@@ -42,7 +42,7 @@ public class KafkaSenderUtilsTest {
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

@@ -81,7 +81,7 @@ public class RecordStoreControllerImplTest {
     details.put("", "");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
 

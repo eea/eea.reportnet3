@@ -99,7 +99,7 @@ public class DataSetSnapshotControllerImplTest {
     reportingDataset2.setId(2L);
     reportingDataset2.setDataProviderId(1L);
     datasets.add(reportingDataset2);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

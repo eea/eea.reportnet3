@@ -50,7 +50,7 @@ public class OakRepositoryUtilsTest {
     session = MockJcr.newSession();
     session.getRootNode().addNode("1", "nt:file");
     session.save();
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
 
