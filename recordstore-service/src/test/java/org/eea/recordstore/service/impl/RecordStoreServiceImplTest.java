@@ -89,7 +89,7 @@ public class RecordStoreServiceImplTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
 
     ReflectionTestUtils.setField(recordStoreServiceImpl, "containerName", "crunchy-postgres");
     ReflectionTestUtils.setField(recordStoreServiceImpl, "ipPostgreDb", "localhost");

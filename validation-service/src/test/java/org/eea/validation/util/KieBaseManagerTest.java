@@ -66,7 +66,7 @@ public class KieBaseManagerTest {
     securityContext = Mockito.mock(SecurityContext.class);
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     id = new ObjectId();
     datasetSchema = new DataSetSchema();
     List<TableSchema> tableSchemas = new ArrayList<>();

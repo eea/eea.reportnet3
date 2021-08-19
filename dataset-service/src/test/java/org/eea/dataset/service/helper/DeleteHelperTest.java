@@ -43,7 +43,7 @@ public class DeleteHelperTest {
     SecurityContextHolder.getContext()
         .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
     ThreadPropertiesManager.setVariable("user", "user");
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

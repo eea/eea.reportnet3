@@ -123,7 +123,7 @@ public class DockerInterfaceServiceImplTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     ReflectionTestUtils.setField(recordStoreServiceImpl, "containerName", "crunchy-postgres");
     ReflectionTestUtils.setField(recordStoreServiceImpl, "ipPostgreDb", "localhost");
     ReflectionTestUtils.setField(recordStoreServiceImpl, "userPostgreDb", "root");

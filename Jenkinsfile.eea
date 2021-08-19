@@ -41,7 +41,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('Sonarqube') {
                     // requires SonarQube Scanner for Maven 3.2+
-                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -P sonar -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
+                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -P sonar -Dsonar.java.source=11 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
                 }
             }
         }

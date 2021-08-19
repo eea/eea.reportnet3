@@ -91,7 +91,7 @@ public class LoadValidationsHelperTest {
     tableValue.setDatasetId(datasetValue);
     tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
     pageable = PageRequest.of(1, 10);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

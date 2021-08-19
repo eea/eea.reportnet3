@@ -67,7 +67,7 @@ public class DocumentServiceImplTest {
     ThreadPropertiesManager.setVariable("user", "user");
     fileMock = new MockMultipartFile("file", "fileOriginal.cvs", "cvs", "content".getBytes());
     documentVO = new DocumentVO();
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

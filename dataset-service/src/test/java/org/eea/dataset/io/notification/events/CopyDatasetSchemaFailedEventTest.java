@@ -33,7 +33,7 @@ public class CopyDatasetSchemaFailedEventTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

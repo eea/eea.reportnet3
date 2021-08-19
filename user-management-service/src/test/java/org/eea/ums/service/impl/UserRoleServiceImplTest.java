@@ -65,7 +65,7 @@ public class UserRoleServiceImplTest {
     SecurityContextHolder.clearContext();
     SecurityContextHolder.getContext().setAuthentication(
         new UsernamePasswordAuthenticationToken("user", "password", authorities));
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

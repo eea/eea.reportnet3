@@ -126,7 +126,7 @@ public class DataFlowWebLinkServiceImplTest {
     badResources.add(badResource);
 
 
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

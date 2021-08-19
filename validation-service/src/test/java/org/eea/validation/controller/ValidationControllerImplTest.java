@@ -78,7 +78,7 @@ public class ValidationControllerImplTest {
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
     failedValidationsDatasetVO = new FailedValidationsDatasetVO();
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**
