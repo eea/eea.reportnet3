@@ -292,7 +292,7 @@ export const ManageBusinessDataflow = ({
         className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
         icon={'cancel'}
         label={isEditing ? resources.messages['cancel'] : resources.messages['close']}
-        onClick={onHideDataflowDialog()}
+        onClick={onHideDataflowDialog}
       />
     </Fragment>
   );
@@ -306,7 +306,7 @@ export const ManageBusinessDataflow = ({
             ? resources.messages['editBusinessDataflowDialogHeader']
             : resources.messages['createBusinessDataflowDialogHeader']
         }
-        onHide={onHideDataflowDialog()}
+        onHide={onHideDataflowDialog}
         visible={isVisible}>
         <div className={styles.dialogContent}>
           {isLoading ? (
