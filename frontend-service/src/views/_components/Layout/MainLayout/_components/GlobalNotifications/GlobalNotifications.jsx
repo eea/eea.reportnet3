@@ -19,10 +19,18 @@ const GlobalNotifications = () => {
       downloadValidationsFile();
     }
 
+    if (hasHiddenDownloadQCRulesNotification()) {
+      downloadQCRulesFile();
+    }
+
     if (findHiddenExportFMENotification()) downloadExportFMEFile();
 
     findHiddenExportDatasetNotification();
   }, [notificationContext.hidden]);
+
+  const hasHiddenDownloadQCRulesNotification = () => {
+    return notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_QC_RULES_COMPLETED_EVENT');
+  };
 
   const hasHiddenDownloadValidationsNotification = () => {
     return notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_VALIDATIONS_COMPLETED_EVENT');
@@ -135,6 +143,29 @@ const GlobalNotifications = () => {
     } catch (error) {
       console.error('GlobalNotifications - downloadValidationsFile.', error);
       notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_FILE_ERROR' });
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
+  };
+
+  const downloadQCRulesFile = async () => {
+    const [notification] = notificationContext.hidden.filter(
+      notification => notification.key === 'DOWNLOAD_QC_RULES_COMPLETED_EVENT'
+    );
+
+    try {
+      const { data } = await ValidationService.downloadQCRulesFile(
+        notification.content.datasetId,
+        notification.content.nameFile
+      );
+      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE' });
+
+      if (data.size !== 0) {
+        DownloadFile(data, notification.content.nameFile);
+      }
+    } catch (error) {
+      console.error('GlobalNotifications - downloadValidationsFile.', error);
+      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' });
     } finally {
       notificationContext.clearHiddenNotifications();
     }

@@ -1223,6 +1223,8 @@
     "percentSignSqlQCTooltip": "You can use fields from the SQL sentence writing the field name inside {% ... %}",
     "downloadQCsButtonLabel": "Download QCs",
     "downloadQcRulesStart": "Generating QCs rules file",
-    "downloadQcRulesError": "Failed downloading QCs rules"
+    "downloadQcRulesError": "Failed downloading QCs rules",
+    "downloadQcRulesFileError": "Failed downloading QC rules file",
+    "automaticallyDownloadQcRulesFile": "QC rules file generated successfully"
   }
 }

@@ -641,6 +641,12 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   );
 
   useCheckNotifications(
+    ['AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE', 'DOWNLOAD_QC_RULES_FILE_ERROR'],
+    setIsDownloadingQCRules,
+    false
+  );
+
+  useCheckNotifications(
     ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR'],
     setIsDownloadingValidations,
     false

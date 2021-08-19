@@ -12,6 +12,11 @@ export const ValidationRepository = {
   delete: async (datasetSchemaId, ruleId) =>
     await HTTPRequester.delete({ url: getUrl(ValidationConfig.delete, { datasetSchemaId, ruleId }) }),
 
+  downloadQCRulesFile: async (datasetId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(ValidationConfig.downloadQCRulesFile, { datasetId, fileName })
+    }),
+
   downloadShowValidationsFile: async (datasetId, fileName) =>
     await HTTPRequester.download({
       url: getUrl(ValidationConfig.downloadShowValidationsFile, { datasetId, fileName })

@@ -90,6 +90,9 @@ export const ValidationService = {
 
   delete: async (datasetSchemaId, ruleId) => await ValidationRepository.delete(datasetSchemaId, ruleId),
 
+  downloadQCRulesFile: async (datasetId, fileName) =>
+    await ValidationRepository.downloadQCRulesFile(datasetId, fileName),
+
   downloadShowValidationsFile: async (datasetId, fileName) =>
     await ValidationRepository.downloadShowValidationsFile(datasetId, fileName),
 
