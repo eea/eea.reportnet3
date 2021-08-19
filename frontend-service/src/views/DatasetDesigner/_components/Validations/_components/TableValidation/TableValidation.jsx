@@ -374,8 +374,9 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
   const onCreateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
-      const { candidateRule } = creationFormState;
+      const { candidateRule, expressionText } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      candidateRule.expressionText = expressionText;
 
       await ValidationService.createTableRule(datasetId, candidateRule);
       onHide();
@@ -399,8 +400,10 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
   const onUpdateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
-      const { candidateRule } = creationFormState;
+      const { candidateRule, expressionText } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      candidateRule.expressionText = expressionText;
+
       await ValidationService.updateTableRule(datasetId, candidateRule);
       if (!isNil(candidateRule) && candidateRule.automatic) {
         validationContext.onAutomaticRuleIsUpdated(true);

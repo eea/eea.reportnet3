@@ -196,12 +196,7 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
       type: 'SET_EXPRESSIONS_STRING',
       payload: formula
     });
-  }, [
-    creationFormState.candidateRule.expressions,
-    creationFormState.candidateRule.expressionType,
-    creationFormState.candidateRule.expressionsIf,
-    creationFormState.candidateRule.expressionsThen
-  ]);
+  }, [creationFormState.candidateRule]);
 
   useEffect(() => {
     if (checkActivateRules()) {
@@ -295,8 +290,9 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
   const onCreateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
-      const { candidateRule } = creationFormState;
+      const { candidateRule, expressionText } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      candidateRule.expressionText = expressionText;
 
       if (candidateRule.expressionType === 'ifThenClause') {
         setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
@@ -322,8 +318,9 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
   const onUpdateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
-      const { candidateRule } = creationFormState;
+      const { candidateRule, expressionText } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      candidateRule.expressionText = expressionText;
 
       if (candidateRule.expressionType === 'ifThenClause') {
         setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);

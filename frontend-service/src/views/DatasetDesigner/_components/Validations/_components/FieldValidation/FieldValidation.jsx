@@ -197,7 +197,7 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
       type: 'SET_EXPRESSIONS_STRING',
       payload: getFieldExpressionString(expressions, field)
     });
-  }, [creationFormState.candidateRule.field, creationFormState.candidateRule.expressions]);
+  }, [creationFormState.candidateRule]);
 
   useEffect(() => {
     if (checkActivateRules()) {
@@ -257,35 +257,25 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     }
   }, [clickedFields]);
 
-  const onExpressionTypeToggle = expressionType => {
-    creationFormDispatch({
-      type: 'ON_EXPRESSION_TYPE_TOGGLE',
-      payload: expressionType
-    });
-  };
+  const onExpressionTypeToggle = expressionType =>
+    creationFormDispatch({ type: 'ON_EXPRESSION_TYPE_TOGGLE', payload: expressionType });
 
-  const checkActivateRules = () => {
-    return creationFormState.candidateRule.table && creationFormState.candidateRule.field;
-  };
+  const checkActivateRules = () => creationFormState.candidateRule.table && creationFormState.candidateRule.field;
 
-  const checkDeactivateRules = () => {
-    return (
-      (!creationFormState.candidateRule.table || !creationFormState.candidateRule.field) &&
-      !creationFormState.areRulesDisabled
-    );
-  };
+  const checkDeactivateRules = () =>
+    (!creationFormState.candidateRule.table || !creationFormState.candidateRule.field) &&
+    !creationFormState.areRulesDisabled;
 
   const onCreateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
-      const { candidateRule } = creationFormState;
+      const { candidateRule, expressionText } = creationFormState;
+      candidateRule.expressionText = expressionText;
       await ValidationService.createFieldRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
       console.error('FieldValidation - onCreateValidationRule.', error);
-      notificationContext.add({
-        type: 'QC_RULE_CREATION_ERROR'
-      });
+      notificationContext.add({ type: 'QC_RULE_CREATION_ERROR' });
     } finally {
       setIsSubmitDisabled(false);
     }
@@ -294,7 +284,8 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
   const onUpdateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
-      const { candidateRule } = creationFormState;
+      const { candidateRule, expressionText } = creationFormState;
+      candidateRule.expressionText = expressionText;
       await ValidationService.updateFieldRule(datasetId, candidateRule);
       if (!isNil(candidateRule) && candidateRule.automatic) {
         validationContext.onAutomaticRuleIsUpdated(true);
@@ -421,9 +412,8 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     }
   };
 
-  const printError = field => {
-    return clickedFields.includes(field) && isEmpty(creationFormState.candidateRule[field]) ? 'error' : '';
-  };
+  const printError = field =>
+    clickedFields.includes(field) && isEmpty(creationFormState.candidateRule[field]) ? 'error' : '';
 
   const onAddNewExpression = () => {
     creationFormDispatch({
@@ -465,9 +455,7 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     });
   };
 
-  const onGetFieldType = field => {
-    return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
-  };
+  const onGetFieldType = field => getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
 
   const renderFieldQCsFooter = (
     <div className={styles.footer}>
