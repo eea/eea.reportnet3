@@ -114,7 +114,7 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
             onExpressionTypeToggle={onExpressionTypeToggle}
             onExpressionsErrors={onExpressionsErrors}
             onGetFieldType={onGetFieldType}
-            onSetSQLsentence={onSetSQLsentence}
+            onSetSqlSentence={onSetSqlSentence}
             tabsChanges={tabsChanges}
           />
         </TabPanel>
@@ -290,8 +290,9 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
   const onCreateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
-      const { candidateRule } = creationFormState;
+      const { candidateRule, expressionText } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      candidateRule.expressionText = expressionText;
 
       if (candidateRule.expressionType === 'ifThenClause') {
         setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
@@ -317,8 +318,9 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
   const onUpdateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
-      const { candidateRule } = creationFormState;
+      const { candidateRule, expressionText } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      candidateRule.expressionText = expressionText;
 
       if (candidateRule.expressionType === 'ifThenClause') {
         setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
@@ -626,7 +628,7 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     });
   };
 
-  const onSetSQLsentence = (key, value) => {
+  const onSetSqlSentence = (key, value) => {
     creationFormDispatch({
       type: 'SET_FORM_FIELD',
       payload: {
