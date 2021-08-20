@@ -120,7 +120,7 @@ public class ContributorServiceImplTest {
     reportingDatasetVO.setId(1L);
     reportingDatasets.add(reportingDatasetVO);
     listUserWrite.add(new UserRepresentationVO());
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

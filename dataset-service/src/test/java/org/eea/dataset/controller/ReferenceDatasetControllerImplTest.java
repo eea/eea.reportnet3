@@ -40,7 +40,7 @@ public class ReferenceDatasetControllerImplTest {
 
   @Before
   public void initMocks() throws Exception {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

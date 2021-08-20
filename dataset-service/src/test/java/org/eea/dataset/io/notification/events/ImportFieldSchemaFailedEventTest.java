@@ -42,7 +42,7 @@ public class ImportFieldSchemaFailedEventTest {
 
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

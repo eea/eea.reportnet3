@@ -26,7 +26,7 @@ public class UploadDocumentCompletedEventTest {
 
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

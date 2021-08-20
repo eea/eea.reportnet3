@@ -43,7 +43,7 @@ public class EEAEventHandlerImplTest {
     event = new EEAEventVO();
     Map<String, Object> data = new HashMap<>();
     event.setData(data);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

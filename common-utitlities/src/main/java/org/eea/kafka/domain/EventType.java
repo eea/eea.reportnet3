@@ -232,6 +232,14 @@ public enum EventType {
   DELETE_DOCUMENT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "delete_document_failed_event", true),
 
+  /** The delete dataflow completed event. */
+  DELETE_DATAFLOW_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "delete_dataflow_completed_event", true),
+
+  /** The delete dataflow failed event. */
+  DELETE_DATAFLOW_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "delete_dataflow_failed_event", true),
+
   /** The command execute new design field propagation. */
   COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION(LiteralConstants.COMMAND_TOPIC,
       "execute_new_field_propagation", false),

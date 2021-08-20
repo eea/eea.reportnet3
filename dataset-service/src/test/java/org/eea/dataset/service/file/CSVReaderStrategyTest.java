@@ -56,7 +56,7 @@ public class CSVReaderStrategyTest {
    */
   @Before
   public void initMocks() throws IOException {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     ReflectionTestUtils.setField(csvReaderStrategy, "delimiter", ',');
     String csv = "campo_1,campo_2,campo_3\r\n" + "B,C,D\r\n" + "\"I,I\",I,I";
     MockMultipartFile file =

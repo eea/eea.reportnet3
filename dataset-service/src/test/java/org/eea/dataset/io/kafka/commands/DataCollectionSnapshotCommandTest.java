@@ -57,7 +57,7 @@ public class DataCollectionSnapshotCommandTest {
   public void initMocks() {
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.ADD_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

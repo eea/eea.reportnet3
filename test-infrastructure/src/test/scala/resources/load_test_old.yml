@@ -11,6 +11,17 @@ gatling_config:
       requestBody: '{"name":"${name}"}'
       headers:
         Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJDZ3o5akY5TjVHTFNmOXhGaWpZdGgzOTIwZzdrVEppejlhRk5uOXdBa1h3In0.eyJqdGkiOiIwYmM5MGZiMC05YjI5LTRlOTItOTUyOS02NDY3MDQ0NmExMjgiLCJleHAiOjE2MTM4OTEyNTgsIm5iZiI6MCwiaWF0IjoxNjEzODkxMTk4LCJpc3MiOiJodHRwOi8va3ZtLXJuM3Byb2QtMDEucGRtei5lZWE6MzEwNTUvYXV0aC9yZWFsbXMvbWFzdGVyIiwic3ViIjoiNzA0MDZiYjUtZGMxZi00MWMwLWFkZmUtYmE1YzA5OGI4N2UwIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic2VjdXJpdHktYWRtaW4tY29uc29sZSIsIm5vbmNlIjoiMmNkOTdhODctYjI5ZS00ZTJhLTg2MTctYTZkZjQ5OGNmNzM2IiwiYXV0aF90aW1lIjoxNjEzODg5NTAwLCJzZXNzaW9uX3N0YXRlIjoiZDJjYzI2ODYtMDQ5NS00Njk4LTkyNmYtMDFmYWMzYzE2ZGM4IiwiYWNyIjoiMCIsInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJSZXBvcnRuZXQgSGVscGRlc2sgU2VydmljZSIsInByZWZlcnJlZF91c2VybmFtZSI6ImFkbWluIiwiZ2l2ZW5fbmFtZSI6IlJlcG9ydG5ldCBIZWxwZGVzayIsImZhbWlseV9uYW1lIjoiU2VydmljZSIsImVtYWlsIjoiaGVscGRlc2tAcmVwb3J0bmV0LmV1cm9wYS5ldSJ9.DFLEuB9TtavByWKmRZFzfu10x4IqtmhclQRP8MD1KyCejeiYfQyxSYivx7tO_lkayXf12I6q3Urghyg2mimvN81O39ftjvGWRH6T8Pmyu3il5qjGlRKTUp-E7s1XjxaS_i6Is8xU-9_ZpUxPkrB0EHA0m9IhugKxpb-uM9E8trfsw62qgUk3EiLl1ox52JfLAQnO-ETag8XNO88gyrJXfyPvvq41qma0Pt1TwHuMr2vzRvUvO62g9LX7Fgi32tTrJAiNA-UGJGmX4b5c5q71hKZ22tnswi4h8qfj1GsKvW7syj7LIMgPucgIlcVQ0PqHpNn-PudWK8aOHj43xaJ42w
+#            - requestName: cloningSchema
+#      endpoint: /dataschema/copy?sourceDataflow=${dataflowIdOrigin}&targetDataflow=${dataflowIdTarget}
+#      usersNumber: 5
+#      numberExecutions: 1
+#      useFeeder: true
+#      requireAuth: true
+#      method: post
+#      pauseTime: 2
+#      timeOut: 20000
+#      headers:
+#         Authorization: Bearer ${token}
       #    - requestName: cloneDataflowWithData
       #      endpoint: /dataschema/copy?sourceDataflow=188&targetDataflow=${targetDataflow}
       #      usersNumber: 10

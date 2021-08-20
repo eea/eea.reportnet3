@@ -93,6 +93,11 @@ public class Rule {
   @Field(value = "sqlError")
   private String sqlError;
 
+  /** The expression text. */
+  @Field(value = "expressionText")
+  private String expressionText;
+
+
   /**
    * Hash code.
    *
