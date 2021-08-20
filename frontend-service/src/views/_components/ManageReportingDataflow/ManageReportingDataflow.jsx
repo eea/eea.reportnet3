@@ -55,7 +55,10 @@ export const ManageReportingDataflow = ({
     isReleasable: state.isReleasable
   };
 
-  useCheckNotifications('DELETE_DATAFLOW_FAILED_EVENT', setIsDeleting, false);
+  const setIsDeleting = isDeleting =>
+    manageReportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
+
+  useCheckNotifications(['DELETE_DATAFLOW_FAILED_EVENT'], setIsDeleting, false);
 
   const [reportingDataflowState, manageReportingDataflowDispatch] = useReducer(
     reportingDataflowReducer,
@@ -81,9 +84,6 @@ export const ManageReportingDataflow = ({
 
   const onSubmit = value => manageReportingDataflowDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
-  function setIsDeleting(isDeleting) {
-    manageReportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
-  }
   const onHideDataflowDialog = () => {
     onResetData();
     resetObligations();

@@ -116,7 +116,7 @@ export const ManageBusinessDataflow = ({
     }
   }, []);
 
-  useCheckNotifications('DELETE_DATAFLOW_FAILED_EVENT', setIsDeleting, false);
+  useCheckNotifications(['DELETE_DATAFLOW_FAILED_EVENT'], setIsDeleting, false);
 
   const checkErrors = () => {
     let hasErrors = false;

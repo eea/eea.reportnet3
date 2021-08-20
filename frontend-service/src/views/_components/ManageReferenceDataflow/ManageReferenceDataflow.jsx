@@ -66,7 +66,7 @@ export const ManageReferenceDataflow = ({
   useInputTextFocus(isVisible, inputRef);
   useInputTextFocus(isDeleteDialogVisible, deleteInputRef);
 
-  useCheckNotifications('DELETE_DATAFLOW_FAILED_EVENT', setIsDeleting, false);
+  useCheckNotifications(['DELETE_DATAFLOW_FAILED_EVENT'], setIsDeleting, false);
 
   const checkErrors = () => {
     let hasErrors = false;
