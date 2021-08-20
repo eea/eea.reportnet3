@@ -4,7 +4,6 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
-import { routes } from 'conf/routes';
 
 import styles from './ManageBusinessDataflow.module.scss';
 
@@ -26,22 +25,20 @@ import { BusinessDataflowService } from 'services/BusinessDataflowService';
 import { DataflowService } from 'services/DataflowService';
 import { RepresentativeService } from 'services/RepresentativeService';
 
-import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { UserService } from 'services/UserService';
 
-import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageBusinessDataflow = ({
   dataflowId,
   hasRepresentatives,
-  history,
   isAdmin,
   isEditing = false,
   isVisible,
@@ -56,13 +53,13 @@ export const ManageBusinessDataflow = ({
   const dialogName = 'isBusinessDataflowDialogVisible';
   const isDesign = TextUtils.areEquals(state?.status, config.dataflowStatus.DESIGN);
 
-  const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [deleteInput, setDeleteInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState({});
   const [selectedFmeUser, setSelectedFmeUser] = useState({});
   const [description, setDescription] = useState(isEditing ? state.description : '');
@@ -120,6 +117,8 @@ export const ManageBusinessDataflow = ({
     }
   }, []);
 
+  useCheckNotifications(['DELETE_DATAFLOW_FAILED_EVENT'], setIsDeleting, false);
+
   const checkErrors = () => {
     let hasErrors = false;
 
@@ -169,18 +168,19 @@ export const ManageBusinessDataflow = ({
   const onSelectGroup = group => setSelectedGroup(group);
   const onSelectFmeUser = fmeUser => setSelectedFmeUser(fmeUser);
 
+  const onHideDataflowDialog = () => {
+    resetObligations();
+    manageDialogs(dialogName, false);
+  };
+
   const onDeleteDataflow = async () => {
-    setIsDeleteDialogVisible(false);
-    showLoading();
+    setIsDeleting(true);
     try {
       await DataflowService.delete(dataflowId);
-      history.push(getUrl(routes.DATAFLOWS));
-      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
     } catch (error) {
       console.error('ManageBusinessDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
-    } finally {
-      hideLoading();
+      setIsDeleting(false);
     }
   };
 
@@ -297,10 +297,7 @@ export const ManageBusinessDataflow = ({
         className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
         icon={'cancel'}
         label={isEditing ? resources.messages['cancel'] : resources.messages['close']}
-        onClick={() => {
-          resetObligations();
-          manageDialogs(dialogName, false);
-        }}
+        onClick={onHideDataflowDialog}
       />
     </Fragment>
   );
@@ -314,10 +311,7 @@ export const ManageBusinessDataflow = ({
             ? resources.messages['editBusinessDataflowDialogHeader']
             : resources.messages['createBusinessDataflowDialogHeader']
         }
-        onHide={() => {
-          resetObligations();
-          manageDialogs(dialogName, false);
-        }}
+        onHide={onHideDataflowDialog}
         visible={isVisible}>
         <div className={styles.dialogContent}>
           {isLoading ? (
@@ -415,8 +409,9 @@ export const ManageBusinessDataflow = ({
       {isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          disabledConfirm={!TextUtils.areEquals(deleteInput, state.name)}
+          disabledConfirm={!TextUtils.areEquals(deleteInput, state.name) || isDeleting}
           header={resources.messages['deleteBusinessDataflowDialogHeader']}
+          iconConfirm={isDeleting && 'spinnerAnimate'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={onDeleteDataflow}

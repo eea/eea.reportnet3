@@ -32,6 +32,7 @@ export const createValidationReducerInitState = {
   areRulesDisabledThen: true,
   datasetSchema: {},
   datasetSchemas: [],
+  expressionText: '',
   groupCandidate: [],
   groupCandidateIf: [],
   groupCandidateThen: [],
@@ -43,7 +44,6 @@ export const createValidationReducerInitState = {
   isRuleAddingDisabledThen: true,
   isValidationCreationDisabled: true,
   schemaTables: [],
-  validationRuleString: '',
   ruleType: ''
 };
 export const createValidationReducer = (state, { type, payload }) => {
@@ -307,7 +307,7 @@ export const createValidationReducer = (state, { type, payload }) => {
     case 'SET_EXPRESSIONS_STRING':
       return {
         ...state,
-        validationRuleString: payload
+        expressionText: payload
       };
 
     case 'INIT_FORM':

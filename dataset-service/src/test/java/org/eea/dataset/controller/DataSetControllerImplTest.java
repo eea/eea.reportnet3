@@ -129,7 +129,7 @@ public class DataSetControllerImplTest {
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
     fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

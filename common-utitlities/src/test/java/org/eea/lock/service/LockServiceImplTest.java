@@ -52,7 +52,7 @@ public class LockServiceImplTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     lockCriteria = new HashMap<>();
     lockCriteria.put("criteria", "value");
     lockVO = new LockVO(new Timestamp(1L), "user", LockType.METHOD, -1877130660, lockCriteria);

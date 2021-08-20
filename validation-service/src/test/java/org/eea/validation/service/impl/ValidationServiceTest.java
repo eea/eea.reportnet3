@@ -308,7 +308,7 @@ public class ValidationServiceTest {
     tableValue.setDatasetId(datasetValue);
     tableValue.setIdTableSchema("5cf0e9b3b793310e9ceca190");
 
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     List<DatasetValidation> datasetValidations = new ArrayList<>();
     DatasetValidation datasetValidation = new DatasetValidation();
     Validation validation = new Validation();

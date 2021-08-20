@@ -4,7 +4,6 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
-import { routes } from 'conf/routes';
 
 import styles from './ManageReportingDataflow.module.scss';
 
@@ -20,18 +19,16 @@ import ReactTooltip from 'react-tooltip';
 
 import { DataflowService } from 'services/DataflowService';
 
-import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { reportingDataflowReducer } from './_functions/Reducers/reportingDataflowReducer';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
-import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageReportingDataflow = ({
   dataflowId,
-  history,
   isEditForm,
   manageDialogs,
   obligation,
@@ -41,7 +38,6 @@ export const ManageReportingDataflow = ({
   setCheckedObligation,
   state
 }) => {
-  const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
 
@@ -51,12 +47,18 @@ export const ManageReportingDataflow = ({
   const manageReportingDataflowInitialState = {
     deleteInput: '',
     description: isEditForm ? state.description : '',
+    isDeleting: false,
     isSubmitting: false,
     name: isEditForm ? state.name : '',
     obligation,
     pinDataflow: false,
     isReleasable: state.isReleasable
   };
+
+  const setIsDeleting = isDeleting =>
+    manageReportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
+
+  useCheckNotifications(['DELETE_DATAFLOW_FAILED_EVENT'], setIsDeleting, false);
 
   const [reportingDataflowState, manageReportingDataflowDispatch] = useReducer(
     reportingDataflowReducer,
@@ -82,25 +84,21 @@ export const ManageReportingDataflow = ({
 
   const onSubmit = value => manageReportingDataflowDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
-  const onDeleteDataflow = async () => {
-    manageDialogs('isDeleteDialogVisible', false);
-    showLoading();
-    try {
-      await DataflowService.delete(dataflowId);
-      history.push(getUrl(routes.DATAFLOWS));
-      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
-    } catch (error) {
-      console.error('ManageReportingDataflow - onDeleteDataflow.', error);
-      notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
-    } finally {
-      hideLoading();
-    }
-  };
-
   const onHideDataflowDialog = () => {
     onResetData();
     resetObligations();
     manageDialogs(secondaryDialog, false);
+  };
+
+  const onDeleteDataflow = async () => {
+    setIsDeleting(true);
+    try {
+      await DataflowService.delete(dataflowId);
+    } catch (error) {
+      console.error('ManageReportingDataflow - onDeleteDataflow.', error);
+      notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
+      setIsDeleting(false);
+    }
   };
 
   const onLoadData = ({ name, description }) =>
@@ -233,8 +231,11 @@ export const ManageReportingDataflow = ({
       {state.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          disabledConfirm={!TextUtils.areEquals(reportingDataflowState.deleteInput, state.name)}
+          disabledConfirm={
+            !TextUtils.areEquals(reportingDataflowState.deleteInput, state.name) || reportingDataflowState.isDeleting
+          }
           header={resources.messages['delete'].toUpperCase()}
+          iconConfirm={reportingDataflowState.isDeleting && 'spinnerAnimate'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteDataflow()}

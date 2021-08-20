@@ -43,7 +43,7 @@ public class ExternalJwtAuthenticationFilterTest {
 
   @Before
   public void init() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     SecurityContextHolder.getContext().setAuthentication(null);
   }
 

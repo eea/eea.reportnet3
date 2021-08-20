@@ -42,7 +42,7 @@ public class FinishViewProccesCommandTest {
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.FINISH_VIEW_PROCCES_EVENT);
     eeaEventVO.setData(data);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
 
