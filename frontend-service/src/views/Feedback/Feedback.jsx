@@ -143,7 +143,7 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const markMessagesAsRead = async data => {
     //mark unread messages as read
-    if (data.unreadMessages.length > 0) {
+    if (data?.unreadMessages.length > 0) {
       const unreadMessages = data.unreadMessages
         .filter(unreadMessage => (isCustodian ? unreadMessage.direction : !unreadMessage.direction))
         .map(unreadMessage => ({ id: unreadMessage.id, read: true }));
@@ -187,21 +187,29 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onGetMoreMessages = async () => {
     if ((isCustodian && isEmpty(selectedDataProvider)) || isLoading) return;
-    const data = await onLoadMessages(
-      isCustodian ? selectedDataProvider.dataProviderId : representativeId,
-      currentPage
-    );
+    try {
+      const data = await onLoadMessages(
+        isCustodian ? selectedDataProvider.dataProviderId : representativeId,
+        currentPage
+      );
+      console.log(data);
+      await markMessagesAsRead(data);
 
-    await markMessagesAsRead(data);
-
-    dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data.messages });
+      dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data.messages });
+    } catch (error) {
+      console.error('Feedback - onGetMoreMessages.', error);
+      // notificationContext.add({
+      //   type: 'DATAFLOW_DETAILS_ERROR',
+      //   content: {}
+      // });
+    }
   };
 
   const onGetInitialMessages = async dataProviderId => {
     const data = await onLoadMessages(dataProviderId, 0);
     await markMessagesAsRead(data);
 
-    dispatchFeedback({ type: 'SET_MESSAGES', payload: data.messages });
+    dispatchFeedback({ type: 'SET_MESSAGES', payload: !isNil(data) ? data.messages : [] });
   };
 
   const onDrop = event => {
@@ -430,12 +438,12 @@ export const Feedback = withRouter(({ match, history }) => {
           infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} any`}
           invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
-          name="file"
+          name="fileAttachment"
           onError={onImportFileError}
           onUpload={onUpload}
-          operation="PUT"
           url={`${window.env.REACT_APP_BACKEND}${getUrl(FeedbackConfig.importFile, {
-            dataflowId
+            dataflowId,
+            providerId: selectedDataProvider.dataProviderId
           })}`}
         />
       )}
