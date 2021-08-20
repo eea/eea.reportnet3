@@ -1228,6 +1228,7 @@
     "downloadQcRulesFileError": "Failed downloading QC rules file",
     "automaticallyDownloadQcRulesFile": "QC rules file generated successfully",
     "if": "IF",
-    "then": "THEN"
+    "then": "THEN",
+    "sqlErrorMessageCopy": "Please click to copy to clipboard the SQL Error: "
   }
 }
