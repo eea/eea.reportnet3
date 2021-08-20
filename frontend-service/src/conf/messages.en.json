@@ -1229,6 +1229,7 @@
     "automaticallyDownloadQcRulesFile": "QC rules file generated successfully",
     "if": "IF",
     "then": "THEN",
+    "maxAllowedCharacters": "max allowed characters",
     "sqlErrorMessageCopy": "Please click to copy to clipboard the SQL Error: "
   }
 }

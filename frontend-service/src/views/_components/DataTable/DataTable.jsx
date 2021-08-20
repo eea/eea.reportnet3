@@ -539,9 +539,9 @@ export class DataTable extends Component {
                         {this.state.pageInputTooltip}
                       </ReactTooltip>
                       <label style={{ fontWeight: 'bold', margin: '0 0 0 0.5rem' }}>
-                        {this.props.totalRecords > 0
-                          ? `${this.context.messages['of']} ${Math.ceil(this.props.totalRecords / this.getRows())}`
-                          : 1}
+                        {`${this.context.messages['of']} ${
+                          this.props.totalRecords > 0 ? ` ${Math.ceil(this.props.totalRecords / this.getRows())}` : 1
+                        }`}
                       </label>
                     </span>
                   );

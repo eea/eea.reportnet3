@@ -42,8 +42,11 @@ export const TableManagement = ({
   schemaTables,
   tables
 }) => {
-  const { getFieldSchemaColumnIdByHeader, parsePamsRecordsWithParentData, parseTableSchemaColumns } =
-    TableManagementUtils;
+  const {
+    getFieldSchemaColumnIdByHeader,
+    parsePamsRecordsWithParentData,
+    parseTableSchemaColumns
+  } = TableManagementUtils;
 
   const { getWebformTabs, parsePamsRecords } = WebformsUtils;
 
@@ -488,7 +491,6 @@ export const TableManagement = ({
 
       {isDialogVisible.manageRows && (
         <Dialog
-          className={`calendar-table ${styles.addEditRecordDialog}`}
           footer={editRowDialogFooter}
           header={resources.messages['editRow']}
           modal={true}
