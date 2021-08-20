@@ -269,6 +269,18 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
     return datasetsVO;
   }
 
+  /**
+   * Gets the reportings by dataflow ids.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the reportings by dataflow ids
+   */
+  @Override
+  public List<ReportingDatasetVO> getReportingsByDataflowIds(List<Long> dataflowIds) {
+    return reportingDatasetMapper
+        .entityListToClass(reportingDatasetRepository.findByDataflowIdIn(dataflowIds));
+  }
+
 
 
   /**
