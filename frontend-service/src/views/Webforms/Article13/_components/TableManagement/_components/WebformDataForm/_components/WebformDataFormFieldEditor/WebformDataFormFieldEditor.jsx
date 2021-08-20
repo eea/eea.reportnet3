@@ -2,6 +2,7 @@ import { Fragment, useContext, useEffect, useRef } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
@@ -135,16 +136,23 @@ const WebformDataFormFieldEditor = ({
     );
 
   const renderTextarea = (field, fieldValue) => (
-    <InputTextarea
-      collapsedHeight={75}
-      disabled={column.readOnly}
-      id={field}
-      keyfilter={RecordUtils.getFilter(type)}
-      maxLength={getMaxCharactersByType(type)}
-      onChange={e => onChangeForm(field, e.target.value)}
-      style={{ width: '60%' }}
-      value={fieldValue}
-    />
+    <div style={{ paddingBottom: '2rem' }}>
+      <InputTextarea
+        collapsedHeight={75}
+        disabled={column.readOnly}
+        id={field}
+        keyfilter={RecordUtils.getFilter(type)}
+        maxLength={getMaxCharactersByType(type)}
+        onChange={e => onChangeForm(field, e.target.value)}
+        style={{ width: '60%' }}
+        value={fieldValue}
+      />
+      <CharacterCounter
+        currentLength={fieldValue.length}
+        maxLength={getMaxCharactersByType(type)}
+        style={{ position: 'relative', right: '40%', top: '0.25rem' }}
+      />
+    </div>
   );
 
   return <Fragment>{renderFieldEditor()}</Fragment>;
