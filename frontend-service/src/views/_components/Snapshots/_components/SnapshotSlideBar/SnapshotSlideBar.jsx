@@ -120,24 +120,30 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
               className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper} ${
                 hasError ? ' error' : ''
               }`}>
-              <InputTextarea
-                autoComplete="off"
-                className={styles.formField}
-                collapsedHeight={90}
-                id="createSnapshotDescription"
-                maxLength={config.INPUT_MAX_LENGTH}
-                name="createSnapshotDescription"
-                onChange={e => setInputValue(e.target.value)}
-                onKeyDown={e => onPressEnter(e)}
-                placeholder={resources.messages.createSnapshotPlaceholder}
-                rows={10}
-                type="text"
-                value={inputValue}
-              />
-              <CharacterCounter currentLength={inputValue.length} maxLength={config.INPUT_MAX_LENGTH} />
-              <label className="srOnly" htmlFor="createSnapshotDescription">
-                {resources.messages['createSnapshotPlaceholder']}
-              </label>
+              <div className={styles.descriptionWrapper}>
+                <InputTextarea
+                  autoComplete="off"
+                  className={styles.formField}
+                  collapsedHeight={90}
+                  id="createSnapshotDescription"
+                  maxLength={config.INPUT_MAX_LENGTH}
+                  name="createSnapshotDescription"
+                  onChange={e => setInputValue(e.target.value)}
+                  onKeyDown={e => onPressEnter(e)}
+                  placeholder={resources.messages.createSnapshotPlaceholder}
+                  rows={10}
+                  type="text"
+                  value={inputValue}
+                />
+                <CharacterCounter
+                  currentLength={inputValue.length}
+                  maxLength={config.INPUT_MAX_LENGTH}
+                  style={{ position: 'relative', top: '0.25rem' }}
+                />
+                <label className="srOnly" htmlFor="createSnapshotDescription">
+                  {resources.messages['createSnapshotPlaceholder']}
+                </label>
+              </div>
               <div className={styles.createButtonWrapper} data-for="saveCopy" data-tip>
                 <Button
                   className={`${styles.createSnapshotButton} rp-btn secondary`}
