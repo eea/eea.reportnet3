@@ -1,5 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 
+import isNil from 'lodash/isNil';
+
 import styles from './SqlSentence.module.scss';
 
 import { config } from 'conf';
@@ -14,6 +16,7 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
   const resources = useContext(ResourcesContext);
 
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
+  const [isEditingSqlSentence, setIsEditingSqlSentence] = useState(false);
 
   useEffect(() => {
     return () => onSetSqlSentence('sqlSentence', '');
@@ -49,6 +52,8 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
 
   const codeKeyword = isBusinessDataflow ? `${config.COMPANY_CODE_KEYWORD}` : `${config.COUNTRY_CODE_KEYWORD}`;
 
+  const sqlError = '[205] not from this dataflow'; //TODO WITH REAL DATA
+
   return (
     <div className={styles.section}>
       <div className={styles.content}>
@@ -79,10 +84,23 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
           <textarea
             id="sqlSentenceText"
             name=""
-            onChange={e => onSetSqlSentence('sqlSentence', e.target.value)}
+            onChange={e => {
+              setIsEditingSqlSentence(true);
+              onSetSqlSentence('sqlSentence', e.target.value);
+            }}
             value={creationFormState.candidateRule.sqlSentence}></textarea>
         </div>
       </div>
+
+      {!isNil(creationFormState.candidateRule.sqlError) && !isEditingSqlSentence ? (
+        <p
+          className={
+            styles.sqlErrorMessage
+          }>{`${resources.messages['sqlErrorMessage']} ${creationFormState.candidateRule.sqlError}`}</p>
+      ) : (
+        <p className={styles.emptySqlErrorMessage}></p>
+      )}
+
       {isVisibleInfoDialog && (
         <Dialog
           header={resources.messages['sqlSentenceHelpDialogTitle']}
