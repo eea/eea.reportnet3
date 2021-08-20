@@ -126,12 +126,13 @@ export const ListMessages = ({
             <Spinner className={styles.lazyLoadingSpinner} />
           </div>
         )}
+        {console.log(messages)}
         {messages.map((message, i) => (
           <Message
+            attachment={message.messageAttachment}
             hasSeparator={
               i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
             }
-            // isAttachment={i % 2 === 1}
             isAttachment={TextUtils.areEquals(message.type, 'ATTACHMENT')}
             key={uniqueId('message_')}
             message={message}
