@@ -275,4 +275,15 @@ public interface DatasetMetabaseController {
   List<ReportingDatasetVO> findReportingDataSetIdByDataflowIdAndProviderId(
       @PathVariable("id") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId);
 
+  /**
+   * Find reporting data set by dataflow ids.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the list
+   */
+  @GetMapping(value = "/private/reportings/dataflowIds",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ReportingDatasetVO> findReportingDataSetByDataflowIds(
+      @RequestParam("dataflowIds") List<Long> dataflowIds);
+
 }
