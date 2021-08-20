@@ -464,7 +464,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/private/getByDataflowIds", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/reportings/dataflowIds",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ReportingDatasetVO> findReportingDataSetByDataflowIds(
       @RequestParam("dataflowIds") List<Long> dataflowIds) {
     return reportingDatasetService.getReportingsByDataflowIds(dataflowIds);
