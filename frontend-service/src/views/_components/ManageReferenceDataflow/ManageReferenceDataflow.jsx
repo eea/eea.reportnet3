@@ -25,6 +25,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { UserService } from 'services/UserService';
 
@@ -64,6 +65,8 @@ export const ManageReferenceDataflow = ({
 
   useInputTextFocus(isVisible, inputRef);
   useInputTextFocus(isDeleteDialogVisible, deleteInputRef);
+
+  useCheckNotifications(['DELETE_DATAFLOW_FAILED_EVENT'], setIsDeleting, false);
 
   const checkErrors = () => {
     let hasErrors = false;
@@ -111,11 +114,9 @@ export const ManageReferenceDataflow = ({
     setIsDeleting(true);
     try {
       await DataflowService.delete(dataflowId);
-      manageDialogs(dialogName, false);
     } catch (error) {
       console.error('ManageReferenceDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
-    } finally {
       setIsDeleting(false);
     }
   };
