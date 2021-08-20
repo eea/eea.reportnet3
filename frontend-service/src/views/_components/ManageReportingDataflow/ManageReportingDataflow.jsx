@@ -23,6 +23,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { reportingDataflowReducer } from './_functions/Reducers/reportingDataflowReducer';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -54,6 +55,11 @@ export const ManageReportingDataflow = ({
     isReleasable: state.isReleasable
   };
 
+  const setIsDeleting = isDeleting =>
+    manageReportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
+
+  useCheckNotifications(['DELETE_DATAFLOW_FAILED_EVENT'], setIsDeleting, false);
+
   const [reportingDataflowState, manageReportingDataflowDispatch] = useReducer(
     reportingDataflowReducer,
     manageReportingDataflowInitialState
@@ -78,9 +84,6 @@ export const ManageReportingDataflow = ({
 
   const onSubmit = value => manageReportingDataflowDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
-  const setIsDeleting = isDeleting =>
-    manageReportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
-
   const onHideDataflowDialog = () => {
     onResetData();
     resetObligations();
@@ -91,11 +94,9 @@ export const ManageReportingDataflow = ({
     setIsDeleting(true);
     try {
       await DataflowService.delete(dataflowId);
-      onHideDataflowDialog();
     } catch (error) {
       console.error('ManageReportingDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
-    } finally {
       setIsDeleting(false);
     }
   };
@@ -247,18 +248,16 @@ export const ManageReportingDataflow = ({
                 dataflowName: state.name
               })
             }}></p>
-          <p>
-            <InputText
-              autoFocus={true}
-              className={`${styles.inputText}`}
-              id={'deleteDataflow'}
-              maxLength={255}
-              name={resources.messages['deleteDataflowButton']}
-              onChange={event => onDeleteInputChange(event.target.value)}
-              ref={deleteInputRef}
-              value={reportingDataflowState.deleteInput}
-            />
-          </p>
+          <InputText
+            autoFocus={true}
+            className={styles.inputText}
+            id={'deleteDataflow'}
+            maxLength={config.INPUT_MAX_LENGTH}
+            name={resources.messages['deleteDataflowButton']}
+            onChange={event => onDeleteInputChange(event.target.value)}
+            ref={deleteInputRef}
+            value={reportingDataflowState.deleteInput}
+          />
         </ConfirmDialog>
       )}
     </Fragment>

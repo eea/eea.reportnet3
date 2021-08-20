@@ -6,6 +6,8 @@ import isNil from 'lodash/isNil';
 
 import styles from './WebLinks.module.scss';
 
+import { config } from 'conf';
+
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
@@ -79,7 +81,7 @@ export const WebLinks = ({
 
   const checkIsValidUrl = url => RegularExpressions['url'].test(url);
 
-  const checkIsCorrectLength = inputValue => inputValue.length <= 255;
+  const checkIsCorrectLength = inputValue => inputValue.length <= config.INPUT_MAX_LENGTH;
 
   const checkIsEmptyInput = inputValue => inputValue.trim() === '';
 
@@ -355,7 +357,7 @@ export const WebLinks = ({
               <div className={`formField ${webLinksState.errors.description.hasErrors ? 'error' : ''}`}>
                 <input
                   id={`descriptionWebLinks`}
-                  maxLength={255}
+                  maxLength={config.INPUT_MAX_LENGTH}
                   name="description"
                   onBlur={() => checkIsCorrectInputValue('description')}
                   onChange={e => {
