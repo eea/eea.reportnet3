@@ -27,7 +27,7 @@ public class IntegrationExecutorFactoryImplTest {
 
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     integrationMap = new HashMap<>();
     integrationMap.put(IntegrationToolTypeEnum.OTHER, abstractIntegrationExecutorService);
     ReflectionTestUtils.setField(integrationExecutorFactory, "integrationMap", integrationMap);

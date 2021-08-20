@@ -107,10 +107,7 @@ const ComparisonExpression = ({
 
       if (!isFieldInTable(parsedTableFields) && !isNil(expressionValues.field1) && expressionValues.field1 !== '') {
         ['union', 'field1', 'operatorType', 'operatorValue', 'valueTypeSelector', 'field2'].forEach(field => {
-          onExpressionFieldUpdate(expressionId, {
-            key: field,
-            value: null
-          });
+          onExpressionFieldUpdate(expressionId, { key: field, value: null });
         });
       }
 
@@ -246,31 +243,19 @@ const ComparisonExpression = ({
 
     if (key === 'field1' && value !== expressionValues.field1) {
       ['operatorType', 'operatorValue', 'valueTypeSelector', 'field2'].forEach(field => {
-        onExpressionFieldUpdate(expressionId, {
-          key: field,
-          value: ''
-        });
+        onExpressionFieldUpdate(expressionId, { key: field, value: '' });
       });
     }
 
     if (key === 'operatorType' && value !== expressionValues.operatorType) {
-      onExpressionFieldUpdate(expressionId, {
-        key: 'field2',
-        value: ''
-      });
+      onExpressionFieldUpdate(expressionId, { key: 'field2', value: '' });
     }
 
     if (key === 'valueTypeSelector' && value !== expressionValues.valueTypeSelector) {
-      onExpressionFieldUpdate(expressionId, {
-        key: 'field2',
-        value: ''
-      });
+      onExpressionFieldUpdate(expressionId, { key: 'field2', value: '' });
     }
 
-    onExpressionFieldUpdate(expressionId, {
-      key,
-      value
-    });
+    onExpressionFieldUpdate(expressionId, { key, value });
   };
 
   const onAddToClickedFields = field => {

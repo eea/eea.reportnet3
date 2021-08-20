@@ -12,10 +12,18 @@ export const ValidationRepository = {
   delete: async (datasetSchemaId, ruleId) =>
     await HTTPRequester.delete({ url: getUrl(ValidationConfig.delete, { datasetSchemaId, ruleId }) }),
 
+  downloadQCRulesFile: async (datasetId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(ValidationConfig.downloadQCRulesFile, { datasetId, fileName })
+    }),
+
   downloadShowValidationsFile: async (datasetId, fileName) =>
     await HTTPRequester.download({
       url: getUrl(ValidationConfig.downloadShowValidationsFile, { datasetId, fileName })
     }),
+
+  generateQCRulesFile: async datasetId =>
+    await HTTPRequester.post({ url: getUrl(ValidationConfig.generateQCRulesFile, { datasetId }) }),
 
   generateShowValidationsFile: async datasetId =>
     await HTTPRequester.post({ url: getUrl(ValidationConfig.generateShowValidationsFile, { datasetId }) }),
@@ -23,14 +31,11 @@ export const ValidationRepository = {
   getAll: async datasetSchemaId =>
     await HTTPRequester.get({ url: getUrl(ValidationConfig.getAll, { datasetSchemaId }) }),
 
-  update: async (datasetId, validation) => {
+  update: async (datasetId, validationRule) => {
     let url = getUrl(ValidationConfig.update, { datasetId });
-    if (validation.automatic) {
+    if (validationRule.automatic) {
       url = getUrl(ValidationConfig.updateAutomatic, { datasetId });
     }
-    return await HTTPRequester.update({
-      url: url,
-      data: validation
-    });
+    return await HTTPRequester.update({ url: url, data: validationRule });
   }
 };

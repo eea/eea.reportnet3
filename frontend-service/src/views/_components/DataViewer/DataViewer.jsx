@@ -490,8 +490,7 @@ const DataViewer = withRouter(
     };
 
     const onChangePage = event => {
-      dispatchRecords({ type: 'SET_RECORDS_PER_PAGE', payload: event.rows });
-      dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: event.first });
+      dispatchRecords({ type: 'ON_CHANGE_PAGE', payload: event });
       onFetchData(
         sort.sortField,
         sort.sortOrder,
@@ -1114,6 +1113,7 @@ const DataViewer = withRouter(
                 />
               ) : null
             }
+            hasDefaultCurrentPage={true}
             id={tableId}
             lazy={true}
             loading={isLoading}

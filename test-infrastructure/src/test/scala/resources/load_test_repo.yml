@@ -1,0 +1,167 @@
+gatling_config:
+   scenarios:
+    #checked
+    - requestName: importFileData
+      endpoint: /dataset/${datasetId}/importFileData?delimiter=,&replace=false
+      usersNumber: 5
+      numberExecutions: 1
+      useFeeder: true
+      requireAuth: true
+      method: post
+      pauseTime: 2
+      timeOut: 20000
+      uploadFileName: C:\\Users\\Mario Severa\\Desktop\\TC\\es3\t1.zip
+      uploadFileKey: file
+      headers:
+         Authorization: Bearer ${token}
+    #checked
+    - requestName: exportFileData
+      endpoint: /dataset/${datasetId}/exportDatasetFile?mimeType=xlsx
+      usersNumber: 5
+      numberExecutions: 1
+      useFeeder: true
+      requireAuth: true
+      method: get
+      pauseTime: 2
+      timeOut: 20000
+      headers:
+         Authorization: Bearer ${token}
+    #checked
+    - requestName: createDataCollection
+      endpoint: /datacollection/create?stopAndNotifySQLErrors=false&showPublicInfo=false
+      usersNumber: 5
+      numberExecutions: 1
+      useFeeder: true
+      requireAuth: true
+      method: post
+      pauseTime: 2
+      timeOut: 20000
+      requestBody: '{"dueDate":"${dueDate}","idDataflow":"${dataflowId}"}'
+      headers:
+         Authorization: Bearer ${token}        
+    #checked
+    - requestName: releaseDataCollection
+      endpoint: /snapshot/dataflow/${dataflowId}/dataProvider/${dataProviderId}/release?restrictFromPublic=false
+      usersNumber: 5
+      numberExecutions: 1
+      useFeeder: true
+      requireAuth: true
+      method: post
+      pauseTime: 2
+      timeOut: 20000
+      headers:
+         Authorization: Bearer ${token}
+    #checked
+    - requestName: validationTest
+      endpoint: /validation/dataset/${datasetId}
+      usersNumber: 5
+      numberExecutions: 1
+      useFeeder: true
+      requireAuth: true
+      method: put
+      pauseTime: 2
+      timeOut: 20000
+      headers:
+         Authorization: Bearer ${token}
+    #checked     
+    - requestName: createSnapshot
+      endpoint: /snapshot/dataschema/${schemaId}/dataset/${datasetId}/create?description=${description}
+      usersNumber: 5
+      numberExecutions: 1
+      useFeeder: true
+      requireAuth: true
+      method: post
+      pauseTime: 2
+      timeOut: 20000
+      headers:
+         Authorization: Bearer ${token}
+    #checked 
+    - requestName: restoreSnapshot
+      endpoint: /snapshot/${snapshotDatasetId}/dataschema/${datasetIdTarget}/restore
+      usersNumber: 5
+      numberExecutions: 1
+      useFeeder: true
+      requireAuth: true
+      method: post
+      pauseTime: 2
+      timeOut: 20000
+      headers:
+         Authorization: Bearer ${token}
+    #checked         
+    - requestName: getDataGrid
+      endpoint: /dataset/TableValueDataset/${datasetId}?fieldValue=&idTableSchema=${tableSchemaId}&pageNum=1&pageSize=100&levelError=CORRECT,INFO,WARNING,ERROR,BLOCKER
+      usersNumber: 5
+      numberExecutions: 10
+      useFeeder: true
+      requireAuth: true
+      method: get
+      pauseTime: 2
+      timeOut: 35000
+      headers:
+        Authorization: Bearer ${token}
+    #Each addRecords has to have its own requestBody    
+    #checked        
+    - requestName: addRecordsCustodian_one
+      endpoint: /dataset/${datasetId}/table/${tableSchemaId}/record
+      usersNumber: 1
+      numberExecutions: 100
+      useFeeder: true
+      requireAuth: true
+      method: post
+      pauseTime: 0
+      timeOut: 20000
+      requestBody: '[{"fields":[{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079ab3b4ea780001467571"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079ac739633c0001cd0259"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079acbb4ea780001467572"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079ad039633c0001cd025a"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079ad9b4ea780001467573"}],"idRecordSchema":"6107994239633c0001cd0258","id":null}]'
+      headers:
+        Authorization: Bearer ${token}
+    #checked        
+    - requestName: addRecordsCustodian_two
+      endpoint: /dataset/${datasetId}/table/${tableSchemaId}/record
+      usersNumber: 1
+      numberExecutions: 100
+      useFeeder: true
+      requireAuth: true
+      method: post
+      pauseTime: 0
+      timeOut: 20000
+      requestBody: '[{"fields":[{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079c9ab4ea780001467588"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079c9ab4ea780001467589"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079c9ab4ea78000146758a"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079c9ab4ea78000146758b"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079c9ab4ea78000146758c"}],"idRecordSchema":"61079c9ab4ea780001467587","id":null}]'
+      headers:
+        Authorization: Bearer ${token}
+    #checked
+    - requestName: addRecordsCustodian_three
+      endpoint: /dataset/${datasetId}/table/${tableSchemaId}/record
+      usersNumber: 1
+      numberExecutions: 100
+      useFeeder: true
+      requireAuth: true
+      method: post
+      pauseTime: 0
+      timeOut: 20000
+      requestBody: '[{"fields":[{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079dba39633c0001cd026d"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079dba39633c0001cd026e"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079dba39633c0001cd026f"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079dba39633c0001cd0270"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079dba39633c0001cd0271"}],"idRecordSchema":"61079dba39633c0001cd026c","id":null}]'
+      headers:
+        Authorization: Bearer ${token}
+    #checked        
+    - requestName: addRecordsCustodian_four
+      endpoint: /dataset/${datasetId}/table/${tableSchemaId}/record
+      usersNumber: 1
+      numberExecutions: 100
+      useFeeder: true
+      requireAuth: true
+      method: post
+      pauseTime: 0
+      timeOut: 20000
+      requestBody: '[{"fields":[{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079eac39633c0001cd0284"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079eac39633c0001cd0285"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079eac39633c0001cd0286"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079eac39633c0001cd0287"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"61079eac39633c0001cd0288"}],"idRecordSchema":"61079eac39633c0001cd0283","id":null}]'
+      headers:
+        Authorization: Bearer ${token}
+    #checked
+    - requestName: addRecordsCustodian_five
+      endpoint: /dataset/${datasetId}/table/${tableSchemaId}/record
+      usersNumber: 1
+      numberExecutions: 100
+      useFeeder: true
+      requireAuth: true
+      method: post
+      pauseTime: 0
+      timeOut: 20000
+      requestBody: '[{"fields":[{"type":"TEXT","value":"11","id":null,"idFieldSchema":"6107a07039633c0001cd029b"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"6107a07039633c0001cd029c"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"6107a07039633c0001cd029d"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"6107a07039633c0001cd029e"},{"type":"TEXT","value":"11","id":null,"idFieldSchema":"6107a07039633c0001cd029f"}],"idRecordSchema":"6107a07039633c0001cd029a","id":null}]'
+      headers:
+        Authorization: Bearer ${token}        

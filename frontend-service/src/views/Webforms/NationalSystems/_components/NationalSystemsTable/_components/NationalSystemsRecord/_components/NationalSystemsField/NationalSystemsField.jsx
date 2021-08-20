@@ -14,6 +14,7 @@ import styles from './NationalSystemsField.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Calendar } from 'views/_components/Calendar';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DownloadFile } from 'views/_components/DownloadFile';
@@ -190,16 +191,23 @@ export const NationalSystemsField = ({
 
       case 'TEXTAREA':
         return (
-          <InputTextarea
-            className={field.required ? styles.required : undefined}
-            collapsedHeight={150}
-            id={field.fieldId}
-            maxLength={getInputMaxLength[type]}
-            onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
-            onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
-            onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
-            value={field.value}
-          />
+          <div>
+            <InputTextarea
+              className={field.required ? styles.required : undefined}
+              collapsedHeight={150}
+              id={field.fieldId}
+              maxLength={getInputMaxLength[type]}
+              onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
+              onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
+              onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
+              value={field.value}
+            />
+            <CharacterCounter
+              currentLength={field.value.length}
+              maxLength={getInputMaxLength.RICH_TEXT}
+              style={{ position: 'relative', top: '0.25rem' }}
+            />
+          </div>
         );
 
       case 'CODELIST':

@@ -27,7 +27,7 @@ import {
 } from 'views/DatasetDesigner/_components/Validations/_functions/Reducers/CreateValidationReducer';
 
 import { checkComparisonExpressions } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonExpressions';
-import { checkComparisonSQLsentence } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonSQLsentence';
+import { checkComparisonSqlSentence } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonSqlSentence';
 import { checkComparisonValidation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonValidation';
 import { checkComparisonValidationIfThen } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonValidationIfThen';
 import { deleteExpression } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/deleteExpression';
@@ -114,7 +114,7 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
             onExpressionTypeToggle={onExpressionTypeToggle}
             onExpressionsErrors={onExpressionsErrors}
             onGetFieldType={onGetFieldType}
-            onSetSQLsentence={onSetSQLsentence}
+            onSetSqlSentence={onSetSqlSentence}
             tabsChanges={tabsChanges}
           />
         </TabPanel>
@@ -290,8 +290,9 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
   const onCreateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
-      const { candidateRule } = creationFormState;
+      const { candidateRule, expressionText } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      candidateRule.expressionText = expressionText;
 
       if (candidateRule.expressionType === 'ifThenClause') {
         setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
@@ -317,8 +318,9 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
   const onUpdateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
-      const { candidateRule } = creationFormState;
+      const { candidateRule, expressionText } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      candidateRule.expressionText = expressionText;
 
       if (candidateRule.expressionType === 'ifThenClause') {
         setExpressionsFieldsTypes(candidateRule.expressionsIf, candidateRule.table, tabs);
@@ -626,7 +628,7 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     });
   };
 
-  const onSetSQLsentence = (key, value) => {
+  const onSetSqlSentence = (key, value) => {
     creationFormDispatch({
       type: 'SET_FORM_FIELD',
       payload: {
@@ -645,7 +647,7 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
       return (
         creationFormState.isValidationCreationDisabled ||
         isSubmitDisabled ||
-        !checkComparisonSQLsentence(creationFormState?.candidateRule?.sqlSentence)
+        !checkComparisonSqlSentence(creationFormState?.candidateRule?.sqlSentence)
       );
     }
 

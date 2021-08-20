@@ -25,7 +25,7 @@ public class DockerClientBuilderBeanTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     ReflectionTestUtils.setField(dockerClientBuilderBean, "dockerServerUrl",
         "tcp://localhost:2375");
   }

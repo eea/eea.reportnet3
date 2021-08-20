@@ -38,7 +38,7 @@ public class ReleaseProviderFinishEventTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

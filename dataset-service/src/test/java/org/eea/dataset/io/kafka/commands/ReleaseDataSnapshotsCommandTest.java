@@ -86,7 +86,7 @@ public class ReleaseDataSnapshotsCommandTest {
     SecurityContextHolder.setContext(securityContext);
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

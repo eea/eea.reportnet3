@@ -14,7 +14,7 @@ const userSettingsDefaultState = {
   currentDataflowType: config.dataflowType.REPORTING,
   userProps: {
     amPm24h: true,
-    basemapLayer: { label: 'Topographic', value: 'Topographic' },
+    basemapLayer: 'Topographic',
     dateFormat: 'YYYY-MM-DD',
     listView: true,
     notificationSound: false,

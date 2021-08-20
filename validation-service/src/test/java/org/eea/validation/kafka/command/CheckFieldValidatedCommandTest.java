@@ -57,7 +57,7 @@ public class CheckFieldValidatedCommandTest {
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_FIELD_COMPLETED);
     eeaEventVO.setData(data);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

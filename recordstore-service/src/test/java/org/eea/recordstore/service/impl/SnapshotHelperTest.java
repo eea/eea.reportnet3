@@ -38,7 +38,7 @@ public class SnapshotHelperTest {
   public void initMocks() {
     restorationExecutorService =
         new EEADelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2));
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @After

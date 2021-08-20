@@ -1448,6 +1448,14 @@
     "value": "ZmFsc2U="
   },
   {
+    "key": "config/collaboration/spring.servlet.multipart.max-file-size",
+    "value": "JHtUT01DQVRfTUFYX0ZJTEVfU0laRToxMDQ4NTc2MDB9"
+  },
+  {
+    "key": "config/collaboration/spring.servlet.multipart.max-request-size",
+    "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToyMDk3MTUyMDB9"
+  },
+  {
     "key": "config/ums/eea.keycloak.listUsersMax",
     "value": "MTAwMA=="
   }

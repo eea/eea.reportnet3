@@ -44,6 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -270,6 +271,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * @param resourceInfoVO the resource info VO
    */
   @Override
+  @Async
   public void deleteResourceInstances(List<ResourceInfoVO> resourceInfoVO) {
     // Recover the resource names so they can be removed in the generic way.
     List<String> resourceNames =
@@ -306,8 +308,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         groups.stream().filter(groupInfo -> resources.containsKey(groupInfo.getName()))
             .forEach(groupInfo -> resources.put(groupInfo.getName(), groupInfo.getId()));
         // Removing groups one by one
-        resources.values().stream()
-            .forEach(groupId -> keycloakConnectorService.deleteGroupDetail(groupId));
+        for (String resource : resources.values()) {
+          keycloakConnectorService.deleteGroupDetail(resource);
+        }
         LOG.info("Resources {} removed succesfully", resources);
       }
 

@@ -46,6 +46,7 @@ import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
+import org.hibernate.exception.SQLGrammarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,8 +142,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         .error("The QC Rule is disabled").build();
 
     String query = proccessQuery(datasetId, rule.getSqlSentence());
-
-    if (validateRule(query, datasetId, rule, Boolean.TRUE)) {
+    String sqlError = validateRule(query, datasetId, rule, Boolean.TRUE);
+    if (!StringUtils.isBlank(sqlError)) {
       notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
       rule.setVerified(true);
       LOG.info("Rule validation passed: {}", rule);
@@ -150,6 +151,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       notificationEventType = EventType.INVALIDATED_QC_RULE_EVENT;
       rule.setVerified(false);
       rule.setEnabled(false);
+      rule.setSqlError(sqlError);
       LOG.info("Rule validation not passed: {}", rule);
     }
     rule.setWhenCondition(new StringBuilder().append("isSQLSentenceWithCode(this.datasetId.id, '")
@@ -177,7 +179,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     String query = proccessQuery(datasetId, ruleVO.getSqlSentence());
     boolean verifAndEnabled = true;
-    if (!validateRule(query, datasetId, rule, Boolean.TRUE)) {
+    if (!StringUtils.isBlank(validateRule(query, datasetId, rule, Boolean.TRUE))) {
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
       verifAndEnabled = false;
       rule.setEnabled(verifAndEnabled);
@@ -272,15 +274,16 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     List<RuleVO> rulesSql =
         ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
     Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
-
     if (null != rulesSql && !rulesSql.isEmpty()) {
       rulesSql.stream().forEach(ruleVO -> {
         Rule rule = ruleMapper.classToEntity(ruleVO);
-        if (validateRule(ruleVO.getSqlSentence(), datasetId, rule, Boolean.TRUE)) {
+        String sqlError = validateRule(ruleVO.getSqlSentence(), datasetId, rule, Boolean.TRUE);
+        if (StringUtils.isBlank(sqlError)) {
           rule.setVerified(true);
         } else {
           rule.setVerified(false);
           rule.setEnabled(false);
+          rule.setSqlError(sqlError);
         }
         rule.setWhenCondition(new StringBuilder()
             .append("isSQLSentenceWithCode(this.datasetId.id, '")
@@ -343,8 +346,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param ischeckDC the ischeck DC
    * @return the boolean
    */
-  private boolean validateRule(String query, Long datasetId, Rule rule, Boolean ischeckDC) {
-    boolean isSQLCorrect = true;
+  private String validateRule(String query, Long datasetId, Rule rule, Boolean ischeckDC) {
+    String isSQLCorrect = "";
     // validate query
     if (!StringUtils.isBlank(query)) {
       // validate query sintax
@@ -360,19 +363,20 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           try {
             checkQueryTestExecution(query.replace(";", ""), datasetId, rule);
           } catch (EEAInvalidSQLException e) {
-            LOG_ERROR.error("SQL is not correct: {}", e.getMessage(), e);
-            isSQLCorrect = false;
+            LOG_ERROR.error("SQL is not correct: {}",
+                ((SQLGrammarException) e.getCause()).getSQLException().getMessage(), e);
+            isSQLCorrect = ((SQLGrammarException) e.getCause()).getSQLException().getMessage();
           }
         } else {
-          isSQLCorrect = false;
+          isSQLCorrect = "Datasets " + ids.toString() + " not from this dataflow";
         }
       } else {
-        isSQLCorrect = false;
+        isSQLCorrect = "Syntax not allowed";
       }
     } else {
-      isSQLCorrect = false;
+      isSQLCorrect = "Empty query";
     }
-    if (!isSQLCorrect) {
+    if (!StringUtils.isBlank(isSQLCorrect)) {
       LOG.info("Rule validation not passed: {}", rule);
     } else {
       LOG.info("Rule validation passed: {}", rule);

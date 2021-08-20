@@ -59,7 +59,7 @@ public class CheckDatasetValidatedCommandTest {
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATED_DATASET_COMPLETED);
     eeaEventVO.setData(data);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
 
   }
 

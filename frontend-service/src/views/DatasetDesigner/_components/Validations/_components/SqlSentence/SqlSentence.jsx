@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
-import styles from './SQLsentence.module.scss';
+import styles from './SqlSentence.module.scss';
 
 import { config } from 'conf';
 
@@ -10,13 +10,13 @@ import { SqlHelp } from './_components/SqlHelp';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const SQLsentence = ({ creationFormState, isBusinessDataflow, onSetSQLsentence, level }) => {
+export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSentence, level }) => {
   const resources = useContext(ResourcesContext);
 
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
 
   useEffect(() => {
-    return () => onSetSQLsentence('sqlSentence', '');
+    return () => onSetSqlSentence('sqlSentence', '');
   }, []);
 
   const levelTypes = {
@@ -44,7 +44,7 @@ export const SQLsentence = ({ creationFormState, isBusinessDataflow, onSetSQLsen
   };
 
   const onCCButtonClick = () => {
-    onSetSQLsentence('sqlSentence', `${creationFormState.candidateRule['sqlSentence']} ${codeKeyword}`);
+    onSetSqlSentence('sqlSentence', `${creationFormState.candidateRule['sqlSentence']} ${codeKeyword}`);
   };
 
   const codeKeyword = isBusinessDataflow ? `${config.COMPANY_CODE_KEYWORD}` : `${config.COUNTRY_CODE_KEYWORD}`;
@@ -53,7 +53,7 @@ export const SQLsentence = ({ creationFormState, isBusinessDataflow, onSetSQLsen
     <div className={styles.section}>
       <div className={styles.content}>
         <div className={styles.helpSideBar}>
-          <SqlHelp onSetSqlSentence={onSetSQLsentence} sqlSentence={creationFormState.candidateRule['sqlSentence']} />
+          <SqlHelp onSetSqlSentence={onSetSqlSentence} sqlSentence={creationFormState.candidateRule['sqlSentence']} />
         </div>
         <div className={styles.sqlSentence}>
           <h3 className={styles.title}>
@@ -79,8 +79,8 @@ export const SQLsentence = ({ creationFormState, isBusinessDataflow, onSetSQLsen
           <textarea
             id="sqlSentenceText"
             name=""
-            onChange={e => onSetSQLsentence('sqlSentence', e.target.value)}
-            value={creationFormState.candidateRule['sqlSentence']}></textarea>
+            onChange={e => onSetSqlSentence('sqlSentence', e.target.value)}
+            value={creationFormState.candidateRule.sqlSentence}></textarea>
         </div>
       </div>
       {isVisibleInfoDialog && (
