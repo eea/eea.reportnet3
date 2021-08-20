@@ -20,7 +20,7 @@
   position: absolute;
   width: 12.5em;
   padding: 0.25em;
-  z-index:  1001;
+  z-index: 1001;
 }
 
 .p-contextmenu .p-menuitem-active > .p-submenu-list {

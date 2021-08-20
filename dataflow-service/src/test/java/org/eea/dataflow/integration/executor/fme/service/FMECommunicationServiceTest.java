@@ -75,7 +75,7 @@ public class FMECommunicationServiceTest {
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

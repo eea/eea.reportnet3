@@ -13,6 +13,7 @@ export const ValidationService = {
       automatic: false,
       description: validationRule.description,
       enabled: validationRule.active ? validationRule.active : false,
+      expressionText: validationRule.expressionText,
       referenceId: validationRule.field.code,
       ruleName: validationRule.name,
       shortCode: validationRule.shortCode,
@@ -27,38 +28,13 @@ export const ValidationService = {
     return await ValidationRepository.create(datasetSchemaId, validation);
   },
 
-  createTableRule: async (datasetSchemaId, validationRule) => {
-    const validation = {
-      automatic: false,
-      description: validationRule.description,
-      enabled: validationRule.active ? validationRule.active : false,
-      integrityVO:
-        isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)
-          ? {
-              isDoubleReferenced: validationRule.relations.isDoubleReferenced,
-              originDatasetSchemaId: validationRule.relations.originDatasetSchema,
-              originFields: validationRule.relations.links.map(link => link.originField.code),
-              referencedDatasetSchemaId: validationRule.relations.referencedDatasetSchema.code,
-              referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
-            }
-          : null,
-      referenceId: validationRule.table.code,
-      ruleName: validationRule.name,
-      shortCode: validationRule.shortCode,
-      sqlSentence: validationRule.sqlSentence,
-      thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-      type: 'TABLE',
-      whenCondition: null
-    };
-    return await ValidationRepository.create(datasetSchemaId, validation);
-  },
-
   createRowRule: async (datasetSchemaId, validationRule) => {
     const { expressions, expressionsIf, expressionsThen, expressionType } = validationRule;
     const validation = {
       automatic: false,
       description: validationRule.description,
       enabled: validationRule.active ? validationRule.active : false,
+      expressionText: validationRule.expressionText,
       referenceId: validationRule.recordSchemaId,
       ruleName: validationRule.name,
       shortCode: validationRule.shortCode,
@@ -85,7 +61,37 @@ export const ValidationService = {
     return await ValidationRepository.create(datasetSchemaId, validation);
   },
 
+  createTableRule: async (datasetSchemaId, validationRule) => {
+    const validation = {
+      automatic: false,
+      description: validationRule.description,
+      enabled: validationRule.active ? validationRule.active : false,
+      expressionText: validationRule.expressionText,
+      integrityVO:
+        isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)
+          ? {
+              isDoubleReferenced: validationRule.relations.isDoubleReferenced,
+              originDatasetSchemaId: validationRule.relations.originDatasetSchema,
+              originFields: validationRule.relations.links.map(link => link.originField.code),
+              referencedDatasetSchemaId: validationRule.relations.referencedDatasetSchema.code,
+              referencedFields: validationRule.relations.links.map(link => link.referencedField.code)
+            }
+          : null,
+      referenceId: validationRule.table.code,
+      ruleName: validationRule.name,
+      shortCode: validationRule.shortCode,
+      sqlSentence: validationRule.sqlSentence,
+      thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
+      type: 'TABLE',
+      whenCondition: null
+    };
+    return await ValidationRepository.create(datasetSchemaId, validation);
+  },
+
   delete: async (datasetSchemaId, ruleId) => await ValidationRepository.delete(datasetSchemaId, ruleId),
+
+  downloadQCRulesFile: async (datasetId, fileName) =>
+    await ValidationRepository.downloadQCRulesFile(datasetId, fileName),
 
   downloadShowValidationsFile: async (datasetId, fileName) =>
     await ValidationRepository.downloadShowValidationsFile(datasetId, fileName),
@@ -110,6 +116,8 @@ export const ValidationService = {
     return validationsList;
   },
 
+  generateQCRulesFile: async datasetId => await ValidationRepository.generateQCRulesFile(datasetId),
+
   generateShowValidationsFile: async datasetId => await ValidationRepository.generateShowValidationsFile(datasetId),
 
   updateFieldRule: async (datasetId, validationRule) => {
@@ -118,6 +126,7 @@ export const ValidationService = {
       automatic: validationRule.automatic,
       description: validationRule.description,
       enabled: validationRule.active ? validationRule.active : false,
+      expressionText: validationRule.expressionText,
       referenceId: validationRule.field.code,
       ruleId: validationRule.id,
       ruleName: validationRule.name,
@@ -141,6 +150,7 @@ export const ValidationService = {
       automatic: validationRule.automatic,
       description: validationRule.description,
       enabled: validationRule.active ? validationRule.active : false,
+      expressionText: validationRule.expressionText,
       referenceId: validationRule.recordSchemaId,
       ruleId: validationRule.id,
       ruleName: validationRule.name,
@@ -173,6 +183,7 @@ export const ValidationService = {
       automatic: validationRule.automatic,
       description: validationRule.description,
       enabled: validationRule.active ? validationRule.active : false,
+      expressionText: validationRule.expressionText,
       referenceId: validationRule.table.code,
       ruleId: validationRule.id,
       ruleName: validationRule.name,

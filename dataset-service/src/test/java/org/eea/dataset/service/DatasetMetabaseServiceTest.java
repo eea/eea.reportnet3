@@ -178,7 +178,7 @@ public class DatasetMetabaseServiceTest {
     foreignRelations.setIdDatasetDestination(dataSetMetabase);
     leadReportersVO = new ArrayList<>();
     leadReportersVO.add(new LeadReporterVO());
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

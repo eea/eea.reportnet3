@@ -71,7 +71,7 @@ public class ViewHelperTest {
   public void initMocks() {
     viewExecutorService = Executors.newFixedThreadPool(2);
     processesList = new ArrayList<>();
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

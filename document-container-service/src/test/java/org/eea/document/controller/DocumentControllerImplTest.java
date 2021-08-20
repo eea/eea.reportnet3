@@ -69,7 +69,7 @@ public class DocumentControllerImplTest {
     SecurityContextHolder.setContext(securityContext);
     fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     emptyFileMock = new MockMultipartFile("file", "fileOriginal", "cvs", (byte[]) null);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

@@ -26,7 +26,7 @@ import {
 } from 'views/DatasetDesigner/_components/Validations/_functions/Reducers/CreateValidationReducer';
 
 import { checkComparisonRelation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonRelation';
-import { checkComparisonSQLsentence } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonSQLsentence';
+import { checkComparisonSqlSentence } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonSqlSentence';
 import { checkComparisonValidation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/checkComparisonValidation';
 import { deleteLink } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/deleteLink';
 import { getDatasetSchemaTableFields } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/getDatasetSchemaTableFields';
@@ -105,7 +105,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
             onRelationDelete={onRelationDelete}
             onRelationFieldUpdate={onRelationFieldUpdate}
             onRelationsErrors={onRelationsErrors}
-            onSetSQLsentence={onSetSQLsentence}
+            onSetSqlSentence={onSetSqlSentence}
             showRequiredFields={tabsChanges.expression}
             tabsChanges={tabsChanges}
           />
@@ -374,8 +374,9 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
   const onCreateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
-      const { candidateRule } = creationFormState;
+      const { candidateRule, expressionText } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      candidateRule.expressionText = expressionText;
 
       await ValidationService.createTableRule(datasetId, candidateRule);
       onHide();
@@ -399,8 +400,10 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
   const onUpdateValidationRule = async () => {
     try {
       setIsSubmitDisabled(true);
-      const { candidateRule } = creationFormState;
+      const { candidateRule, expressionText } = creationFormState;
       candidateRule.recordSchemaId = getRecordIdByTableSchemaId(candidateRule.table.code);
+      candidateRule.expressionText = expressionText;
+
       await ValidationService.updateTableRule(datasetId, candidateRule);
       if (!isNil(candidateRule) && candidateRule.automatic) {
         validationContext.onAutomaticRuleIsUpdated(true);
@@ -542,7 +545,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
     return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
   };
 
-  const onSetSQLsentence = (key, value) => {
+  const onSetSqlSentence = (key, value) => {
     creationFormDispatch({
       type: 'SET_FORM_FIELD',
       payload: {
@@ -573,7 +576,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
       return (
         creationFormState.isValidationCreationDisabled ||
         isSubmitDisabled ||
-        !checkComparisonSQLsentence(creationFormState?.candidateRule?.sqlSentence)
+        !checkComparisonSqlSentence(creationFormState?.candidateRule?.sqlSentence)
       );
     }
     return (

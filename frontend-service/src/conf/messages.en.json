@@ -1045,7 +1045,7 @@
     "tableWithNoPKWarningTitle": "There are tables with no primary keys (PK)",
     "tabMenuConstraintData": "Info",
     "tabMenuExpression": "Expression",
-    "tabMenuExpressions": "Expressions",
+    "expressionText": "Expression",
     "tabMenuTableRelations": "Table relations",
     "tabularDataView": "Tabular data",
     "targetDatasetSchema": "Reference schema",
@@ -1221,6 +1221,14 @@
     "of": "of",
     "percentSignSqlQCTooltip": "You can use fields from the SQL sentence writing the field name inside {% ... %}",
     "deleteDataflowCompletedEvent": "Dataflow deleted successfully",
-    "deleteDataflowFailedEvent": "Error deleting the dataflow"
+    "deleteDataflowFailedEvent": "Error deleting the dataflow",
+    "downloadQCsButtonLabel": "Download QCs",
+    "downloadQcRulesStart": "Generating QCs rules file",
+    "generateQcRulesFileError": "Failed generating QCs rules file",
+    "downloadQcRulesFileError": "Failed downloading QC rules file",
+    "automaticallyDownloadQcRulesFile": "QC rules file generated successfully",
+    "if": "IF",
+    "then": "THEN",
+    "maxAllowedCharacters": "max allowed characters"
   }
 }

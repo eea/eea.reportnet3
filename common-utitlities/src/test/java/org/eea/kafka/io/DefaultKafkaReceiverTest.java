@@ -30,7 +30,7 @@ public class DefaultKafkaReceiverTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

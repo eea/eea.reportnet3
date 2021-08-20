@@ -16,7 +16,7 @@
   width: 50vw;
   margin-bottom: 1rem !important;
   transition: 0.5s !important;
-  @include for-desktop-up{
+  @include for-desktop-up {
     flex: auto;
   }
 }

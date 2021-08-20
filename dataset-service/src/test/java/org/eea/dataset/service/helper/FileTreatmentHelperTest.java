@@ -202,7 +202,7 @@ public class FileTreatmentHelperTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     SecurityContextHolder.clearContext();
     SecurityContextHolder.getContext()
         .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));

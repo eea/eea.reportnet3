@@ -1,6 +1,8 @@
+.errorAndCounterWrapper {
+  height: 40px;
+}
 .search {
   --searchButtonWidth: 170px;
-
   cursor: pointer !important;
   display: flex;
   justify-content: space-between;

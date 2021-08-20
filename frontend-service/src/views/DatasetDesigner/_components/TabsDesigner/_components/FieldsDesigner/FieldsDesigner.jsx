@@ -9,7 +9,10 @@ import { DatasetConfig } from 'repositories/config/DatasetConfig';
 
 import styles from './FieldsDesigner.module.scss';
 
+import { config } from 'conf';
+
 import { Button } from 'views/_components/Button';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
@@ -677,23 +680,28 @@ export const FieldsDesigner = ({
       </Toolbar>
       <h4 className={styles.descriptionLabel}>{resources.messages['newTableDescriptionPlaceHolder']}</h4>
       <div className={styles.tableDescriptionRow}>
-        <InputTextarea
-          className={styles.tableDescriptionInput}
-          collapsedHeight={55}
-          disabled={isDataflowOpen || isDesignDatasetEditorRead}
-          expandableOnClick={true}
-          id="tableDescription"
-          key="tableDescription"
-          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, notEmpty, fixedNumber })}
-          onChange={e => setTableDescriptionValue(e.target.value)}
-          onFocus={e => {
-            setInitialTableDescription(e.target.value);
-          }}
-          onKeyDown={e => onKeyChange(e)}
-          placeholder={resources.messages['newTableDescriptionPlaceHolder']}
-          value={tableDescriptionValue}
-        />
-
+        <div>
+          <InputTextarea
+            className={styles.tableDescriptionInput}
+            collapsedHeight={75}
+            disabled={isDataflowOpen || isDesignDatasetEditorRead}
+            id="tableDescription"
+            key="tableDescription"
+            onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, notEmpty, fixedNumber })}
+            onChange={e => setTableDescriptionValue(e.target.value)}
+            onFocus={e => {
+              setInitialTableDescription(e.target.value);
+            }}
+            onKeyDown={e => onKeyChange(e)}
+            placeholder={resources.messages['newTableDescriptionPlaceHolder']}
+            value={tableDescriptionValue}
+          />
+          <CharacterCounter
+            currentLength={tableDescriptionValue.length}
+            maxLength={config.DESCRIPTION_MAX_LENGTH}
+            style={{ position: 'relative', top: '4px' }}
+          />
+        </div>
         <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>
           <div>
             <span

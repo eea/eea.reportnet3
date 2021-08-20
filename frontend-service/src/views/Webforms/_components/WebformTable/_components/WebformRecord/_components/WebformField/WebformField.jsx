@@ -9,6 +9,7 @@ import styles from './WebformField.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Calendar } from 'views/_components/Calendar';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DownloadFile } from 'views/_components/DownloadFile';
@@ -471,22 +472,29 @@ export const WebformField = ({
         );
       case 'TEXTAREA':
         return (
-          <InputTextarea
-            className={field.required ? styles.required : undefined}
-            collapsedHeight={150}
-            id={field.fieldId}
-            maxLength={getInputMaxLength[type]}
-            onBlur={event => {
-              if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value);
-            }}
-            onChange={event => onFillField(field, option, event.target.value)}
-            onFocus={event => {
-              onFocusField(event.target.value);
-            }}
-            onKeyDown={event => onEditorKeyChange(event, field, option)}
-            value={field.value}
-          />
+          <Fragment>
+            <InputTextarea
+              className={field.required ? styles.required : undefined}
+              collapsedHeight={150}
+              id={field.fieldId}
+              maxLength={getInputMaxLength[type]}
+              onBlur={event => {
+                if (isNil(field.recordId)) onSaveField(option, event.target.value);
+                else onEditorSubmitValue(field, option, event.target.value);
+              }}
+              onChange={event => onFillField(field, option, event.target.value)}
+              onFocus={event => {
+                onFocusField(event.target.value);
+              }}
+              onKeyDown={event => onEditorKeyChange(event, field, option)}
+              value={field.value}
+            />
+            <CharacterCounter
+              currentLength={field.value.length}
+              maxLength={getInputMaxLength.RICH_TEXT}
+              style={{ position: 'relative', right: '0', top: '0.25rem' }}
+            />
+          </Fragment>
         );
       case 'EMPTY':
         return (
