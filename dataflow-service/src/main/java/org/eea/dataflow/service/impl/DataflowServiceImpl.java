@@ -236,7 +236,7 @@ public class DataflowServiceImpl implements DataflowService {
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
 
     // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
 
     // Get user's dataflows sorted by status and creation date
     List<Long> idsResources =
@@ -279,7 +279,7 @@ public class DataflowServiceImpl implements DataflowService {
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
 
     // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
 
     // First, get reference dataflows in DESIGN that the user has permission
     List<Long> idsResources =
@@ -327,7 +327,7 @@ public class DataflowServiceImpl implements DataflowService {
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
 
     // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
     boolean userAdmin = isAdmin();
 
     // Get user's dataflows sorted by status and creation date
@@ -680,9 +680,8 @@ public class DataflowServiceImpl implements DataflowService {
 
     // set reporting status
     Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus(dataflowIds);
-    dataflowPublicList.forEach(dataflow -> {
-      setReportingDatasetStatus(map.get(dataflow.getId()), dataflow);
-    });
+    dataflowPublicList
+        .forEach(dataflow -> setReportingDatasetStatus(map.get(dataflow.getId()), dataflow));
 
     // sort and paging
     sortPublicDataflows(dataflowPublicList, header, asc);
@@ -1391,15 +1390,15 @@ public class DataflowServiceImpl implements DataflowService {
     if (!listDatasets.isEmpty()) {
       List<IDatasetStatus> queryResult = dataflowRepository.getDatasetsStatus(listDatasets);
       for (IDatasetStatus object : queryResult) {
-        List<DataflowStatusDataset> list2 = new ArrayList<>();
+        List<DataflowStatusDataset> list = new ArrayList<>();
         DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
         dataflowStatusDataset.setId(object.getId());
         dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
-        list2.add(dataflowStatusDataset);
+        list.add(dataflowStatusDataset);
         if (map.get(dataflowStatusDataset.getId()) != null) {
-          map.get(dataflowStatusDataset.getId()).addAll(list2);
+          map.get(dataflowStatusDataset.getId()).addAll(list);
         } else {
-          map.put(dataflowStatusDataset.getId(), list2);
+          map.put(dataflowStatusDataset.getId(), list);
         }
       }
     }
@@ -1409,11 +1408,11 @@ public class DataflowServiceImpl implements DataflowService {
 
 
   /**
-   * Gets the datasets status.
+   * Gets the datasets status by user.
    *
-   * @return the datasets status
+   * @return the datasets status by user
    */
-  private Map<Long, List<DataflowStatusDataset>> getDatasetsStatus() {
+  private Map<Long, List<DataflowStatusDataset>> getDatasetsStatusByUser() {
     Map<Long, List<DataflowStatusDataset>> map = new HashMap<>();
 
     List<Long> listDatasets =
@@ -1422,15 +1421,15 @@ public class DataflowServiceImpl implements DataflowService {
     if (!listDatasets.isEmpty()) {
       List<IDatasetStatus> queryResult = dataflowRepository.getDatasetsStatus(listDatasets);
       for (IDatasetStatus object : queryResult) {
-        List<DataflowStatusDataset> list2 = new ArrayList<>();
+        List<DataflowStatusDataset> list = new ArrayList<>();
         DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
         dataflowStatusDataset.setId(object.getId());
         dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
-        list2.add(dataflowStatusDataset);
+        list.add(dataflowStatusDataset);
         if (map.get(dataflowStatusDataset.getId()) != null) {
-          map.get(dataflowStatusDataset.getId()).addAll(list2);
+          map.get(dataflowStatusDataset.getId()).addAll(list);
         } else {
-          map.put(dataflowStatusDataset.getId(), list2);
+          map.put(dataflowStatusDataset.getId(), list);
         }
       }
     }
