@@ -67,7 +67,7 @@ public class SQLValidationUtilsTest {
 
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     ReflectionTestUtils.setField(sqlValidationUtils, "datasetMetabaseControllerZuul",
         dataSetMetabaseControllerZuul);
     ReflectionTestUtils.setField(sqlValidationUtils, "datasetRepository", datasetRepository);

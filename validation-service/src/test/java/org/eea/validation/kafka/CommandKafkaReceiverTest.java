@@ -38,7 +38,7 @@ public class CommandKafkaReceiverTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     message = new Message<EEAEventVO>() {
 
       @Override

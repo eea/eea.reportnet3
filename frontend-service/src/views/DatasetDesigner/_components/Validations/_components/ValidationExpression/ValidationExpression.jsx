@@ -129,10 +129,7 @@ const ValidationExpression = ({
   const onUpdateExpressionField = (key, value) => {
     checkField(key, value);
     onDeleteFromClickedFields(key);
-    onExpressionFieldUpdate(expressionId, {
-      key,
-      value
-    });
+    onExpressionFieldUpdate(expressionId, { key, value });
   };
 
   const onAddToClickedFields = field => {

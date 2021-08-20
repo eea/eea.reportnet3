@@ -28,7 +28,7 @@ public class ExternalIntegrationDesignCompletedEventTest {
 
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

@@ -66,7 +66,7 @@ public class RulesErrorUtilsTest {
 
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     e = new RuntimeException("aaaaaaa ," + new ObjectId());
     fieldValue = new FieldValue();
     recordValue = new RecordValue();

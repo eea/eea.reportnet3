@@ -9,6 +9,7 @@ import { config } from 'conf';
 import { Button } from 'views/_components/Button';
 import { Dropdown } from 'views/_components/Dropdown';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 
 import { DocumentService } from 'services/DocumentService';
 
@@ -68,7 +69,7 @@ const DocumentFileUpload = ({
     return inputValue.trim() === '';
   };
 
-  const checkIsCorrectLength = inputValue => inputValue.length <= 255;
+  const checkIsCorrectLength = inputValue => inputValue.length <= config.INPUT_MAX_LENGTH;
 
   const checkIsEmptyFile = inputUpload => {
     return inputUpload.files.length === 0;
@@ -199,7 +200,7 @@ const DocumentFileUpload = ({
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <input
             id={'descriptionDocumentFileUpload'}
-            maxLength={255}
+            maxLength={config.INPUT_MAX_LENGTH}
             name={resources.messages['description']}
             onBlur={() => checkInputForErrors('description')}
             onChange={e => {
@@ -221,6 +222,7 @@ const DocumentFileUpload = ({
             type="text"
             value={inputs.description}
           />
+          <CharacterCounter currentLength={inputs.description.length} maxLength={config.INPUT_MAX_LENGTH} />
           <label className="srOnly" htmlFor="descriptionDocumentFileUpload">
             {resources.messages['description']}
           </label>

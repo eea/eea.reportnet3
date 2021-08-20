@@ -73,7 +73,7 @@ public class ExecuteTableValidationCommandTest {
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATE_TABLE);
     eeaEventVO.setData(data);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

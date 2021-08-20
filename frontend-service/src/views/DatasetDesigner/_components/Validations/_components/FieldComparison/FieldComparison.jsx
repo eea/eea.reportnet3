@@ -75,7 +75,7 @@ export const FieldComparison = ({
           name=""
           readOnly
           rows="5"
-          value={creationFormState.validationRuleString}></textarea>
+          value={creationFormState.expressionText}></textarea>
       </div>
     </Fragment>
   );

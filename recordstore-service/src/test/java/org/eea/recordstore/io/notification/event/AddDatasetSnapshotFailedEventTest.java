@@ -40,7 +40,7 @@ public class AddDatasetSnapshotFailedEventTest {
   public void initMocks() {
     dataflowVO = new DataFlowVO();
     dataflowVO.setName("dataflowName");
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

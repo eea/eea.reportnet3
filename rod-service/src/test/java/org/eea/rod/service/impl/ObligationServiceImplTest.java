@@ -57,7 +57,7 @@ public class ObligationServiceImplTest {
 
   @Before
   public void init() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
 
     //Set up issues mock
     List<Issue> issues = new ArrayList<>();

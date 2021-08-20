@@ -299,7 +299,7 @@ public class DatasetSchemaServiceTest {
 
     ReflectionTestUtils.setField(dataSchemaServiceImpl, "timeToWaitBeforeContinueCopy", 3000L);
 
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     validationCommands.add(command);
   }
 

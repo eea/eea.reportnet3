@@ -123,7 +123,7 @@ public class DataFlowWebLinkControllerImplTest {
     badResources.add(badResource);
 
 
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /** The dataflow web link mapper. */

@@ -25,7 +25,7 @@ public class CountryServiceImplTest {
 
   @Before
   public void init() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test

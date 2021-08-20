@@ -4,12 +4,12 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
-import { routes } from 'conf/routes';
 
 import styles from './ManageBusinessDataflow.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Dialog } from 'views/_components/Dialog';
@@ -25,22 +25,20 @@ import { BusinessDataflowService } from 'services/BusinessDataflowService';
 import { DataflowService } from 'services/DataflowService';
 import { RepresentativeService } from 'services/RepresentativeService';
 
-import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { UserService } from 'services/UserService';
 
-import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageBusinessDataflow = ({
   dataflowId,
   hasRepresentatives,
-  history,
   isAdmin,
   isEditing = false,
   isVisible,
@@ -55,13 +53,13 @@ export const ManageBusinessDataflow = ({
   const dialogName = 'isBusinessDataflowDialogVisible';
   const isDesign = TextUtils.areEquals(state?.status, config.dataflowStatus.DESIGN);
 
-  const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [deleteInput, setDeleteInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState({});
   const [selectedFmeUser, setSelectedFmeUser] = useState({});
   const [description, setDescription] = useState(isEditing ? state.description : '');
@@ -119,6 +117,8 @@ export const ManageBusinessDataflow = ({
     }
   }, []);
 
+  useCheckNotifications(['DELETE_DATAFLOW_FAILED_EVENT'], setIsDeleting, false);
+
   const checkErrors = () => {
     let hasErrors = false;
 
@@ -144,13 +144,17 @@ export const ManageBusinessDataflow = ({
       handleErrors({
         field: 'description',
         hasErrors: true,
-        message: resources.messages['dataflowDescriptionValidationMax']
+        message: `${resources.messages['dataflowDescriptionValidationMax']} (${resources.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`
       });
       hasErrors = true;
     }
 
     if (name.length > config.INPUT_MAX_LENGTH) {
-      handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameValidationMax'] });
+      handleErrors({
+        field: 'name',
+        hasErrors: true,
+        message: `${resources.messages['dataflowNameValidationMax']} (${resources.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`
+      });
       hasErrors = true;
     }
 
@@ -164,18 +168,19 @@ export const ManageBusinessDataflow = ({
   const onSelectGroup = group => setSelectedGroup(group);
   const onSelectFmeUser = fmeUser => setSelectedFmeUser(fmeUser);
 
+  const onHideDataflowDialog = () => {
+    resetObligations();
+    manageDialogs(dialogName, false);
+  };
+
   const onDeleteDataflow = async () => {
-    setIsDeleteDialogVisible(false);
-    showLoading();
+    setIsDeleting(true);
     try {
       await DataflowService.delete(dataflowId);
-      history.push(getUrl(routes.DATAFLOWS));
-      notificationContext.add({ type: 'DATAFLOW_DELETE_SUCCESS' });
     } catch (error) {
       console.error('ManageBusinessDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
-    } finally {
-      hideLoading();
+      setIsDeleting(false);
     }
   };
 
@@ -292,10 +297,7 @@ export const ManageBusinessDataflow = ({
         className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
         icon={'cancel'}
         label={isEditing ? resources.messages['cancel'] : resources.messages['close']}
-        onClick={() => {
-          resetObligations();
-          manageDialogs(dialogName, false);
-        }}
+        onClick={onHideDataflowDialog}
       />
     </Fragment>
   );
@@ -309,10 +311,7 @@ export const ManageBusinessDataflow = ({
             ? resources.messages['editBusinessDataflowDialogHeader']
             : resources.messages['createBusinessDataflowDialogHeader']
         }
-        onHide={() => {
-          resetObligations();
-          manageDialogs(dialogName, false);
-        }}
+        onHide={onHideDataflowDialog}
         visible={isVisible}>
         <div className={styles.dialogContent}>
           {isLoading ? (
@@ -321,7 +320,10 @@ export const ManageBusinessDataflow = ({
             <Fragment>
               <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
                 <InputText
+                  hasMaxCharCounter={true}
                   id="dataflowName"
+                  maxLength={config.INPUT_MAX_LENGTH}
+                  onBlur={checkErrors}
                   onChange={event => setName(event.target.value)}
                   onFocus={() => handleErrors({ field: 'name', hasErrors: false, message: '' })}
                   placeholder={resources.messages['createDataflowName']}
@@ -335,13 +337,21 @@ export const ManageBusinessDataflow = ({
                 <InputTextarea
                   className={styles.inputTextArea}
                   id="dataflowDescription"
+                  onBlur={checkErrors}
                   onChange={event => setDescription(event.target.value)}
                   onFocus={() => handleErrors({ field: 'description', hasErrors: false, message: '' })}
                   placeholder={resources.messages['createDataflowDescription']}
                   rows={10}
                   value={description}
                 />
-                {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
+                <div className={styles.errorAndCounterWrapper}>
+                  <CharacterCounter
+                    currentLength={description.length}
+                    maxLength={config.INPUT_MAX_LENGTH}
+                    style={{ marginTop: '0.25rem' }}
+                  />
+                  {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
+                </div>
               </div>
               <div className={styles.dropdownsWrapper}>
                 <Dropdown
@@ -399,8 +409,9 @@ export const ManageBusinessDataflow = ({
       {isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          disabledConfirm={!TextUtils.areEquals(deleteInput, state.name)}
+          disabledConfirm={!TextUtils.areEquals(deleteInput, state.name) || isDeleting}
           header={resources.messages['deleteBusinessDataflowDialogHeader']}
+          iconConfirm={isDeleting && 'spinnerAnimate'}
           labelCancel={resources.messages['no']}
           labelConfirm={resources.messages['yes']}
           onConfirm={onDeleteDataflow}
@@ -413,17 +424,15 @@ export const ManageBusinessDataflow = ({
                 dataflowName: state.name
               })
             }}></p>
-          <p>
-            <InputText
-              className={`${styles.inputText}`}
-              id="deleteDataflow"
-              maxLength={255}
-              name={resources.messages['deleteDataflowButton']}
-              onChange={event => setDeleteInput(event.target.value)}
-              ref={deleteInputRef}
-              value={deleteInput}
-            />
-          </p>
+          <InputText
+            className={`${styles.inputText}`}
+            id="deleteDataflow"
+            maxLength={config.INPUT_MAX_LENGTH}
+            name={resources.messages['deleteDataflowButton']}
+            onChange={event => setDeleteInput(event.target.value)}
+            ref={deleteInputRef}
+            value={deleteInput}
+          />
         </ConfirmDialog>
       )}
     </Fragment>
