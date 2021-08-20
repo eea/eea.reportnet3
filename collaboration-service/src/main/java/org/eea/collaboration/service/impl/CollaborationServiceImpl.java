@@ -132,6 +132,7 @@ public class CollaborationServiceImpl implements CollaborationService {
    * @throws IOException
    */
   @Override
+  @Transactional
   public MessageVO createMessageAttachment(Long dataflowId, Long providerId, InputStream is,
       String fileName, String fileSize)
       throws EEAForbiddenException, EEAIllegalArgumentException, IOException {
@@ -140,33 +141,35 @@ public class CollaborationServiceImpl implements CollaborationService {
     boolean direction = authorizeAndGetDirection(dataflowId, providerId);
 
     Message message = new Message();
-    message.setContent(fileName);
-    message.setDataflowId(dataflowId);
-    message.setProviderId(providerId);
-    message.setDate(new Date());
-    message.setRead(false);
-    message.setUserName(userName);
-    message.setDirection(direction);
-    message.setType(MessageTypeEnum.ATTACHMENT);
-    message = messageRepository.save(message);
-    byte[] fileContent;
     try {
+      message.setContent(fileName);
+      message.setDataflowId(dataflowId);
+      message.setProviderId(providerId);
+      message.setDate(new Date());
+      message.setRead(false);
+      message.setUserName(userName);
+      message.setDirection(direction);
+      message.setType(MessageTypeEnum.ATTACHMENT);
+      message = messageRepository.save(message);
+      byte[] fileContent;
+
       fileContent = IOUtils.toByteArray(is);
+
+      MessageAttachment messageAttachment = new MessageAttachment();
+      messageAttachment.setFileName(fileName);
+      messageAttachment.setFileSize(fileSize);
+      messageAttachment.setContent(fileContent);
+      messageAttachment.setMessage(message);
+      messageAttachmentRepository.save(messageAttachment);
+
+      String eventType = EventType.RECEIVED_MESSAGE.toString();
+      collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null,
+          eventType);
+
+      LOG.info("Message created: message={}", message);
     } finally {
       is.close();
     }
-    MessageAttachment messageAttachment = new MessageAttachment();
-    messageAttachment.setFileName(fileName);
-    messageAttachment.setFileSize(fileSize);
-    messageAttachment.setContent(fileContent);
-    messageAttachment.setMessage(message);
-    messageAttachmentRepository.save(messageAttachment);
-
-    String eventType = EventType.RECEIVED_MESSAGE.toString();
-    collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null,
-        eventType);
-
-    LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);
   }
 
