@@ -5,8 +5,6 @@ import styles from './IfThenClause.module.scss';
 import { Button } from 'views/_components/Button';
 import { ValidationExpressionSelector } from 'views/DatasetDesigner/_components/Validations/_components/ValidationExpressionSelector';
 
-import { config } from 'conf';
-
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const IfThenClause = ({
