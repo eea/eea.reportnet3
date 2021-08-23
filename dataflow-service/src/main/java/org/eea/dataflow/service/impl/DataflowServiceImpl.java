@@ -428,6 +428,10 @@ public class DataflowServiceImpl implements DataflowService {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
     }
+    // if type comes null, set the default (REPORTING) type to the dataflow
+    if (null == dataflowVO.getType()) {
+      dataflowVO.setType(TypeDataflowEnum.REPORTING);
+    }
     if (TypeDataflowEnum.BUSINESS.equals(dataflowVO.getType())) {
       if (!dataProviderGroupRepository.existsById(dataflowVO.getDataProviderGroupId())) {
         LOG.info("The company group : {} don't exists.", dataflowVO.getDataProviderGroupId());
