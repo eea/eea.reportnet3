@@ -43,7 +43,7 @@ public class ExtendedRulesRepositoryImplTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

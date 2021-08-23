@@ -12,6 +12,9 @@ export const reportingDataflowReducer = (state, { type, payload }) => {
     case 'ON_SUBMIT':
       return { ...state, isSubmitting: payload.submit };
 
+    case 'ON_DELETE_INPUT_CHANGE':
+      return { ...state, deleteInput: payload.deleteInput };
+
     case 'PREV_STATE':
       return { ...state, obligationPrevState: { id: payload.id, title: payload.title } };
 
@@ -20,6 +23,9 @@ export const reportingDataflowReducer = (state, { type, payload }) => {
 
     case 'TOGGLE_PIN':
       return { ...state, pinDataflow: payload };
+
+    case 'SET_IS_DELETING':
+      return { ...state, isDeleting: payload.isDeleting };
 
     default:
       return state;

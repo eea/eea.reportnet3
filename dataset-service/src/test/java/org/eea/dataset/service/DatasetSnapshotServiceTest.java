@@ -264,7 +264,7 @@ public class DatasetSnapshotServiceTest {
 
     leadReportersVO = new ArrayList<>();
     leadReportersVO.add(new LeadReporterVO());
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
 

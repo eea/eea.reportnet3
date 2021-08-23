@@ -29,7 +29,7 @@ public class JwtAuthenticationEntryPointTest {
 
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
 

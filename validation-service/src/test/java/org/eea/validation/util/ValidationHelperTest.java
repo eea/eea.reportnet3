@@ -147,7 +147,7 @@ public class ValidationHelperTest {
     processesMap = new ConcurrentHashMap<>();
     executorService =
         new EEADelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2));
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     SecurityContextHolder.setContext(securityContext);
   }
 

@@ -97,6 +97,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   useCheckNotifications(['REFERENCE_DATAFLOW_PROCESSED_EVENT', 'COPY_DATASET_SCHEMA_COMPLETED_EVENT'], refreshPage);
   useCheckNotifications(['REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT'], setIsCreatingReferenceDatasets, false);
+  useCheckNotifications(['DELETE_DATAFLOW_COMPLETED_EVENT'], goToDataflowsPage);
 
   function manageDialogs(dialog, value, secondDialog, secondValue) {
     dataflowDispatch({
@@ -112,6 +113,10 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   function refreshPage() {
     dataflowDispatch({ type: 'REFRESH_PAGE' });
     onRefreshToken();
+  }
+
+  function goToDataflowsPage() {
+    history.push(getUrl(routes.DATAFLOWS));
   }
 
   const onRefreshToken = async () => {
@@ -311,7 +316,6 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       {dataflowState.isEditDialogVisible && (
         <ManageReferenceDataflow
           dataflowId={referenceDataflowId}
-          history={history}
           isEditing
           isVisible={dataflowState.isEditDialogVisible}
           manageDialogs={manageDialogs}

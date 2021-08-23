@@ -202,7 +202,7 @@ public class FileTreatmentHelperTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     SecurityContextHolder.clearContext();
     SecurityContextHolder.getContext()
         .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
@@ -366,7 +366,8 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("zip")
         .thenReturn(FileTypeEnum.CSV.getValue()).thenReturn("txt")
         .thenReturn(FileTypeEnum.CSV.getValue());
-    Mockito.doNothing().when(datasetService).deleteImportData(Mockito.anyLong());
+    Mockito.doNothing().when(datasetService).deleteImportData(Mockito.anyLong(),
+        Mockito.anyBoolean());
     Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.REPORTING);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),

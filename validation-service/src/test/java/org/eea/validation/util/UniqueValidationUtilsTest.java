@@ -142,7 +142,7 @@ public class UniqueValidationUtilsTest {
     when(recordRepository.saveAll(Mockito.any())).thenReturn(null);
     when(rulesService.getIntegrityConstraint(Mockito.any())).thenReturn(integrityVO);
     when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(new TableValue());
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

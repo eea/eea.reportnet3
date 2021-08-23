@@ -75,7 +75,7 @@ public class FKValidationUtilsTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     ReflectionTestUtils.setField(fKValidationUtils, "dataSetControllerZuul", dataSetControllerZuul);
     ReflectionTestUtils.setField(fKValidationUtils, "datasetMetabaseControllerZuul",
         datasetMetabaseControllerZuul);

@@ -1,12 +1,14 @@
 import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import isNil from 'lodash/isNil';
 
 import './InputText.scss';
 
 import KeyFilter from 'views/_functions/PrimeReact/KeyFilter';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,6 +20,7 @@ export class InputText extends Component {
   static defaultProps = {
     autoFocus: false,
     expandable: false,
+    hasMaxCharCounter: false,
     id: null,
     keyfilter: null,
     maxLength: 10000,
@@ -34,6 +37,7 @@ export class InputText extends Component {
   static propTypes = {
     autoFocus: PropTypes.bool,
     expandable: PropTypes.bool,
+    hasMaxCharCounter: PropTypes.bool,
     id: PropTypes.string,
     keyfilter: PropTypes.any,
     maxLength: PropTypes.number,
@@ -44,7 +48,7 @@ export class InputText extends Component {
     tooltip: PropTypes.string,
     tooltipOptions: PropTypes.object,
     validateOnly: PropTypes.bool,
-    value: PropTypes.string
+    value: PropTypes.any
   };
 
   constructor(props) {
@@ -82,6 +86,9 @@ export class InputText extends Component {
   componentDidMount() {
     if (this.props.tooltip) {
       this.renderTooltip();
+    }
+    if (this.props.hasMaxCharCounter && !isNil(this.props.maxLength) && !isNil(this.inputElement)) {
+      this.element.style.paddingRight = `${this.inputElement.getBoundingClientRect().width + 30}px`;
     }
   }
 
@@ -142,6 +149,14 @@ export class InputText extends Component {
               }}
             />
           </div>
+        ) : null}
+        {this.props.hasMaxCharCounter && !isNil(this.props.maxLength) ? (
+          <CharacterCounter
+            currentLength={this.props.value.length}
+            inputRef={el => (this.inputElement = el)}
+            maxLength={this.props.maxLength}
+            style={{ top: '-30px' }}
+          />
         ) : null}
         <label className="srOnly" htmlFor={this.props.id}>
           {this.props.name !== '' ? this.props.name : this.props.placeholder || this.props.id}

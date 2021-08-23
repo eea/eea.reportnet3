@@ -1,0 +1,23 @@
+.characterCount {
+  background-color: var(--statusBox-true-bg);
+  border-radius: 3px;
+  color: var(--statusBox-true-color);
+  float: right;
+  font-size: 10pt;
+  font-weight: 600;
+  margin-right: 5px;
+  max-width: 110px;
+  padding: 4px;
+  position: relative;
+  width: fit-content;
+}
+
+.warningCharacterCount {
+  background-color: var(--statusBox-warning-bg);
+  color: var(--statusBox-warning-color);
+}
+
+.errorCharacterCount {
+  background-color: var(--statusBox-error-bg);
+  color: var(--statusBox-error-color);
+}

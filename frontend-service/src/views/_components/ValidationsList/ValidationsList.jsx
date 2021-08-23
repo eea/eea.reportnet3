@@ -7,7 +7,6 @@ import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-import upperFirst from 'lodash/upperFirst';
 
 import styles from './ValidationsList.module.scss';
 
@@ -182,17 +181,27 @@ const ValidationsList = withRouter(
       </div>
     );
 
-    const correctTemplate = rowData => (
-      <div className={styles.checkedValueColumn}>
-        {!isNil(rowData.isCorrect) ? (
-          rowData.isCorrect ? (
-            <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />
-          ) : null
-        ) : (
-          <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />
-        )}
-      </div>
-    );
+    const correctTemplate = rowData => <div className={styles.checkedValueColumn}>{getCorrectTemplate(rowData)}</div>;
+
+    const getCorrectTemplate = rowData => {
+      if (isNil(rowData.isCorrect)) {
+        return <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />;
+      } else {
+        if (rowData.isCorrect) {
+          return <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />;
+        } else if (!isNil(rowData.sqlError)) {
+          return (
+            <Button
+              className={`${styles.invalidSqlIcon} p-button-secondary`}
+              icon="warning"
+              onClick={() => navigator.clipboard.writeText(rowData.sqlError)}
+              tooltip={`${rowData.sqlError} <br />  <br />${resources.messages['sqlErrorMessageCopy']} `}
+              tooltipOptions={{ position: 'left' }}
+            />
+          );
+        }
+      }
+    };
 
     const enabledTemplate = rowData => (
       <div className={styles.checkedValueColumn}>
@@ -201,9 +210,14 @@ const ValidationsList = withRouter(
     );
 
     const expressionsTemplate = rowData => {
+      if (!isNil(rowData.expressionText)) {
+        return rowData.expressionText;
+      }
+
       if (!isNil(rowData.sqlSentence)) {
         return rowData.sqlSentence;
       }
+
       return getExpressionString(rowData, datasetSchemaAllTables);
     };
 
@@ -260,11 +274,8 @@ const ValidationsList = withRouter(
         case 'isCorrect':
           header = resources.messages['valid'];
           break;
-        case 'entityType':
-          header = resources.messages['entityType'];
-          break;
         default:
-          header = upperFirst(fieldHeader);
+          header = resources.messages[fieldHeader];
           break;
       }
 
@@ -280,7 +291,7 @@ const ValidationsList = withRouter(
         { id: 'name', index: 4 },
         { id: 'description', index: 5 },
         { id: 'message', index: 6 },
-        { id: 'expressions', index: 7 },
+        { id: 'expressionText', index: 7 },
         { id: 'entityType', index: 8 },
         { id: 'levelError', index: 9 },
         { id: 'automatic', index: 10 },
@@ -387,15 +398,14 @@ const ValidationsList = withRouter(
     const columnStyles = field => {
       const style = {};
       const invisibleFields = ['id', 'referenceId', 'activationGroup', 'condition', 'date'];
-      const fieldUppercase = field.toUpperCase();
       if (reporting) {
         invisibleFields.push('enabled', 'automatic', 'isCorrect');
       }
-      if (fieldUppercase === 'DESCRIPTION') {
+      if (field === 'description') {
         style.width = '23%';
       }
 
-      if (fieldUppercase === 'ENTITYTYPE' || fieldUppercase === 'LEVELERROR') {
+      if (field === 'entityType' || field === 'levelError') {
         style.minWidth = '6rem';
       }
 
@@ -431,7 +441,7 @@ const ValidationsList = withRouter(
         if (field === 'enabled') template = enabledTemplate;
         if (field === 'isCorrect') template = correctTemplate;
         if (field === 'levelError') template = levelErrorTemplate;
-        if (field === 'expressions') template = expressionsTemplate;
+        if (field === 'expressionText') template = expressionsTemplate;
         return (
           <Column
             body={template}
@@ -507,6 +517,7 @@ const ValidationsList = withRouter(
             <DataTable
               autoLayout={true}
               className={styles.paginatorValidationViewer}
+              hasDefaultCurrentPage={true}
               loading={false}
               onRowClick={event => validationId(event.data.id)}
               paginator={true}

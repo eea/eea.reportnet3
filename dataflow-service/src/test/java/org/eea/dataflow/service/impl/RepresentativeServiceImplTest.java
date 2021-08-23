@@ -148,7 +148,7 @@ public class RepresentativeServiceImplTest {
     leadReporter = new LeadReporter(1L, "email@host.com", representative);
     leadReporters = new ArrayList<>();
     leadReporters.add(leadReporter);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**

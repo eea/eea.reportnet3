@@ -30,7 +30,7 @@ export const IfThenClause = ({
   return (
     <Fragment>
       <div className={styles.section}>
-        <h3 className="if">IF</h3>
+        <h3 className="if">{resourcesContext.messages['if']}</h3>
         <ul className={styles.list}>
           {creationFormState.candidateRule.expressionsIf &&
             creationFormState.candidateRule.expressionsIf.map((expression, i) => (
@@ -76,7 +76,7 @@ export const IfThenClause = ({
       </div>
       <hr></hr>
       <div className={styles.section}>
-        <h3 className="then">THEN</h3>
+        <h3 className="then">{resourcesContext.messages['then']}</h3>
         <ul className={styles.list}>
           {creationFormState.candidateRule.expressionsThen &&
             creationFormState.candidateRule.expressionsThen.map((expression, i) => (
@@ -128,7 +128,7 @@ export const IfThenClause = ({
           name=""
           readOnly
           rows="5"
-          value={creationFormState.validationRuleString}></textarea>
+          value={creationFormState.expressionText}></textarea>
       </div>
     </Fragment>
   );

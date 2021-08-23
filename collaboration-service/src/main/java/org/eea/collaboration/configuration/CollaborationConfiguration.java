@@ -18,6 +18,8 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
@@ -64,6 +66,14 @@ public class CollaborationConfiguration {
   /** The flush mode. */
   @Value("${spring.jpa.hibernate.flushMode}")
   private String flushMode;
+
+  /** The max file size. */
+  @Value("${spring.servlet.multipart.max-file-size}")
+  private Long maxFileSize;
+
+  /** The max request size. */
+  @Value("${spring.servlet.multipart.max-request-size}")
+  private Long maxRequestSize;
 
   /**
    * Collaboration entity manager factory.
@@ -125,5 +135,18 @@ public class CollaborationConfiguration {
     properties.setProperty("hibernate.show_sql", showSql);
     properties.setProperty("hibernate.flushMode", flushMode);
     return properties;
+  }
+
+  /**
+   * Multipart resolver.
+   *
+   * @return the multipart resolver
+   */
+  @Bean
+  public MultipartResolver multipartResolver() {
+    CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
+    multipartResolver.setMaxUploadSize(maxFileSize);
+    multipartResolver.setMaxUploadSizePerFile(maxRequestSize);
+    return multipartResolver;
   }
 }
