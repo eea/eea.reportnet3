@@ -1,5 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 
+import isNil from 'lodash/isNil';
+
 import styles from './SqlSentence.module.scss';
 
 import { config } from 'conf';
@@ -10,13 +12,21 @@ import { SqlHelp } from './_components/SqlHelp';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
 export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSentence, level }) => {
   const resources = useContext(ResourcesContext);
 
+  const [isChangedSqlSentence, setIsChangedSqlSentence] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
+  const [previousSqlSentence, setPreviousSqlSentence] = useState('');
 
   useEffect(() => {
     return () => onSetSqlSentence('sqlSentence', '');
+  }, []);
+
+  useEffect(() => {
+    setPreviousSqlSentence(creationFormState.candidateRule?.sqlSentence);
   }, []);
 
   const levelTypes = {
@@ -79,10 +89,23 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
           <textarea
             id="sqlSentenceText"
             name=""
-            onChange={e => onSetSqlSentence('sqlSentence', e.target.value)}
+            onChange={e => {
+              onSetSqlSentence('sqlSentence', e.target.value);
+              setIsChangedSqlSentence(!TextUtils.areEquals(e.target.value, previousSqlSentence));
+            }}
             value={creationFormState.candidateRule.sqlSentence}></textarea>
         </div>
       </div>
+
+      {!isNil(creationFormState.candidateRule.sqlError) && !isChangedSqlSentence ? (
+        <p
+          className={
+            styles.sqlErrorMessage
+          }>{`${resources.messages['sqlErrorMessage']} ${creationFormState.candidateRule.sqlError}`}</p>
+      ) : (
+        <p className={styles.emptySqlErrorMessage}></p>
+      )}
+
       {isVisibleInfoDialog && (
         <Dialog
           header={resources.messages['sqlSentenceHelpDialogTitle']}

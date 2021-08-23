@@ -190,7 +190,15 @@ const ValidationsList = withRouter(
         if (rowData.isCorrect) {
           return <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />;
         } else if (!isNil(rowData.sqlError)) {
-          return rowData.sqlError;
+          return (
+            <Button
+              className={`${styles.invalidSqlIcon} p-button-secondary`}
+              icon="warning"
+              onClick={() => navigator.clipboard.writeText(rowData.sqlError)}
+              tooltip={`${rowData.sqlError} <br />  <br />${resources.messages['sqlErrorMessageCopy']} `}
+              tooltipOptions={{ position: 'left' }}
+            />
+          );
         }
       }
     };
