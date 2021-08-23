@@ -17,7 +17,7 @@ const Snapshots = ({
   setIsSnapshotDialogVisible,
   snapshotListData
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const snapshotContext = useContext(SnapshotContext);
   const userContext = useContext(UserContext);
 
@@ -56,8 +56,8 @@ const Snapshots = ({
           disabledConfirm={snapshotContext.snapshotState.isConfirmDisabled}
           header={snapshotContext.snapshotState.dialogMessage}
           iconConfirm={snapshotContext.snapshotState.isConfirmDisabled && 'spinnerAnimate'}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onSnapshotAction}
           onHide={() => setIsSnapshotDialogVisible(false)}
           showHeader={false}
@@ -66,7 +66,7 @@ const Snapshots = ({
           <p>{snapshotContext.snapshotState.dialogConfirmMessage}</p>
           <ul>
             <li>
-              <strong>{resources.messages.creationDate}: </strong>
+              <strong>{resourcesContext.messages.creationDate}: </strong>
               {dayjs(snapshotContext.snapshotState.creationDate).format(
                 `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
                   userContext.userProps.amPm24h ? '' : ' A'
@@ -74,7 +74,7 @@ const Snapshots = ({
               )}
             </li>
             <li>
-              <strong>{resources.messages.description}: </strong>
+              <strong>{resourcesContext.messages.description}: </strong>
               <p className={styles.description}>{snapshotContext.snapshotState.description}</p>
             </li>
           </ul>

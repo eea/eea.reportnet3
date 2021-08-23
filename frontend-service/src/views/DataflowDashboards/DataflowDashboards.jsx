@@ -34,7 +34,7 @@ export const DataflowDashboards = withRouter(
     history
   }) => {
     const leftSideBarContext = useContext(LeftSideBarContext);
-    const resources = useContext(ResourcesContext);
+    const resourcesContext = useContext(ResourcesContext);
 
     const [dashboardInitialValues, setDashboardInitialValues] = useState({});
     const [dataflowName, setDataflowName] = useState('');
@@ -130,15 +130,20 @@ export const DataflowDashboards = withRouter(
 
     return layout(
       <Fragment>
-        <Title icon="barChart" iconSize="4.5rem" subtitle={dataflowName} title={resources.messages['dashboards']} />
+        <Title
+          icon="barChart"
+          iconSize="4.5rem"
+          subtitle={dataflowName}
+          title={resourcesContext.messages['dashboards']}
+        />
 
         <div className={styles.validationChartWrap}>
           <h2 className={styles.dashboardType}>
-            {resources.messages['validationDashboards']}{' '}
+            {resourcesContext.messages['validationDashboards']}{' '}
             <span
               className={styles.dashboardWarning}
               dangerouslySetInnerHTML={{
-                __html: resources.messages['dashboardWarning']
+                __html: resourcesContext.messages['dashboardWarning']
               }}></span>{' '}
           </h2>
           <Toolbar className={styles.chartToolbar}>
@@ -146,14 +151,14 @@ export const DataflowDashboards = withRouter(
           </Toolbar>
 
           {!Object.values(chartState).includes(true) && (
-            <div className={styles.informationText}>{resources.messages['noDashboardSelected']}</div>
+            <div className={styles.informationText}>{resourcesContext.messages['noDashboardSelected']}</div>
           )}
 
           {onLoadCharts}
         </div>
 
         <div className={styles.releasedChartWrap}>
-          <h2 className={styles.dashboardType}>{resources.messages['releaseDashboard']}</h2>
+          <h2 className={styles.dashboardType}>{resourcesContext.messages['releaseDashboard']}</h2>
           <ReleasedDatasetsDashboard dataflowId={dataflowId} />
         </div>
       </Fragment>

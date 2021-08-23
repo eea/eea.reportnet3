@@ -19,7 +19,7 @@ import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
 
 const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, snapshotListData }) => {
   const dialogContext = useContext(DialogContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const snapshotContext = useContext(SnapshotContext);
 
   const [hasError, setHasError] = useState(false);
@@ -112,7 +112,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
       visible={isVisible}>
       <div className={styles.content}>
         <div className={styles.title}>
-          <h3>{resources.messages.createSnapshotTitle}</h3>
+          <h3>{resourcesContext.messages.createSnapshotTitle}</h3>
         </div>
         <div className={`${styles.newContainer} ${styles.section}`}>
           <div className={styles.createForm}>
@@ -130,7 +130,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                   name="createSnapshotDescription"
                   onChange={e => setInputValue(e.target.value)}
                   onKeyDown={e => onPressEnter(e)}
-                  placeholder={resources.messages.createSnapshotPlaceholder}
+                  placeholder={resourcesContext.messages.createSnapshotPlaceholder}
                   rows={10}
                   type="text"
                   value={inputValue}
@@ -141,7 +141,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                   style={{ position: 'relative', top: '0.25rem' }}
                 />
                 <label className="srOnly" htmlFor="createSnapshotDescription">
-                  {resources.messages['createSnapshotPlaceholder']}
+                  {resourcesContext.messages['createSnapshotPlaceholder']}
                 </label>
               </div>
               <div className={styles.createButtonWrapper} data-for="saveCopy" data-tip>
@@ -155,10 +155,10 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
               </div>
               <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="saveCopy" place="left">
                 {inputValue.length === 0
-                  ? resources.messages['snapshotsEmptyDescription']
+                  ? resourcesContext.messages['snapshotsEmptyDescription']
                   : inputValue.length > config.INPUT_MAX_LENGTH
-                  ? resources.messages['snapshotsWrongLengthDescription']
-                  : resources.messages.createSnapshotTooltip}
+                  ? resourcesContext.messages['snapshotsWrongLengthDescription']
+                  : resourcesContext.messages.createSnapshotTooltip}
               </ReactTooltip>
             </div>
           </div>
@@ -168,7 +168,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
         ) : snapshotListData.length > 0 ? (
           <SnapshotsList snapshotListData={snapshotListData} />
         ) : (
-          <h3>{resources.messages.snapshotsDoNotExist}</h3>
+          <h3>{resourcesContext.messages.snapshotsDoNotExist}</h3>
         )}
       </div>
     </Sidebar>

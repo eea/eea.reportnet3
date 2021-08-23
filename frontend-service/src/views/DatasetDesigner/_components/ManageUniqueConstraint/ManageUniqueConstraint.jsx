@@ -27,7 +27,7 @@ export const ManageUniqueConstraint = ({
   setIsUniqueConstraintUpdating
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const {
     datasetSchemaAllTables,
@@ -93,7 +93,7 @@ export const ManageUniqueConstraint = ({
   const getTableOptions = () => {
     const tables = datasetSchemaAllTables.filter(table => table.index >= 0);
     return isEmpty(tables)
-      ? [{ name: resources.messages['noTablesToSelect'], disabled: true }]
+      ? [{ name: resourcesContext.messages['noTablesToSelect'], disabled: true }]
       : tables.map(table => ({ name: table.tableSchemaName, value: table.tableSchemaId }));
   };
 
@@ -103,9 +103,9 @@ export const ManageUniqueConstraint = ({
       if (table && table.records) {
         return !isEmpty(table.records[0].fields)
           ? table.records[0].fields.map(field => ({ name: field.name, value: field.fieldId }))
-          : [{ name: resources.messages['noFieldsToSelect'], disabled: true }];
+          : [{ name: resourcesContext.messages['noFieldsToSelect'], disabled: true }];
       }
-    } else return [{ name: resources.messages['noTableSelected'], disabled: true }];
+    } else return [{ name: resourcesContext.messages['noTableSelected'], disabled: true }];
   };
 
   const pkTemplate = option => {
@@ -207,7 +207,9 @@ export const ManageUniqueConstraint = ({
         className={styles.dialog}
         footer={renderFooter}
         header={
-          !isNil(uniqueId) ? resources.messages['editUniqueConstraint'] : resources.messages['createUniqueConstraint']
+          !isNil(uniqueId)
+            ? resourcesContext.messages['editUniqueConstraint']
+            : resourcesContext.messages['createUniqueConstraint']
         }
         onHide={() => manageDialogs('isManageUniqueConstraintDialogVisible', false)}
         style={{ width: '975px' }}
@@ -223,14 +225,14 @@ export const ManageUniqueConstraint = ({
           className={`p-button-primary ${!isEmpty(selectedFields) && !isDuplicated ? 'p-button-animated-blink' : ''}`}
           disabled={isEmpty(selectedFields) || isDuplicated || isCreating || isUpdating}
           icon={isCreating || isUpdating ? 'spinnerAnimate' : 'check'}
-          label={!isNil(uniqueId) ? resources.messages['update'] : resources.messages['create']}
+          label={!isNil(uniqueId) ? resourcesContext.messages['update'] : resourcesContext.messages['create']}
           onClick={() => (!isNil(uniqueId) ? onUpdateConstraint() : onCreateConstraint())}
         />
       </span>
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
-        label={resources.messages['close']}
+        label={resourcesContext.messages['close']}
         onClick={() => {
           manageDialogs('isManageUniqueConstraintDialogVisible', false);
           onResetValues();
@@ -238,7 +240,7 @@ export const ManageUniqueConstraint = ({
       />
       {isDuplicated && (
         <ReactTooltip border={true} effect="solid" id="createTooltip" place="top">
-          {resources.messages['duplicatedUniqueConstraint']}
+          {resourcesContext.messages['duplicatedUniqueConstraint']}
         </ReactTooltip>
       )}
     </Fragment>
@@ -254,7 +256,7 @@ export const ManageUniqueConstraint = ({
       optionLabel="name"
       optionValue="value"
       options={getTableOptions()}
-      title={resources.messages['selectUniqueTableTitle']}
+      title={resourcesContext.messages['selectUniqueTableTitle']}
       value={selectedTable}
     />
   );
@@ -269,7 +271,7 @@ export const ManageUniqueConstraint = ({
       optionLabel="name"
       optionValue="value"
       options={getFieldOptions()}
-      title={resources.messages['selectUniqueFieldsTitle']}
+      title={resourcesContext.messages['selectUniqueFieldsTitle']}
       value={selectedFields}
     />
   );
@@ -281,11 +283,11 @@ export const ManageUniqueConstraint = ({
         {renderListBoxField()}
       </div>
       <div className={styles.selected}>
-        <span className={styles.title}>{`${resources.messages['selectedTable']}: `}</span>
+        <span className={styles.title}>{`${resourcesContext.messages['selectedTable']}: `}</span>
         <span>{!isNil(selectedTable.value) ? selectedTable.name : ''}</span>
       </div>
       <div className={`${styles.selected} ${styles.fields}`}>
-        <span className={styles.title}>{`${resources.messages['selectedFields']}: `}</span>
+        <span className={styles.title}>{`${resourcesContext.messages['selectedFields']}: `}</span>
         <span>{!isEmpty(selectedFields) ? selectedFields.map(field => field.name).join(', ') : ''}</span>
       </div>
     </Fragment>

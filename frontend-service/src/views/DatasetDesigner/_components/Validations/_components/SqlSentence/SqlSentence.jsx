@@ -15,7 +15,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSentence, level }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [isChangedSqlSentence, setIsChangedSqlSentence] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
@@ -37,11 +37,11 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
 
   const getHelpByLevel = level => {
     if (level === levelTypes.FIELD) {
-      return resources.messages['sqlSentenceHelpField'];
+      return resourcesContext.messages['sqlSentenceHelpField'];
     } else if (level === levelTypes.ROW) {
-      return resources.messages['sqlSentenceHelpRow'];
+      return resourcesContext.messages['sqlSentenceHelpRow'];
     } else {
-      return resources.messages['sqlSentenceHelpTable'];
+      return resourcesContext.messages['sqlSentenceHelpTable'];
     }
   };
 
@@ -67,7 +67,7 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
         </div>
         <div className={styles.sqlSentence}>
           <h3 className={styles.title}>
-            {resources.messages['sqlSentence']}
+            {resourcesContext.messages['sqlSentence']}
             <Button
               className={`${styles.sqlSentenceInfoBtn} p-button-rounded p-button-secondary-transparent`}
               icon="infoCircle"
@@ -76,12 +76,12 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
-              label={resources.messages['countryCodeAcronym']}
+              label={resourcesContext.messages['countryCodeAcronym']}
               onClick={onCCButtonClick}
               tooltip={
                 isBusinessDataflow
-                  ? resources.messages['matchStringCompanyTooltip']
-                  : resources.messages['matchStringTooltip']
+                  ? resourcesContext.messages['matchStringCompanyTooltip']
+                  : resourcesContext.messages['matchStringTooltip']
               }
               tooltipOptions={{ position: 'top' }}
             />
@@ -101,33 +101,33 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
         <p
           className={
             styles.sqlErrorMessage
-          }>{`${resources.messages['sqlErrorMessage']} ${creationFormState.candidateRule.sqlError}`}</p>
+          }>{`${resourcesContext.messages['sqlErrorMessage']} ${creationFormState.candidateRule.sqlError}`}</p>
       ) : (
         <p className={styles.emptySqlErrorMessage}></p>
       )}
 
       {isVisibleInfoDialog && (
         <Dialog
-          header={resources.messages['sqlSentenceHelpDialogTitle']}
+          header={resourcesContext.messages['sqlSentenceHelpDialogTitle']}
           onHide={onHideInfoDiaog}
           style={{ maxWidth: '41vw' }}
           visible={isVisibleInfoDialog}>
           <p className={styles.levelHelp} dangerouslySetInnerHTML={{ __html: getHelpByLevel(level) }}></p>
           <p
             className={styles.note}
-            dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceHelpNote'] }}></p>
+            dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceHelpNote'] }}></p>
           <p
             className={styles.levelHelp}
-            dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceSpatialNote'] }}></p>
+            dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceSpatialNote'] }}></p>
           <p
             className={styles.levelHelp}
-            dangerouslySetInnerHTML={{ __html: resources.messages['sqlSentenceSpatialTypesNote'] }}></p>
+            dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceSpatialTypesNote'] }}></p>
           <p
             className={styles.levelHelp}
             dangerouslySetInnerHTML={
               isBusinessDataflow
-                ? { __html: resources.messages['sqlSentenceCompanyCodeNote'] }
-                : { __html: resources.messages['sqlSentenceCountryCodeNote'] }
+                ? { __html: resourcesContext.messages['sqlSentenceCompanyCodeNote'] }
+                : { __html: resourcesContext.messages['sqlSentenceCountryCodeNote'] }
             }></p>
         </Dialog>
       )}

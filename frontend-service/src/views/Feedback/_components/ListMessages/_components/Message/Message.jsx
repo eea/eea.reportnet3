@@ -24,8 +24,9 @@ export const Message = ({
   isAttachment = false,
   message
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+
   const isCustodian = userContext.hasPermission([
     config.permissions.roles.CUSTODIAN.key,
     config.permissions.roles.STEWARD.key
@@ -75,7 +76,7 @@ export const Message = ({
             iconPos="right"
             onClick={() => onFileDownload(attachment.fileName, attachment.fieldId)}
             style={{ color: message.direction ? 'var(--white)' : 'var(--c-black-400)' }}
-            tooltip={resources.messages['downloadFile']}
+            tooltip={resourcesContext.messages['downloadFile']}
             tooltipOptions={{ position: 'top' }}
           />
         </div>
@@ -106,7 +107,7 @@ export const Message = ({
 
   const renderSeparator = () => {
     return (
-      <div className={styles.unreadSeparator}>{`${resources.messages['unreadMessageSeparator']} (${dayjs(
+      <div className={styles.unreadSeparator}>{`${resourcesContext.messages['unreadMessageSeparator']} (${dayjs(
         message.date
       ).format('YYYY-MM-DD HH:mm')})`}</div>
     );

@@ -74,7 +74,7 @@ export const Map = ({
   },
   selectedCRS = { label: 'WGS84 - 4326', value: 'EPSG:4326' }
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   // const { BaseLayer, Overlay } = LayersControl;
 
@@ -363,8 +363,8 @@ export const Map = ({
             <div className={styles.pointLegendItemLabel}>
               <label>
                 {TextUtils.areEquals(geometryType, 'POINT')
-                  ? resources.messages['currentPoint']
-                  : resources.messages['geometryCoordinates']}
+                  ? resourcesContext.messages['currentPoint']
+                  : resourcesContext.messages['geometryCoordinates']}
                 :{' '}
               </label>
               <label data-for="coordinatesTooltip" data-tip>
@@ -390,13 +390,13 @@ export const Map = ({
               <div className={styles.pointLegendItem}>
                 <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
                 <div className={styles.pointLegendItemLabel}>
-                  <label>{resources.messages['newPoint']}: </label>
+                  <label>{resourcesContext.messages['newPoint']}: </label>
                   <label>{MapUtils.printCoordinates(newPositionMarker, false, geometryType)}</label>
                 </div>
               </div>
               <div className={styles.pointLegendItem}>
                 <div className={styles.pointLegendItemInfoLabel}>
-                  <label>{resources.messages['mapSelectPointMessage']}</label>
+                  <label>{resourcesContext.messages['mapSelectPointMessage']}</label>
                 </div>
               </div>
             </Fragment>

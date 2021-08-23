@@ -18,7 +18,7 @@ const FilterList = ({
   statusFilters,
   tableFilters
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const tables = [];
   const allTables = uniqBy(datasets, 'tableId');
@@ -31,7 +31,7 @@ const FilterList = ({
 
   const filterByReporters = () => {
     return labels.length > 0 ? (
-      <AccordionTab header={resources.messages['filterByDataset']}>
+      <AccordionTab header={resourcesContext.messages['filterByDataset']}>
         <ReporterList
           datasetSchemaId={datasetSchemaId}
           filterDispatch={filterDispatch}
@@ -40,13 +40,13 @@ const FilterList = ({
         />
       </AccordionTab>
     ) : (
-      <AccordionTab disabled={true} header={resources.messages['filterByTable']} />
+      <AccordionTab disabled={true} header={resourcesContext.messages['filterByTable']} />
     );
   };
 
   const filterByTables = () => {
     return tables.length > 0 ? (
-      <AccordionTab header={resources.messages['filterByTable']}>
+      <AccordionTab header={resourcesContext.messages['filterByTable']}>
         <TableList
           datasetSchemaId={datasetSchemaId}
           filterDispatch={filterDispatch}
@@ -55,7 +55,7 @@ const FilterList = ({
         />
       </AccordionTab>
     ) : (
-      <AccordionTab disabled={true} header={resources.messages['filterByTable']} />
+      <AccordionTab disabled={true} header={resourcesContext.messages['filterByTable']} />
     );
   };
 

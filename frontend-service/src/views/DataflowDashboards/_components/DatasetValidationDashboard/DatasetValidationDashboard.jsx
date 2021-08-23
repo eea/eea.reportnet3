@@ -20,7 +20,7 @@ import { DataflowService } from 'services/DataflowService';
 import { ErrorUtils } from 'views/_functions/Utils';
 
 export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datasetSchemaName, isVisible }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const initialFiltersState = { data: {}, originalData: {}, reporterFilter: [], statusFilter: [], tableFilter: [] };
 
@@ -154,7 +154,7 @@ export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datase
           stacked: true,
           scaleLabel: {
             display: true,
-            labelString: resources.messages['percentage']
+            labelString: resourcesContext.messages['percentage']
           },
           ticks: {
             min: 0,
@@ -185,7 +185,7 @@ export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datase
               statusFilters={filterState.statusFilter}
               tableFilters={filterState.tableFilter}
             />
-            {!isEmpty(filterState.originalData.datasets) ? '' : onLoadStamp(resources.messages['empty'])}
+            {!isEmpty(filterState.originalData.datasets) ? '' : onLoadStamp(resourcesContext.messages['empty'])}
             <Chart
               data={filterState.data}
               height="30%"
@@ -199,7 +199,7 @@ export const DatasetValidationDashboard = ({ dataflowId, datasetSchemaId, datase
         ) : (
           <Fragment>
             <FilterList levelErrors={[]} originalData={{ labels: {}, datasets: {} }} />
-            {onLoadStamp(resources.messages['empty'])}
+            {onLoadStamp(resourcesContext.messages['empty'])}
             <Chart className={styles.emptyChart} height="30%" options={datasetOptionsObject} type="bar" width="100%" />
           </Fragment>
         )}
