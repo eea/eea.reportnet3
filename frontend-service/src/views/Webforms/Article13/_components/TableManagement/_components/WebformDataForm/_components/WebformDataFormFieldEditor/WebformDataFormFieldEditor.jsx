@@ -26,8 +26,6 @@ const WebformDataFormFieldEditor = ({
   const resources = useContext(ResourcesContext);
   const inputRef = useRef(null);
 
-  useEffect(() => {}, []);
-
   useEffect(() => {
     if (inputRef.current && autoFocus) {
       inputRef.current.element.focus();
