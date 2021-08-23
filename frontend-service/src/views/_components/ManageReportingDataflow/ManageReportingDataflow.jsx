@@ -23,6 +23,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { reportingDataflowReducer } from './_functions/Reducers/reportingDataflowReducer';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -38,7 +39,7 @@ export const ManageReportingDataflow = ({
   state
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const deleteInputRef = useRef(null);
   const formRef = useRef(null);
@@ -53,6 +54,11 @@ export const ManageReportingDataflow = ({
     pinDataflow: false,
     isReleasable: state.isReleasable
   };
+
+  const setIsDeleting = isDeleting =>
+    manageReportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
+
+  useCheckNotifications(['DELETE_DATAFLOW_FAILED_EVENT'], setIsDeleting, false);
 
   const [reportingDataflowState, manageReportingDataflowDispatch] = useReducer(
     reportingDataflowReducer,
@@ -78,9 +84,6 @@ export const ManageReportingDataflow = ({
 
   const onSubmit = value => manageReportingDataflowDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
-  const setIsDeleting = isDeleting =>
-    manageReportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
-
   const onHideDataflowDialog = () => {
     onResetData();
     resetObligations();
@@ -91,11 +94,9 @@ export const ManageReportingDataflow = ({
     setIsDeleting(true);
     try {
       await DataflowService.delete(dataflowId);
-      onHideDataflowDialog();
     } catch (error) {
       console.error('ManageReportingDataflow - onDeleteDataflow.', error);
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
-    } finally {
       setIsDeleting(false);
     }
   };
@@ -123,7 +124,7 @@ export const ManageReportingDataflow = ({
     <Button
       className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
       icon="cancel"
-      label={isEditForm ? resources.messages['cancel'] : resources.messages['close']}
+      label={isEditForm ? resourcesContext.messages['cancel'] : resourcesContext.messages['close']}
       onClick={() => action()}
     />
   );
@@ -135,14 +136,14 @@ export const ManageReportingDataflow = ({
           <Button
             className="p-button-danger p-button-animated-blink"
             icon="trash"
-            label={resources.messages['deleteDataflowButton']}
+            label={resourcesContext.messages['deleteDataflowButton']}
             onClick={() => manageDialogs('isDeleteDialogVisible', true)}
           />
         )}
         {!isEditForm && (
           <div className={styles.checkboxWrapper}>
             <Checkbox
-              ariaLabel={resources.messages['pinDataflow']}
+              ariaLabel={resourcesContext.messages['pinDataflow']}
               checked={reportingDataflowState.pinDataflow}
               id="replaceCheckbox"
               inputId="replaceCheckbox"
@@ -162,7 +163,7 @@ export const ManageReportingDataflow = ({
                     payload: !reportingDataflowState.pinDataflow
                   })
                 }>
-                {resources.messages['pinDataflow']}
+                {resourcesContext.messages['pinDataflow']}
               </span>
             </label>
             <FontAwesomeIcon
@@ -173,7 +174,7 @@ export const ManageReportingDataflow = ({
               icon={AwesomeIcons('infoCircle')}
             />
             <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="pinDataflow" place="top">
-              <span>{resources.messages['pinDataflowMessage']}</span>
+              <span>{resourcesContext.messages['pinDataflowMessage']}</span>
             </ReactTooltip>
           </div>
         )}
@@ -194,7 +195,7 @@ export const ManageReportingDataflow = ({
           reportingDataflowState.isSubmitting
         }
         icon={reportingDataflowState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'check' : 'add'}
-        label={isEditForm ? resources.messages['save'] : resources.messages['create']}
+        label={isEditForm ? resourcesContext.messages['save'] : resourcesContext.messages['create']}
         onClick={() => (reportingDataflowState.isSubmitting ? {} : onSave())}
       />
       {renderCancelButton(onHideDataflowDialog)}
@@ -207,7 +208,7 @@ export const ManageReportingDataflow = ({
         <Dialog
           className={styles.dialog}
           footer={renderDataflowDialog()}
-          header={resources.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow']}
+          header={resourcesContext.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow']}
           onHide={() => onHideDataflowDialog()}
           visible={state.isAddDialogVisible || state.isEditDialogVisible}>
           <ManageReportingDataflowForm
@@ -233,17 +234,17 @@ export const ManageReportingDataflow = ({
           disabledConfirm={
             !TextUtils.areEquals(reportingDataflowState.deleteInput, state.name) || reportingDataflowState.isDeleting
           }
-          header={resources.messages['delete'].toUpperCase()}
+          header={resourcesContext.messages['delete'].toUpperCase()}
           iconConfirm={reportingDataflowState.isDeleting && 'spinnerAnimate'}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={() => onDeleteDataflow()}
           onHide={() => manageDialogs('isDeleteDialogVisible', false)}
           visible={state.isDeleteDialogVisible}>
-          <p>{resources.messages['deleteDataflow']}</p>
+          <p>{resourcesContext.messages['deleteDataflow']}</p>
           <p
             dangerouslySetInnerHTML={{
-              __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
+              __html: TextUtils.parseText(resourcesContext.messages['deleteDataflowConfirm'], {
                 dataflowName: state.name
               })
             }}></p>
@@ -253,7 +254,7 @@ export const ManageReportingDataflow = ({
               className={`${styles.inputText}`}
               id={'deleteDataflow'}
               maxLength={255}
-              name={resources.messages['deleteDataflowButton']}
+              name={resourcesContext.messages['deleteDataflowButton']}
               onChange={event => onDeleteInputChange(event.target.value)}
               ref={deleteInputRef}
               value={reportingDataflowState.deleteInput}

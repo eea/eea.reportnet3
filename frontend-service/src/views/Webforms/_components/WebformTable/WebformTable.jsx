@@ -45,7 +45,7 @@ export const WebformTable = ({
     WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [webformTableState, webformTableDispatch] = useReducer(webformTableReducer, {
     addingOnTableSchemaId: null,
@@ -281,7 +281,7 @@ export const WebformTable = ({
         {webformData.multipleRecords && (
           <Button
             icon={'plus'}
-            label={resources.messages['addRecord']}
+            label={resourcesContext.messages['addRecord']}
             onClick={() => onAddMultipleWebform(webformData.tableSchemaId)}
           />
         )}
@@ -290,7 +290,7 @@ export const WebformTable = ({
         <span
           className={styles.nonExistTable}
           dangerouslySetInnerHTML={{
-            __html: TextUtils.parseText(resources.messages['tableIsNotCreated'], { tableName: webformData.name })
+            __html: TextUtils.parseText(resourcesContext.messages['tableIsNotCreated'], { tableName: webformData.name })
           }}
         />
       )}

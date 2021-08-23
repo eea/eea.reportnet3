@@ -5,8 +5,6 @@ import styles from './IfThenClause.module.scss';
 import { Button } from 'views/_components/Button';
 import { ValidationExpressionSelector } from 'views/DatasetDesigner/_components/Validations/_components/ValidationExpressionSelector';
 
-import { config } from 'conf';
-
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const IfThenClause = ({
@@ -32,7 +30,7 @@ export const IfThenClause = ({
   return (
     <Fragment>
       <div className={styles.section}>
-        <h3 className="if">{config.messages['if']}</h3>
+        <h3 className="if">{resourcesContext.messages['if']}</h3>
         <ul className={styles.list}>
           {creationFormState.candidateRule.expressionsIf &&
             creationFormState.candidateRule.expressionsIf.map((expression, i) => (
@@ -78,7 +76,7 @@ export const IfThenClause = ({
       </div>
       <hr></hr>
       <div className={styles.section}>
-        <h3 className="then">{config.messages['then']}</h3>
+        <h3 className="then">{resourcesContext.messages['then']}</h3>
         <ul className={styles.list}>
           {creationFormState.candidateRule.expressionsThen &&
             creationFormState.candidateRule.expressionsThen.map((expression, i) => (

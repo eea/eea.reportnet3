@@ -48,7 +48,7 @@ export const TableManagement = ({
   const { getWebformTabs, parsePamsRecords } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [tableManagementState, tableManagementDispatch] = useReducer(tableManagementReducer, {
     initialSelectedRecord: {},
@@ -96,13 +96,13 @@ export const TableManagement = ({
         className={!isSaving && 'p-button-animated-blink'}
         disabled={isSaving}
         icon={isSaving === true ? 'spinnerAnimate' : 'check'}
-        label={resources.messages['save']}
+        label={resourcesContext.messages['save']}
         onClick={() => onSaveRecord(selectedRecord)}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
-        label={resources.messages['cancel']}
+        label={resourcesContext.messages['cancel']}
         onClick={onCancelRowEdit}
       />
     </div>
@@ -325,7 +325,11 @@ export const TableManagement = ({
           className={'p-button-secondary'}
           disabled={!hasTable || isSaving}
           icon={hasRecord ? 'edit' : 'add'}
-          label={hasRecord ? resources.messages['webformTableEdit'] : resources.messages['webformTableCreation']}
+          label={
+            hasRecord
+              ? resourcesContext.messages['webformTableEdit']
+              : resourcesContext.messages['webformTableCreation']
+          }
           onClick={async () => {
             if (hasRecord) {
               onSelectEditTable(pamsFieldSchemaValue, colData.field);
@@ -395,7 +399,7 @@ export const TableManagement = ({
   const renderActionButtonsColumn = (
     <Column
       body={row => renderActionsTemplate(row)}
-      header={resources.messages['actions']}
+      header={resourcesContext.messages['actions']}
       key="actions"
       style={{ width: '100px' }}
     />
@@ -411,10 +415,10 @@ export const TableManagement = ({
   const validationsTemplate = recordData => {
     const validationsGroup = DataViewerUtils.groupValidations(
       recordData,
-      resources.messages['recordBlockers'],
-      resources.messages['recordErrors'],
-      resources.messages['recordWarnings'],
-      resources.messages['recordInfos']
+      resourcesContext.messages['recordBlockers'],
+      resourcesContext.messages['recordErrors'],
+      resourcesContext.messages['recordWarnings'],
+      resourcesContext.messages['recordInfos']
     );
     return getIconsValidationsErrors(validationsGroup);
   };
@@ -423,7 +427,7 @@ export const TableManagement = ({
     <Column
       body={validationsTemplate}
       field="validations"
-      header={resources.messages['validationsDataColumn']}
+      header={resourcesContext.messages['validationsDataColumn']}
       key="recordValidation"
       sortable={false}
       style={{ width: '100px' }}
@@ -449,8 +453,8 @@ export const TableManagement = ({
   };
 
   const renderEmptyTable = () => (
-    <DataTable className={styles.table} value={[{ emptyContent: resources.messages['noDataInDataTable'] }]}>
-      <Column field={'emptyContent'} header={resources.messages['overviewEmptyTableHeader']} />
+    <DataTable className={styles.table} value={[{ emptyContent: resourcesContext.messages['noDataInDataTable'] }]}>
+      <Column field={'emptyContent'} header={resourcesContext.messages['overviewEmptyTableHeader']} />
     </DataTable>
   );
 
@@ -476,21 +480,20 @@ export const TableManagement = ({
       {isDialogVisible.delete && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          header={resources.messages['deleteTabHeader']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          header={resourcesContext.messages['deleteTabHeader']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={() => onDeleteRow()}
           onHide={() => manageDialogs('delete', false)}
           visible={isDialogVisible.delete}>
-          {resources.messages['confirmDeleteRow']}
+          {resourcesContext.messages['confirmDeleteRow']}
         </ConfirmDialog>
       )}
 
       {isDialogVisible.manageRows && (
         <Dialog
-          className={`calendar-table ${styles.addEditRecordDialog}`}
           footer={editRowDialogFooter}
-          header={resources.messages['editRow']}
+          header={resourcesContext.messages['editRow']}
           modal={true}
           onHide={() => manageDialogs('manageRows', false)}
           visible={isDialogVisible.manageRows}

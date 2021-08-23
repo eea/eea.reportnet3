@@ -9,6 +9,7 @@ import styles from './WebformField.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Calendar } from 'views/_components/Calendar';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DownloadFile } from 'views/_components/DownloadFile';
@@ -49,7 +50,7 @@ export const WebformField = ({
   record
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [webformFieldState, webformFieldDispatch] = useReducer(webformFieldReducer, {
     initialFieldValue: '',
@@ -158,7 +159,7 @@ export const WebformField = ({
 
       if (!field.pkHasMultipleValues) {
         linkItems.unshift({
-          itemType: resources.messages['noneCodelist'],
+          itemType: resourcesContext.messages['noneCodelist'],
           value: ''
         });
       }
@@ -166,7 +167,7 @@ export const WebformField = ({
       if (referencedFieldValues.length > 99) {
         linkItems[linkItems.length - 1] = {
           disabled: true,
-          itemType: resources.messages['moreElements'],
+          itemType: resourcesContext.messages['moreElements'],
           value: ''
         };
       }
@@ -257,11 +258,13 @@ export const WebformField = ({
     .flat()
     .join(', ');
 
-  const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions || '*'}
-  ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
+  const infoAttachTooltip = `${resourcesContext.messages['supportedFileAttachmentsTooltip']} ${
+    getAttachExtensions || '*'
+  }
+  ${resourcesContext.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
     !isNil(element.maxSize) && element.maxSize.toString() !== '0'
-      ? `${element.maxSize} ${resources.messages['MB']}`
-      : resources.messages['maxSizeNotDefined']
+      ? `${element.maxSize} ${resourcesContext.messages['MB']}`
+      : resourcesContext.messages['maxSizeNotDefined']
   }`;
 
   const onUploadFileError = async ({ xhr }) => {
@@ -359,7 +362,7 @@ export const WebformField = ({
               currentValue={field.value}
               disabled={isLoadingData}
               filter={true}
-              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+              filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               maxSelectedLabels={10}
               onChange={event => {
@@ -382,7 +385,7 @@ export const WebformField = ({
               currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
               disabled={isLoadingData}
               filter={true}
-              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
+              filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               onChange={event => {
                 const value =
@@ -471,22 +474,29 @@ export const WebformField = ({
         );
       case 'TEXTAREA':
         return (
-          <InputTextarea
-            className={field.required ? styles.required : undefined}
-            collapsedHeight={150}
-            id={field.fieldId}
-            maxLength={getInputMaxLength[type]}
-            onBlur={event => {
-              if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value);
-            }}
-            onChange={event => onFillField(field, option, event.target.value)}
-            onFocus={event => {
-              onFocusField(event.target.value);
-            }}
-            onKeyDown={event => onEditorKeyChange(event, field, option)}
-            value={field.value}
-          />
+          <Fragment>
+            <InputTextarea
+              className={field.required ? styles.required : undefined}
+              collapsedHeight={150}
+              id={field.fieldId}
+              maxLength={getInputMaxLength[type]}
+              onBlur={event => {
+                if (isNil(field.recordId)) onSaveField(option, event.target.value);
+                else onEditorSubmitValue(field, option, event.target.value);
+              }}
+              onChange={event => onFillField(field, option, event.target.value)}
+              onFocus={event => {
+                onFocusField(event.target.value);
+              }}
+              onKeyDown={event => onEditorKeyChange(event, field, option)}
+              value={field.value}
+            />
+            <CharacterCounter
+              currentLength={field.value.length}
+              maxLength={getInputMaxLength.RICH_TEXT}
+              style={{ position: 'relative', right: '0', top: '0.25rem' }}
+            />
+          </Fragment>
         );
       case 'EMPTY':
         return (
@@ -498,7 +508,7 @@ export const WebformField = ({
             <span
               className={styles.nonExistField}
               dangerouslySetInnerHTML={{
-                __html: TextUtils.parseText(resources.messages['fieldIsNotCreated'], { fieldName: field.name })
+                __html: TextUtils.parseText(resourcesContext.messages['fieldIsNotCreated'], { fieldName: field.name })
               }}
             />
           </div>
@@ -530,8 +540,8 @@ export const WebformField = ({
                 icon="import"
                 label={
                   !isNil(field.value) && field.value !== ''
-                    ? resources.messages['uploadReplaceAttachment']
-                    : resources.messages['uploadAttachment']
+                    ? resourcesContext.messages['uploadReplaceAttachment']
+                    : resourcesContext.messages['uploadAttachment']
                 }
                 onClick={() => {
                   onToggleDialogVisible(true);
@@ -564,14 +574,14 @@ export const WebformField = ({
       {isFileDialogVisible && (
         <CustomFileUpload
           accept={getAttachExtensions || '*'}
-          chooseLabel={resources.messages['selectFile']}
+          chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.fileUpload}
           dialogClassName={styles.dialog}
-          dialogHeader={resources.messages['uploadAttachment']}
+          dialogHeader={resourcesContext.messages['uploadAttachment']}
           dialogOnHide={() => onToggleDialogVisible(false)}
           dialogVisible={isFileDialogVisible}
           infoTooltip={infoAttachTooltip}
-          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           maxFileSize={
             !isNil(element.maxSize) && element.maxSize.toString() !== '0'
@@ -591,13 +601,13 @@ export const WebformField = ({
       {isDeleteAttachmentVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          header={`${resources.messages['deleteAttachmentHeader']}`}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          header={`${resourcesContext.messages['deleteAttachmentHeader']}`}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteAttachment}
           onHide={() => onToggleDeleteAttachmentDialogVisible(false)}
           visible={isDeleteAttachmentVisible}>
-          {resources.messages['deleteAttachmentConfirm']}
+          {resourcesContext.messages['deleteAttachmentConfirm']}
         </ConfirmDialog>
       )}
     </Fragment>

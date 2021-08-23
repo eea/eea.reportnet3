@@ -307,8 +307,8 @@ export class ContextMenu extends Component {
         top = document.body.scrollTop;
       }
 
-      this.container.style.left = left - 50 + 'px';
-      this.container.style.top = top - 183 + 'px';
+      this.container.style.left = left - width / 2 + 'px';
+      this.container.style.top = top - height / 2 + 'px';
     }
   }
 

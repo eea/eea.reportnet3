@@ -4,14 +4,14 @@ import { Button } from 'views/_components/Button';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 const Footer = ({ hasWritePermissions, isDataflowOpen, isDesignDatasetEditorRead, onAddClick, onPasteClick }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   return (
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
       <Button
         className={`p-button-secondary ${isDataflowOpen ? null : 'p-button-animated-blink'}`}
         disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
         icon="add"
-        label={resources.messages['addRecord']}
+        label={resourcesContext.messages['addRecord']}
         onClick={() => onAddClick()}
         style={{ float: 'left' }}
       />
@@ -21,7 +21,7 @@ const Footer = ({ hasWritePermissions, isDataflowOpen, isDesignDatasetEditorRead
         }`}
         disabled={isDataflowOpen || isDesignDatasetEditorRead}
         icon="clipboard"
-        label={resources.messages['pasteRecords']}
+        label={resourcesContext.messages['pasteRecords']}
         onClick={async () => {
           onPasteClick();
         }}

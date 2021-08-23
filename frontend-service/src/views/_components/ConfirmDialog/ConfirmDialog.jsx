@@ -32,7 +32,7 @@ const ConfirmDialog = forwardRef((props, _) => {
     onPasteAsync,
     visible
   } = props;
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const isChrome = () => {
     const isChromium = window.chrome;
@@ -74,12 +74,12 @@ const ConfirmDialog = forwardRef((props, _) => {
         <Button
           disabled={!isChrome() || isPasting}
           icon={!isPasting ? 'clipboard' : 'spinnerAnimate'}
-          label={resources.messages['paste']}
+          label={resourcesContext.messages['paste']}
           onClick={async () => {
             onPasteAsync();
           }}
           style={{ float: 'left' }}
-          tooltip={!isChrome() ? resources.messages['pasteDisableButtonMessage'] : null}
+          tooltip={!isChrome() ? resourcesContext.messages['pasteDisableButtonMessage'] : null}
         />
       ) : null}
       {hasPasteOption ? (

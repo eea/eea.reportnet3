@@ -14,7 +14,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 const SnapshotItem = ({ itemData }) => {
   const snapshotContext = useContext(SnapshotContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const getFormatedDate = creationDate => {
@@ -31,7 +31,7 @@ const SnapshotItem = ({ itemData }) => {
         <h5>{getFormatedDate(itemData.creationDate)}</h5>
         {itemData.isReleased && (
           <h5 className={styles.is_released_snapshot}>
-            {resources.messages['snapshotIsReleased']}
+            {resourcesContext.messages['snapshotIsReleased']}
             <FontAwesomeIcon icon={AwesomeIcons('released')} />
           </h5>
         )}
@@ -48,7 +48,7 @@ const SnapshotItem = ({ itemData }) => {
               payload: { ...itemData }
             });
           }}
-          tooltip={resources.messages.restoreSnapshotTooltip}
+          tooltip={resourcesContext.messages.restoreSnapshotTooltip}
           tooltipOptions={{ position: 'top' }}
         />
 
@@ -65,8 +65,8 @@ const SnapshotItem = ({ itemData }) => {
           }
           tooltip={
             itemData.isAutomatic
-              ? resources.messages['deleteAutomaticSnapshotTooltip']
-              : resources.messages['deleteSnapshotTooltip']
+              ? resourcesContext.messages['deleteAutomaticSnapshotTooltip']
+              : resourcesContext.messages['deleteSnapshotTooltip']
           }
           tooltipOptions={{ position: 'left' }}
         />

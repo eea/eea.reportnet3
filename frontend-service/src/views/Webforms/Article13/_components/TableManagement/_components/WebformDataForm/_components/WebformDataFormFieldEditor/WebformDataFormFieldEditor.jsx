@@ -2,6 +2,7 @@ import { Fragment, useContext, useEffect, useRef } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
@@ -22,10 +23,9 @@ const WebformDataFormFieldEditor = ({
   onChangeForm,
   type
 }) => {
-  const resources = useContext(ResourcesContext);
-  const inputRef = useRef(null);
+  const resourcesContext = useContext(ResourcesContext);
 
-  useEffect(() => {}, []);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     if (inputRef.current && autoFocus) {
@@ -81,9 +81,9 @@ const WebformDataFormFieldEditor = ({
         disabled={column.readOnly}
         onChange={e => onChangeForm(field, e.target.value.value)}
         optionLabel="itemType"
-        options={RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist'])}
+        options={RecordUtils.getCodelistItemsWithEmptyOption(column, resourcesContext.messages['noneCodelist'])}
         value={RecordUtils.getCodelistValue(
-          RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist']),
+          RecordUtils.getCodelistItemsWithEmptyOption(column, resourcesContext.messages['noneCodelist']),
           fieldValue
         )}
       />
@@ -135,16 +135,23 @@ const WebformDataFormFieldEditor = ({
     );
 
   const renderTextarea = (field, fieldValue) => (
-    <InputTextarea
-      collapsedHeight={75}
-      disabled={column.readOnly}
-      id={field}
-      keyfilter={RecordUtils.getFilter(type)}
-      maxLength={getMaxCharactersByType(type)}
-      onChange={e => onChangeForm(field, e.target.value)}
-      style={{ width: '60%' }}
-      value={fieldValue}
-    />
+    <div style={{ paddingBottom: '2rem' }}>
+      <InputTextarea
+        collapsedHeight={75}
+        disabled={column.readOnly}
+        id={field}
+        keyfilter={RecordUtils.getFilter(type)}
+        maxLength={getMaxCharactersByType(type)}
+        onChange={e => onChangeForm(field, e.target.value)}
+        style={{ width: '60%' }}
+        value={fieldValue}
+      />
+      <CharacterCounter
+        currentLength={fieldValue.length}
+        maxLength={getMaxCharactersByType(type)}
+        style={{ position: 'relative', right: '40%', top: '0.25rem' }}
+      />
+    </div>
   );
 
   return <Fragment>{renderFieldEditor()}</Fragment>;

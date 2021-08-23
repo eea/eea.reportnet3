@@ -165,7 +165,7 @@ export const InfoTab = ({
           <InputText
             id={`${componentName}__shortCode`}
             keyfilter="noDoubleQuote"
-            maxLength={255}
+            maxLength={config.INPUT_MAX_LENGTH}
             onChange={e => onInfoFieldChange('shortCode', e.target.value)}
             placeholder={resourcesContext.messages['ruleShortCode']}
             value={creationFormState.candidateRule.shortCode || ''}
@@ -190,7 +190,7 @@ export const InfoTab = ({
           <label htmlFor={`${componentName}__name`}>{resourcesContext.messages['ruleName']}</label>
           <InputText
             id={`${componentName}__name`}
-            maxLength={255}
+            maxLength={config.INPUT_MAX_LENGTH}
             onChange={e => onInfoFieldChange('name', e.target.value)}
             placeholder={resourcesContext.messages['ruleName']}
             value={creationFormState.candidateRule.name || ''}
@@ -201,7 +201,7 @@ export const InfoTab = ({
           <label htmlFor={`${componentName}__description`}>{resourcesContext.messages['description']}</label>
           <InputText
             id={`${componentName}__description`}
-            maxLength={255}
+            maxLength={config.INPUT_MAX_LENGTH}
             onChange={e => onInfoFieldChange('description', e.target.value)}
             placeholder={resourcesContext.messages['description']}
             value={creationFormState.candidateRule.description}
@@ -238,7 +238,7 @@ export const InfoTab = ({
           <InputText
             id={`${componentName}__errorMessage`}
             keyfilter="noDoubleQuote"
-            maxLength={255}
+            maxLength={config.INPUT_MAX_LENGTH}
             onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
             placeholder={resourcesContext.messages['ruleErrorMessage']}
             value={creationFormState.candidateRule.errorMessage}

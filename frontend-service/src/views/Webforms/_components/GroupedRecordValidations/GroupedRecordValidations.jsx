@@ -12,7 +12,7 @@ import { GroupedRecordValidationsUtils } from './_functions/Utils/GroupedRecordV
 export const GroupedRecordValidations = ({ parsedRecordData }) => {
   const { getGroupValidations } = GroupedRecordValidationsUtils;
 
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const addIconLevelError = (validation, levelError, message) => {
     let icon = [];
@@ -37,10 +37,10 @@ export const GroupedRecordValidations = ({ parsedRecordData }) => {
   const validationsTemplate = () => {
     const validationsGroup = getGroupValidations(
       parsedRecordData,
-      resources.messages['recordBlockers'],
-      resources.messages['recordErrors'],
-      resources.messages['recordWarnings'],
-      resources.messages['recordInfos']
+      resourcesContext.messages['recordBlockers'],
+      resourcesContext.messages['recordErrors'],
+      resourcesContext.messages['recordWarnings'],
+      resourcesContext.messages['recordInfos']
     );
     return getIconsValidationsErrors(validationsGroup);
   };

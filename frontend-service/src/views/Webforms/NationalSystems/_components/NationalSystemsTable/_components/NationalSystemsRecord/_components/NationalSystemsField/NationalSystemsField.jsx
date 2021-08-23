@@ -14,6 +14,7 @@ import styles from './NationalSystemsField.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Calendar } from 'views/_components/Calendar';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DownloadFile } from 'views/_components/DownloadFile';
@@ -48,7 +49,7 @@ export const NationalSystemsField = ({
   const getInputMaxLength = { TEXT: 10000, RICH_TEXT: 10000, EMAIL: 256, NUMBER_INTEGER: 20, NUMBER_DECIMAL: 40 };
 
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [nationalSystemsFieldState, nationalSystemsFieldDispatch] = useReducer(nationalSystemsFieldReducer, {
     field: nationalField,
@@ -66,11 +67,13 @@ export const NationalSystemsField = ({
     .flat()
     .join(', ');
 
-  const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions || '*'}
-  ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
+  const infoAttachTooltip = `${resourcesContext.messages['supportedFileAttachmentsTooltip']} ${
+    getAttachExtensions || '*'
+  }
+  ${resourcesContext.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
     !isNil(field.maxSize) && field.maxSize.toString() !== '0'
-      ? `${field.maxSize} ${resources.messages['MB']}`
-      : resources.messages['maxSizeNotDefined']
+      ? `${field.maxSize} ${resourcesContext.messages['MB']}`
+      : resourcesContext.messages['maxSizeNotDefined']
   }`;
 
   const getMultiselectValues = (multiselectItemsOptions, value) => {
@@ -190,16 +193,23 @@ export const NationalSystemsField = ({
 
       case 'TEXTAREA':
         return (
-          <InputTextarea
-            className={field.required ? styles.required : undefined}
-            collapsedHeight={150}
-            id={field.fieldId}
-            maxLength={getInputMaxLength[type]}
-            onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
-            onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
-            onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
-            value={field.value}
-          />
+          <div>
+            <InputTextarea
+              className={field.required ? styles.required : undefined}
+              collapsedHeight={150}
+              id={field.fieldId}
+              maxLength={getInputMaxLength[type]}
+              onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
+              onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
+              onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
+              value={field.value}
+            />
+            <CharacterCounter
+              currentLength={field.value.length}
+              maxLength={getInputMaxLength.RICH_TEXT}
+              style={{ position: 'relative', top: '0.25rem' }}
+            />
+          </div>
         );
 
       case 'CODELIST':
@@ -290,7 +300,7 @@ export const NationalSystemsField = ({
                 className={`p-button-animated-blink p-button-primary-transparent`}
                 icon={'import'}
                 label={
-                  resources.messages[
+                  resourcesContext.messages[
                     !isNil(field.value) && field.value !== '' ? 'uploadReplaceAttachment' : 'uploadAttachment'
                   ]
                 }
@@ -354,15 +364,15 @@ export const NationalSystemsField = ({
       {isDialogVisible.uploadFile && (
         <CustomFileUpload
           accept={getAttachExtensions || '*'}
-          chooseLabel={resources.messages['selectFile']}
+          chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.fileUpload}
           dialogClassName={styles.dialog}
-          dialogHeader={resources.messages['uploadAttachment']}
+          dialogHeader={resourcesContext.messages['uploadAttachment']}
           dialogOnHide={() => handleDialogs('uploadFile', false)}
           dialogVisible={isDialogVisible.uploadFile}
           fileLimit={1}
           infoTooltip={infoAttachTooltip}
-          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           maxFileSize={
             !isNil(field.maxSize) && field.maxSize.toString() !== '0'
@@ -384,13 +394,13 @@ export const NationalSystemsField = ({
       {isDialogVisible.deleteAttachment && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          header={resources.messages['deleteAttachmentHeader']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          header={resourcesContext.messages['deleteAttachmentHeader']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteAttachment}
           onHide={() => handleDialogs('deleteAttachment', false)}
           visible={isDialogVisible.deleteAttachment}>
-          {resources.messages['deleteAttachmentConfirm']}
+          {resourcesContext.messages['deleteAttachmentConfirm']}
         </ConfirmDialog>
       )}
     </div>

@@ -35,7 +35,7 @@ export const HistoricReleases = ({
   isBusinessDataflow
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [historicReleasesState, historicReleasesDispatch] = useReducer(historicReleasesReducer, {
@@ -60,12 +60,12 @@ export const HistoricReleases = ({
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {historicReleasesState.filtered && historicReleasesState.data.length !== historicReleasesState.filteredData.length
-        ? `${resources.messages['filtered']} : ${historicReleasesState.filteredData.length} | `
+        ? `${resourcesContext.messages['filtered']} : ${historicReleasesState.filteredData.length} | `
         : ''}
-      {resources.messages['totalRecords']} {historicReleasesState.data.length}{' '}
-      {resources.messages['records'].toLowerCase()}
+      {resourcesContext.messages['totalRecords']} {historicReleasesState.data.length}{' '}
+      {resourcesContext.messages['records'].toLowerCase()}
       {historicReleasesState.filtered && historicReleasesState.data.length === historicReleasesState.filteredData.length
-        ? ` (${resources.messages['filtered'].toLowerCase()})`
+        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
   );
@@ -158,8 +158,8 @@ export const HistoricReleases = ({
             field={field}
             header={
               isBusinessDataflow && TextUtils.areEquals(field, 'countryCode')
-                ? resources.messages['companyCode']
-                : resources.messages[field]
+                ? resourcesContext.messages['companyCode']
+                : resourcesContext.messages[field]
             }
             key={field}
             sortable={true}
@@ -182,8 +182,8 @@ export const HistoricReleases = ({
             field={field}
             header={
               isBusinessDataflow && TextUtils.areEquals(field, 'countryCode')
-                ? resources.messages['companyCode']
-                : resources.messages[field]
+                ? resourcesContext.messages['companyCode']
+                : resourcesContext.messages[field]
             }
             key={field}
             sortable={true}
@@ -198,8 +198,11 @@ export const HistoricReleases = ({
     {
       type: 'checkbox',
       properties: [
-        { name: 'isDataCollectionReleased', label: resources.messages['onlyReleasedDataCollectionCheckboxLabel'] },
-        { name: 'isEUReleased', label: resources.messages['onlyReleasedEUDatasetCheckboxLabel'] }
+        {
+          name: 'isDataCollectionReleased',
+          label: resourcesContext.messages['onlyReleasedDataCollectionCheckboxLabel']
+        },
+        { name: 'isEUReleased', label: resourcesContext.messages['onlyReleasedEUDatasetCheckboxLabel'] }
       ]
     }
   ];
@@ -219,7 +222,7 @@ export const HistoricReleases = ({
             body={template}
             columnResizeMode="expand"
             field={field}
-            header={resources.messages[field]}
+            header={resourcesContext.messages[field]}
             key={field}
             sortable={true}
           />
@@ -240,7 +243,7 @@ export const HistoricReleases = ({
 
   return isEmpty(historicReleasesState.data) ? (
     <div className={styles.historicReleasesWithoutTable}>
-      <div className={styles.noHistoricReleases}>{resources.messages['noHistoricReleases']}</div>
+      <div className={styles.noHistoricReleases}>{resourcesContext.messages['noHistoricReleases']}</div>
     </div>
   ) : (
     <div className={styles.historicReleases}>
@@ -272,7 +275,7 @@ export const HistoricReleases = ({
           paginatorRight={getPaginatorRecordsCount()}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
-          summary={resources.messages['historicReleases']}
+          summary={resourcesContext.messages['historicReleases']}
           totalRecords={historicReleasesState.filteredData.length}
           value={historicReleasesState.filteredData}>
           {historicReleasesView === 'dataCollection' && renderDataCollectionColumns(historicReleasesState.filteredData)}
@@ -281,7 +284,9 @@ export const HistoricReleases = ({
             renderReportingDatasetColumns(historicReleasesState.filteredData)}
         </DataTable>
       ) : (
-        <div className={styles.emptyFilteredData}>{resources.messages['noHistoricReleasesWithSelectedParameters']}</div>
+        <div className={styles.emptyFilteredData}>
+          {resourcesContext.messages['noHistoricReleasesWithSelectedParameters']}
+        </div>
       )}
     </div>
   );

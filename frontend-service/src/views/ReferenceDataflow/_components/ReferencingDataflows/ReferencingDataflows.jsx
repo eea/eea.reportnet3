@@ -16,7 +16,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 
 const ReferencingDataflows = ({ referenceDataflowId }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [state, dispatch] = useReducer(referencingDataflowsReducer, {
     dataflows: [],
@@ -69,7 +69,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
   if (state.requestStatus === 'resolved' && state.dataflows.length === 0) {
     return renderDialogLayout(
       <div className={styles.noReferencingWrap}>
-        <h3>{resources.messages['noReferencingDataflows']}</h3>
+        <h3>{resourcesContext.messages['noReferencingDataflows']}</h3>
       </div>
     );
   }
@@ -80,7 +80,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
 
       {state.filteredData.length === 0 ? (
         <div className={styles.notMatchingWrap}>
-          <h3>{resources.messages['dataflowsNotMatchingFilter']}</h3>
+          <h3>{resourcesContext.messages['dataflowsNotMatchingFilter']}</h3>
         </div>
       ) : (
         <DataTable
@@ -90,10 +90,13 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
           rows={state.pagination.rows}
           rowsPerPageOptions={[5, 10, 15]}
           value={state.filteredData}>
-          <Column body={renderNameColumnTemplate} header={resources.messages['referencingDataflowNameColumnLabel']} />
+          <Column
+            body={renderNameColumnTemplate}
+            header={resourcesContext.messages['referencingDataflowNameColumnLabel']}
+          />
           <Column
             body={renderIdColumnTemplate}
-            header={resources.messages['referencingDataflowIdColumnLabel']}
+            header={resourcesContext.messages['referencingDataflowIdColumnLabel']}
             style={{ width: '120px' }}
           />
         </DataTable>

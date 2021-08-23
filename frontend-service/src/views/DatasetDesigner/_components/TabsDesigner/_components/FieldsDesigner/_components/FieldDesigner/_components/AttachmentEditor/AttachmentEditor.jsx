@@ -15,7 +15,7 @@ const AttachmentEditor = ({
   onSaveAttachment,
   selectedAttachment
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const [validExtensions, setValidExtensionsItems] = useState(selectedAttachment.validExtensions || []);
   const [maxSize, setMaxSize] = useState(selectedAttachment.maxSize || 0);
   const [isVisible, setIsVisible] = useState(isAttachmentEditorVisible);
@@ -61,11 +61,11 @@ const AttachmentEditor = ({
 
   const attachmentDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button icon="check" label={resources.messages['save']} onClick={() => setIsSaved(true)} />
+      <Button icon="check" label={resourcesContext.messages['save']} onClick={() => setIsSaved(true)} />
       <Button
         className="p-button-secondary button-right-aligned"
         icon="cancel"
-        label={resources.messages['cancel']}
+        label={resourcesContext.messages['cancel']}
         onClick={() => {
           onCancelSaveAttachment();
           setValidExtensionsItems([]);
@@ -81,19 +81,19 @@ const AttachmentEditor = ({
         <div className={styles.inputTitleWrapper}>
           <span
             dangerouslySetInnerHTML={{
-              __html: resources.messages['attachmentEditorItemsMessage']
+              __html: resourcesContext.messages['attachmentEditorItemsMessage']
             }}></span>
         </div>
         <Chips
           checkForDuplicates={true}
           clearOnPaste={true}
           deleteWhiteSpaces={true}
-          errorMessage={resources.messages['duplicatedItem']}
+          errorMessage={resourcesContext.messages['duplicatedItem']}
           forbiddenChar={true}
           inputClassName={styles.validExtensionsChips}
           onChange={e => setValidExtensionsItems(e.value)}
           showErrorMessage={true}
-          tooltip={resources.messages['validExtensionEditor']}
+          tooltip={resourcesContext.messages['validExtensionEditor']}
           tooltipOptions={{ position: 'bottom' }}
           value={validExtensions}></Chips>
       </div>
@@ -107,7 +107,7 @@ const AttachmentEditor = ({
         contentStyle={{ overflow: 'auto' }}
         focusOnShow={false}
         footer={attachmentDialogFooter}
-        header={resources.messages['validExtensionEditor']}
+        header={resourcesContext.messages['validExtensionEditor']}
         modal={true}
         onHide={() => {
           onCancelSaveAttachment();
@@ -120,7 +120,7 @@ const AttachmentEditor = ({
         {
           <span
             dangerouslySetInnerHTML={{
-              __html: resources.messages['attachmentEditorSizeMessage']
+              __html: resourcesContext.messages['attachmentEditorSizeMessage']
             }}></span>
         }
         <div className={styles.maxSizeWrapper}>
@@ -128,7 +128,7 @@ const AttachmentEditor = ({
             className={`secondary`}
             icon="minus"
             onClick={() => onMaxSizeChange((Number(maxSize) - 0.25).toString())}
-            tooltip={resources.messages['minusFileSize']}
+            tooltip={resourcesContext.messages['minusFileSize']}
             tooltipOptions={{ position: 'bottom' }}
           />
           <InputText
@@ -142,15 +142,15 @@ const AttachmentEditor = ({
             className={`secondary`}
             icon="plus"
             onClick={() => onMaxSizeChange((Number(maxSize) + 0.25).toString())}
-            tooltip={resources.messages['plusFileSize']}
+            tooltip={resourcesContext.messages['plusFileSize']}
             tooltipOptions={{ position: 'bottom' }}
           />
           <label className="srOnly" htmlFor="maxFileSize">
-            {resources.messages['supportedFileAttachmentsMaxSizeTooltip']}
+            {resourcesContext.messages['supportedFileAttachmentsMaxSizeTooltip']}
           </label>
-          <span className={styles.mbSpan}>{`${resources.messages['MB']} (${
+          <span className={styles.mbSpan}>{`${resourcesContext.messages['MB']} (${
             isNaN(Number(maxSize)) ? 0 : Number(maxSize) * 1024
-          } ${resources.messages['KB']})`}</span>
+          } ${resourcesContext.messages['KB']})`}</span>
         </div>
       </Dialog>
     )

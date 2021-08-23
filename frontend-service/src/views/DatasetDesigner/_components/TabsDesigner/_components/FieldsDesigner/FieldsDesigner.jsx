@@ -9,7 +9,10 @@ import { DatasetConfig } from 'repositories/config/DatasetConfig';
 
 import styles from './FieldsDesigner.module.scss';
 
+import { config } from 'conf';
+
 import { Button } from 'views/_components/Button';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
@@ -58,7 +61,7 @@ export const FieldsDesigner = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const validationContext = useContext(ValidationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [toPrefill, setToPrefill] = useState(false);
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
@@ -284,7 +287,7 @@ export const FieldsDesigner = ({
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
         icon="check"
-        label={resources.messages['ok']}
+        label={resourcesContext.messages['ok']}
         onClick={() => {
           setIsErrorDialogVisible(false);
           errorMessageAndTitle?.focusElement?.focus();
@@ -395,16 +398,16 @@ export const FieldsDesigner = ({
   const renderConfirmDialog = () => (
     <ConfirmDialog
       classNameConfirm={'p-button-danger'}
-      header={resources.messages['deleteFieldTitle']}
-      labelCancel={resources.messages['no']}
-      labelConfirm={resources.messages['yes']}
+      header={resourcesContext.messages['deleteFieldTitle']}
+      labelCancel={resourcesContext.messages['no']}
+      labelConfirm={resourcesContext.messages['yes']}
       onConfirm={() => {
         deleteField(indexToDelete, fieldToDeleteType);
         setIsDeleteDialogVisible(false);
       }}
       onHide={() => setIsDeleteDialogVisible(false)}
       visible={isDeleteDialogVisible}>
-      {resources.messages['deleteFieldConfirm']}
+      {resourcesContext.messages['deleteFieldConfirm']}
     </ConfirmDialog>
   );
 
@@ -561,7 +564,7 @@ export const FieldsDesigner = ({
 
   const renderNoFields = () => (
     <div>
-      <h3>{resources.messages['datasetDesignerNoFields']}</h3>
+      <h3>{resourcesContext.messages['datasetDesignerNoFields']}</h3>
     </div>
   );
 
@@ -636,7 +639,7 @@ export const FieldsDesigner = ({
             }`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead}
             icon={'import'}
-            label={resources.messages['importTableSchema']}
+            label={resourcesContext.messages['importTableSchema']}
             onClick={() => manageDialogs('isImportTableSchemaDialogVisible', true)}
           />
           <Button
@@ -645,7 +648,7 @@ export const FieldsDesigner = ({
             }`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead}
             icon={'export'}
-            label={resources.messages['exportTableSchema']}
+            label={resourcesContext.messages['exportTableSchema']}
             onClick={() => onExportTableSchema('csv', true)}
           />
           <Button
@@ -654,7 +657,7 @@ export const FieldsDesigner = ({
             } datasetSchema-uniques-help-step`}
             disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
             icon={'key'}
-            label={resources.messages['addUniqueConstraint']}
+            label={resourcesContext.messages['addUniqueConstraint']}
             onClick={() => {
               manageDialogs('isManageUniqueConstraintDialogVisible', true);
               manageUniqueConstraint({
@@ -670,37 +673,42 @@ export const FieldsDesigner = ({
             } datasetSchema-rowConstraint-help-step`}
             disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
             icon={'horizontalSliders'}
-            label={resources.messages['addRowConstraint']}
+            label={resourcesContext.messages['addRowConstraint']}
             onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
           />
         </div>
       </Toolbar>
-      <h4 className={styles.descriptionLabel}>{resources.messages['newTableDescriptionPlaceHolder']}</h4>
+      <h4 className={styles.descriptionLabel}>{resourcesContext.messages['newTableDescriptionPlaceHolder']}</h4>
       <div className={styles.tableDescriptionRow}>
-        <InputTextarea
-          className={styles.tableDescriptionInput}
-          collapsedHeight={55}
-          disabled={isDataflowOpen || isDesignDatasetEditorRead}
-          expandableOnClick={true}
-          id="tableDescription"
-          key="tableDescription"
-          onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, notEmpty, fixedNumber })}
-          onChange={e => setTableDescriptionValue(e.target.value)}
-          onFocus={e => {
-            setInitialTableDescription(e.target.value);
-          }}
-          onKeyDown={e => onKeyChange(e)}
-          placeholder={resources.messages['newTableDescriptionPlaceHolder']}
-          value={tableDescriptionValue}
-        />
-
+        <div>
+          <InputTextarea
+            className={styles.tableDescriptionInput}
+            collapsedHeight={75}
+            disabled={isDataflowOpen || isDesignDatasetEditorRead}
+            id="tableDescription"
+            key="tableDescription"
+            onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, notEmpty, fixedNumber })}
+            onChange={e => setTableDescriptionValue(e.target.value)}
+            onFocus={e => {
+              setInitialTableDescription(e.target.value);
+            }}
+            onKeyDown={e => onKeyChange(e)}
+            placeholder={resourcesContext.messages['newTableDescriptionPlaceHolder']}
+            value={tableDescriptionValue}
+          />
+          <CharacterCounter
+            currentLength={tableDescriptionValue.length}
+            maxLength={config.DESCRIPTION_MAX_LENGTH}
+            style={{ position: 'relative', top: '4px' }}
+          />
+        </div>
         <div className={`${styles.switchDiv} datasetSchema-readOnlyAndPrefill-help-step`}>
           <div>
             <span
               className={styles.switchTextInput}
               id={`${table.tableSchemaId}_check_readOnly_label`}
               style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
-              {resources.messages['readOnlyTable']}
+              {resourcesContext.messages['readOnlyTable']}
             </span>
             <Checkbox
               ariaLabelledBy={`${table.tableSchemaId}_check_readOnly_label`}
@@ -718,7 +726,7 @@ export const FieldsDesigner = ({
               className={styles.switchTextInput}
               id={`${table.tableSchemaId}_check_to_prefill_label`}
               style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
-              {resources.messages['prefilled']}
+              {resourcesContext.messages['prefilled']}
             </span>
             <Checkbox
               ariaLabelledBy={`${table.tableSchemaId}_check_to_prefill_label`}
@@ -738,7 +746,7 @@ export const FieldsDesigner = ({
               className={styles.switchTextInput}
               id={`${table.tableSchemaId}_check_fixed_number_label`}
               style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
-              {resources.messages['fixedNumber']}
+              {resourcesContext.messages['fixedNumber']}
             </span>
             <Checkbox
               ariaLabelledBy={`${table.tableSchemaId}_check_fixed_number_label`}
@@ -751,7 +759,7 @@ export const FieldsDesigner = ({
               onChange={e => onChangeFixedNumber(e.checked)}
             />
             <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_fixed_number`}>
-              {resources.messages['fixedNumber']}
+              {resourcesContext.messages['fixedNumber']}
             </label>
           </div>
           <div>
@@ -759,7 +767,7 @@ export const FieldsDesigner = ({
               className={styles.switchTextInput}
               id={`${table.tableSchemaId}_check_not_empty_label`}
               style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
-              {resources.messages['notEmpty']}
+              {resourcesContext.messages['notEmpty']}
             </span>
             <Checkbox
               ariaLabelledBy={`${table.tableSchemaId}_check_not_empty_label`}
@@ -772,7 +780,7 @@ export const FieldsDesigner = ({
               onChange={e => onChangeNotEmpty(e.checked)}
             />
             <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_not_empty`}>
-              {resources.messages['notEmpty']}
+              {resourcesContext.messages['notEmpty']}
             </label>
           </div>
         </div>
@@ -780,23 +788,23 @@ export const FieldsDesigner = ({
       {!viewType['tabularData'] && (
         <div className={styles.fieldsHeader}>
           <span className={styles.PKWrap}>
-            <label>{resources.messages['pk']}</label>
+            <label>{resourcesContext.messages['pk']}</label>
             <Button
               className={`${styles.PKInfoButton} p-button-rounded p-button-secondary-transparent`}
               icon="infoCircle"
               id="infoPk"
-              title={resources.messages['PKTooltip']}
-              tooltip={resources.messages['PKTooltip']}
+              title={resourcesContext.messages['PKTooltip']}
+              tooltip={resourcesContext.messages['PKTooltip']}
               tooltipOptions={{ position: 'top' }}
             />
           </span>
-          <label className={styles.requiredWrap}>{resources.messages['required']}</label>
-          <label className={styles.readOnlyWrap}>{resources.messages['readOnly']}</label>
+          <label className={styles.requiredWrap}>{resourcesContext.messages['required']}</label>
+          <label className={styles.readOnlyWrap}>{resourcesContext.messages['readOnly']}</label>
           <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}>
-            {resources.messages['newFieldPlaceHolder']}
+            {resourcesContext.messages['newFieldPlaceHolder']}
           </label>
-          <label>{resources.messages['newFieldDescriptionPlaceHolder']}</label>
-          <label>{resources.messages['newFieldTypePlaceHolder']}</label>
+          <label>{resourcesContext.messages['newFieldDescriptionPlaceHolder']}</label>
+          <label>{resourcesContext.messages['newFieldTypePlaceHolder']}</label>
         </div>
       )}
       {renderAllFields()}
@@ -805,15 +813,15 @@ export const FieldsDesigner = ({
       {designerState.isImportTableSchemaDialogVisible && (
         <CustomFileUpload
           accept=".csv"
-          chooseLabel={resources.messages['selectFile']}
+          chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogClassName={styles.Dialog}
-          dialogHeader={`${resources.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}
+          dialogHeader={`${resourcesContext.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}
           dialogOnHide={() => manageDialogs('isImportTableSchemaDialogVisible', false)}
           dialogVisible={designerState.isImportTableSchemaDialogVisible}
           fileLimit={1}
-          infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .csv`}
-          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
+          invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           mode="advanced"
           multiple={false}
@@ -822,7 +830,7 @@ export const FieldsDesigner = ({
           onUpload={onUpload}
           replaceCheck={true}
           replaceCheckDisabled={hasPKReferenced}
-          replaceCheckLabelMessage={resources.messages['replaceDataPKInUse']}
+          replaceCheckLabelMessage={resourcesContext.messages['replaceDataPKInUse']}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableSchema, {
             datasetSchemaId: designerState.datasetSchemaId,
             datasetId: datasetId,
