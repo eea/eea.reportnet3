@@ -7,8 +7,9 @@ package org.eea.interfaces.vo.dataflow.enums;
 public enum TypeDataflowEnum {
 
 
-  /** The regular. */
-  REGULAR("REGULAR"),
+
+  /** The reporting. */
+  REPORTING("REPORTING"),
 
 
   /** The reference. */

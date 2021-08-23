@@ -27,7 +27,7 @@ export const ManageManualAcceptanceDataset = ({
   refreshManualAcceptanceDatasets
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [manageManualAcceptanceDatasetState, manageManualAcceptanceDatasetDispatch] = useReducer(
     manageManualAcceptanceDatasetReducer,
@@ -95,20 +95,20 @@ export const ManageManualAcceptanceDataset = ({
             manageManualAcceptanceDatasetState.datasetFeedbackStatus === dataset.feedbackStatus
           }
           icon={'check'}
-          label={resources.messages['update']}
+          label={resourcesContext.messages['update']}
           onClick={() => onUpdateDataset()}
         />
       </span>
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
-        label={resources.messages['close']}
+        label={resourcesContext.messages['close']}
         onClick={() => manageDialogs(false)}
       />
       {(isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
         manageManualAcceptanceDatasetState.datasetFeedbackStatus === dataset.feedbackStatus) && (
         <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
-          <span>{resources.messages['fcSubmitButtonDisabled']}</span>
+          <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
         </ReactTooltip>
       )}
     </Fragment>
@@ -116,7 +116,7 @@ export const ManageManualAcceptanceDataset = ({
   const renderDialogLayout = children => (
     <Dialog
       footer={renderDialogFooter}
-      header={`${resources.messages['editStatusDataset']} ${datasetName}`}
+      header={`${resourcesContext.messages['editStatusDataset']} ${datasetName}`}
       onHide={() => manageDialogs(false)}
       style={{ width: '50%' }}
       visible={isManageManualAcceptanceDatasetDialogVisible}>
@@ -128,7 +128,7 @@ export const ManageManualAcceptanceDataset = ({
 
   const renderInputTextLayout = option => (
     <span>
-      <label htmlFor={idTextArea}>{resources.messages[option]}</label>
+      <label htmlFor={idTextArea}>{resourcesContext.messages[option]}</label>
       <InputTextarea
         className={`${styles.datasetMessage} datasetSchema-metadata-help-step`}
         collapsedHeight={85}
@@ -141,7 +141,7 @@ export const ManageManualAcceptanceDataset = ({
           })
         }
         onKeyDown={e => onKeyChange(e)}
-        placeholder={resources.messages['feedbackMessagePlaceholder']}
+        placeholder={resourcesContext.messages['feedbackMessagePlaceholder']}
       />
     </span>
   );
@@ -158,7 +158,7 @@ export const ManageManualAcceptanceDataset = ({
             value={feedbackStatus}
           />
           <label className={styles.label} htmlFor={feedbackStatus}>
-            {resources.messages[camelCase(feedbackStatus)]}
+            {resourcesContext.messages[camelCase(feedbackStatus)]}
           </label>
         </div>
       );
@@ -167,7 +167,7 @@ export const ManageManualAcceptanceDataset = ({
   return renderDialogLayout(
     <div className={styles.content}>
       <div className={styles.group}>
-        <div>{resources.messages['feedbackStatus']}</div>
+        <div>{resourcesContext.messages['feedbackStatus']}</div>
         {renderRadioButtons()}
       </div>
       <div className={styles.group}>{renderInputTextLayout('feedbackMessage')}</div>

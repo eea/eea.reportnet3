@@ -75,7 +75,7 @@ public interface DataflowRepository
    * @return the list
    */
   @Modifying
-  @Query("select df from Dataflow df where df.type is null and df.id IN :ids order by status, creationDate desc")
+  @Query("select df from Dataflow df where df.type='REPORTING' and df.id IN :ids order by status, creationDate desc")
   List<Dataflow> findByIdInOrderByStatusDescCreationDateDesc(@Param("ids") List<Long> ids);
 
 

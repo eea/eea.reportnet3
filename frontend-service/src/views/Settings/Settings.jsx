@@ -18,7 +18,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 
 const Settings = withRouter(({ history }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   useBreadCrumbs({ currentPage: CurrentPage.USER_SETTINGS, history });
 
@@ -58,8 +58,8 @@ const Settings = withRouter(({ history }) => {
             <Title
               icon="userConfig"
               iconSize="4rem"
-              subtitle={resources.messages['userSettingsSubtitle']}
-              title={resources.messages['userSettingsTitle']}
+              subtitle={resourcesContext.messages['userSettingsSubtitle']}
+              title={resourcesContext.messages['userSettingsTitle']}
             />
           </div>
         </div>

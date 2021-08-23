@@ -74,7 +74,7 @@ export const TabsDesigner = withRouter(
     const [scrollFn, setScrollFn] = useState();
     const [tabs, setTabs] = useState([]);
 
-    const resources = useContext(ResourcesContext);
+    const resourcesContext = useContext(ResourcesContext);
 
     useEffect(() => {
       if (!isNil(datasetSchema) && !isEmpty(datasetSchema)) {
@@ -195,13 +195,13 @@ export const TabsDesigner = withRouter(
     const onTableAdd = (header, tabIndex, initialHeader) => {
       if (header !== initialHeader) {
         if (checkDuplicates(header, tabIndex)) {
-          setErrorMessageTitle(resources.messages['duplicatedTabHeader']);
-          setErrorMessage(resources.messages['duplicatedTabHeaderError']);
+          setErrorMessageTitle(resourcesContext.messages['duplicatedTabHeader']);
+          setErrorMessage(resourcesContext.messages['duplicatedTabHeaderError']);
           setIsErrorDialogVisible(true);
           return { correct: false, tableName: header };
         } else if (checkInvalidCharacters(header)) {
-          setErrorMessageTitle(resources.messages['invalidCharactersTabHeader']);
-          setErrorMessage(resources.messages['invalidCharactersTabHeaderError']);
+          setErrorMessageTitle(resourcesContext.messages['invalidCharactersTabHeader']);
+          setErrorMessage(resourcesContext.messages['invalidCharactersTabHeaderError']);
           setIsErrorDialogVisible(true);
           return { correct: false, tableName: header };
         } else {
@@ -327,7 +327,7 @@ export const TabsDesigner = withRouter(
 
     const errorDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
-        <Button icon="check" label={resources.messages['ok']} onClick={() => setIsErrorDialogVisible(false)} />
+        <Button icon="check" label={resourcesContext.messages['ok']} onClick={() => setIsErrorDialogVisible(false)} />
       </div>
     );
 
@@ -424,7 +424,7 @@ export const TabsDesigner = withRouter(
                         viewType={viewType}
                       />
                     ) : (
-                      <h3>{`${resources.messages['datasetDesignerAddTable']}`}</h3>
+                      <h3>{`${resourcesContext.messages['datasetDesignerAddTable']}`}</h3>
                     )}
                   </TabPanel>
                 );

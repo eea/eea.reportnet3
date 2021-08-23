@@ -22,7 +22,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const PublicDataflows = withRouter(({ history }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
   const [contentStyles, setContentStyles] = useState({});
@@ -81,7 +81,7 @@ export const PublicDataflows = withRouter(({ history }) => {
                   />
                 ))
               ) : (
-                <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
+                <div className={styles.noDataflows}>{resourcesContext.messages['noDataflows']}</div>
               )
             ) : (
               <Spinner style={{ left: 0 }} />

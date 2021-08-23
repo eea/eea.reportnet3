@@ -428,6 +428,10 @@ public class DataflowServiceImpl implements DataflowService {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
     }
+    // if type comes null, set the default (REPORTING) type to the dataflow
+    if (null == dataflowVO.getType()) {
+      dataflowVO.setType(TypeDataflowEnum.REPORTING);
+    }
     if (TypeDataflowEnum.BUSINESS.equals(dataflowVO.getType())) {
       if (!dataProviderGroupRepository.existsById(dataflowVO.getDataProviderGroupId())) {
         LOG.info("The company group : {} don't exists.", dataflowVO.getDataProviderGroupId());
@@ -587,30 +591,32 @@ public class DataflowServiceImpl implements DataflowService {
       // add resource to delete(DATAFLOW PART)
       deleteDataflowResources(idDataflow);
 
+
+      NotificationVO notificationVO = NotificationVO.builder().dataflowId(idDataflow)
+          .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_COMPLETED_EVENT,
+            null, notificationVO);
+      } catch (EEAException e) {
+        LOG.error(
+            "Failed sending kafka delete dataflow completed event notification. DataflowId: {}",
+            idDataflow);
+      }
+
     } catch (Exception e) {
       NotificationVO notificationVO = NotificationVO.builder().dataflowId(idDataflow)
           .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_FAILED_EVENT, null,
             notificationVO);
+        LOG.error("Error deleting dataflow with id: {}", idDataflow);
         throw new EEAException(String.format("Error deleting dataflow with id: %s", idDataflow), e);
       } catch (EEAException e1) {
         LOG.error("Failed sending kafka delete dataflow failed event notification. DataflowId: {}",
             idDataflow);
       }
     }
-
-    NotificationVO notificationVO = NotificationVO.builder().dataflowId(idDataflow)
-        .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
-
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_COMPLETED_EVENT, null,
-          notificationVO);
-    } catch (EEAException e) {
-      LOG.error("Failed sending kafka delete dataflow completed event notification. DataflowId: {}",
-          idDataflow);
-    }
-
   }
 
   /**

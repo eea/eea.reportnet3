@@ -24,7 +24,7 @@ import { RodUrl } from 'repositories/config/RodUrl';
 
 export const ReportingObligations = ({ obligationChecked, setCheckedObligation }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
@@ -86,13 +86,13 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     <Fragment>
       {reportingObligationState.filteredSearched &&
       reportingObligationState.searchedData.length !== reportingObligationState.filteredData.length
-        ? `${resources.messages['filtered']}: ${reportingObligationState.searchedData.length} | `
+        ? `${resourcesContext.messages['filtered']}: ${reportingObligationState.searchedData.length} | `
         : ''}
-      {resources.messages['totalRecords']} {reportingObligationState.data.length}{' '}
-      {resources.messages['records'].toLowerCase()}
+      {resourcesContext.messages['totalRecords']} {reportingObligationState.data.length}{' '}
+      {resourcesContext.messages['records'].toLowerCase()}
       {reportingObligationState.filteredSearched &&
       reportingObligationState.searchedData.length === reportingObligationState.filteredData.length
-        ? ` (${resources.messages['filtered'].toLowerCase()})`
+        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
   );
@@ -221,9 +221,9 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
           searchAll
         />
         <div className={styles.switchDiv}>
-          <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
+          <label className={styles.switchTextInput}>{resourcesContext.messages['magazineView']}</label>
           <InputSwitch checked={userContext.userProps.listView} onChange={e => userContext.onToggleTypeView(e.value)} />
-          <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
+          <label className={styles.switchTextInput}>{resourcesContext.messages['listView']}</label>
         </div>
       </div>
 
@@ -241,9 +241,9 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
         <Spinner className={styles.spinner} />
       ) : isEmpty(reportingObligationState.data) ? (
         reportingObligationState.filteredSearched ? (
-          <h3 className={styles.noObligations}>{resources.messages['noObligationsWithSelectedParameters']}</h3>
+          <h3 className={styles.noObligations}>{resourcesContext.messages['noObligationsWithSelectedParameters']}</h3>
         ) : (
-          <h3 className={styles.noObligations}>{resources.messages['emptyObligationList']}</h3>
+          <h3 className={styles.noObligations}>{resourcesContext.messages['emptyObligationList']}</h3>
         )
       ) : (
         renderData()
@@ -256,7 +256,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
               ? styles.filteredSelected
               : ''
           }`}>
-          <span>{`${resources.messages['selectedObligation']}: `}</span>
+          <span>{`${resourcesContext.messages['selectedObligation']}: `}</span>
           {`${
             !isEmpty(reportingObligationState.selectedObligation.title) &&
             !isEmpty(reportingObligationState.selectedObligation)

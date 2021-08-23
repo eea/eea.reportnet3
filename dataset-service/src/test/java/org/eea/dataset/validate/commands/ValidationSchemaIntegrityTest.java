@@ -38,7 +38,7 @@ public class ValidationSchemaIntegrityTest {
   @Test
   public void testExecuteValidationEmpty() {
     DataSetSchemaVO schema = new DataSetSchemaVO();
-    assertFalse("its valid", validationIntegrity.execute(schema, TypeDataflowEnum.REGULAR));
+    assertFalse("its valid", validationIntegrity.execute(schema, TypeDataflowEnum.REPORTING));
   }
 
 
@@ -48,7 +48,7 @@ public class ValidationSchemaIntegrityTest {
     schema.setTableSchemas(new ArrayList<>());
     TableSchemaVO table = new TableSchemaVO();
     schema.getTableSchemas().add(table);
-    assertFalse("its valid", validationIntegrity.execute(schema, TypeDataflowEnum.REGULAR));
+    assertFalse("its valid", validationIntegrity.execute(schema, TypeDataflowEnum.REPORTING));
   }
 
   @Test
@@ -59,7 +59,7 @@ public class ValidationSchemaIntegrityTest {
     RecordSchemaVO record = new RecordSchemaVO();
     table.setRecordSchema(record);
     schema.getTableSchemas().add(table);
-    assertFalse("its valid", validationIntegrity.execute(schema, TypeDataflowEnum.REGULAR));
+    assertFalse("its valid", validationIntegrity.execute(schema, TypeDataflowEnum.REPORTING));
   }
 
   @Test
@@ -73,7 +73,7 @@ public class ValidationSchemaIntegrityTest {
     record.getFieldSchema().add(field);
     table.setRecordSchema(record);
     schema.getTableSchemas().add(table);
-    assertTrue("its valid", validationIntegrity.execute(schema, TypeDataflowEnum.REGULAR));
+    assertTrue("its valid", validationIntegrity.execute(schema, TypeDataflowEnum.REPORTING));
   }
 
 
