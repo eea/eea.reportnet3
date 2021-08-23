@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
-import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -143,7 +143,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     String query = proccessQuery(datasetId, rule.getSqlSentence());
     String sqlError = validateRule(query, datasetId, rule, Boolean.TRUE);
-    if (!StringUtils.isBlank(sqlError)) {
+    if (StringUtils.isBlank(sqlError)) {
       notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
       rule.setVerified(true);
       LOG.info("Rule validation passed: {}", rule);
