@@ -300,23 +300,9 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'ON_UPDATE_NEW_MESSAGE_ADDED', payload });
   };
 
-  const onUpload = async () => {
-    dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: false });
-    // const {
-    //   dataflow: { name: dataflowName },
-    //   dataset: { name: datasetName }
-    // } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-    // notificationContext.add({
-    //   type: 'DATASET_DATA_LOADING_INIT',
-    //   content: {
-    //     datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-    //     title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
-    //     datasetLoading: resources.messages['datasetLoading'],
-    //     dataflowName,
-    //     datasetName
-    //   }
-    // });
-    dispatchFeedback({ type: 'RESET_DRAGGED_FILES' });
+  const onUpload = async event => {
+    console.log(JSON.parse(event.xhr.response));
+    dispatchFeedback({ type: 'ON_SEND_ATTACHMENT', payload: { value: { ...JSON.parse(event.xhr.response) } } });
   };
 
   const layout = children => {
@@ -365,6 +351,7 @@ export const Feedback = withRouter(({ match, history }) => {
           <ListMessages
             canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
             className={`feedback-messages-help-step`}
+            dataflowId={dataflowId}
             emptyMessage={
               isCustodian && isEmpty(selectedDataProvider)
                 ? resources.messages['noMessagesCustodian']
@@ -378,6 +365,7 @@ export const Feedback = withRouter(({ match, history }) => {
             onFirstLoadMessages={onFirstLoadMessages}
             onLazyLoad={onGetMoreMessages}
             onUpdateNewMessageAdded={onUpdateNewMessageAdded}
+            providerId={selectedDataProvider}
           />
           {!isCustodian && (
             <label className={styles.helpdeskMessage}>{resources.messages['feedbackHelpdeskMessage']}</label>

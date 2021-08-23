@@ -23,9 +23,11 @@ export const Message = ({
     name: '',
     size: ''
   },
+  dataflowId,
   hasSeparator,
-  isAttachment = false,
-  message
+  isAttachment = false,  
+  message,
+  onToggleVisibleDeleteMessage
 }) => {
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -52,6 +54,7 @@ export const Message = ({
 
   const onFileDownload = async (dataflowId, messageId, dataProviderId) => {
     try {
+      console.log(dataflowId, messageId, dataProviderId, message);
       const { data } = await FeedbackService.getMessageAttachment(dataflowId, messageId, dataProviderId);
       DownloadFile(data, attachment.name);
     } catch (error) {
@@ -74,7 +77,7 @@ export const Message = ({
             className={`p-button-animated-right-blink p-button-secondary-transparent ${styles.downloadFileButton}`}
             icon="export"
             iconPos="right"
-            onClick={() => onFileDownload(attachment.name, message.fieldId)}
+            onClick={() => onFileDownload(dataflowId, message.id, message.providerId)}
             style={{ color: message.direction ? 'var(--white)' : 'var(--c-black-400)' }}
             tooltip={`${resources.messages['downloadFile']}: ${attachment.name}`}
             tooltipOptions={{ position: 'top' }}
@@ -101,21 +104,26 @@ export const Message = ({
           )}
           <span className={styles.datetime}>{dayjs(message.date).format('YYYY-MM-DD HH:mm')}</span>
         </div>
+       {isCustodian && <FontAwesomeIcon
+          className={styles.deleteMessageButton}
+          icon={AwesomeIcons('deleteCircle')}
+          onClick={() => onToggleVisibleDeleteMessage(true, message.id)}
+          role="presentation"
+        />}
       </div>
     );
   };
 
-  const renderSeparator = () => {
-    return (
-      <div className={styles.unreadSeparator}>{`${resources.messages['unreadMessageSeparator']} (${dayjs(
-        message.date
-      ).format('YYYY-MM-DD HH:mm')})`}</div>
-    );
-  };
+  const renderSeparator = () => (
+    <div className={styles.unreadSeparator}>{`${resources.messages['unreadMessageSeparator']} (${dayjs(
+      message.date
+    ).format('YYYY-MM-DD HH:mm')})`}</div>
+  );
 
   return hasSeparator ? (
     <Fragment>
-      {renderSeparator()} {renderMessage()}
+      {renderSeparator()}
+      {renderMessage()}
     </Fragment>
   ) : (
     renderMessage()

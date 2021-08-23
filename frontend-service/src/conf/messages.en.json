@@ -1229,6 +1229,8 @@
     "automaticallyDownloadQcRulesFile": "QC rules file generated successfully",
     "if": "IF",
     "then": "THEN",
-    "maxAllowedCharacters": "max allowed characters"
+    "maxAllowedCharacters": "max allowed characters",
+    "deleteFeedbackMessageHeader": "Delete message",
+    "deleteFeedbackMessage": "Are you sure you want to delete this message?"
   }
 }

@@ -9,6 +9,10 @@ export const FeedbackRepository = {
       data: { content: message, providerId: dataProviderId, type, messageAttachment }
     });
   },
+  deleteMessage: async (dataflowId, messageId, providerId) =>
+    await HTTPRequester.delete({
+      url: getUrl(FeedbackConfig.deleteMessage, { dataflowId, messageId, providerId })
+    }),
 
   getAllMessages: async (dataflowId, page, dataProviderId) => {
     return await HTTPRequester.get({
@@ -18,8 +22,11 @@ export const FeedbackRepository = {
 
   getMessageAttachment: async (dataflowId, messageId, dataProviderId) => {
     return await HTTPRequester.download({
-      url: getUrl(FeedbackConfig.getMessageAttachment, { dataflowId }),
-      data: { messageId, providerId: dataProviderId }
+      url: getUrl(FeedbackConfig.getMessageAttachment, {
+        dataflowId,
+        messageId,
+        providerId: dataProviderId
+      })
     });
   },
 

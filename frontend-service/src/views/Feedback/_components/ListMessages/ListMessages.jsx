@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef } from 'react';
+import { useContext, useEffect, useReducer, useRef } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import last from 'lodash/last';
@@ -6,16 +6,22 @@ import uniqueId from 'lodash/uniqueId';
 
 import styles from './ListMessages.module.scss';
 
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Message } from './_components/Message';
 import { Spinner } from 'views/_components/Spinner';
 
 import { listMessagesReducer } from './_functions/Reducers/listMessagesReducer';
+
+import { FeedbackService } from 'services/FeedbackService';
+
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ListMessages = ({
   canLoad = true,
   className = '',
+  dataflowId,
   emptyMessage = '',
   isCustodian,
   isLoading,
@@ -25,18 +31,22 @@ export const ListMessages = ({
   newMessageAdded,
   onFirstLoadMessages,
   onLazyLoad,
-  onUpdateNewMessageAdded
+  onUpdateNewMessageAdded,
+  providerId
 }) => {
+  const resources = useContext(ResourcesContext);
   const messagesWrapperRef = useRef();
 
   const [listMessagesState, dispatchListMessages] = useReducer(listMessagesReducer, {
+    isVisibleConfirmDelete: false,
     isLoadingNewMessages: false,
-    separatorIndex: -1,
     listContent: null,
-    resetScrollStates: null
+    messageIdToDelete: null,
+    resetScrollStates: null,
+    separatorIndex: -1
   });
 
-  const { isLoadingNewMessages, separatorIndex } = listMessagesState;
+  const { isLoadingNewMessages, isVisibleConfirmDelete, messageIdToDelete, separatorIndex } = listMessagesState;
 
   useEffect(() => {
     if (!isNil(messagesWrapperRef)) {
@@ -98,6 +108,19 @@ export const ListMessages = ({
     }
   }, [listMessagesState.resetScrollStates]);
 
+  const onConfirmDeleteMessage = async () => {
+    console.log(messageIdToDelete);
+    try {
+      await FeedbackService.deleteMessage(dataflowId, messageIdToDelete, providerId);
+      // dispatchListMessages({
+      //   type: 'DELETE_MESSAGE',
+      //   payload: messageIdToDelete
+      // });
+    } catch (error) {
+      console.error('ListMessages - onConfirmDeleteMessage.', error);
+    }
+  };
+
   const onScroll = e => {
     if (!isNil(e)) {
       if (e.target.scrollTop <= 0 && lazyLoading && canLoad) {
@@ -130,12 +153,16 @@ export const ListMessages = ({
         {messages.map((message, i) => (
           <Message
             attachment={message.messageAttachment}
+            dataflowId={dataflowId}
             hasSeparator={
               i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
             }
             isAttachment={TextUtils.areEquals(message.type, 'ATTACHMENT')}
             key={uniqueId('message_')}
             message={message}
+            onToggleVisibleDeleteMessage={(isVisible, messageId) =>
+              dispatchListMessages({ type: 'ON_TOGGLE_VISIBLE_DELETE_MESSAGE', payload: { isVisible, messageId } })
+            }
           />
         ))}
       </div>
@@ -145,6 +172,23 @@ export const ListMessages = ({
   return (
     <div className={`${styles.messagesWrapper} ${className}`} onScroll={onScroll} ref={messagesWrapperRef}>
       {listMessagesState.listContent}
+      {isVisibleConfirmDelete && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={`${resources.messages['deleteFeedbackMessageHeader']}`}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
+          onConfirm={onConfirmDeleteMessage}
+          onHide={() =>
+            dispatchListMessages({
+              type: 'ON_TOGGLE_VISIBLE_DELETE_MESSAGE',
+              payload: { isVisible: false, messageId: null }
+            })
+          }
+          visible={isVisibleConfirmDelete}>
+          {resources.messages['deleteFeedbackMessage']}
+        </ConfirmDialog>
+      )}
     </div>
   );
 };

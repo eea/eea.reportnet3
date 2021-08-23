@@ -16,6 +16,17 @@ export const feedbackReducer = (state, { type, payload }) => {
         messages: uniqBy(inmAllMessages, 'id'),
         newMessageAdded: false
       };
+    case 'ON_SEND_ATTACHMENT':
+      const inmAttachMessages = [...state.messages];
+      inmAttachMessages.push(payload.value);
+      console.log({ inmAttachMessages });
+      return {
+        ...state,
+        messages: inmAttachMessages,
+        newMessageAdded: true,
+        importFileDialogVisible: false,
+        draggedFiles: null
+      };
     case 'ON_SEND_MESSAGE':
       const inmMessages = [...state.messages];
       inmMessages.push(payload.value);

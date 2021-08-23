@@ -10,6 +10,9 @@ export const FeedbackService = {
   createMessage: async (dataflowId, message, providerId, type, messageAttachment) =>
     await FeedbackRepository.createMessage(dataflowId, message, providerId, type, messageAttachment),
 
+  deleteMessage: async (dataflowId, messageId, providerId) =>
+    await FeedbackRepository.deleteMessage(dataflowId, messageId, providerId),
+
   getAllMessages: async (dataflowId, page, dataProviderId) => {
     const response = await FeedbackRepository.getAllMessages(dataflowId, page, dataProviderId);
     console.log(response.data);
