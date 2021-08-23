@@ -14,6 +14,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 
 const Navigation = withRouter(({ history }) => {
   const resourcesContext = useContext(ResourcesContext);
+
   return (
     <div className={styles.header} id="header">
       <a

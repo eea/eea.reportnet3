@@ -24,7 +24,6 @@ const WebformDataFormFieldEditor = ({
   type
 }) => {
   const resourcesContext = useContext(ResourcesContext);
-
   const inputRef = useRef(null);
 
   useEffect(() => {

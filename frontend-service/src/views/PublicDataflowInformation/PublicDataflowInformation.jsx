@@ -43,6 +43,7 @@ export const PublicDataflowInformation = withRouter(
   }) => {
     const resourcesContext = useContext(ResourcesContext);
     const themeContext = useContext(ThemeContext);
+    const notificationContext = useContext(NotificationContext);
 
     const [contentStyles, setContentStyles] = useState({});
     const [dataflowData, setDataflowData] = useState({});
@@ -50,8 +51,6 @@ export const PublicDataflowInformation = withRouter(
     const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
     const [referenceDatasets, setReferenceDatasets] = useState([]);
     const [representatives, setRepresentatives] = useState({});
-
-    const notificationContext = useContext(NotificationContext);
 
     useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOW, dataflowId, history });
 

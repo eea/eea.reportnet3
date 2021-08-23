@@ -144,13 +144,17 @@ export const ManageBusinessDataflow = ({
       handleErrors({
         field: 'description',
         hasErrors: true,
-        message: resourcesContext.messages['dataflowDescriptionValidationMax']
+        message: `${resourcesContext.messages['dataflowDescriptionValidationMax']} (${resourcesContext.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`
       });
       hasErrors = true;
     }
 
     if (name.length > config.INPUT_MAX_LENGTH) {
-      handleErrors({ field: 'name', hasErrors: true, message: resourcesContext.messages['dataflowNameValidationMax'] });
+      handleErrors({
+        field: 'name',
+        hasErrors: true,
+        message: `${resourcesContext.messages['dataflowNameValidationMax']} (${resourcesContext.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`
+      });
       hasErrors = true;
     }
 
@@ -422,17 +426,15 @@ export const ManageBusinessDataflow = ({
                 dataflowName: state.name
               })
             }}></p>
-          <p>
-            <InputText
-              className={`${styles.inputText}`}
-              id="deleteDataflow"
-              maxLength={255}
-              name={resourcesContext.messages['deleteDataflowButton']}
-              onChange={event => setDeleteInput(event.target.value)}
-              ref={deleteInputRef}
-              value={deleteInput}
-            />
-          </p>
+          <InputText
+            className={`${styles.inputText}`}
+            id="deleteDataflow"
+            maxLength={config.INPUT_MAX_LENGTH}
+            name={resourcesContext.messages['deleteDataflowButton']}
+            onChange={event => setDeleteInput(event.target.value)}
+            ref={deleteInputRef}
+            value={deleteInput}
+          />
         </ConfirmDialog>
       )}
     </Fragment>

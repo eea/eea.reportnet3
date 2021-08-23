@@ -27,14 +27,16 @@ export const TableRelationsSelector = ({
   tabsChanges
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+
+  const [clickedFields, setClickedFields] = useState([]);
+  const [referenceTableOptions, setReferenceTableOptions] = useState([]);
+
   const {
     candidateRule: { expressionType }
   } = creationFormState;
   const {
     candidateRule: { relations }
   } = creationFormState;
-  const [clickedFields, setClickedFields] = useState([]);
-  const [referenceTableOptions, setReferenceTableOptions] = useState([]);
 
   useEffect(() => {
     onExpressionTypeToggle('fieldRelations');

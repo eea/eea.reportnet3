@@ -248,18 +248,16 @@ export const ManageReportingDataflow = ({
                 dataflowName: state.name
               })
             }}></p>
-          <p>
-            <InputText
-              autoFocus={true}
-              className={`${styles.inputText}`}
-              id={'deleteDataflow'}
-              maxLength={255}
-              name={resourcesContext.messages['deleteDataflowButton']}
-              onChange={event => onDeleteInputChange(event.target.value)}
-              ref={deleteInputRef}
-              value={reportingDataflowState.deleteInput}
-            />
-          </p>
+          <InputText
+            autoFocus={true}
+            className={styles.inputText}
+            id={'deleteDataflow'}
+            maxLength={config.INPUT_MAX_LENGTH}
+            name={resourcesContext.messages['deleteDataflowButton']}
+            onChange={event => onDeleteInputChange(event.target.value)}
+            ref={deleteInputRef}
+            value={reportingDataflowState.deleteInput}
+          />
         </ConfirmDialog>
       )}
     </Fragment>

@@ -5,10 +5,9 @@ import styles from './LeftSideBarButton.module.scss';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import ReactTooltip from 'react-tooltip';
-
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
+import ReactTooltip from 'react-tooltip';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, label, onClick, style, title }) => {

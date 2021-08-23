@@ -55,10 +55,9 @@ const TabView = withRouter(
     const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
     const [isNavigationHidden, setIsNavigationHidden] = useState(true);
 
-    const resourcesContext = useContext(ResourcesContext);
-
     const divTabsRef = useRef();
     const ulTabsRef = useRef();
+    const resourcesContext = useContext(ResourcesContext);
 
     const classNamed = classNames('p-tabview p-component p-tabview-top', className);
     useEffect(() => {

@@ -11,6 +11,7 @@ import ReactTooltip from 'react-tooltip';
 import { Sidebar } from 'primereact/sidebar';
 import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'views/_components/Spinner';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 
 import { DialogContext } from 'views/_functions/Contexts/DialogContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -119,23 +120,30 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
               className={`${styles.snapshotForm} formField ${styles.createInputAndButtonWrapper} ${
                 hasError ? ' error' : ''
               }`}>
-              <InputTextarea
-                autoComplete="off"
-                className={styles.formField}
-                collapsedHeight={90}
-                id="createSnapshotDescription"
-                maxLength={255}
-                name="createSnapshotDescription"
-                onChange={e => setInputValue(e.target.value)}
-                onKeyDown={e => onPressEnter(e)}
-                placeholder={resourcesContext.messages.createSnapshotPlaceholder}
-                rows={10}
-                type="text"
-                value={inputValue}
-              />
-              <label className="srOnly" htmlFor="createSnapshotDescription">
-                {resourcesContext.messages['createSnapshotPlaceholder']}
-              </label>
+              <div className={styles.descriptionWrapper}>
+                <InputTextarea
+                  autoComplete="off"
+                  className={styles.formField}
+                  collapsedHeight={90}
+                  id="createSnapshotDescription"
+                  maxLength={config.INPUT_MAX_LENGTH}
+                  name="createSnapshotDescription"
+                  onChange={e => setInputValue(e.target.value)}
+                  onKeyDown={e => onPressEnter(e)}
+                  placeholder={resourcesContext.messages.createSnapshotPlaceholder}
+                  rows={10}
+                  type="text"
+                  value={inputValue}
+                />
+                <CharacterCounter
+                  currentLength={inputValue.length}
+                  maxLength={config.INPUT_MAX_LENGTH}
+                  style={{ position: 'relative', top: '0.25rem' }}
+                />
+                <label className="srOnly" htmlFor="createSnapshotDescription">
+                  {resourcesContext.messages['createSnapshotPlaceholder']}
+                </label>
+              </div>
               <div className={styles.createButtonWrapper} data-for="saveCopy" data-tip>
                 <Button
                   className={`${styles.createSnapshotButton} rp-btn secondary`}
@@ -148,7 +156,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
               <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="saveCopy" place="left">
                 {inputValue.length === 0
                   ? resourcesContext.messages['snapshotsEmptyDescription']
-                  : inputValue.length > 255
+                  : inputValue.length > config.INPUT_MAX_LENGTH
                   ? resourcesContext.messages['snapshotsWrongLengthDescription']
                   : resourcesContext.messages.createSnapshotTooltip}
               </ReactTooltip>

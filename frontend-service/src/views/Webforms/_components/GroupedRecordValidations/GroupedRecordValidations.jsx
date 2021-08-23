@@ -15,23 +15,20 @@ export const GroupedRecordValidations = ({ parsedRecordData }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const addIconLevelError = (validation, levelError, message) => {
-    let icon = [];
-    if (!isEmpty(validation)) icon.push(<IconTooltip key={levelError} levelError={levelError} message={message} />);
+    if (isEmpty(validation)) return [];
 
-    return icon;
+    return [].concat(<IconTooltip key={levelError} levelError={levelError} message={message} />);
   };
 
   const getIconsValidationsErrors = validations => {
-    let icons = [];
-    if (isNull(validations)) return icons;
+    if (isNull(validations)) return [];
 
     const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
     const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
     const warningIcon = addIconLevelError(validations.warnings, 'WARNING', validations.messageWarnings);
     const infoIcon = addIconLevelError(validations.infos, 'INFO', validations.messageInfos);
 
-    icons = blockerIcon.concat(errorIcon, warningIcon, infoIcon);
-    return icons;
+    return blockerIcon.concat(errorIcon, warningIcon, infoIcon);
   };
 
   const validationsTemplate = () => {

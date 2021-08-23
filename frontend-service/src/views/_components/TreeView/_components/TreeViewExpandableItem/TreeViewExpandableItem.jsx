@@ -21,7 +21,6 @@ const TreeViewExpandableItem = ({
   onExpandTree
 }) => {
   const [isOpen, setIsOpen] = useState(expanded);
-
   const resourcesContext = useContext(ResourcesContext);
 
   useEffect(() => {

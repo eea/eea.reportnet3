@@ -33,9 +33,8 @@ const leftSideBarReducer = (state, { type, payload }) => {
 };
 
 const LeftSideBarProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(leftSideBarReducer, { models: [], steps: [], helpTitle: '' });
-
   const resourcesContext = useContext(ResourcesContext);
+  const [state, dispatch] = useReducer(leftSideBarReducer, { models: [], steps: [], helpTitle: '' });
 
   const getSteps = (config, component) => {
     const steps = [

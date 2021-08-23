@@ -65,7 +65,6 @@ export const TabsDesigner = withRouter(
       params: { dataflowId, datasetId }
     } = match;
     const notificationContext = useContext(NotificationContext);
-    const resourcesContext = useContext(ResourcesContext);
 
     const [errorMessage, setErrorMessage] = useState();
     const [errorMessageTitle, setErrorMessageTitle] = useState();
@@ -74,6 +73,8 @@ export const TabsDesigner = withRouter(
     const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
     const [scrollFn, setScrollFn] = useState();
     const [tabs, setTabs] = useState([]);
+
+    const resourcesContext = useContext(ResourcesContext);
 
     useEffect(() => {
       if (!isNil(datasetSchema) && !isEmpty(datasetSchema)) {

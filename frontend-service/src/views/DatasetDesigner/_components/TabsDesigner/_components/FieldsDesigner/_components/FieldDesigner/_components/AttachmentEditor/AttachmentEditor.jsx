@@ -16,6 +16,7 @@ const AttachmentEditor = ({
   selectedAttachment
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+
   const [validExtensions, setValidExtensionsItems] = useState(selectedAttachment.validExtensions || []);
   const [maxSize, setMaxSize] = useState(selectedAttachment.maxSize || 0);
   const [isVisible, setIsVisible] = useState(isAttachmentEditorVisible);

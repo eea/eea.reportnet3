@@ -53,10 +53,10 @@ const ManageReportingDataflowForm = forwardRef(
         message = '';
         hasErrors = true;
       } else if (inputName === 'description' && !checkIsCorrectLength(inputValue)) {
-        message = resourcesContext.messages['dataflowDescriptionValidationMax'];
+        message = `${resourcesContext.messages['dataflowDescriptionValidationMax']} (${resourcesContext.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`;
         hasErrors = true;
       } else if (inputName === 'name' && !checkIsCorrectLength(inputValue)) {
-        message = resourcesContext.messages['dataflowNameValidationMax'];
+        message = `${resourcesContext.messages['dataflowNameValidationMax']} (${resourcesContext.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`;
         hasErrors = true;
       }
 

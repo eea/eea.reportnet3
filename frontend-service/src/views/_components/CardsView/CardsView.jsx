@@ -25,6 +25,7 @@ export const CardsView = ({
   type
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+
   const [cards, setCards] = useState(data);
   const [cardsPerPage, setCardsPerPage] = useState(pagination.rows);
   const [currentPage, setCurrentPage] = useState(pagination.page);

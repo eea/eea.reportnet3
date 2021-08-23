@@ -14,6 +14,7 @@ import { TooltipUtils } from 'views/_functions/Utils/TooltipUtils';
 
 export const ErrorBoundaryFallback = ({ error, resetErrorBoundary }) => {
   const resourcesContext = useContext(ResourcesContext);
+
   const onCopyErrorToClipboard = error => {
     const stringError = JSON.stringify({
       msg: error.message,
