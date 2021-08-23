@@ -12,14 +12,21 @@ import { SqlHelp } from './_components/SqlHelp';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
 export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSentence, level }) => {
   const resources = useContext(ResourcesContext);
 
+  const [isChangedSqlSentence, setIsChangedSqlSentence] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
-  const [isEditingSqlSentence, setIsEditingSqlSentence] = useState(false);
+  const [previousSqlSentence, setPreviousSqlSentence] = useState('');
 
   useEffect(() => {
     return () => onSetSqlSentence('sqlSentence', '');
+  }, []);
+
+  useEffect(() => {
+    setPreviousSqlSentence(creationFormState.candidateRule?.sqlSentence);
   }, []);
 
   const levelTypes = {
@@ -52,8 +59,6 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
 
   const codeKeyword = isBusinessDataflow ? `${config.COMPANY_CODE_KEYWORD}` : `${config.COUNTRY_CODE_KEYWORD}`;
 
-  const sqlError = '[205] not from this dataflow'; //TODO WITH REAL DATA
-
   return (
     <div className={styles.section}>
       <div className={styles.content}>
@@ -85,14 +90,14 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
             id="sqlSentenceText"
             name=""
             onChange={e => {
-              setIsEditingSqlSentence(true);
               onSetSqlSentence('sqlSentence', e.target.value);
+              setIsChangedSqlSentence(!TextUtils.areEquals(e.target.value, previousSqlSentence));
             }}
             value={creationFormState.candidateRule.sqlSentence}></textarea>
         </div>
       </div>
 
-      {!isNil(creationFormState.candidateRule.sqlError) && !isEditingSqlSentence ? (
+      {!isNil(creationFormState.candidateRule.sqlError) && !isChangedSqlSentence ? (
         <p
           className={
             styles.sqlErrorMessage
