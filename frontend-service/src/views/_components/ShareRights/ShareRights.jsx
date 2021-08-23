@@ -63,7 +63,7 @@ export const ShareRights = ({
   ];
 
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [shareRightsState, shareRightsDispatch] = useReducer(shareRightsReducer, {
@@ -355,8 +355,8 @@ export const ShareRights = ({
         <div className={styles.inputWrapper}>
           <label className={styles.label} htmlFor="accountInput">
             {userType === userTypes.REQUESTER
-              ? resources.messages['userRolesRequesterInputLabel']
-              : resources.messages['userRolesReporterInputLabel']}
+              ? resourcesContext.messages['userRolesRequesterInputLabel']
+              : resourcesContext.messages['userRolesReporterInputLabel']}
           </label>
           <InputText
             className={hasError ? styles.error : ''}
@@ -371,7 +371,7 @@ export const ShareRights = ({
         </div>
         <div className={styles.inputWrapper}>
           <label className={styles.label} htmlFor="rolesDropdown">
-            {resources.messages['role']}
+            {resourcesContext.messages['role']}
           </label>
           <Dropdown
             appendTo={document.body}
@@ -380,7 +380,7 @@ export const ShareRights = ({
             onKeyPress={event => onEnterKey(event.key, userRight)}
             optionLabel="label"
             options={roleOptions}
-            placeholder={resources.messages['selectRole']}
+            placeholder={resourcesContext.messages['selectRole']}
             ref={dropdownRef}
             style={{ margin: '0.3rem 0' }}
             value={first(roleOptions.filter(option => option.role === userRight.role))}
@@ -396,13 +396,13 @@ export const ShareRights = ({
 
   const getTooltipMessage = userRight => {
     if (hasEmptyData(userRight)) {
-      return resources.messages['incompleteDataTooltip'];
+      return resourcesContext.messages['incompleteDataTooltip'];
     } else if (userRight.isNew && isRepeatedAccount(userRight.account)) {
-      return resources.messages['emailAlreadyAssignedTooltip'];
+      return resourcesContext.messages['emailAlreadyAssignedTooltip'];
     } else if (!isValidEmail(userRight.account)) {
-      return resources.messages['notValidEmailTooltip'];
+      return resourcesContext.messages['notValidEmailTooltip'];
     } else if (shareRightsState.accountHasError) {
-      return resources.messages['emailHasErrorTooltip'];
+      return resourcesContext.messages['emailHasErrorTooltip'];
     } else {
       return null;
     }
@@ -424,9 +424,9 @@ export const ShareRights = ({
             : ''
         }>
         {isEmpty(shareRightsState.userRightList) ? (
-          <h3>{resources.messages[`${userType}EmptyUserRightList`]}</h3>
+          <h3>{resourcesContext.messages[`${userType}EmptyUserRightList`]}</h3>
         ) : isEmpty(shareRightsState.filteredData) ? (
-          <h3>{resources.messages[`${userType}NotMatchingFilter`]}</h3>
+          <h3>{resourcesContext.messages[`${userType}NotMatchingFilter`]}</h3>
         ) : (
           <div className={styles.table}>
             <DataTable
@@ -438,7 +438,7 @@ export const ShareRights = ({
               summary="shareRights"
               value={shareRightsState.filteredData}>
               <Column body={renderAccountTemplate} header={columnHeader} />
-              <Column body={renderRoleColumnTemplate} header={resources.messages['rolesColumn']} />
+              <Column body={renderRoleColumnTemplate} header={resourcesContext.messages['rolesColumn']} />
               <Column
                 body={renderButtonsColumnTemplate}
                 className={styles.emptyTableHeader}
@@ -455,8 +455,8 @@ export const ShareRights = ({
           disabledConfirm={shareRightsState.isDeletingUserRight}
           header={deleteConfirmHeader}
           iconConfirm={shareRightsState.isDeletingUserRight ? 'spinnerAnimate' : 'check'}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={() => onDeleteUserRight()}
           onHide={() => {
             onResetAll();
@@ -482,8 +482,8 @@ export const ShareRights = ({
           }
           header={shareRightsState.isEditingModal ? editConfirmHeader : addConfirmHeader}
           iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
-          labelCancel={resources.messages['cancel']}
-          labelConfirm={resources.messages['save']}
+          labelCancel={resourcesContext.messages['cancel']}
+          labelConfirm={resourcesContext.messages['save']}
           onConfirm={() => updateUserRight()}
           onHide={() => {
             onResetAll();

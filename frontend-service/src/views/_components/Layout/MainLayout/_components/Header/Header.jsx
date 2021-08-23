@@ -35,7 +35,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPublic = false }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const themeContext = useContext(ThemeContext);
 
@@ -124,7 +124,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       <label
         onClick={() => setDoNotRemember(!doNotRemember)}
         style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
-        {resources.messages['doNotAskAgain']}
+        {resourcesContext.messages['doNotAskAgain']}
       </label>
     </div>
   );
@@ -137,7 +137,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         e.preventDefault();
         history.push(getUrl(routes.ACCESS_POINT));
       }}
-      title={resources.messages['titleHeader']}>
+      title={resourcesContext.messages['titleHeader']}>
       {isPublic ? (
         <img alt="Reportnet 3" className={styles.appLogo} height="50px" src={ReportnetPublicLogo} />
       ) : (
@@ -157,17 +157,17 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   const localhostEnvironmentAlert = isLocalEnvironment() && (
     <div className={styles.localhostAlert}>
       <FontAwesomeIcon
-        aria-labelledby={resources.messages['localhostAlert']}
+        aria-labelledby={resourcesContext.messages['localhostAlert']}
         icon={AwesomeIcons('localhostAlert')}
         role="button"
-        title={resources.messages['localhostAlert']}
+        title={resourcesContext.messages['localhostAlert']}
       />
     </div>
   );
 
   const themeSwitcher = isLocalEnvironment() && !isPublic && (
     <InputSwitch
-      aria-label={resources.messages['toggleDarkTheme']}
+      aria-label={resourcesContext.messages['toggleDarkTheme']}
       checked={themeContext.currentTheme === 'dark'}
       onChange={e => {
         userContext.onToggleVisualTheme(e.value ? 'dark' : 'light');
@@ -177,8 +177,8 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       style={{ marginRight: '1rem' }}
       tooltip={
         themeContext.currentTheme === 'light'
-          ? resources.messages['toggleDarkTheme']
-          : resources.messages['toggleLightTheme']
+          ? resourcesContext.messages['toggleDarkTheme']
+          : resourcesContext.messages['toggleLightTheme']
       }
       tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
     />
@@ -275,7 +275,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
     <div className={styles.loginWrapper}>
       <Button
         className="p-button-primary"
-        label={resources.messages.login}
+        label={resourcesContext.messages.login}
         onClick={() => {
           if (window.env.REACT_APP_EULOGIN.toString() === 'true') {
             window.location.href = AccessPointConfig.euloginUrl;
@@ -310,15 +310,15 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         {!isPublic && userContext.userProps.showLogoutConfirmation && confirmvisible && (
           <ConfirmDialog
             footerAddon={checkDoNotRemember}
-            header={resources.messages['logout']}
-            labelCancel={resources.messages['no']}
-            labelConfirm={resources.messages['yes']}
+            header={resourcesContext.messages['logout']}
+            labelCancel={resourcesContext.messages['no']}
+            labelConfirm={resourcesContext.messages['yes']}
             onConfirm={() => {
               userLogout();
             }}
             onHide={() => setConfirmVisible(false)}
             visible={confirmvisible}>
-            {resources.messages['userLogout']}
+            {resourcesContext.messages['userLogout']}
           </ConfirmDialog>
         )}
       </div>

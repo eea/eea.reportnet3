@@ -26,7 +26,7 @@ export const TableRelationsSelector = ({
   showRequiredFields,
   tabsChanges
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const {
     candidateRule: { expressionType }
   } = creationFormState;
@@ -79,20 +79,20 @@ export const TableRelationsSelector = ({
 
   return (
     <Fragment>
-      <p className={styles.title}>{resources.messages['tableRelationsTitle']}</p>
+      <p className={styles.title}>{resourcesContext.messages['tableRelationsTitle']}</p>
       <div className={styles.section}>
         <div className={styles.fieldsGroup}>
           <div className={styles.field}>
-            <label htmlFor="dataset">{resources.messages['targetDatasetSchema']}</label>
+            <label htmlFor="dataset">{resourcesContext.messages['targetDatasetSchema']}</label>
             <Dropdown
               appendTo={document.body}
               disabled={relations.links.length > 1}
-              filterPlaceholder={resources.messages['referenceSchemaPlaceholder']}
+              filterPlaceholder={resourcesContext.messages['referenceSchemaPlaceholder']}
               id={`${componentName}__dataset`}
               onChange={e => onDatasetSchemaChange(e.target.value)}
               optionLabel="label"
               options={creationFormState.datasetSchemas}
-              placeholder={resources.messages['referenceSchemaPlaceholder']}
+              placeholder={resourcesContext.messages['referenceSchemaPlaceholder']}
               value={first(
                 creationFormState.datasetSchemas.filter(
                   option => option.code === creationFormState.candidateRule.relations.referencedDatasetSchema.code
@@ -101,21 +101,21 @@ export const TableRelationsSelector = ({
             />
           </div>
           <div className={styles.field}>
-            <label htmlFor="table">{resources.messages['targetTable']}</label>
+            <label htmlFor="table">{resourcesContext.messages['targetTable']}</label>
             <Dropdown
               appendTo={document.body}
               disabled={relations.links.length > 1}
-              filterPlaceholder={resources.messages['referenceTablePlaceholder']}
+              filterPlaceholder={resourcesContext.messages['referenceTablePlaceholder']}
               id={`${componentName}__table`}
               onChange={e => onReferencedTableChange(e.target.value)}
               optionLabel="label"
               options={referenceTableOptions}
-              placeholder={resources.messages['referenceTablePlaceholder']}
+              placeholder={resourcesContext.messages['referenceTablePlaceholder']}
               value={first(referenceTableOptions.filter(option => option.code === relations.referencedTable.code))}
             />
           </div>
           <div className={styles.checkbox}>
-            <span>{resources.messages['datasetReferenceMustBeUsed']}</span>
+            <span>{resourcesContext.messages['datasetReferenceMustBeUsed']}</span>
             <Checkbox
               checked={creationFormState.candidateRule.relations.isDoubleReferenced}
               inputId="isDoubleReferenced_check"
@@ -124,7 +124,7 @@ export const TableRelationsSelector = ({
               style={{ width: '70px', marginLeft: '0.5rem', marginTop: '5px' }}
             />
             <label className="srOnly" htmlFor={'isDoubleReferenced_check'}>
-              {resources.messages['datasetReferenceMustBeUsed']}
+              {resourcesContext.messages['datasetReferenceMustBeUsed']}
             </label>
           </div>
         </div>

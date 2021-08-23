@@ -23,7 +23,7 @@ export const MultiSelectHeader = ({
   onFilter,
   onToggleAll
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const filterRef = useRef(null);
 
@@ -83,7 +83,7 @@ export const MultiSelectHeader = ({
         <button className="p-multiselect-close p-link" onClick={event => onClose(event)} type="button">
           <span className="p-multiselect-close-icon pi pi-times" id={`clearFilter_${id}`} />
           <span className="srOnly" htmlFor={`clearFilter_${id}`}>
-            {resources.messages['clearFilter']}
+            {resourcesContext.messages['clearFilter']}
           </span>
         </button>
       )}
