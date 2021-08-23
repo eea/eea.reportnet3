@@ -1118,8 +1118,8 @@ public class DatasetSchemaServiceTest {
   @Test
   public void validateSchemaTest() {
 
-    Assert.assertFalse(
-        dataSchemaServiceImpl.validateSchema("5ce524fad31fc52540abae73", TypeDataflowEnum.REGULAR));
+    Assert.assertFalse(dataSchemaServiceImpl.validateSchema("5ce524fad31fc52540abae73",
+        TypeDataflowEnum.REPORTING));
   }
 
 
