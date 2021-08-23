@@ -1251,7 +1251,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         //   })
         // }
         >
-          {resources.messages['arePrefilledTablesDeletedCheckboxLabel']}
+          {resourcesContext.messages['arePrefilledTablesDeletedCheckboxLabel']}
         </span>
       </label>
     </div>
@@ -1426,7 +1426,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataset-deleteDataset-help-step`}
                 // disabled={!hasWritePermissions}
                 icon="trash"
-                label={resources.messages['deleteDatasetData']}
+                label={resourcesContext.messages['deleteDatasetData']}
                 onClick={() => manageDialogs('isDeleteDialogVisible', true)}
               />
             </div>
@@ -1615,7 +1615,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             labelConfirm={resourcesContext.messages['yes']}
             onConfirm={onConfirmValidate}
             onHide={() => manageDialogs('validateDialogVisible', false)}
-            visible={validateDialogVisible}>
+            visible={isValidateDialogVisible}>
             {resourcesContext.messages['validateDatasetConfirm']}
           </ConfirmDialog>
         )}
@@ -1624,13 +1624,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           <ConfirmDialog
             classNameConfirm={'p-button-danger'}
             footerAddon={deletePrefilledFooter}
-            header={resources.messages['deleteDatasetHeader']}
-            labelCancel={resources.messages['no']}
-            labelConfirm={resources.messages['yes']}
+            header={resourcesContext.messages['deleteDatasetHeader']}
+            labelCancel={resourcesContext.messages['no']}
+            labelConfirm={resourcesContext.messages['yes']}
             onConfirm={onConfirmDelete}
             onHide={() => manageDialogs('isDeleteDialogVisible', false)}
             visible={isDeleteDialogVisible}>
-            {resources.messages['deleteDatasetConfirm']}
+            {resourcesContext.messages['deleteDatasetConfirm']}
           </ConfirmDialog>
         )}
 
