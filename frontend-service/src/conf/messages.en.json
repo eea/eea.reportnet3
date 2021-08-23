@@ -1231,6 +1231,6 @@
     "then": "THEN",
     "maxAllowedCharacters": "max allowed characters",
     "sqlErrorMessage": "SQL error message: ",
-    "sqlErrorMessageCopy": "Please click to copy to clipboard the SQL Error: "
+    "sqlErrorMessageCopy": "Please click to copy to clipboard the SQL Error."
   }
 }

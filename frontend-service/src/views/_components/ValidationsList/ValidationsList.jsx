@@ -195,7 +195,7 @@ const ValidationsList = withRouter(
               className={`${styles.invalidSqlIcon} p-button-secondary`}
               icon="warning"
               onClick={() => navigator.clipboard.writeText(rowData.sqlError)}
-              tooltip={`${resources.messages['sqlErrorMessageCopy']} ${rowData.sqlError}`}
+              tooltip={`${rowData.sqlError} <br />  <br />${resources.messages['sqlErrorMessageCopy']} `}
               tooltipOptions={{ position: 'left' }}
             />
           );
