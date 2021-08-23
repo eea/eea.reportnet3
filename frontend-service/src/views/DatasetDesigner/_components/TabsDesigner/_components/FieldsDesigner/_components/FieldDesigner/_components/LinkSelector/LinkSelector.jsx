@@ -45,7 +45,7 @@ const LinkSelector = withRouter(
     selectedLink,
     tableSchemaId
   }) => {
-    const resourcesContext = useContext(ResourcesContext);
+    const resources = useContext(ResourcesContext);
 
     const [linkSelectorState, dispatchLinkSelector] = useReducer(linkSelectorReducer, {
       link: {
@@ -193,7 +193,7 @@ const LinkSelector = withRouter(
         <Button
           disabled={isUndefined(link) || isEmpty(link) || (!isNil(link) && isNil(link.referencedField))}
           icon="check"
-          label={resourcesContext.messages['save']}
+          label={resources.messages['save']}
           onClick={() => {
             setIsSaved(true);
           }}
@@ -201,7 +201,7 @@ const LinkSelector = withRouter(
         <Button
           className="p-button-secondary button-right-aligned"
           icon="cancel"
-          label={resourcesContext.messages['cancel']}
+          label={resources.messages['cancel']}
           onClick={() => {
             if (fieldId === '-1' || isNil(link) || isNil(link.referencedField)) {
               onHideSelector();
@@ -244,7 +244,7 @@ const LinkSelector = withRouter(
           return { fieldSchemaId: field.fieldId, name: field.name };
         });
       linkedFields?.unshift({
-        name: resourcesContext.messages['noneCodelist'],
+        name: resources.messages['noneCodelist'],
         fieldSchemaId: ''
       });
 
@@ -258,7 +258,7 @@ const LinkSelector = withRouter(
       }
 
       masterFields?.unshift({
-        name: resourcesContext.messages['noneCodelist'],
+        name: resources.messages['noneCodelist'],
         fieldSchemaId: ''
       });
 
@@ -306,23 +306,23 @@ const LinkSelector = withRouter(
             return linkObj;
           } else {
             return {
-              name: `${table.tableSchemaName} - ${resourcesContext.messages['noSelectablePK']}`,
-              value: `${table.tableSchemaName} - ${resourcesContext.messages['noSelectablePK']}`,
+              name: `${table.tableSchemaName} - ${resources.messages['noSelectablePK']}`,
+              value: `${table.tableSchemaName} - ${resources.messages['noSelectablePK']}`,
               referencedField: null,
               disabled: true
             };
           }
         } else if (table.tableSchemaId === tableSchemaId) {
           return {
-            name: `${table.tableSchemaName} - ${resourcesContext.messages['noSelectablePK']}`,
-            value: `${table.tableSchemaName} - ${resourcesContext.messages['noSelectablePK']}`,
+            name: `${table.tableSchemaName} - ${resources.messages['noSelectablePK']}`,
+            value: `${table.tableSchemaName} - ${resources.messages['noSelectablePK']}`,
             referencedField: null,
             disabled: true
           };
         } else {
           return {
-            name: `${table.tableSchemaName} - ${resourcesContext.messages['noPK']}`,
-            value: `${table.tableSchemaName} - ${resourcesContext.messages['noPK']}`,
+            name: `${table.tableSchemaName} - ${resources.messages['noPK']}`,
+            value: `${table.tableSchemaName} - ${resources.messages['noPK']}`,
             referencedField: null,
             disabled: true
           };
@@ -352,16 +352,16 @@ const LinkSelector = withRouter(
                 <span
                   className={
                     styles.selectedReferenceDataflowLabel
-                  }>{`${resourcesContext.messages['selectedReferenceDataflow']}: `}</span>
+                  }>{`${resources.messages['selectedReferenceDataflow']}: `}</span>
                 <span>{linkSelectorState.selectedReferenceDataflow.name}</span>
               </div>
             )}
             <div className={styles.referenceDataflowsDropdownWrapper}>
-              <label>{resourcesContext.messages['referenceDataflows']}</label>
+              <label>{resources.messages['referenceDataflows']}</label>
               <Button
                 className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
                 icon={'infoCircle'}
-                tooltip={resourcesContext.messages['referenceDataflowsDraftInfo']}
+                tooltip={resources.messages['referenceDataflowsDraftInfo']}
                 tooltipOptions={{ position: 'top' }}
               />
               <Dropdown
@@ -369,13 +369,13 @@ const LinkSelector = withRouter(
                 className={styles.referenceDataflowsDropdown}
                 filter={true}
                 filterBy="name,description"
-                filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
+                filterPlaceholder={resources.messages['linkFilterPlaceholder']}
                 itemTemplate={dataflowsTemplate}
                 name="referenceDataflowsDropdown"
                 onChange={e => dispatchLinkSelector({ type: 'SET_REFERENCE_DATAFLOW', payload: e.target.value })}
                 optionLabel="name"
                 options={referenceDataflows}
-                placeholder={resourcesContext.messages['manageRolesDialogDropdownPlaceholder']}
+                placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
                 showFilterClear={true}
                 value={linkSelectorState.selectedReferenceDataflow}
               />
@@ -383,7 +383,7 @@ const LinkSelector = withRouter(
           </div>
           {isEmpty(linkSelectorState.selectedReferenceDataflow) ? (
             <p className={styles.chooseReferenceDataflowText}>
-              {resourcesContext.messages['externalLinkDialogNoReferenceDataflowMessage']}
+              {resources.messages['externalLinkDialogNoReferenceDataflowMessage']}
             </p>
           ) : (
             renderLinkSelector()
@@ -394,7 +394,7 @@ const LinkSelector = withRouter(
 
     const renderLinkSelector = () => {
       if (!datasetSchemas.length) {
-        return <p className={styles.chooseReferenceDataflowText}>{resourcesContext.messages['emptyDatasetSchemas']}</p>;
+        return <p className={styles.chooseReferenceDataflowText}>{resources.messages['emptyDatasetSchemas']}</p>;
       } else {
         if (isExternalLink) {
           const tabSchema = datasetSchemas
@@ -428,51 +428,51 @@ const LinkSelector = withRouter(
                 })}
             </div>
             <div className={styles.selectedLinkFieldsWrapper}>
-              <span htmlFor={'linkedTableLabel'}>{resourcesContext.messages['linkedTableLabel']}</span>
+              <span htmlFor={'linkedTableLabel'}>{resources.messages['linkedTableLabel']}</span>
               <Dropdown
                 appendTo={document.body}
                 ariaLabel="linkedTableLabel"
                 className={styles.fieldSelector}
                 inputId="linkedTableLabel"
-                name={resourcesContext.messages['linkedTableLabel']}
+                name={resources.messages['linkedTableLabel']}
                 onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_LABEL', payload: e.target.value })}
                 optionLabel="name"
                 options={linkedTableFields}
-                placeholder={resourcesContext.messages['linkedTableLabel']}
+                placeholder={resources.messages['linkedTableLabel']}
                 value={pkLinkedTableLabel}
               />
             </div>
             <div className={styles.selectedLinkFieldsWrapper}>
-              <span htmlFor={'masterTableConditional'}>{resourcesContext.messages['masterTableConditional']}</span>
+              <span htmlFor={'masterTableConditional'}>{resources.messages['masterTableConditional']}</span>
               <Dropdown
                 appendTo={document.body}
                 ariaLabel="masterTableConditional"
                 className={styles.fieldSelector}
                 inputId="masterTableConditional"
-                name={resourcesContext.messages['masterTableConditional']}
+                name={resources.messages['masterTableConditional']}
                 onChange={e => dispatchLinkSelector({ type: 'SET_MASTER_TABLE_CONDITIONAL', payload: e.target.value })}
                 optionLabel="name"
                 options={masterTableFields}
-                placeholder={resourcesContext.messages['masterTableConditional']}
+                placeholder={resources.messages['masterTableConditional']}
                 value={pkMasterTableConditional}
               />
-              <span htmlFor={'linkedTableConditional'}>{resourcesContext.messages['linkedTableConditional']}</span>
+              <span htmlFor={'linkedTableConditional'}>{resources.messages['linkedTableConditional']}</span>
               <Dropdown
                 appendTo={document.body}
                 ariaLabel="linkedTableConditional"
                 className={styles.fieldSelector}
                 inputId="linkedTableConditional"
-                name={resourcesContext.messages['linkedTableConditional']}
+                name={resources.messages['linkedTableConditional']}
                 onChange={e => dispatchLinkSelector({ type: 'SET_LINKED_TABLE_CONDITIONAL', payload: e.target.value })}
                 optionLabel="name"
                 options={linkedTableFields}
-                placeholder={resourcesContext.messages['linkedTableConditional']}
+                placeholder={resources.messages['linkedTableConditional']}
                 value={pkLinkedTableConditional}
               />
             </div>
             <div className={styles.selectedLinkWrapper}>
               <span className={styles.switchTextInput} htmlFor={'pkMustBeUsed_check'}>
-                {resourcesContext.messages['pkValuesMustBeUsed']}
+                {resources.messages['pkValuesMustBeUsed']}
               </span>
               <Checkbox
                 checked={pkMustBeUsed}
@@ -483,7 +483,7 @@ const LinkSelector = withRouter(
                 style={{ width: '70px', marginLeft: '0.5rem' }}
               />
               <span className={styles.switchTextInput} htmlFor={'pkHasMultipleValues_check'}>
-                {resourcesContext.messages['pkHasMultipleValues']}
+                {resources.messages['pkHasMultipleValues']}
               </span>
               <Checkbox
                 checked={pkHasMultipleValues}
@@ -495,7 +495,7 @@ const LinkSelector = withRouter(
               />
             </div>
             <div className={styles.selectedLinkWrapper}>
-              <span className={styles.selectedLinkLabel}>{`${resourcesContext.messages['selectedLink']}: `}</span>
+              <span className={styles.selectedLinkLabel}>{`${resources.messages['selectedLink']}: `}</span>
               <span>{!isNil(link) ? link.name : ''}</span>
             </div>
           </Fragment>
@@ -509,11 +509,7 @@ const LinkSelector = withRouter(
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
           footer={linkSelectorDialogFooter}
-          header={
-            isExternalLink
-              ? resourcesContext.messages['externalLinkSelector']
-              : resourcesContext.messages['linkSelector']
-          }
+          header={isExternalLink ? resources.messages['externalLinkSelector'] : resources.messages['linkSelector']}
           modal={true}
           onHide={() => {
             if (fieldId === '-1' || isNil(link) || isNil(link.referencedField)) {

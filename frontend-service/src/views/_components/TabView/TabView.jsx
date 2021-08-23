@@ -55,10 +55,9 @@ const TabView = withRouter(
     const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
     const [isNavigationHidden, setIsNavigationHidden] = useState(true);
 
-    const resourcesContext = useContext(ResourcesContext);
-
     const divTabsRef = useRef();
     const ulTabsRef = useRef();
+    const resources = useContext(ResourcesContext);
 
     const classNamed = classNames('p-tabview p-component p-tabview-top', className);
     useEffect(() => {
@@ -312,16 +311,16 @@ const TabView = withRouter(
     const renderConfirmDialog = () => (
       <ConfirmDialog
         classNameConfirm={'p-button-danger'}
-        header={resourcesContext.messages['deleteTabHeader']}
-        labelCancel={resourcesContext.messages['no']}
-        labelConfirm={resourcesContext.messages['yes']}
+        header={resources.messages['deleteTabHeader']}
+        labelCancel={resources.messages['no']}
+        labelConfirm={resources.messages['yes']}
         onConfirm={() => {
           onTabConfirmDelete(tableSchemaIdToDeleteToDelete);
           setIsDeleteDialogVisible(false);
         }}
         onHide={() => setIsDeleteDialogVisible(false)}
         visible={isDeleteDialogVisible}>
-        {resourcesContext.messages['deleteTabConfirm']}
+        {resources.messages['deleteTabConfirm']}
       </ConfirmDialog>
     );
 

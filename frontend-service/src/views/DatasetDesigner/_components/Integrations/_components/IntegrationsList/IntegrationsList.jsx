@@ -34,7 +34,7 @@ export const IntegrationsList = ({
   setIsUpdating
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [integrationListState, integrationListDispatch] = useReducer(integrationsListReducer, {
     data: [],
@@ -77,12 +77,12 @@ export const IntegrationsList = ({
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {integrationListState.filtered && integrationListState.data.length !== integrationListState.filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${integrationListState.filteredData.length} | `
+        ? `${resources.messages['filtered']} : ${integrationListState.filteredData.length} | `
         : ''}
-      {resourcesContext.messages['totalRecords']} {integrationListState.data.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
+      {resources.messages['totalRecords']} {integrationListState.data.length}{' '}
+      {resources.messages['records'].toLowerCase()}
       {integrationListState.filtered && integrationListState.data.length === integrationListState.filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
+        ? ` (${resources.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
   );
@@ -160,13 +160,13 @@ export const IntegrationsList = ({
   const integrationNameTemplate = row => (
     <Fragment>
       {row.integrationName}
-      <TooltipButton message={`${resourcesContext.messages['integrationId']}: ${row.integrationId}`}></TooltipButton>
+      <TooltipButton message={`${resources.messages['integrationId']}: ${row.integrationId}`}></TooltipButton>
     </Fragment>
   );
 
   return isEmpty(integrationListState.data) ? (
     <div className={styles.integrationsWithoutTable}>
-      <div className={styles.noIntegrations}>{resourcesContext.messages['noIntegrations']}</div>
+      <div className={styles.noIntegrations}>{resources.messages['noIntegrations']}</div>
     </div>
   ) : (
     <div className={styles.integrations}>
@@ -185,48 +185,46 @@ export const IntegrationsList = ({
           paginatorRight={getPaginatorRecordsCount()}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
-          summary={resourcesContext.messages['externalIntegrations']}
+          summary={resources.messages['externalIntegrations']}
           totalRecords={integrationListState.filteredData.length}
           value={integrationListState.filteredData}>
           <Column
             body={integrationNameTemplate}
             field="integrationName"
-            header={resourcesContext.messages['integrationName']}
+            header={resources.messages['integrationName']}
             key="integrationName"
             sortable={true}
           />
           <Column
             field="operationName"
-            header={resourcesContext.messages['operationName']}
+            header={resources.messages['operationName']}
             key="operationName"
             sortable={true}
           />
           <Column
             body={row => actionsTemplate(row)}
             className={styles.validationCol}
-            header={resourcesContext.messages['actions']}
+            header={resources.messages['actions']}
             key="actions"
             style={{ width: '100px' }}
           />
         </DataTable>
       ) : (
-        <div className={styles.emptyFilteredData}>
-          {resourcesContext.messages['noIntegrationsWithSelectedParameters']}
-        </div>
+        <div className={styles.emptyFilteredData}>{resources.messages['noIntegrationsWithSelectedParameters']}</div>
       )}
 
       {integrationListState.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={integrationListState.isDeleting}
-          header={resourcesContext.messages['deleteIntegrationHeader']}
+          header={resources.messages['deleteIntegrationHeader']}
           iconConfirm={integrationListState.isDeleting ? 'spinnerAnimate' : 'check'}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteIntegration(integrationListState.integrationId)}
           onHide={() => isDeleteDialogVisible(false)}
           visible={integrationListState.isDeleteDialogVisible}>
-          {resourcesContext.messages['deleteIntegrationConfirm']}
+          {resources.messages['deleteIntegrationConfirm']}
         </ConfirmDialog>
       )}
     </div>

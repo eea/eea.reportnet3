@@ -13,7 +13,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 
 export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [isPinned, setIsPinned] = useState(dataflow.pinned === 'pinned');
   const [isPinning, setIsPinning] = useState(false);
@@ -62,7 +62,7 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }
 
       <div className={`${styles.status} ${styles[dataflow.status]}  dataflowList-status-help-step`}>
         <p>
-          <span>{`${resourcesContext.messages['dataflowStatus']}: `}</span>
+          <span>{`${resources.messages['dataflowStatus']}: `}</span>
           {dataflow.status}
         </p>
       </div>
@@ -70,7 +70,7 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }
         <p>
           {dataflow.userRole && (
             <Fragment>
-              <span>{`${resourcesContext.messages['role']}: `}</span>
+              <span>{`${resources.messages['role']}: `}</span>
               {dataflow.userRole}
             </Fragment>
           )}

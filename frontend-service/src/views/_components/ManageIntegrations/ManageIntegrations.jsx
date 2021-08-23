@@ -47,7 +47,7 @@ export const ManageIntegrations = ({
   const componentName = 'integration';
 
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const editParameterRef = useRef(null);
   const integrationNameRef = useRef(null);
@@ -280,13 +280,13 @@ export const ManageIntegrations = ({
 
   const onToggleDialogError = (errorType, option, value) => {
     const dialogContent = {
-      duplicated: resourcesContext.messages['duplicatedParameterKeyErrorContent'],
-      empty: resourcesContext.messages['emptyParameterErrorContent']
+      duplicated: resources.messages['duplicatedParameterKeyErrorContent'],
+      empty: resources.messages['emptyParameterErrorContent']
     };
 
     const dialogHeader = {
-      duplicated: resourcesContext.messages['duplicatedParameterKeyErrorHeader'],
-      empty: resourcesContext.messages['emptyParameterErrorHeader']
+      duplicated: resources.messages['duplicatedParameterKeyErrorHeader'],
+      empty: resources.messages['emptyParameterErrorHeader']
     };
 
     if (parameterRef.current) parameterRef.current.element.focus();
@@ -349,11 +349,11 @@ export const ManageIntegrations = ({
     return options.map(option => (
       <div className={`${styles.field} ${styles[option]} formField `} key={`${componentName}__${option}`}>
         <label htmlFor={`${componentName}__${option}`}>
-          {resourcesContext.messages[option]}
+          {resources.messages[option]}
           <Button
             className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
             icon="infoCircle"
-            tooltip={resourcesContext.messages['notificationRequiredTooltip']}
+            tooltip={resources.messages['notificationRequiredTooltip']}
             tooltipOptions={{ position: 'top' }}
           />
         </label>
@@ -389,7 +389,7 @@ export const ManageIntegrations = ({
               ? 'spinnerAnimate'
               : 'check'
           }
-          label={!isEmpty(updatedData) ? resourcesContext.messages['update'] : resourcesContext.messages['create']}
+          label={!isEmpty(updatedData) ? resources.messages['update'] : resources.messages['create']}
           onClick={() => {
             if (isEmptyForm) onShowErrors();
             else !isEmpty(updatedData) ? onUpdateIntegration() : onCreateIntegration();
@@ -399,13 +399,13 @@ export const ManageIntegrations = ({
       <Button
         className="p-button-secondary p-button-rounded p-button-animated-blink button-right-aligned"
         icon="cancel"
-        label={resourcesContext.messages['cancel']}
+        label={resources.messages['cancel']}
         onClick={() => onCloseModal()}
       />
 
       {(isEmptyForm || isIntegrationNameDuplicated) && (
         <ReactTooltip border={true} effect="solid" id="integrationTooltip" place="top">
-          {resourcesContext.messages[renderDialogFooterTooltipContent()]}
+          {resources.messages[renderDialogFooterTooltipContent()]}
         </ReactTooltip>
       )}
     </Fragment>
@@ -417,8 +417,8 @@ export const ManageIntegrations = ({
         footer={renderDialogFooter}
         header={
           !isEmpty(updatedData)
-            ? resourcesContext.messages['editExternalIntegration']
-            : resourcesContext.messages['createExternalIntegration']
+            ? resources.messages['editExternalIntegration']
+            : resources.messages['createExternalIntegration']
         }
         onHide={() => onCloseModal()}
         style={{ width: '975px' }}
@@ -430,12 +430,12 @@ export const ManageIntegrations = ({
   const renderDropdownLayout = (options = []) => {
     const optionList = {
       operation: [
-        { label: resourcesContext.messages['importOperationManageIntegration'].toUpperCase(), value: 'IMPORT' },
+        { label: resources.messages['importOperationManageIntegration'].toUpperCase(), value: 'IMPORT' },
         {
-          label: resourcesContext.messages['importFromOtherSystemOperationManageIntegration'].toUpperCase(),
+          label: resources.messages['importFromOtherSystemOperationManageIntegration'].toUpperCase(),
           value: 'IMPORT_FROM_OTHER_SYSTEM'
         },
-        { label: resourcesContext.messages['exportOperationManageIntegration'].toUpperCase(), value: 'EXPORT' }
+        { label: resources.messages['exportOperationManageIntegration'].toUpperCase(), value: 'EXPORT' }
       ],
       repository: manageIntegrationsState.repositories,
       processName: manageIntegrationsState.processes
@@ -445,14 +445,14 @@ export const ManageIntegrations = ({
       <div
         className={`${styles.field} ${styles[option]} formField ${printError(option, manageIntegrationsState)}`}
         key={`${componentName}__${option}`}>
-        <label htmlFor={`${componentName}__${option}`}>{resourcesContext.messages[option]}</label>
+        <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
         <Dropdown
           appendTo={document.body}
-          ariaLabel={resourcesContext.messages[option]}
+          ariaLabel={resources.messages[option]}
           disabled={isEmpty(optionList[option])}
           filter={optionList[option].length > 7}
           inputId={`${componentName}__${option}`}
-          name={uniqueId(resourcesContext.messages[option])}
+          name={uniqueId(resources.messages[option])}
           onChange={event => {
             if (option === 'repository') {
               onFillFieldRepository(event.value, option);
@@ -464,7 +464,7 @@ export const ManageIntegrations = ({
           }}
           optionLabel="label"
           options={optionList[option]}
-          placeholder={resourcesContext.messages[`${option}PlaceHolder`]}
+          placeholder={resources.messages[`${option}PlaceHolder`]}
           value={manageIntegrationsState[option]}
         />
       </div>
@@ -485,7 +485,7 @@ export const ManageIntegrations = ({
   };
 
   const renderErrorDialogFooter = (
-    <Button icon="check" label={resourcesContext.messages['ok']} onClick={() => onToggleDialogError('', '', false)} />
+    <Button icon="check" label={resources.messages['ok']} onClick={() => onToggleDialogError('', '', false)} />
   );
 
   const renderInputLayout = (options = []) => {
@@ -498,7 +498,7 @@ export const ManageIntegrations = ({
               : styles[option]
           }`}
           key={`${componentName}__${option}`}>
-          <label htmlFor={`${componentName}__${option}`}>{resourcesContext.messages[option]}</label>
+          <label htmlFor={`${componentName}__${option}`}>{resources.messages[option]}</label>
           <InputText
             id={`${componentName}__${option}`}
             maxLength={
@@ -510,7 +510,7 @@ export const ManageIntegrations = ({
             }
             onChange={event => onFillField(event.target.value, option)}
             onKeyDown={event => onSaveKeyDown(event)}
-            placeholder={resourcesContext.messages[option]}
+            placeholder={resources.messages[option]}
             ref={inputRefs[option]}
             value={manageIntegrationsState[option]}
           />
@@ -529,7 +529,7 @@ export const ManageIntegrations = ({
           className={`${styles.item} ${parameter.id === editorView.id ? styles.selected : undefined}`}
           key={parameter.id}>
           <span className={styles.key} onDoubleClick={() => onToggleEditorView(parameter.id, ['key'])}>
-            {resourcesContext.messages['parameterKey']}:
+            {resources.messages['parameterKey']}:
             <span
               className={styles.parameterText}
               style={{ overflow: parameter.isEditorView.key ? 'visible' : 'hidden' }}>
@@ -537,7 +537,7 @@ export const ManageIntegrations = ({
             </span>
           </span>
           <span className={styles.value} onDoubleClick={() => onToggleEditorView(parameter.id, ['value'])}>
-            {resourcesContext.messages['parameterValue']}:
+            {resources.messages['parameterValue']}:
             <span
               className={styles.parameterText}
               style={{ overflow: parameter.isEditorView.value ? 'visible' : 'hidden' }}>
@@ -583,7 +583,7 @@ export const ManageIntegrations = ({
                 className="p-button-rounded p-button-animated-blink"
                 disabled={isEmpty(parameterKey.trim()) || isKeyDuplicated}
                 icon="add"
-                label={editorView.isEditing ? resourcesContext.messages['update'] : resourcesContext.messages['add']}
+                label={editorView.isEditing ? resources.messages['update'] : resources.messages['add']}
                 onClick={() => onSaveParameter()}
               />
             </span>
@@ -591,14 +591,14 @@ export const ManageIntegrations = ({
               <Button
                 className="p-button-secondary p-button-rounded p-button-animated-blink p-button-right-aligned"
                 icon={'cancel'}
-                label={resourcesContext.messages['cancel']}
+                label={resources.messages['cancel']}
                 onClick={() => onResetParameterInput()}
               />
             )}
 
             {isKeyDuplicated && (
               <ReactTooltip border={true} effect="solid" id="addParameterTooltip" place="top">
-                {resourcesContext.messages['parameterAlreadyExists']}
+                {resources.messages['parameterAlreadyExists']}
               </ReactTooltip>
             )}
           </span>

@@ -57,7 +57,7 @@ const FieldEditor = ({
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [codelistItemsOptions, setCodelistItemsOptions] = useState([]);
   const [codelistItemValue, setCodelistItemValue] = useState();
@@ -175,7 +175,7 @@ const FieldEditor = ({
 
       if (!hasMultipleValues) {
         linkItems.unshift({
-          itemType: resourcesContext.messages['noneCodelist'],
+          itemType: resources.messages['noneCodelist'],
           value: ''
         });
       }
@@ -183,7 +183,7 @@ const FieldEditor = ({
       if (referencedFieldValues.length > 99) {
         linkItems[linkItems.length - 1] = {
           disabled: true,
-          itemType: resourcesContext.messages['moreElements'],
+          itemType: resources.messages['moreElements'],
           value: ''
         };
       }
@@ -250,7 +250,7 @@ const FieldEditor = ({
     const codelistsItems = RecordUtils.getCodelistItems(colsSchema, cells.field);
     codelistsItems.sort((a, b) => a.value.localeCompare(b.value, undefined, { numeric: true, sensitivity: 'base' }));
     codelistsItems.unshift({
-      itemType: resourcesContext.messages['noneCodelist'],
+      itemType: resources.messages['noneCodelist'],
       value: ''
     });
     return codelistsItems;
@@ -423,7 +423,7 @@ const FieldEditor = ({
       case 'POINT':
         return (
           <div className={styles.pointEpsgWrapper}>
-            <label className={styles.epsg}>{resourcesContext.messages['coords']}</label>
+            <label className={styles.epsg}>{resources.messages['coords']}</label>
             <InputText
               id={cells.field}
               keyfilter={RecordUtils.getFilter(type)}
@@ -507,7 +507,7 @@ const FieldEditor = ({
               }
             />
             <div className={styles.pointEpsgWrapper}>
-              <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
+              <label className={styles.epsg}>{resources.messages['epsg']}</label>
               <div>
                 <Dropdown
                   appendTo={document.body}
@@ -555,7 +555,7 @@ const FieldEditor = ({
                         onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type);
                       }
                     }}
-                    tooltip={resourcesContext.messages['selectGeographicalDataOnMap']}
+                    tooltip={resources.messages['selectGeographicalDataOnMap']}
                     tooltipOptions={{ position: 'bottom' }}
                   />
                 </div>
@@ -586,13 +586,13 @@ const FieldEditor = ({
               {!isNil(value) && value !== '' && isValidJSON && !differentTypes
                 ? JSON.parse(value).geometry.coordinates.join(', ')
                 : differentTypes
-                ? resourcesContext.messages['nonEditableDataDifferentTypes']
-                : resourcesContext.messages['nonEditableData']}
+                ? resources.messages['nonEditableDataDifferentTypes']
+                : resources.messages['nonEditableData']}
             </label>
             {!differentTypes && (
               <div className={styles.pointEpsgWrapper}>
                 {!isNil(value) && value !== '' && isValidJSON && (
-                  <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
+                  <label className={styles.epsg}>{resources.messages['epsg']}</label>
                 )}
                 <div>
                   {!isNil(value) && value !== '' && isValidJSON && <span>{currentCRS.label}</span>}
@@ -607,7 +607,7 @@ const FieldEditor = ({
                         }
                       }}
                       style={{ width: '35%' }}
-                      tooltip={resourcesContext.messages['selectGeographicalDataOnMap']}
+                      tooltip={resources.messages['selectGeographicalDataOnMap']}
                       tooltipOptions={{ position: 'bottom' }}
                     />
                   )}
@@ -731,7 +731,7 @@ const FieldEditor = ({
               clearButton={false}
               disabled={isLoadingData}
               filter={true}
-              filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
+              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               maxSelectedLabels={10}
               onChange={e => {
@@ -767,7 +767,7 @@ const FieldEditor = ({
               currentValue={RecordUtils.getCellValue(cells, cells.field)}
               disabled={isLoadingData}
               filter={true}
-              filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
+              filterPlaceholder={resources.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               onChange={e => {
                 setLinkItemsValue(e.target.value.value);

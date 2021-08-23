@@ -33,15 +33,14 @@ const leftSideBarReducer = (state, { type, payload }) => {
 };
 
 const LeftSideBarProvider = ({ children }) => {
+  const resources = useContext(ResourcesContext);
   const [state, dispatch] = useReducer(leftSideBarReducer, { models: [], steps: [], helpTitle: '' });
-
-  const resourcesContext = useContext(ResourcesContext);
 
   const getSteps = (config, component) => {
     const steps = [
       {
-        content: <h2>{resourcesContext.messages[component]}</h2>,
-        locale: { skip: <strong aria-label="skip">{resourcesContext.messages['skipHelp']}</strong> },
+        content: <h2>{resources.messages[component]}</h2>,
+        locale: { skip: <strong aria-label="skip">{resources.messages['skipHelp']}</strong> },
         placement: 'center',
         target: 'body'
       }

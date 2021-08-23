@@ -80,7 +80,7 @@ const BigButtonListReference = withRouter(
     );
 
     const notificationContext = useContext(NotificationContext);
-    const resourcesContext = useContext(ResourcesContext);
+    const resources = useContext(ResourcesContext);
 
     const {
       cloneDataflow,
@@ -234,20 +234,20 @@ const BigButtonListReference = withRouter(
       {
         command: () => handleDialogs({ dialog: 'isNewDataset', isVisible: true }),
         icon: 'add',
-        label: resourcesContext.messages['createNewEmptyDatasetSchema']
+        label: resources.messages['createNewEmptyDatasetSchema']
       },
       {
         command: () => handleDialogs({ dialog: 'cloneDialogVisible', isVisible: true }),
         icon: 'clone',
-        label: resourcesContext.messages['cloneSchemasFromDataflow']
+        label: resources.messages['cloneSchemasFromDataflow']
       },
-      { disabled: true, icon: 'import', label: resourcesContext.messages['importSchema'] }
+      { disabled: true, icon: 'import', label: resources.messages['importSchema'] }
     ];
 
     const designModel = newDatasetSchema => {
       return [
         {
-          label: resourcesContext.messages['openDataset'],
+          label: resources.messages['openDataset'],
           icon: 'openFolder',
           command: () => {
             onRedirect({
@@ -256,9 +256,9 @@ const BigButtonListReference = withRouter(
             });
           }
         },
-        { label: resourcesContext.messages['rename'], icon: 'pencil' },
+        { label: resources.messages['rename'], icon: 'pencil' },
         {
-          label: resourcesContext.messages['delete'],
+          label: resources.messages['delete'],
           icon: 'trash',
           command: () => {
             getDeleteSchemaIndex(newDatasetSchema.index);
@@ -301,7 +301,7 @@ const BigButtonListReference = withRouter(
         : hasDatasets && isCreateReferenceEnabled
         ? 'siteMap'
         : 'siteMapDisabled',
-      caption: resourcesContext.messages['createReferenceDatasetsBtnLabel'],
+      caption: resources.messages['createReferenceDatasetsBtnLabel'],
       enabled: hasDatasets && isCreateReferenceEnabled,
       handleRedirect:
         hasDatasets && isCreateReferenceEnabled && !dataflowState.isCreatingReferenceDatasets
@@ -310,9 +310,9 @@ const BigButtonListReference = withRouter(
       helpClassName: 'dataflow-create-datacollection-help-step',
       layout: 'defaultBigButton',
       tooltip: !hasDatasets
-        ? resourcesContext.messages['createReferenceDatasetsBtnTooltip']
+        ? resources.messages['createReferenceDatasetsBtnTooltip']
         : !isCreateReferenceEnabled
-        ? resourcesContext.messages['disabledCreateDataCollectionSchemasWithError']
+        ? resources.messages['disabledCreateDataCollectionSchemasWithError']
         : '',
       visibility: isDesignStatus
     };
@@ -321,7 +321,7 @@ const BigButtonListReference = withRouter(
       buttonClass: 'newItem',
       buttonIcon: isCloningStatus ? 'spinner' : 'plus',
       buttonIconClass: isCloningStatus ? 'spinner' : 'newItemCross',
-      caption: resourcesContext.messages['newSchema'],
+      caption: resources.messages['newSchema'],
       helpClassName: 'dataflow-new-schema-help-step',
       layout: isCloningStatus ? 'defaultBigButton' : 'menuBigButton',
       model: isCloningStatus ? [] : newSchemaModel,
@@ -346,7 +346,7 @@ const BigButtonListReference = withRouter(
           index: newDatasetSchema.index,
           layout: 'defaultBigButton',
           onSaveName: onSaveName,
-          placeholder: resourcesContext.messages['datasetSchemaNamePlaceholder'],
+          placeholder: resources.messages['datasetSchemaNamePlaceholder'],
           visibility: isDesignStatus
         }));
 
@@ -368,7 +368,7 @@ const BigButtonListReference = withRouter(
         {dialogVisibility.isNewDataset && (
           <Dialog
             className={styles.dialog}
-            header={resourcesContext.messages['newDatasetSchema']}
+            header={resources.messages['newDatasetSchema']}
             onHide={() => handleDialogs({ dialog: 'isNewDataset', isVisible: false })}
             visible={dialogVisibility.isNewDataset}>
             <NewDatasetSchemaForm
@@ -390,18 +390,18 @@ const BigButtonListReference = withRouter(
                   className="p-button-primary p-button-animated-blink"
                   disabled={isNil(cloneDataflow.id)}
                   icon={'plus'}
-                  label={resourcesContext.messages['cloneSelectedDataflow']}
+                  label={resources.messages['cloneSelectedDataflow']}
                   onClick={() => cloneDatasetSchemas()}
                 />
                 <Button
                   className="p-button-secondary p-button-animated-blink p-button-right-aligned"
                   icon={'cancel'}
-                  label={resourcesContext.messages['close']}
+                  label={resources.messages['close']}
                   onClick={() => handleDialogs({ dialog: 'cloneDialogVisible', isVisible: false })}
                 />
               </Fragment>
             }
-            header={resourcesContext.messages['dataflowsList']}
+            header={resources.messages['dataflowsList']}
             onHide={() => handleDialogs({ dialog: 'cloneDialogVisible', isVisible: false })}
             style={{ width: '95%' }}
             visible={dialogVisibility.cloneDialogVisible}>
@@ -411,38 +411,38 @@ const BigButtonListReference = withRouter(
 
         {dialogVisibility.isCreateReference && (
           <ConfirmDialog
-            header={resourcesContext.messages['createReferenceDatasetsDialogHeader']}
-            labelCancel={resourcesContext.messages['no']}
-            labelConfirm={resourcesContext.messages['yes']}
+            header={resources.messages['createReferenceDatasetsDialogHeader']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
             onConfirm={onCreateReferenceDatasets}
             onHide={() => handleDialogs({ dialog: 'isCreateReference', isVisible: false })}
             visible={dialogVisibility.isCreateReference}>
-            {resourcesContext.messages['createReferenceDatasetsDialogMessage']}
+            {resources.messages['createReferenceDatasetsDialogMessage']}
           </ConfirmDialog>
         )}
 
         {dialogVisibility.isTableWithNoPK && (
           <ConfirmDialog
-            header={resourcesContext.messages['tableWithNoPKWarningTitle']}
-            labelCancel={resourcesContext.messages['no']}
-            labelConfirm={resourcesContext.messages['yes']}
+            header={resources.messages['tableWithNoPKWarningTitle']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
             onConfirm={() => onCreateReferenceDatasetsWithNoPKs()}
             onHide={() => handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false })}
             visible={dialogVisibility.isTableWithNoPK}>
-            {resourcesContext.messages['tableWithNoPKWarningBody']}
+            {resources.messages['tableWithNoPKWarningBody']}
           </ConfirmDialog>
         )}
 
         {dialogVisibility.isDeleteDataset && (
           <ConfirmDialog
             classNameConfirm={'p-button-danger'}
-            header={resourcesContext.messages['deleteReferenceDatasetDialogHeader']}
-            labelCancel={resourcesContext.messages['no']}
-            labelConfirm={resourcesContext.messages['yes']}
+            header={resources.messages['deleteReferenceDatasetDialogHeader']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
             onConfirm={onDeleteDatasetSchema}
             onHide={() => handleDialogs({ dialog: 'isDeleteDataset', isVisible: false })}
             visible={dialogVisibility.isDeleteDataset}>
-            {resourcesContext.messages['deleteReferenceDatasetDialogMessage']}
+            {resources.messages['deleteReferenceDatasetDialogMessage']}
           </ConfirmDialog>
         )}
       </Fragment>

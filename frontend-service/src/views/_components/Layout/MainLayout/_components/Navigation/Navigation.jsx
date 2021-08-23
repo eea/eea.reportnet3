@@ -13,7 +13,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 const Navigation = withRouter(({ history }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   return (
     <div className={styles.header} id="header">
       <a
@@ -23,9 +23,9 @@ const Navigation = withRouter(({ history }) => {
           e.preventDefault();
           history.push(getUrl(routes.ACCESS_POINT));
         }}
-        title={resourcesContext.messages['titleHeader']}>
+        title={resources.messages['titleHeader']}>
         <img alt="Reportnet" className={styles.appLogo} height="50px" src={logo} />
-        <h1 className={styles.appTitle}>{resourcesContext.messages['titleHeader']}</h1>
+        <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
       </a>
       <UserCard />
     </div>

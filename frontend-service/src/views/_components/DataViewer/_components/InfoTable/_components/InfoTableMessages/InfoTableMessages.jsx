@@ -7,7 +7,7 @@ import colors from 'conf/colors.json';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const InfoTableMessages = ({ checkValidCoordinates, data, filteredColumns, numCopiedRecords }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const checkPastedColumnsErrors = () => {
     const numCopiedCols = data.map(rows => rows.copiedCols);
@@ -22,31 +22,31 @@ export const InfoTableMessages = ({ checkValidCoordinates, data, filteredColumns
             <div>
               {equalNumberColumns.length > 0 && (
                 <p style={{ fontWeight: 'bold', color: colors.errors }}>
-                  {resourcesContext.messages['pasteColumnWarningMessage']}
+                  {resources.messages['pasteColumnWarningMessage']}
                 </p>
               )}
               {numCopiedRecords > 500 ? (
                 <p style={{ fontWeight: 'bold', color: colors.errors }}>
-                  {resourcesContext.messages['pasteRecordsWarningMessage']}
+                  {resources.messages['pasteRecordsWarningMessage']}
                 </p>
               ) : null}
               {!checkValidCoordinates() && (
                 <Fragment>
                   <p style={{ fontWeight: 'bold', color: colors.errors }}>
-                    {resourcesContext.messages['pasteRecordsWarningCoordinatesMessage']}
+                    {resources.messages['pasteRecordsWarningCoordinatesMessage']}
                   </p>
                   <p style={{ fontStyle: 'italic', fontSize: '0.9em', fontWeight: 'bold' }}>
-                    {`${resourcesContext.messages['pasteRecordsCoordinatesMessage']}(${resourcesContext.messages['pasteRecordsCoordinatesStructureMessage']})`}
+                    {`${resources.messages['pasteRecordsCoordinatesMessage']}(${resources.messages['pasteRecordsCoordinatesStructureMessage']})`}
                   </p>
                 </Fragment>
               )}
-              <p>{resourcesContext.messages['pasteColumnWarningConfirmMessage']}</p>
+              <p>{resources.messages['pasteColumnWarningConfirmMessage']}</p>
             </div>
           );
         } else {
           return (
             <div>
-              <p>{resourcesContext.messages['pasteColumnConfirmMessage']}</p>
+              <p>{resources.messages['pasteColumnConfirmMessage']}</p>
             </div>
           );
         }

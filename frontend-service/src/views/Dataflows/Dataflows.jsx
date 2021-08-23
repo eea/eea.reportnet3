@@ -51,7 +51,7 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
@@ -78,13 +78,13 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const tabMenuItems = isCustodian
     ? [
-        { className: styles.flow_tab, id: 'reporting', label: resourcesContext.messages['reportingDataflowsListTab'] },
-        { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] },
-        { className: styles.flow_tab, id: 'reference', label: resourcesContext.messages['referenceDataflowsListTab'] }
+        { className: styles.flow_tab, id: 'reporting', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'reference', label: resources.messages['referenceDataflowsListTab'] }
       ]
     : [
-        { className: styles.flow_tab, id: 'reporting', label: resourcesContext.messages['reportingDataflowsListTab'] },
-        { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] }
+        { className: styles.flow_tab, id: 'reporting', label: resources.messages['reportingDataflowsListTab'] },
+        { className: styles.flow_tab, id: 'business', label: resources.messages['businessDataflowsListTab'] }
       ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
@@ -256,7 +256,7 @@ const Dataflows = withRouter(({ history, match }) => {
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon={'cancel'}
-      label={resourcesContext.messages['close']}
+      label={resources.messages['close']}
       onClick={() => manageDialogs('isUserListVisible', false)}
     />
   );
@@ -265,7 +265,7 @@ const Dataflows = withRouter(({ history, match }) => {
     <Fragment>
       <Button
         icon="check"
-        label={resourcesContext.messages['ok']}
+        label={resources.messages['ok']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
           setToCheckedObligation();
@@ -274,7 +274,7 @@ const Dataflows = withRouter(({ history, match }) => {
       <Button
         className="p-button-secondary button-right-aligned p-button-animated-blink"
         icon="cancel"
-        label={resourcesContext.messages['cancel']}
+        label={resources.messages['cancel']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
           setObligationToPrevious();
@@ -302,7 +302,7 @@ const Dataflows = withRouter(({ history, match }) => {
       {dataflowsState.isUserListVisible && (
         <Dialog
           footer={renderUserListDialogFooter()}
-          header={resourcesContext.messages['allDataflowsUserListHeader']}
+          header={resources.messages['allDataflowsUserListHeader']}
           onHide={() => manageDialogs('isUserListVisible', false)}
           visible={dataflowsState.isUserListVisible}>
           <UserList />
@@ -340,7 +340,7 @@ const Dataflows = withRouter(({ history, match }) => {
       {dataflowsState.isReportingObligationsDialogVisible && (
         <Dialog
           footer={renderObligationFooter()}
-          header={resourcesContext.messages['reportingObligations']}
+          header={resources.messages['reportingObligations']}
           onHide={onHideObligationDialog}
           style={{ width: '95%' }}
           visible={dataflowsState.isReportingObligationsDialogVisible}>

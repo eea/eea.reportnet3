@@ -26,7 +26,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow = false }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [cloneSchemasState, cloneSchemasDispatch] = useReducer(cloneSchemasReducer, {
@@ -52,12 +52,12 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
     return (
       <Fragment>
         {cloneSchemasState.filtered && cloneSchemasState.allDataflows.length !== cloneSchemasState.filteredData.length
-          ? `${resourcesContext.messages['filtered']} : ${cloneSchemasState.filteredData.length} | `
+          ? `${resources.messages['filtered']} : ${cloneSchemasState.filteredData.length} | `
           : ''}
-        {resourcesContext.messages['totalRecords']} {cloneSchemasState.allDataflows.length}{' '}
-        {resourcesContext.messages['records'].toLowerCase()}
+        {resources.messages['totalRecords']} {cloneSchemasState.allDataflows.length}{' '}
+        {resources.messages['records'].toLowerCase()}
         {cloneSchemasState.filtered && cloneSchemasState.allDataflows.length === cloneSchemasState.filteredData.length
-          ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
+          ? ` (${resources.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>
     );
@@ -178,9 +178,9 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
   return (
     <div className={styles.cloneSchemas} style={cloneSchemaStyles}>
       <div className={styles.switchDiv}>
-        <label className={styles.switchTextInput}>{resourcesContext.messages['magazineView']}</label>
+        <label className={styles.switchTextInput}>{resources.messages['magazineView']}</label>
         <InputSwitch checked={userContext.userProps.listView} onChange={e => userContext.onToggleTypeView(e.value)} />
-        <label className={styles.switchTextInput}>{resourcesContext.messages['listView']}</label>
+        <label className={styles.switchTextInput}>{resources.messages['listView']}</label>
       </div>
       <div className={styles.filters}>
         <Filters
@@ -195,7 +195,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
         className={`${styles.selectedDataflow} ${
           isEmpty(cloneSchemasState.data || cloneSchemasState.filteredData) ? styles.filteredSelected : ''
         }`}>
-        <span>{`${resourcesContext.messages['selectedDataflow']}: `}</span>
+        <span>{`${resources.messages['selectedDataflow']}: `}</span>
         {!isEmpty(cloneSchemasState.chosenDataflow) ? cloneSchemasState.chosenDataflow.name : '-'}
       </span>
     </div>

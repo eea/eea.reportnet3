@@ -46,7 +46,7 @@ export const ManageReferenceDataflow = ({
   const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
 
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [deleteInput, setDeleteInput] = useState('');
@@ -76,7 +76,7 @@ export const ManageReferenceDataflow = ({
       handleErrors({
         field: 'name',
         hasErrors: true,
-        message: resourcesContext.messages['emptyNameValidationError']
+        message: resources.messages['emptyNameValidationError']
       });
       hasErrors = true;
     }
@@ -85,7 +85,7 @@ export const ManageReferenceDataflow = ({
       handleErrors({
         field: 'description',
         hasErrors: true,
-        message: resourcesContext.messages['emptyDescriptionValidationError']
+        message: resources.messages['emptyDescriptionValidationError']
       });
       hasErrors = true;
     }
@@ -94,13 +94,17 @@ export const ManageReferenceDataflow = ({
       handleErrors({
         field: 'description',
         hasErrors: true,
-        message: resourcesContext.messages['dataflowDescriptionValidationMax']
+        message: `${resources.messages['dataflowDescriptionValidationMax']} (${resources.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`
       });
       hasErrors = true;
     }
 
     if (name.length > config.INPUT_MAX_LENGTH) {
-      handleErrors({ field: 'name', hasErrors: true, message: resourcesContext.messages['dataflowNameValidationMax'] });
+      handleErrors({
+        field: 'name',
+        hasErrors: true,
+        message: `${resources.messages['dataflowNameValidationMax']} (${resources.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`
+      });
       hasErrors = true;
     }
 
@@ -143,7 +147,7 @@ export const ManageReferenceDataflow = ({
       }
     } catch (error) {
       if (TextUtils.areEquals(error?.response?.data, 'Dataflow name already exists')) {
-        handleErrors({ field: 'name', hasErrors: true, message: resourcesContext.messages['dataflowNameExists'] });
+        handleErrors({ field: 'name', hasErrors: true, message: resources.messages['dataflowNameExists'] });
         notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
       } else {
         console.error('ManageReferenceDataflows - onManageReferenceDataflow.', error);
@@ -164,7 +168,7 @@ export const ManageReferenceDataflow = ({
         {!isEditing && (
           <div className={styles.checkboxWrapper}>
             <Checkbox
-              ariaLabel={resourcesContext.messages['pinDataflow']}
+              ariaLabel={resources.messages['pinDataflow']}
               checked={pinDataflow}
               id="replaceCheckbox"
               inputId="replaceCheckbox"
@@ -172,7 +176,7 @@ export const ManageReferenceDataflow = ({
               role="checkbox"
             />
             <label>
-              <span onClick={() => setPinDataflow(!pinDataflow)}>{resourcesContext.messages['pinDataflow']}</span>
+              <span onClick={() => setPinDataflow(!pinDataflow)}>{resources.messages['pinDataflow']}</span>
             </label>
             <FontAwesomeIcon
               aria-hidden={false}
@@ -182,7 +186,7 @@ export const ManageReferenceDataflow = ({
               icon={AwesomeIcons('infoCircle')}
             />
             <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="pinDataflow" place="top">
-              <span>{resourcesContext.messages['pinDataflowMessage']}</span>
+              <span>{resources.messages['pinDataflowMessage']}</span>
             </ReactTooltip>
           </div>
         )}
@@ -190,7 +194,7 @@ export const ManageReferenceDataflow = ({
           <Button
             className="p-button-danger p-button-animated-blink"
             icon="trash"
-            label={resourcesContext.messages['deleteDataflowButton']}
+            label={resources.messages['deleteDataflowButton']}
             onClick={() => setIsDeleteDialogVisible(true)}
           />
         )}
@@ -201,13 +205,13 @@ export const ManageReferenceDataflow = ({
         }`}
         disabled={isEmpty(name) || isEmpty(description) || isSending}
         icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}
-        label={isEditing ? resourcesContext.messages['save'] : resourcesContext.messages['create']}
+        label={isEditing ? resources.messages['save'] : resources.messages['create']}
         onClick={() => onManageReferenceDataflow()}
       />
       <Button
         className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
         icon={'cancel'}
-        label={isEditing ? resourcesContext.messages['cancel'] : resourcesContext.messages['close']}
+        label={isEditing ? resources.messages['cancel'] : resources.messages['close']}
         onClick={() => manageDialogs(dialogName, false)}
       />
     </Fragment>
@@ -219,8 +223,8 @@ export const ManageReferenceDataflow = ({
         footer={renderDialogFooter()}
         header={
           isEditing
-            ? resourcesContext.messages['editReferenceDataflowDialogHeader']
-            : resourcesContext.messages['createReferenceDataflowDialogHeader']
+            ? resources.messages['editReferenceDataflowDialogHeader']
+            : resources.messages['createReferenceDataflowDialogHeader']
         }
         onHide={() => manageDialogs(dialogName, false)}
         visible={isVisible}>
@@ -232,7 +236,7 @@ export const ManageReferenceDataflow = ({
             onBlur={checkErrors}
             onChange={event => setName(event.target.value)}
             onFocus={() => handleErrors({ field: 'name', hasErrors: false, message: '' })}
-            placeholder={resourcesContext.messages['createDataflowName']}
+            placeholder={resources.messages['createDataflowName']}
             ref={inputRef}
             value={name}
           />
@@ -245,7 +249,7 @@ export const ManageReferenceDataflow = ({
             onBlur={checkErrors}
             onChange={event => setDescription(event.target.value)}
             onFocus={() => handleErrors({ field: 'description', hasErrors: false, message: '' })}
-            placeholder={resourcesContext.messages['createDataflowDescription']}
+            placeholder={resources.messages['createDataflowDescription']}
             rows={10}
             value={description}
           />
@@ -264,31 +268,29 @@ export const ManageReferenceDataflow = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={!TextUtils.areEquals(deleteInput, metadata.name) || isDeleting}
-          header={resourcesContext.messages['deleteReferenceDataflowDialogHeader']}
+          header={resources.messages['deleteReferenceDataflowDialogHeader']}
           iconConfirm={isDeleting && 'spinnerAnimate'}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={onDeleteDataflow}
           onHide={() => setIsDeleteDialogVisible(false)}
           visible={isDeleteDialogVisible}>
-          <p>{resourcesContext.messages['deleteDataflow']}</p>
+          <p>{resources.messages['deleteDataflow']}</p>
           <p
             dangerouslySetInnerHTML={{
-              __html: TextUtils.parseText(resourcesContext.messages['deleteDataflowConfirm'], {
+              __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
                 dataflowName: metadata.name
               })
             }}></p>
-          <p>
-            <InputText
-              className={`${styles.inputText}`}
-              id="deleteDataflow"
-              maxLength={255}
-              name={resourcesContext.messages['deleteDataflowButton']}
-              onChange={event => setDeleteInput(event.target.value)}
-              ref={deleteInputRef}
-              value={deleteInput}
-            />
-          </p>
+          <InputText
+            className={`${styles.inputText}`}
+            id="deleteDataflow"
+            maxLength={config.INPUT_MAX_LENGTH}
+            name={resources.messages['deleteDataflowButton']}
+            onChange={event => setDeleteInput(event.target.value)}
+            ref={deleteInputRef}
+            value={deleteInput}
+          />
         </ConfirmDialog>
       )}
     </Fragment>

@@ -22,7 +22,7 @@ const DatasetSchema = ({
   uniqueList = [],
   validationList
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const renderDatasetSchema = () => {
     if (!isUndefined(designDataset) && !isNull(designDataset)) {
@@ -140,30 +140,30 @@ const DatasetSchema = ({
   const getFieldFormat = field => {
     switch (field.type.toUpperCase()) {
       case 'DATE':
-        return resourcesContext.messages['dateFieldFormatRestriction'];
+        return resources.messages['dateFieldFormatRestriction'];
       case 'DATETIME':
-        return resourcesContext.messages['datetimeFieldFormatRestriction'];
+        return resources.messages['datetimeFieldFormatRestriction'];
       case 'TEXT':
       case 'TEXTAREA':
-        return resourcesContext.messages['textFieldFormatRestriction'];
+        return resources.messages['textFieldFormatRestriction'];
       case 'RICH_TEXT':
-        return resourcesContext.messages['richTextFieldFormatRestriction'];
+        return resources.messages['richTextFieldFormatRestriction'];
       case 'NUMBER_INTEGER':
-        return resourcesContext.messages['longFieldFormatRestriction'];
+        return resources.messages['longFieldFormatRestriction'];
       case 'NUMBER_DECIMAL':
-        return resourcesContext.messages['decimalFieldFormatRestriction'];
+        return resources.messages['decimalFieldFormatRestriction'];
       case 'EMAIL':
-        return resourcesContext.messages['emailFieldFormatRestriction'];
+        return resources.messages['emailFieldFormatRestriction'];
       case 'PHONE':
-        return resourcesContext.messages['phoneNumberFieldFormatRestriction'];
+        return resources.messages['phoneNumberFieldFormatRestriction'];
       case 'URL':
-        return resourcesContext.messages['urlFieldFormatRestriction'];
+        return resources.messages['urlFieldFormatRestriction'];
       case 'ATTACHMENT':
-        return `${resourcesContext.messages['validExtensions']} ${field.validExtensions.join(', ')}
-        - ${resourcesContext.messages['maxFileSize']} ${
+        return `${resources.messages['validExtensions']} ${field.validExtensions.join(', ')}
+        - ${resources.messages['maxFileSize']} ${
           field.maxSize.toString() !== '0'
-            ? `${field.maxSize} ${resourcesContext.messages['MB']}`
-            : resourcesContext.messages['maxSizeNotDefined']
+            ? `${field.maxSize} ${resources.messages['MB']}`
+            : resources.messages['maxSizeNotDefined']
         }`;
       case 'POINT':
       case 'MULTIPOINT':
@@ -176,10 +176,10 @@ const DatasetSchema = ({
             href="https://geojsonlint.com/"
             rel="noreferrer"
             target="_blank"
-            title={resourcesContext.messages['geomTypeHelpTooltip']}>
+            title={resources.messages['geomTypeHelpTooltip']}>
             <FontAwesomeIcon
               aria-hidden={false}
-              aria-label={resourcesContext.messages['geomTypeHelpTooltip']}
+              aria-label={resources.messages['geomTypeHelpTooltip']}
               className="p-breadcrumb-home"
               data-for={`${field.fieldId}_geometricTypeTooltip`}
               data-tip
@@ -191,7 +191,7 @@ const DatasetSchema = ({
               effect="solid"
               id={`${field.fieldId}_geometricTypeTooltip`}
               place="top">
-              <span>{resourcesContext.messages['geomTypeHelpTooltip']}</span>
+              <span>{resources.messages['geomTypeHelpTooltip']}</span>
             </ReactTooltip>
           </a>
         );

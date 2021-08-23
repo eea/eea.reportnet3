@@ -46,7 +46,7 @@ export const WebformView = ({
   state,
   tables
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const tableSchemaNames = state.schemaTables.map(table => table.name);
   const { getWebformTabs } = WebformsUtils;
@@ -191,7 +191,7 @@ export const WebformView = ({
         field={field}
         filter={true}
         filterMatchMode="contains"
-        header={resourcesContext.messages[field]}
+        header={resources.messages[field]}
         key={field}
         sortable={true}
       />

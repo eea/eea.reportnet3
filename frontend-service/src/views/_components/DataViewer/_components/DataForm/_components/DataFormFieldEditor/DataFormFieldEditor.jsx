@@ -56,7 +56,7 @@ const DataFormFieldEditor = ({
   ];
 
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
@@ -271,14 +271,14 @@ const DataFormFieldEditor = ({
 
       if (!hasMultipleValues) {
         linkItems.unshift({
-          itemType: resourcesContext.messages['noneCodelist'],
+          itemType: resources.messages['noneCodelist'],
           value: ''
         });
       }
       if (referencedFieldValues.length > 99) {
         linkItems[linkItems.length - 1] = {
           disabled: true,
-          itemType: resourcesContext.messages['moreElements'],
+          itemType: resources.messages['moreElements'],
           value: ''
         };
       }
@@ -308,10 +308,10 @@ const DataFormFieldEditor = ({
           onChangeForm(field, e.target.value.value, isConditional);
         }}
         optionLabel="itemType"
-        options={RecordUtils.getCodelistItemsWithEmptyOption(column, resourcesContext.messages['noneCodelist'])}
+        options={RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist'])}
         ref={dropdownRef}
         value={RecordUtils.getCodelistValue(
-          RecordUtils.getCodelistItemsWithEmptyOption(column, resourcesContext.messages['noneCodelist']),
+          RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist']),
           fieldValue
         )}
       />
@@ -485,7 +485,7 @@ const DataFormFieldEditor = ({
           clearButton={false}
           disabled={(column.readOnly && reporting) || isSaving || isLoadingData}
           filter={true}
-          filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
+          filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           isLoadingData={isLoadingData}
           maxSelectedLabels={10}
           onChange={e => onChangeForm(field, e.value, isConditional)}
@@ -512,7 +512,7 @@ const DataFormFieldEditor = ({
           currentValue={fieldValue}
           disabled={(column.readOnly && reporting) || isSaving || isLoadingData}
           filter={true}
-          filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
+          filterPlaceholder={resources.messages['linkFilterPlaceholder']}
           isLoadingData={isLoadingData}
           onChange={e => {
             onChangeForm(field, e.target.value.value, isConditional);
@@ -540,7 +540,7 @@ const DataFormFieldEditor = ({
   const renderMapType = (field, fieldValue) => (
     <div>
       <div className={styles.pointEpsgWrapper}>
-        <label className={styles.epsg}>{resourcesContext.messages['coords']}</label>
+        <label className={styles.epsg}>{resources.messages['coords']}</label>
         <InputText
           className={`${styles.pointInput} ${map.showCoordinateError && styles.pointInputError}`}
           disabled={(column.readOnly && reporting) || isSaving}
@@ -572,13 +572,11 @@ const DataFormFieldEditor = ({
           type="text"
           value={fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates : ''}
         />
-        {map.showCoordinateError && (
-          <span className={styles.pointError}>{resourcesContext.messages['wrongCoordinate']}</span>
-        )}
+        {map.showCoordinateError && <span className={styles.pointError}>{resources.messages['wrongCoordinate']}</span>}
       </div>
 
       <div className={styles.pointEpsgWrapper}>
-        <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
+        <label className={styles.epsg}>{resources.messages['epsg']}</label>
         <Dropdown
           appendTo={document.body}
           ariaLabel={'crs'}
@@ -605,7 +603,7 @@ const DataFormFieldEditor = ({
           disabled={map.isMapDisabled}
           icon="marker"
           onClick={() => onMapOpen(fieldValue)}
-          tooltip={resourcesContext.messages['selectGeographicalDataOnMap']}
+          tooltip={resources.messages['selectGeographicalDataOnMap']}
           tooltipOptions={{ position: 'bottom' }}
         />
       </div>
@@ -631,13 +629,13 @@ const DataFormFieldEditor = ({
       <Button
         className={`p-button-animated-blink ${styles.saveButton}`}
         icon={'check'}
-        label={resourcesContext.messages['save']}
+        label={resources.messages['save']}
         onClick={() => onSavePoint(map.newPoint, map.newPointCRS)}
       />
       <Button
         className="p-button-secondary button-right-aligned"
         icon="cancel"
-        label={resourcesContext.messages['cancel']}
+        label={resources.messages['cancel']}
         onClick={() => {
           dispatchMap({
             type: 'CANCEL_SAVE_MAP_NEW_POINT',
@@ -657,7 +655,7 @@ const DataFormFieldEditor = ({
           className={'map-data'}
           dismissableMask={false}
           footer={saveMapCoordinatesDialogFooter}
-          header={resourcesContext.messages['geospatialData']}
+          header={resources.messages['geospatialData']}
           modal={true}
           onHide={() => dispatchMap({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}
           visible={map.isMapOpen}>

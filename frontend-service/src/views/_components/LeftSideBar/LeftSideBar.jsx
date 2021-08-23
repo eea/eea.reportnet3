@@ -22,7 +22,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [helpIndex, setHelpIndex] = useState();
@@ -195,13 +195,13 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
 
             {userContext.userProps.showLogoutConfirmation && logoutConfirmVisible && (
               <ConfirmDialog
-                header={resourcesContext.messages['logout']}
-                labelCancel={resourcesContext.messages['no']}
-                labelConfirm={resourcesContext.messages['yes']}
+                header={resources.messages['logout']}
+                labelCancel={resources.messages['no']}
+                labelConfirm={resources.messages['yes']}
                 onConfirm={() => userLogout()}
                 onHide={() => setLogoutConfirmVisible(false)}
                 visible={logoutConfirmVisible}>
-                {resourcesContext.messages['userLogout']}
+                {resources.messages['userLogout']}
               </ConfirmDialog>
             )}
           </Fragment>

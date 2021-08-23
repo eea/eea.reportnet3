@@ -54,7 +54,7 @@ export const WebformRecord = ({
   webformType
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
     isConditionalChanged: false,
@@ -315,7 +315,7 @@ export const WebformRecord = ({
                     {element.title ? element.title : element.name}
                     {<span style={{ color: 'var(--errors)' }}>{element.showRequiredCharacter ? ' *' : ''}</span>}
                     {element.hasErrors && (
-                      <IconTooltip levelError={'ERROR'} message={resourcesContext.messages['tableWithErrorsTooltip']} />
+                      <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
                     )}
                   </h3>
 
@@ -325,7 +325,7 @@ export const WebformRecord = ({
                       icon={
                         addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
                       }
-                      label={resourcesContext.messages['addRecord']}
+                      label={resources.messages['addRecord']}
                       onClick={() => {
                         let filteredRecordId = null;
                         if (TextUtils.areEquals(element.name, 'OtherObjectives')) {
@@ -346,9 +346,7 @@ export const WebformRecord = ({
                 <span
                   className={styles.nonExistTable}
                   dangerouslySetInnerHTML={{
-                    __html: TextUtils.parseText(resourcesContext.messages['tableIsNotCreated'], {
-                      tableName: element.name
-                    })
+                    __html: TextUtils.parseText(resources.messages['tableIsNotCreated'], { tableName: element.name })
                   }}
                 />
               )}
@@ -459,10 +457,10 @@ export const WebformRecord = ({
 
     if (isEmpty(record)) errorMessages.push('PLEASE CHOOSE ONE');
     if (hasFields) {
-      errorMessages.push(resourcesContext.messages['emptyWebformTable']);
+      errorMessages.push(resources.messages['emptyWebformTable']);
     }
     if (content.totalRecords === 0) {
-      errorMessages.push(resourcesContext.messages['webformTableWithLessRecords']);
+      errorMessages.push(resources.messages['webformTableWithLessRecords']);
     }
     return errorMessages;
   };
@@ -470,16 +468,16 @@ export const WebformRecord = ({
   const renderArticle15ErrorMessages = content => {
     const errorMessages = [];
     if (hasFields) {
-      errorMessages.push(resourcesContext.messages['emptyWebformTable']);
+      errorMessages.push(resources.messages['emptyWebformTable']);
     }
     if (content.totalRecords === 0) {
-      errorMessages.push(resourcesContext.messages['webformTableWithLessRecords']);
+      errorMessages.push(resources.messages['webformTableWithLessRecords']);
     }
     if (content.totalRecords > 1) {
-      errorMessages.push(resourcesContext.messages['webformTableWithMoreRecords']);
+      errorMessages.push(resources.messages['webformTableWithMoreRecords']);
     }
     if (!isFixedNumber) {
-      errorMessages.push(resourcesContext.messages['webformTableWithoutFixedNumber']);
+      errorMessages.push(resources.messages['webformTableWithoutFixedNumber']);
     }
 
     return errorMessages;
@@ -493,14 +491,14 @@ export const WebformRecord = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={webformRecordState.isDeleting}
-          header={resourcesContext.messages['deleteRow']}
+          header={resources.messages['deleteRow']}
           iconConfirm={webformRecordState.isDeleting ? 'spinnerAnimate' : 'check'}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteMultipleWebform(selectedRecordId)}
           onHide={() => handleDialogs('deleteRow', false)}
           visible={isDialogVisible.deleteRow}>
-          {resourcesContext.messages['confirmDeleteRow']}
+          {resources.messages['confirmDeleteRow']}
         </ConfirmDialog>
       )}
     </Fragment>

@@ -17,7 +17,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { useStatusFilter } from 'views/_components/StatusList/_hooks/useStatusFilter';
 
 export const ReleasedDatasetsDashboard = dataflowId => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [isLoading, setLoading] = useState(true);
   const [maxValue, setMaxValue] = useState();
@@ -51,8 +51,8 @@ export const ReleasedDatasetsDashboard = dataflowId => {
     return {
       labels: data.labels,
       datasets: [
-        { label: resourcesContext.messages['released'], backgroundColor: colors.green400, data: data.releasedData },
-        { label: resourcesContext.messages['unreleased'], backgroundColor: colors.gray25, data: data.unReleasedData }
+        { label: resources.messages['released'], backgroundColor: colors.green400, data: data.releasedData },
+        { label: resources.messages['unreleased'], backgroundColor: colors.gray25, data: data.unReleasedData }
       ]
     };
   };
@@ -127,7 +127,7 @@ export const ReleasedDatasetsDashboard = dataflowId => {
 
   return (
     <div>
-      <h2>{resourcesContext.messages['emptyReleasedDashboard']}</h2>
+      <h2>{resources.messages['emptyReleasedDashboard']}</h2>
     </div>
   );
 };

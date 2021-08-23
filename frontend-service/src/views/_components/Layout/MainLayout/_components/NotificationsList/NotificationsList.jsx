@@ -19,7 +19,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [columns, setColumns] = useState([]);
@@ -29,20 +29,20 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     const headers = [
       {
         id: 'message',
-        header: resourcesContext.messages['message']
+        header: resources.messages['message']
       },
       {
         id: 'messageLevel',
-        header: resourcesContext.messages['notificationLevel'],
+        header: resources.messages['notificationLevel'],
         template: notificationLevelTemplate
       },
       {
         id: 'date',
-        header: resourcesContext.messages['date']
+        header: resources.messages['date']
       },
       {
         id: 'redirectionUrl',
-        header: resourcesContext.messages['action'],
+        header: resources.messages['action'],
         template: linkTemplate
       }
     ];
@@ -74,7 +74,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
             <Button
               className={`${styles.columnActionButton}`}
               icon={'export'}
-              label={resourcesContext.messages['downloadFile']}
+              label={resources.messages['downloadFile']}
               onClick={() => notification.onClick()}
             />
           </span>
@@ -128,7 +128,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         blockScroll={false}
         className="edit-table"
         contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
-        header={resourcesContext.messages['notifications']}
+        header={resources.messages['notifications']}
         modal={true}
         onHide={() => setIsNotificationVisible(false)}
         style={{ width: '60%' }}
@@ -139,7 +139,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
             autoLayout={true}
             loading={false}
             paginator={true}
-            paginatorRight={<span>{`${resourcesContext.messages['totalRecords']}  ${notifications.length}`}</span>}
+            paginatorRight={<span>{`${resources.messages['totalRecords']}  ${notifications.length}`}</span>}
             rows={10}
             rowsPerPageOptions={[5, 10, 15]}
             summary="notificationsList"
@@ -149,7 +149,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           </DataTable>
         ) : (
           <div className={styles.notificationsWithoutTable}>
-            <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
+            <div className={styles.noNotifications}>{resources.messages['noNotifications']}</div>
           </div>
         )}
       </Dialog>

@@ -38,7 +38,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   } = match;
 
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
   const baseRod3Url = 'https://rod.eionet.europa.eu';
@@ -88,31 +88,31 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     let header;
     switch (fieldHeader) {
       case 'name':
-        header = resourcesContext.messages['name'];
+        header = resources.messages['name'];
         break;
       case 'obligation':
-        header = resourcesContext.messages['obligationTitle'];
+        header = resources.messages['obligationTitle'];
         break;
       case 'legalInstrument':
-        header = resourcesContext.messages['legalInstrument'];
+        header = resources.messages['legalInstrument'];
         break;
       case 'deadline':
-        header = resourcesContext.messages['deadline'];
+        header = resources.messages['deadline'];
         break;
       case 'isReleasable':
-        header = resourcesContext.messages['status'];
+        header = resources.messages['status'];
         break;
       case 'isReleased':
-        header = resourcesContext.messages['delivered'];
+        header = resources.messages['delivered'];
         break;
       case 'releaseDate':
-        header = resourcesContext.messages['releaseDate'];
+        header = resources.messages['releaseDate'];
         break;
       case 'publicFilesNames':
-        header = resourcesContext.messages['files'];
+        header = resources.messages['files'];
         break;
       case 'referencePublicFilesNames':
-        header = resourcesContext.messages['referenceDatasets'];
+        header = resources.messages['referenceDatasets'];
         break;
       default:
         header = fieldHeader;
@@ -311,7 +311,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
             effect="solid"
             id={'restrictFromPublicField'}
             place="top">
-            <span>{resourcesContext.messages['restrictFromPublicField']}</span>
+            <span>{resources.messages['restrictFromPublicField']}</span>
           </ReactTooltip>
         </div>
       );
@@ -349,7 +349,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   };
 
   const renderIsReleasableBodyColumn = rowData => (
-    <div>{rowData.isReleasable ? resourcesContext.messages['open'] : resourcesContext.messages['closed']}</div>
+    <div>{rowData.isReleasable ? resources.messages['open'] : resources.messages['closed']}</div>
   );
 
   const renderIsReleasedBodyColumn = rowData => (
@@ -385,7 +385,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
           }}
         />
         <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
-          <span>{resourcesContext.messages['navigateToDataflow']}</span>
+          <span>{resources.messages['navigateToDataflow']}</span>
         </ReactTooltip>
       </span>
     </div>
@@ -415,19 +415,14 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     <PublicLayout>
       <div className={`${styles.container}  rep-container`} style={contentStyles}>
         {!isEmpty(countryName) && (
-          <Title
-            icon={'clone'}
-            iconSize={'4rem'}
-            subtitle={resourcesContext.messages['dataflows']}
-            title={countryName}
-          />
+          <Title icon={'clone'} iconSize={'4rem'} subtitle={resources.messages['dataflows']} title={countryName} />
         )}
         {isLoading ? (
           <Spinner className={styles.isLoading} />
         ) : isEmpty(countryName) ? (
-          <div className={styles.noDataflows}>{resourcesContext.messages['wrongUrlCountryCode']}</div>
+          <div className={styles.noDataflows}>{resources.messages['wrongUrlCountryCode']}</div>
         ) : isEmpty(dataflows) ? (
-          <div className={styles.noDataflows}>{resourcesContext.messages['noDataflows']}</div>
+          <div className={styles.noDataflows}>{resources.messages['noDataflows']}</div>
         ) : (
           <div className={styles.countriesList}>
             <DataTable
@@ -438,7 +433,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
               onSort={onSort}
               paginator={true}
               paginatorRight={
-                <span>{`${resourcesContext.messages['totalRecords']} ${totalRecords} ${resourcesContext.messages[
+                <span>{`${resources.messages['totalRecords']} ${totalRecords} ${resources.messages[
                   'records'
                 ].toLowerCase()}`}</span>
               }

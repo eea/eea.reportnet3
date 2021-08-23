@@ -75,7 +75,7 @@ const ActionsToolbar = ({
 
   const { groupedFilter, validationDropdown, valueFilter, visibilityDropdown, visibilityColumnIcon } = filter;
 
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
   const exportMenuRef = useRef();
@@ -177,8 +177,8 @@ const ActionsToolbar = ({
   const getTooltipMessage = () => {
     return (
       <Fragment>
-        <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipGeometryNote']}</span>
-        <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipCaseSensitiveNote']}</span>
+        <span style={{ fontStyle: 'italic' }}>{resources.messages['valueFilterTooltipGeometryNote']}</span>
+        <span style={{ fontStyle: 'italic' }}>{resources.messages['valueFilterTooltipCaseSensitiveNote']}</span>
       </Fragment>
     );
   };
@@ -206,7 +206,7 @@ const ActionsToolbar = ({
             }`}
             disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
             icon={'import'}
-            label={resourcesContext.messages['importTable']}
+            label={resources.messages['importTable']}
             onClick={() => setImportTableDialogVisible(true)}
           />
         )}
@@ -218,7 +218,7 @@ const ActionsToolbar = ({
             disabled={isDataflowOpen || isDesignDatasetEditorRead}
             icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
             id="buttonExportTable"
-            label={resourcesContext.messages['exportTable']}
+            label={resources.messages['exportTable']}
             onClick={event => {
               onUpdateData();
               exportMenuRef.current.show(event);
@@ -244,7 +244,7 @@ const ActionsToolbar = ({
               !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
             }
             icon={'trash'}
-            label={resourcesContext.messages['deleteTable']}
+            label={resources.messages['deleteTable']}
             onClick={() => onSetVisible(setDeleteDialogVisible, true)}
           />
         )}
@@ -256,7 +256,7 @@ const ActionsToolbar = ({
           disabled={isDataflowOpen || isDesignDatasetEditorRead}
           icon={'eye'}
           iconClasses={visibilityColumnIcon === 'eye' ? styles.filterInactive : styles.filterActive}
-          label={resourcesContext.messages['showHideColumns']}
+          label={resources.messages['showHideColumns']}
           onClick={event => {
             dropdownFilterRef.current.show(event);
           }}
@@ -280,7 +280,7 @@ const ActionsToolbar = ({
               disabled={!tableHasErrors}
               icon={'filter'}
               iconClasses={!isFilterValidationsActive ? styles.filterInactive : styles.filterActive}
-              label={resourcesContext.messages['validationFilter']}
+              label={resources.messages['validationFilter']}
               onClick={event => filterMenuRef.current.show(event)}
             />
             <DropdownFilter
@@ -346,7 +346,7 @@ const ActionsToolbar = ({
             <InputText
               className={styles.inputFilter}
               id={`value_filter_input_${tableId}`}
-              name={resourcesContext.messages['valueFilter']}
+              name={resources.messages['valueFilter']}
               onChange={event => dispatchFilter({ type: 'SET_VALUE_FILTER', payload: event.target.value })}
               onKeyDown={onSearchKeyEvent}
               value={valueFilter}
@@ -368,7 +368,7 @@ const ActionsToolbar = ({
             <label
               className={`${styles.label} ${valueFilter !== '' && styles.labelFilled}`}
               htmlFor={`value_filter_input_${tableId}`}>
-              {resourcesContext.messages['valueFilter']}
+              {resources.messages['valueFilter']}
             </label>
           </span>
         </span>

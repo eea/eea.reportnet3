@@ -31,7 +31,7 @@ const DataForm = ({
   reporting,
   onShowFieldInfo
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [fieldsWithError, setFieldsWithError] = useState([]);
   const [isConditionalChanged, setIsConditionalChanged] = useState(false);
@@ -165,7 +165,7 @@ const DataForm = ({
         return null;
       })
     ) : (
-      <span className={styles.allAttachmentMessage}>{resourcesContext.messages['allAttachmentOrComplexGeom']}</span>
+      <span className={styles.allAttachmentMessage}>{resources.messages['allAttachmentOrComplexGeom']}</span>
     );
 
   const newRecordForm =
@@ -249,7 +249,7 @@ const DataForm = ({
         return null;
       })
     ) : (
-      <span className={styles.allAttachmentMessage}>{resourcesContext.messages['allAttachmentOrComplexGeom']}</span>
+      <span className={styles.allAttachmentMessage}>{resources.messages['allAttachmentOrComplexGeom']}</span>
     );
 
   return formType === 'EDIT' ? editRecordForm : newRecordForm;

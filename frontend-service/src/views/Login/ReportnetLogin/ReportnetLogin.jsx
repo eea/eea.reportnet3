@@ -19,7 +19,7 @@ import { routes } from 'conf/routes';
 
 const ReportnetLogin = ({ history }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [errors, setErrors] = useState({ userName: '', password: '' });
@@ -31,7 +31,7 @@ const ReportnetLogin = ({ history }) => {
   const checkIsEmptyUserName = () =>
     userName.length === 0
       ? setErrors(previousErrors => {
-          return { ...previousErrors, userName: resourcesContext.messages['loginFormUserError'] };
+          return { ...previousErrors, userName: resources.messages['loginFormUserError'] };
         })
       : setErrors(previousErrors => {
           return { ...previousErrors, userName: '' };
@@ -40,7 +40,7 @@ const ReportnetLogin = ({ history }) => {
   const checkIsEmptyPassword = () =>
     password.length === 0
       ? setErrors(previousErrors => {
-          return { ...previousErrors, password: resourcesContext.messages['loginFormPasswordError'] };
+          return { ...previousErrors, password: resources.messages['loginFormPasswordError'] };
         })
       : setErrors(previousErrors => {
           return { ...previousErrors, password: '' };
@@ -68,7 +68,7 @@ const ReportnetLogin = ({ history }) => {
         userContext.onLogout();
         const errorResponse = error.response;
         if (!isUndefined(errorResponse) && errorResponse.status === 500) {
-          setLoginError(resourcesContext.messages['loginFormError']);
+          setLoginError(resources.messages['loginFormError']);
         }
         setIsSubmitting(false);
       }
@@ -81,13 +81,13 @@ const ReportnetLogin = ({ history }) => {
         <div className={`${styles.loginBox}`}>
           <div className={styles.logo}>
             <img alt="Reportnet" src={logo} />
-            <h1>{resourcesContext.messages['appName']}</h1>
+            <h1>{resources.messages['appName']}</h1>
             {!isEmpty(loginError) && <div className={styles.error}>{loginError}</div>}
           </div>
 
           <form>
             <fieldset>
-              <label htmlFor="userName">{resourcesContext.messages['loginUserName']}</label>
+              <label htmlFor="userName">{resources.messages['loginUserName']}</label>
               <input
                 className={errors.userName !== '' ? styles.hasErrors : null}
                 id="userName"
@@ -102,7 +102,7 @@ const ReportnetLogin = ({ history }) => {
                     return { ...previousErrors, userName: '' };
                   })
                 }
-                placeholder={resourcesContext.messages['loginUserName']}
+                placeholder={resources.messages['loginUserName']}
                 type="text"
                 value={userName}
               />
@@ -110,7 +110,7 @@ const ReportnetLogin = ({ history }) => {
             </fieldset>
 
             <fieldset>
-              <label htmlFor="password">{resourcesContext.messages['loginPassword']}</label>
+              <label htmlFor="password">{resources.messages['loginPassword']}</label>
               <input
                 autoComplete="password"
                 className={errors.password !== '' ? styles.hasErrors : null}
@@ -126,7 +126,7 @@ const ReportnetLogin = ({ history }) => {
                     return { ...previousErrors, password: '' };
                   })
                 }
-                placeholder={resourcesContext.messages['loginPassword']}
+                placeholder={resources.messages['loginPassword']}
                 type="password"
                 value={password}
               />
@@ -138,7 +138,7 @@ const ReportnetLogin = ({ history }) => {
                 className="rp-btn primary"
                 disabled={isSubmitting}
                 id="kc-login"
-                label={resourcesContext.messages['login']}
+                label={resources.messages['login']}
                 layout="simple"
                 onClick={() => onLogin()}
                 type="button"

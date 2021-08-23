@@ -43,7 +43,7 @@ const useBigButtonList = ({
   onShowUpdateDataCollectionModal,
   setErrorDialogData
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [buttonsVisibility, setButtonsVisibility] = useState({});
@@ -119,7 +119,7 @@ const useBigButtonList = ({
     {
       buttonClass: 'manageReporters',
       buttonIcon: 'manageReporters',
-      caption: resourcesContext.messages['manageReporters'],
+      caption: resources.messages['manageReporters'],
       handleRedirect: () => onShowManageReportersDialog(),
       helpClassName: 'dataflow-big-buttons-manageReporters-help-step',
       layout: 'defaultBigButton',
@@ -131,7 +131,7 @@ const useBigButtonList = ({
     {
       buttonClass: 'technicalFeedback',
       buttonIcon: 'comments',
-      caption: resourcesContext.messages['technicalFeedback'],
+      caption: resources.messages['technicalFeedback'],
       handleRedirect: () =>
         handleRedirect(
           !isLeadDesigner
@@ -149,7 +149,7 @@ const useBigButtonList = ({
     {
       buttonClass: 'dataflowHelp',
       buttonIcon: 'info',
-      caption: resourcesContext.messages['dataflowHelp'],
+      caption: resources.messages['dataflowHelp'],
       handleRedirect: () => handleRedirect(getUrl(routes.DOCUMENTS, { dataflowId }, true)),
       helpClassName: 'dataflow-big-buttons-dataflowHelp-help-step',
       layout: 'defaultBigButton',
@@ -160,17 +160,17 @@ const useBigButtonList = ({
 
   const newSchemaModel = [
     {
-      label: resourcesContext.messages['createNewEmptyDatasetSchema'],
+      label: resources.messages['createNewEmptyDatasetSchema'],
       icon: 'add',
       command: () => onShowNewSchemaDialog()
     },
     {
-      label: resourcesContext.messages['cloneSchemasFromDataflow'],
+      label: resources.messages['cloneSchemasFromDataflow'],
       icon: 'clone',
       command: () => onCloneDataflow()
     },
     {
-      label: resourcesContext.messages['importSchema'],
+      label: resources.messages['importSchema'],
       icon: 'import',
       command: () => onImportSchema()
     }
@@ -181,7 +181,7 @@ const useBigButtonList = ({
       buttonClass: 'newItem',
       buttonIcon: isCloningDataflow || isImportingDataflow ? 'spinner' : 'plus',
       buttonIconClass: isCloningDataflow || isImportingDataflow ? 'spinner' : 'newItemCross',
-      caption: resourcesContext.messages['newSchema'],
+      caption: resources.messages['newSchema'],
       handleRedirect: !isCloningDataflow && !isImportingDataflow ? () => onShowNewSchemaDialog() : () => {},
       helpClassName: 'dataflow-new-schema-help-step',
       layout:
@@ -220,7 +220,7 @@ const useBigButtonList = ({
           buttonsVisibility.designDatasetsActions || buttonsVisibility.designDatasetEditorReadActions
             ? [
                 {
-                  label: resourcesContext.messages['openDataset'],
+                  label: resources.messages['openDataset'],
                   icon: 'openFolder',
                   command: () => {
                     handleRedirect(
@@ -229,13 +229,13 @@ const useBigButtonList = ({
                   }
                 },
                 {
-                  label: resourcesContext.messages['rename'],
+                  label: resources.messages['rename'],
                   icon: 'pencil',
                   disabled:
                     dataflowState.status !== config.dataflowStatus.DESIGN || !buttonsVisibility.designDatasetsActions
                 },
                 {
-                  label: resourcesContext.messages['delete'],
+                  label: resources.messages['delete'],
                   icon: 'trash',
                   command: () => getDeleteSchemaIndex(newDatasetSchema.index),
                   disabled:
@@ -245,11 +245,11 @@ const useBigButtonList = ({
             : [],
         onSaveName: onSaveName,
         onWheel: getUrl(routes.DATASET_SCHEMA, { dataflowId, datasetId: newDatasetSchema.datasetId }, true),
-        placeholder: resourcesContext.messages['datasetSchemaNamePlaceholder'],
+        placeholder: resources.messages['datasetSchemaNamePlaceholder'],
         setErrorDialogData: setErrorDialogData,
         tooltip:
           !buttonsVisibility.designDatasetsActions && !buttonsVisibility.designDatasetsOpen
-            ? resourcesContext.messages['accessDenied']
+            ? resources.messages['accessDenied']
             : '',
         visibility: buttonsVisibility.designDatasets || buttonsVisibility.designDatasetsOpen
       }));
@@ -282,7 +282,7 @@ const useBigButtonList = ({
           layout: 'defaultBigButton',
           model: [
             {
-              label: resourcesContext.messages['historicReleases'],
+              label: resources.messages['historicReleases'],
               command: () => {
                 onShowHistoricReleases('reportingDataset');
                 getDataHistoricReleases(dataset.datasetId, dataset.datasetName);
@@ -311,7 +311,7 @@ const useBigButtonList = ({
         layout: 'defaultBigButton',
         model: [
           {
-            label: resourcesContext.messages['historicReleases'],
+            label: resources.messages['historicReleases'],
             command: () => {
               onShowHistoricReleases('reportingDataset');
               getDataHistoricReleasesByRepresentatives(dataset.name, dataset.dataProviderId);
@@ -335,7 +335,7 @@ const useBigButtonList = ({
     {
       buttonClass: 'dashboard',
       buttonIcon: 'barChart',
-      caption: resourcesContext.messages['dashboards'],
+      caption: resources.messages['dashboards'],
       handleRedirect: () => handleRedirect(getUrl(routes.DASHBOARDS, { dataflowId }, true)),
       helpClassName: 'dataflow-dashboards-help-step',
       layout: 'defaultBigButton',
@@ -353,18 +353,18 @@ const useBigButtonList = ({
           ? 'siteMapDisabled'
           : 'siteMap'
         : 'spinner',
-      caption: resourcesContext.messages['createDataCollection'],
+      caption: resources.messages['createDataCollection'],
       enabled: checkDisabledDataCollectionButton(),
       helpClassName: 'dataflow-create-datacollection-help-step',
       handleRedirect:
         isActiveButton && checkDisabledDataCollectionButton() ? () => onShowDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
       tooltip: !isEmpty(dataflowState.data.dataCollections)
-        ? resourcesContext.messages['disabledCreateDataCollectionSchemas']
+        ? resources.messages['disabledCreateDataCollectionSchemas']
         : !dataflowState.isDataSchemaCorrect
-        ? resourcesContext.messages['disabledCreateDataCollectionSchemasWithError']
+        ? resources.messages['disabledCreateDataCollectionSchemasWithError']
         : !dataflowState.formHasRepresentatives
-        ? resourcesContext.messages['disabledCreateDataCollectionNoProviders']
+        ? resources.messages['disabledCreateDataCollectionNoProviders']
         : undefined,
       visibility: buttonsVisibility.createDataCollection
     }
@@ -375,7 +375,7 @@ const useBigButtonList = ({
       buttonClass: 'newItem',
       buttonIcon: isActiveButton ? 'siteMap' : 'spinner',
       buttonIconClass: isActiveButton ? 'siteMap' : 'spinner',
-      caption: resourcesContext.messages['updateDataCollection'],
+      caption: resources.messages['updateDataCollection'],
       helpClassName: 'dataflow-updateNewRepresentatives-help-step',
       handleRedirect: isActiveButton ? () => onShowUpdateDataCollectionModal() : () => {},
       layout: 'defaultBigButton',
@@ -422,7 +422,7 @@ const useBigButtonList = ({
         layout: 'defaultBigButton',
         model: [
           {
-            label: resourcesContext.messages['historicReleases'],
+            label: resources.messages['historicReleases'],
             command: () => {
               onShowHistoricReleases('dataCollection');
               getDataHistoricReleases(dataCollection.dataCollectionId, dataCollection.dataCollectionName);
@@ -445,7 +445,7 @@ const useBigButtonList = ({
         layout: 'defaultBigButton',
         model: [
           {
-            label: resourcesContext.messages['historicReleases'],
+            label: resources.messages['historicReleases'],
             command: () => {
               onShowHistoricReleases('EUDataset');
               getDataHistoricReleases(euDataset.euDatasetId, euDataset.euDatasetName);
@@ -463,7 +463,7 @@ const useBigButtonList = ({
         buttonClass: 'schemaDataset',
         buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
         buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
-        caption: resourcesContext.messages['confirmationReceipt'],
+        caption: resources.messages['confirmationReceipt'],
         enabled: !isReleasing,
         handleRedirect: dataflowState.isReceiptLoading || isReleasing ? () => {} : () => onLoadReceiptData(),
         helpClassName: 'dataflow-big-buttons-confirmation-receipt-help-step',
@@ -480,12 +480,12 @@ const useBigButtonList = ({
         buttonClass: 'schemaDataset',
         buttonIcon: isReleasing ? 'spinner' : 'released',
         buttonIconClass: isReleasing ? 'spinner' : 'released',
-        caption: resourcesContext.messages['releaseDataCollection'],
+        caption: resources.messages['releaseDataCollection'],
         enabled: dataflowState.isReleasable,
         handleRedirect: dataflowState.isReleasable && !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
-        tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
+        tooltip: dataflowState.isReleasable ? '' : resources.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }
     ];
@@ -508,7 +508,7 @@ const useBigButtonList = ({
   const exportEUDatasetModel = !isNil(dataflowState.data.euDatasets)
     ? [
         {
-          label: resourcesContext.messages['updateConfigurations'],
+          label: resources.messages['updateConfigurations'],
           title: true
         }
       ].concat(
@@ -542,7 +542,7 @@ const useBigButtonList = ({
     {
       buttonClass: 'manualTechnicalAcceptance',
       buttonIcon: 'reply',
-      caption: resourcesContext.messages['manualTechnicalAcceptanceBigButton'],
+      caption: resources.messages['manualTechnicalAcceptanceBigButton'],
       handleRedirect: () => onShowManualTechnicalAcceptanceDialog(),
       layout: 'defaultBigButton',
       visibility: buttonsVisibility.manualTechnicalAcceptance
@@ -553,7 +553,7 @@ const useBigButtonList = ({
     {
       buttonClass: 'dataCollection',
       buttonIcon: 'representative',
-      caption: resourcesContext.messages['testDatasetBigButton'],
+      caption: resources.messages['testDatasetBigButton'],
       handleRedirect: () => {
         handleRedirect(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: 0 }, true));
       },

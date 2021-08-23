@@ -23,9 +23,10 @@ const WebformDataFormFieldEditor = ({
   onChangeForm,
   type
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
-
+  const resources = useContext(ResourcesContext);
   const inputRef = useRef(null);
+
+  useEffect(() => {}, []);
 
   useEffect(() => {
     if (inputRef.current && autoFocus) {
@@ -81,9 +82,9 @@ const WebformDataFormFieldEditor = ({
         disabled={column.readOnly}
         onChange={e => onChangeForm(field, e.target.value.value)}
         optionLabel="itemType"
-        options={RecordUtils.getCodelistItemsWithEmptyOption(column, resourcesContext.messages['noneCodelist'])}
+        options={RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist'])}
         value={RecordUtils.getCodelistValue(
-          RecordUtils.getCodelistItemsWithEmptyOption(column, resourcesContext.messages['noneCodelist']),
+          RecordUtils.getCodelistItemsWithEmptyOption(column, resources.messages['noneCodelist']),
           fieldValue
         )}
       />

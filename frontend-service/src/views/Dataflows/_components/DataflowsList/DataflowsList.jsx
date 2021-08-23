@@ -22,7 +22,7 @@ import { DataflowsListUtils } from './_functions/Utils/DataflowsListUtils';
 
 const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibleTab }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [dataToFilter, setDataToFilter] = useState({
@@ -187,7 +187,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
         reporting: 'thereAreNoReportingDataflows'
       };
 
-      return <div className={styles.noDataflows}>{resourcesContext.messages[emptyDataflowsMessage[visibleTab]]}</div>;
+      return <div className={styles.noDataflows}>{resources.messages[emptyDataflowsMessage[visibleTab]]}</div>;
     }
 
     return !isEmpty(filteredData) ? (
@@ -198,7 +198,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
         </Fragment>
       ))
     ) : (
-      <div className={styles.noDataflows}>{resourcesContext.messages['noDataflowsWithSelectedParameters']}</div>
+      <div className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</div>
     );
   };
 

@@ -62,7 +62,7 @@ export const BigButtonList = ({
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [errorDialogData, setErrorDialogData] = useState({ isVisible: false, message: '' });
@@ -166,7 +166,7 @@ export const BigButtonList = ({
         id="show_public_info_label"
         onClick={() => setShowPublicInfo(!showPublicInfo)}
         style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
-        {resourcesContext.messages['showPublicInfo']}
+        {resources.messages['showPublicInfo']}
       </label>
     </div>
   );
@@ -200,7 +200,7 @@ export const BigButtonList = ({
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button icon="check" label={resourcesContext.messages['ok']} onClick={() => onHideErrorDialog()} />
+      <Button icon="check" label={resources.messages['ok']} onClick={() => onHideErrorDialog()} />
     </div>
   );
 
@@ -460,7 +460,7 @@ export const BigButtonList = ({
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
-        label={resourcesContext.messages['close']}
+        label={resources.messages['close']}
         onClick={() => {
           setIsHistoricReleasesDialogVisible(false);
           setIsManualTechnicalAcceptanceDialogVisible(false);
@@ -472,13 +472,13 @@ export const BigButtonList = ({
           className="p-button-primary p-button-animated-blink"
           disabled={isNil(cloneDataflow.id)}
           icon={'plus'}
-          label={resourcesContext.messages['cloneSelectedDataflow']}
+          label={resources.messages['cloneSelectedDataflow']}
           onClick={() => cloneDatasetSchemas()}
         />
         <Button
           className="p-button-secondary p-button-animated-blink p-button-right-aligned"
           icon={'cancel'}
-          label={resourcesContext.messages['close']}
+          label={resources.messages['close']}
           onClick={() => setCloneDialogVisible(false)}
         />
       </Fragment>
@@ -579,7 +579,7 @@ export const BigButtonList = ({
       {newDatasetDialog && (
         <Dialog
           className={styles.dialog}
-          header={resourcesContext.messages['newDatasetSchema']}
+          header={resources.messages['newDatasetSchema']}
           onHide={() => setNewDatasetDialog(false)}
           visible={newDatasetDialog}>
           <NewDatasetSchemaForm
@@ -596,7 +596,7 @@ export const BigButtonList = ({
         <Dialog
           className={styles.dialog}
           footer={renderDialogFooter}
-          header={resourcesContext.messages['dataflowsList']}
+          header={resources.messages['dataflowsList']}
           onHide={() => setCloneDialogVisible(false)}
           style={{ width: '95%' }}
           visible={cloneDialogVisible}>
@@ -607,7 +607,7 @@ export const BigButtonList = ({
       {errorDialogData.isVisible && (
         <Dialog
           footer={errorDialogFooter}
-          header={resourcesContext.messages['error'].toUpperCase()}
+          header={resources.messages['error'].toUpperCase()}
           onHide={onHideErrorDialog}
           visible={errorDialogData.isVisible}>
           <div className="p-grid p-fluid">{errorDialogData.message}</div>
@@ -617,13 +617,13 @@ export const BigButtonList = ({
       {deleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          header={resourcesContext.messages['delete'].toUpperCase()}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
+          header={resources.messages['delete'].toUpperCase()}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteDatasetSchema(deleteSchemaIndex)}
           onHide={() => setDeleteDialogVisible(false)}
           visible={deleteDialogVisible}>
-          {resourcesContext.messages['deleteDatasetSchema']}
+          {resources.messages['deleteDatasetSchema']}
         </ConfirmDialog>
       )}
 
@@ -631,7 +631,7 @@ export const BigButtonList = ({
         <Dialog
           className={styles.dialog}
           footer={renderDialogFooter}
-          header={`${resourcesContext.messages['historicReleasesContextMenu']} ${historicReleasesDialogHeader}`}
+          header={`${resources.messages['historicReleasesContextMenu']} ${historicReleasesDialogHeader}`}
           onHide={() => setIsHistoricReleasesDialogVisible(false)}
           visible={isHistoricReleasesDialogVisible}>
           <HistoricReleases
@@ -648,7 +648,7 @@ export const BigButtonList = ({
         <Dialog
           className={styles.dialog}
           footer={renderDialogFooter}
-          header={`${resourcesContext.messages['manualTechnicalAcceptanceHeader']} ${dataflowName}`}
+          header={`${resources.messages['manualTechnicalAcceptanceHeader']} ${dataflowName}`}
           onHide={() => setIsManualTechnicalAcceptanceDialogVisible(false)}
           style={{ width: '80%' }}
           visible={isManualTechnicalAcceptanceDialogVisible}>
@@ -675,13 +675,13 @@ export const BigButtonList = ({
 
       {isUpdateDataCollectionDialogVisible && (
         <ConfirmDialog
-          header={resourcesContext.messages['updateDataCollectionHeader']}
-          labelCancel={resourcesContext.messages['close']}
-          labelConfirm={resourcesContext.messages['create']}
+          header={resources.messages['updateDataCollectionHeader']}
+          labelCancel={resources.messages['close']}
+          labelConfirm={resources.messages['create']}
           onConfirm={() => onUpdateDataCollection()}
           onHide={() => setIsUpdateDataCollectionDialogVisible(false)}
           visible={isUpdateDataCollectionDialogVisible}>
-          <p>{resourcesContext.messages['updateDataCollectionMessage']}</p>
+          <p>{resources.messages['updateDataCollectionMessage']}</p>
         </ConfirmDialog>
       )}
 
@@ -690,16 +690,16 @@ export const BigButtonList = ({
           className={styles.calendarConfirm}
           disabledConfirm={isNil(dataCollectionDueDate)}
           footerAddon={!dataflowState.isBusinessDataflow && checkShowPublicInfo}
-          header={resourcesContext.messages['createDataCollection']}
-          labelCancel={resourcesContext.messages['close']}
-          labelConfirm={resourcesContext.messages['create']}
+          header={resources.messages['createDataCollection']}
+          labelCancel={resources.messages['close']}
+          labelConfirm={resources.messages['create']}
           onConfirm={() => setIsConfirmCollectionDialog(true)}
           onHide={() => setDataCollectionDialog(false)}
           visible={dataCollectionDialog}>
           {hasExpirationDate ? (
             <p
               dangerouslySetInnerHTML={{
-                __html: TextUtils.parseText(resourcesContext.messages['dataCollectionExpirationDate'], {
+                __html: TextUtils.parseText(resources.messages['dataCollectionExpirationDate'], {
                   expirationData: dayjs(dataflowState.obligations.expirationDate).format(
                     userContext.userProps.dateFormat
                   )
@@ -707,8 +707,8 @@ export const BigButtonList = ({
               }}></p>
           ) : (
             <p>
-              <div>{`${resourcesContext.messages['chooseExpirationDate']} `}</div>
-              <div>{`${resourcesContext.messages['chooseExpirationDateSecondLine']} `}</div>
+              <div>{`${resources.messages['chooseExpirationDate']} `}</div>
+              <div>{`${resources.messages['chooseExpirationDateSecondLine']} `}</div>
             </p>
           )}
           <Calendar
@@ -728,44 +728,44 @@ export const BigButtonList = ({
 
       {isCopyDataCollectionToEUDatasetDialogVisible && (
         <ConfirmDialog
-          header={resourcesContext.messages['copyDataCollectionToEUDatasetHeader']}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
+          header={resources.messages['copyDataCollectionToEUDatasetHeader']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={() => onCopyDataCollectionToEUDataset()}
           onHide={() => setIsCopyDataCollectionToEUDatasetDialogVisible(false)}
           visible={isCopyDataCollectionToEUDatasetDialogVisible}>
-          <p>{resourcesContext.messages['copyDataCollectionToEUDatasetMessage']}</p>
+          <p>{resources.messages['copyDataCollectionToEUDatasetMessage']}</p>
         </ConfirmDialog>
       )}
 
       {isExportEUDatasetDialogVisible && (
         <ConfirmDialog
-          header={resourcesContext.messages['exportEUDatasetHeader']}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
+          header={resources.messages['exportEUDatasetHeader']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={() => onExportEUDataset()}
           onHide={() => setIsExportEUDatasetDialogVisible(false)}
           visible={isExportEUDatasetDialogVisible}>
-          <p>{resourcesContext.messages['exportEUDatasetMessage']}</p>
+          <p>{resources.messages['exportEUDatasetMessage']}</p>
         </ConfirmDialog>
       )}
 
       {isConfirmCollectionDialog && (
         <ConfirmDialog
           disabledConfirm={isNil(isManualTechnicalAcceptance)}
-          header={resourcesContext.messages['createDataCollection']}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
+          header={resources.messages['createDataCollection']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={() => onCreateDataCollections()}
           onHide={() => {
             setIsConfirmCollectionDialog(false);
             onResetRadioButtonOptions();
           }}
           visible={isConfirmCollectionDialog}>
-          <div>{resourcesContext.messages['createDataCollectionConfirmQuestion']}</div>
-          <div>{resourcesContext.messages['createDataCollectionConfirm']}</div>
+          <div>{resources.messages['createDataCollectionConfirmQuestion']}</div>
+          <div>{resources.messages['createDataCollectionConfirm']}</div>
           <div className={styles.radioButtonDiv}>
-            <label>{resourcesContext.messages['manualTechnicalAcceptanceTitle']}</label>
+            <label>{resources.messages['manualTechnicalAcceptanceTitle']}</label>
             {renderRadioButtonsCreateDC()}
           </div>
         </ConfirmDialog>
@@ -773,13 +773,13 @@ export const BigButtonList = ({
 
       {isQCsNotValidWarningVisible && (
         <ConfirmDialog
-          header={resourcesContext.messages['notValidQCWarningTitle']}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
+          header={resources.messages['notValidQCWarningTitle']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={() => onCreateDataCollectionsWithNotValids()}
           onHide={() => setIsQCsNotValidWarningVisible(false)}
           visible={isQCsNotValidWarningVisible}>
-          {TextUtils.parseText(resourcesContext.messages['notValidQCWarningBody'], {
+          {TextUtils.parseText(resources.messages['notValidQCWarningBody'], {
             disabled: invalidAndDisabledRulesAmount.disabledRules,
             invalid: invalidAndDisabledRulesAmount.invalidRules
           })}
@@ -789,13 +789,13 @@ export const BigButtonList = ({
       {isImportSchemaVisible && (
         <CustomFileUpload
           accept=".zip"
-          chooseLabel={resourcesContext.messages['selectFile']}
+          chooseLabel={resources.messages['selectFile']}
           className={styles.FileUpload}
-          dialogHeader={`${resourcesContext.messages['importSchema']}`}
+          dialogHeader={`${resources.messages['importSchema']}`}
           dialogOnHide={() => setIsImportSchemaVisible(false)} //allowTypes="/(\.|\/)(csv)$/"
           dialogVisible={isImportSchemaVisible}
-          infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .zip`}
-          invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
+          infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .zip`}
+          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
           name="file"
           onError={onImportSchemaError}
@@ -808,7 +808,7 @@ export const BigButtonList = ({
         className="dataflow-big-buttons-confirmation-receipt-help-step"
         ref={receiptBtnRef}
         style={{ display: 'none' }}>
-        <span className="srOnly">{resourcesContext.messages['confirmationReceipt']}</span>
+        <span className="srOnly">{resources.messages['confirmationReceipt']}</span>
       </button>
     </Fragment>
   );

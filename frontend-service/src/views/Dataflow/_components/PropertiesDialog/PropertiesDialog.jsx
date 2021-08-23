@@ -16,7 +16,7 @@ import { PropertiesUtils } from './_functions/Utils/PropertiesUtils';
 import { RodUrl } from 'repositories/config/RodUrl';
 
 export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [dialogHeight, setDialogHeight] = useState(null);
@@ -40,7 +40,7 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
     <Button
       className="p-button-secondary p-button-animated-blink button-right-aligned"
       icon="cancel"
-      label={resourcesContext.messages['close']}
+      label={resources.messages['close']}
       onClick={() => manageDialogs('isPropertiesDialogVisible', false)}
     />
   );
@@ -50,12 +50,12 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
       <Dialog
         className={styles.propertiesDialog}
         footer={dialogFooter}
-        header={resourcesContext.messages['properties']}
+        header={resources.messages['properties']}
         onHide={() => manageDialogs('isPropertiesDialogVisible', false)}
         visible={dataflowState.isPropertiesDialogVisible}>
         <div className={styles.propertiesWrap} ref={propertiesRef} style={{ height: dialogHeight }}>
           <div style={{ marginTop: '1rem', marginBottom: '2rem' }}>
-            <TreeViewExpandableItem items={[{ label: resourcesContext.messages['dataflowDetails'] }]}>
+            <TreeViewExpandableItem items={[{ label: resources.messages['dataflowDetails'] }]}>
               <TreeView property={parsedDataflowData} propertyName={''} />
             </TreeViewExpandableItem>
           </div>
@@ -66,7 +66,7 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
                   {
                     className: `p-button-secondary-transparent`,
                     icon: 'externalUrl',
-                    tooltip: resourcesContext.messages['viewMore'],
+                    tooltip: resources.messages['viewMore'],
                     onMouseDown: () =>
                       window.open(
                         data.label === 'obligation'

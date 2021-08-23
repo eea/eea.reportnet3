@@ -30,7 +30,7 @@ export const NationalSystemsTable = ({
   const { parseData } = NationalSystemsTableUtils;
   const { parseText } = TextUtils;
 
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [data, setData] = useState([]);
   const [hasErrors, setHasErrors] = useState(false);
@@ -87,9 +87,7 @@ export const NationalSystemsTable = ({
   };
 
   const renderMissingTables = tableName => (
-    <h4
-      dangerouslySetInnerHTML={{ __html: parseText(resourcesContext.messages['tableIsNotCreated'], { tableName }) }}
-    />
+    <h4 dangerouslySetInnerHTML={{ __html: parseText(resources.messages['tableIsNotCreated'], { tableName }) }} />
   );
 
   const renderRecords = () => {

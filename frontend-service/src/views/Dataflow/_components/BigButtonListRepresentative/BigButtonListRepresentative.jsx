@@ -30,7 +30,7 @@ export const BigButtonListRepresentative = ({
   uniqRepresentatives
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [bigButtonListRepresentativeState, bigButtonListRepresentativeDispatch] = useReducer(
     bigButtonListRepresentativeReducer,
@@ -93,7 +93,7 @@ export const BigButtonListRepresentative = ({
     <Button
       className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
-      label={resourcesContext.messages['close']}
+      label={resources.messages['close']}
       onClick={() => onCloseHistoricReleasesDialogVisible(false)}
     />
   );
@@ -128,7 +128,7 @@ export const BigButtonListRepresentative = ({
         <Dialog
           className={styles.dialog}
           footer={renderDialogFooter}
-          header={`${resourcesContext.messages['historicReleases']} ${bigButtonListRepresentativeState.historicReleasesDialogHeader}`}
+          header={`${resources.messages['historicReleases']} ${bigButtonListRepresentativeState.historicReleasesDialogHeader}`}
           onHide={() => onCloseHistoricReleasesDialogVisible(false)}
           visible={bigButtonListRepresentativeState.isHistoricReleasesDialogVisible}>
           <HistoricReleases

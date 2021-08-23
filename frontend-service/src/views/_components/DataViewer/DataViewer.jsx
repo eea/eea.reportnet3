@@ -156,7 +156,7 @@ const DataViewer = withRouter(
     });
 
     const notificationContext = useContext(NotificationContext);
-    const resourcesContext = useContext(ResourcesContext);
+    const resources = useContext(ResourcesContext);
 
     let contextMenuRef = useRef();
     let datatableRef = useRef();
@@ -167,7 +167,7 @@ const DataViewer = withRouter(
     const { colsSchema, columnOptions } = useLoadColsSchemasAndColumnOptions(tableSchemaColumns);
 
     const { menu } = useContextMenu(
-      resourcesContext,
+      resources,
       records,
       RecordUtils.allAttachments(colsSchema),
       tableFixedNumber,
@@ -209,10 +209,10 @@ const DataViewer = withRouter(
     const validationsTemplate = recordData => {
       const validationsGroup = DataViewerUtils.groupValidations(
         recordData,
-        resourcesContext.messages['recordBlockers'],
-        resourcesContext.messages['recordErrors'],
-        resourcesContext.messages['recordWarnings'],
-        resourcesContext.messages['recordInfos']
+        resources.messages['recordBlockers'],
+        resources.messages['recordErrors'],
+        resources.messages['recordWarnings'],
+        resources.messages['recordInfos']
       );
       return getIconsValidationsErrors(validationsGroup);
     };
@@ -256,7 +256,7 @@ const DataViewer = withRouter(
       onFileDownload,
       onFileUploadVisible,
       records,
-      resourcesContext,
+      resources,
       setIsAttachFileVisible,
       setIsColumnInfoVisible,
       validationsTemplate,
@@ -840,9 +840,9 @@ const DataViewer = withRouter(
       notificationContext.add({
         type: 'DATASET_DATA_LOADING_INIT',
         content: {
-          datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+          datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
           title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
-          datasetLoading: resourcesContext.messages['datasetLoading'],
+          datasetLoading: resources.messages['datasetLoading'],
           dataflowName,
           datasetName
         }
@@ -861,7 +861,7 @@ const DataViewer = withRouter(
               role="checkbox"
             />
             <span className={styles.addAnotherOne} onClick={() => setAddAnotherOne(!addAnotherOne)}>
-              {resourcesContext.messages['addAnotherOne']}
+              {resources.messages['addAnotherOne']}
             </span>
           </div>
         )}
@@ -869,13 +869,13 @@ const DataViewer = withRouter(
           className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
           disabled={isSaving || records.isSaveDisabled}
           icon={!isSaving ? 'check' : 'spinnerAnimate'}
-          label={resourcesContext.messages['save']}
+          label={resources.messages['save']}
           onClick={() => onSaveRecord(records.newRecord)}
         />
         <Button
           className="p-button-secondary button-right-aligned p-button-animated-blink"
           icon="cancel"
-          label={resourcesContext.messages['cancel']}
+          label={resources.messages['cancel']}
           onClick={() => {
             dispatchRecords({ type: 'SET_NEW_RECORD', payload: RecordUtils.createEmptyObject(colsSchema, undefined) });
             setAddDialogVisible(false);
@@ -886,7 +886,7 @@ const DataViewer = withRouter(
 
     const columnInfoDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
-        <Button icon="check" label={resourcesContext.messages['ok']} onClick={() => setIsColumnInfoVisible(false)} />
+        <Button icon="check" label={resources.messages['ok']} onClick={() => setIsColumnInfoVisible(false)} />
       </div>
     );
 
@@ -896,7 +896,7 @@ const DataViewer = withRouter(
           className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
           disabled={isSaving || records.isSaveDisabled}
           icon={isSaving === true ? 'spinnerAnimate' : 'check'}
-          label={resourcesContext.messages['save']}
+          label={resources.messages['save']}
           onClick={() => {
             try {
               onSaveRecord(records.editedRecord);
@@ -908,7 +908,7 @@ const DataViewer = withRouter(
         <Button
           className="p-button-secondary p-button-animated-blink p-button-right-aligned"
           icon={'cancel'}
-          label={resourcesContext.messages['cancel']}
+          label={resources.messages['cancel']}
           onClick={onCancelRowEdit}
         />
       </div>
@@ -919,11 +919,7 @@ const DataViewer = withRouter(
         <Button
           className={`p-button-animated-blink ${styles.saveButton}`}
           icon={'check'}
-          label={
-            areEquals(records.geometryType, 'POINT')
-              ? resourcesContext.messages['save']
-              : resourcesContext.messages['ok']
-          }
+          label={areEquals(records.geometryType, 'POINT') ? resources.messages['save'] : resources.messages['ok']}
           onClick={
             areEquals(records.geometryType, 'POINT')
               ? () => onSavePoint(records.newPoint)
@@ -934,7 +930,7 @@ const DataViewer = withRouter(
           <Button
             className="p-button-secondary button-right-aligned"
             icon="cancel"
-            label={resourcesContext.messages['cancel']}
+            label={resources.messages['cancel']}
             onClick={() => {
               dispatchRecords({ type: 'CANCEL_SAVE_MAP_NEW_POINT', payload: {} });
             }}
@@ -992,17 +988,17 @@ const DataViewer = withRouter(
             <Chips
               className={styles.chips}
               disabled={true}
-              name={resourcesContext.messages['multipleSingleMessage']}
+              name={resources.messages['multipleSingleMessage']}
               pasteSeparator=";"
               value={rowData.value.split(';')}></Chips>
           ) : rowData.field === 'Valid extensions' ? (
             <Chips
               className={styles.chips}
               disabled={true}
-              name={resourcesContext.messages['validExtensionsShort']}
+              name={resources.messages['validExtensionsShort']}
               value={rowData.value.split(',')}></Chips>
           ) : rowData.field === 'Maximum file size' ? (
-            `${rowData.value} ${resourcesContext.messages['MB']}`
+            `${rowData.value} ${resources.messages['MB']}`
           ) : (
             rowData.value
           )}
@@ -1014,15 +1010,15 @@ const DataViewer = withRouter(
       <Fragment>
         {(isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
         records.totalRecords !== records.totalFilteredRecords
-          ? `${resourcesContext.messages['filtered']}: ${records.totalFilteredRecords} | `
+          ? `${resources.messages['filtered']}: ${records.totalFilteredRecords} | `
           : ''}
-        {resourcesContext.messages['totalRecords']} {!isUndefined(records.totalRecords) ? records.totalRecords : 0}{' '}
+        {resources.messages['totalRecords']} {!isUndefined(records.totalRecords) ? records.totalRecords : 0}{' '}
         {records.totalRecords === 1
-          ? resourcesContext.messages['record'].toLowerCase()
-          : resourcesContext.messages['records'].toLowerCase()}
+          ? resources.messages['record'].toLowerCase()
+          : resources.messages['records'].toLowerCase()}
         {(isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
         records.totalRecords === records.totalFilteredRecords
-          ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
+          ? ` (${resources.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>
     );
@@ -1039,14 +1035,14 @@ const DataViewer = withRouter(
       .join(', ');
 
     const infoAttachTooltip = `<span style="font-weight: bold">${
-      resourcesContext.messages['supportedFileAttachmentsTooltip']
+      resources.messages['supportedFileAttachmentsTooltip']
     } </span><span style="color: var(--success-color-lighter); fontWeight: 600">${getAttachExtensions || '*'}</span>
     <span style="font-weight: bold">${
-      resourcesContext.messages['supportedFileAttachmentsMaxSizeTooltip']
+      resources.messages['supportedFileAttachmentsMaxSizeTooltip']
     } </span><span style="color: var(--success-color-lighter); fontWeight: 600">${
       !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
-        ? `${records.selectedMaxSize} ${resourcesContext.messages['MB']}`
-        : resourcesContext.messages['maxSizeNotDefined']
+        ? `${records.selectedMaxSize} ${resources.messages['MB']}`
+        : resources.messages['maxSizeNotDefined']
     }`;
 
     const onImportTableError = async ({ xhr }) => {
@@ -1168,7 +1164,7 @@ const DataViewer = withRouter(
           <Dialog
             className={styles.fieldInfoDialogWrapper}
             footer={columnInfoDialogFooter}
-            header={resourcesContext.messages['columnInfo']}
+            header={resources.messages['columnInfo']}
             onHide={() => setIsColumnInfoVisible(false)}
             visible={isColumnInfoVisible}>
             <DataTable
@@ -1215,14 +1211,14 @@ const DataViewer = withRouter(
         {importTableDialogVisible && (
           <CustomFileUpload
             accept=".csv"
-            chooseLabel={resourcesContext.messages['selectFile']}
+            chooseLabel={resources.messages['selectFile']}
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
-            dialogHeader={`${resourcesContext.messages['uploadTable']}${tableName}`}
+            dialogHeader={`${resources.messages['uploadTable']}${tableName}`}
             dialogOnHide={() => setImportTableDialogVisible(false)} //allowTypes="/(\.|\/)(csv)$/"
             dialogVisible={importTableDialogVisible}
-            infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
-            invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
+            infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} .csv`}
+            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
             isDialog={true}
             name="file"
             onError={onImportTableError}
@@ -1239,14 +1235,14 @@ const DataViewer = withRouter(
         {isAttachFileVisible && (
           <CustomFileUpload
             accept={getAttachExtensions || '*'}
-            chooseLabel={resourcesContext.messages['selectFile']}
+            chooseLabel={resources.messages['selectFile']}
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
-            dialogHeader={`${resourcesContext.messages['uploadAttachment']}`}
+            dialogHeader={`${resources.messages['uploadAttachment']}`}
             dialogOnHide={() => setIsAttachFileVisible(false)}
             dialogVisible={isAttachFileVisible}
             infoTooltip={infoAttachTooltip}
-            invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
+            invalidExtensionMessage={resources.messages['invalidExtensionFile']}
             isDialog={true}
             maxFileSize={
               !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
@@ -1269,7 +1265,7 @@ const DataViewer = withRouter(
               blockScroll={false}
               className={`edit-table calendar-table ${styles.addEditRecordDialog}`}
               footer={addRowDialogFooter}
-              header={resourcesContext.messages['addRecord']}
+              header={resources.messages['addRecord']}
               modal={true}
               onHide={() => setAddDialogVisible(false)}
               visible={addDialogVisible}
@@ -1301,7 +1297,7 @@ const DataViewer = withRouter(
             blockScroll={false}
             className={`calendar-table ${styles.addEditRecordDialog}`}
             footer={editRowDialogFooter}
-            header={resourcesContext.messages['editRow']}
+            header={resources.messages['editRow']}
             modal={true}
             onHide={() => setEditDialogVisible(false)}
             visible={editDialogVisible}
@@ -1330,39 +1326,39 @@ const DataViewer = withRouter(
         {deleteDialogVisible && (
           <ConfirmDialog
             classNameConfirm={'p-button-danger'}
-            header={`${resourcesContext.messages['deleteDatasetTableHeader']} (${tableName})`}
-            labelCancel={resourcesContext.messages['no']}
-            labelConfirm={resourcesContext.messages['yes']}
+            header={`${resources.messages['deleteDatasetTableHeader']} (${tableName})`}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
             onConfirm={onConfirmDeleteTable}
             onHide={() => onSetVisible(setDeleteDialogVisible, false)}
             visible={deleteDialogVisible}>
-            {resourcesContext.messages['deleteDatasetTableConfirm']}
+            {resources.messages['deleteDatasetTableConfirm']}
           </ConfirmDialog>
         )}
 
         {isDeleteAttachmentVisible && (
           <ConfirmDialog
             classNameConfirm={'p-button-danger'}
-            header={`${resourcesContext.messages['deleteAttachmentHeader']}`}
-            labelCancel={resourcesContext.messages['no']}
-            labelConfirm={resourcesContext.messages['yes']}
+            header={`${resources.messages['deleteAttachmentHeader']}`}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
             onConfirm={onConfirmDeleteAttachment}
             onHide={() => setIsDeleteAttachmentVisible(false)}
             visible={isDeleteAttachmentVisible}>
-            {resourcesContext.messages['deleteAttachmentConfirm']}
+            {resources.messages['deleteAttachmentConfirm']}
           </ConfirmDialog>
         )}
 
         {confirmDeleteVisible && (
           <ConfirmDialog
             classNameConfirm={'p-button-danger'}
-            header={resourcesContext.messages['deleteRow']}
-            labelCancel={resourcesContext.messages['no']}
-            labelConfirm={resourcesContext.messages['yes']}
+            header={resources.messages['deleteRow']}
+            labelCancel={resources.messages['no']}
+            labelConfirm={resources.messages['yes']}
             onConfirm={onConfirmDeleteRow}
             onHide={() => setConfirmDeleteVisible(false)}
             visible={confirmDeleteVisible}>
-            {resourcesContext.messages['confirmDeleteRow']}
+            {resources.messages['confirmDeleteRow']}
           </ConfirmDialog>
         )}
         {confirmPasteVisible && (
@@ -1371,10 +1367,10 @@ const DataViewer = withRouter(
             disabledConfirm={isEmpty(records.pastedRecords)}
             divRef={divRef}
             hasPasteOption={true}
-            header={resourcesContext.messages['pasteRecords']}
+            header={resources.messages['pasteRecords']}
             isPasting={isPasting}
-            labelCancel={resourcesContext.messages['cancel']}
-            labelConfirm={resourcesContext.messages['save']}
+            labelCancel={resources.messages['cancel']}
+            labelConfirm={resources.messages['save']}
             onConfirm={onPasteAccept}
             onHide={onPasteCancel}
             onPaste={onPaste}
@@ -1400,7 +1396,7 @@ const DataViewer = withRouter(
             blockScroll={false}
             className={'map-data'}
             footer={saveMapGeoJsonDialogFooter}
-            header={resourcesContext.messages['geospatialData']}
+            header={resources.messages['geospatialData']}
             modal={true}
             onHide={() => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}
             visible={records.isMapOpen}>

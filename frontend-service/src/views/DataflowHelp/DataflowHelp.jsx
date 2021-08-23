@@ -42,7 +42,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [dataflowName, setDataflowName] = useState();
@@ -227,15 +227,10 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   if (documents) {
     return renderLayout(
       <Fragment>
-        <Title
-          icon="info"
-          iconSize="3.5rem"
-          subtitle={dataflowName}
-          title={`${resourcesContext.messages['dataflowHelp']} `}
-        />
+        <Title icon="info" iconSize="3.5rem" subtitle={dataflowName} title={`${resources.messages['dataflowHelp']} `} />
         <TabView activeIndex={0} hasQueryString={false} name="DataflowHelp" onTabClick={e => setSelectedIndex(e)}>
           <TabPanel
-            header={resourcesContext.messages['supportingDocuments']}
+            header={resources.messages['supportingDocuments']}
             headerClassName="dataflowHelp-documents-help-step">
             <Documents
               dataflowId={dataflowId}
@@ -251,7 +246,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
               sortOrderDocuments={sortOrderDocuments}
             />
           </TabPanel>
-          <TabPanel header={resourcesContext.messages['webLinks']} headerClassName="dataflowHelp-webLinks-help-step">
+          <TabPanel header={resources.messages['webLinks']} headerClassName="dataflowHelp-webLinks-help-step">
             <WebLinks
               dataflowId={dataflowId}
               isLoading={isLoadingWebLinks}
@@ -266,7 +261,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
           </TabPanel>
           <TabPanel
             disabled={isEmpty(datasetsSchemas)}
-            header={resourcesContext.messages['datasetSchemas']}
+            header={resources.messages['datasetSchemas']}
             headerClassName="dataflowHelp-schemas-help-step"
             rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas ? config.icons['spinnerAnimate'] : null}>
             <DatasetSchemas

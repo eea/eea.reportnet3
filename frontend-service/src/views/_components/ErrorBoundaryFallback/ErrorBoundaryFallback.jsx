@@ -13,7 +13,7 @@ import { MainLayout } from 'views/_components/Layout';
 import { TooltipUtils } from 'views/_functions/Utils/TooltipUtils';
 
 export const ErrorBoundaryFallback = ({ error, resetErrorBoundary }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const onCopyErrorToClipboard = error => {
     const stringError = JSON.stringify({
       msg: error.message,
@@ -39,7 +39,7 @@ export const ErrorBoundaryFallback = ({ error, resetErrorBoundary }) => {
       <div className="rep-container">
         <div className={styles.boundaryWrap}>
           <div className={styles.boundaryContainer}>
-            <h2>{resourcesContext.messages['errorBoundaryTitle']}</h2>
+            <h2>{resources.messages['errorBoundaryTitle']}</h2>
             <h3 className={styles.errorMessage}>{error.message}</h3>
             <FontAwesomeIcon
               aria-hidden={false}
@@ -50,9 +50,9 @@ export const ErrorBoundaryFallback = ({ error, resetErrorBoundary }) => {
             <div className={styles.errorTexts}>
               <p
                 dangerouslySetInnerHTML={{
-                  __html: resourcesContext.messages['errorBoundaryMessageCopy']
+                  __html: resources.messages['errorBoundaryMessageCopy']
                 }}></p>
-              <p>{resourcesContext.messages['errorBoundaryMessageRefresh']}</p>
+              <p>{resources.messages['errorBoundaryMessageRefresh']}</p>
             </div>
 
             <div className={styles.boundaryButtonsWrap}>
@@ -61,7 +61,7 @@ export const ErrorBoundaryFallback = ({ error, resetErrorBoundary }) => {
                   icon={'copy'}
                   label={'Copy to clipboard'}
                   onClick={() => onCopyErrorToClipboard(error)}
-                  tooltip={resourcesContext.messages['copyToClipboardSuccess']}
+                  tooltip={resources.messages['copyToClipboardSuccess']}
                   tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
                 />
               </div>

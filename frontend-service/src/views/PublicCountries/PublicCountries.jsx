@@ -20,7 +20,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { EuroFlag } from './_components/EuroFlag';
 
 export const PublicCountries = withRouter(({ history }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
   const [contentStyles, setContentStyles] = useState({});
@@ -68,18 +68,18 @@ export const PublicCountries = withRouter(({ history }) => {
     <PublicLayout>
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
-          <h1 className={styles.title}>{resourcesContext.messages['countriesPageTitle']}</h1>
-          <h2>{resourcesContext.messages['eeaCountries']}</h2>
+          <h1 className={styles.title}>{resources.messages['countriesPageTitle']}</h1>
+          <h2>{resources.messages['eeaCountries']}</h2>
           <div className={styles.countriesWrapper}>
             {config.countriesByGroup.eeaCountries.map(renderCountryCard(true))}
           </div>
 
-          <h2>{resourcesContext.messages['cooperatingCountries']}</h2>
+          <h2>{resources.messages['cooperatingCountries']}</h2>
           <div className={styles.countriesWrapper}>
             {config.countriesByGroup.cooperatingCountries.map(renderCountryCard(false))}
           </div>
 
-          <h2>{resourcesContext.messages['otherCountries']}</h2>
+          <h2>{resources.messages['otherCountries']}</h2>
           <div className={styles.countriesWrapper}>
             {config.countriesByGroup.otherCountries.map(renderCountryCard(false))}
           </div>

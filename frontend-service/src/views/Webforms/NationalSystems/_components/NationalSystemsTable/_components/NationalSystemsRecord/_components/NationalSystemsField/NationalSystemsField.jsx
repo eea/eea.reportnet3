@@ -49,7 +49,7 @@ export const NationalSystemsField = ({
   const getInputMaxLength = { TEXT: 10000, RICH_TEXT: 10000, EMAIL: 256, NUMBER_INTEGER: 20, NUMBER_DECIMAL: 40 };
 
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [nationalSystemsFieldState, nationalSystemsFieldDispatch] = useReducer(nationalSystemsFieldReducer, {
     field: nationalField,
@@ -67,13 +67,11 @@ export const NationalSystemsField = ({
     .flat()
     .join(', ');
 
-  const infoAttachTooltip = `${resourcesContext.messages['supportedFileAttachmentsTooltip']} ${
-    getAttachExtensions || '*'
-  }
-  ${resourcesContext.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
+  const infoAttachTooltip = `${resources.messages['supportedFileAttachmentsTooltip']} ${getAttachExtensions || '*'}
+  ${resources.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
     !isNil(field.maxSize) && field.maxSize.toString() !== '0'
-      ? `${field.maxSize} ${resourcesContext.messages['MB']}`
-      : resourcesContext.messages['maxSizeNotDefined']
+      ? `${field.maxSize} ${resources.messages['MB']}`
+      : resources.messages['maxSizeNotDefined']
   }`;
 
   const getMultiselectValues = (multiselectItemsOptions, value) => {
@@ -300,7 +298,7 @@ export const NationalSystemsField = ({
                 className={`p-button-animated-blink p-button-primary-transparent`}
                 icon={'import'}
                 label={
-                  resourcesContext.messages[
+                  resources.messages[
                     !isNil(field.value) && field.value !== '' ? 'uploadReplaceAttachment' : 'uploadAttachment'
                   ]
                 }
@@ -364,15 +362,15 @@ export const NationalSystemsField = ({
       {isDialogVisible.uploadFile && (
         <CustomFileUpload
           accept={getAttachExtensions || '*'}
-          chooseLabel={resourcesContext.messages['selectFile']}
+          chooseLabel={resources.messages['selectFile']}
           className={styles.fileUpload}
           dialogClassName={styles.dialog}
-          dialogHeader={resourcesContext.messages['uploadAttachment']}
+          dialogHeader={resources.messages['uploadAttachment']}
           dialogOnHide={() => handleDialogs('uploadFile', false)}
           dialogVisible={isDialogVisible.uploadFile}
           fileLimit={1}
           infoTooltip={infoAttachTooltip}
-          invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
+          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
           isDialog={true}
           maxFileSize={
             !isNil(field.maxSize) && field.maxSize.toString() !== '0'
@@ -394,13 +392,13 @@ export const NationalSystemsField = ({
       {isDialogVisible.deleteAttachment && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          header={resourcesContext.messages['deleteAttachmentHeader']}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
+          header={resources.messages['deleteAttachmentHeader']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={onConfirmDeleteAttachment}
           onHide={() => handleDialogs('deleteAttachment', false)}
           visible={isDialogVisible.deleteAttachment}>
-          {resourcesContext.messages['deleteAttachmentConfirm']}
+          {resources.messages['deleteAttachmentConfirm']}
         </ConfirmDialog>
       )}
     </div>

@@ -34,7 +34,7 @@ export const UniqueConstraints = ({
   setIsUniqueConstraintUpdating
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const {
     datasetSchemaId,
@@ -82,12 +82,11 @@ export const UniqueConstraints = ({
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {constraintsState.filtered && constraintsState.data.length !== constraintsState.filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${constraintsState.filteredData.length} | `
+        ? `${resources.messages['filtered']} : ${constraintsState.filteredData.length} | `
         : ''}
-      {resourcesContext.messages['totalRecords']} {constraintsState.data.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
+      {resources.messages['totalRecords']} {constraintsState.data.length} {resources.messages['records'].toLowerCase()}
       {constraintsState.filtered && constraintsState.data.length === constraintsState.filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
+        ? ` (${resources.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
   );
@@ -144,7 +143,7 @@ export const UniqueConstraints = ({
     <Column
       body={row => actionsTemplate(row)}
       className={styles.validationCol}
-      header={resourcesContext.messages['actions']}
+      header={resources.messages['actions']}
       key="actions"
       style={{ width: '100px' }}
     />
@@ -157,7 +156,7 @@ export const UniqueConstraints = ({
         <Column
           body={field === 'fieldData' ? renderFieldBody : null}
           field={field}
-          header={resourcesContext.messages[field]}
+          header={resources.messages[field]}
           key={field}
           sortable={true}
         />
@@ -182,7 +181,7 @@ export const UniqueConstraints = ({
 
   return isEmpty(constraintsState.data) ? (
     <div className={styles.constraintsWithoutTable}>
-      <div className={styles.noConstraints}>{resourcesContext.messages['noConstraints']}</div>
+      <div className={styles.noConstraints}>{resources.messages['noConstraints']}</div>
     </div>
   ) : (
     <div className={styles.constraints}>
@@ -209,23 +208,21 @@ export const UniqueConstraints = ({
           {renderColumns(constraintsState.filteredData)}
         </DataTable>
       ) : (
-        <div className={styles.emptyFilteredData}>
-          {resourcesContext.messages['noConstraintsWithSelectedParameters']}
-        </div>
+        <div className={styles.emptyFilteredData}>{resources.messages['noConstraintsWithSelectedParameters']}</div>
       )}
 
       {constraintsState.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={constraintsState.isDeleting}
-          header={resourcesContext.messages['deleteUniqueConstraintHeader']}
+          header={resources.messages['deleteUniqueConstraintHeader']}
           iconConfirm={constraintsState.isDeleting ? 'spinnerAnimate' : 'check'}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteConstraint()}
           onHide={() => isDeleteDialogVisible(false)}
           visible={constraintsState.isDeleteDialogVisible}>
-          {resourcesContext.messages['deleteUniqueConstraintConfirm']}
+          {resources.messages['deleteUniqueConstraintConfirm']}
         </ConfirmDialog>
       )}
     </div>

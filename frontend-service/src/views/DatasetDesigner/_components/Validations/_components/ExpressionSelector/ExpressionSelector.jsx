@@ -47,7 +47,7 @@ export const ExpressionSelector = ({
   onSetSqlSentence,
   tabsChanges
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
   const [expressionTypeValue, setExpressionTypeValue] = useState('');
@@ -63,25 +63,25 @@ export const ExpressionSelector = ({
         candidateRule: { fieldType }
       } = creationFormState;
       if (nonSql.includes(fieldType?.toLowerCase())) {
-        return [{ label: resourcesContext.messages['sqlSentence'], value: 'sqlSentence' }];
+        return [{ label: resources.messages['sqlSentence'], value: 'sqlSentence' }];
       }
       return [
-        { label: resourcesContext.messages['fieldComparisonLabel'], value: 'fieldTab' },
-        { label: resourcesContext.messages['sqlSentence'], value: 'sqlSentence' }
+        { label: resources.messages['fieldComparisonLabel'], value: 'fieldTab' },
+        { label: resources.messages['sqlSentence'], value: 'sqlSentence' }
       ];
     }
 
     if (validationContext.level === 'row') {
       return [
-        { label: resourcesContext.messages['fieldComparisonLabel'], value: 'fieldComparison' },
-        { label: resourcesContext.messages['ifThenLabel'], value: 'ifThenClause' },
-        { label: resourcesContext.messages['sqlSentence'], value: 'sqlSentence' }
+        { label: resources.messages['fieldComparisonLabel'], value: 'fieldComparison' },
+        { label: resources.messages['ifThenLabel'], value: 'ifThenClause' },
+        { label: resources.messages['sqlSentence'], value: 'sqlSentence' }
       ];
     }
 
     return [
-      { label: resourcesContext.messages['datasetComparison'], value: 'fieldRelations' },
-      { label: resourcesContext.messages['sqlSentence'], value: 'sqlSentence' }
+      { label: resources.messages['datasetComparison'], value: 'fieldRelations' },
+      { label: resources.messages['sqlSentence'], value: 'sqlSentence' }
     ];
   };
 
@@ -199,7 +199,7 @@ export const ExpressionSelector = ({
             onChange={e => onExpressionTypeToggle(e.value.value)}
             optionLabel="label"
             options={getOptions()}
-            placeholder={resourcesContext.messages['expressionTypeDropdownPlaceholder']}
+            placeholder={resources.messages['expressionTypeDropdownPlaceholder']}
             style={{ width: '12em' }}
             value={getSelectorValue()}
           />

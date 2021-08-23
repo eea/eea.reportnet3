@@ -36,7 +36,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
   const { onParseWebformData, onParseWebformRecords, parseNewTableRecord, parsePamsRecords } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [article13State, article13Dispatch] = useReducer(article13Reducer, {
     data: [],
@@ -51,7 +51,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
     selectedTableName: null,
     selectedTableSchemaId: null,
     tableList: { group: [], single: [] },
-    view: resourcesContext.messages['overview']
+    view: resources.messages['overview']
   });
 
   const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = article13State;
@@ -256,7 +256,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
     setTableSchemaId(filteredTable.tableSchemaId);
     onSelectRecord(recordId, pamNumberId);
     onSelectTableName(tableName);
-    onToggleView(resourcesContext.messages['details']);
+    onToggleView(resources.messages['details']);
   };
 
   const onSelectFieldSchemaId = fieldSchemaId => {
@@ -283,7 +283,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
 
     return (
       <Fragment>
-        <h4 className={styles.title}>{resourcesContext.messages['missingWebformTablesOrFieldsMissing']}</h4>
+        <h4 className={styles.title}>{resources.messages['missingWebformTablesOrFieldsMissing']}</h4>
         <div className={styles.missingElements}>
           {Object.keys(missingElements).map(key => {
             const { fields, table } = missingElements[key];
@@ -306,7 +306,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
 
   const renderLayout = children => (
     <Fragment>
-      <h2 className={styles.title}>{resourcesContext.messages['webformArticle13Title']}</h2>
+      <h2 className={styles.title}>{resources.messages['webformArticle13Title']}</h2>
       {children}
     </Fragment>
   );
@@ -319,7 +319,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
         {Object.keys(tableList).map(list => (
           <li className={styles.tableListItem} key={uniqueId()}>
             <div className={styles.tableListTitleWrapper}>
-              <span className={styles.tableListTitle}>{resourcesContext.messages[list]}:</span>
+              <span className={styles.tableListTitle}>{resources.messages[list]}:</span>
             </div>
             <div className={styles.tableListContentWrapper}>
               {tableList[list].map(items => (
@@ -331,7 +331,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
                   onClick={() => {
                     article13Dispatch({ type: 'ON_REFRESH', payload: { value: !article13State.isRefresh } });
                     onSelectRecord(items.recordId, items.id);
-                    onToggleView(resourcesContext.messages['details']);
+                    onToggleView(resources.messages['details']);
                   }}>
                   {items.id || '-'}
                 </span>
@@ -350,7 +350,7 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
                     ? 'spinnerAnimate'
                     : 'add'
                 }
-                label={resourcesContext.messages[list === 'single' ? 'addSingle' : 'addGroup']}
+                label={resources.messages[list === 'single' ? 'addSingle' : 'addGroup']}
                 onClick={() => onAddPamsRecord(list)}
               />
             </div>
@@ -359,15 +359,15 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
       </ul>
 
       <TabularSwitch
-        className={`${styles.tabBar} ${view === resourcesContext.messages['details'] ? undefined : styles.hide}`}
-        elements={[resourcesContext.messages['overview']]}
+        className={`${styles.tabBar} ${view === resources.messages['details'] ? undefined : styles.hide}`}
+        elements={[resources.messages['overview']]}
         onChange={switchView => {
           onToggleView(switchView);
           onSelectRecord(null, null);
         }}
         value={view}
       />
-      {view === resourcesContext.messages['details'] ? (
+      {view === resources.messages['details'] ? (
         <WebformView
           data={article13State.data}
           dataProviderId={dataProviderId}

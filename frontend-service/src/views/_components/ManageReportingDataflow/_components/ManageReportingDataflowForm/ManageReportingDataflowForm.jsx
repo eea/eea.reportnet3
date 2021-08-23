@@ -21,7 +21,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 const ManageReportingDataflowForm = forwardRef(
   ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onResetData, onSearch, onSubmit, refresh }, ref) => {
     const notificationContext = useContext(NotificationContext);
-    const resourcesContext = useContext(ResourcesContext);
+    const resources = useContext(ResourcesContext);
     const userContext = useContext(UserContext);
 
     const [description, setDescription] = useState(data.description);
@@ -53,10 +53,10 @@ const ManageReportingDataflowForm = forwardRef(
         message = '';
         hasErrors = true;
       } else if (inputName === 'description' && !checkIsCorrectLength(inputValue)) {
-        message = resourcesContext.messages['dataflowDescriptionValidationMax'];
+        message = `${resources.messages['dataflowDescriptionValidationMax']} (${resources.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`;
         hasErrors = true;
       } else if (inputName === 'name' && !checkIsCorrectLength(inputValue)) {
-        message = resourcesContext.messages['dataflowNameValidationMax'];
+        message = `${resources.messages['dataflowNameValidationMax']} (${resources.messages['maxAllowedCharacters']} ${config.INPUT_MAX_LENGTH})`;
         hasErrors = true;
       }
 
@@ -104,7 +104,7 @@ const ManageReportingDataflowForm = forwardRef(
             setErrors(previousErrors => {
               return {
                 ...previousErrors,
-                name: { message: resourcesContext.messages['dataflowNameExists'], hasErrors: true }
+                name: { message: resources.messages['dataflowNameExists'], hasErrors: true }
               };
             });
             notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
@@ -144,13 +144,13 @@ const ManageReportingDataflowForm = forwardRef(
               onKeyPress={e => {
                 if (e.key === 'Enter' && !checkIsCorrectInputValue(name, 'name')) onConfirm();
               }}
-              placeholder={resourcesContext.messages['createDataflowName']}
+              placeholder={resources.messages['createDataflowName']}
               ref={inputRef}
               type="text"
               value={name}
             />
             <label className="srOnly" htmlFor="dataflowName">
-              {resourcesContext.messages['createDataflowName']}
+              {resources.messages['createDataflowName']}
             </label>
             {errors.name.message !== '' && <ErrorMessage message={errors.name.message} />}
           </div>
@@ -171,13 +171,13 @@ const ManageReportingDataflowForm = forwardRef(
                   return { ...previousErrors, description: { message: '', hasErrors: false } };
                 });
               }}
-              placeholder={resourcesContext.messages['createDataflowDescription']}
+              placeholder={resources.messages['createDataflowDescription']}
               rows={10}
               value={description}
             />
 
             <label className="srOnly" htmlFor="dataflowDescription">
-              {resourcesContext.messages['createDataflowDescription']}
+              {resources.messages['createDataflowDescription']}
             </label>
 
             <div className={styles.errorAndCounterWrapper}>
@@ -190,7 +190,7 @@ const ManageReportingDataflowForm = forwardRef(
             </div>
           </div>
           <div className={`${styles.search}`}>
-            <Button icon="search" label={resourcesContext.messages['searchObligations']} onClick={onSearch} />
+            <Button icon="search" label={resources.messages['searchObligations']} onClick={onSearch} />
             <input
               className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
               id="searchObligation"
@@ -199,13 +199,13 @@ const ManageReportingDataflowForm = forwardRef(
               onKeyPress={e => {
                 if (e.key === 'Enter' && !checkIsCorrectInputValue(data.obligation.title, 'obligation')) onConfirm();
               }}
-              placeholder={resourcesContext.messages['associatedObligation']}
+              placeholder={resources.messages['associatedObligation']}
               readOnly={true}
               type="text"
               value={data.obligation.title}
             />
             <label className="srOnly" htmlFor="searchObligation">
-              {resourcesContext.messages['searchObligations']}
+              {resources.messages['searchObligations']}
             </label>
           </div>
         </fieldset>

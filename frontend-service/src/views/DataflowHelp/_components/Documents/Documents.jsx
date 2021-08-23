@@ -43,7 +43,7 @@ const Documents = ({
   sortOrderDocuments
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [allDocuments, setAllDocuments] = useState(documents);
@@ -109,10 +109,7 @@ const Documents = ({
         <Icon icon="spinnerAnimate" />
       ) : (
         <div>
-          <FontAwesomeIcon
-            aria-label={resourcesContext.messages['downloadFile']}
-            icon={AwesomeIcons(rowData.category)}
-          />
+          <FontAwesomeIcon aria-label={resources.messages['downloadFile']} icon={AwesomeIcons(rowData.category)} />
         </div>
       )}
     </span>
@@ -156,7 +153,7 @@ const Documents = ({
   const isPublicColumnTemplate = rowData => (
     <span>
       {rowData.isPublic ? (
-        <FontAwesomeIcon aria-label={resourcesContext.messages['documentIsPublic']} icon={AwesomeIcons('check')} />
+        <FontAwesomeIcon aria-label={resources.messages['documentIsPublic']} icon={AwesomeIcons('check')} />
       ) : (
         ''
       )}
@@ -228,7 +225,7 @@ const Documents = ({
             <Button
               className={`p-button-rounded p-button-secondary-transparent dataflowHelp-document-upload-help-step`}
               icon={'upload'}
-              label={resourcesContext.messages['upload']}
+              label={resources.messages['upload']}
               onClick={() => {
                 setDocumentInitialValues({
                   description: '',
@@ -261,28 +258,28 @@ const Documents = ({
           field="title"
           filter={false}
           filterMatchMode="contains"
-          header={resourcesContext.messages['title']}
+          header={resources.messages['title']}
           sortable={!isEmpty(documents)}
         />
         <Column
           field="description"
           filter={false}
           filterMatchMode="contains"
-          header={resourcesContext.messages['description']}
+          header={resources.messages['description']}
           sortable={!isEmpty(documents)}
         />
         <Column
           field="category"
           filter={false}
           filterMatchMode="contains"
-          header={resourcesContext.messages['category']}
+          header={resources.messages['category']}
           sortable={!isEmpty(documents)}
         />
         <Column
           field="language"
           filter={false}
           filterMatchMode="contains"
-          header={resourcesContext.messages['language']}
+          header={resources.messages['language']}
           sortable={!isEmpty(documents)}
         />
         <Column
@@ -291,7 +288,7 @@ const Documents = ({
           field="isPublic"
           filter={false}
           filterMatchMode="contains"
-          header={resourcesContext.messages['documentIsPublic']}
+          header={resources.messages['documentIsPublic']}
           sortable={!isEmpty(documents)}
         />
         <Column
@@ -299,7 +296,7 @@ const Documents = ({
           field="date"
           filter={false}
           filterMatchMode="contains"
-          header={resourcesContext.messages['documentUploadDate']}
+          header={resources.messages['documentUploadDate']}
           sortable={!isEmpty(documents)}
         />
         <Column
@@ -307,7 +304,7 @@ const Documents = ({
           field="size"
           filter={false}
           filterMatchMode="contains"
-          header={resourcesContext.messages['documentSize']}
+          header={resources.messages['documentSize']}
           sortable={!isEmpty(documents)}
         />
         <Column
@@ -315,18 +312,18 @@ const Documents = ({
           field="url"
           filter={false}
           filterMatchMode="contains"
-          header={resourcesContext.messages['file']}
+          header={resources.messages['file']}
           style={{ textAlign: 'center', width: '8em' }}
         />
         {isToolbarVisible && !isEmpty(documents) ? (
           <Column
             body={documentsEditButtons}
             className={styles.crudColumn}
-            header={resourcesContext.messages['documentsActionColumns']}
+            header={resources.messages['documentsActionColumns']}
             style={{ width: '5em' }}
           />
         ) : (
-          <Column className={styles.emptyTableHeader} header={resourcesContext.messages['documentsActionColumns']} />
+          <Column className={styles.emptyTableHeader} header={resources.messages['documentsActionColumns']} />
         )}
       </DataTable>
 
@@ -334,14 +331,14 @@ const Documents = ({
 
       {!isLoading && isEmpty(documents) && (
         <div className={styles.noDataWrapper}>
-          <h4>{resourcesContext.messages['noDocuments']}</h4>
+          <h4>{resources.messages['noDocuments']}</h4>
         </div>
       )}
 
       {isUploadDialogVisible && (
         <Dialog
           className={styles.dialog}
-          header={isEditForm ? resourcesContext.messages['editDocument'] : resourcesContext.messages['uploadDocument']}
+          header={isEditForm ? resources.messages['editDocument'] : resources.messages['uploadDocument']}
           onHide={onCancelDialog}
           visible={isUploadDialogVisible}>
           <DocumentFileUpload
@@ -361,18 +358,18 @@ const Documents = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={isDeletingDocument}
-          header={resourcesContext.messages['delete']}
+          header={resources.messages['delete']}
           iconConfirm={isDeletingDocument ? 'spinnerAnimate' : 'check'}
           isDeleting={isDeletingDocument}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={() => {
             setIsDeletingDocument(true);
             onDeleteDocument(rowDataState);
           }}
           onHide={onHideDeleteDialog}
           visible={deleteDialogVisible}>
-          {resourcesContext.messages['deleteDocument']}
+          {resources.messages['deleteDocument']}
         </ConfirmDialog>
       )}
     </Fragment>

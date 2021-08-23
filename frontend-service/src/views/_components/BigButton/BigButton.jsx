@@ -42,7 +42,7 @@ export const BigButton = ({
   setErrorDialogData,
   tooltip
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const regex = new RegExp(/[a-zA-Z0-9_-\s()]/);
 
   const [buttonsTitle, setButtonsTitle] = useState('');
@@ -76,7 +76,7 @@ export const BigButton = ({
       if (buttonsTitle !== '') {
         onInputSave(event.target.value, index);
       } else {
-        setErrorDialogData({ isVisible: true, message: resourcesContext.messages['emptyDatasetSchema'] });
+        setErrorDialogData({ isVisible: true, message: resources.messages['emptyDatasetSchema'] });
         document.getElementsByClassName('p-inputtext p-component')[0].focus();
       }
     }
@@ -101,7 +101,7 @@ export const BigButton = ({
   const designModel =
     !isUndefined(model) &&
     model.map(button => {
-      if (button.label === resourcesContext.messages['rename']) {
+      if (button.label === resources.messages['rename']) {
         button.command = onEnableSchemaNameEdit;
       }
       return button;
@@ -125,19 +125,19 @@ export const BigButton = ({
         if (checkDuplicates(title, index)) {
           setErrorDialogData({
             isVisible: true,
-            message: resourcesContext.messages['duplicateSchemaError']
+            message: resources.messages['duplicateSchemaError']
           });
           hasErrors = true;
         } else if (title.length > 250) {
           setErrorDialogData({
             isVisible: true,
-            message: resourcesContext.messages['tooLongSchemaNameError']
+            message: resources.messages['tooLongSchemaNameError']
           });
           hasErrors = true;
         } else if (checkInvalidCharacters(title)) {
           setErrorDialogData({
             isVisible: true,
-            message: resourcesContext.messages['invalidCharactersSchemaError']
+            message: resources.messages['invalidCharactersSchemaError']
           });
           hasErrors = true;
         }
@@ -151,7 +151,7 @@ export const BigButton = ({
         setIsEditEnabled(false);
       }
     } else {
-      setErrorDialogData({ isVisible: true, message: resourcesContext.messages['emptyDatasetSchema'] });
+      setErrorDialogData({ isVisible: true, message: resources.messages['emptyDatasetSchema'] });
       document.getElementsByClassName('p-inputtext p-component')[0].focus();
     }
   };
@@ -192,7 +192,7 @@ export const BigButton = ({
                 margin: '0 0.5rem',
                 fontWeight: '600'
               }}>
-              {resourcesContext.messages['new'].toUpperCase()}
+              {resources.messages['new'].toUpperCase()}
             </p>
           ))}
       </div>
@@ -202,7 +202,7 @@ export const BigButton = ({
           className={`${styles.inputText}`}
           id="editName"
           key={index}
-          name={resourcesContext.messages['editDatasetSchemaName']}
+          name={resources.messages['editDatasetSchemaName']}
           onBlur={e => {
             onInputSave(e.target.value.trim(), index);
             setButtonsTitle(e.target.value.trim());

@@ -41,7 +41,7 @@ const ValidationViewer = memo(
     tables,
     visible
   }) => {
-    const resourcesContext = useContext(ResourcesContext);
+    const resources = useContext(ResourcesContext);
     const validationContext = useContext(ValidationContext);
 
     const [columns, setColumns] = useState([]);
@@ -94,29 +94,29 @@ const ValidationViewer = memo(
       const headers = [
         {
           id: 'entityType',
-          header: resourcesContext.messages['entity']
+          header: resources.messages['entity']
         },
         {
           id: 'tableSchemaName',
-          header: resourcesContext.messages['table']
+          header: resources.messages['table']
         },
         {
           id: 'fieldSchemaName',
-          header: resourcesContext.messages['field']
+          header: resources.messages['field']
         },
         {
           id: 'shortCode',
-          header: resourcesContext.messages['ruleCode'],
+          header: resources.messages['ruleCode'],
           template: ruleCodeTemplate
         },
         {
           id: 'levelError',
-          header: resourcesContext.messages['levelError'],
+          header: resources.messages['levelError'],
           template: levelErrorTemplate
         },
         {
           id: 'message',
-          header: resourcesContext.messages['errorMessage']
+          header: resources.messages['errorMessage']
         }
       ];
 
@@ -139,7 +139,7 @@ const ValidationViewer = memo(
         <Column
           className={styles.invisibleHeader}
           field="recordId"
-          header={resourcesContext.messages['recordId']}
+          header={resources.messages['recordId']}
           key="recordId"
         />
       );
@@ -147,7 +147,7 @@ const ValidationViewer = memo(
         <Column
           className={styles.invisibleHeader}
           field="datasetPartitionId"
-          header={resourcesContext.messages['datasetPartitionId']}
+          header={resources.messages['datasetPartitionId']}
           key="datasetPartitionId"
         />
       );
@@ -155,23 +155,18 @@ const ValidationViewer = memo(
         <Column
           className={styles.invisibleHeader}
           field="tableSchemaId"
-          header={resourcesContext.messages['tableSchemaId']}
+          header={resources.messages['tableSchemaId']}
           key="tableSchemaId"
         />
       );
       columnsArr.push(
-        <Column
-          className={styles.invisibleHeader}
-          field="ruleId"
-          header={resourcesContext.messages['ruleId']}
-          key="ruleId"
-        />
+        <Column className={styles.invisibleHeader} field="ruleId" header={resources.messages['ruleId']} key="ruleId" />
       );
 
       columnsArr.push(
         <Column
           field="numberOfRecords"
-          header={resourcesContext.messages['numberOfRecords']}
+          header={resources.messages['numberOfRecords']}
           key="numberOfRecords"
           sortable={true}
         />
@@ -229,14 +224,14 @@ const ValidationViewer = memo(
       const ruleInfo = getRuleSchema(column);
       return (
         <Fragment>
-          <span className={styles.tooltipInfoLabel}>{resourcesContext.messages['ruleName']}: </span>{' '}
+          <span className={styles.tooltipInfoLabel}>{resources.messages['ruleName']}: </span>{' '}
           <span className={styles.tooltipValueLabel}>{ruleInfo?.name}</span>
           <br />
-          <span className={styles.tooltipInfoLabel}>{resourcesContext.messages['description']}: </span>
+          <span className={styles.tooltipInfoLabel}>{resources.messages['description']}: </span>
           <span className={styles.tooltipValueLabel}>
             {!isNil(ruleInfo?.description) && ruleInfo?.description !== ''
               ? ruleInfo?.description
-              : resourcesContext.messages['noDescription']}
+              : resources.messages['noDescription']}
           </span>
         </Fragment>
       );
@@ -499,15 +494,13 @@ const ValidationViewer = memo(
     const getPaginatorRecordsCount = () => (
       <Fragment>
         {filtered && totalRecords !== totalFilteredRecords
-          ? `${resourcesContext.messages['filtered']}: ${totalFilteredRecords} | `
+          ? `${resources.messages['filtered']}: ${totalFilteredRecords} | `
           : ''}
-        {resourcesContext.messages['totalRecords']} {totalRecords}{' '}
-        {`${resourcesContext.messages['records'].toLowerCase()}${` (${resourcesContext.messages[
+        {resources.messages['totalRecords']} {totalRecords}{' '}
+        {`${resources.messages['records'].toLowerCase()}${` (${resources.messages[
           'totalErrors'
         ].toLowerCase()}${totalErrors})`}`}
-        {filtered && totalRecords === totalFilteredRecords
-          ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-          : ''}
+        {filtered && totalRecords === totalFilteredRecords ? ` (${resources.messages['filtered'].toLowerCase()})` : ''}
       </Fragment>
     );
 
@@ -577,9 +570,9 @@ const ValidationViewer = memo(
         ) : (
           <div className={styles.emptyFilteredData}>
             {!filtered ? (
-              <h3>{resourcesContext.messages['emptyValidations']}</h3>
+              <h3>{resources.messages['emptyValidations']}</h3>
             ) : (
-              <h3>{resourcesContext.messages['noValidationsWithSelectedParameters']}</h3>
+              <h3>{resources.messages['noValidationsWithSelectedParameters']}</h3>
             )}
           </div>
         )}

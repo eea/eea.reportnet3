@@ -23,12 +23,12 @@ export const TableViewSchemas = ({
   pagination,
   paginatorRightText
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const fieldTables = {
-    expirationDate: resourcesContext.messages['nextReportDue'],
-    obligation: resourcesContext.messages['obligationTitle'],
-    legalInstruments: resourcesContext.messages['legalInstruments']
+    expirationDate: resources.messages['nextReportDue'],
+    obligation: resources.messages['obligationTitle'],
+    legalInstruments: resources.messages['legalInstruments']
   };
 
   const getOrderedFields = dataflows => {
@@ -54,13 +54,13 @@ export const TableViewSchemas = ({
       .map(orderedField => orderedField.id);
   };
 
-  const headerTableTemplate = field => fieldTables[field] || resourcesContext.messages[field];
+  const headerTableTemplate = field => fieldTables[field] || resources.messages[field];
 
   const onLoadCheckButton = row => {
     return (
       <div className={styles.checkColumn}>
         <Checkbox
-          ariaLabel={resourcesContext.messages['selectedDataflow']}
+          ariaLabel={resources.messages['selectedDataflow']}
           checked={checkedDataflow.id === row.id}
           id={`${row.id}_checkbox`}
           inputId={`${row.id}_checkbox`}
@@ -77,7 +77,7 @@ export const TableViewSchemas = ({
     <div className={styles.titleColum}>
       {row.name}
       <FontAwesomeIcon
-        aria-label={resourcesContext.messages['goToLink']}
+        aria-label={resources.messages['goToLink']}
         className={styles.linkIcon}
         icon={AwesomeIcons('externalUrl')}
         onMouseDown={() => handleRedirect(row.id)}
@@ -89,7 +89,7 @@ export const TableViewSchemas = ({
     <Column
       body={row => onLoadCheckButton(row)}
       className={styles.emptyTableHeader}
-      header={resourcesContext.messages['selectedDataflow']}
+      header={resources.messages['selectedDataflow']}
       key="checkId"
     />
   );
@@ -108,7 +108,7 @@ export const TableViewSchemas = ({
   };
 
   return isEmpty(data) ? (
-    <h3 className={styles.noDataflows}>{resourcesContext.messages['noDataflowsWithSelectedParameters']}</h3>
+    <h3 className={styles.noDataflows}>{resources.messages['noDataflowsWithSelectedParameters']}</h3>
   ) : (
     <DataTable
       autoLayout={true}

@@ -11,7 +11,7 @@ import { UserImage } from './_components/UserImage';
 
 const UserData = () => {
   const userContext = useContext(UserContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   return (
     <div className={styles.userDataContainer}>
@@ -34,7 +34,7 @@ const UserData = () => {
           style={{ cursor: 'pointer' }}
           target="_blank"
           type="button">
-          {resourcesContext.messages['privacyPolicy']}
+          {resources.messages['privacyPolicy']}
         </a>
       </div>
     </div>

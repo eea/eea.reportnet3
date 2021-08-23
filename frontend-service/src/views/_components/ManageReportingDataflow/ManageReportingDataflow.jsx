@@ -39,7 +39,7 @@ export const ManageReportingDataflow = ({
   state
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const deleteInputRef = useRef(null);
   const formRef = useRef(null);
@@ -124,7 +124,7 @@ export const ManageReportingDataflow = ({
     <Button
       className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
       icon="cancel"
-      label={isEditForm ? resourcesContext.messages['cancel'] : resourcesContext.messages['close']}
+      label={isEditForm ? resources.messages['cancel'] : resources.messages['close']}
       onClick={() => action()}
     />
   );
@@ -136,14 +136,14 @@ export const ManageReportingDataflow = ({
           <Button
             className="p-button-danger p-button-animated-blink"
             icon="trash"
-            label={resourcesContext.messages['deleteDataflowButton']}
+            label={resources.messages['deleteDataflowButton']}
             onClick={() => manageDialogs('isDeleteDialogVisible', true)}
           />
         )}
         {!isEditForm && (
           <div className={styles.checkboxWrapper}>
             <Checkbox
-              ariaLabel={resourcesContext.messages['pinDataflow']}
+              ariaLabel={resources.messages['pinDataflow']}
               checked={reportingDataflowState.pinDataflow}
               id="replaceCheckbox"
               inputId="replaceCheckbox"
@@ -163,7 +163,7 @@ export const ManageReportingDataflow = ({
                     payload: !reportingDataflowState.pinDataflow
                   })
                 }>
-                {resourcesContext.messages['pinDataflow']}
+                {resources.messages['pinDataflow']}
               </span>
             </label>
             <FontAwesomeIcon
@@ -174,7 +174,7 @@ export const ManageReportingDataflow = ({
               icon={AwesomeIcons('infoCircle')}
             />
             <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="pinDataflow" place="top">
-              <span>{resourcesContext.messages['pinDataflowMessage']}</span>
+              <span>{resources.messages['pinDataflowMessage']}</span>
             </ReactTooltip>
           </div>
         )}
@@ -195,7 +195,7 @@ export const ManageReportingDataflow = ({
           reportingDataflowState.isSubmitting
         }
         icon={reportingDataflowState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'check' : 'add'}
-        label={isEditForm ? resourcesContext.messages['save'] : resourcesContext.messages['create']}
+        label={isEditForm ? resources.messages['save'] : resources.messages['create']}
         onClick={() => (reportingDataflowState.isSubmitting ? {} : onSave())}
       />
       {renderCancelButton(onHideDataflowDialog)}
@@ -208,7 +208,7 @@ export const ManageReportingDataflow = ({
         <Dialog
           className={styles.dialog}
           footer={renderDataflowDialog()}
-          header={resourcesContext.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow']}
+          header={resources.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow']}
           onHide={() => onHideDataflowDialog()}
           visible={state.isAddDialogVisible || state.isEditDialogVisible}>
           <ManageReportingDataflowForm
@@ -234,32 +234,30 @@ export const ManageReportingDataflow = ({
           disabledConfirm={
             !TextUtils.areEquals(reportingDataflowState.deleteInput, state.name) || reportingDataflowState.isDeleting
           }
-          header={resourcesContext.messages['delete'].toUpperCase()}
+          header={resources.messages['delete'].toUpperCase()}
           iconConfirm={reportingDataflowState.isDeleting && 'spinnerAnimate'}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
+          labelCancel={resources.messages['no']}
+          labelConfirm={resources.messages['yes']}
           onConfirm={() => onDeleteDataflow()}
           onHide={() => manageDialogs('isDeleteDialogVisible', false)}
           visible={state.isDeleteDialogVisible}>
-          <p>{resourcesContext.messages['deleteDataflow']}</p>
+          <p>{resources.messages['deleteDataflow']}</p>
           <p
             dangerouslySetInnerHTML={{
-              __html: TextUtils.parseText(resourcesContext.messages['deleteDataflowConfirm'], {
+              __html: TextUtils.parseText(resources.messages['deleteDataflowConfirm'], {
                 dataflowName: state.name
               })
             }}></p>
-          <p>
-            <InputText
-              autoFocus={true}
-              className={`${styles.inputText}`}
-              id={'deleteDataflow'}
-              maxLength={255}
-              name={resourcesContext.messages['deleteDataflowButton']}
-              onChange={event => onDeleteInputChange(event.target.value)}
-              ref={deleteInputRef}
-              value={reportingDataflowState.deleteInput}
-            />
-          </p>
+          <InputText
+            autoFocus={true}
+            className={styles.inputText}
+            id={'deleteDataflow'}
+            maxLength={config.INPUT_MAX_LENGTH}
+            name={resources.messages['deleteDataflowButton']}
+            onChange={event => onDeleteInputChange(event.target.value)}
+            ref={deleteInputRef}
+            value={reportingDataflowState.deleteInput}
+          />
         </ConfirmDialog>
       )}
     </Fragment>

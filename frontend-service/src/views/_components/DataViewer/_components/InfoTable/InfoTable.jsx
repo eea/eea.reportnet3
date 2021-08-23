@@ -20,7 +20,7 @@ import { RecordUtils } from 'views/_functions/Utils';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, onDeletePastedRecord }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const actionTemplate = record => {
     return (
@@ -130,23 +130,20 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
     if (!isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)) {
       return (
         <Fragment>
-          <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['type']}: </span>{' '}
+          <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
             {RecordUtils.getFieldTypeValue(column.type)}
           </span>
           <br />
-          <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['description']}: </span>
+          <span style={{ fontWeight: 'bold' }}>{resources.messages['description']}: </span>
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
             {!isNil(column.description) && column.description !== ''
               ? column.description
-              : resourcesContext.messages['noDescription']}
+              : resources.messages['noDescription']}
           </span>
           <br />
           <span style={{ fontWeight: 'bold' }}>
-            {column.type === 'CODELIST'
-              ? resourcesContext.messages['codelists']
-              : resourcesContext.messages['multiselectCodelists']}
-            :{' '}
+            {column.type === 'CODELIST' ? resources.messages['codelists'] : resources.messages['multiselectCodelists']}:{' '}
           </span>
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
             {column.codelistItems
@@ -162,34 +159,34 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
     } else {
       return (
         <Fragment>
-          <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['type']}: </span>{' '}
+          <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
             {RecordUtils.getFieldTypeValue(column.type)}
           </span>
           <br />
-          <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['description']}: </span>
+          <span style={{ fontWeight: 'bold' }}>{resources.messages['description']}: </span>
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
             {!isNil(column.description) && column.description !== '' && column.description.length > 35
               ? `${column.description.substring(0, 35)}...`
               : isNil(column.description) || column.description === ''
-              ? resourcesContext.messages['noDescription']
+              ? resources.messages['noDescription']
               : column.description}
           </span>
           {column.type === 'ATTACHMENT' ? (
             <Fragment>
               <br />
-              <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['validExtensions']} </span>
+              <span style={{ fontWeight: 'bold' }}>{resources.messages['validExtensions']} </span>
               <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
                 {!isEmpty(column.validExtensions)
                   ? column.validExtensions.map(extension => `.${extension}`).join(', ')
                   : '*'}
               </span>
               <br />
-              <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['maxFileSize']}</span>
+              <span style={{ fontWeight: 'bold' }}>{resources.messages['maxFileSize']}</span>
               <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
                 {!isNil(column.maxSize) && column.maxSize.toString() !== '0'
-                  ? ` ${column.maxSize} ${resourcesContext.messages['MB']}`
-                  : resourcesContext.messages['maxSizeNotDefined']}
+                  ? ` ${column.maxSize} ${resources.messages['MB']}`
+                  : resources.messages['maxSizeNotDefined']}
               </span>
             </Fragment>
           ) : (
@@ -258,7 +255,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
 
   const totalCount = (
     <span>
-      {resourcesContext.messages['totalPastedRecords']} {!isUndefined(numCopiedRecords) ? data.length : 0}{' '}
+      {resources.messages['totalPastedRecords']} {!isUndefined(numCopiedRecords) ? data.length : 0}{' '}
     </span>
   );
 
@@ -268,16 +265,13 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         levelError="WARNING"
         message={
           recordData.copiedCols < filteredColumns.length
-            ? resourcesContext.messages['pasteColumnErrorLessMessage']
-            : resourcesContext.messages['pasteColumnErrorMoreMessage']
+            ? resources.messages['pasteColumnErrorLessMessage']
+            : resources.messages['pasteColumnErrorMoreMessage']
         }
       />
     ) : (
       !checkValidCoordinates() && (
-        <IconTooltip
-          levelError="WARNING"
-          message={resourcesContext.messages['pasteRecordsWarningCoordinatesMessage']}
-        />
+        <IconTooltip levelError="WARNING" message={resources.messages['pasteRecordsWarningCoordinatesMessage']} />
       )
     );
   };
@@ -304,15 +298,13 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
       ) : (
         <div className={styles.infoTablePaste}>
           <div className={styles.infoTableItem}>
-            <p>{resourcesContext.messages['pasteRecordsMessage']}</p>
+            <p>{resources.messages['pasteRecordsMessage']}</p>
           </div>
           <div className={styles.lineBreak}></div>
           <div className={styles.infoTableItem}>
-            <p>{resourcesContext.messages['pasteRecordsMaxMessage']}</p>
-            <p>{resourcesContext.messages['pasteRecordsCoordinatesMessage']}</p>
-            <p style={{ fontStyle: 'italic' }}>
-              {resourcesContext.messages['pasteRecordsCoordinatesStructureMessage']}
-            </p>
+            <p>{resources.messages['pasteRecordsMaxMessage']}</p>
+            <p>{resources.messages['pasteRecordsCoordinatesMessage']}</p>
+            <p style={{ fontStyle: 'italic' }}>{resources.messages['pasteRecordsCoordinatesStructureMessage']}</p>
           </div>
         </div>
       )}

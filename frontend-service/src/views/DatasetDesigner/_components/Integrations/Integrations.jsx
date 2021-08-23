@@ -12,7 +12,7 @@ import { IntegrationsUtils } from './_functions/Utils/IntegrationsUtils';
 export const Integrations = ({ dataflowId, datasetId, designerState, manageDialogs, onUpdateData }) => {
   const { isIntegrationListDialogVisible, isIntegrationManageDialogVisible } = designerState;
 
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [integrationsList, setIntegrationsList] = useState([]);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -38,7 +38,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
         <Button
           className="p-button-secondary p-button-animated-blink"
           icon={'plus'}
-          label={resourcesContext.messages['createExternalIntegration']}
+          label={resources.messages['createExternalIntegration']}
           onClick={() => {
             manageDialogs('isIntegrationManageDialogVisible', true);
             setUpdatedData({});
@@ -48,7 +48,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
-        label={resourcesContext.messages['close']}
+        label={resources.messages['close']}
         onClick={() => onCloseListModal()}
       />
     </Fragment>
@@ -59,7 +59,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
       {isIntegrationListDialogVisible && (
         <Dialog
           footer={renderIntegrationFooter}
-          header={resourcesContext.messages['externalIntegrations']}
+          header={resources.messages['externalIntegrations']}
           onHide={() => onCloseListModal()}
           style={{ width: '70%' }}
           visible={isIntegrationListDialogVisible}>

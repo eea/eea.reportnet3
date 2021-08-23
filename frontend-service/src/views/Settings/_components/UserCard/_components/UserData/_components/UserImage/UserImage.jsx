@@ -23,7 +23,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 const UserImage = () => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [isAvatarDialogVisible, setIsAvatarDialogVisible] = useState(false);
@@ -118,7 +118,7 @@ const UserImage = () => {
           type="file"
         />
         <label className="srOnly" htmlFor="userIcon">
-          {resourcesContext.messages['selectImage']}
+          {resources.messages['selectImage']}
         </label>
         <img
           alt="User profile avatar"
@@ -134,7 +134,7 @@ const UserImage = () => {
       </div>
       {isAvatarDialogVisible && (
         <Dialog
-          header={resourcesContext.messages['selectImage']}
+          header={resources.messages['selectImage']}
           onHide={() => setIsAvatarDialogVisible(false)}
           style={{ width: '80%' }}
           visible={isAvatarDialogVisible}>
@@ -152,14 +152,14 @@ const UserImage = () => {
         <Button
           className={`p-button-secondary p-button-animated-blink`}
           icon={'add'}
-          label={resourcesContext.messages['uploadImage']}
+          label={resources.messages['uploadImage']}
           onClick={() => imageUploader.current.click()}
           style={{ marginRight: '1rem' }}
         />
         <Button
           className={`p-button-secondary p-button-animated-blink`}
           icon={'userPlus'}
-          label={resourcesContext.messages['selectImage']}
+          label={resources.messages['selectImage']}
           onClick={() => setIsAvatarDialogVisible(true)}
         />
       </ReactTooltip>

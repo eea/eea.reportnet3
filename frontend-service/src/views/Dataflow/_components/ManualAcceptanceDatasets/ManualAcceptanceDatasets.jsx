@@ -31,7 +31,7 @@ export const ManualAcceptanceDatasets = ({
   refreshManualAcceptanceDatasets
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [manualAcceptanceDatasetsState, manualAcceptanceDatasetsDispatch] = useReducer(
     manualAcceptanceDatasetsReducer,
@@ -48,13 +48,13 @@ export const ManualAcceptanceDatasets = ({
     <Fragment>
       {manualAcceptanceDatasetsState.filtered &&
       manualAcceptanceDatasetsState.data.length !== manualAcceptanceDatasetsState.filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${manualAcceptanceDatasetsState.filteredData.length} | `
+        ? `${resources.messages['filtered']} : ${manualAcceptanceDatasetsState.filteredData.length} | `
         : ''}
-      {resourcesContext.messages['totalRecords']} {manualAcceptanceDatasetsState.data.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
+      {resources.messages['totalRecords']} {manualAcceptanceDatasetsState.data.length}{' '}
+      {resources.messages['records'].toLowerCase()}
       {manualAcceptanceDatasetsState.filtered &&
       manualAcceptanceDatasetsState.data.length === manualAcceptanceDatasetsState.filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
+        ? ` (${resources.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
   );
@@ -115,7 +115,7 @@ export const ManualAcceptanceDatasets = ({
     <Column
       body={row => row.isReleased && actionsTemplate(row)}
       className={styles.validationCol}
-      header={resourcesContext.messages['changeStatus']}
+      header={resources.messages['changeStatus']}
       key="actions"
       style={{ width: '100px' }}
     />
@@ -127,10 +127,7 @@ export const ManualAcceptanceDatasets = ({
       type: 'multiselect',
       properties: [{ name: isBusinessDataflow ? 'company' : 'dataProviderName' }, { name: 'feedbackStatus' }]
     },
-    {
-      type: 'checkbox',
-      properties: [{ name: 'isReleased', label: resourcesContext.messages['onlyReleasedCheckboxLabel'] }]
-    }
+    { type: 'checkbox', properties: [{ name: 'isReleased', label: resources.messages['onlyReleasedCheckboxLabel'] }] }
   ];
 
   const renderColumns = datasets => {
@@ -144,8 +141,8 @@ export const ManualAcceptanceDatasets = ({
           field={field}
           header={
             isBusinessDataflow && TextUtils.areEquals(field, 'dataProviderName')
-              ? resourcesContext.messages['company']
-              : resourcesContext.messages[field]
+              ? resources.messages['company']
+              : resources.messages[field]
           }
           key={field}
           sortable={true}
@@ -167,7 +164,7 @@ export const ManualAcceptanceDatasets = ({
 
   return isEmpty(manualAcceptanceDatasetsState.data) ? (
     <div className={styles.historicReleasesWithoutTable}>
-      <div className={styles.noManualAcceptanceDatasets}>{resourcesContext.messages['noDatasets']}</div>
+      <div className={styles.noManualAcceptanceDatasets}>{resources.messages['noDatasets']}</div>
     </div>
   ) : (
     <div className={styles.manualAcceptanceDatasets}>
@@ -191,7 +188,7 @@ export const ManualAcceptanceDatasets = ({
           {renderColumns(manualAcceptanceDatasetsState.filteredData)}
         </DataTable>
       ) : (
-        <div className={styles.emptyFilteredData}>{resourcesContext.messages['noDatasetsWithSelectedParameters']}</div>
+        <div className={styles.emptyFilteredData}>{resources.messages['noDatasetsWithSelectedParameters']}</div>
       )}
     </div>
   );

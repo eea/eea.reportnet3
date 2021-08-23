@@ -20,7 +20,7 @@ const useBigButtonList = ({
   onOpenReleaseConfirmDialog,
   onShowHistoricReleases
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [buttonsVisibility, setButtonsVisibility] = useState({});
@@ -61,7 +61,7 @@ const useBigButtonList = ({
     layout: 'defaultBigButton',
     buttonClass: 'technicalFeedback',
     buttonIcon: 'comments',
-    caption: resourcesContext.messages['technicalFeedback'],
+    caption: resources.messages['technicalFeedback'],
     handleRedirect: () =>
       handleRedirect(
         getUrl(
@@ -89,7 +89,7 @@ const useBigButtonList = ({
     layout: 'defaultBigButton',
     buttonClass: 'dataflowHelp',
     buttonIcon: 'info',
-    caption: resourcesContext.messages['dataflowHelp'],
+    caption: resources.messages['dataflowHelp'],
     handleRedirect: () =>
       handleRedirect(
         getUrl(
@@ -149,7 +149,7 @@ const useBigButtonList = ({
         helpClassName: 'dataflow-dataset-container-help-step',
         model: [
           {
-            label: resourcesContext.messages['historicReleases'],
+            label: resources.messages['historicReleases'],
             command: () => {
               onShowHistoricReleases('reportingDataset', true);
               getDataHistoricReleases(datasetId, datasetName);
@@ -167,7 +167,7 @@ const useBigButtonList = ({
         buttonClass: 'schemaDataset',
         buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
         buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
-        caption: resourcesContext.messages['confirmationReceipt'],
+        caption: resources.messages['confirmationReceipt'],
         handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
         infoStatus: dataflowState.isReceiptOutdated,
         layout: 'defaultBigButton',
@@ -190,12 +190,12 @@ const useBigButtonList = ({
         buttonClass: 'schemaDataset',
         buttonIcon: getIsReleasing() ? 'spinner' : 'released',
         buttonIconClass: getIsReleasing() ? 'spinner' : 'released',
-        caption: resourcesContext.messages['releaseDataCollection'],
+        caption: resources.messages['releaseDataCollection'],
         enabled: dataflowState.isReleasable,
         handleRedirect: dataflowState.isReleasable && !getIsReleasing() ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
-        tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
+        tooltip: dataflowState.isReleasable ? '' : resources.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }
     ];

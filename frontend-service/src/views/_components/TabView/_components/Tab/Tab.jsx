@@ -61,7 +61,7 @@ const Tab = ({
 
   const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s]/);
 
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   let contextMenuRef = useRef();
   const tabRef = useRef();
@@ -69,14 +69,14 @@ const Tab = ({
   useEffect(() => {
     setMenu([
       {
-        label: resourcesContext.messages['edit'],
+        label: resources.messages['edit'],
         icon: config.icons['edit'],
         command: () => {
           setEditingHeader(true);
         }
       },
       {
-        label: resourcesContext.messages['delete'],
+        label: resources.messages['delete'],
         icon: config.icons['trash'],
         command: () => {
           if (!isUndefined(onTabDeleteClick) && !addTab && !hasPKReferenced) {
@@ -199,10 +199,7 @@ const Tab = ({
         onInputBlur(event.target.value, index, initialTitleHeader);
       } else {
         if (!isUndefined(onTabNameError)) {
-          onTabNameError(
-            resourcesContext.messages['emptyTabHeader'],
-            resourcesContext.messages['emptyTitleValidationError']
-          );
+          onTabNameError(resources.messages['emptyTabHeader'], resources.messages['emptyTitleValidationError']);
         }
       }
     }
@@ -350,16 +347,16 @@ const Tab = ({
                     onInputBlur(e.target.value.trim(), index, initialTitleHeader);
                   } else {
                     onTabNameError(
-                      resourcesContext.messages['invalidCharactersTabHeader'],
-                      resourcesContext.messages['invalidCharactersTabHeaderError']
+                      resources.messages['invalidCharactersTabHeader'],
+                      resources.messages['invalidCharactersTabHeaderError']
                     );
                   }
                 } else {
                   if (!isUndefined(onTabNameError)) {
                     if (!newTab) {
                       onTabNameError(
-                        resourcesContext.messages['emptyTabHeader'],
-                        resourcesContext.messages['emptyTitleValidationError']
+                        resources.messages['emptyTabHeader'],
+                        resources.messages['emptyTitleValidationError']
                       );
                     } else {
                       onTabAddCancel();
@@ -369,7 +366,7 @@ const Tab = ({
               }}
               onChange={e => setTitleHeader(e.target.value)}
               onKeyDown={e => onKeyChange(e, index)}
-              placeholder={resourcesContext.messages['newTablePlaceHolder']}
+              placeholder={resources.messages['newTablePlaceHolder']}
               value={!isUndefined(titleHeader) ? titleHeader : header}></InputText>
           ) : (
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>

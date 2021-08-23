@@ -19,7 +19,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
 
 const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [isPinned, setIsPinned] = useState(itemContent.pinned === 'pinned');
@@ -43,7 +43,7 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
         </Link>
         <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
           <FontAwesomeIcon
-            aria-label={resourcesContext.messages['pinDataflow']}
+            aria-label={resources.messages['pinDataflow']}
             className={`${isPinned ? styles.pinned : styles.notPinned} ${isPinning ? 'fa-spin' : null}`}
             icon={!isPinning ? AwesomeIcons('pin') : AwesomeIcons('spinner')}
             onClick={async () => {
@@ -67,10 +67,10 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
 
       <div className={`${styles.deliveryDate} dataflowList-delivery-date-help-step`}>
         <p>
-          <span>{`${resourcesContext.messages['deliveryDate']}: `}</span>
+          <span>{`${resources.messages['deliveryDate']}: `}</span>
           <span className={`${styles.dateBlock}`}>
             {TextUtils.areEquals(itemContent.expirationDate, '-')
-              ? resourcesContext.messages['pending']
+              ? resources.messages['pending']
               : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
           </span>
         </p>
@@ -91,31 +91,31 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
       <div className={`${styles.status}  dataflowList-status-help-step`}>
         {!isCustodian && !isNil(itemContent.reportingDatasetsStatus) && itemContent.status === 'OPEN' && (
           <p>
-            <span>{`${resourcesContext.messages['deliveryStatus']}: `}</span>
+            <span>{`${resources.messages['deliveryStatus']}: `}</span>
             {itemContent.reportingDatasetsStatus === 'PENDING'
-              ? resourcesContext.messages['draft'].toUpperCase()
+              ? resources.messages['draft'].toUpperCase()
               : itemContent.reportingDatasetsStatus.split('_').join(' ').toUpperCase()}
           </p>
         )}
         <p>
-          <span>{`${resourcesContext.messages['dataflowStatus']}: `}</span>
+          <span>{`${resources.messages['dataflowStatus']}: `}</span>
           {itemContent.status}
         </p>
       </div>
       <div className={`${styles.role}  dataflowList-role-help-step`}>
         <p>
-          <span>{`${resourcesContext.messages['role']}: `}</span>
+          <span>{`${resources.messages['role']}: `}</span>
           {itemContent.userRole}
         </p>
       </div>
 
       <div className={`${styles.obligation} `}>
         <p className="dataflowList-obligation-description-help-step">
-          <span>{`${resourcesContext.messages['legalInstrumentDataflowItem']}: `}</span>
+          <span>{`${resources.messages['legalInstrumentDataflowItem']}: `}</span>
           {itemContent.legalInstrument}
         </p>
         <p>
-          <span>{`${resourcesContext.messages['obligationDataflowItem']}: `}</span>
+          <span>{`${resources.messages['obligationDataflowItem']}: `}</span>
           {itemContent.obligationTitle}
         </p>
       </div>

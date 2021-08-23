@@ -17,7 +17,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const UserList = ({ dataflowId, isBusinessDataflow = false, representativeId }) => {
   const notificationContext = useContext(NotificationContext);
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
 
   const [userListData, setUserListData] = useState([]);
   const [filteredData, setFilteredData] = useState(userListData);
@@ -60,12 +60,11 @@ export const UserList = ({ dataflowId, isBusinessDataflow = false, representativ
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {isDataFiltered && userListData.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
+        ? `${resources.messages['filtered']} : ${filteredData.length} | `
         : ''}
-      {resourcesContext.messages['totalRecords']} {userListData.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
+      {resources.messages['totalRecords']} {userListData.length} {resources.messages['records'].toLowerCase()}
       {isDataFiltered && userListData.length === filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
+        ? ` (${resources.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
   );
@@ -84,7 +83,7 @@ export const UserList = ({ dataflowId, isBusinessDataflow = false, representativ
         {
           name: 'country',
           showInput: true,
-          label: isBusinessDataflow ? resourcesContext.messages['company'] : resourcesContext.messages['countries']
+          label: isBusinessDataflow ? resources.messages['company'] : resources.messages['countries']
         }
       ]
     }
@@ -137,7 +136,7 @@ export const UserList = ({ dataflowId, isBusinessDataflow = false, representativ
       {isLoading ? (
         <Spinner />
       ) : isEmpty(userListData) ? (
-        <div className={styles.noUsers}>{resourcesContext.messages['noUsers']}</div>
+        <div className={styles.noUsers}>{resources.messages['noUsers']}</div>
       ) : (
         <div className={styles.users}>
           {renderFilters()}
@@ -151,22 +150,20 @@ export const UserList = ({ dataflowId, isBusinessDataflow = false, representativ
               totalRecords={userListData.length}
               value={filteredData}>
               {isNil(representativeId) && isNil(dataflowId) && (
-                <Column field="dataflowName" header={resourcesContext.messages['dataflowName']} sortable={true} />
+                <Column field="dataflowName" header={resources.messages['dataflowName']} sortable={true} />
               )}
-              <Column field="role" header={resourcesContext.messages['role']} sortable={true} />
-              <Column field="email" header={resourcesContext.messages['user']} sortable={true} />
+              <Column field="role" header={resources.messages['role']} sortable={true} />
+              <Column field="email" header={resources.messages['user']} sortable={true} />
               {isNil(representativeId) && !isNil(dataflowId) && (
                 <Column
                   field="country"
-                  header={
-                    isBusinessDataflow ? resourcesContext.messages['company'] : resourcesContext.messages['countries']
-                  }
+                  header={isBusinessDataflow ? resources.messages['company'] : resources.messages['countries']}
                   sortable={true}
                 />
               )}
             </DataTable>
           ) : (
-            <div className={styles.emptyFilteredData}>{resourcesContext.messages['noUsersWithSelectedParameters']}</div>
+            <div className={styles.emptyFilteredData}>{resources.messages['noUsersWithSelectedParameters']}</div>
           )}
         </div>
       )}

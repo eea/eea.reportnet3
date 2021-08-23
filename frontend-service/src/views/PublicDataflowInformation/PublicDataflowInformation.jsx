@@ -41,7 +41,7 @@ export const PublicDataflowInformation = withRouter(
       params: { dataflowId }
     }
   }) => {
-    const resourcesContext = useContext(ResourcesContext);
+    const resources = useContext(ResourcesContext);
     const themeContext = useContext(ThemeContext);
 
     const [contentStyles, setContentStyles] = useState({});
@@ -104,7 +104,7 @@ export const PublicDataflowInformation = withRouter(
               effect="solid"
               id={'restrictFromPublicField'}
               place="top">
-              <span>{resourcesContext.messages['restrictFromPublicField']}</span>
+              <span>{resources.messages['restrictFromPublicField']}</span>
             </ReactTooltip>
           </div>
         );
@@ -154,16 +154,16 @@ export const PublicDataflowInformation = withRouter(
       let header;
       switch (fieldHeader) {
         case 'datasetSchemaName':
-          header = resourcesContext.messages['countries'];
+          header = resources.messages['countries'];
           break;
         case 'releaseDate':
-          header = resourcesContext.messages['releaseDate'];
+          header = resources.messages['releaseDate'];
           break;
         case 'isReleased':
-          header = resourcesContext.messages['delivered'];
+          header = resources.messages['delivered'];
           break;
         case 'publicsFileName':
-          header = resourcesContext.messages['files'];
+          header = resources.messages['files'];
           break;
         default:
           break;
@@ -175,10 +175,10 @@ export const PublicDataflowInformation = withRouter(
       let header;
       switch (fieldHeader) {
         case 'datasetSchemaName':
-          header = resourcesContext.messages['name'];
+          header = resources.messages['name'];
           break;
         case 'publicFileName':
-          header = resourcesContext.messages['file'];
+          header = resources.messages['file'];
           break;
         default:
           break;
@@ -224,7 +224,7 @@ export const PublicDataflowInformation = withRouter(
             }}
           />
           <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
-            <span>{resourcesContext.messages['navigateToCountry']}</span>
+            <span>{resources.messages['navigateToCountry']}</span>
           </ReactTooltip>
         </span>
       </div>
@@ -369,7 +369,7 @@ export const PublicDataflowInformation = withRouter(
         <div className={`${styles.container} rep-container`} style={contentStyles}>
           {!isLoading ? (
             isWrongUrlDataflowId ? (
-              <div className={styles.noDatasets}>{resourcesContext.messages['wrongUrlDataflowId']}</div>
+              <div className={styles.noDatasets}>{resources.messages['wrongUrlDataflowId']}</div>
             ) : !isEmpty(representatives) ? (
               <Fragment>
                 <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
@@ -378,9 +378,7 @@ export const PublicDataflowInformation = withRouter(
                 </DataTable>
                 {!isEmpty(referenceDatasets) && (
                   <div className={styles.referenceDatasetsWrapper}>
-                    <div className={styles.referenceDatasetsTitle}>
-                      {resourcesContext.messages['referenceDatasets']}
-                    </div>
+                    <div className={styles.referenceDatasetsTitle}>{resources.messages['referenceDatasets']}</div>
                     <DataTable
                       autoLayout={true}
                       className={styles.referenceDatasetsTable}
@@ -392,7 +390,7 @@ export const PublicDataflowInformation = withRouter(
                 )}
               </Fragment>
             ) : (
-              <div className={styles.noDatasets}>{resourcesContext.messages['noDatasets']}</div>
+              <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
             )
           ) : (
             <Spinner className={styles.isLoading} />
