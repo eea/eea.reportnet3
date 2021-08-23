@@ -27,6 +27,7 @@ import { DataViewerUtils } from 'views/_components/DataViewer/_functions/Utils/D
 import { MetadataUtils, RecordUtils } from 'views/_functions/Utils';
 import { TableManagementUtils } from './_functions/Utils/TableManagementUtils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
+import { ErrorUtils } from 'views/_functions/Utils/ErrorUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -290,21 +291,6 @@ export const TableManagement = ({
     }
   };
 
-  const addIconLevelError = (validation, levelError, message) => {
-    let icon = [];
-    if (!isEmpty(validation)) {
-      icon.push(
-        <IconTooltip
-          className={styles.iconTooltipLevelError}
-          key={levelError}
-          levelError={levelError}
-          message={message}
-        />
-      );
-    }
-    return icon;
-  };
-
   const addTableTemplate = (rowData, colData) => {
     let hasRecord = false;
     let hasTable = false;
@@ -381,21 +367,6 @@ export const TableManagement = ({
     }
   };
 
-  const getIconsValidationsErrors = validations => {
-    let icons = [];
-    if (isNil(validations)) {
-      return icons;
-    }
-
-    const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
-    const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
-    const warningIcon = addIconLevelError(validations.warnings, 'WARNING', validations.messageWarnings);
-    const infoIcon = addIconLevelError(validations.infos, 'INFO', validations.messageInfos);
-
-    icons = blockerIcon.concat(errorIcon, warningIcon, infoIcon);
-    return <div className={styles.iconTooltipWrapper}>{icons}</div>;
-  };
-
   const renderActionButtonsColumn = (
     <Column
       body={row => renderActionsTemplate(row)}
@@ -413,14 +384,16 @@ export const TableManagement = ({
   );
 
   const validationsTemplate = recordData => {
-    const validationsGroup = DataViewerUtils.groupValidations(
-      recordData,
-      resourcesContext.messages['recordBlockers'],
-      resourcesContext.messages['recordErrors'],
-      resourcesContext.messages['recordWarnings'],
-      resourcesContext.messages['recordInfos']
+    return (
+      <div className={styles.iconTooltipWrapper}>
+        {ErrorUtils.getValidationsTemplate(recordData, {
+          blockers: resourcesContext.messages['recordBlockers'],
+          errors: resourcesContext.messages['recordErrors'],
+          warnings: resourcesContext.messages['recordWarnings'],
+          infos: resourcesContext.messages['recordInfos']
+        })}
+      </div>
     );
-    return getIconsValidationsErrors(validationsGroup);
   };
 
   const renderValidationColumn = (
