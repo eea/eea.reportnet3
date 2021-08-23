@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 const useSnapshotReducer = (setIsSnapshotDialogVisible, onCreateSnapshot, onDeleteSnapshot, onRestoreSnapshot) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const snapshotReducer = (state, { type, payload }) => {
     switch (type) {
@@ -15,9 +15,9 @@ const useSnapshotReducer = (setIsSnapshotDialogVisible, onCreateSnapshot, onDele
           action: onCreateSnapshot,
           creationDate: Date.now(),
           description: payload.description,
-          dialogConfirmMessage: resources.messages.createSnapshotConfirmationMessage,
-          dialogConfirmQuestion: resources.messages.createSnapshotConfirmationQuestion,
-          dialogMessage: resources.messages.createSnapshotMessage,
+          dialogConfirmMessage: resourcesContext.messages.createSnapshotConfirmationMessage,
+          dialogConfirmQuestion: resourcesContext.messages.createSnapshotConfirmationQuestion,
+          dialogMessage: resourcesContext.messages.createSnapshotMessage,
           snapShotId: '',
           isConfirmDisabled: false
         };
@@ -30,9 +30,9 @@ const useSnapshotReducer = (setIsSnapshotDialogVisible, onCreateSnapshot, onDele
           action: onDeleteSnapshot,
           creationDate: payload.creationDate,
           description: payload.description,
-          dialogConfirmMessage: resources.messages.deleteSnapshotConfirmationMessage,
-          dialogConfirmQuestion: resources.messages.deleteSnapshotConfirmationQuestion,
-          dialogMessage: resources.messages.deleteSnapshotMessage,
+          dialogConfirmMessage: resourcesContext.messages.deleteSnapshotConfirmationMessage,
+          dialogConfirmQuestion: resourcesContext.messages.deleteSnapshotConfirmationQuestion,
+          dialogMessage: resourcesContext.messages.deleteSnapshotMessage,
           snapShotId: payload.id,
           isConfirmDisabled: false
         };
@@ -45,9 +45,9 @@ const useSnapshotReducer = (setIsSnapshotDialogVisible, onCreateSnapshot, onDele
           action: onRestoreSnapshot,
           creationDate: payload.creationDate,
           description: payload.description,
-          dialogConfirmMessage: resources.messages.restoreSnapshotConfirmationMessage,
-          dialogConfirmQuestion: resources.messages.restoreSnapshotConfirmationQuestion,
-          dialogMessage: resources.messages.restoreSnapshotMessage,
+          dialogConfirmMessage: resourcesContext.messages.restoreSnapshotConfirmationMessage,
+          dialogConfirmQuestion: resourcesContext.messages.restoreSnapshotConfirmationQuestion,
+          dialogMessage: resourcesContext.messages.restoreSnapshotMessage,
           snapShotId: payload.id,
           isConfirmDisabled: false
         };

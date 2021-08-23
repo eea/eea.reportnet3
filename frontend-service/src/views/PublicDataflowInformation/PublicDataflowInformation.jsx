@@ -41,8 +41,9 @@ export const PublicDataflowInformation = withRouter(
       params: { dataflowId }
     }
   }) => {
-    const resources = useContext(ResourcesContext);
+    const resourcesContext = useContext(ResourcesContext);
     const themeContext = useContext(ThemeContext);
+    const notificationContext = useContext(NotificationContext);
 
     const [contentStyles, setContentStyles] = useState({});
     const [dataflowData, setDataflowData] = useState({});
@@ -50,8 +51,6 @@ export const PublicDataflowInformation = withRouter(
     const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
     const [referenceDatasets, setReferenceDatasets] = useState([]);
     const [representatives, setRepresentatives] = useState({});
-
-    const notificationContext = useContext(NotificationContext);
 
     useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOW, dataflowId, history });
 
@@ -104,7 +103,7 @@ export const PublicDataflowInformation = withRouter(
               effect="solid"
               id={'restrictFromPublicField'}
               place="top">
-              <span>{resources.messages['restrictFromPublicField']}</span>
+              <span>{resourcesContext.messages['restrictFromPublicField']}</span>
             </ReactTooltip>
           </div>
         );
@@ -154,16 +153,16 @@ export const PublicDataflowInformation = withRouter(
       let header;
       switch (fieldHeader) {
         case 'datasetSchemaName':
-          header = resources.messages['countries'];
+          header = resourcesContext.messages['countries'];
           break;
         case 'releaseDate':
-          header = resources.messages['releaseDate'];
+          header = resourcesContext.messages['releaseDate'];
           break;
         case 'isReleased':
-          header = resources.messages['delivered'];
+          header = resourcesContext.messages['delivered'];
           break;
         case 'publicsFileName':
-          header = resources.messages['files'];
+          header = resourcesContext.messages['files'];
           break;
         default:
           break;
@@ -175,10 +174,10 @@ export const PublicDataflowInformation = withRouter(
       let header;
       switch (fieldHeader) {
         case 'datasetSchemaName':
-          header = resources.messages['name'];
+          header = resourcesContext.messages['name'];
           break;
         case 'publicFileName':
-          header = resources.messages['file'];
+          header = resourcesContext.messages['file'];
           break;
         default:
           break;
@@ -224,7 +223,7 @@ export const PublicDataflowInformation = withRouter(
             }}
           />
           <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
-            <span>{resources.messages['navigateToCountry']}</span>
+            <span>{resourcesContext.messages['navigateToCountry']}</span>
           </ReactTooltip>
         </span>
       </div>
@@ -369,7 +368,7 @@ export const PublicDataflowInformation = withRouter(
         <div className={`${styles.container} rep-container`} style={contentStyles}>
           {!isLoading ? (
             isWrongUrlDataflowId ? (
-              <div className={styles.noDatasets}>{resources.messages['wrongUrlDataflowId']}</div>
+              <div className={styles.noDatasets}>{resourcesContext.messages['wrongUrlDataflowId']}</div>
             ) : !isEmpty(representatives) ? (
               <Fragment>
                 <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
@@ -378,7 +377,9 @@ export const PublicDataflowInformation = withRouter(
                 </DataTable>
                 {!isEmpty(referenceDatasets) && (
                   <div className={styles.referenceDatasetsWrapper}>
-                    <div className={styles.referenceDatasetsTitle}>{resources.messages['referenceDatasets']}</div>
+                    <div className={styles.referenceDatasetsTitle}>
+                      {resourcesContext.messages['referenceDatasets']}
+                    </div>
                     <DataTable
                       autoLayout={true}
                       className={styles.referenceDatasetsTable}
@@ -390,7 +391,7 @@ export const PublicDataflowInformation = withRouter(
                 )}
               </Fragment>
             ) : (
-              <div className={styles.noDatasets}>{resources.messages['noDatasets']}</div>
+              <div className={styles.noDatasets}>{resourcesContext.messages['noDatasets']}</div>
             )
           ) : (
             <Spinner className={styles.isLoading} />

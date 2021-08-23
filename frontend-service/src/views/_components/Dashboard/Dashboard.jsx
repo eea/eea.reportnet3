@@ -43,7 +43,7 @@ const Dashboard = withRouter(
 
       const { updatedState, statusDispatcher } = useStatusFilter(dashboardData);
 
-      const resources = useContext(ResourcesContext);
+      const resourcesContext = useContext(ResourcesContext);
 
       const chartRef = useRef();
 
@@ -120,7 +120,7 @@ const Dashboard = withRouter(
               stacked: true,
               scaleLabel: {
                 display: true,
-                labelString: resources.messages['percentage']
+                labelString: resourcesContext.messages['percentage']
               },
               ticks: {
                 min: 0,
@@ -143,7 +143,7 @@ const Dashboard = withRouter(
             <Fragment>
               <span
                 className={styles.dashboardWarning}
-                dangerouslySetInnerHTML={{ __html: resources.messages['dashboardWarning'] }}></span>
+                dangerouslySetInnerHTML={{ __html: resourcesContext.messages['dashboardWarning'] }}></span>
               <div className={styles.chartDiv}>
                 <StatusList
                   filterDispatch={statusDispatcher}
@@ -163,7 +163,7 @@ const Dashboard = withRouter(
         } else {
           return (
             <div className={styles.dashboardWithoutData}>
-              <div className={styles.noDashboard}>{resources.messages['noValidationDashboardData']}</div>
+              <div className={styles.noDashboard}>{resourcesContext.messages['noValidationDashboardData']}</div>
             </div>
           );
         }

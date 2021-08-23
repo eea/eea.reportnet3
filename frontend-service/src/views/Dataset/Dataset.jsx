@@ -57,7 +57,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
@@ -308,7 +308,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const importFromFile = !isEmpty(externalOperationsList.import)
     ? [
         {
-          label: resources.messages['customImports'],
+          label: resourcesContext.messages['customImports'],
           items: externalOperationsList.import.map(type => {
             return {
               command: () => {
@@ -327,7 +327,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const importFromOtherSystems = !isEmpty(externalOperationsList.importOtherSystems)
     ? [
         {
-          label: resources.messages['importPreviousData'],
+          label: resourcesContext.messages['importPreviousData'],
           items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
             label: importOtherSystem.name,
             icon: 'upload',
@@ -342,7 +342,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const validImportExtensions = `.${importSelectedIntegrationExtension}`;
 
-  const infoExtensionsTooltip = `${resources.messages['supportedFileExtensionsTooltip']} ${validImportExtensions}`;
+  const infoExtensionsTooltip = `${resourcesContext.messages['supportedFileExtensionsTooltip']} ${validImportExtensions}`;
 
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
     const extensionsTypes = !isNil(type.code) && type.code.split('+');
@@ -355,7 +355,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const externalIntegrationsNames = [
     {
-      label: resources.messages['customExports'],
+      label: resourcesContext.messages['customExports'],
       items: externalOperationsList.export.map(type => ({
         label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`,
         icon: type.fileExtension,
@@ -771,11 +771,11 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const datasetInsideTitle = () => {
     if (dataset?.isReleasing) {
-      return `${resources.messages['isReleasing']} `;
+      return `${resourcesContext.messages['isReleasing']} `;
     } else if (!isEmpty(datasetFeedbackStatus)) {
       return `${datasetFeedbackStatus} `;
     } else if (isEmpty(datasetFeedbackStatus) && isDatasetReleased) {
-      return `${resources.messages['released'].toString()}`;
+      return `${resourcesContext.messages['released'].toString()}`;
     } else {
       return '';
     }
@@ -786,13 +786,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
-        label={resources.messages['downloadQCsButtonLabel']}
+        label={resourcesContext.messages['downloadQCsButtonLabel']}
         onClick={() => onDownloadQCRules()}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
-        label={resources.messages['close']}
+        label={resourcesContext.messages['close']}
         onClick={() => onSetVisible(setValidationListDialogVisible, false)}
       />
     </Fragment>
@@ -816,9 +816,9 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     notificationContext.add({
       type: 'DATASET_DATA_LOADING_INIT',
       content: {
-        datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
+        datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
         title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
-        datasetLoading: resources.messages['datasetLoading'],
+        datasetLoading: resourcesContext.messages['datasetLoading'],
         dataflowName,
         datasetName
       }
@@ -829,7 +829,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     <Button
       className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon={'cancel'}
-      label={resources.messages['close']}
+      label={resourcesContext.messages['close']}
       onClick={() => onSetVisible(setDashDialogVisible, false)}
     />
   );
@@ -839,13 +839,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       <Button
         className="p-button-animated-blink"
         icon={'check'}
-        label={resources.messages['import']}
+        label={resourcesContext.messages['import']}
         onClick={() => onImportOtherSystems()}
       />
       <Button
         className="p-button-secondary button-right-aligned"
         icon="cancel"
-        label={resources.messages['cancel']}
+        label={resourcesContext.messages['cancel']}
         onClick={() => cleanImportOtherSystemsDialog()}
       />
     </Fragment>
@@ -857,11 +857,11 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch
             className={styles.tabularSwitch}
-            elements={[resources.messages['tabularDataView'], resources.messages['webform']]}
+            elements={[resourcesContext.messages['tabularDataView'], resourcesContext.messages['webform']]}
             isValidationsTabularView={isValidationsTabularView}
-            onChange={switchView => setIsTableView(switchView === resources.messages['webform'] ? false : true)}
+            onChange={switchView => setIsTableView(switchView === resourcesContext.messages['webform'] ? false : true)}
             setIsValidationsTabularView={setIsValidationsTabularView}
-            value={resources.messages['webform']}
+            value={resourcesContext.messages['webform']}
           />
         </div>
       </div>
@@ -903,13 +903,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         disabled={isDownloadingValidations}
         icon={isDownloadingValidations ? 'spinnerAnimate' : 'export'}
-        label={resources.messages['downloadValidationsButtonLabel']}
+        label={resourcesContext.messages['downloadValidationsButtonLabel']}
         onClick={onDownloadValidations}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
-        label={resources.messages['close']}
+        label={resourcesContext.messages['close']}
         onClick={() => setValidationsVisible(false)}
       />
     </div>
@@ -943,7 +943,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
                   }`}
                   disabled={!hasWritePermissions}
                   icon="import"
-                  label={resources.messages['importDataset']}
+                  label={resourcesContext.messages['importDataset']}
                   onClick={event => importMenuRef.current.show(event)}
                 />
                 <Menu
@@ -959,7 +959,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step`}
               icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
               id="buttonExportDataset"
-              label={resources.messages['exportDataset']}
+              label={resourcesContext.messages['exportDataset']}
               onClick={event => exportMenuRef.current.show(event)}
             />
             <Menu
@@ -975,7 +975,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
               }`}
               disabled={!hasWritePermissions}
               icon="trash"
-              label={resources.messages['deleteDatasetData']}
+              label={resourcesContext.messages['deleteDatasetData']}
               onClick={() => onSetVisible(setDeleteDialogVisible, true)}
             />
           </div>
@@ -986,14 +986,14 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
               }`}
               disabled={!hasWritePermissions}
               icon="validate"
-              label={resources.messages['validate']}
+              label={resourcesContext.messages['validate']}
               onClick={() => onSetVisible(setValidateDialogVisible, true)}
             />
             <Button
               className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"
               icon="warning"
               iconClasses={datasetHasErrors ? 'warning' : ''}
-              label={resources.messages['showValidations']}
+              label={resourcesContext.messages['showValidations']}
               onClick={() => onSetVisible(setValidationsVisible, true)}
             />
             <Button
@@ -1001,7 +1001,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
                 'p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-qcRules-help-step'
               }
               icon="horizontalSliders"
-              label={resources.messages['qcRules']}
+              label={resourcesContext.messages['qcRules']}
               onClick={() => onSetVisible(setValidationListDialogVisible, true)}
             />
             <Button
@@ -1010,7 +1010,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
               }`}
               disabled={!datasetHasData}
               icon="dashboard"
-              label={resources.messages['dashboards']}
+              label={resourcesContext.messages['dashboards']}
               onClick={() => onSetVisible(setDashDialogVisible, true)}
             />
             <Button
@@ -1019,7 +1019,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
               }`}
               disabled={!hasWritePermissions}
               icon="camera"
-              label={resources.messages['snapshots']}
+              label={resourcesContext.messages['snapshots']}
               onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
             />
             <Button
@@ -1027,7 +1027,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
                 isRefreshHighlighted ? 'primary' : 'secondary-transparent'
               } p-button-animated-blink dataset-refresh-help-step`}
               icon="refresh"
-              label={resources.messages['refresh']}
+              label={resourcesContext.messages['refresh']}
               onClick={() => onLoadDatasetSchema()}
             />
           </div>
@@ -1037,7 +1037,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       {dashDialogVisible && (
         <Dialog
           footer={renderDashboardFooter}
-          header={resources.messages['titleDashboard']}
+          header={resourcesContext.messages['titleDashboard']}
           onHide={() => onSetVisible(setDashDialogVisible, false)}
           style={{ width: '70vw' }}
           visible={dashDialogVisible}>
@@ -1090,7 +1090,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         <Dialog
           className={styles.paginatorValidationViewer}
           footer={renderValidationsFooter}
-          header={resources.messages['titleValidations']}
+          header={resourcesContext.messages['titleValidations']}
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '90%' }}
           visible={validationsVisible}>
@@ -1114,7 +1114,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       {validationListDialogVisible && (
         <Dialog
           footer={validationListFooter}
-          header={resources.messages['qcRules']}
+          header={resourcesContext.messages['qcRules']}
           onHide={() => onSetVisible(setValidationListDialogVisible, false)}
           style={{ width: '90%' }}
           visible={validationListDialogVisible}>
@@ -1130,17 +1130,17 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
           accept={validImportExtensions}
-          chooseLabel={resources.messages['selectFile']}
+          chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogClassName={styles.Dialog}
-          dialogHeader={`${resources.messages['uploadDataset']}${datasetName}`}
+          dialogHeader={`${resourcesContext.messages['uploadDataset']}${datasetName}`}
           dialogOnHide={() => {
             setIsImportDatasetDialogVisible(false);
             setImportSelectedIntegrationId(null);
           }}
           dialogVisible={isImportDatasetDialogVisible}
           infoTooltip={infoExtensionsTooltip}
-          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           name="file"
           onError={onImportDatasetError}
@@ -1164,10 +1164,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         <Dialog
           className={styles.Dialog}
           footer={renderImportOtherSystemsFooter}
-          header={resources.messages['importPreviousDataHeader']}
+          header={resourcesContext.messages['importPreviousDataHeader']}
           onHide={cleanImportOtherSystemsDialog}
           visible={isImportOtherSystemsDialogVisible}>
-          <div className={styles.text}>{resources.messages['importPreviousDataConfirm']}</div>
+          <div className={styles.text}>{resourcesContext.messages['importPreviousDataConfirm']}</div>
           <div className={styles.checkboxWrapper}>
             <Checkbox
               checked={replaceData}
@@ -1178,7 +1178,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             />
             <label htmlFor="replaceCheckbox">
               <span className={styles.replaceDataLabel} onClick={() => setReplaceData(!replaceData)}>
-                {resources.messages['replaceData']}
+                {resourcesContext.messages['replaceData']}
               </span>
             </label>
           </div>
@@ -1188,34 +1188,34 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       {deleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          header={resources.messages['deleteDatasetHeader']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          header={resourcesContext.messages['deleteDatasetHeader']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDelete}
           onHide={() => onSetVisible(setDeleteDialogVisible, false)}
           visible={deleteDialogVisible}>
-          {resources.messages['deleteDatasetConfirm']}
+          {resourcesContext.messages['deleteDatasetConfirm']}
         </ConfirmDialog>
       )}
 
       {validateDialogVisible && (
         <ConfirmDialog
-          header={resources.messages['validateDataset']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          header={resourcesContext.messages['validateDataset']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmValidate}
           onHide={() => onSetVisible(setValidateDialogVisible, false)}
           visible={validateDialogVisible}>
-          {resources.messages['validateDatasetConfirm']}
+          {resourcesContext.messages['validateDatasetConfirm']}
         </ConfirmDialog>
       )}
 
       {isUpdatableDialogVisible && (
         <ConfirmDialog
           disabledConfirm={isDatasetUpdatable === dataset.updatable}
-          header={resources.messages['referenceStateDialogHeader']}
-          labelCancel={resources.messages['cancel']}
-          labelConfirm={resources.messages['save']}
+          header={resourcesContext.messages['referenceStateDialogHeader']}
+          labelCancel={resourcesContext.messages['cancel']}
+          labelConfirm={resourcesContext.messages['save']}
           onConfirm={onConfirmUpdateReferenceDataset}
           onHide={() => setIsUpdatableDialogVisible(false)}
           visible={isUpdatableDialogVisible}>
@@ -1228,7 +1228,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           />
           <label className={styles.checkboxLabel} htmlFor="referenceDatasetUpdatableCheckbox">
             <span className={styles.pointer} onClick={() => setIsDatasetUpdatable(!isDatasetUpdatable)}>
-              {resources.messages['unlockReferenceDatasetLabel']}
+              {resourcesContext.messages['unlockReferenceDatasetLabel']}
             </span>
           </label>
         </ConfirmDialog>

@@ -44,7 +44,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   } = match;
 
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
@@ -218,7 +218,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon={'cancel'}
-      label={resources.messages['close']}
+      label={resourcesContext.messages['close']}
       onClick={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
     />
   );
@@ -227,7 +227,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon={'cancel'}
-      label={resources.messages['close']}
+      label={resourcesContext.messages['close']}
       onClick={() => manageDialogs('isPropertiesDialogVisible', false)}
     />
   );
@@ -237,13 +237,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       <Button
         className={`p-button-secondary p-button-animated-blink p-button-left-aligned`}
         icon={'plus'}
-        label={resources.messages['add']}
+        label={resourcesContext.messages['add']}
         onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
       />
       <Button
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={'cancel'}
-        label={resources.messages['cancel']}
+        label={resourcesContext.messages['cancel']}
         onClick={() => manageDialogs(`isManageRequestersDialogVisible`, false)}
       />
     </div>
@@ -278,7 +278,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         <Title
           icon="clone"
           iconSize="4rem"
-          subtitle={resources.messages['referenceDataflowCrumbLabel']}
+          subtitle={resourcesContext.messages['referenceDataflowCrumbLabel']}
           title={dataflowState.name}
         />
       </div>
@@ -297,18 +297,18 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       {dataflowState.isPropertiesDialogVisible && (
         <Dialog
           footer={propertiesDataflowsDialogFooter}
-          header={resources.messages['properties']}
+          header={resourcesContext.messages['properties']}
           onHide={() => manageDialogs('isPropertiesDialogVisible', false)}
           visible={dataflowState.isPropertiesDialogVisible}>
-          <h3>{resources.messages['propertiesModalTitle']}</h3>
+          <h3>{resourcesContext.messages['propertiesModalTitle']}</h3>
           <p>
-            {resources.messages['propertiesModalDataflowNameLabel']}: {dataflowState.name}
+            {resourcesContext.messages['propertiesModalDataflowNameLabel']}: {dataflowState.name}
           </p>
           <p>
-            {resources.messages['propertiesModalDataflowDescriptionLabel']}: {dataflowState.description}
+            {resourcesContext.messages['propertiesModalDataflowDescriptionLabel']}: {dataflowState.description}
           </p>
           <p>
-            {resources.messages['propertiesModalDataflowStatusLabel']}: {dataflowState.status}
+            {resourcesContext.messages['propertiesModalDataflowStatusLabel']}: {dataflowState.status}
           </p>
         </Dialog>
       )}
@@ -337,7 +337,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       {dataflowState.isReferencingDataflowsDialogVisible && (
         <Dialog
           footer={referencingDataflowsDialogFooter}
-          header={resources.messages['referencingDataflowsDialogHeader']}
+          header={resourcesContext.messages['referencingDataflowsDialogHeader']}
           onHide={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
           visible={dataflowState.isReferencingDataflowsDialogVisible}>
           <ReferencingDataflows referenceDataflowId={referenceDataflowId} />
@@ -347,22 +347,22 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       {dataflowState.isManageRequestersDialogVisible && (
         <Dialog
           footer={shareRightsFooterDialogFooter}
-          header={resources.messages['manageRequestersRights']}
+          header={resourcesContext.messages['manageRequestersRights']}
           onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
           visible={dataflowState.isManageRequestersDialogVisible}>
           <ShareRights
-            addConfirmHeader={resources.messages[`addRequesterConfirmHeader`]}
+            addConfirmHeader={resourcesContext.messages[`addRequesterConfirmHeader`]}
             addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
-            columnHeader={resources.messages['requestersEmailColumn']}
+            columnHeader={resourcesContext.messages['requestersEmailColumn']}
             dataflowId={referenceDataflowId}
-            deleteColumnHeader={resources.messages['deleteRequesterButtonTableHeader']}
-            deleteConfirmHeader={resources.messages[`requestersRightsDialogConfirmDeleteHeader`]}
-            deleteConfirmMessage={resources.messages[`requestersRightsDialogConfirmDeleteQuestion`]}
+            deleteColumnHeader={resourcesContext.messages['deleteRequesterButtonTableHeader']}
+            deleteConfirmHeader={resourcesContext.messages[`requestersRightsDialogConfirmDeleteHeader`]}
+            deleteConfirmMessage={resourcesContext.messages[`requestersRightsDialogConfirmDeleteQuestion`]}
             deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
-            editConfirmHeader={resources.messages[`editRequesterConfirmHeader`]}
+            editConfirmHeader={resourcesContext.messages[`editRequesterConfirmHeader`]}
             getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
             isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
-            placeholder={resources.messages['manageRolesRequesterDialogInputPlaceholder']}
+            placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}
             roleOptions={requesterRoleOptions}
             setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
             updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}

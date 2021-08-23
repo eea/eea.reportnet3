@@ -36,7 +36,7 @@ export const WebLinks = ({
   webLinks
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const inputRef = useRef(null);
 
@@ -94,10 +94,10 @@ export const WebLinks = ({
       message = '';
       hasErrors = true;
     } else if (inputName === 'description' && !checkIsCorrectLength(inputValue)) {
-      message = resources.messages['webLinkDescriptionValidationMax'];
+      message = resourcesContext.messages['webLinkDescriptionValidationMax'];
       hasErrors = true;
     } else if (inputName === 'url' && !checkIsValidUrl(inputValue)) {
-      message = resources.messages['urlError'];
+      message = resourcesContext.messages['urlError'];
       hasErrors = true;
     }
 
@@ -107,8 +107,8 @@ export const WebLinks = ({
   };
 
   const fieldsArray = [
-    { field: 'description', header: resources.messages['description'] },
-    { field: 'url', header: resources.messages['url'] }
+    { field: 'description', header: resourcesContext.messages['description'] },
+    { field: 'url', header: resourcesContext.messages['url'] }
   ];
 
   const emptyWebLinkColumns = fieldsArray.map(item => (
@@ -311,7 +311,7 @@ export const WebLinks = ({
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataflowHelp-webLink-upload-help-step`}
               icon="add"
               id="addWebLinkButton"
-              label={resources.messages['add']}
+              label={resourcesContext.messages['add']}
               onClick={() => setIsAddOrEditWebLinkDialogVisible(true)}
               style={{ float: 'left' }}
             />
@@ -336,7 +336,7 @@ export const WebLinks = ({
 
       {!isLoading && isEmpty(webLinks) && (
         <div className={styles.noDataWrapper}>
-          <h4>{resources.messages['noWebLinks']}</h4>
+          <h4>{resourcesContext.messages['noWebLinks']}</h4>
         </div>
       )}
 
@@ -346,7 +346,9 @@ export const WebLinks = ({
           className={styles.dialog}
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
           header={
-            isNil(webLinksState.webLink.id) ? resources.messages['createNewWebLink'] : resources.messages['editWebLink']
+            isNil(webLinksState.webLink.id)
+              ? resourcesContext.messages['createNewWebLink']
+              : resourcesContext.messages['editWebLink']
           }
           modal={true}
           onHide={() => onHideAddEditDialog()}
@@ -369,13 +371,13 @@ export const WebLinks = ({
                       onSaveRecord();
                     }
                   }}
-                  placeholder={resources.messages['description']}
+                  placeholder={resourcesContext.messages['description']}
                   ref={inputRef}
                   type="text"
                   value={webLinksState.webLink.description}
                 />
                 <label className="srOnly" htmlFor="descriptionWebLinks">
-                  {resources.messages['description']}
+                  {resourcesContext.messages['description']}
                 </label>
                 {webLinksState.errors.description.message !== '' && (
                   <ErrorMessage message={webLinksState.errors.description.message} />
@@ -394,12 +396,12 @@ export const WebLinks = ({
                       onSaveRecord();
                     }
                   }}
-                  placeholder={resources.messages['url']}
+                  placeholder={resourcesContext.messages['url']}
                   type="text"
                   value={webLinksState.webLink.url}
                 />
                 <label className="srOnly" htmlFor="urlWebLinks">
-                  {resources.messages['url']}
+                  {resourcesContext.messages['url']}
                 </label>
                 {webLinksState.errors.url.message !== '' && <ErrorMessage message={webLinksState.errors.url.message} />}
               </div>
@@ -410,13 +412,17 @@ export const WebLinks = ({
                   disabled={webLinksState.isSubmitting}
                   icon={getButtonIcon(webLinksState.isSubmitting)}
                   id="submitButton"
-                  label={isNil(webLinksState.webLink.id) ? resources.messages['add'] : resources.messages['edit']}
+                  label={
+                    isNil(webLinksState.webLink.id)
+                      ? resourcesContext.messages['add']
+                      : resourcesContext.messages['edit']
+                  }
                   onClick={() => onSaveRecord()}
                 />
                 <Button
                   className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
                   icon="cancel"
-                  label={resources.messages['cancel']}
+                  label={resourcesContext.messages['cancel']}
                   onClick={() => onHideAddEditDialog()}
                 />
               </div>
@@ -429,14 +435,14 @@ export const WebLinks = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={webLinksState.isDeleting}
-          header={resources.messages['delete']}
+          header={resourcesContext.messages['delete']}
           iconConfirm={webLinksState.isDeleting ? 'spinnerAnimate' : 'check'}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={() => onDeleteWebLink(webLinksState.webLink.id)}
           onHide={onHideDeleteDialog}
           visible={webLinksState.isConfirmDeleteVisible}>
-          {resources.messages['deleteWebLink']}
+          {resourcesContext.messages['deleteWebLink']}
         </ConfirmDialog>
       )}
     </Fragment>

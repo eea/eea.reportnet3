@@ -21,7 +21,7 @@ const ApiKeyDialog = ({
     params: { representativeId }
   }
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [apiKey, setApiKey] = useState('');
   const [isKeyLoading, setIsKeyLoading] = useState(false);
@@ -74,13 +74,13 @@ const ApiKeyDialog = ({
         className="p-button-primary"
         disabled={isKeyLoading}
         icon={isKeyLoading ? 'spinnerAnimate' : 'key'}
-        label={resources.messages['generateApiKey']}
+        label={resourcesContext.messages['generateApiKey']}
         onClick={() => onGenerateApiKey()}
       />
       <Button
         className="p-button-secondary p-button-right-aligned"
         icon={'cancel'}
-        label={resources.messages['close']}
+        label={resourcesContext.messages['close']}
         onClick={() => onCloseDialog()}
       />
     </Fragment>
@@ -90,7 +90,7 @@ const ApiKeyDialog = ({
     <Dialog
       blockScroll={false}
       footer={footer}
-      header={resources.messages['apiKeyDialogHead']}
+      header={resourcesContext.messages['apiKeyDialogHead']}
       modal={true}
       onHide={() => onCloseDialog()}
       style={{ width: '80%', maxWidth: '650px' }}
@@ -104,12 +104,12 @@ const ApiKeyDialog = ({
             </div>
           ) : (
             <div className={styles.row}>
-              <p>{resources.messages['noApiKey']}</p>
+              <p>{resourcesContext.messages['noApiKey']}</p>
             </div>
           )
         ) : (
           <div className={styles.row}>
-            <label className={styles.label}>{resources.messages['apiKeyDialogLabel']}</label>
+            <label className={styles.label}>{resourcesContext.messages['apiKeyDialogLabel']}</label>
 
             <div className={styles.input_api}>
               <div className={styles.flex}>
@@ -129,16 +129,16 @@ const ApiKeyDialog = ({
                   icon={'copy'}
                   onClick={() => onCopyToClipboard()}
                   showDelay="3000"
-                  tooltip={resources.messages['copyToClipboardSuccess']}
+                  tooltip={resourcesContext.messages['copyToClipboardSuccess']}
                   tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
                 />
               </div>
               <p className={styles.ids_info}>
                 <span className={styles.ids_label}>
-                  {resources.messages['dataflow']}: <strong>{dataflowId} </strong>
+                  {resourcesContext.messages['dataflow']}: <strong>{dataflowId} </strong>
                 </span>
                 <span className={styles.ids_label} style={{ display: isCustodian ? 'none' : '' }}>
-                  {resources.messages['apiKeyDataProviderIdLabel']}:{' '}
+                  {resourcesContext.messages['apiKeyDataProviderIdLabel']}:{' '}
                   <strong>{representativeId ? representativeId : dataProviderId} </strong>
                 </span>
               </p>
