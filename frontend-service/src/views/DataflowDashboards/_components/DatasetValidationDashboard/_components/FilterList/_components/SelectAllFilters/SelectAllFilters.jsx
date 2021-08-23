@@ -7,7 +7,7 @@ import styles from './SelectAllFilters.module.scss';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 const SelectAllFilters = ({ datasetSchemaId, filterDispatch, filters, id, labels }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [isChecked, setIsChecked] = useState(true);
 
@@ -33,7 +33,7 @@ const SelectAllFilters = ({ datasetSchemaId, filterDispatch, filters, id, labels
         type="checkbox"
       />
       <label className={styles.labelItem} htmlFor={`${id}_${'selectAll'}_${datasetSchemaId}`}>
-        {resources.messages['selectAll']}
+        {resourcesContext.messages['selectAll']}
       </label>
     </li>
   );

@@ -6,7 +6,6 @@ import isNil from 'lodash/isNil';
 import styles from './WebformTable.module.scss';
 
 import { Button } from 'views/_components/Button';
-import { GroupedRecordValidations } from 'views/Webforms/_components/GroupedRecordValidations';
 import { Spinner } from 'views/_components/Spinner';
 import { WebformRecord } from './_components/WebformRecord';
 
@@ -17,7 +16,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { webformTableReducer } from './_functions/Reducers/webformTableReducer';
 
-import { MetadataUtils } from 'views/_functions/Utils';
+import { ErrorUtils, MetadataUtils } from 'views/_functions/Utils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -45,7 +44,7 @@ export const WebformTable = ({
     WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [webformTableState, webformTableDispatch] = useReducer(webformTableReducer, {
     addingOnTableSchemaId: null,
@@ -264,6 +263,15 @@ export const WebformTable = ({
     }
   };
 
+  const validationsTemplate = recordData => {
+    return ErrorUtils.getValidationsTemplate(recordData, {
+      blockers: resourcesContext.messages['recordBlockers'],
+      errors: resourcesContext.messages['recordErrors'],
+      warnings: resourcesContext.messages['recordWarnings'],
+      infos: resourcesContext.messages['recordInfos']
+    });
+  };
+
   if (webformTableState.isLoading) {
     return <Spinner style={{ top: 0, margin: '1rem' }} />;
   }
@@ -275,13 +283,12 @@ export const WebformTable = ({
           {webformData.title
             ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
             : webformData.name}
-
-          <GroupedRecordValidations parsedRecordData={parseRecordsValidations(webformData.elementsRecords)[0]} />
+          {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
         </div>
         {webformData.multipleRecords && (
           <Button
             icon={'plus'}
-            label={resources.messages['addRecord']}
+            label={resourcesContext.messages['addRecord']}
             onClick={() => onAddMultipleWebform(webformData.tableSchemaId)}
           />
         )}
@@ -290,7 +297,7 @@ export const WebformTable = ({
         <span
           className={styles.nonExistTable}
           dangerouslySetInnerHTML={{
-            __html: TextUtils.parseText(resources.messages['tableIsNotCreated'], { tableName: webformData.name })
+            __html: TextUtils.parseText(resourcesContext.messages['tableIsNotCreated'], { tableName: webformData.name })
           }}
         />
       )}

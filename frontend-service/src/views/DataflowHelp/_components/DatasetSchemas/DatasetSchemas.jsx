@@ -25,7 +25,7 @@ import { UniqueConstraintService } from 'services/UniqueConstraintService';
 import { ValidationService } from 'services/ValidationService';
 
 const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
   const [expandAll, setExpandAll] = useState(true);
@@ -337,7 +337,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
         ))}
       </div>
     ) : (
-      <h3>{`${resources.messages['noDesignSchemasCreated']}`}</h3>
+      <h3>{`${resourcesContext.messages['noDesignSchemasCreated']}`}</h3>
     );
   };
 
@@ -349,7 +349,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
             <Button
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
               icon={expandAll ? 'angleRight' : 'angleDown'}
-              label={expandAll ? resources.messages['collapseAll'] : resources.messages['expandAll']}
+              label={expandAll ? resourcesContext.messages['collapseAll'] : resourcesContext.messages['expandAll']}
               onClick={() => setExpandAll(!expandAll)}
             />
             <Button
@@ -357,7 +357,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
                 isLoading ? 'p-button-animated-spin' : ''
               }`}
               icon="refresh"
-              label={resources.messages['refresh']}
+              label={resourcesContext.messages['refresh']}
               onClick={async () => {
                 setIsLoading(true);
                 await onLoadDatasetsSchemas();

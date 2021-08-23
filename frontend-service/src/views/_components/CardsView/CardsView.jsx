@@ -24,12 +24,13 @@ export const CardsView = ({
   paginatorRightText,
   type
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
+
   const [cards, setCards] = useState(data);
   const [cardsPerPage, setCardsPerPage] = useState(pagination.rows);
   const [currentPage, setCurrentPage] = useState(pagination.page);
   const [goToPage, setGoToPage] = useState(pagination.page + 1);
-  const [pageInputTooltip, setPageInputTooltip] = useState(resources.messages['currentPageInfoMessage']);
+  const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
 
   useEffect(() => {
     onLoadData();
@@ -53,10 +54,10 @@ export const CardsView = ({
       setGoToPage(event.target.value);
       if (event.target.value <= 0 || event.target.value > Math.ceil(data.length / cardsPerPage)) {
         setPageInputTooltip(
-          `${resources.messages['currentPageErrorMessage']} ${Math.ceil(data.length / cardsPerPage)}`
+          `${resourcesContext.messages['currentPageErrorMessage']} ${Math.ceil(data.length / cardsPerPage)}`
         );
       } else {
-        setPageInputTooltip(resources.messages['currentPageInfoMessage']);
+        setPageInputTooltip(resourcesContext.messages['currentPageInfoMessage']);
       }
     }
   };
@@ -77,7 +78,7 @@ export const CardsView = ({
     CurrentPageReport: options => {
       return (
         <span style={{ color: 'var(--white)', userSelect: 'none' }}>
-          <label style={{ fontWeight: 'bold', margin: '0 0.5rem' }}>{resources.messages['goTo']}</label>
+          <label style={{ fontWeight: 'bold', margin: '0 0.5rem' }}>{resourcesContext.messages['goTo']}</label>
           <InputText
             data-for="pageInputTooltip"
             data-tip
@@ -99,7 +100,7 @@ export const CardsView = ({
             {pageInputTooltip}
           </ReactTooltip>
           <label style={{ fontWeight: 'bold', margin: '0 0 0 0.5rem' }}>
-            {data.length > 0 ? `${resources.messages['of']} ${Math.ceil(data.length / cardsPerPage)}` : 1}
+            {data.length > 0 ? `${resourcesContext.messages['of']} ${Math.ceil(data.length / cardsPerPage)}` : 1}
           </label>
         </span>
       );
@@ -111,7 +112,7 @@ export const CardsView = ({
   const currentPosts = cards.slice(begin, end);
 
   return isEmpty(data) ? (
-    <h3 className={styles.noObligations}>{resources.messages[`no${contentType}WithSelectedParameters`]}</h3>
+    <h3 className={styles.noObligations}>{resourcesContext.messages[`no${contentType}WithSelectedParameters`]}</h3>
   ) : (
     <Fragment>
       <div className={styles.cardWrap}>

@@ -22,11 +22,11 @@ export const TableView = ({
   pagination,
   paginatorRightText
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const headerTableTemplate = obligation => {
-    if (obligation === 'dueDate') return resources.messages['nextReportDue'];
-    else return resources.messages[obligation];
+    if (obligation === 'dueDate') return resourcesContext.messages['nextReportDue'];
+    else return resourcesContext.messages[obligation];
   };
 
   const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
@@ -34,7 +34,7 @@ export const TableView = ({
   const onLoadCheckButton = row => (
     <div className={styles.checkColumn}>
       <Checkbox
-        ariaLabel={resources.messages['selectedObligation']}
+        ariaLabel={resourcesContext.messages['selectedObligation']}
         checked={checkedObligation.id === row.id}
         id={`${row.id}_checkbox`}
         inputId={`${row.id}_checkbox`}
@@ -60,7 +60,7 @@ export const TableView = ({
     <Column
       body={row => onLoadCheckButton(row)}
       className={styles.emptyTableHeader}
-      header={resources.messages['selectedObligation']}
+      header={resourcesContext.messages['selectedObligation']}
       key="checkId"
     />
   );
@@ -91,7 +91,7 @@ export const TableView = ({
   };
 
   return isEmpty(data) ? (
-    <h3 className={styles.noObligations}>{resources.messages['noObligationsWithSelectedParameters']}</h3>
+    <h3 className={styles.noObligations}>{resourcesContext.messages['noObligationsWithSelectedParameters']}</h3>
   ) : (
     <DataTable
       autoLayout={true}

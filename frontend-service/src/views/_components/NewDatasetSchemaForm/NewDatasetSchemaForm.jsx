@@ -20,7 +20,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdateData, setNewDatasetDialog }) => {
   const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const validCharsRegex = new RegExp(/[a-zA-Z0-9_-\s()]/);
   const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s()]/);
@@ -38,7 +38,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
 
   const checkIsInvalidName = () => {
     if (invalidCharsRegex.test(inputRef.current.value)) {
-      setErrorMessage({ datasetSchemaName: resources.messages['invalidCharactersSchemaError'] });
+      setErrorMessage({ datasetSchemaName: resourcesContext.messages['invalidCharactersSchemaError'] });
       return true;
     }
     return false;
@@ -50,7 +50,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
     );
 
     if (isDuplicatedName) {
-      setErrorMessage({ datasetSchemaName: resources.messages['duplicateSchemaError'] });
+      setErrorMessage({ datasetSchemaName: resourcesContext.messages['duplicateSchemaError'] });
     }
     return isDuplicatedName;
   };
@@ -124,13 +124,13 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
               return false;
             }
           }}
-          placeholder={resources.messages['createDatasetSchemaName']}
+          placeholder={resourcesContext.messages['createDatasetSchemaName']}
           ref={inputRef}
           type="text"
           value={datasetSchemaName}
         />
         <label className="srOnly" htmlFor="datasetSchemaName">
-          {resources.messages['createDatasetSchemaName']}
+          {resourcesContext.messages['createDatasetSchemaName']}
         </label>
         {errorMessage['datasetSchemaName'] !== '' && <ErrorMessage message={errorMessage['datasetSchemaName']} />}
       </fieldset>
@@ -141,14 +141,14 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
             className="p-button-primary"
             disabled={isSubmitting}
             icon="add"
-            label={resources.messages['create']}
+            label={resourcesContext.messages['create']}
             onClick={e => onConfirm(e)}
             type="subscribe"
           />
           <Button
             className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
             icon="cancel"
-            label={resources.messages['cancel']}
+            label={resourcesContext.messages['cancel']}
             onClick={() => setNewDatasetDialog(false)}
           />
         </div>

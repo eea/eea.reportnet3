@@ -11,7 +11,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [openGloban, setOpenGloban] = useState(false);
@@ -20,23 +20,23 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
     <Fragment>
       <div className={styles.globan} id="globan" style={globanElementStyle}>
         <div className={styles.globanContent}>
-          <span>{resources.messages['anOfficialWebsite']}</span>
+          <span>{resourcesContext.messages['anOfficialWebsite']}</span>
           <span
             onClick={e => {
               e.preventDefault();
               setOpenGloban(!openGloban);
             }}>
-            {resources.messages['howDoYouKnow']}
+            {resourcesContext.messages['howDoYouKnow']}
             {openGloban ? (
               <FontAwesomeIcon
-                ariaLabel={resources.messages['howDoYouKnow']}
+                ariaLabel={resourcesContext.messages['howDoYouKnow']}
                 className="p-breadcrumb-home"
                 icon={AwesomeIcons('angleSingleUp')}
                 role="button"
               />
             ) : (
               <FontAwesomeIcon
-                aria-label={resources.messages['howDoYouKnow']}
+                aria-label={resourcesContext.messages['howDoYouKnow']}
                 className="p-breadcrumb-home"
                 icon={AwesomeIcons('angleDown')}
                 role="button"
@@ -45,10 +45,10 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
           </span>
           {openGloban && (
             <div class={styles.ban}>
-              <p>{resources.messages['allOfficialEuropeanUnionWebsiteAddresses']}</p>
+              <p>{resourcesContext.messages['allOfficialEuropeanUnionWebsiteAddresses']}</p>
               <p>
                 <a href="//europa.eu/european-union/contact/institutions-bodies_en">
-                  {resources.messages['seeAllEUInstitutions']}
+                  {resourcesContext.messages['seeAllEUInstitutions']}
                 </a>
               </p>
             </div>
@@ -66,7 +66,7 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
             }`}
             href="https://europa.eu/european-union/index_en"
             title="Home - European Union">
-            <span>{resources.messages['home']}</span>
+            <span>{resourcesContext.messages['home']}</span>
           </a>
         </div>
         <div className={styles.searchBarWrapper}></div>

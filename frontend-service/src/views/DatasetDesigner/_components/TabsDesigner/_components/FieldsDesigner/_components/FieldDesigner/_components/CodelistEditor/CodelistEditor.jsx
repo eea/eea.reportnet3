@@ -11,7 +11,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveCodelist, selectedCodelist, type }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
+
   const [codelistItems, setCodelistItems] = useState(selectedCodelist);
   const [isVisible, setIsVisible] = useState(isCodelistEditorVisible);
   const [isSaved, setIsSaved] = useState(false);
@@ -43,7 +44,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
         icon="check"
-        label={resources.messages['save']}
+        label={resourcesContext.messages['save']}
         onClick={() => {
           setIsSaved(true);
         }}
@@ -51,7 +52,7 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
       <Button
         className="p-button-secondary button-right-aligned"
         icon="cancel"
-        label={resources.messages['cancel']}
+        label={resourcesContext.messages['cancel']}
         onClick={() => {
           onCancelSaveCodelist();
           setCodelistItems([]);
@@ -67,24 +68,24 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
         <div className={styles.inputTitleWrapper}>
           <span
             dangerouslySetInnerHTML={{
-              __html: resources.messages['codelistEditorItemsMessage']
+              __html: resourcesContext.messages['codelistEditorItemsMessage']
             }}></span>
         </div>
         <Chips
           checkForDuplicates={true}
           clearOnPaste={true}
           deleteWhiteSpaces={true}
-          errorMessage={resources.messages['duplicatedItem']}
+          errorMessage={resourcesContext.messages['duplicatedItem']}
           forbiddenChar={true}
           inputClassName={styles.codelistChips}
-          name={resources.messages['multipleSingleMessage']}
+          name={resourcesContext.messages['multipleSingleMessage']}
           onChange={e => setCodelistItems(e.value)}
           pasteSeparator=";"
           showErrorMessage={true}
           tooltip={
             TextUtils.areEquals(type, 'SINGLE SELECT')
-              ? resources.messages['codelistEditorMessage']
-              : resources.messages['multiselectCodelistEditorMessage']
+              ? resourcesContext.messages['codelistEditorMessage']
+              : resourcesContext.messages['multiselectCodelistEditorMessage']
           }
           tooltipOptions={{ position: 'bottom' }}
           value={codelistItems}></Chips>
@@ -101,8 +102,8 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
         footer={codelistDialogFooter}
         header={
           TextUtils.areEquals(type, 'SINGLE SELECT')
-            ? resources.messages['codelistEditor']
-            : resources.messages['multiselectCodelistEditor']
+            ? resourcesContext.messages['codelistEditor']
+            : resourcesContext.messages['multiselectCodelistEditor']
         }
         modal={true}
         onHide={() => {

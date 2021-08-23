@@ -29,7 +29,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 const UserConfiguration = () => {
   const notificationContext = useContext(NotificationContext);
   const userContext = useContext(UserContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
   const loadImage = layer => {
@@ -88,12 +88,12 @@ const UserConfiguration = () => {
           await changeUserProperties(inmUserProperties);
           userContext.onChangeBasemapLayer(e.target.value);
         }}
-        options={resources.userParameters['defaultBasemapLayer']}
+        options={resourcesContext.userParameters['defaultBasemapLayer']}
         placeholder="select"
         value={userContext.userProps.basemapLayer}
       />
       <label className="srOnly" htmlFor="basemapLayer">
-        {resources.messages['userSettingsBasemapLayerSubtitle']}
+        {resourcesContext.messages['userSettingsBasemapLayerSubtitle']}
       </label>
     </Fragment>
   );
@@ -112,7 +112,7 @@ const UserConfiguration = () => {
 
   const themeSwitch = (
     <Fragment>
-      <span className={styles.switchTextInput}>{resources.messages['light']}</span>
+      <span className={styles.switchTextInput}>{resourcesContext.messages['light']}</span>
       <InputSwitch
         aria-label="theme"
         checked={userContext.userProps.visualTheme === 'dark'}
@@ -130,12 +130,12 @@ const UserConfiguration = () => {
         sliderCheckedClassName={styles.themeSwitcherInputSwitch}
         tooltip={
           userContext.userProps.visualTheme === 'light'
-            ? resources.messages['toggleDarkTheme']
-            : resources.messages['toggleLightTheme']
+            ? resourcesContext.messages['toggleDarkTheme']
+            : resourcesContext.messages['toggleLightTheme']
         }
         tooltipOptions={{ position: 'bottom', className: styles.themeSwitcherTooltip }}
       />
-      <span className={styles.switchTextInput}>{resources.messages['dark']}</span>
+      <span className={styles.switchTextInput}>{resourcesContext.messages['dark']}</span>
     </Fragment>
   );
 
@@ -155,7 +155,9 @@ const UserConfiguration = () => {
           }
         }}
         tooltip={
-          userContext.userProps.amPm24h === true ? resources.messages['amPmFormat'] : resources.messages['24hFormat']
+          userContext.userProps.amPm24h === true
+            ? resourcesContext.messages['amPmFormat']
+            : resourcesContext.messages['24hFormat']
         }
       />
       <span className={styles.switchTextInput}>24H</span>
@@ -179,8 +181,8 @@ const UserConfiguration = () => {
         }}
         tooltip={
           userContext.userProps.showLogoutConfirmation === true
-            ? resources.messages['toggleConfirmationOff']
-            : resources.messages['toggleConfirmationOn']
+            ? resourcesContext.messages['toggleConfirmationOff']
+            : resourcesContext.messages['toggleConfirmationOn']
         }
       />
       <span className={styles.switchTextInput}>Popup</span>
@@ -189,7 +191,7 @@ const UserConfiguration = () => {
 
   const notificationSoundSwitch = (
     <Fragment>
-      <span className={styles.switchTextInput}>{resources.messages['noSound']}</span>
+      <span className={styles.switchTextInput}>{resourcesContext.messages['noSound']}</span>
       <InputSwitch
         aria-label="notificationSound"
         checked={userContext.userProps.notificationSound}
@@ -204,17 +206,17 @@ const UserConfiguration = () => {
         }}
         tooltip={
           userContext.userProps.notificationSound === true
-            ? resources.messages['toggleNotificationSoundOff']
-            : resources.messages['toggleNotificationSoundOn']
+            ? resourcesContext.messages['toggleNotificationSoundOff']
+            : resourcesContext.messages['toggleNotificationSoundOn']
         }
       />
-      <span className={styles.switchTextInput}>{resources.messages['sound']}</span>
+      <span className={styles.switchTextInput}>{resourcesContext.messages['sound']}</span>
     </Fragment>
   );
 
   const pushNotificationsSwitch = (
     <Fragment>
-      <span className={styles.switchTextInput}>{resources.messages['noPushNotifications']}</span>
+      <span className={styles.switchTextInput}>{resourcesContext.messages['noPushNotifications']}</span>
       <InputSwitch
         aria-label="pushNotifications"
         checked={userContext.userProps.pushNotifications}
@@ -230,17 +232,17 @@ const UserConfiguration = () => {
         }}
         tooltip={
           userContext.userProps.notificationSound === true
-            ? resources.messages['togglePushNotificationOff']
-            : resources.messages['togglePushNotificationOn']
+            ? resourcesContext.messages['togglePushNotificationOff']
+            : resourcesContext.messages['togglePushNotificationOn']
         }
       />
-      <span className={styles.switchTextInput}>{resources.messages['pushNotifications']}</span>
+      <span className={styles.switchTextInput}>{resourcesContext.messages['pushNotifications']}</span>
     </Fragment>
   );
 
   const chooseTypeViewSwitch = (
     <Fragment>
-      <span className={styles.switchTextInput}>{`${resources.messages['magazineView']}`}</span>
+      <span className={styles.switchTextInput}>{`${resourcesContext.messages['magazineView']}`}</span>
       <InputSwitch
         aria-label="typeView"
         checked={userContext.userProps.listView}
@@ -255,11 +257,11 @@ const UserConfiguration = () => {
         }}
         tooltip={
           userContext.userProps.listView === true
-            ? resources.messages['toggleMagazineView']
-            : resources.messages['toggleListView']
+            ? resourcesContext.messages['toggleMagazineView']
+            : resourcesContext.messages['toggleListView']
         }
       />
-      <span className={styles.switchTextInput}>{`${resources.messages['listView']}`}</span>
+      <span className={styles.switchTextInput}>{`${resourcesContext.messages['listView']}`}</span>
     </Fragment>
   );
 
@@ -275,12 +277,12 @@ const UserConfiguration = () => {
           await changeUserProperties(inmUserProperties);
           userContext.onChangeRowsPerPage(e.target.value);
         }}
-        options={resources.userParameters['defaultRowsPage']}
+        options={resourcesContext.userParameters['defaultRowsPage']}
         placeholder="select"
         value={userContext.userProps.rowsPerPage}
       />
       <label className="srOnly" htmlFor="rowsPage">
-        {resources.messages['userSettingsRowsPerPageSubtitle']}
+        {resourcesContext.messages['userSettingsRowsPerPageSubtitle']}
       </label>
     </Fragment>
   );
@@ -295,7 +297,7 @@ const UserConfiguration = () => {
         await changeUserProperties(inmUserProperties);
         userContext.onChangeDateFormat(e.target.value);
       }}
-      options={resources.userParameters['dateFormat']}
+      options={resourcesContext.userParameters['dateFormat']}
       placeholder="select"
       value={userContext.userProps.dateFormat}
     />
@@ -306,8 +308,8 @@ const UserConfiguration = () => {
       icon="map"
       iconSize="2rem"
       items={[basemapLayerDropdown]}
-      subtitle={resources.messages['userSettingsBasemapLayerSubtitle']}
-      title={resources.messages['basemapLayer']}
+      subtitle={resourcesContext.messages['userSettingsBasemapLayerSubtitle']}
+      title={resourcesContext.messages['basemapLayer']}
     />
   );
 
@@ -316,8 +318,8 @@ const UserConfiguration = () => {
       icon="palette"
       iconSize="2rem"
       items={[themeSwitch]}
-      subtitle={resources.messages['userSettingsThemeSubtitle']}
-      title={resources.messages['theme']}
+      subtitle={resourcesContext.messages['userSettingsThemeSubtitle']}
+      title={resourcesContext.messages['theme']}
     />
   );
 
@@ -326,8 +328,8 @@ const UserConfiguration = () => {
       icon="power-off"
       iconSize="2rem"
       items={[confirmationLogoutSwitch]}
-      subtitle={resources.messages['userSettingsConfirmSubtitle']}
-      title={resources.messages['userConfirmationLogout']}
+      subtitle={resourcesContext.messages['userSettingsConfirmSubtitle']}
+      title={resourcesContext.messages['userConfirmationLogout']}
     />
   );
   const pushNotificationsConfiguration = (
@@ -337,9 +339,9 @@ const UserConfiguration = () => {
       iconSize="2rem"
       imgClassName={styles.pushNotificationsImgInfo}
       items={[pushNotificationsSwitch]}
-      subtitle={resources.messages['userSettingsPushNotificationsSubtitle']}
-      title={resources.messages['userPushNotifications']}
-      tooltipInfo={resources.messages['userPushNotificationsTooltipInfo']}
+      subtitle={resourcesContext.messages['userSettingsPushNotificationsSubtitle']}
+      title={resourcesContext.messages['userPushNotifications']}
+      tooltipInfo={resourcesContext.messages['userPushNotificationsTooltipInfo']}
     />
   );
 
@@ -348,8 +350,8 @@ const UserConfiguration = () => {
       icon="sound"
       iconSize="2rem"
       items={[notificationSoundSwitch]}
-      subtitle={resources.messages['userSettingsNotificationSoundSubtitle']}
-      title={resources.messages['userNotificationSound']}
+      subtitle={resourcesContext.messages['userSettingsNotificationSoundSubtitle']}
+      title={resourcesContext.messages['userNotificationSound']}
     />
   );
 
@@ -358,8 +360,8 @@ const UserConfiguration = () => {
       icon="list-ol"
       iconSize="2rem"
       items={[rowsInPaginationDropdown]}
-      subtitle={resources.messages['userSettingsRowsPerPageSubtitle']}
-      title={resources.messages['userRowsInPagination']}
+      subtitle={resourcesContext.messages['userSettingsRowsPerPageSubtitle']}
+      title={resourcesContext.messages['userRowsInPagination']}
     />
   );
 
@@ -368,15 +370,15 @@ const UserConfiguration = () => {
       icon="eye"
       iconSize="2rem"
       items={[chooseTypeViewSwitch]}
-      subtitle={resources.messages['userTypeOfViewSubtitle']}
-      title={resources.messages['userTypeOfView']}
+      subtitle={resourcesContext.messages['userTypeOfViewSubtitle']}
+      title={resourcesContext.messages['userTypeOfView']}
     />
   );
 
   const dateFormatSubtitle = (
     <Fragment>
-      <div>{resources.messages['dateFormatSubtitle']}</div>
-      <div className={styles.dateFormatWarning}>{resources.messages['dateFormatWarning']}</div>
+      <div>{resourcesContext.messages['dateFormatSubtitle']}</div>
+      <div className={styles.dateFormatWarning}>{resourcesContext.messages['dateFormatWarning']}</div>
     </Fragment>
   );
 
@@ -386,7 +388,7 @@ const UserConfiguration = () => {
       iconSize="2rem"
       items={[dateFormatDropdown, amPmSwitch]}
       subtitle={dateFormatSubtitle}
-      title={resources.messages['dateFormat']}
+      title={resourcesContext.messages['dateFormat']}
     />
   );
 

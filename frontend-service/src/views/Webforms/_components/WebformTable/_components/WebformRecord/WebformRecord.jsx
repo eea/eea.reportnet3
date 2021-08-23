@@ -11,7 +11,6 @@ import styles from './WebformRecord.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
-import { GroupedRecordValidations } from 'views/Webforms/_components/GroupedRecordValidations';
 import { IconTooltip } from 'views/_components/IconTooltip';
 import { WebformField } from './_components/WebformField';
 
@@ -22,7 +21,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer';
 
-import { MetadataUtils } from 'views/_functions/Utils';
+import { ErrorUtils, MetadataUtils } from 'views/_functions/Utils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
@@ -54,7 +53,7 @@ export const WebformRecord = ({
   webformType
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
     isConditionalChanged: false,
@@ -315,7 +314,7 @@ export const WebformRecord = ({
                     {element.title ? element.title : element.name}
                     {<span style={{ color: 'var(--errors)' }}>{element.showRequiredCharacter ? ' *' : ''}</span>}
                     {element.hasErrors && (
-                      <IconTooltip levelError={'ERROR'} message={resources.messages['tableWithErrorsTooltip']} />
+                      <IconTooltip levelError={'ERROR'} message={resourcesContext.messages['tableWithErrorsTooltip']} />
                     )}
                   </h3>
 
@@ -325,7 +324,7 @@ export const WebformRecord = ({
                       icon={
                         addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
                       }
-                      label={resources.messages['addRecord']}
+                      label={resourcesContext.messages['addRecord']}
                       onClick={() => {
                         let filteredRecordId = null;
                         if (TextUtils.areEquals(element.name, 'OtherObjectives')) {
@@ -346,7 +345,9 @@ export const WebformRecord = ({
                 <span
                   className={styles.nonExistTable}
                   dangerouslySetInnerHTML={{
-                    __html: TextUtils.parseText(resources.messages['tableIsNotCreated'], { tableName: element.name })
+                    __html: TextUtils.parseText(resourcesContext.messages['tableIsNotCreated'], {
+                      tableName: element.name
+                    })
                   }}
                 />
               )}
@@ -405,6 +406,19 @@ export const WebformRecord = ({
     return filtered;
   };
 
+  const validationsTemplate = recordData => {
+    return (
+      <div className={styles.iconTooltipWrapper}>
+        {ErrorUtils.getValidationsTemplate(recordData, {
+          blockers: resourcesContext.messages['recordBlockers'],
+          errors: resourcesContext.messages['recordErrors'],
+          warnings: resourcesContext.messages['recordWarnings'],
+          infos: resourcesContext.messages['recordInfos']
+        })}
+      </div>
+    );
+  };
+
   const renderWebformContent = content => {
     const errorMessages = renderErrorMessages(content);
 
@@ -412,7 +426,7 @@ export const WebformRecord = ({
       <div className={styles.content}>
         {multipleRecords && !isEmpty(content.elements) && (
           <div className={styles.actionButtons}>
-            <GroupedRecordValidations parsedRecordData={parseRecordValidations(webformRecordState.record)} />
+            {validationsTemplate(parseRecordValidations(webformRecordState.record))}
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
               disabled={webformRecordState.isDeleting}
@@ -457,10 +471,10 @@ export const WebformRecord = ({
 
     if (isEmpty(record)) errorMessages.push('PLEASE CHOOSE ONE');
     if (hasFields) {
-      errorMessages.push(resources.messages['emptyWebformTable']);
+      errorMessages.push(resourcesContext.messages['emptyWebformTable']);
     }
     if (content.totalRecords === 0) {
-      errorMessages.push(resources.messages['webformTableWithLessRecords']);
+      errorMessages.push(resourcesContext.messages['webformTableWithLessRecords']);
     }
     return errorMessages;
   };
@@ -468,16 +482,16 @@ export const WebformRecord = ({
   const renderArticle15ErrorMessages = content => {
     const errorMessages = [];
     if (hasFields) {
-      errorMessages.push(resources.messages['emptyWebformTable']);
+      errorMessages.push(resourcesContext.messages['emptyWebformTable']);
     }
     if (content.totalRecords === 0) {
-      errorMessages.push(resources.messages['webformTableWithLessRecords']);
+      errorMessages.push(resourcesContext.messages['webformTableWithLessRecords']);
     }
     if (content.totalRecords > 1) {
-      errorMessages.push(resources.messages['webformTableWithMoreRecords']);
+      errorMessages.push(resourcesContext.messages['webformTableWithMoreRecords']);
     }
     if (!isFixedNumber) {
-      errorMessages.push(resources.messages['webformTableWithoutFixedNumber']);
+      errorMessages.push(resourcesContext.messages['webformTableWithoutFixedNumber']);
     }
 
     return errorMessages;
@@ -491,14 +505,14 @@ export const WebformRecord = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={webformRecordState.isDeleting}
-          header={resources.messages['deleteRow']}
+          header={resourcesContext.messages['deleteRow']}
           iconConfirm={webformRecordState.isDeleting ? 'spinnerAnimate' : 'check'}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={() => onDeleteMultipleWebform(selectedRecordId)}
           onHide={() => handleDialogs('deleteRow', false)}
           visible={isDialogVisible.deleteRow}>
-          {resources.messages['confirmDeleteRow']}
+          {resourcesContext.messages['confirmDeleteRow']}
         </ConfirmDialog>
       )}
     </Fragment>

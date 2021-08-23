@@ -27,7 +27,7 @@ const DocumentFileUpload = ({
   setIsUpdating
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const inputRef = useRef(null);
 
@@ -93,11 +93,11 @@ const DocumentFileUpload = ({
       message = '';
       hasErrors = true;
     } else if (inputName === 'description' && !checkIsCorrectLength(inputValue)) {
-      message = resources.messages['documentDescriptionValidationMax'];
+      message = resourcesContext.messages['documentDescriptionValidationMax'];
       hasErrors = true;
     } else if (inputName === 'uploadFile') {
       if (isEditForm && checkExсeedsMaxFileSize(inputUpload)) {
-        message = resources.messages['tooLargeFileValidationError'];
+        message = resourcesContext.messages['tooLargeFileValidationError'];
         hasErrors = true;
       }
       if (!isEditForm) {
@@ -105,7 +105,7 @@ const DocumentFileUpload = ({
           message = '';
           hasErrors = true;
         } else if (checkExсeedsMaxFileSize(inputUpload)) {
-          message = resources.messages['tooLargeFileValidationError'];
+          message = resourcesContext.messages['tooLargeFileValidationError'];
           hasErrors = true;
         }
       }
@@ -201,7 +201,7 @@ const DocumentFileUpload = ({
           <input
             id={'descriptionDocumentFileUpload'}
             maxLength={config.INPUT_MAX_LENGTH}
-            name={resources.messages['description']}
+            name={resourcesContext.messages['description']}
             onBlur={() => checkInputForErrors('description')}
             onChange={e => {
               e.persist();
@@ -217,14 +217,14 @@ const DocumentFileUpload = ({
             onKeyPress={e => {
               if (!checkInputForErrors('description') && e.key === 'Enter') onConfirm();
             }}
-            placeholder={resources.messages['fileDescription']}
+            placeholder={resourcesContext.messages['fileDescription']}
             ref={inputRef}
             type="text"
             value={inputs.description}
           />
           <CharacterCounter currentLength={inputs.description.length} maxLength={config.INPUT_MAX_LENGTH} />
           <label className="srOnly" htmlFor="descriptionDocumentFileUpload">
-            {resources.messages['description']}
+            {resourcesContext.messages['description']}
           </label>
           {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
         </div>
@@ -252,11 +252,11 @@ const DocumentFileUpload = ({
             optionLabel="label"
             optionValue="value"
             options={getOptionTypes()}
-            placeholder={resources.messages['selectLang']}
+            placeholder={resourcesContext.messages['selectLang']}
             value={inputs.lang}
           />
           <label className="srOnly" htmlFor="selectLanguage">
-            {resources.messages['selectLang']}
+            {resourcesContext.messages['selectLang']}
           </label>
         </div>
       </fieldset>
@@ -282,7 +282,7 @@ const DocumentFileUpload = ({
               type="file"
             />
             <label className="srOnly" htmlFor="uploadFile">
-              {resources.messages['uploadDocument']}
+              {resourcesContext.messages['uploadDocument']}
             </label>
           </span>
           {errors.uploadFile.message !== '' && <ErrorMessage message={errors.uploadFile.message} />}
@@ -302,7 +302,7 @@ const DocumentFileUpload = ({
             type="checkbox"
           />
           <label htmlFor="isPublic" style={{ display: 'block' }}>
-            {resources.messages['documentUploadCheckboxIsPublic']}
+            {resourcesContext.messages['documentUploadCheckboxIsPublic']}
           </label>
         </div>
       </fieldset>
@@ -312,13 +312,13 @@ const DocumentFileUpload = ({
           <Button
             disabled={isSubmitting || isUploading}
             icon={!isUploading ? (isEditForm ? 'check' : 'add') : 'spinnerAnimate'}
-            label={isEditForm ? resources.messages['save'] : resources.messages['upload']}
+            label={isEditForm ? resourcesContext.messages['save'] : resourcesContext.messages['upload']}
             onClick={() => onConfirm()}
           />
           <Button
             className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
             icon="cancel"
-            label={resources.messages['cancel']}
+            label={resourcesContext.messages['cancel']}
             onClick={() => setIsUploadDialogVisible(false)}
           />
         </div>

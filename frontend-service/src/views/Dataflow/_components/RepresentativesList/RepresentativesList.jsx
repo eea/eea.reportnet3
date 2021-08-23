@@ -40,7 +40,7 @@ const RepresentativesList = ({
   setRepresentativeImport
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const initialState = {
     allPossibleDataProviders: [],
@@ -346,7 +346,7 @@ const RepresentativesList = ({
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
             onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
             onKeyDown={event => onKeyDown(event, representativeId, dataProviderId, leadReporter)}
-            placeholder={resources.messages['manageRolesDialogInputPlaceholder']}
+            placeholder={resourcesContext.messages['manageRolesDialogInputPlaceholder']}
             value={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
           />
 
@@ -380,7 +380,7 @@ const RepresentativesList = ({
     return (
       <Fragment>
         <label className="srOnly" htmlFor={labelId}>
-          {resources.messages['manageRolesDialogInputPlaceholder']}
+          {resourcesContext.messages['manageRolesDialogInputPlaceholder']}
         </label>
         <select
           className={
@@ -435,9 +435,9 @@ const RepresentativesList = ({
   return (
     <div className={styles.container}>
       <div className={styles.selectWrapper}>
-        <div className={styles.title}>{resources.messages['manageRolesDialogHeader']}</div>
+        <div className={styles.title}>{resourcesContext.messages['manageRolesDialogHeader']}</div>
         <div>
-          <label>{resources.messages['manageRolesDialogDropdownLabel']} </label>
+          <label>{resourcesContext.messages['manageRolesDialogDropdownLabel']} </label>
           {isBusinessDataflow ? (
             <Dropdown
               ariaLabel={'dataProviders'}
@@ -457,7 +457,7 @@ const RepresentativesList = ({
               onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
               optionLabel="label"
               options={formState.dataProvidersTypesList}
-              placeholder={resources.messages['manageRolesDialogDropdownPlaceholder']}
+              placeholder={resourcesContext.messages['manageRolesDialogDropdownPlaceholder']}
               value={formState.selectedDataProviderGroup}
             />
           )}
@@ -467,7 +467,7 @@ const RepresentativesList = ({
             }`}
             disabled={isEmpty(formState.selectedDataProviderGroup)}
             icon={'export'}
-            label={resources.messages['exportLeadReportersTemplate']}
+            label={resourcesContext.messages['exportLeadReportersTemplate']}
             onClick={onExportLeadReportersTemplate}
           />
         </div>
@@ -485,36 +485,38 @@ const RepresentativesList = ({
             <Column
               body={renderDeleteBtnColumnTemplate}
               className={styles.emptyTableHeader}
-              header={resources.messages['deleteRepresentativeButtonTableHeader']}
+              header={resourcesContext.messages['deleteRepresentativeButtonTableHeader']}
               style={{ width: '60px' }}
             />
             <Column
               body={renderDropdownColumnTemplate}
-              header={resources.messages['manageRolesDialogDataProviderColumn']}
+              header={resourcesContext.messages['manageRolesDialogDataProviderColumn']}
               style={{ width: '16rem' }}
             />
             <Column
               body={renderLeadReporterColumnTemplate}
-              header={resources.messages['manageRolesDialogAccountColumn']}
+              header={resourcesContext.messages['manageRolesDialogAccountColumn']}
             />
           </DataTable>
         </div>
       ) : (
-        <p className={styles.chooseRepresentative}>{resources.messages['manageRolesDialogNoRepresentativesMessage']}</p>
+        <p className={styles.chooseRepresentative}>
+          {resourcesContext.messages['manageRolesDialogNoRepresentativesMessage']}
+        </p>
       )}
 
       {formState.isVisibleConfirmDeleteDialog && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={formState.isDeleting}
-          header={resources.messages['manageRolesDialogConfirmDeleteProviderHeader']}
+          header={resourcesContext.messages['manageRolesDialogConfirmDeleteProviderHeader']}
           iconConfirm={formState.isDeleting ? 'spinnerAnimate' : undefined}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={() => onDeleteConfirm()}
           onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
           visible={formState.isVisibleConfirmDeleteDialog}>
-          {resources.messages['manageRolesDialogConfirmDeleteProviderQuestion']}
+          {resourcesContext.messages['manageRolesDialogConfirmDeleteProviderQuestion']}
         </ConfirmDialog>
       )}
 
@@ -522,17 +524,17 @@ const RepresentativesList = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={formState.isDeleting}
-          header={resources.messages['manageRolesDialogConfirmDeleteHeader']}
+          header={resourcesContext.messages['manageRolesDialogConfirmDeleteHeader']}
           iconConfirm={formState.isDeleting ? 'spinnerAnimate' : undefined}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={() => onDeleteLeadReporter()}
           onHide={() => {
             handleDialogs('deleteLeadReporter', false);
             formDispatcher({ type: 'LEAD_REPORTER_DELETE_ID', payload: { id: null } });
           }}
           visible={isVisibleDialog.deleteLeadReporter}>
-          {resources.messages['manageRolesDialogConfirmDeleteQuestion']}
+          {resourcesContext.messages['manageRolesDialogConfirmDeleteQuestion']}
         </ConfirmDialog>
       )}
     </div>
