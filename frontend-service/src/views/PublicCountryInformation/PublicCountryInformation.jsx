@@ -111,6 +111,12 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       case 'publicFilesNames':
         header = resourcesContext.messages['files'];
         break;
+      case 'reportingDatasetsStatus':
+        header = resourcesContext.messages['reportingDatasetsStatus'];
+        break;
+      case 'manualAcceptance':
+        header = resourcesContext.messages['manualAcceptance'];
+        break;
       case 'referencePublicFilesNames':
         header = resourcesContext.messages['referenceDatasets'];
         break;
@@ -205,17 +211,19 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       });
 
       const parsedDataflow = {
+        deadline: dataflow.expirationDate,
         id: dataflow.id,
+        isReleasable: dataflow.isReleasable,
+        isReleased: isReleased,
+        legalInstrument: dataflow.obligation?.legalInstruments,
+        manualAcceptance: dataflow.manualAcceptance,
         name: dataflow.name,
         obligation: dataflow.obligation,
-        legalInstrument: dataflow.obligation?.legalInstruments,
-        deadline: dataflow.expirationDate,
-        isReleased: isReleased,
-        isReleasable: dataflow.isReleasable,
-        releaseDate: isReleased ? dataflow.datasets[0].releaseDate : '-',
-        restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false,
+        publicFilesNames: publicFilesNames,
         referencePublicFilesNames: referencePublicFilesNames,
-        publicFilesNames: publicFilesNames
+        releaseDate: isReleased ? dataflow.datasets[0].releaseDate : '-',
+        reportingDatasetsStatus: dataflow.reportingDatasetsStatus,
+        restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false
       };
       parsedDataflows.push(parsedDataflow);
     });
@@ -230,10 +238,12 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       { id: 'legalInstrument', index: 3 },
       { id: 'deadline', index: 4 },
       { id: 'isReleasable', index: 5 },
-      { id: 'isReleased', index: 6 },
-      { id: 'releaseDate', index: 7 },
-      { id: 'referencePublicFilesNames', index: 8 },
-      { id: 'publicFilesNames', index: 9 }
+      { id: 'manualAcceptance', index: 6 },
+      { id: 'reportingDatasetsStatus', index: 7 },
+      { id: 'releaseDate', index: 8 },
+      { id: 'isReleased', index: 9 },
+      { id: 'referencePublicFilesNames', index: 10 },
+      { id: 'publicFilesNames', index: 11 }
     ];
 
     return dataflows
@@ -251,10 +261,12 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         if (field === 'name') template = renderDataflowNameBodyColumn;
         if (field === 'isReleasable') template = renderIsReleasableBodyColumn;
         if (field === 'isReleased') template = renderIsReleasedBodyColumn;
+        if (field === 'manualAcceptance') template = renderManualAcceptanceBodyColumn;
         if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
         if (field === 'obligation') template = renderObligationBodyColumn;
         if (field === 'publicFilesNames') template = renderDownloadFileBodyColumn;
         if (field === 'referencePublicFilesNames') template = renderDownloadReferenceFileBodyColumn;
+        if (field === 'reportingDatasetsStatus') template = reportingDatasetsStatusBodyColumn;
         return (
           <Column
             body={template}
@@ -356,6 +368,16 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     <div className={styles.checkedValueColumn}>
       {rowData.isReleased && <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />}
     </div>
+  );
+
+  const renderManualAcceptanceBodyColumn = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {rowData.manualAcceptance && <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />}
+    </div>
+  );
+
+  const reportingDatasetsStatusBodyColumn = rowData => (
+    <div className={styles.cellContentPosition}>{rowData.reportingDatasetsStatus}</div>
   );
 
   const renderLegalInstrumentBodyColumn = rowData => (

@@ -1,3 +1,4 @@
+import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
 
@@ -60,7 +61,7 @@ const parseDataflowDTO = dataflowDTO =>
     name: dataflowDTO.name,
     obligation: ObligationUtils.parseObligation(dataflowDTO.obligation),
     referenceDatasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.referenceDatasets),
-    reportingDatasetsStatus: dataflowDTO.reportingStatus,
+    reportingDatasetsStatus: capitalize(dataflowDTO.reportingStatus?.replaceAll('_', ' ')),
     representatives: RepresentativeUtils.parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
     showPublicInfo: dataflowDTO.showPublicInfo,

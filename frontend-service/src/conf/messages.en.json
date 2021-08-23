@@ -1232,6 +1232,7 @@
     "maxAllowedCharacters": "max allowed characters",
     "sqlErrorMessage": "SQL error message: ",
     "sqlErrorMessageCopy": "Please click to copy to clipboard the SQL Error.",
-    "reportingDatasetsStatus": "Technical acceptance status"
+    "reportingDatasetsStatus": "Technical acceptance status",
+    "manualAcceptance": "Manual acceptance"
   }
 }
