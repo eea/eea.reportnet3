@@ -88,11 +88,13 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -301,6 +303,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The file common. */
   @Autowired
   private FileCommonUtils fileCommon;
+
+
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
 
 
 
@@ -2507,6 +2514,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           NotificationVO.builder()
               .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(dataflowId).error("Error importing the schemas").build());
+    }
+
+    finally {
+      Map<String, Object> importDatasetData = new HashMap<>();
+      importDatasetData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_SCHEMAS.getValue());
+      importDatasetData.put(LiteralConstants.DATAFLOWID, dataflowId);
+
+      lockService.removeLockByCriteria(importDatasetData);
+      LOG_ERROR.info("Released import lock on the dataflowId {}", dataflowId);
     }
   }
 

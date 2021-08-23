@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
@@ -18,13 +19,17 @@ import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
+import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.lock.service.LockService;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +78,10 @@ public class DataFlowControllerImpl implements DataFlowController {
   /** The representative service. */
   @Autowired
   private RepresentativeService representativeService;
+
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
 
   /**
    * Find by id.
@@ -475,7 +484,16 @@ public class DataFlowControllerImpl implements DataFlowController {
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
-    dataflowService.deleteDataFlow(dataflowId);
+    Map<String, Object> importDatasetData = new HashMap<>();
+    importDatasetData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_SCHEMAS.getValue());
+    importDatasetData.put(LiteralConstants.DATAFLOWID, dataflowId);
+    LockVO importLockVO = lockService.findByCriteria(importDatasetData);
+
+    if (importLockVO == null)
+      dataflowService.deleteDataFlow(dataflowId);
+    else
+      throw new ResponseStatusException(HttpStatus.LOCKED,
+          "Dataflow is locked because import is in progress.");
   }
 
   /**
