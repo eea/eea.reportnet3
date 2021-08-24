@@ -117,11 +117,7 @@ export const PublicCard = ({
           ) : (
             <span>
               <strong>{resourcesContext.messages['status']}: </strong>
-              {`${
-                isReleasable
-                  ? resourcesContext.messages['openFieldValue']
-                  : resourcesContext.messages['closedFieldValue']
-              }`}
+              {`${isReleasable ? resourcesContext.messages['open'] : resourcesContext.messages['closed']}`}
             </span>
           )}
           <span>

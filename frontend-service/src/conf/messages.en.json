@@ -1237,8 +1237,6 @@
     "manualAcceptance": "Manual acceptance",
     "pilotScenarioAmbitionColumnTitle": "Pilot scenario ambition",
     "frequencyColumnTitle": "Frequency",
-    "instrumentColumnTitle": "Instrument",
-    "openFieldValue": "OPEN",
-    "closedFieldValue": "CLOSED"
+    "instrumentColumnTitle": "Instrument"
   }
 }
