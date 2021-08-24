@@ -238,10 +238,10 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       { id: 'legalInstrument', index: 3 },
       { id: 'deadline', index: 4 },
       { id: 'isReleasable', index: 5 },
-      { id: 'manualAcceptance', index: 6 },
-      { id: 'reportingDatasetsStatus', index: 7 },
-      { id: 'releaseDate', index: 8 },
-      { id: 'isReleased', index: 9 },
+      { id: 'releaseDate', index: 6 },
+      { id: 'isReleased', index: 7 },
+      { id: 'manualAcceptance', index: 8 },
+      { id: 'reportingDatasetsStatus', index: 9 },
       { id: 'referencePublicFilesNames', index: 10 },
       { id: 'publicFilesNames', index: 11 }
     ];
