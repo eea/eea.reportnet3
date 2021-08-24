@@ -35,7 +35,7 @@ export const BusinessDataflowService = {
       const isOpen = businessDataflow.status === config.dataflowStatus.OPEN;
 
       if (isOpen) {
-        businessDataflow.releasable ? (businessDataflow.status = 'OPEN') : (businessDataflow.status = 'CLOSED');
+        businessDataflow.status = businessDataflow.releasable ? 'OPEN' : 'CLOSED';
       }
 
       if (isAdmin) {

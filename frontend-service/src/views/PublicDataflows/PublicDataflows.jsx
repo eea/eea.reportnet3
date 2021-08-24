@@ -72,10 +72,10 @@ export const PublicDataflows = withRouter(({ history }) => {
                     card={dataflow}
                     dueDate={dataflow.expirationDate}
                     externalCard={false}
-                    isReleasable={dataflow.isReleasable}
                     key={dataflow.id}
                     obligation={dataflow.obligation}
                     onCardClick={() => onOpenDataflow(dataflow.id)}
+                    status={dataflow.status}
                     subtitle={{ text: dataflow.description, url: '' }}
                     title={{ text: dataflow.name, url: '' }}
                   />
