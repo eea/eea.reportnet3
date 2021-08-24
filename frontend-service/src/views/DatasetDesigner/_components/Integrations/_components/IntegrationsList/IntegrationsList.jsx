@@ -58,6 +58,13 @@ export const IntegrationsList = ({
     <ActionsColumn
       isDeletingDocument={integrationListState.isDeleting}
       isUpdating={isUpdating}
+      onCloneClick={() => {
+        const filteredData = integrationListState.data.find(
+          integration => integration.integrationId === row.integrationId
+        );
+        manageDialogs('isIntegrationManageDialogVisible', true);
+        if (!isEmpty(filteredData)) getUpdatedData(filteredData);
+      }}
       onDeleteClick={row.operation === 'EXPORT_EU_DATASET' ? null : () => isDeleteDialogVisible(true)}
       onEditClick={() => {
         const filteredData = integrationListState.data.filter(

@@ -10,6 +10,7 @@ const ActionsColumn = ({
   hideEdition = false,
   isDeletingDocument,
   isUpdating,
+  onCloneClick,
   onDeleteClick,
   onEditClick,
   rowDataId,
@@ -41,6 +42,21 @@ const ActionsColumn = ({
           disabled={isDeletingDocument || (rowUpdatingId === rowDataId && isUpdating) || disabledButtons}
           icon={rowDeletingId !== rowDataId || !isDeletingDocument ? 'trash' : 'spinnerAnimate'}
           onClick={() => onDeleteClick()}
+          type="button"
+        />
+      )}
+      {!isNil(onCloneClick) && !hideEdition && (
+        <Button
+          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
+            disabledButtons ? null : 'p-button-animated-blink'
+          }`}
+          disabled={
+            (rowDeletingId === rowDataId && isDeletingDocument) ||
+            (rowUpdatingId === rowDataId && isUpdating) ||
+            disabledButtons
+          }
+          icon={rowUpdatingId !== rowDataId || !isUpdating ? 'clone' : 'spinnerAnimate'}
+          onClick={() => onCloneClick()}
           type="button"
         />
       )}
