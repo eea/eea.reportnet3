@@ -1,6 +1,8 @@
 import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
+
 import { DataCollectionUtils } from 'services/_utils/DataCollectionUtils';
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { DocumentUtils } from 'services/_utils/DocumentUtils';
@@ -22,6 +24,9 @@ const sortDataflowsByExpirationDate = dataflows =>
 
 const parseDataflowListDTO = dataflowsDTO => dataflowsDTO?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
 
+const parsePublicDataflowListDTO = dataflowsDTO =>
+  dataflowsDTO?.map(dataflowDTO => parsePublicDataflowDTO(dataflowDTO));
+
 const parseSortedDataflowListDTO = dataflowDTOs => {
   const dataflows = dataflowDTOs?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
   return sortDataflowsByExpirationDate(dataflows);
@@ -29,14 +34,19 @@ const parseSortedDataflowListDTO = dataflowDTOs => {
 
 const parsePublicDataflowDTO = publicDataflowDTO =>
   new Dataflow({
+    datasets: DatasetUtils.parseDatasetListDTO(publicDataflowDTO.reportingDatasets),
     description: publicDataflowDTO.description,
+    documents: DocumentUtils.parseDocumentListDTO(publicDataflowDTO.documents),
     expirationDate:
       publicDataflowDTO.deadlineDate > 0 ? dayjs(publicDataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: publicDataflowDTO.id,
     isReleasable: publicDataflowDTO.releasable,
+    manualAcceptance: publicDataflowDTO.manualAcceptance,
     name: publicDataflowDTO.name,
     obligation: ObligationUtils.parseObligation(publicDataflowDTO.obligation),
-    status: publicDataflowDTO.status
+    referenceDatasets: DatasetUtils.parseDatasetListDTO(publicDataflowDTO.referenceDatasets),
+    reportingDatasetsStatus: publicDataflowDTO.reportingStatus,
+    status: publicDataflowDTO.status === config.dataflowStatus.OPEN ? 'OPEN' : 'CLOSED'
   });
 
 const parseDataflowDTO = dataflowDTO =>
@@ -66,7 +76,7 @@ const parseDataflowDTO = dataflowDTO =>
     showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
     testDatasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.testDatasets),
-    type: isNil(dataflowDTO.type) ? 'REPORTING' : dataflowDTO.type, //TODO Remove this check when this data will come from BE
+    type: dataflowDTO.type,
     userRole: dataflowDTO.userRole,
     webLinks: WebLinksUtils.parseWebLinkListDTO(dataflowDTO.weblinks)
   });
@@ -134,6 +144,7 @@ export const DataflowUtils = {
   sortDataflowsByExpirationDate,
   parseDataflowDTO,
   parseDataflowListDTO,
+  parsePublicDataflowListDTO,
   parsePublicDataflowDTO,
   parseSortedDataflowListDTO,
   parseAllDataflowsUserList,
