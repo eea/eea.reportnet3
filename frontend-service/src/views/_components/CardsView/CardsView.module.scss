@@ -6,6 +6,23 @@
   margin: 2rem 1rem;
 }
 
+.currentPageWrapper {
+  color: var(--white);
+  margin-left: 1.5rem;
+  user-select: none;
+  .currentPageInput {
+    display: inline;
+    height: 1.75rem;
+    width: 2.5rem;
+  }
+  .currentPageLabel {
+    margin: 0 0.5rem;
+  }
+  .currentPageOf {
+    margin: 0 0 0 0.5rem;
+  }
+}
+
 .cardWrap {
   display: grid;
   gap: 1em;

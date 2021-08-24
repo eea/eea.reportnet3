@@ -24,7 +24,7 @@ export class Paginator extends Component {
     rows: 0,
     rowsPerPageOptions: null,
     style: null,
-    template: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown',
+    template: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink',
     totalRecords: 0
   };
 
@@ -187,17 +187,6 @@ export class Paginator extends Component {
         );
         break;
 
-      case 'RowsPerPageDropdown':
-        element = (
-          <RowsPerPageDropdown
-            key={key}
-            onChange={this.onRowsChange}
-            options={this.props.rowsPerPageOptions}
-            value={this.props.rows}
-          />
-        );
-        break;
-
       case 'CurrentPageReport':
         element = (
           <CurrentPageReport
@@ -261,8 +250,18 @@ export class Paginator extends Component {
 
       return (
         <div className={className} style={this.props.style}>
-          <div>{leftContent}</div>
-          <div>{paginatorElements}</div>
+          <div className="p-paginator-left-content-rowsPerPage">
+            <RowsPerPageDropdown
+              hasLabel={true}
+              key="RowsPerPageDropdown"
+              label={this.context.messages['rowsPerPage']}
+              onChange={this.onRowsChange}
+              options={this.props.rowsPerPageOptions}
+              value={this.props.rows}
+            />
+            {leftContent}
+          </div>
+          <div className="p-paginator-middle-content">{paginatorElements}</div>
           <div>{rightContent}</div>
         </div>
       );
