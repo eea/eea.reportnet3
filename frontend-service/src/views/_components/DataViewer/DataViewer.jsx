@@ -5,7 +5,6 @@ import { withRouter } from 'react-router-dom';
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 
 import { config } from 'conf';
@@ -30,7 +29,6 @@ import { DownloadFile } from 'views/_components/DownloadFile';
 import { FieldEditor } from './_components/FieldEditor';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Footer } from './_components/Footer';
-import { IconTooltip } from 'views/_components/IconTooltip';
 import { InfoTable } from './_components/InfoTable';
 import { Map } from 'views/_components/Map';
 
@@ -49,6 +47,7 @@ import { useContextMenu, useLoadColsSchemasAndColumnOptions, useSetColumns } fro
 import { DataViewerUtils } from './_functions/Utils/DataViewerUtils';
 import { MetadataUtils, RecordUtils } from 'views/_functions/Utils';
 import { MapUtils } from 'views/_functions/Utils/MapUtils';
+import { ErrorUtils } from 'views/_functions/Utils/ErrorUtils';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -205,16 +204,17 @@ const DataViewer = withRouter(
       />
     );
 
-    //Template for Record validation
     const validationsTemplate = recordData => {
-      const validationsGroup = DataViewerUtils.groupValidations(
-        recordData,
-        resourcesContext.messages['recordBlockers'],
-        resourcesContext.messages['recordErrors'],
-        resourcesContext.messages['recordWarnings'],
-        resourcesContext.messages['recordInfos']
+      return (
+        <div className={styles.iconTooltipWrapper}>
+          {ErrorUtils.getValidationsTemplate(recordData, {
+            blockers: resourcesContext.messages['recordBlockers'],
+            errors: resourcesContext.messages['recordErrors'],
+            warnings: resourcesContext.messages['recordWarnings'],
+            infos: resourcesContext.messages['recordInfos']
+          })}
+        </div>
       );
-      return getIconsValidationsErrors(validationsGroup);
     };
 
     const onChangePointCRS = crs => dispatchRecords({ type: 'SET_MAP_CRS', payload: crs });
@@ -942,36 +942,6 @@ const DataViewer = withRouter(
         )}
       </div>
     );
-
-    const addIconLevelError = (validation, levelError, message) => {
-      let icon = [];
-      if (!isEmpty(validation)) {
-        icon.push(
-          <IconTooltip
-            className={styles.iconTooltipLevelError}
-            key={levelError}
-            levelError={levelError}
-            message={message}
-          />
-        );
-      }
-      return icon;
-    };
-
-    const getIconsValidationsErrors = validations => {
-      let icons = [];
-      if (isNull(validations)) {
-        return icons;
-      }
-
-      const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
-      const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
-      const warningIcon = addIconLevelError(validations.warnings, 'WARNING', validations.messageWarnings);
-      const infoIcon = addIconLevelError(validations.infos, 'INFO', validations.messageInfos);
-
-      icons = blockerIcon.concat(errorIcon, warningIcon, infoIcon);
-      return <div className={styles.iconTooltipWrapper}>{icons}</div>;
-    };
 
     const mapRender = () => (
       <Map
