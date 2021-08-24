@@ -6,15 +6,13 @@ import { Dropdown } from 'views/_components/Dropdown';
 
 export class RowsPerPageDropdown extends Component {
   static defaultProps = {
-    hasLabel: false,
-    label: 'Rows per page',
+    label: '',
     onChange: null,
     options: null,
     value: null
   };
 
   static propTypes = {
-    hasLabel: PropTypes.bool,
     label: PropTypes.string,
     onChange: PropTypes.func,
     options: PropTypes.array,
@@ -28,7 +26,7 @@ export class RowsPerPageDropdown extends Component {
       });
       return (
         <div>
-          {this.props.hasLabel && <label>{this.props.label}</label>}
+          <label>{this.props.label}</label>
           <Dropdown
             appendTo={document.body}
             ariaLabel={'rowsPerPage'}

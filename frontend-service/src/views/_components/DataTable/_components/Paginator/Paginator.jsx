@@ -252,7 +252,6 @@ export class Paginator extends Component {
         <div className={className} style={this.props.style}>
           <div className="p-paginator-left-content-rowsPerPage">
             <RowsPerPageDropdown
-              hasLabel={true}
               key="RowsPerPageDropdown"
               label={this.context.messages['rowsPerPage']}
               onChange={this.onRowsChange}
