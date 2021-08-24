@@ -54,7 +54,8 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
   };
 
   const onCCButtonClick = () => {
-    onSetSqlSentence('sqlSentence', `${creationFormState.candidateRule['sqlSentence']} ${codeKeyword}`);
+    onSetSqlSentence('sqlSentence', `${creationFormState.candidateRule.sqlSentence} ${codeKeyword}`);
+  };
   };
 
   const codeKeyword = isBusinessDataflow ? `${config.COMPANY_CODE_KEYWORD}` : `${config.COUNTRY_CODE_KEYWORD}`;
@@ -63,7 +64,7 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
     <div className={styles.section}>
       <div className={styles.content}>
         <div className={styles.helpSideBar}>
-          <SqlHelp onSetSqlSentence={onSetSqlSentence} sqlSentence={creationFormState.candidateRule['sqlSentence']} />
+          <SqlHelp onSetSqlSentence={onSetSqlSentence} sqlSentence={creationFormState.candidateRule.sqlSentence} />
         </div>
         <div className={styles.sqlSentence}>
           <h3 className={styles.title}>
