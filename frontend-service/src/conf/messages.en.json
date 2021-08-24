@@ -1237,6 +1237,7 @@
     "manualAcceptance": "Manual acceptance",
     "pilotScenarioAmbitionColumnTitle": "Pilot scenario ambition",
     "frequencyColumnTitle": "Frequency",
-    "instrumentColumnTitle": "Instrument"
+    "instrumentColumnTitle": "Instrument",
+    "rowsPerPage": "Rows per page"
   }
 }
