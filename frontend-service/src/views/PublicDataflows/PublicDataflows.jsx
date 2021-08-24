@@ -76,6 +76,7 @@ export const PublicDataflows = withRouter(({ history }) => {
                     key={dataflow.id}
                     obligation={dataflow.obligation}
                     onCardClick={() => onOpenDataflow(dataflow.id)}
+                    status={dataflow.status}
                     subtitle={{ text: dataflow.description, url: '' }}
                     title={{ text: dataflow.name, url: '' }}
                   />

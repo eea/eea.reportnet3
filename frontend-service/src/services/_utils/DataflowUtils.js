@@ -2,6 +2,8 @@ import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
+
 import { DataCollectionUtils } from 'services/_utils/DataCollectionUtils';
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { DocumentUtils } from 'services/_utils/DocumentUtils';
@@ -37,7 +39,7 @@ const parsePublicDataflowDTO = publicDataflowDTO =>
     isReleasable: publicDataflowDTO.releasable,
     name: publicDataflowDTO.name,
     obligation: ObligationUtils.parseObligation(publicDataflowDTO.obligation),
-    status: publicDataflowDTO.status
+    status: publicDataflowDTO.status === config.dataflowStatus.OPEN ? 'OPEN' : 'CLOSED'
   });
 
 const parseDataflowDTO = dataflowDTO =>

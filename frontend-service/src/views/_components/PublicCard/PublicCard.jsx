@@ -22,6 +22,7 @@ export const PublicCard = ({
   obligation,
   onCardClick,
   pilotScenarioAmbition,
+  status,
   subtitle,
   title
 }) => {
@@ -117,7 +118,7 @@ export const PublicCard = ({
           ) : (
             <span>
               <strong>{resourcesContext.messages['status']}: </strong>
-              {`${isReleasable ? resourcesContext.messages['open'] : resourcesContext.messages['closed']}`}
+              {status}
             </span>
           )}
           <span>
