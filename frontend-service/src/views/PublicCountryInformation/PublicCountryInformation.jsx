@@ -5,6 +5,7 @@ import ReactTooltip from 'react-tooltip';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -377,7 +378,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   );
 
   const reportingDatasetsStatusBodyColumn = rowData => (
-    <div className={styles.cellContentPosition}>{rowData.reportingDatasetsStatus}</div>
+    <div className={styles.cellContentPosition}>
+      {capitalize(rowData.reportingDatasetsStatus?.replaceAll('_', ' '))}
+    </div>
   );
 
   const renderLegalInstrumentBodyColumn = rowData => (

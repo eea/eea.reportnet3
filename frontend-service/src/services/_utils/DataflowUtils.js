@@ -1,4 +1,3 @@
-import capitalize from 'lodash/capitalize';
 import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
 
@@ -46,7 +45,7 @@ const parsePublicDataflowDTO = publicDataflowDTO =>
     name: publicDataflowDTO.name,
     obligation: ObligationUtils.parseObligation(publicDataflowDTO.obligation),
     referenceDatasets: DatasetUtils.parseDatasetListDTO(publicDataflowDTO.referenceDatasets),
-    reportingDatasetsStatus: capitalize(publicDataflowDTO.reportingStatus?.replaceAll('_', ' ')),
+    reportingDatasetsStatus: publicDataflowDTO.reportingStatus,
     status: publicDataflowDTO.status === config.dataflowStatus.OPEN ? 'OPEN' : 'CLOSED'
   });
 
@@ -71,7 +70,7 @@ const parseDataflowDTO = dataflowDTO =>
     name: dataflowDTO.name,
     obligation: ObligationUtils.parseObligation(dataflowDTO.obligation),
     referenceDatasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.referenceDatasets),
-    reportingDatasetsStatus: capitalize(dataflowDTO.reportingStatus?.replaceAll('_', ' ')),
+    reportingDatasetsStatus: dataflowDTO.reportingStatus,
     representatives: RepresentativeUtils.parseRepresentativeListDTO(dataflowDTO.representatives),
     requestId: dataflowDTO.requestId,
     showPublicInfo: dataflowDTO.showPublicInfo,
