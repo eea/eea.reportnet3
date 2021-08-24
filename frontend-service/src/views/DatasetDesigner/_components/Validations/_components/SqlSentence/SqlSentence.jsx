@@ -73,7 +73,7 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
               className={`${styles.sqlSentenceInfoBtn} p-button-rounded p-button-secondary-transparent`}
               icon="infoCircle"
               id="infoSqlSentence"
-              onClick={e => onClickInfoButton()}
+              onClick={onClickInfoButton}
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
