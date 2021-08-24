@@ -83,6 +83,7 @@ import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintV
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.junit.Assert;
@@ -282,6 +283,10 @@ public class DatasetSchemaServiceTest {
 
   /** The authentication. */
   private Authentication authentication;
+
+  /** The lock service. */
+  @Mock
+  private LockService lockService;
 
 
   /**
@@ -2443,6 +2448,7 @@ public class DatasetSchemaServiceTest {
         "application/x-zip-compressed", baos.toByteArray());
     when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
+    when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     dataSchemaServiceImpl.importSchemas(1L, multipartFile.getInputStream(), "file.zip");
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());

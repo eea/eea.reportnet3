@@ -1054,9 +1054,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PostMapping(value = "/import")
+  @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
-  public void importSchemas(@RequestParam(value = "dataflowId") Long dataflowId,
+  public void importSchemas(
+      @LockCriteria(name = "dataflowId") @RequestParam(value = "dataflowId") Long dataflowId,
       @RequestParam("file") MultipartFile file) {
+
     if (!TypeStatusEnum.DESIGN
         .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
