@@ -34,7 +34,7 @@ export const useLeftSideBar = (
         icon: 'edit',
         isVisible: buttonsVisibility.editBtn,
         label: 'edit',
-        onClick: () => manageDialogs('isEditDialogVisible', true),
+        onClick: () => manageDialogs('isReportingDataflowDialogVisible', true),
         title: 'edit'
       };
 

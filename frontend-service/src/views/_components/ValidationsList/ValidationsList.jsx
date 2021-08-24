@@ -210,7 +210,7 @@ const ValidationsList = withRouter(
     );
 
     const expressionsTemplate = rowData => {
-      if (!isNil(rowData.expressionText)) {
+      if (!isEmpty(rowData.expressionText)) {
         return rowData.expressionText;
       }
 

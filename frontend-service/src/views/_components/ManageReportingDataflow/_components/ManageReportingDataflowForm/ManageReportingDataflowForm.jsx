@@ -94,7 +94,7 @@ const ManageReportingDataflowForm = forwardRef(
               await UserService.updateConfiguration(inmUserProperties);
               userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
             }
-            onCreate('isAddDialogVisible');
+            onCreate('isReportingDataflowDialogVisible');
             onResetData();
           }
         } catch (error) {
