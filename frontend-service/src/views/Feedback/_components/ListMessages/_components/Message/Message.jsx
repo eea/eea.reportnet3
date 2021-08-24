@@ -25,11 +25,11 @@ export const Message = ({
   },
   dataflowId,
   hasSeparator,
-  isAttachment = false,  
+  isAttachment = false,
   message,
   onToggleVisibleDeleteMessage
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
+  const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const isCustodian = userContext.hasPermission([
@@ -105,12 +105,14 @@ export const Message = ({
           )}
           <span className={styles.datetime}>{dayjs(message.date).format('YYYY-MM-DD HH:mm')}</span>
         </div>
-       {isCustodian && <FontAwesomeIcon
-          className={styles.deleteMessageButton}
-          icon={AwesomeIcons('deleteCircle')}
-          onClick={() => onToggleVisibleDeleteMessage(true, message.id)}
-          role="presentation"
-        />}
+        {isCustodian && (
+          <FontAwesomeIcon
+            className={styles.deleteMessageButton}
+            icon={AwesomeIcons('deleteCircle')}
+            onClick={() => onToggleVisibleDeleteMessage(true, message.id)}
+            role="presentation"
+          />
+        )}
       </div>
     );
   };
