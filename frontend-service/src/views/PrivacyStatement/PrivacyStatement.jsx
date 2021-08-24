@@ -9,7 +9,7 @@ import { Title } from 'views/_components/Title';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 const PrivacyStatement = withRouter(() => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const onClickAnchorLink = e => {
     e.preventDefault();
@@ -47,8 +47,8 @@ const PrivacyStatement = withRouter(() => {
         <Title
           icon="info"
           iconSize="4rem"
-          subtitle={resources.messages['privacyPolicySubtitle']}
-          title={resources.messages['privacyPolicyTitle']}
+          subtitle={resourcesContext.messages['privacyPolicySubtitle']}
+          title={resourcesContext.messages['privacyPolicyTitle']}
         />
         <div className={styles.contentMain}>
           <aside>

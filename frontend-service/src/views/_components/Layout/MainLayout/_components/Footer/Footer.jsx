@@ -15,16 +15,16 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const Footer = withRouter(({ history }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
   return (
     <div className={styles.Footer}>
       <div className={styles.footerContent}>
         <div className={styles.reportnetLogo}>
-          <a className={styles.title} href="https://www.eea.europa.eu/" title={resources.messages['eea']}>
+          <a className={styles.title} href="https://www.eea.europa.eu/" title={resourcesContext.messages['eea']}>
             <img
-              alt={resources.messages['eea']}
+              alt={resourcesContext.messages['eea']}
               className={styles.appLogo}
               height="50px"
               src={themeContext.currentTheme !== 'dark' ? eeaLogo : eeaLogoDark}
@@ -39,9 +39,9 @@ export const Footer = withRouter(({ history }) => {
               e.preventDefault();
               history.push(getUrl(routes.ACCESS_POINT));
             }}
-            title={resources.messages['titleHeader']}>
+            title={resourcesContext.messages['titleHeader']}>
             <img alt="Reportnet app logo" className={styles.appLogo} height="50px" src={logo} />
-            <h1 className={styles.appTitle}>{resources.messages['titleHeader']}</h1>
+            <h1 className={styles.appTitle}>{resourcesContext.messages['titleHeader']}</h1>
           </a>
         </div>
         <div className={styles.helpDesk}>

@@ -29,8 +29,9 @@ export const Message = ({
   message,
   onToggleVisibleDeleteMessage
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+
   const isCustodian = userContext.hasPermission([
     config.permissions.roles.CUSTODIAN.key,
     config.permissions.roles.STEWARD.key

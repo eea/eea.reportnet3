@@ -27,6 +27,7 @@ import { DataViewerUtils } from 'views/_components/DataViewer/_functions/Utils/D
 import { MetadataUtils, RecordUtils } from 'views/_functions/Utils';
 import { TableManagementUtils } from './_functions/Utils/TableManagementUtils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
+import { ErrorUtils } from 'views/_functions/Utils/ErrorUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -42,16 +43,13 @@ export const TableManagement = ({
   schemaTables,
   tables
 }) => {
-  const {
-    getFieldSchemaColumnIdByHeader,
-    parsePamsRecordsWithParentData,
-    parseTableSchemaColumns
-  } = TableManagementUtils;
+  const { getFieldSchemaColumnIdByHeader, parsePamsRecordsWithParentData, parseTableSchemaColumns } =
+    TableManagementUtils;
 
   const { getWebformTabs, parsePamsRecords } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [tableManagementState, tableManagementDispatch] = useReducer(tableManagementReducer, {
     initialSelectedRecord: {},
@@ -99,13 +97,13 @@ export const TableManagement = ({
         className={!isSaving && 'p-button-animated-blink'}
         disabled={isSaving}
         icon={isSaving === true ? 'spinnerAnimate' : 'check'}
-        label={resources.messages['save']}
+        label={resourcesContext.messages['save']}
         onClick={() => onSaveRecord(selectedRecord)}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon={'cancel'}
-        label={resources.messages['cancel']}
+        label={resourcesContext.messages['cancel']}
         onClick={onCancelRowEdit}
       />
     </div>
@@ -293,21 +291,6 @@ export const TableManagement = ({
     }
   };
 
-  const addIconLevelError = (validation, levelError, message) => {
-    let icon = [];
-    if (!isEmpty(validation)) {
-      icon.push(
-        <IconTooltip
-          className={styles.iconTooltipLevelError}
-          key={levelError}
-          levelError={levelError}
-          message={message}
-        />
-      );
-    }
-    return icon;
-  };
-
   const addTableTemplate = (rowData, colData) => {
     let hasRecord = false;
     let hasTable = false;
@@ -328,7 +311,11 @@ export const TableManagement = ({
           className={'p-button-secondary'}
           disabled={!hasTable || isSaving}
           icon={hasRecord ? 'edit' : 'add'}
-          label={hasRecord ? resources.messages['webformTableEdit'] : resources.messages['webformTableCreation']}
+          label={
+            hasRecord
+              ? resourcesContext.messages['webformTableEdit']
+              : resourcesContext.messages['webformTableCreation']
+          }
           onClick={async () => {
             if (hasRecord) {
               onSelectEditTable(pamsFieldSchemaValue, colData.field);
@@ -380,25 +367,10 @@ export const TableManagement = ({
     }
   };
 
-  const getIconsValidationsErrors = validations => {
-    let icons = [];
-    if (isNil(validations)) {
-      return icons;
-    }
-
-    const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
-    const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
-    const warningIcon = addIconLevelError(validations.warnings, 'WARNING', validations.messageWarnings);
-    const infoIcon = addIconLevelError(validations.infos, 'INFO', validations.messageInfos);
-
-    icons = blockerIcon.concat(errorIcon, warningIcon, infoIcon);
-    return <div className={styles.iconTooltipWrapper}>{icons}</div>;
-  };
-
   const renderActionButtonsColumn = (
     <Column
       body={row => renderActionsTemplate(row)}
-      header={resources.messages['actions']}
+      header={resourcesContext.messages['actions']}
       key="actions"
       style={{ width: '100px' }}
     />
@@ -412,21 +384,23 @@ export const TableManagement = ({
   );
 
   const validationsTemplate = recordData => {
-    const validationsGroup = DataViewerUtils.groupValidations(
-      recordData,
-      resources.messages['recordBlockers'],
-      resources.messages['recordErrors'],
-      resources.messages['recordWarnings'],
-      resources.messages['recordInfos']
+    return (
+      <div className={styles.iconTooltipWrapper}>
+        {ErrorUtils.getValidationsTemplate(recordData, {
+          blockers: resourcesContext.messages['recordBlockers'],
+          errors: resourcesContext.messages['recordErrors'],
+          warnings: resourcesContext.messages['recordWarnings'],
+          infos: resourcesContext.messages['recordInfos']
+        })}
+      </div>
     );
-    return getIconsValidationsErrors(validationsGroup);
   };
 
   const renderValidationColumn = (
     <Column
       body={validationsTemplate}
       field="validations"
-      header={resources.messages['validationsDataColumn']}
+      header={resourcesContext.messages['validationsDataColumn']}
       key="recordValidation"
       sortable={false}
       style={{ width: '100px' }}
@@ -452,8 +426,8 @@ export const TableManagement = ({
   };
 
   const renderEmptyTable = () => (
-    <DataTable className={styles.table} value={[{ emptyContent: resources.messages['noDataInDataTable'] }]}>
-      <Column field={'emptyContent'} header={resources.messages['overviewEmptyTableHeader']} />
+    <DataTable className={styles.table} value={[{ emptyContent: resourcesContext.messages['noDataInDataTable'] }]}>
+      <Column field={'emptyContent'} header={resourcesContext.messages['overviewEmptyTableHeader']} />
     </DataTable>
   );
 
@@ -479,20 +453,20 @@ export const TableManagement = ({
       {isDialogVisible.delete && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          header={resources.messages['deleteTabHeader']}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          header={resourcesContext.messages['deleteTabHeader']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={() => onDeleteRow()}
           onHide={() => manageDialogs('delete', false)}
           visible={isDialogVisible.delete}>
-          {resources.messages['confirmDeleteRow']}
+          {resourcesContext.messages['confirmDeleteRow']}
         </ConfirmDialog>
       )}
 
       {isDialogVisible.manageRows && (
         <Dialog
           footer={editRowDialogFooter}
-          header={resources.messages['editRow']}
+          header={resourcesContext.messages['editRow']}
           modal={true}
           onHide={() => manageDialogs('manageRows', false)}
           visible={isDialogVisible.manageRows}

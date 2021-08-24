@@ -21,7 +21,7 @@ const TreeViewExpandableItem = ({
   onExpandTree
 }) => {
   const [isOpen, setIsOpen] = useState(expanded);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   useEffect(() => {
     if (isOpen) {
@@ -112,7 +112,7 @@ const TreeViewExpandableItem = ({
         onClick={() => setIsOpen(!isOpen)}>
         {!isUndefined(items) & (items.length > 0) ? (
           <FontAwesomeIcon
-            aria-label={resources.messages[isOpen ? 'collapse' : 'expand']}
+            aria-label={resourcesContext.messages[isOpen ? 'collapse' : 'expand']}
             icon={AwesomeIcons(isOpen ? 'angleDown' : 'angleRight')}
             onClick={() => setIsOpen(!isOpen)}
           />
@@ -125,7 +125,10 @@ const TreeViewExpandableItem = ({
       </div>
       {isOpen ? <div className={styles.treeChildrenWrapper}>{children}</div> : null}
       {Children.count(children) === 0 && isOpen && !isUndefined(items[0]) ? (
-        <span className={styles.emptyProperty}>{`${resources.messages['emptyDatasetDesign']} ${items[0].label}`}</span>
+        <span
+          className={
+            styles.emptyProperty
+          }>{`${resourcesContext.messages['emptyDatasetDesign']} ${items[0].label}`}</span>
       ) : null}
     </Fragment>
   );

@@ -13,7 +13,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const NationalSystems = ({ dataProviderId, dataflowId, datasetId, state }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const { areEquals } = TextUtils;
   const { datasetSchema } = state;
@@ -37,11 +37,11 @@ export const NationalSystems = ({ dataProviderId, dataflowId, datasetId, state }
     const errorMessages = [];
 
     if (data?.totalRecords === 0) {
-      errorMessages.push(resources.messages['webformTableWithLessRecords']);
+      errorMessages.push(resourcesContext.messages['webformTableWithLessRecords']);
     }
 
     if (data?.totalRecords > 1) {
-      errorMessages.push(resources.messages['webformTableWithMoreRecords']);
+      errorMessages.push(resourcesContext.messages['webformTableWithMoreRecords']);
     }
 
     return errorMessages;
@@ -51,7 +51,7 @@ export const NationalSystems = ({ dataProviderId, dataflowId, datasetId, state }
     const errorMessages = [];
 
     if (data?.totalRecords === 0) {
-      errorMessages.push(resources.messages['webformTableWithLessRecords']);
+      errorMessages.push(resourcesContext.messages['webformTableWithLessRecords']);
     }
 
     return errorMessages;

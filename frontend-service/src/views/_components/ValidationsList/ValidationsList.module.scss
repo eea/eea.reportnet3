@@ -126,3 +126,7 @@
   @extend .editRowButton;
   color: var(--errors) !important;
 }
+
+.invalidSqlIcon {
+  color: var(--errors) !important;
+}

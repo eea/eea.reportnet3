@@ -22,7 +22,7 @@ export const Card = ({
   title,
   type
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const isCloneSchemasView = type === 'cloneSchemas';
   const isSelected = checked.id === id ? styles.checked : undefined;
@@ -30,7 +30,7 @@ export const Card = ({
   const renderCardFooter = () =>
     isCloneSchemasView && (
       <span>
-        {resources.messages['status']}: <span className={styles.dueDate}>{status}</span>
+        {resourcesContext.messages['status']}: <span className={styles.dueDate}>{status}</span>
       </span>
     );
 
@@ -53,7 +53,7 @@ export const Card = ({
       <div className={`${styles.date} ${styles[type]}`}>
         {!isReferenceDataflow && (
           <span>
-            {resources.messages[isCloneSchemasView ? 'date' : 'nextReportDue']}:
+            {resourcesContext.messages[isCloneSchemasView ? 'date' : 'nextReportDue']}:
             <span className={styles.dueDate}>{date}</span>
           </span>
         )}

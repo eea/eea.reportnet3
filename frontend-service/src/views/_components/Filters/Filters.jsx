@@ -47,7 +47,7 @@ export const Filters = ({
   validations,
   validationsAllTypesFilters
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const dateRef = useRef(null);
@@ -373,11 +373,11 @@ export const Filters = ({
             />
           )}
           <label className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label} htmlFor={inputId}>
-            {resources.messages[property]}
+            {resourcesContext.messages[property]}
           </label>
         </span>
         <label className="srOnly" htmlFor={inputId}>
-          {resources.messages[property]}
+          {resourcesContext.messages[property]}
         </label>
       </span>
     );
@@ -385,16 +385,16 @@ export const Filters = ({
 
   const matchModeCheckbox = () => (
     <span className={styles.checkboxWrap} data-for="checkboxTooltip" data-tip>
-      {resources.messages['strictModeCheckboxFilter']}
+      {resourcesContext.messages['strictModeCheckboxFilter']}
       <Button
         className={`${styles.strictModeInfoButton} p-button-rounded p-button-secondary-transparent`}
         icon="infoCircle"
-        tooltip={resources.messages['strictModeTooltip']}
+        tooltip={resourcesContext.messages['strictModeTooltip']}
         tooltipOptions={{ position: 'top' }}
       />
       <span className={styles.checkbox}>
         <Checkbox
-          ariaLabel={resources.messages['strictModeCheckboxFilter']}
+          ariaLabel={resourcesContext.messages['strictModeCheckboxFilter']}
           checked={filterState.matchMode}
           id="matchMode_checkbox"
           inputId="matchMode_checkbox"
@@ -412,7 +412,7 @@ export const Filters = ({
           <span className={styles.switchTextInput}>{label}</span>
           <span className={styles.checkbox}>
             <Checkbox
-              ariaLabel={resources.messages[property]}
+              ariaLabel={resourcesContext.messages[property]}
               checked={getCheckboxFilterState(property)}
               id={property}
               inputId={property}
@@ -421,7 +421,7 @@ export const Filters = ({
               style={{ marginRight: '50px' }}
             />
             <label className="srOnly" htmlFor={property}>
-              {resources.messages[property]}
+              {resourcesContext.messages[property]}
             </label>
           </span>
         </div>
@@ -433,14 +433,14 @@ export const Filters = ({
     <span className={`${styles.input}`} key={property}>
       {renderOrderFilter(property)}
       <Dropdown
-        ariaLabel={resources.messages[property]}
+        ariaLabel={resourcesContext.messages[property]}
         className={styles.dropdownFilter}
         filter={FiltersUtils.getOptionsTypes(data, property, dropDownList).length > 10}
-        filterPlaceholder={resources.messages[property]}
+        filterPlaceholder={resourcesContext.messages[property]}
         id={`${property}_dropdown`}
         inputClassName={`p-float-label ${styles.label}`}
         inputId={property}
-        label={resources.messages[property]}
+        label={resourcesContext.messages[property]}
         onChange={event => onFilterData(property, event.value)}
         onMouseDown={event => {
           event.preventDefault();
@@ -462,7 +462,7 @@ export const Filters = ({
         <InputText
           className={styles.inputFilter}
           id={`${property}_input`}
-          name={resources.messages[property]}
+          name={resourcesContext.messages[property]}
           onChange={event => onFilterData(property, event.target.value)}
           value={filterState.filterBy[property] ? filterState.filterBy[property] : ''}
         />
@@ -474,7 +474,7 @@ export const Filters = ({
           />
         )}
         <label className={styles.label} htmlFor={`${property}_input`}>
-          {resources.messages[property]}
+          {resourcesContext.messages[property]}
         </label>
       </span>
     </span>
@@ -489,7 +489,7 @@ export const Filters = ({
         layout="simple"
         onClick={() => onOrderData(filterState.orderBy[property], property)}
         style={{ fontSize: '12pt' }}
-        tooltip={resources.messages['sort']}
+        tooltip={resourcesContext.messages['sort']}
         tooltipOptions={{ position: 'bottom' }}
         value={`${property}_sortOrder`}
       />
@@ -500,7 +500,7 @@ export const Filters = ({
       {renderOrderFilter(property)}
       <MultiSelect
         ariaLabelledBy={`${property}_input`}
-        checkAllHeader={resources.messages['checkAllFilter']}
+        checkAllHeader={resourcesContext.messages['checkAllFilter']}
         className={styles.multiselectFilter}
         filter={showInput}
         headerClassName={styles.selectHeader}
@@ -509,8 +509,8 @@ export const Filters = ({
         inputId={`${property}_input`}
         isFilter
         itemTemplate={selectTemplate}
-        label={isEmpty(label) ? resources.messages[property] : label}
-        notCheckAllHeader={resources.messages['uncheckAllFilter']}
+        label={isEmpty(label) ? resourcesContext.messages[property] : label}
+        notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
         onChange={event => onFilterData(property, event.value)}
         optionLabel="type"
         options={
@@ -542,7 +542,7 @@ export const Filters = ({
       <label
         className={styles.label}
         dangerouslySetInnerHTML={{
-          __html: TextUtils.parseText(resources.messages['searchAllLabel'], {
+          __html: TextUtils.parseText(resourcesContext.messages['searchAllLabel'], {
             searchData: !isEmpty(searchBy) ? `(${getSearchByLabelParams(searchBy).join(', ').toLowerCase()})` : ''
           })
         }}
@@ -550,7 +550,7 @@ export const Filters = ({
     </span>
   );
 
-  const getSearchByLabelParams = (searchBy = []) => searchBy.map(key => resources.messages[key]);
+  const getSearchByLabelParams = (searchBy = []) => searchBy.map(key => resourcesContext.messages[key]);
 
   const filtersRenderer = () => {
     return options.map(filterOption => {
@@ -595,7 +595,7 @@ export const Filters = ({
           <Button
             className={`p-button-animated-blink ${styles.sendButton}`}
             icon="filter"
-            label={resources.messages['applyFilters']}
+            label={resourcesContext.messages['applyFilters']}
             onClick={() => sendData(filterState.filterBy)}
           />
         )}
@@ -606,7 +606,7 @@ export const Filters = ({
               sendData ? 'p-button-secondary' : 'p-button-secondary'
             } p-button-rounded  p-button-animated-blink`}
             icon="undo"
-            label={resources.messages['reset']}
+            label={resourcesContext.messages['reset']}
             onClick={() => onClearAllFilters()}
             style={{ marginLeft: sendData ? '1rem' : '' }}
           />

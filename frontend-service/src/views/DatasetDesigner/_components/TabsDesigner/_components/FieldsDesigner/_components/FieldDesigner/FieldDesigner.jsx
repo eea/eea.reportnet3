@@ -135,7 +135,7 @@ export const FieldDesigner = ({
   const inputRef = useRef();
 
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [headerInitialHeight, setHeaderInitialHeight] = useState();
@@ -254,8 +254,8 @@ export const FieldDesigner = ({
           if (type !== '') {
             fieldTypeRef.current.hide();
             onShowDialogError(
-              resources.messages['emptyFieldTypeMessage'],
-              resources.messages['emptyFieldTypeTitle'],
+              resourcesContext.messages['emptyFieldTypeMessage'],
+              resourcesContext.messages['emptyFieldTypeTitle'],
               inputRef?.current?.element
             );
           }
@@ -300,16 +300,16 @@ export const FieldDesigner = ({
           ) {
             fieldTypeRef.current.hide();
             onShowDialogError(
-              resources.messages['emptyFieldMessage'],
-              resources.messages['emptyFieldTitle'],
+              resourcesContext.messages['emptyFieldMessage'],
+              resourcesContext.messages['emptyFieldTitle'],
               inputRef?.current?.element
             );
           } else {
             if (checkInvalidCharacters(name)) {
               fieldTypeRef.current.hide();
               onShowDialogError(
-                resources.messages['invalidCharactersFieldMessage'],
-                resources.messages['invalidCharactersFieldTitle'],
+                resourcesContext.messages['invalidCharactersFieldMessage'],
+                resourcesContext.messages['invalidCharactersFieldTitle'],
                 inputRef?.current?.element
               );
               dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
@@ -321,8 +321,8 @@ export const FieldDesigner = ({
               } else {
                 fieldTypeRef.current.hide();
                 onShowDialogError(
-                  resources.messages['duplicatedFieldMessage'],
-                  resources.messages['duplicatedFieldTitle'],
+                  resourcesContext.messages['duplicatedFieldMessage'],
+                  resourcesContext.messages['duplicatedFieldTitle'],
                   inputRef?.current?.element
                 );
                 dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
@@ -333,8 +333,8 @@ export const FieldDesigner = ({
           if (name === '') {
             fieldTypeRef.current.hide();
             onShowDialogError(
-              resources.messages['emptyFieldMessage'],
-              resources.messages['emptyFieldTitle'],
+              resourcesContext.messages['emptyFieldMessage'],
+              resourcesContext.messages['emptyFieldTitle'],
               inputRef?.current?.element
             );
             dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
@@ -343,8 +343,8 @@ export const FieldDesigner = ({
               if (checkInvalidCharacters(name)) {
                 fieldTypeRef.current.hide();
                 onShowDialogError(
-                  resources.messages['invalidCharactersFieldMessage'],
-                  resources.messages['invalidCharactersFieldTitle'],
+                  resourcesContext.messages['invalidCharactersFieldMessage'],
+                  resourcesContext.messages['invalidCharactersFieldTitle'],
                   inputRef?.current?.element
                 );
                 dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
@@ -354,8 +354,8 @@ export const FieldDesigner = ({
                 } else {
                   fieldTypeRef.current.hide();
                   onShowDialogError(
-                    resources.messages['duplicatedFieldMessage'],
-                    resources.messages['duplicatedFieldTitle'],
+                    resourcesContext.messages['duplicatedFieldMessage'],
+                    resourcesContext.messages['duplicatedFieldTitle'],
                     inputRef?.current?.element
                   );
                   dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
@@ -647,8 +647,8 @@ export const FieldDesigner = ({
     if (fieldDesignerState.fieldValue === '') {
       fieldTypeRef.current.hide();
       onShowDialogError(
-        resources.messages['emptyFieldMessage'],
-        resources.messages['emptyFieldTitle'],
+        resourcesContext.messages['emptyFieldMessage'],
+        resourcesContext.messages['emptyFieldTitle'],
         inputRef?.current?.element
       );
     } else {
@@ -668,8 +668,8 @@ export const FieldDesigner = ({
     if (fieldDesignerState.fieldValue === '') {
       fieldTypeRef.current.hide();
       onShowDialogError(
-        resources.messages['emptyFieldMessage'],
-        resources.messages['emptyFieldTitle'],
+        resourcesContext.messages['emptyFieldMessage'],
+        resourcesContext.messages['emptyFieldTitle'],
         inputRef?.current?.element
       );
     } else {
@@ -716,8 +716,8 @@ export const FieldDesigner = ({
     if (fieldDesignerState.fieldValue === '') {
       fieldTypeRef.current.hide();
       onShowDialogError(
-        resources.messages['emptyFieldMessage'],
-        resources.messages['emptyFieldTitle'],
+        resourcesContext.messages['emptyFieldMessage'],
+        resourcesContext.messages['emptyFieldTitle'],
         inputRef?.current?.element
       );
     } else {
@@ -863,7 +863,7 @@ export const FieldDesigner = ({
       <Button
         className="p-button-secondary-transparent p-button-animated-blink button-right-aligned"
         icon="cancel"
-        label={resources.messages['close']}
+        label={resourcesContext.messages['close']}
         onClick={() => dispatchFieldDesigner({ type: 'TOGGLE_QC_MANAGER_VISIBLE', payload: false })}
       />
     </div>
@@ -873,7 +873,7 @@ export const FieldDesigner = ({
     <div>
       {!addField ? (
         <FontAwesomeIcon
-          aria-label={resources.messages['moveField']}
+          aria-label={resourcesContext.messages['moveField']}
           icon={AwesomeIcons('move')}
           style={{ width: '32px', opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
         />
@@ -881,7 +881,7 @@ export const FieldDesigner = ({
         <div style={{ marginLeft: '32px', display: 'inline-block' }}></div>
       )}
       <Checkbox
-        ariaLabel={resources.messages['pk']}
+        ariaLabel={resourcesContext.messages['pk']}
         checked={fieldDesignerState.fieldPKValue}
         className={`${styles.checkPK} datasetSchema-pk-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
@@ -906,21 +906,21 @@ export const FieldDesigner = ({
           !isNil(fieldDesignerState.fieldTypeValue) &&
           !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
           geometricTypes.includes(fieldDesignerState.fieldTypeValue.fieldType.toUpperCase())
-            ? resources.messages['disabledPKGeom']
+            ? resourcesContext.messages['disabledPKGeom']
             : hasPK && !fieldDesignerState.fieldPKValue
-            ? resources.messages['disabledPKHas']
+            ? resourcesContext.messages['disabledPKHas']
             : hasPK && fieldDesignerState.fieldPKReferencedValue
-            ? resources.messages['disabledPKLink']
+            ? resourcesContext.messages['disabledPKLink']
             : isDataflowOpen
-            ? resources.messages['disabledIsOpen']
+            ? resourcesContext.messages['disabledIsOpen']
             : isDesignDatasetEditorRead
-            ? resources.messages['disabledEditorRead']
+            ? resourcesContext.messages['disabledEditorRead']
             : null
         }
         tooltipOptions={{ position: 'top' }}
       />
       <Checkbox
-        ariaLabel={resources.messages['required']}
+        ariaLabel={resourcesContext.messages['required']}
         checked={fieldDesignerState.fieldRequiredValue}
         className={`${styles.checkRequired} datasetSchema-required-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
@@ -934,17 +934,17 @@ export const FieldDesigner = ({
         }}
         tooltip={
           Boolean(fieldDesignerState.fieldPKValue)
-            ? resources.messages['disabledRequiredPK']
+            ? resourcesContext.messages['disabledRequiredPK']
             : isDataflowOpen
-            ? resources.messages['disabledIsOpen']
+            ? resourcesContext.messages['disabledIsOpen']
             : isDesignDatasetEditorRead
-            ? resources.messages['disabledEditorRead']
+            ? resourcesContext.messages['disabledEditorRead']
             : null
         }
         tooltipOptions={{ position: 'top' }}
       />
       <Checkbox
-        ariaLabel={resources.messages['readOnly']}
+        ariaLabel={resourcesContext.messages['readOnly']}
         checked={fieldDesignerState.fieldReadOnlyValue}
         className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
@@ -971,8 +971,8 @@ export const FieldDesigner = ({
           !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
             ? `${fieldDesignerState.codelistItems.join('; ')}`
             : fieldDesignerState.fieldTypeValue.fieldType === 'Codelist'
-            ? resources.messages['codelistSelection']
-            : resources.messages['multiselectCodelistSelection']
+            ? resourcesContext.messages['codelistSelection']
+            : resourcesContext.messages['multiselectCodelistSelection']
         }
         onClick={() => onCodelistDropdownSelected()}
         style={{ pointerEvents: 'auto' }}
@@ -980,8 +980,8 @@ export const FieldDesigner = ({
           !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
             ? `${fieldDesignerState.codelistItems.join('; ')}`
             : fieldDesignerState.fieldTypeValue.fieldType === 'Codelist'
-            ? resources.messages['codelistSelection']
-            : resources.messages['multiselectCodelistSelection']
+            ? resourcesContext.messages['codelistSelection']
+            : resourcesContext.messages['multiselectCodelistSelection']
         }
         tooltipOptions={{ position: 'top' }}
       />
@@ -1008,7 +1008,7 @@ export const FieldDesigner = ({
         }
         label={
           isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
-            ? resources.messages['linkSelection']
+            ? resourcesContext.messages['linkSelection']
             : isNil(fieldDesignerState.fieldLinkValue.name)
             ? '...'
             : `${fieldDesignerState.fieldLinkValue.name}`
@@ -1017,7 +1017,7 @@ export const FieldDesigner = ({
         style={{ pointerEvents: 'auto' }}
         tooltip={
           isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
-            ? resources.messages['linkSelection']
+            ? resourcesContext.messages['linkSelection']
             : isNil(fieldDesignerState.fieldLinkValue.name)
             ? '...'
             : `${fieldDesignerState.fieldLinkValue.name}`
@@ -1031,26 +1031,26 @@ export const FieldDesigner = ({
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
         disabled={isDataflowOpen || isDesignDatasetEditorRead}
-        label={`${resources.messages['validExtensions']} ${
+        label={`${resourcesContext.messages['validExtensions']} ${
           !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
           !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
             ? fieldDesignerState.fieldFileProperties.validExtensions.join(', ')
             : '*'
-        } - ${resources.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
-          resources.messages['MB']
+        } - ${resourcesContext.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
+          resourcesContext.messages['MB']
         }`}
         onClick={() => onAttachmentDropdownSelected()}
         style={{ pointerEvents: 'auto' }}
-        tooltip={`${resources.messages['validExtensions']} ${
+        tooltip={`${resourcesContext.messages['validExtensions']} ${
           !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
           !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
             ? fieldDesignerState.fieldFileProperties.validExtensions.join(', ')
             : '*'
-        } - ${resources.messages['maxFileSize']} ${
+        } - ${resourcesContext.messages['maxFileSize']} ${
           !isNil(fieldDesignerState.fieldFileProperties.maxSize) &&
           fieldDesignerState.fieldFileProperties.maxSize.toString() !== '0'
-            ? `${fieldDesignerState.fieldFileProperties.maxSize} ${resources.messages['MB']}`
-            : resources.messages['maxSizeNotDefined']
+            ? `${fieldDesignerState.fieldFileProperties.maxSize} ${resourcesContext.messages['MB']}`
+            : resourcesContext.messages['maxSizeNotDefined']
         }`}
         tooltipOptions={{ position: 'top' }}
       />
@@ -1076,8 +1076,8 @@ export const FieldDesigner = ({
           event.preventDefault();
           event.stopPropagation();
         }}>
-        <FontAwesomeIcon aria-label={resources.messages['deleteFieldLabel']} icon={AwesomeIcons('delete')} />
-        <span className="srOnly">{resources.messages['deleteFieldLabel']}</span>
+        <FontAwesomeIcon aria-label={resourcesContext.messages['deleteFieldLabel']} icon={AwesomeIcons('delete')} />
+        <span className="srOnly">{resourcesContext.messages['deleteFieldLabel']}</span>
       </div>
     ) : null;
 
@@ -1092,7 +1092,7 @@ export const FieldDesigner = ({
         id={fieldName !== '' ? fieldName : 'newField'}
         keyfilter="schemaTableFields"
         maxLength={60}
-        name={resources.messages['newFieldPlaceHolder']}
+        name={resourcesContext.messages['newFieldPlaceHolder']}
         // key={`${fieldId}_${index}`} --> Problem with DOM modification
         onBlur={e => {
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
@@ -1111,7 +1111,7 @@ export const FieldDesigner = ({
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: true });
         }}
         onKeyDown={e => onKeyChange(e, 'NAME')}
-        placeholder={resources.messages['newFieldPlaceHolder']}
+        placeholder={resourcesContext.messages['newFieldPlaceHolder']}
         ref={inputRef}
         required={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue === '' : fieldName === ''}
         value={!isUndefined(fieldDesignerState.fieldValue) ? fieldDesignerState.fieldValue : fieldName}
@@ -1136,7 +1136,7 @@ export const FieldDesigner = ({
           dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: true });
         }}
         onKeyDown={e => onKeyChange(e, 'DESCRIPTION')}
-        placeholder={resources.messages['newFieldDescriptionPlaceHolder']}
+        placeholder={resourcesContext.messages['newFieldDescriptionPlaceHolder']}
         value={
           !isUndefined(fieldDesignerState.fieldDescriptionValue)
             ? fieldDesignerState.fieldDescriptionValue
@@ -1152,7 +1152,7 @@ export const FieldDesigner = ({
         disabled={isDataflowOpen || isDesignDatasetEditorRead}
         inputId={`${fieldName}_fieldType`}
         itemTemplate={fieldTypeTemplate}
-        name={resources.messages['newFieldTypePlaceHolder']}
+        name={resourcesContext.messages['newFieldTypePlaceHolder']}
         onChange={e => onChangeFieldType(e.target.value)}
         onMouseDown={event => {
           event.preventDefault();
@@ -1161,7 +1161,7 @@ export const FieldDesigner = ({
         }}
         optionLabel="value"
         options={fieldTypes}
-        placeholder={resources.messages['newFieldTypePlaceHolder']}
+        placeholder={resourcesContext.messages['newFieldTypePlaceHolder']}
         ref={fieldTypeRef}
         required={true}
         scrollHeight="450px"
@@ -1224,7 +1224,7 @@ export const FieldDesigner = ({
               (isDataflowOpen && isReferenceDataset)
             }
             icon="horizontalSliders"
-            label={resources.messages['createFieldQC']}
+            label={resourcesContext.messages['createFieldQC']}
             onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
             style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
           />
@@ -1276,7 +1276,7 @@ export const FieldDesigner = ({
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
           footer={qcDialogFooter}
-          header={resources.messages['qcManager']}
+          header={resourcesContext.messages['qcManager']}
           modal={true}
           onHide={() => dispatchFieldDesigner({ type: 'TOGGLE_QC_MANAGER_VISIBLE', payload: false })}
           style={{ width: '80%' }}

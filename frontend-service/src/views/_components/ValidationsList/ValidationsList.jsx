@@ -36,7 +36,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 const ValidationsList = withRouter(
   ({ dataset, datasetSchemaAllTables, datasetSchemaId, reporting = false, setHasValidations = () => {} }) => {
     const notificationContext = useContext(NotificationContext);
-    const resources = useContext(ResourcesContext);
+    const resourcesContext = useContext(ResourcesContext);
     const validationContext = useContext(ValidationContext);
 
     const [tabsValidationsState, tabsValidationsDispatch] = useReducer(tabsValidationsReducer, {
@@ -71,13 +71,13 @@ const ValidationsList = withRouter(
       <Fragment>
         {tabsValidationsState.filtered &&
         tabsValidationsState.validationList.validations.length !== tabsValidationsState.filteredData.length
-          ? `${resources.messages['filtered']} : ${tabsValidationsState.filteredData.length} | `
+          ? `${resourcesContext.messages['filtered']} : ${tabsValidationsState.filteredData.length} | `
           : ''}
-        {resources.messages['totalRecords']} {tabsValidationsState.validationList.validations.length}{' '}
-        {resources.messages['records'].toLowerCase()}
+        {resourcesContext.messages['totalRecords']} {tabsValidationsState.validationList.validations.length}{' '}
+        {resourcesContext.messages['records'].toLowerCase()}
         {tabsValidationsState.filtered &&
         tabsValidationsState.validationList.validations.length === tabsValidationsState.filteredData.length
-          ? ` (${resources.messages['filtered'].toLowerCase()})`
+          ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>
     );
@@ -190,7 +190,15 @@ const ValidationsList = withRouter(
         if (rowData.isCorrect) {
           return <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />;
         } else if (!isNil(rowData.sqlError)) {
-          return rowData.sqlError;
+          return (
+            <Button
+              className={`${styles.invalidSqlIcon} p-button-secondary`}
+              icon="warning"
+              onClick={() => navigator.clipboard.writeText(rowData.sqlError)}
+              tooltip={`${rowData.sqlError} <br />  <br />${resourcesContext.messages['sqlErrorMessageCopy']} `}
+              tooltipOptions={{ position: 'left' }}
+            />
+          );
         }
       }
     };
@@ -202,7 +210,7 @@ const ValidationsList = withRouter(
     );
 
     const expressionsTemplate = rowData => {
-      if (!isNil(rowData.expressionText)) {
+      if (!isEmpty(rowData.expressionText)) {
         return rowData.expressionText;
       }
 
@@ -258,16 +266,16 @@ const ValidationsList = withRouter(
       let header;
       switch (fieldHeader) {
         case 'levelError':
-          header = resources.messages['ruleLevelError'];
+          header = resourcesContext.messages['ruleLevelError'];
           break;
         case 'shortCode':
-          header = resources.messages['ruleCode'];
+          header = resourcesContext.messages['ruleCode'];
           break;
         case 'isCorrect':
-          header = resources.messages['valid'];
+          header = resourcesContext.messages['valid'];
           break;
         default:
-          header = resources.messages[fieldHeader];
+          header = resourcesContext.messages[fieldHeader];
           break;
       }
 
@@ -376,14 +384,14 @@ const ValidationsList = withRouter(
       <ConfirmDialog
         classNameConfirm={'p-button-danger'}
         disabledConfirm={tabsValidationsState.isDeletingRule}
-        header={resources.messages['deleteValidationHeader']}
+        header={resourcesContext.messages['deleteValidationHeader']}
         iconConfirm={tabsValidationsState.isDeletingRule ? 'spinnerAnimate' : 'check'}
-        labelCancel={resources.messages['no']}
-        labelConfirm={resources.messages['yes']}
+        labelCancel={resourcesContext.messages['no']}
+        labelConfirm={resourcesContext.messages['yes']}
         onConfirm={() => onDeleteValidation()}
         onHide={() => onHideDeleteDialog()}
         visible={tabsValidationsState.isDeleteDialogVisible}>
-        {resources.messages['deleteValidationConfirm']}
+        {resourcesContext.messages['deleteValidationConfirm']}
       </ConfirmDialog>
     );
 
@@ -413,7 +421,7 @@ const ValidationsList = withRouter(
       <Column
         body={row => actionsTemplate(row)}
         className={styles.validationCol}
-        header={resources.messages['actions']}
+        header={resourcesContext.messages['actions']}
         key="actions"
         sortable={false}
         style={{ width: '100px' }}
@@ -486,7 +494,7 @@ const ValidationsList = withRouter(
       if (checkIsEmptyValidations()) {
         return (
           <div className={styles.validationsWithoutTable}>
-            <div className={styles.noValidations}>{resources.messages['emptyValidations']}</div>
+            <div className={styles.noValidations}>{resourcesContext.messages['emptyValidations']}</div>
           </div>
         );
       }
@@ -521,7 +529,9 @@ const ValidationsList = withRouter(
               {renderColumns(tabsValidationsState.validationList.validations)}
             </DataTable>
           ) : (
-            <div className={styles.emptyFilteredData}>{resources.messages['noQCRulesWithSelectedParameters']}</div>
+            <div className={styles.emptyFilteredData}>
+              {resourcesContext.messages['noQCRulesWithSelectedParameters']}
+            </div>
           )}
         </div>
       );
