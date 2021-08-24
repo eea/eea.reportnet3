@@ -589,7 +589,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
       manageDialogs('isDeleteDialogVisible', false);
-      await DatasetService.deleteData(datasetId);
+      await DatasetService.deleteData(datasetId, arePrefilledTablesDeleted);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -601,7 +601,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             dataflowId,
             datasetId,
             dataflowName: designerState.dataflowName,
-            datasetName: designerState.datasetName
+            datasetName: designerState.datasetSchemaName
           }
         });
       }
@@ -1234,23 +1234,22 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         checked={arePrefilledTablesDeleted}
         id="arePrefilledTablesDeleted"
         inputId="arePrefilledTablesDeleted"
-        // onChange={() =>
-        //   dataflowDispatch({
-        //     type: 'SET_SHOW_PUBLIC_INFO',
-        //     payload: { showPublicInfo: !dataflowState.showPublicInfo }
-        //   })
-        // }
+        onChange={() =>
+          designerDispatch({
+            type: 'SET_ARE_PREFILLED_TABLES_DELETED',
+            payload: { arePrefilledTablesDeleted: !arePrefilledTablesDeleted }
+          })
+        }
         role="checkbox"
       />
-      <label className={styles.showPublicInfo} htmlFor="arePrefilledTablesDeletedCheckbox">
+      <label htmlFor="arePrefilledTablesDeletedCheckbox">
         <span
-        // onClick={() =>
-        //   dataflowDispatch({
-        //     type: 'SET_SHOW_PUBLIC_INFO',
-        //     payload: { showPublicInfo: !dataflowState.showPublicInfo }
-        //   })
-        // }
-        >
+          onClick={() =>
+            designerDispatch({
+              type: 'SET_ARE_PREFILLED_TABLES_DELETED',
+              payload: { arePrefilledTablesDeleted: !arePrefilledTablesDeleted }
+            })
+          }>
           {resourcesContext.messages['arePrefilledTablesDeletedCheckboxLabel']}
         </span>
       </label>
@@ -1627,8 +1626,20 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             header={resourcesContext.messages['deleteDatasetHeader']}
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={onConfirmDelete}
-            onHide={() => manageDialogs('isDeleteDialogVisible', false)}
+            onConfirm={() => {
+              onConfirmDelete();
+              designerDispatch({
+                type: 'SET_ARE_PREFILLED_TABLES_DELETED',
+                payload: { arePrefilledTablesDeleted: false }
+              });
+            }}
+            onHide={() => {
+              manageDialogs('isDeleteDialogVisible', false);
+              designerDispatch({
+                type: 'SET_ARE_PREFILLED_TABLES_DELETED',
+                payload: { arePrefilledTablesDeleted: false }
+              });
+            }}
             visible={isDeleteDialogVisible}>
             {resourcesContext.messages['deleteDatasetConfirm']}
           </ConfirmDialog>
