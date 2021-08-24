@@ -18,7 +18,6 @@ export const PublicCard = ({
   dueDate,
   externalCard,
   frequency,
-  isReleasable,
   obligation,
   onCardClick,
   pilotScenarioAmbition,
