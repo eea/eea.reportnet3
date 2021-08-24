@@ -25,6 +25,9 @@ const sortDataflowsByExpirationDate = dataflows =>
 
 const parseDataflowListDTO = dataflowsDTO => dataflowsDTO?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
 
+const parsePublicDataflowListDTO = dataflowsDTO =>
+  dataflowsDTO?.map(dataflowDTO => parsePublicDataflowDTO(dataflowDTO));
+
 const parseSortedDataflowListDTO = dataflowDTOs => {
   const dataflows = dataflowDTOs?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
   return sortDataflowsByExpirationDate(dataflows);
@@ -32,13 +35,18 @@ const parseSortedDataflowListDTO = dataflowDTOs => {
 
 const parsePublicDataflowDTO = publicDataflowDTO =>
   new Dataflow({
+    datasets: DatasetUtils.parseDatasetListDTO(publicDataflowDTO.reportingDatasets),
     description: publicDataflowDTO.description,
+    documents: DocumentUtils.parseDocumentListDTO(publicDataflowDTO.documents),
     expirationDate:
       publicDataflowDTO.deadlineDate > 0 ? dayjs(publicDataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: publicDataflowDTO.id,
     isReleasable: publicDataflowDTO.releasable,
+    manualAcceptance: publicDataflowDTO.manualAcceptance,
     name: publicDataflowDTO.name,
     obligation: ObligationUtils.parseObligation(publicDataflowDTO.obligation),
+    referenceDatasets: DatasetUtils.parseDatasetListDTO(publicDataflowDTO.referenceDatasets),
+    reportingDatasetsStatus: capitalize(publicDataflowDTO.reportingStatus?.replaceAll('_', ' ')),
     status: publicDataflowDTO.status === config.dataflowStatus.OPEN ? 'OPEN' : 'CLOSED'
   });
 
@@ -137,6 +145,7 @@ export const DataflowUtils = {
   sortDataflowsByExpirationDate,
   parseDataflowDTO,
   parseDataflowListDTO,
+  parsePublicDataflowListDTO,
   parsePublicDataflowDTO,
   parseSortedDataflowListDTO,
   parseAllDataflowsUserList,

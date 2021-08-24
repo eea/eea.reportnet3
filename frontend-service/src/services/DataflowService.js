@@ -317,7 +317,7 @@ export const DataflowService = {
       sortField
     );
 
-    const publicDataflowsByCountryCodeData = DataflowUtils.parseDataflowListDTO(
+    const publicDataflowsByCountryCodeData = DataflowUtils.parsePublicDataflowListDTO(
       publicDataflowsByCountryCodeResponse.data.publicDataflows
     );
     publicDataflowsByCountryCodeResponse.data.publicDataflows = publicDataflowsByCountryCodeData;
