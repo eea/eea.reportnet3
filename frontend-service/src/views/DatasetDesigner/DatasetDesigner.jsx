@@ -1423,7 +1423,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataset-deleteDataset-help-step`}
-                // disabled={!hasWritePermissions}
                 icon="trash"
                 label={resourcesContext.messages['deleteDatasetData']}
                 onClick={() => manageDialogs('isDeleteDialogVisible', true)}
