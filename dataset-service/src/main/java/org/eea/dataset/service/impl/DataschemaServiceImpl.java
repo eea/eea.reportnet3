@@ -2514,9 +2514,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           NotificationVO.builder()
               .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(dataflowId).error("Error importing the schemas").build());
-    }
-
-    finally {
+    } finally {
       Map<String, Object> importDatasetData = new HashMap<>();
       importDatasetData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_SCHEMAS.getValue());
       importDatasetData.put(LiteralConstants.DATAFLOWID, dataflowId);
