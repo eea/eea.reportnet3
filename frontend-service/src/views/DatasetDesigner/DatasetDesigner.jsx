@@ -1449,7 +1449,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 disabled={isDataflowOpen || isDesignDatasetEditorRead}
                 icon="validate"
                 label={resourcesContext.messages['validate']}
-                onClick={() => manageDialogs('validateDialogVisible', true)}
+                onClick={() => manageDialogs('isValidateDialogVisible', true)}
               />
 
               <Button
@@ -1625,7 +1625,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
             onConfirm={onConfirmValidate}
-            onHide={() => manageDialogs('validateDialogVisible', false)}
+            onHide={() => manageDialogs('isValidateDialogVisible', false)}
             visible={isValidateDialogVisible}>
             {resourcesContext.messages['validateDatasetConfirm']}
           </ConfirmDialog>
