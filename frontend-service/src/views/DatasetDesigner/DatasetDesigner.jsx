@@ -590,6 +590,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
       manageDialogs('isDeleteDialogVisible', false);
       await DatasetService.deleteData(datasetId, arePrefilledTablesDeleted);
+      onResetDelete();
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -606,6 +607,11 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         });
       }
     }
+  };
+
+  const onHideDelete = () => {
+    manageDialogs('isDeleteDialogVisible', false);
+    onResetDelete();
   };
 
   const onExportError = async exportNotification => {
@@ -693,6 +699,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       validationContext.onResetOpener();
     }
     manageDialogs('validationListDialogVisible', false);
+  };
+
+  const onResetDelete = () => {
+    designerDispatch({
+      type: 'SET_ARE_PREFILLED_TABLES_DELETED',
+      payload: { arePrefilledTablesDeleted: false }
+    });
   };
 
   const onKeyChange = event => {
@@ -1625,20 +1638,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             header={resourcesContext.messages['deleteDatasetHeader']}
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={() => {
-              onConfirmDelete();
-              designerDispatch({
-                type: 'SET_ARE_PREFILLED_TABLES_DELETED',
-                payload: { arePrefilledTablesDeleted: false }
-              });
-            }}
-            onHide={() => {
-              manageDialogs('isDeleteDialogVisible', false);
-              designerDispatch({
-                type: 'SET_ARE_PREFILLED_TABLES_DELETED',
-                payload: { arePrefilledTablesDeleted: false }
-              });
-            }}
+            onConfirm={onConfirmDelete}
+            onHide={onHideDelete}
             visible={isDeleteDialogVisible}>
             {resourcesContext.messages['deleteDatasetConfirm']}
           </ConfirmDialog>
