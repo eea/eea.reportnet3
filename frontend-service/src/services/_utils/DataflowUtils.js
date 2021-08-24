@@ -67,7 +67,7 @@ const parseDataflowDTO = dataflowDTO =>
     showPublicInfo: dataflowDTO.showPublicInfo,
     status: dataflowDTO.status,
     testDatasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.testDatasets),
-    type: isNil(dataflowDTO.type) ? 'REPORTING' : dataflowDTO.type, //TODO Remove this check when this data will come from BE
+    type: dataflowDTO.type,
     userRole: dataflowDTO.userRole,
     webLinks: WebLinksUtils.parseWebLinkListDTO(dataflowDTO.weblinks)
   });
