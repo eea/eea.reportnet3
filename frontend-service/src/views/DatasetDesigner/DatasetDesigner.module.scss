@@ -131,3 +131,25 @@
   display: flex;
   justify-content: space-between;
 }
+
+.deleteDatasetFooter {
+  float: left !important;
+}
+
+.checkboxWrapper {
+  float: left !important;
+  :global .p-checkbox {
+    margin-left: 0 !important;
+  }
+  label {
+    margin-left: 0.5rem !important;
+    user-select: none;
+    cursor: pointer;
+    span {
+      color: var(--main-font-color);
+    }
+    span:hover {
+      color: var(--main-font-color);
+    }
+  }
+}
