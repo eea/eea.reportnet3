@@ -259,11 +259,11 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       .filter(key => !key.includes('id'))
       .map(field => {
         let template = null;
-        if (field === 'name') template = renderDataflowNameBodyColumn;
         if (field === 'isReleasable') template = renderIsReleasableBodyColumn;
         if (field === 'isReleased') template = renderIsReleasedBodyColumn;
-        if (field === 'manualAcceptance') template = renderManualAcceptanceBodyColumn;
         if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
+        if (field === 'manualAcceptance') template = renderManualAcceptanceBodyColumn;
+        if (field === 'name') template = renderDataflowNameBodyColumn;
         if (field === 'obligation') template = renderObligationBodyColumn;
         if (field === 'publicFilesNames') template = renderDownloadFileBodyColumn;
         if (field === 'referencePublicFilesNames') template = renderDownloadReferenceFileBodyColumn;
