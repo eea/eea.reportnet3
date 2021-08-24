@@ -667,8 +667,9 @@ public class DataFlowControllerImplTest {
     Mockito.verify(dataflowService, times(1)).deleteDataFlow(Mockito.anyLong());
   }
 
+
   /**
-   * Test update status exception.
+   * Test delete dataflow exception.
    *
    * @throws EEAException the EEA exception
    */
