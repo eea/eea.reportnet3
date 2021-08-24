@@ -1,9 +1,11 @@
-import { Fragment } from 'react';
+import { Fragment, useContext } from 'react';
 import PropTypes from 'prop-types';
 
 import uniqueId from 'lodash/uniqueId';
 
 import styles from './PublicCard.module.scss';
+
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,13 +18,15 @@ export const PublicCard = ({
   dueDate,
   externalCard,
   frequency,
-  isReleasable,
   obligation,
   onCardClick,
   pilotScenarioAmbition,
+  status,
   subtitle,
   title
 }) => {
+  const resourcesContext = useContext(ResourcesContext);
+
   const idTooltip = uniqueId();
   const baseRod3Url = 'https://rod.eionet.europa.eu';
 
@@ -78,14 +82,14 @@ export const PublicCard = ({
         {externalCard ? (
           <div className={styles.legalInstrumentAndObligation}>
             <p>
-              <strong>Pilot scenario ambition: </strong> {pilotScenarioAmbition}
+              <strong>{resourcesContext.messages['pilotScenarioAmbitionColumnTitle']}: </strong> {pilotScenarioAmbition}
             </p>
           </div>
         ) : (
           <Fragment>
             <div className={styles.legalInstrumentAndObligation}>
               <p>
-                <strong>Obligation: </strong>
+                <strong>{resourcesContext.messages['obligationTitle']}: </strong>
                 {obligation?.obligationId
                   ? renderRedirectText(obligation?.title, `${baseRod3Url}/obligations/${obligation?.obligationId}`)
                   : obligation?.title}
@@ -93,7 +97,7 @@ export const PublicCard = ({
             </div>
             <div className={styles.legalInstrumentAndObligation}>
               <p>
-                <strong>Instrument: </strong>
+                <strong>{resourcesContext.messages['instrumentColumnTitle']}: </strong>
                 {obligation?.legalInstruments?.id
                   ? renderRedirectText(
                       obligation?.legalInstruments?.alias,
@@ -107,25 +111,17 @@ export const PublicCard = ({
         <div className={`${styles.footer}`}>
           {externalCard ? (
             <span>
-              {
-                <Fragment>
-                  <strong>Frequency: </strong>
-                  {frequency}
-                </Fragment>
-              }
+              <strong>{resourcesContext.messages['frequencyColumnTitle']}: </strong>
+              {frequency}
             </span>
           ) : (
             <span>
-              {
-                <Fragment>
-                  <strong>Status: </strong>
-                  {`${isReleasable ? 'OPEN' : 'CLOSED'}`}
-                </Fragment>
-              }
+              <strong>{resourcesContext.messages['status']}: </strong>
+              {status}
             </span>
           )}
           <span>
-            <strong>Delivery date:</strong> {dueDate}
+            <strong>{resourcesContext.messages['deliveryDate']}:</strong> {dueDate}
           </span>
         </div>
       </div>
