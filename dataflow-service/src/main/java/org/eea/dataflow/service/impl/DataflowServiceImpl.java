@@ -1383,7 +1383,7 @@ public class DataflowServiceImpl implements DataflowService {
    */
   private Map<Long, List<DataflowStatusDataset>> getDatasetsStatus(List<Long> dataflowIds) {
     Map<Long, List<DataflowStatusDataset>> map = new HashMap<>();
-    if (CollectionUtils.isEmpty(dataflowIds)) {
+    if (!CollectionUtils.isEmpty(dataflowIds)) {
       List<ReportingDatasetVO> datasets =
           datasetMetabaseControllerZuul.findReportingDataSetByDataflowIds(dataflowIds);
       List<Long> listDatasets =
