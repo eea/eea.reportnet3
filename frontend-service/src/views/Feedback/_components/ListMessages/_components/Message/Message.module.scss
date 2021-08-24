@@ -36,7 +36,8 @@
         padding: 5px;
         display: flex;
         flex-direction: column;
-        width: 14rem;
+        width: fit-content;
+        max-width: 30rem;
         span {
           color: var(--white);
         }

@@ -1233,6 +1233,7 @@
     "sqlErrorMessage": "SQL error message: ",
     "sqlErrorMessageCopy": "Please click to copy to clipboard the SQL Error.",
     "deleteFeedbackMessageHeader": "Delete message",
-    "deleteFeedbackMessage": "Are you sure you want to delete this message?"
+    "deleteFeedbackMessage": "Are you sure you want to delete this message?",
+    "loadDatasetFeedbackMessagesError": "Error loading messages"
   }
 }

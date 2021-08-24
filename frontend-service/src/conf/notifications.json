@@ -584,6 +584,9 @@
         },
         { "key": "UPDATE_DATASET_FEEDBACK_STATUS_ERROR" },
         {
+          "key": "LOAD_DATASET_FEEDBACK_MESSAGES_ERROR"
+        },
+        {
           "key": "VALIDATE_RULES_ERROR_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",

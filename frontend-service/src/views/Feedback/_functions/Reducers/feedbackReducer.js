@@ -18,8 +18,7 @@ export const feedbackReducer = (state, { type, payload }) => {
       };
     case 'ON_SEND_ATTACHMENT':
       const inmAttachMessages = [...state.messages];
-      inmAttachMessages.push(payload.value);
-      console.log({ inmAttachMessages });
+      inmAttachMessages.push(payload);
       return {
         ...state,
         messages: inmAttachMessages,

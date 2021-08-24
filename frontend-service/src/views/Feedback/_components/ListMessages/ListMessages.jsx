@@ -109,7 +109,6 @@ export const ListMessages = ({
   }, [listMessagesState.resetScrollStates]);
 
   const onConfirmDeleteMessage = async () => {
-    console.log(messageIdToDelete);
     try {
       await FeedbackService.deleteMessage(dataflowId, messageIdToDelete, providerId);
       // dispatchListMessages({
@@ -149,7 +148,6 @@ export const ListMessages = ({
             <Spinner className={styles.lazyLoadingSpinner} />
           </div>
         )}
-        {console.log(messages)}
         {messages.map((message, i) => (
           <Message
             attachment={message.messageAttachment}

@@ -190,23 +190,23 @@ export const Feedback = withRouter(({ match, history }) => {
     try {
       const data = await onLoadMessages(
         isCustodian ? selectedDataProvider.dataProviderId : representativeId,
-        currentPage
+        currentPage,
+        true
       );
-      console.log(data);
       await markMessagesAsRead(data);
 
       dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data.messages });
     } catch (error) {
       console.error('Feedback - onGetMoreMessages.', error);
-      // notificationContext.add({
-      //   type: 'DATAFLOW_DETAILS_ERROR',
-      //   content: {}
-      // });
+      notificationContext.add({
+        type: 'LOAD_DATASET_FEEDBACK_MESSAGES_ERROR',
+        content: {}
+      });
     }
   };
 
   const onGetInitialMessages = async dataProviderId => {
-    const data = await onLoadMessages(dataProviderId, 0);
+    const data = await onLoadMessages(dataProviderId, 0, false);
     await markMessagesAsRead(data);
 
     dispatchFeedback({ type: 'SET_MESSAGES', payload: !isNil(data) ? data.messages : [] });
@@ -252,12 +252,19 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   };
 
-  const onLoadMessages = async (dataProviderId, page) => {
+  const onLoadMessages = async (dataProviderId, page, isLazyLoad) => {
     try {
+      if (!isLazyLoad) {
+        dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
+      }
       const { data } = await FeedbackService.getAllMessages(dataflowId, page, dataProviderId);
       return { messages: data, unreadMessages: data.filter(msg => !msg.read) };
     } catch (error) {
       console.error('Feedback - onLoadMessages.', error);
+    } finally {
+      if (!isLazyLoad) {
+        dispatchFeedback({ type: 'SET_IS_LOADING', payload: false });
+      }
     }
   };
 
@@ -301,8 +308,14 @@ export const Feedback = withRouter(({ match, history }) => {
   };
 
   const onUpload = async event => {
-    console.log(JSON.parse(event.xhr.response));
-    dispatchFeedback({ type: 'ON_SEND_ATTACHMENT', payload: { value: { ...JSON.parse(event.xhr.response) } } });
+    const messageVO = JSON.parse(event.xhr.response);
+    Object.defineProperty(
+      messageVO,
+      'messageAttachment',
+      Object.getOwnPropertyDescriptor(messageVO, 'messageAttachmentVO')
+    );
+    delete messageVO['messageAttachmentVO'];
+    dispatchFeedback({ type: 'ON_SEND_ATTACHMENT', payload: messageVO });
   };
 
   const layout = children => {
