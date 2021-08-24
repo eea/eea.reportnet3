@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -140,6 +141,34 @@ public class CollaborationControllerImpl implements CollaborationController {
     } catch (EEAForbiddenException e) {
       LOG_ERROR.error("Error updating messages: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Delete message.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param messageId the message id
+   */
+  @Override
+  @DeleteMapping("/deleteMessage/dataflow/{dataflowId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  public void deleteMessage(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId, @RequestParam("messageId") Long messageId) {
+    try {
+      if (providerId == null || dataflowId == null || messageId == null) {
+        throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGING_BAD_REQUEST);
+      }
+      collaborationService.deleteMessage(messageId);
+
+    } catch (EEAIllegalArgumentException e) {
+      LOG_ERROR.error("Error deleting message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting message, messageId {}, with message: {}", messageId,
+          e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
   }
 

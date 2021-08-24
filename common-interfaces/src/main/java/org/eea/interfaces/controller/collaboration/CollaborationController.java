@@ -5,6 +5,7 @@ import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,6 +61,17 @@ public interface CollaborationController {
   @PutMapping("/updateMessageReadStatus/dataflow/{dataflowId}")
   void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
       @RequestBody List<MessageVO> messageVOs);
+
+  /**
+   * Delete message.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param messageId the message id
+   */
+  @DeleteMapping("/deleteMessage/dataflow/{dataflowId}")
+  void deleteMessage(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId, @RequestParam("messageId") Long messageId);
 
   /**
    * Find messages.

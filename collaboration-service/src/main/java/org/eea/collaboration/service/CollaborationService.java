@@ -52,6 +52,14 @@ public interface CollaborationService {
       throws EEAIllegalArgumentException, EEAForbiddenException;
 
   /**
+   * Delete message.
+   *
+   * @param messageId the message id
+   * @throws EEAException the EEA exception
+   */
+  void deleteMessage(Long messageId) throws EEAException;
+
+  /**
    * Find messages.
    *
    * @param dataflowId the dataflow id
