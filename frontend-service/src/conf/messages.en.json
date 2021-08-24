@@ -1232,6 +1232,6 @@
     "maxAllowedCharacters": "max allowed characters",
     "sqlErrorMessage": "SQL error message: ",
     "sqlErrorMessageCopy": "Please click to copy to clipboard the SQL Error.",
-    "arePrefilledTablesDeletedCheckboxLabel" : "Delete prefilled tables data?"
+    "arePrefilledTablesDeletedCheckboxLabel" : "Delete prefilled tables data"
   }
 }
