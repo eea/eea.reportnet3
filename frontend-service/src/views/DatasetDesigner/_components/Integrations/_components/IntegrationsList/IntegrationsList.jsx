@@ -172,7 +172,9 @@ export const IntegrationsList = ({
   const integrationNameTemplate = row => (
     <Fragment>
       {row.integrationName}
-      <TooltipButton message={`${resourcesContext.messages['integrationId']}: ${row.integrationId}`}></TooltipButton>
+      <TooltipButton
+        message={`${resourcesContext.messages['integrationId']}: ${row.integrationId}`}
+        uniqueIdentifier={row.integrationId}></TooltipButton>
     </Fragment>
   );
 
