@@ -21,7 +21,7 @@ export const DatasetRepository = {
       data: { nameTableSchema: tableSchemaName, notEmpty: true }
     }),
 
-  deleteData: async (datasetId, arePrefilledTablesDeleted) => await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteData, { datasetId, arePrefilledTablesDeleted }) }),
+  deleteData: async (datasetId, deletePrefilledTables) => await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteData, { datasetId, deletePrefilledTables }) }),
 
   deleteAttachment: async (datasetId, fieldId) =>
     await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteAttachment, { datasetId, fieldId }) }),
