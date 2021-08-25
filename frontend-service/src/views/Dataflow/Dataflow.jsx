@@ -89,7 +89,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isDataSchemaCorrect: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
-    isEditDialogVisible: false,
+    isReportingDataflowDialogVisible: false,
     isExportDialogVisible: false,
     isExportEUDatasetLoading: false,
     isExporting: false,
@@ -391,7 +391,12 @@ const Dataflow = withRouter(({ history, match }) => {
   const onEditDataflow = (newName, newDescription) => {
     dataflowDispatch({
       type: 'ON_EDIT_DATA',
-      payload: { name: newName, description: newDescription, isEditDialogVisible: false, isExportDialogVisible: false }
+      payload: {
+        name: newName,
+        description: newDescription,
+        isReportingDataflowDialogVisible: false,
+        isExportDialogVisible: false
+      }
     });
     onLoadReportingDataflow();
   };
@@ -1122,16 +1127,19 @@ const Dataflow = withRouter(({ history, match }) => {
 
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />
 
-        <ManageReportingDataflow
-          dataflowId={dataflowId}
-          isEditForm={true}
-          manageDialogs={manageDialogs}
-          obligation={obligation}
-          onEditDataflow={onEditDataflow}
-          resetObligations={resetObligations}
-          setCheckedObligation={setCheckedObligation}
-          state={dataflowState}
-        />
+        {dataflowState.isReportingDataflowDialogVisible && (
+          <ManageReportingDataflow
+            dataflowId={dataflowId}
+            isEditForm
+            isVisible={dataflowState.isReportingDataflowDialogVisible}
+            manageDialogs={manageDialogs}
+            obligation={obligation}
+            onEditDataflow={onEditDataflow}
+            resetObligations={resetObligations}
+            setCheckedObligation={setCheckedObligation}
+            state={dataflowState}
+          />
+        )}
 
         {dataflowState.isBusinessDataflowDialogVisible && (
           <ManageBusinessDataflow

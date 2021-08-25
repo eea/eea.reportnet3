@@ -22,10 +22,10 @@ public class DataflowPublicVO extends GenericDataflowVO implements Serializable 
   private static final long serialVersionUID = -8073212422480973637L;
 
   /** The datasets. */
-  protected List<ReportingDatasetPublicVO> reportingDatasets;
+  private List<ReportingDatasetPublicVO> reportingDatasets;
 
   /** The reference datasets. */
-  protected List<ReferenceDatasetPublicVO> referenceDatasets;
+  private List<ReferenceDatasetPublicVO> referenceDatasets;
 
   /**
    * Equals.

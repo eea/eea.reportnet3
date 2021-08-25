@@ -11,10 +11,13 @@ import { DataflowsReporterHelpConfig } from 'conf/help/dataflows/reporter';
 import { DataflowsRequesterHelpConfig } from 'conf/help/dataflows/requester';
 
 import { Button } from 'views/_components/Button';
-import { ManageReportingDataflow } from 'views/_components/ManageReportingDataflow';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'views/_components/Dialog';
 import { MainLayout } from 'views/_components/Layout';
+import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
+import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
+import { ManageReportingDataflow } from 'views/_components/ManageReportingDataflow';
+import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
 
@@ -36,9 +39,6 @@ import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
-import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
-import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
-import { ReportingObligations } from 'views/_components/ReportingObligations';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -58,13 +58,12 @@ const Dataflows = withRouter(({ history, match }) => {
     activeIndex: 0,
     business: [],
     reporting: [],
-    isAddDialogVisible: false,
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
+    isReportingDataflowDialogVisible: false,
     isCustodian: null,
     isNationalCoordinator: false,
     isReferencedDataflowDialogVisible: false,
-    isRepObDialogVisible: false,
     isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
     loadingStatus: { reporting: true, business: true, reference: true },
@@ -105,7 +104,7 @@ const Dataflows = withRouter(({ history, match }) => {
       icon: 'plus',
       isVisible: tabId === 'reporting' && isCustodian,
       label: 'createNewDataflow',
-      onClick: () => manageDialogs('isAddDialogVisible', true),
+      onClick: () => manageDialogs('isReportingDataflowDialogVisible', true),
       title: 'createNewDataflow'
     };
 
@@ -328,14 +327,16 @@ const Dataflows = withRouter(({ history, match }) => {
         />
       )}
 
-      <ManageReportingDataflow
-        isEditForm={false}
-        manageDialogs={manageDialogs}
-        obligation={obligation}
-        onCreateDataflow={onCreateDataflow}
-        resetObligations={resetObligations}
-        state={dataflowsState}
-      />
+      {dataflowsState.isReportingDataflowDialogVisible && (
+        <ManageReportingDataflow
+          isVisible={dataflowsState.isReportingDataflowDialogVisible}
+          manageDialogs={manageDialogs}
+          obligation={obligation}
+          onCreateDataflow={onCreateDataflow}
+          resetObligations={resetObligations}
+          state={dataflowsState}
+        />
+      )}
 
       {dataflowsState.isReportingObligationsDialogVisible && (
         <Dialog

@@ -144,12 +144,15 @@ public class CollaborationServiceImplTest {
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE.getAccessRole(1L)));
     authorities.add(
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(1L)));
+    MessageVO messageVO = new MessageVO();
+
     Mockito
         .when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(datasetIds);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(messageMapper.entityToClass(Mockito.any())).thenReturn(messageVO);
     collaborationServiceImpl.createMessageAttachment(1L, 1L,
         new MockMultipartFile("file.csv", "content".getBytes()).getInputStream(), "fileName",
         "fileSize");

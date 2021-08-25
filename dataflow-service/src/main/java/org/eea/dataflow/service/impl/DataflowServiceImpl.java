@@ -1389,22 +1389,24 @@ public class DataflowServiceImpl implements DataflowService {
    */
   private Map<Long, List<DataflowStatusDataset>> getDatasetsStatus(List<Long> dataflowIds) {
     Map<Long, List<DataflowStatusDataset>> map = new HashMap<>();
-    List<ReportingDatasetVO> datasets =
-        datasetMetabaseControllerZuul.findReportingDataSetByDataflowIds(dataflowIds);
-    List<Long> listDatasets =
-        datasets.stream().map(ReportingDatasetVO::getId).collect(Collectors.toList());
-    if (!listDatasets.isEmpty()) {
-      List<IDatasetStatus> queryResult = dataflowRepository.getDatasetsStatus(listDatasets);
-      for (IDatasetStatus object : queryResult) {
-        List<DataflowStatusDataset> list = new ArrayList<>();
-        DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
-        dataflowStatusDataset.setId(object.getId());
-        dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
-        list.add(dataflowStatusDataset);
-        if (map.get(dataflowStatusDataset.getId()) != null) {
-          map.get(dataflowStatusDataset.getId()).addAll(list);
-        } else {
-          map.put(dataflowStatusDataset.getId(), list);
+    if (!CollectionUtils.isEmpty(dataflowIds)) {
+      List<ReportingDatasetVO> datasets =
+          datasetMetabaseControllerZuul.findReportingDataSetByDataflowIds(dataflowIds);
+      List<Long> listDatasets =
+          datasets.stream().map(ReportingDatasetVO::getId).collect(Collectors.toList());
+      if (!listDatasets.isEmpty()) {
+        List<IDatasetStatus> queryResult = dataflowRepository.getDatasetsStatus(listDatasets);
+        for (IDatasetStatus object : queryResult) {
+          List<DataflowStatusDataset> list = new ArrayList<>();
+          DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
+          dataflowStatusDataset.setId(object.getId());
+          dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
+          list.add(dataflowStatusDataset);
+          if (map.get(dataflowStatusDataset.getId()) != null) {
+            map.get(dataflowStatusDataset.getId()).addAll(list);
+          } else {
+            map.put(dataflowStatusDataset.getId(), list);
+          }
         }
       }
     }

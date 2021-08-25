@@ -23,6 +23,7 @@ import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataflow.MessageAttachmentVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
 import org.eea.kafka.domain.EventType;
@@ -171,7 +172,18 @@ public class CollaborationServiceImpl implements CollaborationService {
     } finally {
       is.close();
     }
-    return messageMapper.entityToClass(message);
+    int indexExtension = fileName.lastIndexOf(".");
+    String extension = fileName.substring(indexExtension + 1, fileName.length());
+
+    MessageAttachmentVO messageAttachmentVO = new MessageAttachmentVO();
+    messageAttachmentVO.setName(fileName);
+    messageAttachmentVO.setSize(fileSize);
+    messageAttachmentVO.setExtension(extension);
+
+    MessageVO messageVO = messageMapper.entityToClass(message);
+    messageVO.setMessageAttachmentVO(messageAttachmentVO);
+
+    return messageVO;
   }
 
   /**

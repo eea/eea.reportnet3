@@ -80,7 +80,7 @@ export class DataTable extends Component {
     paginatorLeft: null,
     paginatorPosition: 'bottom',
     paginatorRight: null,
-    paginatorTemplate: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown',
+    paginatorTemplate: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink',
     reorderableColumns: false,
     resizableColumns: false,
     responsive: false,
@@ -509,10 +509,10 @@ export class DataTable extends Component {
           !this.props.hasDefaultCurrentPage
             ? this.props.paginatorTemplate
             : {
-                layout: `PrevPageLink PageLinks NextPageLink RowsPerPageDropdown CurrentPageReport`,
+                layout: `PrevPageLink PageLinks NextPageLink CurrentPageReport`,
                 CurrentPageReport: options => {
                   return (
-                    <span style={{ color: 'var(--white)', userSelect: 'none' }}>
+                    <span style={{ color: 'var(--white)', marginLeft: '1.5rem', userSelect: 'none' }}>
                       <label style={{ margin: '0 0.5rem' }}>{this.context.messages['goTo']}</label>
                       <InputText
                         data-for="pageInputTooltip"
@@ -538,7 +538,7 @@ export class DataTable extends Component {
                       <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="bottom">
                         {this.state.pageInputTooltip}
                       </ReactTooltip>
-                      <label style={{ fontWeight: 'bold', margin: '0 0 0 0.5rem' }}>
+                      <label style={{ margin: '0 0 0 0.5rem' }}>
                         {`${this.context.messages['of']} ${
                           this.props.totalRecords > 0 ? ` ${Math.ceil(this.props.totalRecords / this.getRows())}` : 1
                         }`}
