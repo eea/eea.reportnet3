@@ -19,6 +19,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { integrationsListReducer } from './_functions/Reducers/integrationsListReducer';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
 export const IntegrationsList = ({
   dataflowId,
   designerState,
@@ -57,26 +59,26 @@ export const IntegrationsList = ({
 
   const actionsTemplate = row => (
     <ActionsColumn
+      hideDeletion={TextUtils.areEquals(row.operation, 'EXPORT_EU_DATASET')}
       isDeletingDocument={integrationListState.isDeleting}
       isUpdating={isUpdating}
       onCloneClick={() => {
-        const filteredData = integrationListState.data.find(
-          integration => integration.integrationId === row.integrationId
+        const filteredData = integrationListState.data.find(integration =>
+          TextUtils.areEquals(integration.integrationId, row.integrationId)
         );
-        console.log(filteredData);
         manageDialogs('isIntegrationManageDialogVisible', true);
         if (!isEmpty(filteredData)) {
           filteredData.integrationId = null;
           getClonedData(filteredData);
         }
       }}
-      onDeleteClick={row.operation === 'EXPORT_EU_DATASET' ? null : () => isDeleteDialogVisible(true)}
+      onDeleteClick={TextUtils.areEquals(row.operation, 'EXPORT_EU_DATASET') ? null : () => isDeleteDialogVisible(true)}
       onEditClick={() => {
-        const filteredData = integrationListState.data.filter(
-          integration => integration.integrationId === row.integrationId
+        const filteredData = integrationListState.data.find(integration =>
+          TextUtils.areEquals(integration.integrationId, row.integrationId)
         );
         manageDialogs('isIntegrationManageDialogVisible', true);
-        if (!isEmpty(filteredData)) getUpdatedData(filteredData[0]);
+        if (!isEmpty(filteredData)) getUpdatedData(filteredData);
       }}
       rowDataId={row.integrationId}
       rowDeletingId={integrationListState.integrationToDeleteId}

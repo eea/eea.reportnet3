@@ -17,7 +17,6 @@ export const manageIntegrationsReducer = (state, { type, payload }) => {
       return { ...state, ...payload };
 
     case 'GET_CLONED_DATA':
-      console.log(payload);
       return { ...state, ...payload };
 
     case 'IS_LOADING':

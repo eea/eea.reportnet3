@@ -41,6 +41,19 @@ const ActionsColumn = ({
           type="button"
         />
       )}
+      {!isNil(onCloneClick) && !hideDeletion && (
+        <Button
+          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
+            disabledButtons ? null : 'p-button-animated-blink'
+          }`}
+          disabled={isDeletingDocument || (rowUpdatingId === rowDataId && isUpdating) || disabledButtons}
+          icon={rowUpdatingId !== rowDataId || !isUpdating ? 'clone' : 'spinnerAnimate'}
+          onClick={onCloneClick}
+          tooltip={resources.messages['clone']}
+          tooltipOptions={{ position: 'top' }}
+          type="button"
+        />
+      )}
       {!isNil(onDeleteClick) && !hideDeletion && (
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} ${
@@ -50,23 +63,6 @@ const ActionsColumn = ({
           icon={rowDeletingId !== rowDataId || !isDeletingDocument ? 'trash' : 'spinnerAnimate'}
           onClick={onDeleteClick}
           tooltip={resources.messages['delete']}
-          tooltipOptions={{ position: 'top' }}
-          type="button"
-        />
-      )}
-      {!isNil(onCloneClick) && !hideEdition && (
-        <Button
-          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
-            disabledButtons ? null : 'p-button-animated-blink'
-          }`}
-          disabled={
-            (rowDeletingId === rowDataId && isDeletingDocument) ||
-            (rowUpdatingId === rowDataId && isUpdating) ||
-            disabledButtons
-          }
-          icon={rowUpdatingId !== rowDataId || !isUpdating ? 'clone' : 'spinnerAnimate'}
-          onClick={onCloneClick}
-          tooltip={resources.messages['clone']}
           tooltipOptions={{ position: 'top' }}
           type="button"
         />

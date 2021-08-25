@@ -208,7 +208,6 @@ export const ManageIntegrations = ({
     setIsIntegrationManaging('isIntegrationCreating', true);
     setIsCreating(true);
     try {
-      console.log(manageIntegrationsState);
       manageIntegrationsState.name = manageIntegrationsState.name.trim();
       await IntegrationService.create(manageIntegrationsState);
       onCloseModal();
