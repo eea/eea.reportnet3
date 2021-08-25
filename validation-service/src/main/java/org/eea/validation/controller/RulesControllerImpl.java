@@ -1,7 +1,14 @@
 package org.eea.validation.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.validation.RulesController;
@@ -20,6 +27,7 @@ import org.eea.validation.service.SqlRulesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -614,6 +622,61 @@ public class RulesControllerImpl implements RulesController {
     } catch (EEAException e) {
       LOG_ERROR.error("Error importing the rules: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Export QCCSV.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @PostMapping(value = "/exportQC/{datasetId}")
+  public void exportQCCSV(@PathVariable("datasetId") Long datasetId) {
+    LOG.info("Export dataset QC from datasetId {}, with type .csv", datasetId);
+    try {
+      rulesService.exportQCCSV(datasetId);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.error("Error exporting QCS from the dataset {}.  Message: {}", datasetId,
+          e.getMessage());
+    }
+  }
+
+  /**
+   * Download QCCSV.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @Override
+  @GetMapping("/downloadQC/{datasetId}")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  public void downloadQCCSV(@PathVariable Long datasetId, @RequestParam String fileName,
+      HttpServletResponse response) {
+    try {
+      LOG.info("Downloading file generated when exporting QC Rules. DatasetId {}. Filename {}",
+          datasetId, fileName);
+      File file = rulesService.downloadQCCSV(datasetId, fileName);
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
+      OutputStream out = response.getOutputStream();
+      FileInputStream in = new FileInputStream(file);
+      // copy from in to out
+      IOUtils.copyLarge(in, out);
+      out.close();
+      in.close();
+      // delete the file after downloading it
+      FileUtils.forceDelete(file);
+    } catch (IOException | ResponseStatusException e) {
+      LOG_ERROR.error(
+          "Downloading file generated when exporting QC Rules. DatasetId {}. Filename {}. Error message: {}",
+          datasetId, fileName, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
+          "Trying to download a file generated during the export QC Rules process but the file is not found, datasetID: %s + filename: %s + message: %s ",
+          datasetId, fileName, e.getMessage()), e);
     }
   }
 }

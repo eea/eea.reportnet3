@@ -1,5 +1,7 @@
 package org.eea.validation.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAException;
@@ -10,6 +12,7 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.multitenancy.DatasetId;
 
 /**
  * The Class ValidationService.
@@ -288,4 +291,23 @@ public interface RulesService {
   Map<String, String> importRulesSchema(List<byte[]> qcRulesBytes,
       Map<String, String> dictionaryOriginTargetObjectId, List<IntegrityVO> integrities)
       throws EEAException;
+
+  /**
+   * Export QCCSV.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  void exportQCCSV(@DatasetId Long datasetId) throws EEAException, IOException;
+
+  /**
+   * Download QCCSV.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  File downloadQCCSV(Long datasetId, String fileName) throws IOException;
 }

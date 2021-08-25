@@ -1,6 +1,12 @@
 package org.eea.validation.service.impl;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,11 +18,14 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
@@ -47,11 +56,13 @@ import org.eea.validation.util.KieBaseManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVWriter;
 
 /**
  * The Class ValidationService.
@@ -111,6 +122,10 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private UniqueConstraintRepository uniqueRepository;
 
+  /** The dataset controller zuul. */
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
 
@@ -135,6 +150,53 @@ public class RulesServiceImpl implements RulesService {
 
   /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
+
+  /** The Constant TABLE: {@value}. */
+  private static final String TABLE = "Table";
+
+  /** The Constant FIELD: {@value}. */
+  private static final String FIELD = "Field";
+
+  /** The Constant CODE: {@value}. */
+  private static final String CODE = "Code";
+
+  /** The Constant QCNAME: {@value}. */
+  private static final String QCNAME = "QC Name";
+
+  /** The Constant QCDESC: {@value}. */
+  private static final String QCDESC = "QC Description";
+
+  /** The Constant MESSAGE: {@value}. */
+  private static final String MESSAGE = "Message";
+
+  /** The Constant EXPRESSION: {@value}. */
+  private static final String EXPRESSION = "Expression";
+
+  /** The Constant TYPE_OF_QC: {@value}. */
+  private static final String TYPE_OF_QC = "Type of QC";
+
+  /** The Constant LEVEL_ERROR: {@value}. */
+  private static final String LEVEL_ERROR = "Level Error";
+
+  /** The Constant CREATION_MODE: {@value}. */
+  private static final String CREATION_MODE = "Creation Mode";
+
+  /** The Constant STATUS: {@value}. */
+  private static final String STATUS = "Status";
+
+  /** The Constant VALID: {@value}. */
+  private static final String VALID = "Valid";
+
+  /** The path public file. */
+  @Value("${validationExportPathFile}")
+  private String pathPublicFile;
+
+  /**
+   * The delimiter.
+   */
+  @Value("${exportDataDelimiter}")
+  private char delimiter;
+
 
   /**
    * Gets the rules schema by dataset id.
@@ -1389,6 +1451,108 @@ public class RulesServiceImpl implements RulesService {
     return dictionaryOriginTargetObjectId;
   }
 
+  /**
+   * Export data validation CSV file.
+   *
+   * @param datasetId the dataset id
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Async
+  @Override
+  public void exportQCCSV(Long datasetId) throws EEAException, IOException {
+    DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId);
+
+    // Sets the validation file name and it's root directory
+    String composedFileName = "dataset-" + datasetId + "-QCS-"
+        + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss"));
+    String fileNameWithExtension = composedFileName + "." + FileTypeEnum.CSV.getValue();
+    File fileFolder = new File(pathPublicFile, composedFileName);
+
+    String creatingFileError =
+        String.format("Failed generating CSV file with name %s using datasetID %s",
+            fileNameWithExtension, datasetId);
+
+    fileFolder.mkdirs();
+
+    // Creates notification VO and passes the datasetID, the filename and the datasetType
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+        .fileName(fileNameWithExtension).datasetType(datasetType).error(creatingFileError).build();
+
+    // We create the CSV
+    StringWriter stringWriter = new StringWriter();
+
+    try (CSVWriter csvWriter =
+        new CSVWriter(stringWriter, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+
+      // Creates an array list containing all the column names from the CSV defined as constants
+      List<String> headers = new ArrayList<>();
+      headers.add(TABLE);
+      headers.add(FIELD);
+      headers.add(CODE);
+      headers.add(QCNAME);
+      headers.add(QCDESC);
+      headers.add(EXPRESSION);
+      headers.add(TYPE_OF_QC);
+      headers.add(LEVEL_ERROR);
+      headers.add(CREATION_MODE);
+      headers.add(STATUS);
+      headers.add(VALID);
+
+      // Writes the column names into the CSV Writer and sets the array String to headers size so it
+      // only writes at most the number of columns as variables per row
+      csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+      int nHeaders = 11;
+
+      String dataSetSchema = dataSetControllerZuul.getById(datasetId).getIdDatasetSchema();
+      RulesSchemaVO dataSetRules = getRulesSchemaByDatasetId(dataSetSchema);
+
+      String[] fieldsToWrite = new String[nHeaders];
+
+      for (RuleVO rule : dataSetRules.getRules()) {
+        LOG_ERROR.error(rule.getType().toString()); // Type of QC
+        LOG_ERROR.error(rule.getActivationGroup()); // null
+        LOG_ERROR.error(rule.getDescription()); // Description
+        LOG_ERROR.error(rule.getExpressionText()); // Expression
+        LOG_ERROR.error(rule.getRuleName()); // Name
+        LOG_ERROR.error(rule.getShortCode()); // ShortCode
+        LOG_ERROR.error(rule.getThenCondition().get(0)); // Message
+        LOG_ERROR.error(rule.getThenCondition().get(1)); // Level Error
+        LOG_ERROR.error(rule.getAutomaticType().toString()); //
+        LOG_ERROR.error(rule.getVerified().toString()); // Level Error
+      }
+
+      /*
+       * if (getDatasetValuebyId(datasetId) != null) fillValidationDataCSV(datasetId, nHeaders,
+       * csvWriter, notificationVO); else throw new
+       * ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, creatingFileError);
+       */
+    }
+
+    catch (IOException e) {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_QC_FAILED_EVENT, null,
+          notificationVO);
+      LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+      return;
+    }
+
+    // Convert the writer data to a bytes array to write it into a file
+    String csv = stringWriter.getBuffer().toString();
+    byte[] file = csv.getBytes();
+
+    File fileWrite = new File(new File(pathPublicFile, composedFileName), fileNameWithExtension);
+
+    // Tries to write the data obtained into the file, if it's successful, throws a notification
+    // event completed
+    try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
+      out.write(file);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_QC_COMPLETED_EVENT, null,
+          notificationVO);
+    }
+  }
+
 
   /**
    * Import data.
@@ -1520,6 +1684,12 @@ public class RulesServiceImpl implements RulesService {
           datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
           integrity.getReferencedDatasetSchemaId().toString());
     }
+  }
+
+  @Override
+  public File downloadQCCSV(Long datasetId, String fileName) throws IOException {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }
