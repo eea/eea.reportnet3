@@ -65,6 +65,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the message VO
    */
   @Override
+  @HystrixCommand
   @PostMapping("/createMessage/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
@@ -129,6 +130,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @param messageVOs the message V os
    */
   @Override
+  @HystrixCommand
   @PutMapping("/updateMessageReadStatus/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
@@ -152,6 +154,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @param messageId the message id
    */
   @Override
+  @HystrixCommand
   @DeleteMapping("/deleteMessage/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public void deleteMessage(@PathVariable("dataflowId") Long dataflowId,
@@ -182,6 +185,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the list
    */
   @Override
+  @HystrixCommand
   @GetMapping("/findMessages/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
@@ -227,6 +231,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the message attachment
    */
   @Override
+  @HystrixCommand
   @GetMapping("/findMessages/dataflow/{dataflowId}/getMessageAttachment")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public ResponseEntity<byte[]> getMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
@@ -262,6 +267,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @param eventType the event type
    */
   @Override
+  @HystrixCommand
   @GetMapping("/private/notifyNewMessages")
   public void notifyNewMessages(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
