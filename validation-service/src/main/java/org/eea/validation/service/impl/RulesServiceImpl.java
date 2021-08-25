@@ -1532,7 +1532,7 @@ public class RulesServiceImpl implements RulesService {
     }
 
     catch (IOException e) {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_QC_FAILED_EVENT, null,
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_FAILED_EVENT, null,
           notificationVO);
       LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
       return;
@@ -1548,7 +1548,7 @@ public class RulesServiceImpl implements RulesService {
     // event completed
     try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
       out.write(file);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_QC_COMPLETED_EVENT, null,
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_COMPLETED_EVENT, null,
           notificationVO);
     }
   }

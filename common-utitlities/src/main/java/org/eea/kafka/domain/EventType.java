@@ -399,11 +399,11 @@ public enum EventType {
       "download_validations_failed_event", true),
 
   /** The download dataset validations completed event. */
-  DOWNLOAD_QC_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "download_qc_completed_event",
+  EXPORT_QC_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_completed_event",
       true),
 
   /** The download dataset validations failed event. */
-  DOWNLOAD_QC_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "download_qc_failed_event", true),
+  EXPORT_QC_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_failed_event", true),
 
   /** The export dataset failed event. */
   EXPORT_DATASET_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_dataset_failed_event",
