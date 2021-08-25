@@ -19,7 +19,7 @@ const parseIntegration = data => {
   if (!isNil(data.internalParameters.notificationRequired)) {
     integration.notificationRequired = data.internalParameters.notificationRequired === 'true';
   }
-
+  console.log({ integration });
   return integration;
 };
 

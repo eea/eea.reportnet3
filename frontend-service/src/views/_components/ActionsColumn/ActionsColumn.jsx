@@ -1,8 +1,12 @@
+import { useContext } from 'react';
+
 import isNil from 'lodash/isNil';
 
 import styles from './ActionsColumn.module.scss';
 
 import { Button } from 'views/_components/Button';
+
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 const ActionsColumn = ({
   disabledButtons,
@@ -17,6 +21,7 @@ const ActionsColumn = ({
   rowDeletingId,
   rowUpdatingId
 }) => {
+  const resources = useContext(ResourcesContext);
   return (
     <div className={styles.actionTemplate}>
       {!isNil(onEditClick) && !hideEdition && (
@@ -30,7 +35,9 @@ const ActionsColumn = ({
             disabledButtons
           }
           icon={rowUpdatingId !== rowDataId || !isUpdating ? 'edit' : 'spinnerAnimate'}
-          onClick={() => onEditClick()}
+          onClick={onEditClick}
+          tooltip={resources.messages['edit']}
+          tooltipOptions={{ position: 'top' }}
           type="button"
         />
       )}
@@ -41,7 +48,9 @@ const ActionsColumn = ({
           }`}
           disabled={isDeletingDocument || (rowUpdatingId === rowDataId && isUpdating) || disabledButtons}
           icon={rowDeletingId !== rowDataId || !isDeletingDocument ? 'trash' : 'spinnerAnimate'}
-          onClick={() => onDeleteClick()}
+          onClick={onDeleteClick}
+          tooltip={resources.messages['delete']}
+          tooltipOptions={{ position: 'top' }}
           type="button"
         />
       )}
@@ -56,7 +65,9 @@ const ActionsColumn = ({
             disabledButtons
           }
           icon={rowUpdatingId !== rowDataId || !isUpdating ? 'clone' : 'spinnerAnimate'}
-          onClick={() => onCloneClick()}
+          onClick={onCloneClick}
+          tooltip={resources.messages['clone']}
+          tooltipOptions={{ position: 'top' }}
           type="button"
         />
       )}

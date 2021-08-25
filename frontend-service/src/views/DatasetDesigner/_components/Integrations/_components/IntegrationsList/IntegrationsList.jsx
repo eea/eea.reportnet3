@@ -22,6 +22,7 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 export const IntegrationsList = ({
   dataflowId,
   designerState,
+  getClonedData,
   getUpdatedData,
   integrationsList,
   isCreating,
@@ -62,8 +63,12 @@ export const IntegrationsList = ({
         const filteredData = integrationListState.data.find(
           integration => integration.integrationId === row.integrationId
         );
+        console.log(filteredData);
         manageDialogs('isIntegrationManageDialogVisible', true);
-        if (!isEmpty(filteredData)) getUpdatedData(filteredData);
+        if (!isEmpty(filteredData)) {
+          filteredData.integrationId = null;
+          getClonedData(filteredData);
+        }
       }}
       onDeleteClick={row.operation === 'EXPORT_EU_DATASET' ? null : () => isDeleteDialogVisible(true)}
       onEditClick={() => {
