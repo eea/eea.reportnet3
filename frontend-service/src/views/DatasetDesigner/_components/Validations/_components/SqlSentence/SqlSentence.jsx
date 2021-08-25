@@ -53,18 +53,6 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
     onSetSqlSentence(`${creationFormState.candidateRule.sqlSentence} ${codeKeyword}`);
   };
 
-  const onChangeSqlSentence = event => {
-    const caret = event.target.selectionStart;
-    const element = event.target;
-    window.requestAnimationFrame(() => {
-      element.selectionStart = caret;
-      element.selectionEnd = caret;
-    });
-
-    setIsChangedSqlSentence(!TextUtils.areEquals(event.target.value, previousSqlSentence));
-    onSetSqlSentence(event.target.value);
-  };
-
   const codeKeyword = isBusinessDataflow ? `${config.COMPANY_CODE_KEYWORD}` : `${config.COUNTRY_CODE_KEYWORD}`;
 
   return (
@@ -97,7 +85,7 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
           <textarea
             id="sqlSentenceText"
             name=""
-            onChange={onChangeSqlSentence}
+            onChange={event => onSetSqlSentence(event.target.value)}
             value={creationFormState.candidateRule.sqlSentence}></textarea>
         </div>
       </div>
