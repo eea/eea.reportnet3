@@ -494,11 +494,15 @@ public class DataFlowControllerImpl implements DataFlowController {
     copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, dataflowId);
     LockVO cloneLockVO = lockService.findByCriteria(copyDatasetSchema);
 
-    if (importLockVO == null && cloneLockVO == null)
-      dataflowService.deleteDataFlow(dataflowId);
-    else
+    if (importLockVO != null) {
       throw new ResponseStatusException(HttpStatus.LOCKED,
-          "Dataflow is locked because import or clone is in progress.");
+          "Dataflow is locked because import is in progress.");
+    } else if (cloneLockVO != null) {
+      throw new ResponseStatusException(HttpStatus.LOCKED,
+          "Dataflow is locked because clone is in progress.");
+    } else
+      dataflowService.deleteDataFlow(dataflowId);
+
   }
 
   /**
