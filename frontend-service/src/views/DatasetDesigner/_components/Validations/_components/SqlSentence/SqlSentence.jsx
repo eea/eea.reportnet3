@@ -17,13 +17,24 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSentence, level }) => {
   const resourcesContext = useContext(ResourcesContext);
 
-  const [isChangedSqlSentence, setIsChangedSqlSentence] = useState(false);
+  const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
 
   useEffect(() => {
     return () => onSetSqlSentence('');
   }, []);
+
+  useEffect(() => {
+    if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
+      setIsSqlErrorVisible(true);
+    }
   }, []);
+
+  useEffect(() => {
+    if (isSqlErrorVisible) {
+      setIsSqlErrorVisible(false);
+    }
+  }, [creationFormState.candidateRule.sqlSentence]);
 
   const levelTypes = {
     FIELD: 'field',
@@ -90,7 +101,7 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
         </div>
       </div>
 
-      {!isNil(creationFormState.candidateRule.sqlError) && !isChangedSqlSentence ? (
+      {isSqlErrorVisible ? (
         <p
           className={
             styles.sqlErrorMessage
