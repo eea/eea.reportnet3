@@ -1222,6 +1222,17 @@ body .p-accordion .p-accordion-content {
   border-bottom-right-radius: 3px;
 }
 
+body .p-paginator-middle-content {
+  display: flex;
+  align-items: center;
+}
+
+body .p-paginator-left-content-rowsPerPage {
+  color: var(--paginator-right-content);
+  padding-left: 2em;
+  font-weight: 500;
+}
+
 body .p-paginator-right-content {
   color: var(--paginator-right-content);
   height: 2.286em;

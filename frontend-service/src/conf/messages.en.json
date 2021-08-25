@@ -440,7 +440,7 @@
     "emptyTabHeader": "Empty table name",
     "emptyTabHeaderError": "The table name is empty, please enter one.",
     "emptyTitleValidationError": "Empty table name, please enter one",
-    "emptyValidations": "There are no validations yet",
+    "emptyValidations": "No validations to show",
     "emptyWebformTable": "This table has no fields or do not match with the webform model.",
     "emptyWebformTables": "Created tables do not match with the webform model, please check it.",
     "enabled": "Status",
@@ -1233,6 +1233,12 @@
     "sqlErrorMessage": "SQL error message: ",
     "sqlErrorMessageCopy": "Please click to copy to clipboard the SQL Error.",
     "arePrefilledTablesDeletedCheckboxLabel": "Delete prefilled tables data",
+    "reportingDatasetsStatus": "Technical acceptance status",
+    "manualAcceptance": "Manual acceptance",
+    "pilotScenarioAmbitionColumnTitle": "Pilot scenario ambition",
+    "frequencyColumnTitle": "Frequency",
+    "instrumentColumnTitle": "Instrument",
+    "rowsPerPage": "Rows per page",
     "clone": "Clone"
   }
 }
