@@ -509,7 +509,7 @@ export class DataTable extends Component {
           !this.props.hasDefaultCurrentPage
             ? this.props.paginatorTemplate
             : {
-                layout: `PrevPageLink PageLinks NextPageLink CurrentPageReport`,
+                layout: `FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport`,
                 CurrentPageReport: options => {
                   return (
                     <span style={{ color: 'var(--white)', marginLeft: '1.5rem', userSelect: 'none' }}>
