@@ -378,7 +378,7 @@ export const Feedback = withRouter(({ match, history }) => {
             onFirstLoadMessages={onFirstLoadMessages}
             onLazyLoad={onGetMoreMessages}
             onUpdateNewMessageAdded={onUpdateNewMessageAdded}
-            providerId={selectedDataProvider}
+            providerId={selectedDataProvider.dataProviderId}
           />
           {!isCustodian && (
             <label className={styles.helpdeskMessage}>{resources.messages['feedbackHelpdeskMessage']}</label>
