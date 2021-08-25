@@ -182,6 +182,51 @@ public class CollaborationControllerImplTest {
   }
 
   @Test
+  public void deleteMessageTest() throws EEAException {
+    Mockito.doNothing().when(collaborationService).deleteMessage(Mockito.anyLong());
+    collaborationControllerImpl.deleteMessage(1L, 1L, 1L);
+    Mockito.verify(collaborationService, times(1)).deleteMessage(1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteMessageEEAIllegalArgumentExceptionTest() throws EEAException {
+
+    Mockito.doThrow(new EEAIllegalArgumentException()).when(collaborationService)
+        .deleteMessage(Mockito.anyLong());
+
+    try {
+      collaborationControllerImpl.deleteMessage(1L, 1L, 1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteMessageEEAExceptionTest() throws EEAException {
+
+    Mockito.doThrow(new EEAException()).when(collaborationService).deleteMessage(Mockito.anyLong());
+
+    try {
+      collaborationControllerImpl.deleteMessage(1L, 1L, 1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteMessageEEAIllegalArgumentExceptionProviderIdNullTest()
+      throws EEAIllegalArgumentException, EEAForbiddenException {
+    try {
+      collaborationControllerImpl.deleteMessage(null, 1L, 1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
   public void findMessagesTest() throws EEAIllegalArgumentException, EEAForbiddenException {
     Mockito.when(collaborationService.findMessages(Mockito.anyLong(), Mockito.anyLong(),
         Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(new ArrayList<MessageVO>());

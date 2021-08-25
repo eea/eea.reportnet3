@@ -353,6 +353,9 @@ public final class EEAErrorMessage {
   public static final String EXISTING_REPRESENTATIVES =
       "There are existing representatives selected right now";
 
+  /** The Constant MESSAGE_INCORRECT_ID: {@value}. */
+  public static final String MESSAGE_INCORRECT_ID = "Message Id incorrect";
+
   /**
    * Instantiates a new EEA error message.
    */
