@@ -121,7 +121,12 @@ export const ManageReferenceDataflow = ({
       await DataflowService.delete(dataflowId);
     } catch (error) {
       console.error('ManageReferenceDataflow - onDeleteDataflow.', error);
-      notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
+
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      } else {
+        notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
+      }
       setIsDeleting(false);
     }
   };
