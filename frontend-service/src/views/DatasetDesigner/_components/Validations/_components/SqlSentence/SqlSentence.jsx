@@ -12,17 +12,11 @@ import { SqlHelp } from './_components/SqlHelp';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { TextUtils } from 'repositories/_utils/TextUtils';
-
 export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSentence, level }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
-
-  useEffect(() => {
-    return () => onSetSqlSentence('');
-  }, []);
 
   useEffect(() => {
     if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
