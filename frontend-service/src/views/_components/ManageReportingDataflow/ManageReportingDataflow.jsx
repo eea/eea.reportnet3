@@ -93,11 +93,10 @@ export const ManageReportingDataflow = ({
     try {
       await DataflowService.delete(dataflowId);
     } catch (error) {
-      console.error('ManageReportingDataflow - onDeleteDataflow.', error);
-
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
+        console.error('ManageReportingDataflow - onDeleteDataflow.', error);
         notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
       }
       setIsDeleting(false);
