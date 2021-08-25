@@ -946,9 +946,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("secondLevelAuthorize(#dataflowIdDestination,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/copy", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void copyDesignsFromDataflow(
-      @RequestParam("sourceDataflow") @LockCriteria(
-          name = "dataflowIdOrigin") final Long dataflowIdOrigin,
+  public void copyDesignsFromDataflow(@RequestParam("sourceDataflow") final Long dataflowIdOrigin,
       @RequestParam("targetDataflow") @LockCriteria(
           name = "dataflowIdDestination") final Long dataflowIdDestination) {
     try {
