@@ -251,7 +251,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       case DATASET:
         break;
     }
-    LOG.info("Query to be executed: {}", newQuery);
+    LOG.info("Query from ruleCode {} to be executed: {}", rule.getShortCode(), newQuery);
     TableValue table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName,
         datasetId, idTable);
     if (Boolean.FALSE.equals(ischeckDC) && null != table && null != table.getRecords()
