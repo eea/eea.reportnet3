@@ -2177,6 +2177,7 @@ public class DatasetServiceImpl implements DatasetService {
   private List<Statistics> processTableStats(final TableValue tableValue, final Long datasetId,
       final Map<String, String> mapIdNameDatasetSchema) {
     // Find record ids with errors
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     List<IDError> recordIdsFromRecordWithValidationBlocker =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema());
