@@ -72,7 +72,7 @@ export const DatasetService = {
   createTableDesign: async (datasetId, tableSchemaName) =>
     await DatasetRepository.createTableDesign(datasetId, tableSchemaName),
 
-  deleteData: async datasetId => await DatasetRepository.deleteData(datasetId),
+  deleteData: async (datasetId, arePrefilledTablesDeleted) => await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
 
   deleteAttachment: async (datasetId, fieldId) => await DatasetRepository.deleteAttachment(datasetId, fieldId),
 

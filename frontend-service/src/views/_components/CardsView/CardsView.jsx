@@ -73,13 +73,14 @@ export const CardsView = ({
   };
 
   const currentPageTemplate = {
-    layout: 'PrevPageLink PageLinks NextPageLink RowsPerPageDropdown CurrentPageReport',
+    layout: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport',
     // eslint-disable-next-line react/no-multi-comp
     CurrentPageReport: options => {
       return (
-        <span style={{ color: 'var(--white)', userSelect: 'none' }}>
-          <label style={{ fontWeight: 'bold', margin: '0 0.5rem' }}>{resourcesContext.messages['goTo']}</label>
+        <span className={styles.currentPageWrapper}>
+          <label className={styles.currentPageLabel}>{resourcesContext.messages['goTo']}</label>
           <InputText
+            className={styles.currentPageInput}
             data-for="pageInputTooltip"
             data-tip
             id="currentPageInput"
@@ -89,17 +90,14 @@ export const CardsView = ({
             style={{
               border: (goToPage <= 0 || goToPage > options.totalPages) && '1px solid var(--errors)',
               boxShadow:
-                goToPage <= 0 || goToPage > options.totalPages ? 'var(--inputtext-box-shadow-focus-error)' : 'none',
-              display: 'inline',
-              height: '1.75rem',
-              width: '2.5rem'
+                goToPage <= 0 || goToPage > options.totalPages ? 'var(--inputtext-box-shadow-focus-error)' : 'none'
             }}
             value={goToPage}
           />
           <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="bottom">
             {pageInputTooltip}
           </ReactTooltip>
-          <label style={{ fontWeight: 'bold', margin: '0 0 0 0.5rem' }}>
+          <label className={styles.currentPageOf}>
             {data.length > 0 ? `${resourcesContext.messages['of']} ${Math.ceil(data.length / cardsPerPage)}` : 1}
           </label>
         </span>

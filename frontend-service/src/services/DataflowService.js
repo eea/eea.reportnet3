@@ -44,7 +44,7 @@ export const DataflowService = {
         const isOpen = dataflow.status === config.dataflowStatus.OPEN;
 
         if (isOpen) {
-          dataflow.releasable ? (dataflow.status = 'OPEN') : (dataflow.status = 'CLOSED');
+          dataflow.status = dataflow.releasable ? 'OPEN' : 'CLOSED';
         }
 
         dataflows.push({
@@ -317,7 +317,7 @@ export const DataflowService = {
       sortField
     );
 
-    const publicDataflowsByCountryCodeData = DataflowUtils.parseDataflowListDTO(
+    const publicDataflowsByCountryCodeData = DataflowUtils.parsePublicDataflowListDTO(
       publicDataflowsByCountryCodeResponse.data.publicDataflows
     );
     publicDataflowsByCountryCodeResponse.data.publicDataflows = publicDataflowsByCountryCodeData;
