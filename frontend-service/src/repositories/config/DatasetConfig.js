@@ -9,7 +9,7 @@ export const DatasetConfig = {
     '/dataset/TableValueDataset/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&idRules={:idRules}',
   deleteSchema: '/dataschema/dataset/{:datasetId}',
   deleteAttachment: '/dataset/{:datasetId}/field/{:fieldId}/attachment',
-  deleteData: '/dataset/{:datasetId}/deleteImportData?arePrefilledTablesDeleted={:arePrefilledTablesDeleted}',
+  deleteData: '/dataset/{:datasetId}/deleteImportData?deletePrefilledTables={:deletePrefilledTables}',
   deleteTableData: '/dataset/{:datasetId}/deleteImportTable/{:tableId}',
   deleteRecord: '/dataset/{:datasetId}/record/{:recordId}?deleteCascadePK={:deleteInCascade}',
   deleteFieldDesign: '/dataschema/{:datasetId}/fieldSchema/{:fieldSchemaId}',
