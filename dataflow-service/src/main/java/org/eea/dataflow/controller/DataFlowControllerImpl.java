@@ -489,11 +489,16 @@ public class DataFlowControllerImpl implements DataFlowController {
     importDatasetData.put(LiteralConstants.DATAFLOWID, dataflowId);
     LockVO importLockVO = lockService.findByCriteria(importDatasetData);
 
-    if (importLockVO == null)
+    Map<String, Object> copyDatasetSchema = new HashMap<>();
+    copyDatasetSchema.put(LiteralConstants.SIGNATURE, LockSignature.COPY_DATASET_SCHEMA.getValue());
+    copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, dataflowId);
+    LockVO cloneLockVO = lockService.findByCriteria(copyDatasetSchema);
+
+    if (importLockVO == null && cloneLockVO == null)
       dataflowService.deleteDataFlow(dataflowId);
     else
       throw new ResponseStatusException(HttpStatus.LOCKED,
-          "Dataflow is locked because import is in progress.");
+          "Dataflow is locked because import or clone is in progress.");
   }
 
   /**
