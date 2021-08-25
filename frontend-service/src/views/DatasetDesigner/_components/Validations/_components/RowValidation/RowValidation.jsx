@@ -628,11 +628,11 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     });
   };
 
-  const onSetSqlSentence = (key, value) => {
+  const onSetSqlSentence = value => {
     creationFormDispatch({
       type: 'SET_FORM_FIELD',
       payload: {
-        key,
+        key: 'sqlSentence',
         value
       }
     });

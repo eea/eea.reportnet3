@@ -21,7 +21,8 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
 
   useEffect(() => {
-    return () => onSetSqlSentence('sqlSentence', '');
+    return () => onSetSqlSentence('');
+  }, []);
   }, []);
 
   const levelTypes = {
@@ -49,7 +50,7 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
   };
 
   const onCCButtonClick = () => {
-    onSetSqlSentence('sqlSentence', `${creationFormState.candidateRule.sqlSentence} ${codeKeyword}`);
+    onSetSqlSentence(`${creationFormState.candidateRule.sqlSentence} ${codeKeyword}`);
   };
 
   const onChangeSqlSentence = event => {
@@ -60,8 +61,8 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
       element.selectionEnd = caret;
     });
 
-    onSetSqlSentence('sqlSentence', event.target.value);
     setIsChangedSqlSentence(!TextUtils.areEquals(event.target.value, previousSqlSentence));
+    onSetSqlSentence(event.target.value);
   };
 
   const codeKeyword = isBusinessDataflow ? `${config.COMPANY_CODE_KEYWORD}` : `${config.COUNTRY_CODE_KEYWORD}`;
