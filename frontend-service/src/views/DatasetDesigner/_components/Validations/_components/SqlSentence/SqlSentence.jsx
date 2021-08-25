@@ -19,7 +19,6 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
 
   const [isChangedSqlSentence, setIsChangedSqlSentence] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
-  const [previousSqlSentence, setPreviousSqlSentence] = useState(creationFormState.candidateRule.sqlSentence);
 
   useEffect(() => {
     return () => onSetSqlSentence('sqlSentence', '');
