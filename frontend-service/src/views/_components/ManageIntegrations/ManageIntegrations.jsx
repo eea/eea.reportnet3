@@ -104,12 +104,9 @@ export const ManageIntegrations = ({
   const operationsWithFileExtension = ['IMPORT', 'EXPORT'];
 
   useEffect(() => {
-    if (!isEmpty(updatedData)) getUpdatedData();
-  }, [updatedData]);
-
-  useEffect(() => {
-    if (!isEmpty(clonedData)) getClonedData();
-  }, [clonedData]);
+    if (!isEmpty(updatedData)) getClonedAndUpdatedData(updatedData);
+    if (!isEmpty(clonedData)) getClonedAndUpdatedData(clonedData);
+  }, [clonedData, updatedData]);
 
   useEffect(() => {
     getRepositories();
@@ -157,9 +154,8 @@ export const ManageIntegrations = ({
     }
   };
 
-  const getClonedData = () => manageIntegrationsDispatch({ type: 'GET_CLONED_DATA', payload: clonedData });
-
-  const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
+  const getClonedAndUpdatedData = data =>
+    manageIntegrationsDispatch({ type: 'GET_CLONED_AND_UPDATED_DATA', payload: data });
 
   const isLoading = value => manageIntegrationsDispatch({ type: 'IS_LOADING', payload: { value } });
 

@@ -27,7 +27,11 @@ const ActionsColumn = ({
       {!isNil(onEditClick) && !hideEdition && (
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
-            disabledButtons ? null : 'p-button-animated-blink'
+            (rowDeletingId === rowDataId && isDeletingDocument) ||
+            (rowUpdatingId === rowDataId && isUpdating) ||
+            disabledButtons
+              ? null
+              : 'p-button-animated-blink'
           }`}
           disabled={
             (rowDeletingId === rowDataId && isDeletingDocument) ||
@@ -44,10 +48,18 @@ const ActionsColumn = ({
       {!isNil(onCloneClick) && !hideDeletion && (
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
-            disabledButtons ? null : 'p-button-animated-blink'
+            (rowDeletingId === rowDataId && isDeletingDocument) ||
+            (rowUpdatingId === rowDataId && isUpdating) ||
+            disabledButtons
+              ? null
+              : 'p-button-animated-blink'
           }`}
-          disabled={isDeletingDocument || (rowUpdatingId === rowDataId && isUpdating) || disabledButtons}
-          icon={rowUpdatingId !== rowDataId || !isUpdating ? 'clone' : 'spinnerAnimate'}
+          disabled={
+            (rowDeletingId === rowDataId && isDeletingDocument) ||
+            (rowUpdatingId === rowDataId && isUpdating) ||
+            disabledButtons
+          }
+          icon="clone"
           onClick={onCloneClick}
           tooltip={resources.messages['clone']}
           tooltipOptions={{ position: 'top' }}
@@ -57,7 +69,9 @@ const ActionsColumn = ({
       {!isNil(onDeleteClick) && !hideDeletion && (
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} ${
-            disabledButtons ? null : 'p-button-animated-blink'
+            isDeletingDocument || (rowUpdatingId === rowDataId && isUpdating) || disabledButtons
+              ? null
+              : 'p-button-animated-blink'
           }`}
           disabled={isDeletingDocument || (rowUpdatingId === rowDataId && isUpdating) || disabledButtons}
           icon={rowDeletingId !== rowDataId || !isDeletingDocument ? 'trash' : 'spinnerAnimate'}

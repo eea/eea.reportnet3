@@ -13,10 +13,7 @@ export const manageIntegrationsReducer = (state, { type, payload }) => {
     case 'GET_REPOSITORIES':
       return { ...state, repositories: payload.data };
 
-    case 'GET_UPDATED_DATA':
-      return { ...state, ...payload };
-
-    case 'GET_CLONED_DATA':
+    case 'GET_CLONED_AND_UPDATED_DATA':
       return { ...state, ...payload };
 
     case 'IS_LOADING':
