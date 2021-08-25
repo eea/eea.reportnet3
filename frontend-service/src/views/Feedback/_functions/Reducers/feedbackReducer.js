@@ -3,6 +3,8 @@ import uniqBy from 'lodash/uniqBy';
 
 export const feedbackReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'ON_DELETE_MESSAGE':
+      return { ...state, messages: state.messages.filter(message => message.id !== payload) };
     case 'ON_LOAD_MORE_MESSAGES':
       let inmAllMessages = [];
       if (payload.length !== state.messages.length) {

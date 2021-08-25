@@ -281,6 +281,13 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'SET_DATAPROVIDERS', payload: filteredDataProviders });
   };
 
+  const onMessageDelete = messageIdToDelete => {
+    dispatchFeedback({
+      type: 'ON_DELETE_MESSAGE',
+      payload: messageIdToDelete
+    });
+  };
+
   const onSendMessage = async message => {
     if (message.trim() !== '') {
       try {
@@ -377,8 +384,9 @@ export const Feedback = withRouter(({ match, history }) => {
             newMessageAdded={newMessageAdded}
             onFirstLoadMessages={onFirstLoadMessages}
             onLazyLoad={onGetMoreMessages}
+            onMessageDelete={onMessageDelete}
             onUpdateNewMessageAdded={onUpdateNewMessageAdded}
-            providerId={selectedDataProvider.dataProviderId}
+            providerId={selectedDataProvider?.dataProviderId}
           />
           {!isCustodian && (
             <label className={styles.helpdeskMessage}>{resources.messages['feedbackHelpdeskMessage']}</label>

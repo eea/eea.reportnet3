@@ -31,6 +31,7 @@ export const ListMessages = ({
   newMessageAdded,
   onFirstLoadMessages,
   onLazyLoad,
+  onMessageDelete,
   onUpdateNewMessageAdded,
   providerId
 }) => {
@@ -111,6 +112,12 @@ export const ListMessages = ({
   const onConfirmDeleteMessage = async () => {
     try {
       await FeedbackService.deleteMessage(dataflowId, messageIdToDelete, providerId);
+      dispatchListMessages({
+        type: 'ON_TOGGLE_VISIBLE_DELETE_MESSAGE',
+        payload: { isVisible: false, messageId: null }
+      });
+      onMessageDelete(messageIdToDelete);
+
       // dispatchListMessages({
       //   type: 'DELETE_MESSAGE',
       //   payload: messageIdToDelete
