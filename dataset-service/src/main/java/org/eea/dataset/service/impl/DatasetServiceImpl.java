@@ -411,6 +411,9 @@ public class DatasetServiceImpl implements DatasetService {
         if (Boolean.FALSE.equals(tableSchema.getToPrefill())) {
           deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
         }
+      } else if (TypeStatusEnum.DESIGN.equals(dataflowStatus)
+          && Boolean.TRUE.equals(deletePrefilledTables)) {
+        deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
       } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())
           && !(DatasetTypeEnum.REFERENCE.equals(datasetType)
               && Boolean.TRUE.equals(referenceUpdateable))) {
