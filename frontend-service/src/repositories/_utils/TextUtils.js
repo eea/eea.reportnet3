@@ -2,6 +2,10 @@ import isNil from 'lodash/isNil';
 import isObject from 'lodash/isObject';
 
 const parseText = (rawText = '', param = {}) => {
+  if (isNil(rawText)) {
+    return '';
+  }
+
   let text = rawText;
   if (isObject(param)) {
     Object.keys(param).forEach(key => {
@@ -15,6 +19,10 @@ const parseText = (rawText = '', param = {}) => {
 };
 
 const ellipsis = (rawText = '', limit) => {
+  if (isNil(rawText)) {
+    return '';
+  }
+
   if (rawText.length > limit - 3) {
     return `${rawText.substr(0, limit - 3)}...`;
   }
