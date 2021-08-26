@@ -5,6 +5,7 @@ import ReactTooltip from 'react-tooltip';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
@@ -33,6 +34,7 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
+import { DataflowUtils } from 'services/_utils/DataflowUtils';
 
 export const PublicDataflowInformation = withRouter(
   ({
@@ -158,8 +160,8 @@ export const PublicDataflowInformation = withRouter(
         case 'releaseDate':
           header = resourcesContext.messages['releaseDate'];
           break;
-        case 'isReleased':
-          header = resourcesContext.messages['delivered'];
+        case 'reportingDatasetsStatus':
+          header = resourcesContext.messages['reportingDatasetsStatus'];
           break;
         case 'publicsFileName':
           header = resourcesContext.messages['files'];
@@ -189,8 +191,8 @@ export const PublicDataflowInformation = withRouter(
       const representativesWithPriority = [
         { id: 'id', index: 0 },
         { id: 'datasetSchemaName', index: 1 },
-        { id: 'isReleased', index: 2 },
-        { id: 'releaseDate', index: 3 },
+        { id: 'releaseDate', index: 2 },
+        { id: 'reportingDatasetsStatus', index: 3 },
         { id: 'publicsFileName', index: 4 }
       ];
 
@@ -229,9 +231,9 @@ export const PublicDataflowInformation = withRouter(
       </div>
     );
 
-    const isReleasedBodyColumn = rowData => (
+    const reportingDatasetsStatusBodyColumn = rowData => (
       <div className={styles.cellContentPosition}>
-        {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+        {capitalize(rowData.reportingDatasetsStatus?.replaceAll('_', ' '))}
       </div>
     );
 
@@ -282,6 +284,8 @@ export const PublicDataflowInformation = withRouter(
 
       const datasetsSchemaName = !isNil(datasets) && uniq(datasets.map(dataset => dataset.datasetSchemaName));
 
+      const technicalAcceptanceStatuses = DataflowUtils.getReportingDatasetStatus(datasets);
+
       !isNil(datasets) &&
         datasetsSchemaName.forEach(datasetSchemaName => {
           const publicsFileName = [];
@@ -293,10 +297,10 @@ export const PublicDataflowInformation = withRouter(
               const parsedDataset = {
                 datasetSchemaName: datasetSchemaName,
                 dataProviderId: dataset.dataProviderId,
-                isReleased: dataset.isReleased,
                 releaseDate: dataset.releaseDate,
                 restrictFromPublic: dataset.restrictFromPublic,
-                publicsFileName: publicsFileName
+                publicsFileName: publicsFileName,
+                reportingDatasetsStatus: technicalAcceptanceStatuses[datasetSchemaName]
               };
               parsedDatasets.push(parsedDataset);
             }
@@ -317,16 +321,16 @@ export const PublicDataflowInformation = withRouter(
         .filter(
           key =>
             key.includes('datasetSchemaName') ||
-            key.includes('isReleased') ||
+            key.includes('publicsFileName') ||
             key.includes('releaseDate') ||
-            key.includes('publicsFileName')
+            key.includes('reportingDatasetsStatus')
         )
         .map(field => {
           let template = null;
           if (field === 'datasetSchemaName') template = countryBodyColumn;
-          if (field === 'isReleased') template = isReleasedBodyColumn;
           if (field === 'publicsFileName') template = downloadFileBodyColumn;
           if (field === 'releaseDate') template = releaseDateBodyColumn;
+          if (field === 'reportingDatasetsStatus') template = reportingDatasetsStatusBodyColumn;
           return (
             <Column
               body={template}
