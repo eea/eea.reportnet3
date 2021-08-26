@@ -1,8 +1,6 @@
 import { Fragment, useContext } from 'react';
 import dayjs from 'dayjs';
 
-import { config } from 'conf';
-
 import styles from './Message.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
