@@ -406,9 +406,9 @@ public class DatasetServiceImpl implements DatasetService {
         continue;
       }
 
-      if (TypeStatusEnum.DESIGN.equals(dataflowStatus)
-          && Boolean.FALSE.equals(deletePrefilledTables)) {
-        if (Boolean.FALSE.equals(tableSchema.getToPrefill())) {
+      if (TypeStatusEnum.DESIGN.equals(dataflowStatus)) {
+        if (Boolean.TRUE.equals(deletePrefilledTables) || (Boolean.FALSE
+            .equals(tableSchema.getToPrefill() && Boolean.FALSE.equals(deletePrefilledTables)))) {
           deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
         }
       } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())
