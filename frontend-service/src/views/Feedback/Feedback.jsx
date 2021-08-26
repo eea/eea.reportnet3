@@ -223,7 +223,6 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'TOGGLE_IS_DRAGGING', payload: false });
     event.currentTarget.style.border = '';
     event.currentTarget.style.opacity = '';
-    // event.currentTarget.innerText = '';
     event.preventDefault();
   };
 

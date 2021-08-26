@@ -164,6 +164,7 @@ export const ListMessages = ({
               i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
             }
             isAttachment={TextUtils.areEquals(message.type, 'ATTACHMENT')}
+            isCustodian={isCustodian}
             key={uniqueId('message_')}
             message={message}
             onToggleVisibleDeleteMessage={(isVisible, messageId) =>

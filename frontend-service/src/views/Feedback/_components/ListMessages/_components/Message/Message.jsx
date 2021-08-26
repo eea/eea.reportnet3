@@ -16,7 +16,6 @@ import { FileUtils } from 'views/_functions/Utils/FileUtils';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 export const Message = ({
   attachment = {
@@ -27,17 +26,12 @@ export const Message = ({
   dataflowId,
   hasSeparator,
   isAttachment = false,
+  isCustodian,
   message,
   onToggleVisibleDeleteMessage
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
-
-  const isCustodian = userContext.hasPermission([
-    config.permissions.roles.CUSTODIAN.key,
-    config.permissions.roles.STEWARD.key
-  ]);
 
   const getStyles = () => {
     if (isCustodian) {
