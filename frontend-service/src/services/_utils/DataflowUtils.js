@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
+import uniq from 'lodash/uniq';
 
 import { config } from 'conf';
 
@@ -7,9 +8,9 @@ import { DataCollectionUtils } from 'services/_utils/DataCollectionUtils';
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { DocumentUtils } from 'services/_utils/DocumentUtils';
 import { EUDatasetUtils } from 'services/_utils/EUDatasetUtils';
-import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 import { ObligationUtils } from 'services/_utils/ObligationUtils';
 import { RepresentativeUtils } from 'services/_utils/RepresentativeUtils';
+import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 
 import { Dataflow } from 'entities/Dataflow';
 
@@ -140,14 +141,70 @@ const parseUsersList = usersListDTO => {
   return usersList;
 };
 
+const getReportingDatasetStatus = (datasets = []) => {
+  const providers = [];
+  const providersStatus = {};
+
+  datasets.forEach(dataset => providers.push(dataset.datasetSchemaName));
+
+  const uniqueProviders = uniq(providers);
+
+  datasets.forEach(dataset => {
+    uniqueProviders.forEach(provider => {
+      if (provider === dataset.datasetSchemaName) {
+        if (providersStatus[provider]) {
+          providersStatus[provider].push(dataset.name); //TODO technicalAcceptance
+        } else {
+          providersStatus[provider] = [dataset.name]; //TODO technicalAcceptance
+        }
+      }
+    });
+  });
+
+  uniqueProviders.forEach(provider => (providersStatus[provider] = uniq(providersStatus[provider])));
+
+  // const technicalAcceptanceOrderConfig = {
+  //   0: config.reportingDatasetsStatus.PENDING,
+  //   1: config.reportingDatasetsStatus.CORRECTION_REQUESTED,
+  //   2: config.reportingDatasetsStatus.FINAL_FEEDBACK,
+  //   3: config.reportingDatasetsStatus.TECHNICALLY_ACCEPTED,
+  //   4: config.reportingDatasetsStatus.RELEASED
+  // };
+
+  // TODO UNCOMMENT
+  const technicalAcceptanceOrderConfig = {
+    0: 'Schema 1',
+    1: 'Schema 2'
+  };
+
+  const technicalConfig = Object.values(technicalAcceptanceOrderConfig);
+
+  uniqueProviders.forEach(provider => {
+    let result = null;
+
+    technicalConfig.forEach(technicalAcceptance => {
+      providersStatus[provider].forEach(datasetStatus => {
+        if (isNil(result) && datasetStatus === technicalAcceptance) {
+          result = datasetStatus;
+        }
+      });
+    });
+
+    providersStatus[provider] = result;
+  });
+
+  return providersStatus;
+};
+
 export const DataflowUtils = {
-  sortDataflowsByExpirationDate,
-  parseDataflowDTO,
-  parseDataflowListDTO,
-  parsePublicDataflowListDTO,
-  parsePublicDataflowDTO,
-  parseSortedDataflowListDTO,
+  getReportingDatasetStatus,
   parseAllDataflowsUserList,
   parseCountriesUserList,
-  parseUsersList
+  parseDataflowDTO,
+  parseDataflowListDTO,
+  parsePublicDataflowDTO,
+  parsePublicDataflowListDTO,
+  parseSortedDataflowListDTO,
+  parseUsersList,
+  sortDataflowsByExpirationDate
 };
