@@ -1,6 +1,7 @@
 export { CurrentPage } from './CurrentPage';
 export { ErrorUtils } from './ErrorUtils';
 export { ExtensionUtils } from './ExtensionUtils';
+export { FileUtils } from './FileUtils';
 export { MapUtils } from './MapUtils';
 export { MetadataUtils } from './MetadataUtils';
 export { QuerystringUtils } from './QuerystringUtils';

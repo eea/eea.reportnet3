@@ -14,6 +14,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
 
   const resourcesContext = useContext(ResourcesContext);
 
+  const [clonedData, setClonedData] = useState({});
   const [integrationsList, setIntegrationsList] = useState([]);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -23,6 +24,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
 
   const getIntegrationsList = data => setIntegrationsList(data);
 
+  const getClonedData = data => setClonedData(IntegrationsUtils.parseIntegration(data));
   const getUpdatedData = data => setUpdatedData(IntegrationsUtils.parseIntegration(data));
 
   const onCloseListModal = () => {
@@ -42,6 +44,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
           onClick={() => {
             manageDialogs('isIntegrationManageDialogVisible', true);
             setUpdatedData({});
+            setClonedData({});
           }}
         />
       </div>
@@ -66,6 +69,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
           <IntegrationsList
             dataflowId={dataflowId}
             designerState={designerState}
+            getClonedData={getClonedData}
             getUpdatedData={getUpdatedData}
             integrationsList={getIntegrationsList}
             isCreating={isCreating}
@@ -82,14 +86,17 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
 
       {isIntegrationManageDialogVisible && (
         <ManageIntegrations
+          clonedData={clonedData}
           dataflowId={dataflowId}
           datasetId={datasetId}
           integrationsList={integrationsList}
           manageDialogs={manageDialogs}
           onUpdateData={onUpdateData}
           refreshList={refreshList}
+          setClonedData={setClonedData}
           setIsCreating={setIsCreating}
           setIsUpdating={setIsUpdating}
+          setUpdatedData={setUpdatedData}
           state={designerState}
           updatedData={updatedData}
         />
