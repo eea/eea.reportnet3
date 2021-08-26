@@ -21,7 +21,7 @@ const ActionsColumn = ({
   rowDeletingId,
   rowUpdatingId
 }) => {
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   return (
     <div className={styles.actionTemplate}>
       {!isNil(onEditClick) && !hideEdition && (
@@ -40,7 +40,7 @@ const ActionsColumn = ({
           }
           icon={rowUpdatingId !== rowDataId || !isUpdating ? 'edit' : 'spinnerAnimate'}
           onClick={onEditClick}
-          tooltip={resources.messages['edit']}
+          tooltip={resourcesContext.messages['edit']}
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
@@ -61,7 +61,7 @@ const ActionsColumn = ({
           }
           icon="clone"
           onClick={onCloneClick}
-          tooltip={resources.messages['clone']}
+          tooltip={resourcesContext.messages['clone']}
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
@@ -76,7 +76,7 @@ const ActionsColumn = ({
           disabled={isDeletingDocument || (rowUpdatingId === rowDataId && isUpdating) || disabledButtons}
           icon={rowDeletingId !== rowDataId || !isDeletingDocument ? 'trash' : 'spinnerAnimate'}
           onClick={onDeleteClick}
-          tooltip={resources.messages['delete']}
+          tooltip={resourcesContext.messages['delete']}
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
