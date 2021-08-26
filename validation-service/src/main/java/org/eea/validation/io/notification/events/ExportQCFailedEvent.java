@@ -8,8 +8,9 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.stereotype.Component;
 
+
 /**
- * The Class DownloadValidationsFailedEvent.
+ * The Class ExportQCFailedEvent.
  */
 @Component
 public class ExportQCFailedEvent implements NotificableEventHandler {
@@ -22,7 +23,7 @@ public class ExportQCFailedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT;
+    return EventType.EXPORT_QC_FAILED_EVENT;
   }
 
   /**

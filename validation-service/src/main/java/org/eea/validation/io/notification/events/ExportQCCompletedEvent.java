@@ -9,7 +9,7 @@ import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class DownloadValidationsCompletedEvent.
+ * The Class ExportQCCompletedEvent.
  */
 @Component
 public class ExportQCCompletedEvent implements NotificableEventHandler {
