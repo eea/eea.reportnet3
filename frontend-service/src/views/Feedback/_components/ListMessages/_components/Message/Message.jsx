@@ -14,6 +14,7 @@ import { FeedbackService } from 'services/FeedbackService';
 
 import { FileUtils } from 'views/_functions/Utils/FileUtils';
 
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
@@ -29,6 +30,7 @@ export const Message = ({
   message,
   onToggleVisibleDeleteMessage
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resources = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -55,10 +57,14 @@ export const Message = ({
 
   const onFileDownload = async (dataflowId, messageId, dataProviderId) => {
     try {
-      const { data } = await FeedbackService.getMessageAttachment(dataflowId, messageId, dataProviderId);
+      const data = await FeedbackService.getMessageAttachment(dataflowId, messageId, dataProviderId);
       DownloadFile(data, attachment.name);
     } catch (error) {
       console.error('Message - onFileDownload.', error);
+      notificationContext.add({
+        type: 'FEEDBACK_DOWNLOAD_MESSAGE_ATTACHMENT_ERROR',
+        content: {}
+      });
     }
   };
 

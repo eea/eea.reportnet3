@@ -42,7 +42,7 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [feedbackState, dispatchFeedback] = useReducer(feedbackReducer, {
@@ -257,7 +257,7 @@ export const Feedback = withRouter(({ match, history }) => {
       if (!isLazyLoad) {
         dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
       }
-      const { data } = await FeedbackService.getAllMessages(dataflowId, page, dataProviderId);
+      const data = await FeedbackService.getAllMessages(dataflowId, page, dataProviderId);
       return { messages: data, unreadMessages: data.filter(msg => !msg.read) };
     } catch (error) {
       console.error('Feedback - onLoadMessages.', error);
@@ -339,7 +339,7 @@ export const Feedback = withRouter(({ match, history }) => {
         icon="comments"
         iconSize="3.5rem"
         subtitle={dataflowName}
-        title={`${resources.messages['technicalFeedback']} `}
+        title={`${resourcesContext.messages['technicalFeedback']} `}
       />
       <div className={`${styles.feedbackWrapper} feedback-wrapper-help-step`}>
         {isCustodian && (
@@ -352,12 +352,12 @@ export const Feedback = withRouter(({ match, history }) => {
               }}
               optionLabel="label"
               options={dataProviders}
-              title={resources.messages['feedbackDataProvider']}
+              title={resourcesContext.messages['feedbackDataProvider']}
               value={selectedDataProvider}></ListBox>
           </div>
         )}
         {isCustodian && !isEmpty(selectedDataProvider) && isDragging && (
-          <span className={styles.dragAndDropFileMessage}>{resources.messages['dragAndDropFileMessage']}</span>
+          <span className={styles.dragAndDropFileMessage}>{resourcesContext.messages['dragAndDropFileMessage']}</span>
         )}
         <div
           className={`${styles.listMessagesWrapper} ${
@@ -365,17 +365,17 @@ export const Feedback = withRouter(({ match, history }) => {
           }`}
           onDragLeave={isCustodian && !isEmpty(selectedDataProvider) ? onDragLeave : () => {}}
           onDragOver={isCustodian && !isEmpty(selectedDataProvider) ? onDragOver : () => {}}
-          onDrop={isCustodian && !isEmpty(selectedDataProvider) ? onDrop : () => {}}
-          // onDragStart={onDragStart}
-        >
+          onDrop={isCustodian && !isEmpty(selectedDataProvider) ? onDrop : () => {}}>
           <ListMessages
             canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
             className={`feedback-messages-help-step`}
             dataflowId={dataflowId}
             emptyMessage={
               isCustodian && isEmpty(selectedDataProvider)
-                ? resources.messages['noMessagesCustodian']
-                : resources.messages['noMessages']
+                ? resourcesContext.messages['noMessagesCustodian']
+                : isEmpty(selectedDataProvider)
+                ? resourcesContext.messages['noMessagesCustodian']
+                : resourcesContext.messages['noMessages']
             }
             isCustodian={isCustodian}
             isLoading={isLoading}
@@ -389,7 +389,7 @@ export const Feedback = withRouter(({ match, history }) => {
             providerId={selectedDataProvider?.dataProviderId}
           />
           {!isCustodian && (
-            <label className={styles.helpdeskMessage}>{resources.messages['feedbackHelpdeskMessage']}</label>
+            <label className={styles.helpdeskMessage}>{resourcesContext.messages['feedbackHelpdeskMessage']}</label>
           )}
           {isCustodian && (
             <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
@@ -403,8 +403,8 @@ export const Feedback = withRouter(({ match, history }) => {
                 onKeyDown={e => onKeyChange(e)}
                 placeholder={
                   isCustodian && isEmpty(selectedDataProvider)
-                    ? resources.messages['noMessagesCustodian']
-                    : resources.messages['writeMessagePlaceholder']
+                    ? resourcesContext.messages['noMessagesCustodian']
+                    : resourcesContext.messages['writeMessagePlaceholder']
                 }
                 value={messageToSend}
               />
@@ -415,7 +415,7 @@ export const Feedback = withRouter(({ match, history }) => {
                 disabled={(isCustodian && isEmpty(selectedDataProvider)) || isSending}
                 icon="clipboard"
                 iconPos="right"
-                label={resources.messages['uploadAttachment']}
+                label={resourcesContext.messages['uploadAttachment']}
                 onClick={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: true })}
               />
               <Button
@@ -427,7 +427,7 @@ export const Feedback = withRouter(({ match, history }) => {
                 disabled={messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending}
                 icon="comment"
                 iconPos="right"
-                label={resources.messages['send']}
+                label={resourcesContext.messages['send']}
                 onClick={() => onSendMessage(messageToSend)}
               />
             </div>
@@ -437,15 +437,15 @@ export const Feedback = withRouter(({ match, history }) => {
       {importFileDialogVisible && (
         <CustomFileUpload
           accept="*"
-          chooseLabel={resources.messages['selectFile']}
+          chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogClassName={styles.Dialog}
-          dialogHeader={`${resources.messages['uploadAttachment']} to ${selectedDataProvider.label}`}
+          dialogHeader={`${resourcesContext.messages['uploadAttachment']} to ${selectedDataProvider.label}`}
           dialogOnHide={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: false })}
           dialogVisible={importFileDialogVisible}
           draggedFiles={draggedFiles}
-          infoTooltip={`${resources.messages['supportedFileExtensionsTooltip']} any`}
-          invalidExtensionMessage={resources.messages['invalidExtensionFile']}
+          infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} any`}
+          invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           name="fileAttachment"
           onError={onImportFileError}

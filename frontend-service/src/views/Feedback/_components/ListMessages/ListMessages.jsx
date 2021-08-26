@@ -14,6 +14,7 @@ import { listMessagesReducer } from './_functions/Reducers/listMessagesReducer';
 
 import { FeedbackService } from 'services/FeedbackService';
 
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -35,7 +36,8 @@ export const ListMessages = ({
   onUpdateNewMessageAdded,
   providerId
 }) => {
-  const resources = useContext(ResourcesContext);
+  const notificationContext = useContext(NotificationContext);
+  const resourcesContext = useContext(ResourcesContext);
   const messagesWrapperRef = useRef();
 
   const [listMessagesState, dispatchListMessages] = useReducer(listMessagesReducer, {
@@ -117,13 +119,12 @@ export const ListMessages = ({
         payload: { isVisible: false, messageId: null }
       });
       onMessageDelete(messageIdToDelete);
-
-      // dispatchListMessages({
-      //   type: 'DELETE_MESSAGE',
-      //   payload: messageIdToDelete
-      // });
     } catch (error) {
       console.error('ListMessages - onConfirmDeleteMessage.', error);
+      notificationContext.add({
+        type: 'FEEDBACK_DELETE_MESSAGE_ERROR',
+        content: {}
+      });
     }
   };
 
@@ -180,9 +181,9 @@ export const ListMessages = ({
       {isVisibleConfirmDelete && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          header={`${resources.messages['deleteFeedbackMessageHeader']}`}
-          labelCancel={resources.messages['no']}
-          labelConfirm={resources.messages['yes']}
+          header={`${resourcesContext.messages['deleteFeedbackMessageHeader']}`}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteMessage}
           onHide={() =>
             dispatchListMessages({
@@ -191,7 +192,7 @@ export const ListMessages = ({
             })
           }
           visible={isVisibleConfirmDelete}>
-          {resources.messages['deleteFeedbackMessage']}
+          {resourcesContext.messages['deleteFeedbackMessage']}
         </ConfirmDialog>
       )}
     </div>

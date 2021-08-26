@@ -9,9 +9,7 @@ const formatBytes = bytes => {
 
   const bytesParsed = parseFloat(bytes / k ** i).toFixed(decimals);
 
-  const result = { bytesParsed, sizeType: sizeTypes[i] };
-
-  return result;
+  return { bytesParsed, sizeType: sizeTypes[i] };
 };
 
 export const FileUtils = { formatBytes };

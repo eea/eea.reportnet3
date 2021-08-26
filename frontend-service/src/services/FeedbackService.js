@@ -26,11 +26,13 @@ export const FeedbackService = {
           })
       )
     );
-    return response;
+    return response.data;
   },
 
-  getMessageAttachment: async (dataflowId, messageId, dataProviderId) =>
-    await FeedbackRepository.getMessageAttachment(dataflowId, messageId, dataProviderId),
+  getMessageAttachment: async (dataflowId, messageId, dataProviderId) => {
+    const response = await FeedbackRepository.getMessageAttachment(dataflowId, messageId, dataProviderId);
+    return response.data;
+  },
 
   markMessagesAsRead: async (dataflowId, messages) => await FeedbackRepository.markMessagesAsRead(dataflowId, messages)
 };

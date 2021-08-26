@@ -1241,6 +1241,8 @@
     "rowsPerPage": "Rows per page",
     "deleteFeedbackMessageHeader": "Delete message",
     "deleteFeedbackMessage": "Are you sure you want to delete this message?",
-    "loadDatasetFeedbackMessagesError": "Error loading messages"
+    "loadDatasetFeedbackMessagesError": "Error loading messages",
+    "feedbackDeleteMessageError": "Error deleting the message",
+    "feedbackDownloadMessageAttachmentError": "Error downloading the message attachment"
   }
 }
