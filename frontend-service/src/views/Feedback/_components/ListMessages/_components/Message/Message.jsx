@@ -31,7 +31,7 @@ export const Message = ({
   onToggleVisibleDeleteMessage
 }) => {
   const notificationContext = useContext(NotificationContext);
-  const resources = useContext(ResourcesContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const getStyles = () => {
     if (isCustodian) {
@@ -79,7 +79,7 @@ export const Message = ({
             iconPos="right"
             onClick={() => onFileDownload(dataflowId, message.id, message.providerId)}
             style={{ color: message.direction ? 'var(--white)' : 'var(--c-black-400)' }}
-            tooltip={`${resources.messages['downloadFile']}: ${attachment.name}`}
+            tooltip={`${resourcesContext.messages['downloadFile']}: ${attachment.name}`}
             tooltipOptions={{ position: 'top' }}
           />
         </div>
@@ -117,7 +117,7 @@ export const Message = ({
   };
 
   const renderSeparator = () => (
-    <div className={styles.unreadSeparator}>{`${resources.messages['unreadMessageSeparator']} (${dayjs(
+    <div className={styles.unreadSeparator}>{`${resourcesContext.messages['unreadMessageSeparator']} (${dayjs(
       message.date
     ).format('YYYY-MM-DD HH:mm')})`}</div>
   );

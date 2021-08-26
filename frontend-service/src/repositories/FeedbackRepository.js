@@ -8,6 +8,7 @@ export const FeedbackRepository = {
       url: getUrl(FeedbackConfig.createMessage, { dataflowId }),
       data: { content: message, providerId: dataProviderId, type, messageAttachment }
     }),
+
   deleteMessage: async (dataflowId, messageId, providerId) =>
     await HTTPRequester.delete({
       url: getUrl(FeedbackConfig.deleteMessage, { dataflowId, messageId, providerId })
@@ -17,6 +18,7 @@ export const FeedbackRepository = {
     await HTTPRequester.get({
       url: getUrl(FeedbackConfig.getAllMessages, { dataflowId, page, providerId: dataProviderId })
     }),
+
   getMessageAttachment: async (dataflowId, messageId, dataProviderId) =>
     await HTTPRequester.download({
       url: getUrl(FeedbackConfig.getMessageAttachment, {
@@ -25,6 +27,7 @@ export const FeedbackRepository = {
         providerId: dataProviderId
       })
     }),
+
   markMessagesAsRead: async (dataflowId, messages) =>
     await HTTPRequester.update({
       url: getUrl(FeedbackConfig.markMessagesAsRead, { dataflowId }),
