@@ -12,22 +12,23 @@ import { SqlHelp } from './_components/SqlHelp';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { TextUtils } from 'repositories/_utils/TextUtils';
-
 export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSentence, level }) => {
   const resourcesContext = useContext(ResourcesContext);
 
-  const [isChangedSqlSentence, setIsChangedSqlSentence] = useState(false);
+  const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
-  const [previousSqlSentence, setPreviousSqlSentence] = useState('');
 
   useEffect(() => {
-    return () => onSetSqlSentence('sqlSentence', '');
+    if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
+      setIsSqlErrorVisible(true);
+    }
   }, []);
 
   useEffect(() => {
-    setPreviousSqlSentence(creationFormState.candidateRule?.sqlSentence);
-  }, []);
+    if (isSqlErrorVisible) {
+      setIsSqlErrorVisible(false);
+    }
+  }, [creationFormState.candidateRule.sqlSentence]);
 
   const levelTypes = {
     FIELD: 'field',
@@ -54,7 +55,7 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
   };
 
   const onCCButtonClick = () => {
-    onSetSqlSentence('sqlSentence', `${creationFormState.candidateRule['sqlSentence']} ${codeKeyword}`);
+    onSetSqlSentence(`${creationFormState.candidateRule.sqlSentence} ${codeKeyword}`);
   };
 
   const codeKeyword = isBusinessDataflow ? `${config.COMPANY_CODE_KEYWORD}` : `${config.COUNTRY_CODE_KEYWORD}`;
@@ -63,7 +64,7 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
     <div className={styles.section}>
       <div className={styles.content}>
         <div className={styles.helpSideBar}>
-          <SqlHelp onSetSqlSentence={onSetSqlSentence} sqlSentence={creationFormState.candidateRule['sqlSentence']} />
+          <SqlHelp onSetSqlSentence={onSetSqlSentence} sqlSentence={creationFormState.candidateRule.sqlSentence} />
         </div>
         <div className={styles.sqlSentence}>
           <h3 className={styles.title}>
@@ -72,7 +73,7 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
               className={`${styles.sqlSentenceInfoBtn} p-button-rounded p-button-secondary-transparent`}
               icon="infoCircle"
               id="infoSqlSentence"
-              onClick={e => onClickInfoButton()}
+              onClick={onClickInfoButton}
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
@@ -89,15 +90,12 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
           <textarea
             id="sqlSentenceText"
             name=""
-            onChange={e => {
-              onSetSqlSentence('sqlSentence', e.target.value);
-              setIsChangedSqlSentence(!TextUtils.areEquals(e.target.value, previousSqlSentence));
-            }}
+            onChange={event => onSetSqlSentence(event.target.value)}
             value={creationFormState.candidateRule.sqlSentence}></textarea>
         </div>
       </div>
 
-      {!isNil(creationFormState.candidateRule.sqlError) && !isChangedSqlSentence ? (
+      {isSqlErrorVisible ? (
         <p
           className={
             styles.sqlErrorMessage

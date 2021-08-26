@@ -3,6 +3,8 @@ import uniqBy from 'lodash/uniqBy';
 
 export const feedbackReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'ON_DELETE_MESSAGE':
+      return { ...state, messages: state.messages.filter(message => message.id !== payload) };
     case 'ON_LOAD_MORE_MESSAGES':
       let inmAllMessages = [];
       if (payload.length !== state.messages.length) {
@@ -15,6 +17,16 @@ export const feedbackReducer = (state, { type, payload }) => {
         currentPage: payload.length === 50 ? state.currentPage + 1 : state.currentPage,
         messages: uniqBy(inmAllMessages, 'id'),
         newMessageAdded: false
+      };
+    case 'ON_SEND_ATTACHMENT':
+      const inmAttachMessages = [...state.messages];
+      inmAttachMessages.push(payload);
+      return {
+        ...state,
+        messages: inmAttachMessages,
+        newMessageAdded: true,
+        importFileDialogVisible: false,
+        draggedFiles: null
       };
     case 'ON_SEND_MESSAGE':
       const inmMessages = [...state.messages];

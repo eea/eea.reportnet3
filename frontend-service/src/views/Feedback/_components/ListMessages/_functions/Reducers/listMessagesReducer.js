@@ -1,5 +1,7 @@
 export const listMessagesReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'ON_TOGGLE_VISIBLE_DELETE_MESSAGE':
+      return { ...state, isVisibleConfirmDelete: payload.isVisible, messageIdToDelete: payload.messageId };
     case 'SET_IS_LOADING':
       return {
         ...state,
