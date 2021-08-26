@@ -446,6 +446,7 @@ export const Feedback = withRouter(({ match, history }) => {
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} any`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
+          maxFileSize={config.MAX_ATTACHMENT_SIZE}
           name="fileAttachment"
           onError={onImportFileError}
           onUpload={onUpload}
