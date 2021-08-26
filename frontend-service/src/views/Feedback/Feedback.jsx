@@ -143,7 +143,7 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const markMessagesAsRead = async data => {
     //mark unread messages as read
-    if (data.unreadMessages.length > 0) {
+    if (data?.unreadMessages.length > 0) {
       const unreadMessages = data.unreadMessages
         .filter(unreadMessage => (isCustodian ? unreadMessage.direction : !unreadMessage.direction))
         .map(unreadMessage => ({ id: unreadMessage.id, read: true }));
@@ -187,21 +187,29 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onGetMoreMessages = async () => {
     if ((isCustodian && isEmpty(selectedDataProvider)) || isLoading) return;
-    const data = await onLoadMessages(
-      isCustodian ? selectedDataProvider.dataProviderId : representativeId,
-      currentPage
-    );
+    try {
+      const data = await onLoadMessages(
+        isCustodian ? selectedDataProvider.dataProviderId : representativeId,
+        currentPage,
+        true
+      );
+      await markMessagesAsRead(data);
 
-    await markMessagesAsRead(data);
-
-    dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data.messages });
+      dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data.messages });
+    } catch (error) {
+      console.error('Feedback - onGetMoreMessages.', error);
+      notificationContext.add({
+        type: 'LOAD_DATASET_FEEDBACK_MESSAGES_ERROR',
+        content: {}
+      });
+    }
   };
 
   const onGetInitialMessages = async dataProviderId => {
-    const data = await onLoadMessages(dataProviderId, 0);
+    const data = await onLoadMessages(dataProviderId, 0, false);
     await markMessagesAsRead(data);
 
-    dispatchFeedback({ type: 'SET_MESSAGES', payload: data.messages });
+    dispatchFeedback({ type: 'SET_MESSAGES', payload: !isNil(data) ? data.messages : [] });
   };
 
   const onDrop = event => {
@@ -215,7 +223,6 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'TOGGLE_IS_DRAGGING', payload: false });
     event.currentTarget.style.border = '';
     event.currentTarget.style.opacity = '';
-    // event.currentTarget.innerText = '';
     event.preventDefault();
   };
 
@@ -244,12 +251,19 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   };
 
-  const onLoadMessages = async (dataProviderId, page) => {
+  const onLoadMessages = async (dataProviderId, page, isLazyLoad) => {
     try {
-      const { data } = await FeedbackService.getAllMessages(dataflowId, page, dataProviderId);
+      if (!isLazyLoad) {
+        dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
+      }
+      const data = await FeedbackService.getAllMessages(dataflowId, page, dataProviderId);
       return { messages: data, unreadMessages: data.filter(msg => !msg.read) };
     } catch (error) {
       console.error('Feedback - onLoadMessages.', error);
+    } finally {
+      if (!isLazyLoad) {
+        dispatchFeedback({ type: 'SET_IS_LOADING', payload: false });
+      }
     }
   };
 
@@ -264,6 +278,13 @@ export const Feedback = withRouter(({ match, history }) => {
     );
 
     dispatchFeedback({ type: 'SET_DATAPROVIDERS', payload: filteredDataProviders });
+  };
+
+  const onMessageDelete = messageIdToDelete => {
+    dispatchFeedback({
+      type: 'ON_DELETE_MESSAGE',
+      payload: messageIdToDelete
+    });
   };
 
   const onSendMessage = async message => {
@@ -292,23 +313,15 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'ON_UPDATE_NEW_MESSAGE_ADDED', payload });
   };
 
-  const onUpload = async () => {
-    dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: false });
-    // const {
-    //   dataflow: { name: dataflowName },
-    //   dataset: { name: datasetName }
-    // } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-    // notificationContext.add({
-    //   type: 'DATASET_DATA_LOADING_INIT',
-    //   content: {
-    //     datasetLoadingMessage: resources.messages['datasetLoadingMessage'],
-    //     title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
-    //     datasetLoading: resources.messages['datasetLoading'],
-    //     dataflowName,
-    //     datasetName
-    //   }
-    // });
-    dispatchFeedback({ type: 'RESET_DRAGGED_FILES' });
+  const onUpload = async event => {
+    const messageVO = JSON.parse(event.xhr.response);
+    Object.defineProperty(
+      messageVO,
+      'messageAttachment',
+      Object.getOwnPropertyDescriptor(messageVO, 'messageAttachmentVO')
+    );
+    delete messageVO['messageAttachmentVO'];
+    dispatchFeedback({ type: 'ON_SEND_ATTACHMENT', payload: messageVO });
   };
 
   const layout = children => {
@@ -349,16 +362,17 @@ export const Feedback = withRouter(({ match, history }) => {
           className={`${styles.listMessagesWrapper} ${
             isCustodian ? styles.flexBasisCustodian : styles.flexBasisProvider
           }`}
-          onDragLeave={isCustodian && !isEmpty(selectedDataProvider) && onDragLeave}
-          onDragOver={isCustodian && !isEmpty(selectedDataProvider) && onDragOver}
-          onDrop={isCustodian && !isEmpty(selectedDataProvider) && onDrop}
-          // onDragStart={onDragStart}
-        >
+          onDragLeave={isCustodian && !isEmpty(selectedDataProvider) ? onDragLeave : () => {}}
+          onDragOver={isCustodian && !isEmpty(selectedDataProvider) ? onDragOver : () => {}}
+          onDrop={isCustodian && !isEmpty(selectedDataProvider) ? onDrop : () => {}}>
           <ListMessages
             canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
             className={`feedback-messages-help-step`}
+            dataflowId={dataflowId}
             emptyMessage={
               isCustodian && isEmpty(selectedDataProvider)
+                ? resourcesContext.messages['noMessagesCustodian']
+                : isEmpty(selectedDataProvider)
                 ? resourcesContext.messages['noMessagesCustodian']
                 : resourcesContext.messages['noMessages']
             }
@@ -369,7 +383,9 @@ export const Feedback = withRouter(({ match, history }) => {
             newMessageAdded={newMessageAdded}
             onFirstLoadMessages={onFirstLoadMessages}
             onLazyLoad={onGetMoreMessages}
+            onMessageDelete={onMessageDelete}
             onUpdateNewMessageAdded={onUpdateNewMessageAdded}
+            providerId={selectedDataProvider?.dataProviderId}
           />
           {!isCustodian && (
             <label className={styles.helpdeskMessage}>{resourcesContext.messages['feedbackHelpdeskMessage']}</label>
@@ -391,16 +407,16 @@ export const Feedback = withRouter(({ match, history }) => {
                 }
                 value={messageToSend}
               />
-              {/* <Button
+              <Button
                 className={`${
                   (isCustodian && isEmpty(selectedDataProvider)) || isSending ? '' : 'p-button-animated-right-blink'
                 } p-button-secondary ${styles.attachFileMessageButton}`}
                 disabled={(isCustodian && isEmpty(selectedDataProvider)) || isSending}
                 icon="clipboard"
                 iconPos="right"
-                label={resources.messages['uploadAttachment']}
+                label={resourcesContext.messages['uploadAttachment']}
                 onClick={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: true })}
-              /> */}
+              />
               <Button
                 className={`${
                   messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending
@@ -430,15 +446,13 @@ export const Feedback = withRouter(({ match, history }) => {
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} any`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
-          name="file"
+          maxFileSize={config.MAX_ATTACHMENT_SIZE}
+          name="fileAttachment"
           onError={onImportFileError}
           onUpload={onUpload}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(FeedbackConfig.importFile, {
             dataflowId,
-            providerId:
-              isCustodian && !isEmpty(selectedDataProvider)
-                ? selectedDataProvider.dataProviderId
-                : parseInt(representativeId)
+            providerId: selectedDataProvider.dataProviderId
           })}`}
         />
       )}
