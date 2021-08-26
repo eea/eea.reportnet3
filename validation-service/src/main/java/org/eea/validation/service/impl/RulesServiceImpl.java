@@ -57,9 +57,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
@@ -196,6 +198,10 @@ public class RulesServiceImpl implements RulesService {
    */
   @Value("${exportDataDelimiter}")
   private char delimiter;
+
+  /** The Constant DOWNLOAD_QC_EXCEPTION: {@value}. */
+  private static final String DOWNLOAD_QC_EXCEPTION =
+      "Download exported QC's didn't found a file with the followings parameters:, datasetID: %s + filename: %s";
 
 
   /**
@@ -1494,6 +1500,7 @@ public class RulesServiceImpl implements RulesService {
       headers.add(CODE);
       headers.add(QCNAME);
       headers.add(QCDESC);
+      headers.add(MESSAGE);
       headers.add(EXPRESSION);
       headers.add(TYPE_OF_QC);
       headers.add(LEVEL_ERROR);
@@ -1504,31 +1511,10 @@ public class RulesServiceImpl implements RulesService {
       // Writes the column names into the CSV Writer and sets the array String to headers size so it
       // only writes at most the number of columns as variables per row
       csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
-      int nHeaders = 11;
+      int nHeaders = 12;
 
-      String dataSetSchema = dataSetControllerZuul.getById(datasetId).getIdDatasetSchema();
-      RulesSchemaVO dataSetRules = getRulesSchemaByDatasetId(dataSetSchema);
+      fillQCExportData(csvWriter, datasetId, nHeaders);
 
-      String[] fieldsToWrite = new String[nHeaders];
-
-      for (RuleVO rule : dataSetRules.getRules()) {
-        LOG_ERROR.error(rule.getType().toString()); // Type of QC
-        LOG_ERROR.error(rule.getActivationGroup()); // null
-        LOG_ERROR.error(rule.getDescription()); // Description
-        LOG_ERROR.error(rule.getExpressionText()); // Expression
-        LOG_ERROR.error(rule.getRuleName()); // Name
-        LOG_ERROR.error(rule.getShortCode()); // ShortCode
-        LOG_ERROR.error(rule.getThenCondition().get(0)); // Message
-        LOG_ERROR.error(rule.getThenCondition().get(1)); // Level Error
-        LOG_ERROR.error(rule.getAutomaticType().toString()); //
-        LOG_ERROR.error(rule.getVerified().toString()); // Level Error
-      }
-
-      /*
-       * if (getDatasetValuebyId(datasetId) != null) fillValidationDataCSV(datasetId, nHeaders,
-       * csvWriter, notificationVO); else throw new
-       * ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, creatingFileError);
-       */
     }
 
     catch (IOException e) {
@@ -1551,6 +1537,33 @@ public class RulesServiceImpl implements RulesService {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_COMPLETED_EVENT, null,
           notificationVO);
     }
+  }
+
+
+  /**
+   * Download QCCSV.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws ResponseStatusException the response status exception
+   */
+  @Override
+  public File downloadQCCSV(Long datasetId, String fileName)
+      throws IOException, ResponseStatusException {
+
+    String folderName = fileName.replace(".csv", "");
+    // we compound the route and create the file
+    File file = new File(new File(pathPublicFile, folderName), fileName);
+    if (!file.exists()) {
+
+      LOG_ERROR.error(String.format(DOWNLOAD_QC_EXCEPTION, datasetId, fileName));
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          String.format(DOWNLOAD_QC_EXCEPTION, datasetId, fileName));
+    }
+
+    return file;
   }
 
 
@@ -1686,10 +1699,57 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
-  @Override
-  public File downloadQCCSV(Long datasetId, String fileName) throws IOException {
-    // TODO Auto-generated method stub
-    return null;
-  }
+  private void fillQCExportData(CSVWriter csvWriter, Long datasetId, int nHeaders) {
 
+    String dataSetSchema = dataSetControllerZuul.getById(datasetId).getIdDatasetSchema();
+
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetSchema));
+
+    List<TableSchema> tables = schema.getTableSchemas();
+    Map<String, String> tableNames = new HashMap<>();
+    Map<String, String> fieldNames = new HashMap<>();
+
+    for (TableSchema table : tables) {
+      tableNames.put(table.getIdTableSchema().toString(), table.getNameTableSchema());
+
+      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+        fieldNames.put(field.getIdFieldSchema().toString(), field.getHeaderName());
+        tableNames.put("FieldQC: " + field.getIdFieldSchema(), table.getNameTableSchema());
+        tableNames.put(field.getIdRecord().toString(), table.getNameTableSchema());
+
+      }
+    }
+
+    RulesSchemaVO dataSetRules = getRulesSchemaByDatasetId(dataSetSchema);
+
+    String[] fieldsToWrite;
+
+    for (RuleVO rule : dataSetRules.getRules()) {
+      fieldsToWrite = new String[nHeaders];
+
+      if (rule.getType() == EntityTypeEnum.TABLE || rule.getType() == EntityTypeEnum.RECORD)
+        fieldsToWrite[0] =
+            tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
+                : "Table not found"; // Table Name
+      else
+        fieldsToWrite[0] = tableNames.containsKey("FieldQC: " + rule.getReferenceId())
+            ? tableNames.get("FieldQC: " + rule.getReferenceId())
+            : ""; // Table Name if it has a Field reference ID
+      fieldsToWrite[1] =
+          fieldNames.containsKey(rule.getReferenceId()) ? fieldNames.get(rule.getReferenceId())
+              : ""; // Field Name
+      fieldsToWrite[2] = rule.getShortCode();
+      fieldsToWrite[3] = rule.getRuleName();
+      fieldsToWrite[4] = rule.getDescription();
+      fieldsToWrite[5] = rule.getThenCondition().get(0); // Message
+      fieldsToWrite[6] = rule.getExpressionText();
+      fieldsToWrite[7] = rule.getType().toString(); // Type of QC
+      fieldsToWrite[8] = rule.getThenCondition().get(1); // Level Error
+      fieldsToWrite[9] = Boolean.toString(rule.isAutomatic()); // Creation Mode
+      fieldsToWrite[10] = Boolean.toString(rule.isEnabled()); // Status
+      fieldsToWrite[11] = rule.getVerified().toString(); // Valid
+
+      csvWriter.writeNext(fieldsToWrite);
+    }
+  }
 }
