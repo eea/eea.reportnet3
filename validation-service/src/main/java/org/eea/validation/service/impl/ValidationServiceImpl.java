@@ -113,7 +113,8 @@ public class ValidationServiceImpl implements ValidationService {
   /** The Constant NUMBEROFRECORDS: {@value}. */
   private static final String NUMBEROFRECORDS = "Number of records";
 
-  /** The Constant NUMBEROFRECORDS: {@value}. */
+
+  /** The Constant EXCEPTIONERRORSTRING: {@value}. */
   private static final String EXCEPTIONERRORSTRING =
       "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s";
 
