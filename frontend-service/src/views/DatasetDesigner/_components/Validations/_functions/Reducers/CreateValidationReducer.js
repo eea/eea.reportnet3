@@ -13,6 +13,7 @@ export const createValidationReducerInitState = {
     expressions: [],
     expressionsIf: [],
     expressionsThen: [],
+    expressionText: '',
     expressionType: '',
     field: undefined,
     relations: {
@@ -25,6 +26,7 @@ export const createValidationReducerInitState = {
       links: [{ originField: '', referencedField: '' }]
     },
     shortCode: '',
+    sqlSentence: '',
     table: undefined
   },
   areRulesDisabled: true,

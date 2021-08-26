@@ -582,7 +582,16 @@
         {
           "key": "LOAD_DATASETS_RELEASES_ERROR"
         },
+        {
+          "key": "FEEDBACK_DELETE_MESSAGE_ERROR"
+        },
+        {
+          "key": "FEEDBACK_DOWNLOAD_MESSAGE_ATTACHMENT_ERROR"
+        },
         { "key": "UPDATE_DATASET_FEEDBACK_STATUS_ERROR" },
+        {
+          "key": "LOAD_DATASET_FEEDBACK_MESSAGES_ERROR"
+        },
         {
           "key": "VALIDATE_RULES_ERROR_EVENT",
           "navigateTo": {
