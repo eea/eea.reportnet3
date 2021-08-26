@@ -1520,7 +1520,7 @@ public class RulesServiceImpl implements RulesService {
     catch (IOException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_FAILED_EVENT, null,
           notificationVO);
-      LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+      LOG_ERROR.error(String.format(EEAErrorMessage.CSV_FILE_ERROR, e, "DatasetId: " + datasetId));
       return;
     }
 
