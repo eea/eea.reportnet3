@@ -1,5 +1,6 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './IntegrationsList.module.scss';
@@ -63,19 +64,24 @@ export const IntegrationsList = ({
       isDeletingDocument={integrationListState.isDeleting}
       isUpdating={isUpdating}
       onCloneClick={() => {
-        const filteredData = integrationListState.data.find(integration =>
-          TextUtils.areEquals(integration.integrationId, row.integrationId)
+        const filteredData = cloneDeep(
+          integrationListState.data.find(integration =>
+            TextUtils.areEquals(integration.integrationId, row.integrationId)
+          )
         );
         manageDialogs('isIntegrationManageDialogVisible', true);
         if (!isEmpty(filteredData)) {
+          filteredData.integrationName = `${filteredData.integrationName}_CLONED`;
           filteredData.integrationId = null;
           getClonedData(filteredData);
         }
       }}
       onDeleteClick={TextUtils.areEquals(row.operation, 'EXPORT_EU_DATASET') ? null : () => isDeleteDialogVisible(true)}
       onEditClick={() => {
-        const filteredData = integrationListState.data.find(integration =>
-          TextUtils.areEquals(integration.integrationId, row.integrationId)
+        const filteredData = cloneDeep(
+          integrationListState.data.find(integration =>
+            TextUtils.areEquals(integration.integrationId, row.integrationId)
+          )
         );
         manageDialogs('isIntegrationManageDialogVisible', true);
         if (!isEmpty(filteredData)) getUpdatedData(filteredData);
