@@ -29,7 +29,7 @@ const GlobalNotifications = () => {
   }, [notificationContext.hidden]);
 
   const hasHiddenDownloadQCRulesNotification = () =>
-    notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_QC_RULES_COMPLETED_EVENT');
+    notificationContext.hidden.find(notification => notification.key === 'EXPORT_QC_COMPLETED_EVENT');
 
   const hasHiddenDownloadValidationsNotification = () =>
     notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_VALIDATIONS_COMPLETED_EVENT');
@@ -148,7 +148,7 @@ const GlobalNotifications = () => {
 
   const downloadQCRulesFile = async () => {
     const [notification] = notificationContext.hidden.filter(
-      notification => notification.key === 'DOWNLOAD_QC_RULES_COMPLETED_EVENT'
+      notification => notification.key === 'EXPORT_QC_COMPLETED_EVENT'
     );
 
     try {
