@@ -31,6 +31,7 @@ import { ManageIntegrationsUtils } from './_functions/Utils/ManageIntegrationsUt
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageIntegrations = ({
+  clonedData,
   dataflowId,
   datasetId,
   datasetType,
@@ -38,8 +39,10 @@ export const ManageIntegrations = ({
   manageDialogs,
   onUpdateData,
   refreshList,
+  setClonedData,
   setIsCreating,
   setIsUpdating = () => {},
+  setUpdatedData,
   state,
   updatedData
 }) => {
@@ -82,8 +85,13 @@ export const ManageIntegrations = ({
   });
 
   const { editorView, externalParameters, parameterKey, parametersErrors } = manageIntegrationsState;
-  const { isDuplicatedIntegrationName, isDuplicatedParameter, isFormEmpty, isParameterEditing, printError } =
-    ManageIntegrationsUtils;
+  const {
+    isDuplicatedIntegrationName,
+    isDuplicatedParameter,
+    isFormEmpty,
+    isParameterEditing,
+    printError
+  } = ManageIntegrationsUtils;
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
@@ -96,8 +104,9 @@ export const ManageIntegrations = ({
   const operationsWithFileExtension = ['IMPORT', 'EXPORT'];
 
   useEffect(() => {
-    if (!isEmpty(updatedData)) getUpdatedData();
-  }, [updatedData]);
+    if (!isEmpty(updatedData)) getClonedAndUpdatedData(updatedData);
+    if (!isEmpty(clonedData)) getClonedAndUpdatedData(clonedData);
+  }, [clonedData, updatedData]);
 
   useEffect(() => {
     getRepositories();
@@ -145,7 +154,8 @@ export const ManageIntegrations = ({
     }
   };
 
-  const getUpdatedData = () => manageIntegrationsDispatch({ type: 'GET_UPDATED_DATA', payload: updatedData });
+  const getClonedAndUpdatedData = data =>
+    manageIntegrationsDispatch({ type: 'GET_CLONED_AND_UPDATED_DATA', payload: data });
 
   const isLoading = value => manageIntegrationsDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -204,6 +214,8 @@ export const ManageIntegrations = ({
       notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
       setIsCreating(false);
     } finally {
+      setClonedData({});
+      setUpdatedData({});
       setIsIntegrationManaging('isIntegrationCreating', false);
     }
   };
@@ -315,6 +327,8 @@ export const ManageIntegrations = ({
       notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
       setIsUpdating(false);
     } finally {
+      setClonedData({});
+      setUpdatedData({});
       setIsIntegrationManaging('isIntegrationEditing', false);
     }
   };
@@ -395,7 +409,11 @@ export const ManageIntegrations = ({
         className="p-button-secondary p-button-rounded p-button-animated-blink button-right-aligned"
         icon="cancel"
         label={resourcesContext.messages['cancel']}
-        onClick={() => onCloseModal()}
+        onClick={() => {
+          setClonedData({});
+          setUpdatedData({});
+          onCloseModal();
+        }}
       />
 
       {(isEmptyForm || isIntegrationNameDuplicated) && (
