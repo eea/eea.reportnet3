@@ -24,6 +24,8 @@ import { Toolbar } from 'views/_components/Toolbar';
 
 import { DocumentService } from 'services/DocumentService';
 
+import { FileUtils } from 'views/_functions/Utils/FileUtils';
+
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
@@ -118,22 +120,6 @@ const Documents = ({
     </span>
   );
 
-  const formatBytes = bytes => {
-    if (bytes === 0) return '0 B';
-
-    const k = 1024;
-    const sizeTypes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const decimals = i !== 0 ? 2 : 0;
-
-    const bytesParsed = parseFloat(bytes / k ** i).toFixed(decimals);
-
-    const result = { bytesParsed, sizeType: sizeTypes[i] };
-
-    return result;
-  };
-
   const getAllDocuments = () => {
     const inmAllDocuments = [...allDocuments];
     const filteredAllDocuments = inmAllDocuments.filter(document => document.id !== fileDeletingId);
@@ -210,7 +196,7 @@ const Documents = ({
   };
 
   const sizeColumnTemplate = rowData => {
-    const formatedRowData = formatBytes(rowData.size);
+    const formatedRowData = FileUtils.formatBytes(rowData.size);
     return (
       <Fragment>
         {formatedRowData.bytesParsed} {formatedRowData.sizeType}

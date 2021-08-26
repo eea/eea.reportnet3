@@ -1209,7 +1209,7 @@
     "webformView": "Webform",
     "webLinkDescriptionValidationMax": "Web link description is too long",
     "webLinks": "Web links",
-    "writeMessagePlaceholder": "Write your message",
+    "writeMessagePlaceholder": "Write your message or drag here a file",
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
@@ -1239,6 +1239,11 @@
     "frequencyColumnTitle": "Frequency",
     "instrumentColumnTitle": "Instrument",
     "rowsPerPage": "Rows per page",
+    "deleteFeedbackMessageHeader": "Delete message",
+    "deleteFeedbackMessage": "Are you sure you want to delete this message?",
+    "loadDatasetFeedbackMessagesError": "Error loading messages",
+    "feedbackDeleteMessageError": "Error deleting the message",
+    "feedbackDownloadMessageAttachmentError": "Error downloading the message attachment",
     "clone": "Clone"
   }
 }

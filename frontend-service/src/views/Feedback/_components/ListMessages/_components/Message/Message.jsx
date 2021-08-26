@@ -7,30 +7,31 @@ import styles from './Message.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
-//import { DownloadFile } from 'views/_components/DownloadFile';
+import { DownloadFile } from 'views/_components/DownloadFile';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import ReactTooltip from 'react-tooltip';
 
+import { FeedbackService } from 'services/FeedbackService';
+
+import { FileUtils } from 'views/_functions/Utils/FileUtils';
+
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 export const Message = ({
   attachment = {
-    fileExtension: 'csv',
-    fileName: 'A very very long file name to see how is displayed test.csv',
-    fileSize: '23Mb'
+    extension: '',
+    name: '',
+    size: ''
   },
+  dataflowId,
   hasSeparator,
   isAttachment = false,
-  message
+  isCustodian,
+  message,
+  onToggleVisibleDeleteMessage
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
-
-  const isCustodian = userContext.hasPermission([
-    config.permissions.roles.CUSTODIAN.key,
-    config.permissions.roles.STEWARD.key
-  ]);
 
   const getStyles = () => {
     if (isCustodian) {
@@ -48,41 +49,43 @@ export const Message = ({
     }
   };
 
-  const onFileDownload = async (fileName, fieldId) => {
+  const onFileDownload = async (dataflowId, messageId, dataProviderId) => {
     try {
-      // const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
-      // DownloadFile(data, fileName);
+      const data = await FeedbackService.getMessageAttachment(dataflowId, messageId, dataProviderId);
+      DownloadFile(data, attachment.name);
     } catch (error) {
       console.error('Message - onFileDownload.', error);
+      notificationContext.add({
+        type: 'FEEDBACK_DOWNLOAD_MESSAGE_ATTACHMENT_ERROR',
+        content: {}
+      });
     }
   };
 
   const renderAttachment = () => {
+    const { bytesParsed, sizeType } = FileUtils.formatBytes(attachment.size);
     return (
       <div className={styles.messageAttachment}>
         <div className={styles.messageAttachmentFile}>
           <div>
-            <FontAwesomeIcon icon={AwesomeIcons(attachment.fileExtension)} role="presentation" />
+            <FontAwesomeIcon icon={AwesomeIcons(attachment.extension)} role="presentation" />
             <span data-for="fileName" data-tip>
-              {attachment.fileName.length > 45 ? `${attachment.fileName.substring(0, 45)}...` : attachment.fileName}
+              {attachment.name.length > 45 ? `${attachment.name.substring(0, 45)}...` : attachment.name}
             </span>
-            <ReactTooltip effect="solid" id="fileName" place="top">
-              {attachment.fileName}
-            </ReactTooltip>
           </div>
           <Button
             className={`p-button-animated-right-blink p-button-secondary-transparent ${styles.downloadFileButton}`}
             icon="export"
             iconPos="right"
-            onClick={() => onFileDownload(attachment.fileName, attachment.fieldId)}
+            onClick={() => onFileDownload(dataflowId, message.id, message.providerId)}
             style={{ color: message.direction ? 'var(--white)' : 'var(--c-black-400)' }}
-            tooltip={resourcesContext.messages['downloadFile']}
+            tooltip={`${resourcesContext.messages['downloadFile']}: ${attachment.name}`}
             tooltipOptions={{ position: 'top' }}
           />
         </div>
         <div className={styles.messageAttachmentFileData}>
-          <span>{`.${attachment.fileExtension.toUpperCase()} `}</span>
-          <span>{attachment.fileSize}</span>
+          <span>{`.${attachment.extension.toUpperCase()} `}</span>
+          <span>{`${bytesParsed} ${sizeType}`}</span>
         </div>
       </div>
     );
@@ -101,21 +104,28 @@ export const Message = ({
           )}
           <span className={styles.datetime}>{dayjs(message.date).format('YYYY-MM-DD HH:mm')}</span>
         </div>
+        {isCustodian && (
+          <FontAwesomeIcon
+            className={styles.deleteMessageButton}
+            icon={AwesomeIcons('deleteCircle')}
+            onClick={() => onToggleVisibleDeleteMessage(true, message.id)}
+            role="presentation"
+          />
+        )}
       </div>
     );
   };
 
-  const renderSeparator = () => {
-    return (
-      <div className={styles.unreadSeparator}>{`${resourcesContext.messages['unreadMessageSeparator']} (${dayjs(
-        message.date
-      ).format('YYYY-MM-DD HH:mm')})`}</div>
-    );
-  };
+  const renderSeparator = () => (
+    <div className={styles.unreadSeparator}>{`${resourcesContext.messages['unreadMessageSeparator']} (${dayjs(
+      message.date
+    ).format('YYYY-MM-DD HH:mm')})`}</div>
+  );
 
   return hasSeparator ? (
     <Fragment>
-      {renderSeparator()} {renderMessage()}
+      {renderSeparator()}
+      {renderMessage()}
     </Fragment>
   ) : (
     renderMessage()
