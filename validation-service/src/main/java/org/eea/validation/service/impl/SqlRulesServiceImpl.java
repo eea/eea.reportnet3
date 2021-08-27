@@ -145,7 +145,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     try {
       query = proccessQuery(datasetId, rule.getSqlSentence());
       sqlError = validateRule(query, datasetId, rule, Boolean.TRUE);
-    } catch (NumberFormatException e) {
+    } catch (StringIndexOutOfBoundsException | NumberFormatException e) {
       sqlError = "Syntax not allowed";
     }
     if (StringUtils.isBlank(sqlError)) {
@@ -167,7 +167,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     releaseNotification(notificationEventType, notificationVO);
-
   }
 
   /**
