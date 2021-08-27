@@ -69,6 +69,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
@@ -234,7 +235,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   @Override
   @Transactional
-  @CacheEvict(value = "dataFlowId", key = "#datasetId")
+  @Caching(evict = {@CacheEvict(value = "dataFlowId", key = "#datasetId"),
+      @CacheEvict(value = "datasetSchemaByDatasetId", key = "#datasetId")})
   public void deleteDesignDataset(Long datasetId) {
     dataSetMetabaseRepository.deleteNativeDataset(datasetId);
   }
