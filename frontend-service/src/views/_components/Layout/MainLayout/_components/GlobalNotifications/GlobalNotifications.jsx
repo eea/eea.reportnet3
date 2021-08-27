@@ -154,12 +154,12 @@ const GlobalNotifications = () => {
     try {
       const { data } = await ValidationService.downloadQCRulesFile(
         notification.content.datasetId,
-        notification.content.nameFile
+        notification.content.fileName
       );
       notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE' });
 
       if (data.size !== 0) {
-        DownloadFile(data, notification.content.nameFile);
+        DownloadFile(data, notification.content.fileName);
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadValidationsFile.', error);
