@@ -662,7 +662,7 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
       id: ''
     };
 
-    if (validationContext.ruleEdit) {
+    if (validationContext.ruleEdit && !isNil(creationFormState.candidateRule?.id)) {
       options.onClick = () => onUpdateValidationRule();
       options.label = resourcesContext.messages.update;
       options.id = `${componentName}__update`;
