@@ -785,6 +785,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     <Fragment>
       <Button
         className="p-button-secondary p-button-animated-blink"
+        disabled={isDownloadingQCRules}
         icon={isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadQCsButtonLabel']}
         onClick={() => onDownloadQCRules()}
