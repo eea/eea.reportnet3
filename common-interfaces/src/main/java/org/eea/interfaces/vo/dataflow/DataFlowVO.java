@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.TestDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
 import lombok.Getter;
@@ -81,6 +82,9 @@ public class DataFlowVO extends GenericDataflowVO implements Serializable {
 
   /** The fme user name. */
   private String fmeUserName;
+
+  /** The reporting status. */
+  private DatasetStatusEnum reportingStatus;
 
   /**
    * Equals.
