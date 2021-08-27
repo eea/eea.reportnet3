@@ -1243,7 +1243,6 @@
     "deleteFeedbackMessage": "Are you sure you want to delete this message?",
     "loadDatasetFeedbackMessagesError": "Error loading messages",
     "feedbackDeleteMessageError": "Error deleting the message",
-    "feedbackDownloadMessageAttachmentError": "Error downloading the message attachment",
-    "copyExternalIntegration": "Copy external integration"
+    "feedbackDownloadMessageAttachmentError": "Error downloading the message attachment"
   }
 }
