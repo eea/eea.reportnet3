@@ -972,6 +972,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
+        disabled={designerState.isDownloadingQCRules}
         icon={designerState.isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadQCsButtonLabel']}
         onClick={() => onDownloadQCRules()}
