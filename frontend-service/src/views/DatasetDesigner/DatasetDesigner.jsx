@@ -1641,7 +1641,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             onConfirm={onConfirmDelete}
             onHide={onHideDelete}
             visible={isDeleteDialogVisible}>
-            {resourcesContext.messages['deleteDatasetConfirm']}
+            <div>{resourcesContext.messages['deleteDatasetConfirm']}</div>
             {deletePrefilledDataCheckbox}
           </ConfirmDialog>
         )}
