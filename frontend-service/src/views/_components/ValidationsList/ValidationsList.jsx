@@ -165,7 +165,7 @@ const ValidationsList = withRouter(
 
     const onShowDeleteDialog = () => isDeleteDialogVisible(true);
 
-    const onUpdateData = () => {
+    const onUpdateData = () => {      
       isDataUpdated(!tabsValidationsState.isDataUpdated);
     };
 
@@ -345,7 +345,18 @@ const ValidationsList = withRouter(
             onClick={() => validationContext.onOpenToEdit(row, rowType)}
             type="button"
           />
-
+          <Button
+            className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+            disabled={
+              (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
+              validationContext.isFetchingData
+            }
+            icon="clone"
+            onClick={() => validationContext.onOpenToCopy(row, rowType)}
+            tooltip={resourcesContext.messages['copyQC']}
+            tooltipOptions={{ position: 'top' }}
+            type="button"
+          />
           <Button
             className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
             disabled={validationContext.isFetchingData}
