@@ -1242,7 +1242,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     }
   };
 
-  const deletePrefilledFooter = (
+  const deletePrefilledDataCheckbox = (
     <div className={styles.checkboxWrapper}>
       <Checkbox
         checked={arePrefilledTablesDeleted}
@@ -1635,7 +1635,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         {isDeleteDialogVisible && (
           <ConfirmDialog
             classNameConfirm={'p-button-danger'}
-            footerAddon={deletePrefilledFooter}
             header={resourcesContext.messages['deleteDatasetHeader']}
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
@@ -1643,6 +1642,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             onHide={onHideDelete}
             visible={isDeleteDialogVisible}>
             {resourcesContext.messages['deleteDatasetConfirm']}
+            {deletePrefilledDataCheckbox}
           </ConfirmDialog>
         )}
 
