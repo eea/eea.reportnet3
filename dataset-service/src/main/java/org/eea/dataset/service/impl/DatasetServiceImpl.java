@@ -1405,6 +1405,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the referenced dataset id
    */
   @Override
+  @Cacheable(value = "referencedDatasetId")
   public Long getReferencedDatasetId(Long datasetId, String idPk) {
     return datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
   }

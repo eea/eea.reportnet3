@@ -705,6 +705,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   @Override
   @CheckForNull
+  @Cacheable(value = "datasetSchemaByDatasetId", key = "#datasetId")
   public String findDatasetSchemaIdById(long datasetId) {
     return dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
   }
