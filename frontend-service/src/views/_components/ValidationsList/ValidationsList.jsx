@@ -165,7 +165,7 @@ const ValidationsList = withRouter(
 
     const onShowDeleteDialog = () => isDeleteDialogVisible(true);
 
-    const onUpdateData = () => {      
+    const onUpdateData = () => {
       isDataUpdated(!tabsValidationsState.isDataUpdated);
     };
 
@@ -343,6 +343,8 @@ const ValidationsList = withRouter(
             }
             icon={getEditBtnIcon(row.id)}
             onClick={() => validationContext.onOpenToEdit(row, rowType)}
+            tooltip={resourcesContext.messages['edit']}
+            tooltipOptions={{ position: 'top' }}
             type="button"
           />
           <Button
@@ -353,7 +355,7 @@ const ValidationsList = withRouter(
             }
             icon="clone"
             onClick={() => validationContext.onOpenToCopy(row, rowType)}
-            tooltip={resourcesContext.messages['copyQC']}
+            tooltip={resourcesContext.messages['duplicate']}
             tooltipOptions={{ position: 'top' }}
             type="button"
           />
@@ -362,6 +364,8 @@ const ValidationsList = withRouter(
             disabled={validationContext.isFetchingData}
             icon={getDeleteBtnIcon()}
             onClick={() => onShowDeleteDialog()}
+            tooltip={resourcesContext.messages['delete']}
+            tooltipOptions={{ position: 'top' }}
             type="button"
           />
         </div>
@@ -385,6 +389,8 @@ const ValidationsList = withRouter(
             }
             icon={getEditBtnIcon(row.id)}
             onClick={() => validationContext.onOpenToEdit(row, rowType)}
+            tooltip={resourcesContext.messages['edit']}
+            tooltipOptions={{ position: 'top' }}
             type="button"
           />
         </div>
