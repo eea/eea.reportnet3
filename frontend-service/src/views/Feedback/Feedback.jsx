@@ -389,10 +389,10 @@ export const Feedback = withRouter(({ match, history }) => {
             onUpdateNewMessageAdded={onUpdateNewMessageAdded}
             providerId={selectedDataProvider?.dataProviderId}
           />
-          {!isCustodian && (
+          {!isNil(isCustodian) && !isCustodian && (
             <label className={styles.helpdeskMessage}>{resourcesContext.messages['feedbackHelpdeskMessage']}</label>
           )}
-          {isCustodian && (
+          {!isNil(isCustodian) && isCustodian && (
             <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
               <InputTextarea
                 className={styles.sendMessageTextarea}
