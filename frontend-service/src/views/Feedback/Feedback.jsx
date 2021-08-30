@@ -214,7 +214,13 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onDrop = event => {
     let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
-    dispatchFeedback({ type: 'SET_DRAGGED_FILES', payload: files });
+    if (files[0].size <= config.MAX_ATTACHMENT_SIZE) {
+      dispatchFeedback({ type: 'SET_DRAGGED_FILES', payload: files });
+    } else {
+      notificationContext.add({ type: 'FEEDBACK_MAX_FILE_SIZE_ERROR' });
+      dispatchFeedback({ type: 'TOGGLE_IS_DRAGGING', payload: false });
+    }
+
     event.currentTarget.style.border = '';
     event.currentTarget.style.opacity = '';
   };

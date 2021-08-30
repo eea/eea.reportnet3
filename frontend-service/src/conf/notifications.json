@@ -588,6 +588,9 @@
         {
           "key": "FEEDBACK_DOWNLOAD_MESSAGE_ATTACHMENT_ERROR"
         },
+        {
+          "key": "FEEDBACK_MAX_FILE_SIZE_ERROR"
+        },
         { "key": "UPDATE_DATASET_FEEDBACK_STATUS_ERROR" },
         {
           "key": "LOAD_DATASET_FEEDBACK_MESSAGES_ERROR"
