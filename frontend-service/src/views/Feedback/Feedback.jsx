@@ -370,11 +370,13 @@ export const Feedback = withRouter(({ match, history }) => {
             className={`feedback-messages-help-step`}
             dataflowId={dataflowId}
             emptyMessage={
-              isCustodian && isEmpty(selectedDataProvider)
-                ? resourcesContext.messages['noMessagesCustodian']
-                : isEmpty(selectedDataProvider)
-                ? resourcesContext.messages['noMessagesCustodian']
-                : resourcesContext.messages['noMessages']
+              !isNil(isCustodian)
+                ? !isCustodian
+                  ? resourcesContext.messages['noMessages']
+                  : isEmpty(selectedDataProvider)
+                  ? resourcesContext.messages['noMessagesCustodian']
+                  : resourcesContext.messages['noMessages']
+                : ''
             }
             isCustodian={isCustodian}
             isLoading={isLoading}
@@ -387,10 +389,10 @@ export const Feedback = withRouter(({ match, history }) => {
             onUpdateNewMessageAdded={onUpdateNewMessageAdded}
             providerId={selectedDataProvider?.dataProviderId}
           />
-          {!isCustodian && (
+          {!isNil(isCustodian) && !isCustodian && (
             <label className={styles.helpdeskMessage}>{resourcesContext.messages['feedbackHelpdeskMessage']}</label>
           )}
-          {isCustodian && (
+          {!isNil(isCustodian) && isCustodian && (
             <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
               <InputTextarea
                 className={styles.sendMessageTextarea}
