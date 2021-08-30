@@ -784,8 +784,7 @@ public class RulesServiceImpl implements RulesService {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
           NotificationVO.builder()
               .user(SecurityContextHolder.getContext().getAuthentication().getName())
-              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode())
-              .error("The QC Rule is disabled").build());
+              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
       if (rule.getSqlSentence().contains("!=")) {
         rule.setSqlSentence(rule.getSqlSentence().replaceAll("!=", "<>"));
