@@ -49,7 +49,7 @@ const getIndexById = (datasetSchemaId, datasetSchemasArray) => {
 
 const getTabs = ({ datasetSchema, datasetStatistics, editable, isDataflowOpen, isDesignDatasetEditorRead }) => {
   const inmDatasetSchema = cloneDeep(datasetSchema);
-  inmDatasetSchema.tables.forEach((table, idx) => {
+  inmDatasetSchema.tables?.forEach((table, idx) => {
     table.addTab = false;
     table.description = table.description || table.tableSchemaDescription;
     table.editable = editable;
@@ -70,11 +70,11 @@ const getTabs = ({ datasetSchema, datasetStatistics, editable, isDataflowOpen, i
     table.toPrefill = table.toPrefill || table.tableSchemaToPrefill;
   });
   //Add tab Button/Tab and filter for undefined tableSchemaId tables (webform)
-  inmDatasetSchema.tables = inmDatasetSchema.tables.filter(
+  inmDatasetSchema.tables = inmDatasetSchema.tables?.filter(
     table => table.tableSchemaId !== undefined && table.addTab === false && table.tableSchemaId !== ''
   );
   if (!isDataflowOpen && !isDesignDatasetEditorRead) {
-    inmDatasetSchema.tables.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
+    inmDatasetSchema.tables?.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
   }
   return inmDatasetSchema.tables;
 };

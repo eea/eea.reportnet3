@@ -628,11 +628,11 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     });
   };
 
-  const onSetSqlSentence = (key, value) => {
+  const onSetSqlSentence = value => {
     creationFormDispatch({
       type: 'SET_FORM_FIELD',
       payload: {
-        key,
+        key: 'sqlSentence',
         value
       }
     });
@@ -662,7 +662,7 @@ export const RowValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
       id: ''
     };
 
-    if (validationContext.ruleEdit) {
+    if (validationContext.ruleEdit && !isNil(creationFormState.candidateRule?.id)) {
       options.onClick = () => onUpdateValidationRule();
       options.label = resourcesContext.messages.update;
       options.id = `${componentName}__update`;

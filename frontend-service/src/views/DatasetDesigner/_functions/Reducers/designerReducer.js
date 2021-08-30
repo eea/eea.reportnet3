@@ -204,6 +204,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_IS_DOWNLOADING_VALIDATIONS':
       return { ...state, isDownloadingValidations: payload.isDownloadingValidations };
 
+    case 'SET_ARE_PREFILLED_TABLES_DELETED':
+      return { ...state, arePrefilledTablesDeleted: payload.arePrefilledTablesDeleted };
+
     default:
       return state;
   }

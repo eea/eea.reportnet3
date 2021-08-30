@@ -134,15 +134,20 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Override
   @Transactional
   public void validateSQLRule(Long datasetId, String datasetSchemaId, Rule rule) {
-
+    String query = "";
+    String sqlError = "";
     EventType notificationEventType = null;
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName())
         .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode())
         .error("The QC Rule is disabled").build();
 
-    String query = proccessQuery(datasetId, rule.getSqlSentence());
-    String sqlError = validateRule(query, datasetId, rule, Boolean.TRUE);
+    try {
+      query = proccessQuery(datasetId, rule.getSqlSentence());
+      sqlError = validateRule(query, datasetId, rule, Boolean.TRUE);
+    } catch (StringIndexOutOfBoundsException | NumberFormatException e) {
+      sqlError = "Syntax not allowed";
+    }
     if (StringUtils.isBlank(sqlError)) {
       notificationEventType = EventType.VALIDATED_QC_RULE_EVENT;
       rule.setVerified(true);
@@ -251,7 +256,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       case DATASET:
         break;
     }
-    LOG.info("Query to be executed: {}", newQuery);
+    LOG.info("Query from ruleCode {} to be executed: {}", rule.getShortCode(), newQuery);
     TableValue table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName,
         datasetId, idTable);
     if (Boolean.FALSE.equals(ischeckDC) && null != table && null != table.getRecords()
@@ -816,6 +821,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         } catch (StringIndexOutOfBoundsException | NumberFormatException e) {
           LOG_ERROR.error("Error validating SQL rule, processing the sentence {}. Message {}",
               query, e.getMessage(), e);
+          throw e;
         }
       }
     }

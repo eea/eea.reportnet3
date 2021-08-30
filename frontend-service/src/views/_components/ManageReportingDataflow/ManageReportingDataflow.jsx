@@ -29,7 +29,8 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageReportingDataflow = ({
   dataflowId,
-  isEditForm,
+  isEditForm = false,
+  isVisible,
   manageDialogs,
   obligation,
   onCreateDataflow,
@@ -44,7 +45,7 @@ export const ManageReportingDataflow = ({
   const deleteInputRef = useRef(null);
   const formRef = useRef(null);
 
-  const manageReportingDataflowInitialState = {
+  const reportingDataflowInitialState = {
     deleteInput: '',
     description: isEditForm ? state.description : '',
     isDeleting: false,
@@ -55,14 +56,13 @@ export const ManageReportingDataflow = ({
     isReleasable: state.isReleasable
   };
 
-  const setIsDeleting = isDeleting =>
-    manageReportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
+  const setIsDeleting = isDeleting => reportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
 
   useCheckNotifications(['DELETE_DATAFLOW_FAILED_EVENT'], setIsDeleting, false);
 
-  const [reportingDataflowState, manageReportingDataflowDispatch] = useReducer(
+  const [reportingDataflowState, reportingDataflowDispatch] = useReducer(
     reportingDataflowReducer,
-    manageReportingDataflowInitialState
+    reportingDataflowInitialState
   );
 
   useEffect(() => {
@@ -80,14 +80,12 @@ export const ManageReportingDataflow = ({
     if (!isNil(deleteInputRef.current) && state.isDeleteDialogVisible) deleteInputRef.current.element.focus();
   }, [state.isDeleteDialogVisible]);
 
-  const secondaryDialog = isEditForm ? 'isEditDialogVisible' : 'isAddDialogVisible';
-
-  const onSubmit = value => manageReportingDataflowDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
+  const onSubmit = value => reportingDataflowDispatch({ type: 'ON_SUBMIT', payload: { submit: value } });
 
   const onHideDataflowDialog = () => {
     onResetData();
     resetObligations();
-    manageDialogs(secondaryDialog, false);
+    manageDialogs('isReportingDataflowDialogVisible', false);
   };
 
   const onDeleteDataflow = async () => {
@@ -95,26 +93,30 @@ export const ManageReportingDataflow = ({
     try {
       await DataflowService.delete(dataflowId);
     } catch (error) {
-      console.error('ManageReportingDataflow - onDeleteDataflow.', error);
-      notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      } else {
+        console.error('ManageReportingDataflow - onDeleteDataflow.', error);
+        notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
+      }
       setIsDeleting(false);
     }
   };
 
   const onLoadData = ({ name, description }) =>
-    manageReportingDataflowDispatch({ type: 'ON_LOAD_DATA', payload: { name, description } });
+    reportingDataflowDispatch({ type: 'ON_LOAD_DATA', payload: { name, description } });
 
   const onLoadObligation = ({ id, title }) =>
-    manageReportingDataflowDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
+    reportingDataflowDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
 
   const onResetData = () =>
-    manageReportingDataflowDispatch({
+    reportingDataflowDispatch({
       type: 'RESET_STATE',
-      payload: { resetData: manageReportingDataflowInitialState }
+      payload: { resetData: reportingDataflowInitialState }
     });
 
   const onDeleteInputChange = value =>
-    manageReportingDataflowDispatch({ type: 'ON_DELETE_INPUT_CHANGE', payload: { deleteInput: value } });
+    reportingDataflowDispatch({ type: 'ON_DELETE_INPUT_CHANGE', payload: { deleteInput: value } });
 
   const onSave = () => {
     if (formRef.current) formRef.current.handleSubmit(reportingDataflowState.pinDataflow);
@@ -148,7 +150,7 @@ export const ManageReportingDataflow = ({
               id="replaceCheckbox"
               inputId="replaceCheckbox"
               onChange={() =>
-                manageReportingDataflowDispatch({
+                reportingDataflowDispatch({
                   type: 'TOGGLE_PIN',
                   payload: !reportingDataflowState.pinDataflow
                 })
@@ -158,7 +160,7 @@ export const ManageReportingDataflow = ({
             <label>
               <span
                 onClick={() =>
-                  manageReportingDataflowDispatch({
+                  reportingDataflowDispatch({
                     type: 'TOGGLE_PIN',
                     payload: !reportingDataflowState.pinDataflow
                   })
@@ -204,13 +206,13 @@ export const ManageReportingDataflow = ({
 
   return (
     <Fragment>
-      {(state.isAddDialogVisible || state.isEditDialogVisible) && (
+      {isVisible && (
         <Dialog
           className={styles.dialog}
           footer={renderDataflowDialog()}
           header={resourcesContext.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow']}
           onHide={() => onHideDataflowDialog()}
-          visible={state.isAddDialogVisible || state.isEditDialogVisible}>
+          visible={isVisible}>
           <ManageReportingDataflowForm
             data={reportingDataflowState}
             dataflowId={dataflowId}
@@ -223,7 +225,7 @@ export const ManageReportingDataflow = ({
             onSearch={() => manageDialogs('isReportingObligationsDialogVisible', true)}
             onSubmit={onSubmit}
             ref={formRef}
-            refresh={isEditForm ? state.isEditDialogVisible : state.isAddDialogVisible}
+            refresh={state.isReportingDataflowDialogVisible}
           />
         </Dialog>
       )}
@@ -238,7 +240,7 @@ export const ManageReportingDataflow = ({
           iconConfirm={reportingDataflowState.isDeleting && 'spinnerAnimate'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onDeleteDataflow()}
+          onConfirm={onDeleteDataflow}
           onHide={() => manageDialogs('isDeleteDialogVisible', false)}
           visible={state.isDeleteDialogVisible}>
           <p>{resourcesContext.messages['deleteDataflow']}</p>

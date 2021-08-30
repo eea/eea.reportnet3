@@ -29,7 +29,7 @@ const GlobalNotifications = () => {
   }, [notificationContext.hidden]);
 
   const hasHiddenDownloadQCRulesNotification = () =>
-    notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_QC_RULES_COMPLETED_EVENT');
+    notificationContext.hidden.find(notification => notification.key === 'EXPORT_QC_COMPLETED_EVENT');
 
   const hasHiddenDownloadValidationsNotification = () =>
     notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_VALIDATIONS_COMPLETED_EVENT');
@@ -148,18 +148,18 @@ const GlobalNotifications = () => {
 
   const downloadQCRulesFile = async () => {
     const [notification] = notificationContext.hidden.filter(
-      notification => notification.key === 'DOWNLOAD_QC_RULES_COMPLETED_EVENT'
+      notification => notification.key === 'EXPORT_QC_COMPLETED_EVENT'
     );
 
     try {
       const { data } = await ValidationService.downloadQCRulesFile(
         notification.content.datasetId,
-        notification.content.nameFile
+        notification.content.fileName
       );
       notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE' });
 
       if (data.size !== 0) {
-        DownloadFile(data, notification.content.nameFile);
+        DownloadFile(data, notification.content.fileName);
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadValidationsFile.', error);

@@ -13,6 +13,7 @@ export const createValidationReducerInitState = {
     expressions: [],
     expressionsIf: [],
     expressionsThen: [],
+    expressionText: '',
     expressionType: '',
     field: undefined,
     relations: {
@@ -25,6 +26,7 @@ export const createValidationReducerInitState = {
       links: [{ originField: '', referencedField: '' }]
     },
     shortCode: '',
+    sqlSentence: '',
     table: undefined
   },
   areRulesDisabled: true,
@@ -389,7 +391,8 @@ export const createValidationReducer = (state, { type, payload }) => {
         ...state,
         candidateRule: {
           ...state.candidateRule,
-          expressionType: payload
+          expressionType: payload,
+          sqlSentence: payload !== 'sqlSentence' ? null : state.candidateRule.sqlSentence
         }
       };
 

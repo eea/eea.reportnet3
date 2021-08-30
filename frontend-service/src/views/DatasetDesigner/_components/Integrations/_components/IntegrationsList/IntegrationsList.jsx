@@ -1,5 +1,6 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
 
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './IntegrationsList.module.scss';
@@ -19,9 +20,12 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { integrationsListReducer } from './_functions/Reducers/integrationsListReducer';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
 export const IntegrationsList = ({
   dataflowId,
   designerState,
+  getClonedData,
   getUpdatedData,
   integrationsList,
   isCreating,
@@ -56,15 +60,31 @@ export const IntegrationsList = ({
 
   const actionsTemplate = row => (
     <ActionsColumn
+      hideDeletion={TextUtils.areEquals(row.operation, 'EXPORT_EU_DATASET')}
       isDeletingDocument={integrationListState.isDeleting}
       isUpdating={isUpdating}
-      onDeleteClick={row.operation === 'EXPORT_EU_DATASET' ? null : () => isDeleteDialogVisible(true)}
-      onEditClick={() => {
-        const filteredData = integrationListState.data.filter(
-          integration => integration.integrationId === row.integrationId
+      onCloneClick={() => {
+        const filteredData = cloneDeep(
+          integrationListState.data.find(integration =>
+            TextUtils.areEquals(integration.integrationId, row.integrationId)
+          )
         );
         manageDialogs('isIntegrationManageDialogVisible', true);
-        if (!isEmpty(filteredData)) getUpdatedData(filteredData[0]);
+        if (!isEmpty(filteredData)) {
+          filteredData.integrationName = `${filteredData.integrationName}_DUPLICATED`;
+          filteredData.integrationId = null;
+          getClonedData(filteredData);
+        }
+      }}
+      onDeleteClick={TextUtils.areEquals(row.operation, 'EXPORT_EU_DATASET') ? null : () => isDeleteDialogVisible(true)}
+      onEditClick={() => {
+        const filteredData = cloneDeep(
+          integrationListState.data.find(integration =>
+            TextUtils.areEquals(integration.integrationId, row.integrationId)
+          )
+        );
+        manageDialogs('isIntegrationManageDialogVisible', true);
+        if (!isEmpty(filteredData)) getUpdatedData(filteredData);
       }}
       rowDataId={row.integrationId}
       rowDeletingId={integrationListState.integrationToDeleteId}
@@ -160,7 +180,9 @@ export const IntegrationsList = ({
   const integrationNameTemplate = row => (
     <Fragment>
       {row.integrationName}
-      <TooltipButton message={`${resourcesContext.messages['integrationId']}: ${row.integrationId}`}></TooltipButton>
+      <TooltipButton
+        message={`${resourcesContext.messages['integrationId']}: ${row.integrationId}`}
+        uniqueIdentifier={row.integrationId}></TooltipButton>
     </Fragment>
   );
 

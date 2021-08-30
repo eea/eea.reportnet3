@@ -210,7 +210,7 @@ const ValidationsList = withRouter(
     );
 
     const expressionsTemplate = rowData => {
-      if (!isNil(rowData.expressionText)) {
+      if (!isEmpty(rowData.expressionText)) {
         return rowData.expressionText;
       }
 
@@ -343,14 +343,29 @@ const ValidationsList = withRouter(
             }
             icon={getEditBtnIcon(row.id)}
             onClick={() => validationContext.onOpenToEdit(row, rowType)}
+            tooltip={resourcesContext.messages['edit']}
+            tooltipOptions={{ position: 'top' }}
             type="button"
           />
-
+          <Button
+            className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+            disabled={
+              (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
+              validationContext.isFetchingData
+            }
+            icon="clone"
+            onClick={() => validationContext.onOpenToCopy(row, rowType)}
+            tooltip={resourcesContext.messages['duplicate']}
+            tooltipOptions={{ position: 'top' }}
+            type="button"
+          />
           <Button
             className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
             disabled={validationContext.isFetchingData}
             icon={getDeleteBtnIcon()}
             onClick={() => onShowDeleteDialog()}
+            tooltip={resourcesContext.messages['delete']}
+            tooltipOptions={{ position: 'top' }}
             type="button"
           />
         </div>
@@ -374,6 +389,8 @@ const ValidationsList = withRouter(
             }
             icon={getEditBtnIcon(row.id)}
             onClick={() => validationContext.onOpenToEdit(row, rowType)}
+            tooltip={resourcesContext.messages['edit']}
+            tooltipOptions={{ position: 'top' }}
             type="button"
           />
         </div>

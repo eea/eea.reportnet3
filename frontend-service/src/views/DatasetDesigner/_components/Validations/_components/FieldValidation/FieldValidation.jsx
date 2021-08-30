@@ -270,7 +270,7 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     try {
       setIsSubmitDisabled(true);
       const { candidateRule, expressionText } = creationFormState;
-      candidateRule.expressionText = expressionText;
+      candidateRule.expressionText = expressionText;      
       await ValidationService.createFieldRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
@@ -285,7 +285,7 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     try {
       setIsSubmitDisabled(true);
       const { candidateRule, expressionText } = creationFormState;
-      candidateRule.expressionText = expressionText;
+      candidateRule.expressionText = expressionText;      
       await ValidationService.updateFieldRule(datasetId, candidateRule);
       if (!isNil(candidateRule) && candidateRule.automatic) {
         validationContext.onAutomaticRuleIsUpdated(true);
@@ -445,11 +445,11 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     });
   };
 
-  const onSetSqlSentence = (key, value) => {
+  const onSetSqlSentence = value => {
     creationFormDispatch({
       type: 'SET_FORM_FIELD',
       payload: {
-        key,
+        key: 'sqlSentence',
         value
       }
     });
@@ -461,7 +461,7 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
     <div className={styles.footer}>
       <div className={`${styles.section} ${styles.footerToolBar}`}>
         <div className={styles.subsection}>
-          {validationContext.ruleEdit ? (
+          {validationContext.ruleEdit && !isNil(creationFormState.candidateRule?.id) ? (
             <span data-for="createTooltip" data-tip>
               <Button
                 className="p-button-primary p-button-text-icon-left"

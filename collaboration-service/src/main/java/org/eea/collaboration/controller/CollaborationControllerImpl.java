@@ -22,6 +22,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -64,6 +65,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the message VO
    */
   @Override
+  @HystrixCommand
   @PostMapping("/createMessage/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
@@ -128,6 +130,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @param messageVOs the message V os
    */
   @Override
+  @HystrixCommand
   @PutMapping("/updateMessageReadStatus/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
@@ -144,6 +147,35 @@ public class CollaborationControllerImpl implements CollaborationController {
   }
 
   /**
+   * Delete message.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param messageId the message id
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping("/deleteMessage/dataflow/{dataflowId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  public void deleteMessage(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId, @RequestParam("messageId") Long messageId) {
+    try {
+      if (providerId == null || dataflowId == null || messageId == null) {
+        throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGING_BAD_REQUEST);
+      }
+      collaborationService.deleteMessage(messageId);
+
+    } catch (EEAIllegalArgumentException e) {
+      LOG_ERROR.error("Error deleting message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting message, messageId {}, with message: {}", messageId,
+          e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+  }
+
+  /**
    * Find messages.
    *
    * @param dataflowId the dataflow id
@@ -153,6 +185,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the list
    */
   @Override
+  @HystrixCommand
   @GetMapping("/findMessages/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
@@ -198,6 +231,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the message attachment
    */
   @Override
+  @HystrixCommand
   @GetMapping("/findMessages/dataflow/{dataflowId}/getMessageAttachment")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public ResponseEntity<byte[]> getMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
@@ -233,6 +267,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @param eventType the event type
    */
   @Override
+  @HystrixCommand
   @GetMapping("/private/notifyNewMessages")
   public void notifyNewMessages(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,

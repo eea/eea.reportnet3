@@ -5,6 +5,7 @@ package org.eea.interfaces.controller.validation;
 
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -309,7 +310,7 @@ public interface RulesController {
    * @param showNotification the show notification
    */
   @PostMapping("/validateSqlRules")
-  public void validateSqlRules(@RequestParam("datasetId") Long datasetId,
+  void validateSqlRules(@RequestParam("datasetId") Long datasetId,
       @RequestParam("datasetSchemaId") String datasetSchemaId,
       @RequestParam(value = "showNotification", required = false,
           defaultValue = "true") Boolean showNotification);
@@ -379,5 +380,27 @@ public interface RulesController {
    */
   @PostMapping("/private/importRulesSchema")
   Map<String, String> importRulesSchema(@RequestBody ImportSchemaVO importRules);
+
+
+
+  /**
+   * Export QCCSV.
+   *
+   * @param datasetId the dataset id
+   */
+  @PostMapping(value = "/exportQC/{datasetId}")
+  void exportQCCSV(@PathVariable("datasetId") Long datasetId);
+
+
+  /**
+   * Download QCCSV.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @GetMapping("/downloadQC/{datasetId}")
+  void downloadQCCSV(@PathVariable Long datasetId, @RequestParam String fileName,
+      HttpServletResponse response);
 
 }

@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import org.eea.collaboration.mapper.MessageMapper;
 import org.eea.collaboration.persistence.domain.Message;
+import org.eea.collaboration.persistence.domain.MessageAttachment;
 import org.eea.collaboration.persistence.repository.MessageAttachmentRepository;
 import org.eea.collaboration.persistence.repository.MessageRepository;
 import org.eea.collaboration.service.helper.CollaborationServiceHelper;
@@ -29,6 +30,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
@@ -258,6 +260,36 @@ public class CollaborationServiceImplTest {
         .thenReturn(providerIds);
     collaborationServiceImpl.updateMessageReadStatus(1L, messageVOs);
     Mockito.verify(messageRepository, Mockito.times(1)).saveAll(Mockito.anyIterable());
+  }
+
+  @Test
+  public void deleteMessageTest() throws EEAException {
+    Mockito.doNothing().when(messageRepository).deleteById(Mockito.anyLong());
+    collaborationServiceImpl.deleteMessage(1L);
+    Mockito.verify(messageRepository, times(1)).deleteById(Mockito.anyLong());
+  }
+
+  @Test
+  public void deleteMessageAndAttachmentTest() throws EEAException {
+    MessageAttachment messageAttachment = new MessageAttachment();
+    Mockito.when(messageAttachmentRepository.findByMessageId(Mockito.anyLong()))
+        .thenReturn(messageAttachment);
+    Mockito.doNothing().when(messageRepository).deleteById(Mockito.anyLong());
+    collaborationServiceImpl.deleteMessage(1L);
+    Mockito.verify(messageRepository, times(1)).deleteById(Mockito.anyLong());
+  }
+
+  @Test(expected = EEAIllegalArgumentException.class)
+  public void deleteMessageEEAIllegalArgumentExceptionTest() throws EEAException {
+    Mockito.doThrow(new EmptyResultDataAccessException(1)).when(messageRepository)
+        .deleteById(Mockito.anyLong());
+
+    try {
+      collaborationServiceImpl.deleteMessage(1L);
+    } catch (EmptyResultDataAccessException e) {
+      Assert.assertEquals(EEAErrorMessage.MESSAGE_INCORRECT_ID, e.getMessage());
+      throw e;
+    }
   }
 
   @Test

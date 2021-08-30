@@ -11,7 +11,6 @@ import styles from './WebformRecord.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
-import { GroupedRecordValidations } from 'views/Webforms/_components/GroupedRecordValidations';
 import { IconTooltip } from 'views/_components/IconTooltip';
 import { WebformField } from './_components/WebformField';
 
@@ -22,7 +21,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { webformRecordReducer } from './_functions/Reducers/webformRecordReducer';
 
-import { MetadataUtils } from 'views/_functions/Utils';
+import { ErrorUtils, MetadataUtils } from 'views/_functions/Utils';
 import { WebformRecordUtils } from './_functions/Utils/WebformRecordUtils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
@@ -407,6 +406,19 @@ export const WebformRecord = ({
     return filtered;
   };
 
+  const validationsTemplate = recordData => {
+    return (
+      <div className={styles.iconTooltipWrapper}>
+        {ErrorUtils.getValidationsTemplate(recordData, {
+          blockers: resourcesContext.messages['recordBlockers'],
+          errors: resourcesContext.messages['recordErrors'],
+          warnings: resourcesContext.messages['recordWarnings'],
+          infos: resourcesContext.messages['recordInfos']
+        })}
+      </div>
+    );
+  };
+
   const renderWebformContent = content => {
     const errorMessages = renderErrorMessages(content);
 
@@ -414,7 +426,7 @@ export const WebformRecord = ({
       <div className={styles.content}>
         {multipleRecords && !isEmpty(content.elements) && (
           <div className={styles.actionButtons}>
-            <GroupedRecordValidations parsedRecordData={parseRecordValidations(webformRecordState.record)} />
+            {validationsTemplate(parseRecordValidations(webformRecordState.record))}
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
               disabled={webformRecordState.isDeleting}

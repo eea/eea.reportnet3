@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Date;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,9 +45,6 @@ public class GenericDataflowVO implements Serializable {
 
   /** The type. */
   protected TypeDataflowEnum type;
-
-  /** The reporting status. */
-  protected DatasetStatusEnum reportingStatus;
 
   /** The manual acceptance. */
   protected boolean manualAcceptance;

@@ -1,10 +1,5 @@
 import capitalize from 'lodash/capitalize';
-import isNull from 'lodash/isNull';
-import isUndefined from 'lodash/isUndefined';
-import isEmpty from 'lodash/isEmpty';
 import pick from 'lodash/pick';
-
-import { ValidationUtils } from 'services/_utils/ValidationUtils';
 
 const editLargeStringWithDots = (string, length) => {
   if (string.length > length) {
@@ -86,62 +81,6 @@ const getLevelError = validations => {
   return levelError;
 };
 
-const groupValidations = (recordData, blockerMessage, errorMessage, warningMessage, infoMessage) => {
-  let validations = [];
-  if (recordData.recordValidations && !isUndefined(recordData.recordValidations)) {
-    validations = [...recordData.recordValidations];
-  }
-
-  const recordsWithFieldValidations = recordData.dataRow.filter(
-    row => !isUndefined(row.fieldValidations) && !isNull(row.fieldValidations)
-  );
-
-  const getRecordValidationByErrorAndMessage = (levelError, message) => {
-    return ValidationUtils.createValidation('RECORD', 0, levelError, message);
-  };
-
-  const filteredFieldValidations = recordsWithFieldValidations.map(record => record.fieldValidations).flat();
-  if (!isEmpty(recordsWithFieldValidations)) {
-    const filterFieldValidation = (errorType, errorMessage) => {
-      const filteredFieldValidationsWithErrorType = filteredFieldValidations.filter(
-        filteredFieldValidation => filteredFieldValidation.levelError === errorType
-      );
-      if (!isEmpty(filteredFieldValidationsWithErrorType)) {
-        validations.push(getRecordValidationByErrorAndMessage(errorType, errorMessage));
-      }
-    };
-    filterFieldValidation('BLOCKER', blockerMessage);
-    filterFieldValidation('ERROR', errorMessage);
-    filterFieldValidation('WARNING', warningMessage);
-    filterFieldValidation('INFO', infoMessage);
-  }
-
-  const blockerValidations = validations.filter(validation => validation.levelError === 'BLOCKER');
-  const errorValidations = validations.filter(validation => validation.levelError === 'ERROR');
-  const warningValidations = validations.filter(validation => validation.levelError === 'WARNING');
-  const infoValidations = validations.filter(validation => validation.levelError === 'INFO');
-
-  const getMessages = validationsType => {
-    let messageType = '';
-    validationsType.forEach(validation =>
-      validation.message ? (messageType += '- ' + validation.message + '\n') : ''
-    );
-    return messageType;
-  };
-
-  const validationsGroup = {
-    blockers: blockerValidations,
-    errors: errorValidations,
-    warnings: warningValidations,
-    infos: infoValidations,
-    messageBlockers: getMessages(blockerValidations),
-    messageErrors: getMessages(errorValidations),
-    messageWarnings: getMessages(warningValidations),
-    messageInfos: getMessages(infoValidations)
-  };
-  return validationsGroup;
-};
-
 const formatValidations = validations => {
   let message = '';
   const errorValidations = [...new Set(validations.map(validation => validation.levelError))];
@@ -208,7 +147,6 @@ export const DataViewerUtils = {
   getColumnByHeader,
   getFieldValues,
   getLevelError,
-  groupValidations,
   orderValidationsByLevelError,
   parseData
 };

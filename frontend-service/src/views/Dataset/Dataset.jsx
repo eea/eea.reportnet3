@@ -234,7 +234,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       setIsDownloadingValidations(false);
     }
 
-    if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_QC_RULES_FAILED_EVENT')) {
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_QC_FAILED_EVENT')) {
       setIsDownloadingQCRules(false);
     }
   }, [notificationContext.hidden]);
@@ -785,6 +785,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     <Fragment>
       <Button
         className="p-button-secondary p-button-animated-blink"
+        disabled={isDownloadingQCRules}
         icon={isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadQCsButtonLabel']}
         onClick={() => onDownloadQCRules()}

@@ -545,11 +545,11 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
     return getFieldType(creationFormState.candidateRule.table, { code: field }, tabs);
   };
 
-  const onSetSqlSentence = (key, value) => {
+  const onSetSqlSentence = value => {
     creationFormDispatch({
       type: 'SET_FORM_FIELD',
       payload: {
-        key,
+        key: 'sqlSentence',
         value
       }
     });
@@ -601,7 +601,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
         <div className={styles.footer}>
           <div className={`${styles.section} ${styles.footerToolBar}`}>
             <div className={styles.subsection}>
-              {validationContext.ruleEdit ? (
+              {validationContext.ruleEdit && !isNil(creationFormState.candidateRule?.id) ? (
                 <span data-for="createTooltip" data-tip>
                   <Button
                     className="p-button-primary p-button-text-icon-left"

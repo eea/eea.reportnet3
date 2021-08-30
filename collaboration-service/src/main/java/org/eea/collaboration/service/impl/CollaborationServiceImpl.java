@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.GrantedAuthority;
@@ -234,6 +235,26 @@ public class CollaborationServiceImpl implements CollaborationService {
 
     messages.forEach(message -> message.setRead(messageMap.get(message.getId())));
     messageRepository.saveAll(messages);
+  }
+
+  /**
+   * Delete message.
+   *
+   * @param messageId the message id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void deleteMessage(Long messageId) throws EEAException {
+    try {
+      MessageAttachment messageAttachment = messageAttachmentRepository.findByMessageId(messageId);
+      if (messageAttachment != null) {
+        Long messageAttachmentId = messageAttachment.getId();
+        messageAttachmentRepository.deleteById(messageAttachmentId);
+      }
+      messageRepository.deleteById(messageId);
+    } catch (EmptyResultDataAccessException e) {
+      throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGE_INCORRECT_ID);
+    }
   }
 
   /**

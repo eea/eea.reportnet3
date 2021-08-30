@@ -260,7 +260,9 @@ public class ExcelWriterStrategy implements WriterStrategy {
       for (RecordValue record : fileCommon.getRecordValuesPaginated(datasetId,
           table.getIdTableSchema(), PageRequest.of(numPage, batchSize))) {
         Row row = sheet.createRow(nRow++);
-        List<FieldValue> fields = new ArrayList<>(record.getFields());
+
+        List<FieldValue> fields =
+            record.getFields() != null ? new ArrayList<>(record.getFields()) : new ArrayList<>();
         int nextUnknownCellNumber = nHeaders;
 
         if (includeCountryCode) {
