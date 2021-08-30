@@ -71,7 +71,7 @@ export const IntegrationsList = ({
         );
         manageDialogs('isIntegrationManageDialogVisible', true);
         if (!isEmpty(filteredData)) {
-          filteredData.integrationName = `${filteredData.integrationName}_CLONED`;
+          filteredData.integrationName = `${filteredData.integrationName}_DUPLICATED`;
           filteredData.integrationId = null;
           getClonedData(filteredData);
         }

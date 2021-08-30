@@ -902,7 +902,7 @@
     "releaseDate": "Release date",
     "releaseFailedEvent": "Failed releasing the dataflow",
     "releaseProviderCompletedEvent": "<strong>{:dataProvider}</strong> released <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> successfully",
-    "releaseStartEvent": "Releasing data to data collection.",
+    "releaseStartEvent": "Releasing data to data collection",
     "releasingLeftSideBarButton": "Releasing status",
     "rename": "Rename",
     "replaceData": "Replace data",
@@ -1244,7 +1244,6 @@
     "loadDatasetFeedbackMessagesError": "Error loading messages",
     "feedbackDeleteMessageError": "Error deleting the message",
     "feedbackDownloadMessageAttachmentError": "Error downloading the message attachment",
-    "copyExternalIntegration": "Copy external integration",
     "deliveredStatus": "Delivered"
   }
 }
