@@ -18,6 +18,7 @@ export class Dataset {
     referenceDataset,
     releaseDate,
     restrictFromPublic,
+    status,
     tables,
     tableStatisticPercentages,
     tableStatisticValues,
@@ -45,6 +46,7 @@ export class Dataset {
     this.referenceDataset = referenceDataset;
     this.releaseDate = releaseDate;
     this.restrictFromPublic = restrictFromPublic;
+    this.status = status;
     this.tables = tables;
     this.tableStatisticPercentages = tableStatisticPercentages;
     this.tableStatisticValues = tableStatisticValues;

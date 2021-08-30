@@ -136,13 +136,13 @@ export const PublicDataflowInformation = withRouter(
     const getCountryCode = datasetSchemaName => {
       let country = {};
       if (!isNil(config.countriesByGroup)) {
-        const countryFinded = Object.keys(config.countriesByGroup).some(countriesGroup => {
+        const countryFound = Object.keys(config.countriesByGroup).some(countriesGroup => {
           country = config.countriesByGroup[countriesGroup].find(
             groupCountry => groupCountry.name === datasetSchemaName
           );
           return !isNil(country) ? country : false;
         });
-        return countryFinded ? country.code : '';
+        return countryFound ? country.code : '';
       }
     };
 
@@ -265,7 +265,7 @@ export const PublicDataflowInformation = withRouter(
       try {
         const data = await DataflowService.getPublicDataflowData(dataflowId);
         setDataflowData(data);
-        parseDataflowData(data.datasets);
+        parseDataflowData(data.datasets, data.manualAcceptance);
         setReferenceDatasets(data.referenceDatasets);
       } catch (error) {
         console.error('PublicDataflowInformation - onLoadDataflowData.', error);
@@ -279,12 +279,12 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
-    const parseDataflowData = datasets => {
+    const parseDataflowData = (datasets, hasManualAcceptance) => {
       const parsedDatasets = [];
 
       const datasetsSchemaName = !isNil(datasets) && uniq(datasets.map(dataset => dataset.datasetSchemaName));
 
-      const technicalAcceptanceStatuses = DataflowUtils.getReportingDatasetStatus(datasets);
+      const getReportingDatasetStatus = DataflowUtils.getReportingDatasetStatus(datasets);
 
       !isNil(datasets) &&
         datasetsSchemaName.forEach(datasetSchemaName => {
@@ -300,7 +300,10 @@ export const PublicDataflowInformation = withRouter(
                 releaseDate: dataset.releaseDate,
                 restrictFromPublic: dataset.restrictFromPublic,
                 publicsFileName: publicsFileName,
-                reportingDatasetsStatus: technicalAcceptanceStatuses[datasetSchemaName]
+                reportingDatasetsStatus:
+                  !hasManualAcceptance && dataset.isReleased
+                    ? resourcesContext.messages['deliveredStatus']
+                    : getReportingDatasetStatus[datasetSchemaName]
               };
               parsedDatasets.push(parsedDataset);
             }

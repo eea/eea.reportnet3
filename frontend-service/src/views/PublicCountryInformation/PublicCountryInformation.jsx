@@ -32,6 +32,7 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
+import { DataflowUtils } from 'services/_utils/DataflowUtils';
 
 export const PublicCountryInformation = withRouter(({ match, history }) => {
   const {
@@ -178,6 +179,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         numberRows,
         sortField
       );
+
       setTotalRecords(data.totalRecords);
       parseDataflows(data.publicDataflows);
     } catch (error) {
@@ -211,6 +213,10 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         }
       });
 
+      const deliveredStatus = DataflowUtils.getReportingDatasetStatus(dataflow.datasets);
+
+      const providerName = Object.keys(deliveredStatus)[0];
+
       const parsedDataflow = {
         deadline: dataflow.expirationDate,
         id: dataflow.id,
@@ -223,7 +229,10 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         publicFilesNames: publicFilesNames,
         referencePublicFilesNames: referencePublicFilesNames,
         releaseDate: isReleased ? dataflow.datasets[0].releaseDate : '-',
-        reportingDatasetsStatus: dataflow.reportingDatasetsStatus,
+        reportingDatasetsStatus:
+          !dataflow.manualAcceptance && isReleased
+            ? resourcesContext.messages['deliveredStatus']
+            : deliveredStatus[providerName],
         restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false
       };
       parsedDataflows.push(parsedDataflow);
@@ -240,11 +249,10 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       { id: 'deadline', index: 4 },
       { id: 'isReleasable', index: 5 },
       { id: 'releaseDate', index: 6 },
-      { id: 'isReleased', index: 7 },
-      { id: 'manualAcceptance', index: 8 },
-      { id: 'reportingDatasetsStatus', index: 9 },
-      { id: 'referencePublicFilesNames', index: 10 },
-      { id: 'publicFilesNames', index: 11 }
+      { id: 'manualAcceptance', index: 7 },
+      { id: 'reportingDatasetsStatus', index: 8 },
+      { id: 'referencePublicFilesNames', index: 9 },
+      { id: 'publicFilesNames', index: 10 }
     ];
 
     return dataflows

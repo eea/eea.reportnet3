@@ -30,6 +30,7 @@ const parsePublicDataflowListDTO = dataflowsDTO =>
 
 const parseSortedDataflowListDTO = dataflowDTOs => {
   const dataflows = dataflowDTOs?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
+
   return sortDataflowsByExpirationDate(dataflows);
 };
 
@@ -153,9 +154,9 @@ const getReportingDatasetStatus = (datasets = []) => {
     uniqueProviders.forEach(provider => {
       if (provider === dataset.datasetSchemaName) {
         if (providersStatus[provider]) {
-          providersStatus[provider].push(dataset.name); //TODO technicalAcceptance
+          providersStatus[provider].push(dataset.status);
         } else {
-          providersStatus[provider] = [dataset.name]; //TODO technicalAcceptance
+          providersStatus[provider] = [dataset.status];
         }
       }
     });
@@ -163,18 +164,12 @@ const getReportingDatasetStatus = (datasets = []) => {
 
   uniqueProviders.forEach(provider => (providersStatus[provider] = uniq(providersStatus[provider])));
 
-  // const technicalAcceptanceOrderConfig = {
-  //   0: config.reportingDatasetsStatus.PENDING,
-  //   1: config.reportingDatasetsStatus.CORRECTION_REQUESTED,
-  //   2: config.reportingDatasetsStatus.FINAL_FEEDBACK,
-  //   3: config.reportingDatasetsStatus.TECHNICALLY_ACCEPTED,
-  //   4: config.reportingDatasetsStatus.RELEASED
-  // };
-
-  // TODO UNCOMMENT
   const technicalAcceptanceOrderConfig = {
-    0: 'Schema 1',
-    1: 'Schema 2'
+    0: config.reportingDatasetsStatus.PENDING,
+    1: config.reportingDatasetsStatus.CORRECTION_REQUESTED,
+    2: config.reportingDatasetsStatus.FINAL_FEEDBACK,
+    3: config.reportingDatasetsStatus.TECHNICALLY_ACCEPTED,
+    4: config.reportingDatasetsStatus.RELEASED
   };
 
   const technicalConfig = Object.values(technicalAcceptanceOrderConfig);
