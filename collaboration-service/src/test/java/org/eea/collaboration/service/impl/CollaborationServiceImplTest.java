@@ -37,6 +37,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CollaborationServiceImplTest {
@@ -134,6 +135,58 @@ public class CollaborationServiceImplTest {
   }
 
   @Test
+  public void createMessageMaxMessageLegnthContentTest()
+      throws EEAForbiddenException, EEAIllegalArgumentException {
+    MessageVO messageVO = new MessageVO();
+    messageVO.setProviderId(1L);
+    messageVO.setContent("a");
+    List<Long> datasetIds = new ArrayList<>();
+    datasetIds.add(1L);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(
+        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE.getAccessRole(1L)));
+    authorities.add(
+        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(1L)));
+    ReflectionTestUtils.setField(collaborationServiceImpl, "maxMessageLength", 10);
+    Mockito
+        .when(dataSetMetabaseControllerZuul
+            .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
+        .thenReturn(datasetIds);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    collaborationServiceImpl.createMessage(1L, messageVO);
+    Mockito.verify(messageMapper, Mockito.times(1)).entityToClass(Mockito.any());
+  }
+
+  @Test(expected = EEAIllegalArgumentException.class)
+  public void createMessageEEAIllegalArgumentExceptionProviderIdNullTest()
+      throws EEAForbiddenException, EEAIllegalArgumentException {
+    MessageVO messageVO = new MessageVO();
+    messageVO.setProviderId(null);
+    messageVO.setContent("content");
+    try {
+      collaborationServiceImpl.createMessage(1L, messageVO);
+    } catch (EEAIllegalArgumentException e) {
+      Assert.assertEquals(EEAErrorMessage.MESSAGING_BAD_REQUEST, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAIllegalArgumentException.class)
+  public void createMessageEEAIllegalArgumentExceptionContentNullTest()
+      throws EEAForbiddenException, EEAIllegalArgumentException {
+    MessageVO messageVO = new MessageVO();
+    messageVO.setProviderId(1L);
+    messageVO.setContent(null);
+    try {
+      collaborationServiceImpl.createMessage(1L, messageVO);
+    } catch (EEAIllegalArgumentException e) {
+      Assert.assertEquals(EEAErrorMessage.MESSAGING_BAD_REQUEST, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
   public void createMessageAttachmentTest()
       throws EEAForbiddenException, EEAIllegalArgumentException, IOException {
 
@@ -226,6 +279,29 @@ public class CollaborationServiceImplTest {
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
     authorities
         .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(1L)));
+    Mockito.when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(messages);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    collaborationServiceImpl.updateMessageReadStatus(1L, messageVOs);
+    Mockito.verify(messageRepository, Mockito.times(1)).saveAll(Mockito.anyIterable());
+  }
+
+  @Test
+  public void updateMessageReadStatusStewardTest()
+      throws EEAForbiddenException, EEAIllegalArgumentException {
+    List<MessageVO> messageVOs = new ArrayList<>();
+    MessageVO messageVO = new MessageVO();
+    messageVO.setId(1L);
+    messageVOs.add(messageVO);
+    List<Message> messages = new ArrayList<>();
+    Message message = new Message();
+    message.setId(1L);
+    message.setDirection(true);
+    messages.add(message);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities
+        .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(1L)));
     Mockito.when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
         .thenReturn(messages);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
