@@ -1245,6 +1245,7 @@
     "feedbackDeleteMessageError": "Error deleting the message",
     "feedbackDownloadMessageAttachmentError": "Error downloading the message attachment",
     "feedbackMaxFileSizeError": "File must be smaller than 20 MB",
-    "clone": "Clone"
+    "clone": "Clone",
+    "feedbackInvalidFileError": "Please, drop a valid file"
   }
 }

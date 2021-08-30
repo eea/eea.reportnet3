@@ -591,6 +591,7 @@
         {
           "key": "FEEDBACK_MAX_FILE_SIZE_ERROR"
         },
+        { "key": "FEEDBACK_INVALID_FILE_ERROR" },
         { "key": "UPDATE_DATASET_FEEDBACK_STATUS_ERROR" },
         {
           "key": "LOAD_DATASET_FEEDBACK_MESSAGES_ERROR"
