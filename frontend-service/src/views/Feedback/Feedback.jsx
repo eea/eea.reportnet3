@@ -370,11 +370,13 @@ export const Feedback = withRouter(({ match, history }) => {
             className={`feedback-messages-help-step`}
             dataflowId={dataflowId}
             emptyMessage={
-              isCustodian && isEmpty(selectedDataProvider)
-                ? resourcesContext.messages['noMessagesCustodian']
-                : isEmpty(selectedDataProvider)
-                ? resourcesContext.messages['noMessagesCustodian']
-                : resourcesContext.messages['noMessages']
+              !isNil(isCustodian)
+                ? !isCustodian
+                  ? resourcesContext.messages['noMessages']
+                  : isCustodian && isEmpty(selectedDataProvider)
+                  ? resourcesContext.messages['noMessagesCustodian']
+                  : resourcesContext.messages['noMessages']
+                : ''
             }
             isCustodian={isCustodian}
             isLoading={isLoading}
