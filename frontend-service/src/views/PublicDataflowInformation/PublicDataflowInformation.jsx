@@ -232,9 +232,7 @@ export const PublicDataflowInformation = withRouter(
     );
 
     const reportingDatasetsStatusBodyColumn = rowData => (
-      <div className={styles.cellContentPosition}>
-        {capitalize(rowData.reportingDatasetsStatus?.replaceAll('_', ' '))}
-      </div>
+      <div className={styles.cellContentPosition}>{rowData.reportingDatasetsStatus}</div>
     );
 
     const onFileDownload = async (dataProviderId, fileName) => {
@@ -302,8 +300,10 @@ export const PublicDataflowInformation = withRouter(
                 publicsFileName: publicsFileName,
                 reportingDatasetsStatus:
                   !hasManualAcceptance && dataset.isReleased
-                    ? resourcesContext.messages['deliveredStatus']
-                    : getReportingDatasetStatus[datasetSchemaName]
+                    ? resourcesContext.messages[config.reportingDatasetsStatus.DELIVERED.label]
+                    : resourcesContext.messages[
+                        config.reportingDatasetsStatus[getReportingDatasetStatus[datasetSchemaName]].label
+                      ]
               };
               parsedDatasets.push(parsedDataset);
             }

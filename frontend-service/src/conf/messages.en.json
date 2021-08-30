@@ -1244,6 +1244,6 @@
     "loadDatasetFeedbackMessagesError": "Error loading messages",
     "feedbackDeleteMessageError": "Error deleting the message",
     "feedbackDownloadMessageAttachmentError": "Error downloading the message attachment",
-    "deliveredStatus": "Delivered"
+    "finalFeedback": "Final feedback"
   }
 }

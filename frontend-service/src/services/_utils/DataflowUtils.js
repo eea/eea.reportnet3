@@ -179,7 +179,7 @@ const getReportingDatasetStatus = (datasets = []) => {
 
     technicalConfig.forEach(technicalAcceptance => {
       providersStatus[provider].forEach(datasetStatus => {
-        if (isNil(result) && datasetStatus === technicalAcceptance) {
+        if (isNil(result) && datasetStatus === technicalAcceptance.key) {
           result = datasetStatus;
         }
       });

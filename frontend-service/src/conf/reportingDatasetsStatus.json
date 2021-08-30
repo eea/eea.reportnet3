@@ -1,7 +1,8 @@
 {
-  "PENDING": "PENDING",
-  "CORRECTION_REQUESTED": "CORRECTION_REQUESTED",
-  "FINAL_FEEDBACK": "FINAL_FEEDBACK",
-  "TECHNICALLY_ACCEPTED": "TECHNICALLY_ACCEPTED",
-  "RELEASED": "RELEASED"
+  "DELIVERED": { "key": "DELIVERED", "label": "delivered" },
+  "PENDING": { "key": "PENDING", "label": "pending" },
+  "CORRECTION_REQUESTED": { "key": "CORRECTION_REQUESTED", "label": "correctionRequested" },
+  "FINAL_FEEDBACK": { "key": "FINAL_FEEDBACK", "label": "finalFeedback" },
+  "TECHNICALLY_ACCEPTED": { "key": "TECHNICALLY_ACCEPTED", "label": "technicallyAccepted" },
+  "RELEASED": { "key": "RELEASED", "label": "released" }
 }

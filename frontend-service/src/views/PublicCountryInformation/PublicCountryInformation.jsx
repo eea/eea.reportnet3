@@ -212,9 +212,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
           referencePublicFilesNames.push({ fileName: referenceDataset.publicFileName });
         }
       });
-
       const deliveredStatus = DataflowUtils.getReportingDatasetStatus(dataflow.datasets);
-
       const providerName = Object.keys(deliveredStatus)[0];
 
       const parsedDataflow = {
@@ -231,8 +229,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         releaseDate: isReleased ? dataflow.datasets[0].releaseDate : '-',
         reportingDatasetsStatus:
           !dataflow.manualAcceptance && isReleased
-            ? resourcesContext.messages['deliveredStatus']
-            : deliveredStatus[providerName],
+            ? resourcesContext.messages[config.reportingDatasetsStatus.DELIVERED.label]
+            : resourcesContext.messages[config.reportingDatasetsStatus[deliveredStatus[providerName]].label],
         restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false
       };
       parsedDataflows.push(parsedDataflow);
@@ -386,9 +384,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   );
 
   const reportingDatasetsStatusBodyColumn = rowData => (
-    <div className={styles.cellContentPosition}>
-      {capitalize(rowData.reportingDatasetsStatus?.replaceAll('_', ' '))}
-    </div>
+    <div className={styles.cellContentPosition}>{rowData.reportingDatasetsStatus}</div>
   );
 
   const renderLegalInstrumentBodyColumn = rowData => (
