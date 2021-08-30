@@ -283,7 +283,7 @@ export const Feedback = withRouter(({ match, history }) => {
 
     const filteredDataProviders = responseDataProviders.filter(dataProvider =>
       responseRepresentatives.representatives.some(
-        representative => representative.dataProviderId === dataProvider.dataProviderId
+        representative => representative.dataProviderId === dataProvider.dataProviderId && representative.hasDatasets
       )
     );
 
