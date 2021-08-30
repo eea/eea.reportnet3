@@ -70,7 +70,7 @@ export const ListMessages = ({
       type: 'SET_LIST_CONTENT',
       payload: renderMessageList()
     });
-  }, [isLoading, isLoadingNewMessages, messages, separatorIndex]);
+  }, [isCustodian, isLoading, isLoadingNewMessages, messages, separatorIndex]);
 
   const getIndexByHeader = messagesArray => {
     return messagesArray
