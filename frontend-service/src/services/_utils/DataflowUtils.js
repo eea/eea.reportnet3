@@ -30,7 +30,6 @@ const parsePublicDataflowListDTO = dataflowsDTO =>
 
 const parseSortedDataflowListDTO = dataflowDTOs => {
   const dataflows = dataflowDTOs?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
-
   return sortDataflowsByExpirationDate(dataflows);
 };
 

@@ -179,7 +179,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         numberRows,
         sortField
       );
-
       setTotalRecords(data.totalRecords);
       parseDataflows(data.publicDataflows);
     } catch (error) {
