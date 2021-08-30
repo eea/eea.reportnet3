@@ -45,6 +45,16 @@ const validationReducer = (state, { type, payload }) => {
         isVisible: true,
         opener: null
       };
+    case 'ON_OPEN_TO_COPY':
+      return {
+        ...state,
+        isVisible: true,
+        ruleEdit: true,
+        ruleToEdit: payload.ruleToEdit,
+        level: payload.level,
+        referenceId: payload.referenceId,
+        updatedRuleId: payload.updatedRuleId
+      };
     case 'ON_OPEN_TO_EDIT':
       return {
         ...state,
@@ -125,6 +135,18 @@ export const ValidationProvider = ({ children }) => {
 
         onOpenModalFromRow: recordId => {
           dispatch({ type: 'ON_OPEN_QC_CREATION_MODAL_FROM_ROW', payload: { recordId } });
+        },
+
+        onOpenToCopy: (rule, level) => {
+          dispatch({
+            type: 'ON_OPEN_TO_COPY',
+            payload: {
+              ruleToEdit: { ...rule, shortCode: `${rule.shortCode}_DUPLICATED`, id: null },
+              level,
+              referenceId: rule.referenceId,
+              updatedRuleId: rule.id
+            }
+          });
         },
 
         onOpenToEdit: (rule, level) => {

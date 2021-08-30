@@ -61,7 +61,7 @@ const ActionsColumn = ({
           }
           icon="clone"
           onClick={onCloneClick}
-          tooltip={resourcesContext.messages['clone']}
+          tooltip={resourcesContext.messages['duplicate']}
           tooltipOptions={{ position: 'top' }}
           type="button"
         />

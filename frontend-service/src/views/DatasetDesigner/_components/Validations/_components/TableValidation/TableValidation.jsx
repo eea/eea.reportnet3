@@ -601,7 +601,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
         <div className={styles.footer}>
           <div className={`${styles.section} ${styles.footerToolBar}`}>
             <div className={styles.subsection}>
-              {validationContext.ruleEdit ? (
+              {validationContext.ruleEdit && !isNil(creationFormState.candidateRule?.id) ? (
                 <span data-for="createTooltip" data-tip>
                   <Button
                     className="p-button-primary p-button-text-icon-left"
