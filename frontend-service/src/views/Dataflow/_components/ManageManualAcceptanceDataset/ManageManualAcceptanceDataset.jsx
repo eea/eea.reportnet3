@@ -147,22 +147,24 @@ export const ManageManualAcceptanceDataset = ({
   );
 
   const renderRadioButtons = () =>
-    ['Technically accepted', 'Correction requested'].map(feedbackStatus => {
-      return (
-        <div className={styles.radioButtonWrapper} key={feedbackStatus}>
-          <RadioButton
-            checked={manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedbackStatus}
-            className={styles.radioButton}
-            inputId={feedbackStatus}
-            onChange={event => onChangeStatus(event.target.value)}
-            value={feedbackStatus}
-          />
-          <label className={styles.label} htmlFor={feedbackStatus}>
-            {resourcesContext.messages[camelCase(feedbackStatus)]}
-          </label>
-        </div>
-      );
-    });
+    [resourcesContext.messages['technicallyAccepted'], resourcesContext.messages['correctionRequested']].map(
+      feedbackStatus => {
+        return (
+          <div className={styles.radioButtonWrapper} key={feedbackStatus}>
+            <RadioButton
+              checked={manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedbackStatus}
+              className={styles.radioButton}
+              inputId={feedbackStatus}
+              onChange={event => onChangeStatus(event.target.value)}
+              value={feedbackStatus}
+            />
+            <label className={styles.label} htmlFor={feedbackStatus}>
+              {resourcesContext.messages[camelCase(feedbackStatus)]}
+            </label>
+          </div>
+        );
+      }
+    );
 
   return renderDialogLayout(
     <div className={styles.content}>
