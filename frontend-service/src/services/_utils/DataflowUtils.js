@@ -141,13 +141,11 @@ const parseUsersList = usersListDTO => {
   return usersList;
 };
 
-const getReportingDatasetStatus = (datasets = [], providerName) => {
+const getReportingDatasetStatus = (datasets = []) => {
   let providerStatuses = [];
 
   datasets.forEach(dataset => {
-    if (providerName === dataset.datasetSchemaName) {
-      providerStatuses.push(dataset.status);
-    }
+    providerStatuses.push(dataset.status);
   });
 
   providerStatuses = uniq(providerStatuses);

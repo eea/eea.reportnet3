@@ -276,6 +276,16 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
+    const getReporterDatasets = (datasets, reporterName) => {
+      const reporterDatasets = [];
+      datasets.forEach(dataset => {
+        if (dataset.datasetSchemaName === reporterName) {
+          reporterDatasets.push(dataset);
+        }
+      });
+      return reporterDatasets;
+    };
+
     const parseDataflowData = (datasets, hasManualAcceptance) => {
       const parsedDatasets = [];
 
@@ -298,7 +308,7 @@ export const PublicDataflowInformation = withRouter(
                 deliveredStatus:
                   !hasManualAcceptance && dataset.isReleased
                     ? config.technicalAcceptanceStatus.DELIVERED.label
-                    : DataflowUtils.getReportingDatasetStatus(datasets, datasetSchemaName)
+                    : DataflowUtils.getReportingDatasetStatus(getReporterDatasets(datasets, datasetSchemaName))
               };
               parsedDatasets.push(parsedDataset);
             }

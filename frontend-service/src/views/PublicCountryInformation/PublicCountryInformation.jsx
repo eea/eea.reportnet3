@@ -208,8 +208,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         }
       });
 
-      const providerName = dataflow.datasets.map(dataset => dataset.datasetSchemaName)[0];
-
       const parsedDataflow = {
         deadline: dataflow.expirationDate,
         id: dataflow.id,
@@ -224,7 +222,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         deliveredStatus:
           !dataflow.manualAcceptance && isReleased
             ? config.technicalAcceptanceStatus.DELIVERED.label
-            : DataflowUtils.getReportingDatasetStatus(dataflow.datasets, providerName),
+            : DataflowUtils.getReportingDatasetStatus(dataflow.datasets),
         restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false
       };
       parsedDataflows.push(parsedDataflow);
