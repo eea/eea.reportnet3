@@ -145,7 +145,7 @@ const getReportingDatasetStatus = (datasets = []) => {
   let providerStatuses = [];
 
   datasets.forEach(dataset => {
-    providerStatuses.push(dataset.status);
+    providerStatuses.push(dataset.technicalAcceptanceStatus);
   });
 
   providerStatuses = uniq(providerStatuses);

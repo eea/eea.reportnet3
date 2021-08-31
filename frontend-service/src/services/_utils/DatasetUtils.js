@@ -29,7 +29,7 @@ const parseDatasetDTO = datasetDTO =>
     referenceDataset: datasetDTO.referenceDataset,
     releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased).format('YYYY-MM-DD HH:mm') : '-',
     restrictFromPublic: datasetDTO.restrictFromPublic,
-    status: datasetDTO.status,
+    technicalAcceptanceStatus: datasetDTO.status,
     updatable: datasetDTO.updatable
   });
 
