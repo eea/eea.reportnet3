@@ -164,11 +164,11 @@ const getReportingDatasetStatus = (datasets = []) => {
   uniqueProviders.forEach(provider => (providersStatus[provider] = uniq(providersStatus[provider])));
 
   const technicalAcceptanceOrderConfig = {
-    0: config.reportingDatasetsStatus.PENDING,
-    1: config.reportingDatasetsStatus.CORRECTION_REQUESTED,
-    2: config.reportingDatasetsStatus.FINAL_FEEDBACK,
-    3: config.reportingDatasetsStatus.TECHNICALLY_ACCEPTED,
-    4: config.reportingDatasetsStatus.RELEASED
+    0: config.technicalAcceptanceStatus.PENDING,
+    1: config.technicalAcceptanceStatus.CORRECTION_REQUESTED,
+    2: config.technicalAcceptanceStatus.FINAL_FEEDBACK,
+    3: config.technicalAcceptanceStatus.TECHNICALLY_ACCEPTED,
+    4: config.technicalAcceptanceStatus.RELEASED
   };
 
   const technicalConfig = Object.values(technicalAcceptanceOrderConfig);
