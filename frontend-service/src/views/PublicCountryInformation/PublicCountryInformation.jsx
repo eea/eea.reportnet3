@@ -263,7 +263,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         if (field === 'obligation') template = renderObligationBodyColumn;
         if (field === 'publicFilesNames') template = renderDownloadFileBodyColumn;
         if (field === 'referencePublicFilesNames') template = renderDownloadReferenceFileBodyColumn;
-        if (field === 'deliveredStatus') template = deliveredStatusBodyColumn;
         return (
           <Column
             body={template}
@@ -365,10 +364,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     <div className={styles.checkedValueColumn}>
       {rowData.isReleased && <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />}
     </div>
-  );
-
-  const deliveredStatusBodyColumn = rowData => (
-    <div className={styles.cellContentPosition}>{rowData.deliveredStatus}</div>
   );
 
   const renderLegalInstrumentBodyColumn = rowData => (

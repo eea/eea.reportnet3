@@ -230,10 +230,6 @@ export const PublicDataflowInformation = withRouter(
       </div>
     );
 
-    const deliveredStatusBodyColumn = rowData => (
-      <div className={styles.cellContentPosition}>{rowData.deliveredStatus}</div>
-    );
-
     const onFileDownload = async (dataProviderId, fileName) => {
       try {
         let fileContent;
@@ -338,7 +334,6 @@ export const PublicDataflowInformation = withRouter(
           if (field === 'datasetSchemaName') template = countryBodyColumn;
           if (field === 'publicsFileName') template = downloadFileBodyColumn;
           if (field === 'releaseDate') template = releaseDateBodyColumn;
-          if (field === 'deliveredStatus') template = deliveredStatusBodyColumn;
           return (
             <Column
               body={template}
