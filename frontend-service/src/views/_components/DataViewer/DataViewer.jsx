@@ -1220,7 +1220,7 @@ const DataViewer = withRouter(
             isDialog={true}
             maxFileSize={
               !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
-                ? records.selectedMaxSize * 1000 * 1024
+                ? records.selectedMaxSize * config.MB_SIZE
                 : config.MAX_ATTACHMENT_SIZE
             }
             name="file"
