@@ -88,17 +88,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const getHeader = fieldHeader => {
     let header;
     switch (fieldHeader) {
-      case 'name':
-        header = resourcesContext.messages['name'];
-        break;
       case 'obligation':
         header = resourcesContext.messages['obligationTitle'];
-        break;
-      case 'legalInstrument':
-        header = resourcesContext.messages['legalInstrument'];
-        break;
-      case 'deadline':
-        header = resourcesContext.messages['deadline'];
         break;
       case 'isReleasable':
         header = resourcesContext.messages['status'];
@@ -106,20 +97,14 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       case 'isReleased':
         header = resourcesContext.messages['delivered'];
         break;
-      case 'releaseDate':
-        header = resourcesContext.messages['releaseDate'];
-        break;
       case 'publicFilesNames':
         header = resourcesContext.messages['files'];
-        break;
-      case 'deliveredStatus':
-        header = resourcesContext.messages['deliveredStatus'];
         break;
       case 'referencePublicFilesNames':
         header = resourcesContext.messages['referenceDatasets'];
         break;
       default:
-        header = fieldHeader;
+        header = resourcesContext.messages[fieldHeader];
         break;
     }
     return header;

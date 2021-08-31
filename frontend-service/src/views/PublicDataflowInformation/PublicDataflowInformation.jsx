@@ -156,16 +156,11 @@ export const PublicDataflowInformation = withRouter(
         case 'datasetSchemaName':
           header = resourcesContext.messages['countries'];
           break;
-        case 'releaseDate':
-          header = resourcesContext.messages['releaseDate'];
-          break;
-        case 'deliveredStatus':
-          header = resourcesContext.messages['deliveredStatus'];
-          break;
         case 'publicsFileName':
           header = resourcesContext.messages['files'];
           break;
         default:
+          header = resourcesContext.messages[fieldHeader];
           break;
       }
       return header;
