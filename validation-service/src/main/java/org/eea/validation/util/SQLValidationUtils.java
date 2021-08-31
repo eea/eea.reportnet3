@@ -61,11 +61,16 @@ public class SQLValidationUtils {
   /** The dataset repository. */
   private static DatasetRepository datasetRepository;
 
-  /** The dataset repository. */
+  /** The record repository. */
   private static RecordRepository recordRepository;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(SQLValidationUtils.class);
+
+
 
   /**
    * Sets the sql rules service.
@@ -446,6 +451,7 @@ public class SQLValidationUtils {
    * @param object the object
    * @param rule the rule
    * @param dataSetSchema the data set schema
+   * @param tableName the table name
    * @return the string
    */
   private static String prepareSQLErrorMessage(Object object, Rule rule,
@@ -453,6 +459,8 @@ public class SQLValidationUtils {
     String errorMessage = rule.getThenCondition().get(0);
     if (dataSetSchema.isPresent()) {
       String sql = rule.getSqlSentence();
+      LOG.info("SQL Rule for check: {}", sql);
+      LOG.info("Message Rule for check: {}", errorMessage);
       if (validateMessage(errorMessage)) {
         // get the fields from ruleMessage to replace later
         ArrayList<String> fieldsToReplace = getFieldsToReplace(errorMessage);
@@ -470,8 +478,8 @@ public class SQLValidationUtils {
    *
    * @param object the object
    * @param errorMessage the error message
-   * @param fieldsAndSchemas
-   * @param fieldsToReplace
+   * @param fieldsToReplace the fields to replace
+   * @param fieldsAndSchemas the fields and schemas
    * @return the string
    */
   private static String rewriteMessage(Object object, String errorMessage,
@@ -495,7 +503,8 @@ public class SQLValidationUtils {
   /**
    * Gets the replacement.
    *
-   * @param rvAux the rv aux
+   * @param field the field
+   * @param rvAux the Auxiliary RecordValue
    * @param fieldsAndSchemas the fields and schemas
    * @return the replacement
    */
@@ -504,7 +513,7 @@ public class SQLValidationUtils {
     String replacement = "";
     for (Map.Entry fieldNameOrAlias : fieldsAndSchemas.entrySet()) {
       for (FieldValue fieldAux : rvAux.getFields()) {
-        if (field.contains(fieldNameOrAlias.getKey().toString())
+        if (field.toLowerCase().contains(fieldNameOrAlias.getKey().toString().toLowerCase())
             && fieldAux.getIdFieldSchema().equals(fieldNameOrAlias.getValue())) {
           replacement = fieldAux.getValue();
         }
@@ -534,12 +543,12 @@ public class SQLValidationUtils {
    * @return the fields to replace
    */
   private static ArrayList<String> getFieldsToReplace(String errorMessage) {
-    ArrayList<String> auxList = new ArrayList<String>();
-    String[] wordsList = errorMessage.split(" ");
-    for (String word : wordsList) {
-      if (word.startsWith("{%") && word.endsWith("%}")) {
-        auxList.add(word);
-      }
+    ArrayList<String> auxList = new ArrayList<>();
+    String regex = "\\{%\\w*%}";
+    Pattern p = Pattern.compile(regex);
+    Matcher m = p.matcher(errorMessage);
+    while (m.find()) {
+      auxList.add(m.group());
     }
     return auxList;
   }
@@ -582,10 +591,18 @@ public class SQLValidationUtils {
           fieldAlias = fieldTrimmed;
         }
         for (FieldSchema auxIndexField : indexFields) {
-          if (auxIndexField.getHeaderName().equals(queryField)) {
-            fieldsAndSchemas.put(fieldAlias, auxIndexField.getIdFieldSchema().toString());
+          if (auxIndexField.getHeaderName().equalsIgnoreCase(queryField)) {
+
+            fieldsAndSchemas.put(fieldAlias.replace("\"", ""),
+                auxIndexField.getIdFieldSchema().toString());
           }
         }
+      }
+    } else {
+      List<FieldSchema> indexFields = getNamesAndIdsFromSchema(dataSetSchema, tableName);
+      for (FieldSchema auxIndexField : indexFields) {
+        fieldsAndSchemas.put(auxIndexField.getHeaderName(),
+            auxIndexField.getIdFieldSchema().toString());
       }
     }
     return fieldsAndSchemas;
