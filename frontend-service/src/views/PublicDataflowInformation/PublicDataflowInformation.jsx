@@ -5,7 +5,6 @@ import ReactTooltip from 'react-tooltip';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
@@ -282,8 +281,6 @@ export const PublicDataflowInformation = withRouter(
 
       const datasetsSchemaName = !isNil(datasets) && uniq(datasets.map(dataset => dataset.datasetSchemaName));
 
-      const getReportingDatasetStatus = DataflowUtils.getReportingDatasetStatus(datasets);
-
       !isNil(datasets) &&
         datasetsSchemaName.forEach(datasetSchemaName => {
           const publicsFileName = [];
@@ -301,7 +298,7 @@ export const PublicDataflowInformation = withRouter(
                 reportingDatasetsStatus:
                   !hasManualAcceptance && dataset.isReleased
                     ? config.technicalAcceptanceStatus.DELIVERED.label
-                    : config.technicalAcceptanceStatus[getReportingDatasetStatus[datasetSchemaName]].label
+                    : DataflowUtils.getReportingDatasetStatus(datasets, datasetSchemaName)
               };
               parsedDatasets.push(parsedDataset);
             }

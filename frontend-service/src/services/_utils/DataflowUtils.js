@@ -141,27 +141,16 @@ const parseUsersList = usersListDTO => {
   return usersList;
 };
 
-const getReportingDatasetStatus = (datasets = []) => {
-  const providers = [];
-  const providersStatus = {};
-
-  datasets.forEach(dataset => providers.push(dataset.datasetSchemaName));
-
-  const uniqueProviders = uniq(providers);
+const getReportingDatasetStatus = (datasets = [], providerName) => {
+  let providerStatuses = [];
 
   datasets.forEach(dataset => {
-    uniqueProviders.forEach(provider => {
-      if (provider === dataset.datasetSchemaName) {
-        if (providersStatus[provider]) {
-          providersStatus[provider].push(dataset.status);
-        } else {
-          providersStatus[provider] = [dataset.status];
-        }
-      }
-    });
+    if (providerName === dataset.datasetSchemaName) {
+      providerStatuses.push(dataset.status);
+    }
   });
 
-  uniqueProviders.forEach(provider => (providersStatus[provider] = uniq(providersStatus[provider])));
+  providerStatuses = uniq(providerStatuses);
 
   const technicalAcceptanceOrderConfig = {
     0: config.technicalAcceptanceStatus.PENDING,
@@ -173,21 +162,17 @@ const getReportingDatasetStatus = (datasets = []) => {
 
   const technicalConfig = Object.values(technicalAcceptanceOrderConfig);
 
-  uniqueProviders.forEach(provider => {
-    let result = null;
+  let result = null;
 
+  providerStatuses.forEach(status => {
     technicalConfig.forEach(technicalAcceptance => {
-      providersStatus[provider].forEach(datasetStatus => {
-        if (isNil(result) && datasetStatus === technicalAcceptance.key) {
-          result = datasetStatus;
-        }
-      });
+      if (isNil(result) && status === technicalAcceptance.key) {
+        result = technicalAcceptance.label;
+      }
     });
-
-    providersStatus[provider] = result;
   });
 
-  return providersStatus;
+  return result;
 };
 
 export const DataflowUtils = {
