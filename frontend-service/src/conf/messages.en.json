@@ -1246,7 +1246,6 @@
     "feedbackDownloadMessageAttachmentError": "Error downloading the message attachment",
     "feedbackMaxFileSizeError": "File must be smaller than 20 MB",
     "clone": "Clone",
-    "feedbackInvalidFileError": "Please, drop a valid file",
-    "finalFeedback": "Final feedback"
+    "feedbackInvalidFileError": "Please, drop a valid file"
   }
 }

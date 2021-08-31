@@ -228,8 +228,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         releaseDate: isReleased ? dataflow.datasets[0].releaseDate : '-',
         reportingDatasetsStatus:
           !dataflow.manualAcceptance && isReleased
-            ? resourcesContext.messages[config.reportingDatasetsStatus.DELIVERED.label]
-            : resourcesContext.messages[config.reportingDatasetsStatus[deliveredStatus[providerName]].label],
+            ? config.reportingDatasetsStatus.DELIVERED.label
+            : config.reportingDatasetsStatus[deliveredStatus[providerName]].label,
         restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false
       };
       parsedDataflows.push(parsedDataflow);
