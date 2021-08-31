@@ -115,9 +115,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       case 'reportingDatasetsStatus':
         header = resourcesContext.messages['reportingDatasetsStatus'];
         break;
-      case 'manualAcceptance':
-        header = resourcesContext.messages['manualAcceptance'];
-        break;
       case 'referencePublicFilesNames':
         header = resourcesContext.messages['referenceDatasets'];
         break;
@@ -219,7 +216,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         isReleasable: dataflow.isReleasable,
         isReleased: isReleased,
         legalInstrument: dataflow.obligation?.legalInstruments,
-        manualAcceptance: dataflow.manualAcceptance,
         name: dataflow.name,
         obligation: dataflow.obligation,
         publicFilesNames: publicFilesNames,
@@ -245,10 +241,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       { id: 'deadline', index: 4 },
       { id: 'isReleasable', index: 5 },
       { id: 'releaseDate', index: 6 },
-      { id: 'manualAcceptance', index: 7 },
-      { id: 'reportingDatasetsStatus', index: 8 },
-      { id: 'referencePublicFilesNames', index: 9 },
-      { id: 'publicFilesNames', index: 10 }
+      { id: 'reportingDatasetsStatus', index: 7 },
+      { id: 'referencePublicFilesNames', index: 8 },
+      { id: 'publicFilesNames', index: 9 }
     ];
 
     return dataflows
@@ -266,7 +261,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         if (field === 'isReleasable') template = renderIsReleasableBodyColumn;
         if (field === 'isReleased') template = renderIsReleasedBodyColumn;
         if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
-        if (field === 'manualAcceptance') template = renderManualAcceptanceBodyColumn;
         if (field === 'name') template = renderDataflowNameBodyColumn;
         if (field === 'obligation') template = renderObligationBodyColumn;
         if (field === 'publicFilesNames') template = renderDownloadFileBodyColumn;
@@ -372,12 +366,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const renderIsReleasedBodyColumn = rowData => (
     <div className={styles.checkedValueColumn}>
       {rowData.isReleased && <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />}
-    </div>
-  );
-
-  const renderManualAcceptanceBodyColumn = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.manualAcceptance && <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />}
     </div>
   );
 
