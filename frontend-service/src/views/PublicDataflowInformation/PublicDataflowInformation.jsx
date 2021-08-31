@@ -159,8 +159,8 @@ export const PublicDataflowInformation = withRouter(
         case 'releaseDate':
           header = resourcesContext.messages['releaseDate'];
           break;
-        case 'reportingDatasetsStatus':
-          header = resourcesContext.messages['reportingDatasetsStatus'];
+        case 'deliveredStatus':
+          header = resourcesContext.messages['deliveredStatus'];
           break;
         case 'publicsFileName':
           header = resourcesContext.messages['files'];
@@ -191,7 +191,7 @@ export const PublicDataflowInformation = withRouter(
         { id: 'id', index: 0 },
         { id: 'datasetSchemaName', index: 1 },
         { id: 'releaseDate', index: 2 },
-        { id: 'reportingDatasetsStatus', index: 3 },
+        { id: 'deliveredStatus', index: 3 },
         { id: 'publicsFileName', index: 4 }
       ];
 
@@ -230,8 +230,8 @@ export const PublicDataflowInformation = withRouter(
       </div>
     );
 
-    const reportingDatasetsStatusBodyColumn = rowData => (
-      <div className={styles.cellContentPosition}>{rowData.reportingDatasetsStatus}</div>
+    const deliveredStatusBodyColumn = rowData => (
+      <div className={styles.cellContentPosition}>{rowData.deliveredStatus}</div>
     );
 
     const onFileDownload = async (dataProviderId, fileName) => {
@@ -295,7 +295,7 @@ export const PublicDataflowInformation = withRouter(
                 releaseDate: dataset.releaseDate,
                 restrictFromPublic: dataset.restrictFromPublic,
                 publicsFileName: publicsFileName,
-                reportingDatasetsStatus:
+                deliveredStatus:
                   !hasManualAcceptance && dataset.isReleased
                     ? config.technicalAcceptanceStatus.DELIVERED.label
                     : DataflowUtils.getReportingDatasetStatus(datasets, datasetSchemaName)
@@ -321,14 +321,14 @@ export const PublicDataflowInformation = withRouter(
             key.includes('datasetSchemaName') ||
             key.includes('publicsFileName') ||
             key.includes('releaseDate') ||
-            key.includes('reportingDatasetsStatus')
+            key.includes('deliveredStatus')
         )
         .map(field => {
           let template = null;
           if (field === 'datasetSchemaName') template = countryBodyColumn;
           if (field === 'publicsFileName') template = downloadFileBodyColumn;
           if (field === 'releaseDate') template = releaseDateBodyColumn;
-          if (field === 'reportingDatasetsStatus') template = reportingDatasetsStatusBodyColumn;
+          if (field === 'deliveredStatus') template = deliveredStatusBodyColumn;
           return (
             <Column
               body={template}

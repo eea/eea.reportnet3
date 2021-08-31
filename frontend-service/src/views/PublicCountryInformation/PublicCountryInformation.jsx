@@ -112,8 +112,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       case 'publicFilesNames':
         header = resourcesContext.messages['files'];
         break;
-      case 'reportingDatasetsStatus':
-        header = resourcesContext.messages['reportingDatasetsStatus'];
+      case 'deliveredStatus':
+        header = resourcesContext.messages['deliveredStatus'];
         break;
       case 'referencePublicFilesNames':
         header = resourcesContext.messages['referenceDatasets'];
@@ -221,7 +221,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         publicFilesNames: publicFilesNames,
         referencePublicFilesNames: referencePublicFilesNames,
         releaseDate: isReleased ? dataflow.datasets[0].releaseDate : '-',
-        reportingDatasetsStatus:
+        deliveredStatus:
           !dataflow.manualAcceptance && isReleased
             ? config.technicalAcceptanceStatus.DELIVERED.label
             : DataflowUtils.getReportingDatasetStatus(dataflow.datasets, providerName),
@@ -241,7 +241,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       { id: 'deadline', index: 4 },
       { id: 'isReleasable', index: 5 },
       { id: 'releaseDate', index: 6 },
-      { id: 'reportingDatasetsStatus', index: 7 },
+      { id: 'deliveredStatus', index: 7 },
       { id: 'referencePublicFilesNames', index: 8 },
       { id: 'publicFilesNames', index: 9 }
     ];
@@ -265,7 +265,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         if (field === 'obligation') template = renderObligationBodyColumn;
         if (field === 'publicFilesNames') template = renderDownloadFileBodyColumn;
         if (field === 'referencePublicFilesNames') template = renderDownloadReferenceFileBodyColumn;
-        if (field === 'reportingDatasetsStatus') template = reportingDatasetsStatusBodyColumn;
+        if (field === 'deliveredStatus') template = deliveredStatusBodyColumn;
         return (
           <Column
             body={template}
@@ -369,8 +369,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     </div>
   );
 
-  const reportingDatasetsStatusBodyColumn = rowData => (
-    <div className={styles.cellContentPosition}>{rowData.reportingDatasetsStatus}</div>
+  const deliveredStatusBodyColumn = rowData => (
+    <div className={styles.cellContentPosition}>{rowData.deliveredStatus}</div>
   );
 
   const renderLegalInstrumentBodyColumn = rowData => (

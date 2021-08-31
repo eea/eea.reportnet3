@@ -1233,7 +1233,6 @@
     "sqlErrorMessage": "SQL error message: ",
     "sqlErrorMessageCopy": "Please click to copy to clipboard the SQL Error.",
     "arePrefilledTablesDeletedCheckboxLabel": "Delete prefilled tables data",
-    "reportingDatasetsStatus": "Delivered status",
     "manualAcceptance": "Manual acceptance",
     "pilotScenarioAmbitionColumnTitle": "Pilot scenario ambition",
     "frequencyColumnTitle": "Frequency",
@@ -1246,6 +1245,7 @@
     "feedbackDownloadMessageAttachmentError": "Error downloading the message attachment",
     "feedbackMaxFileSizeError": "File must be smaller than 20 MB",
     "clone": "Clone",
-    "feedbackInvalidFileError": "Please, drop a valid file"
+    "feedbackInvalidFileError": "Please, drop a valid file",
+    "deliveredStatus": "Delivered status"
   }
 }
