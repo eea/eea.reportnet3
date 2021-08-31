@@ -478,14 +478,9 @@ public class SQLValidationUtils {
       ArrayList<String> fieldsToReplace, Map<String, String> fieldsAndSchemas) {
     if (object instanceof FieldValue) {
       FieldValue fvAux = (FieldValue) object;
-      if (fieldsAndSchemas.size() == 1) {
-        errorMessage = errorMessage.replace(fieldsToReplace.get(0), fvAux.getValue());
-      } else {
-        RecordValue rvAux = recordRepository.findFieldsByIdRecord(fvAux.getRecord().getId());
-        for (String field : fieldsToReplace) {
-          errorMessage =
-              errorMessage.replace(field, getReplacement(field, rvAux, fieldsAndSchemas));
-        }
+      RecordValue rvAux = recordRepository.findFieldsByIdRecord(fvAux.getRecord().getId());
+      for (String field : fieldsToReplace) {
+        errorMessage = errorMessage.replace(field, getReplacement(field, rvAux, fieldsAndSchemas));
       }
     } else if (object instanceof RecordValue) {
       RecordValue rvAux = (RecordValue) object;
