@@ -585,7 +585,7 @@ export const WebformField = ({
           isDialog={true}
           maxFileSize={
             !isNil(element.maxSize) && element.maxSize.toString() !== '0'
-              ? element.maxSize * 1000 * 1024
+              ? element.maxSize * 1024 * 1024
               : config.MAX_ATTACHMENT_SIZE
           }
           name="file"
