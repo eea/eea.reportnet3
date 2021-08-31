@@ -1,6 +1,5 @@
 import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
-import uniq from 'lodash/uniq';
 
 import { config } from 'conf';
 
@@ -142,13 +141,7 @@ const parseUsersList = usersListDTO => {
 };
 
 const getReportingDatasetStatus = (datasets = []) => {
-  let providerStatuses = [];
-
-  datasets.forEach(dataset => {
-    providerStatuses.push(dataset.technicalAcceptanceStatus);
-  });
-
-  providerStatuses = uniq(providerStatuses);
+  const [providerStatus] = datasets.map(dataset => dataset.technicalAcceptanceStatus);
 
   const technicalAcceptanceOrderConfig = {
     0: config.technicalAcceptanceStatus.PENDING,
@@ -162,12 +155,10 @@ const getReportingDatasetStatus = (datasets = []) => {
 
   let result = null;
 
-  providerStatuses.forEach(status => {
-    technicalConfig.forEach(technicalAcceptance => {
-      if (isNil(result) && status === technicalAcceptance.key) {
-        result = technicalAcceptance.label;
-      }
-    });
+  technicalConfig.forEach(technicalAcceptance => {
+    if (isNil(result) && providerStatus === technicalAcceptance.key) {
+      result = technicalAcceptance.label;
+    }
   });
 
   return result;
