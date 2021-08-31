@@ -222,7 +222,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         deliveredStatus:
           !dataflow.manualAcceptance && isReleased
             ? config.technicalAcceptanceStatus.DELIVERED.label
-            : DataflowUtils.getReportingDatasetStatus(dataflow.datasets),
+            : DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets),
         restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false
       };
       parsedDataflows.push(parsedDataflow);

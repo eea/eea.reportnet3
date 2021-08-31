@@ -308,7 +308,7 @@ export const PublicDataflowInformation = withRouter(
                 deliveredStatus:
                   !hasManualAcceptance && dataset.isReleased
                     ? config.technicalAcceptanceStatus.DELIVERED.label
-                    : DataflowUtils.getReportingDatasetStatus(getReporterDatasets(datasets, datasetSchemaName))
+                    : DataflowUtils.getTechnicalAcceptanceStatus(getReporterDatasets(datasets, datasetSchemaName))
               };
               parsedDatasets.push(parsedDataset);
             }

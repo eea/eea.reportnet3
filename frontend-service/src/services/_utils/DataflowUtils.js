@@ -140,7 +140,7 @@ const parseUsersList = usersListDTO => {
   return usersList;
 };
 
-const getReportingDatasetStatus = (datasets = []) => {
+const getTechnicalAcceptanceStatus = (datasets = []) => {
   const [providerStatus] = datasets.map(dataset => dataset.technicalAcceptanceStatus);
 
   const technicalAcceptanceOrderConfig = {
@@ -165,7 +165,7 @@ const getReportingDatasetStatus = (datasets = []) => {
 };
 
 export const DataflowUtils = {
-  getReportingDatasetStatus,
+  getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
   parseCountriesUserList,
   parseDataflowDTO,
