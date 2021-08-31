@@ -375,7 +375,7 @@ export const NationalSystemsField = ({
           isDialog={true}
           maxFileSize={
             !isNil(field.maxSize) && field.maxSize.toString() !== '0'
-              ? field.maxSize * 1024 * 1024
+              ? field.maxSize * config.MB_SIZE
               : config.MAX_ATTACHMENT_SIZE
           }
           mode={'advanced'}
