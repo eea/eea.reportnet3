@@ -1,8 +1,7 @@
 {
-  "DELIVERED": { "key": "DELIVERED", "label": "Delivered" },
+  "DELIVERED": { "key": "RELEASED", "label": "Delivered" },
   "PENDING": { "key": "PENDING", "label": "Pending" },
   "CORRECTION_REQUESTED": { "key": "CORRECTION_REQUESTED", "label": "Correction requested" },
   "FINAL_FEEDBACK": { "key": "FINAL_FEEDBACK", "label": "Final feedback" },
-  "TECHNICALLY_ACCEPTED": { "key": "TECHNICALLY_ACCEPTED", "label": "Technically accepted" },
-  "RELEASED": { "key": "RELEASED", "label": "Released" }
+  "TECHNICALLY_ACCEPTED": { "key": "TECHNICALLY_ACCEPTED", "label": "Technically accepted" }
 }
