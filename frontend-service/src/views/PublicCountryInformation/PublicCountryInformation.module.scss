@@ -16,7 +16,7 @@
 
 .filesContainer {
   display: flex;
-  align-items: center;
+  justify-content: center !important;
 
   .filesIcon {
     font-size: 1.4rem;
