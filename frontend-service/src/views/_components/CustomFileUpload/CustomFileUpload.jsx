@@ -38,6 +38,7 @@ export const CustomFileUpload = ({
   invalidExtensionMessage = '',
   invalidFileSizeMessageDetail = 'maximum upload size is {0}.',
   invalidFileSizeMessageSummary = '{0}= Invalid file size, ',
+  invalidNumberOfFilesMessageSummary = 'You can only upload {0} {1}.',
   isDialog = false,
   maxFileSize = null,
   mode = 'advanced',
@@ -82,7 +83,24 @@ export const CustomFileUpload = ({
 
   useEffect(() => {
     if (!isNil(draggedFiles)) {
-      dispatch({ type: 'UPLOAD_PROPERTY', payload: { files: [...draggedFiles] } });
+      if (draggedFiles.length > fileLimit) {
+        messagesUI.current.show({
+          severity: 'error',
+          summary: invalidNumberOfFilesMessageSummary
+            .replace('{0}', fileLimit)
+            .replace(
+              '{1}',
+              fileLimit > 1
+                ? resourcesContext.messages['files'].toLowerCase()
+                : resourcesContext.messages['file'].toLowerCase()
+            )
+        });
+      } else {
+        dispatch({
+          type: 'UPLOAD_PROPERTY',
+          payload: { files: [...draggedFiles] }
+        });
+      }
     }
   }, [draggedFiles]);
 
@@ -303,9 +321,22 @@ export const CustomFileUpload = ({
       event.preventDefault();
 
       let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
-      let allowDrop = multiple || (files && files.length === 1);
 
-      if (allowDrop) onFileSelect(event);
+      if (files && files.length > fileLimit) {
+        messagesUI.current.show({
+          severity: 'error',
+          summary: invalidNumberOfFilesMessageSummary
+            .replace('{0}', fileLimit)
+            .replace(
+              '{1}',
+              fileLimit > 1
+                ? resourcesContext.messages['files'].toLowerCase()
+                : resourcesContext.messages['file'].toLowerCase()
+            )
+        });
+      } else {
+        onFileSelect(event);
+      }
     }
   };
 

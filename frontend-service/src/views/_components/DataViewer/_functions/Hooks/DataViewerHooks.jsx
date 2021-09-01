@@ -405,7 +405,8 @@ export const useSetColumns = (
                       style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: 'flex-start'
+                        alignItems: 'flex-start',
+                        opacity: '0.9'
                       }}>
                       {getTooltipMessage(column)}
                     </div>

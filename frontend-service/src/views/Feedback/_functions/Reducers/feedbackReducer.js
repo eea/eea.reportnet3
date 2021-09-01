@@ -79,7 +79,7 @@ export const feedbackReducer = (state, { type, payload }) => {
         currentPage: !isNil(payload) && !isNil(payload.currentPage) ? state.currentPage : 0
       };
     case 'SET_DRAGGED_FILES':
-      return { ...state, draggedFiles: payload, importFileDialogVisible: true, isDragging: false };
+      return { ...state, draggedFiles: payload, importFileDialogVisible: true };
     case 'RESET_DRAGGED_FILES':
       return { ...state, draggedFiles: null };
     case 'TOGGLE_FILE_UPLOAD_VISIBILITY':

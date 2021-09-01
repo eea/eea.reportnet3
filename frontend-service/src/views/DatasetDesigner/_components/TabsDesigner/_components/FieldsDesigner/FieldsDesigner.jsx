@@ -819,12 +819,10 @@ export const FieldsDesigner = ({
           dialogHeader={`${resourcesContext.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}
           dialogOnHide={() => manageDialogs('isImportTableSchemaDialogVisible', false)}
           dialogVisible={designerState.isImportTableSchemaDialogVisible}
-          fileLimit={1}
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           mode="advanced"
-          multiple={false}
           name="file"
           onError={onImportTableSchemaError}
           onUpload={onUpload}

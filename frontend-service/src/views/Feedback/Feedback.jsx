@@ -214,7 +214,17 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onDrop = event => {
     let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
-    dispatchFeedback({ type: 'SET_DRAGGED_FILES', payload: files });
+    if (!isEmpty(files)) {
+      if (files[0].size <= config.MAX_ATTACHMENT_SIZE) {
+        dispatchFeedback({ type: 'SET_DRAGGED_FILES', payload: files });
+      } else {
+        notificationContext.add({ type: 'FEEDBACK_MAX_FILE_SIZE_ERROR' });
+      }
+    } else {
+      notificationContext.add({ type: 'FEEDBACK_INVALID_FILE_ERROR' });
+    }
+    dispatchFeedback({ type: 'TOGGLE_IS_DRAGGING', payload: false });
+
     event.currentTarget.style.border = '';
     event.currentTarget.style.opacity = '';
   };
@@ -273,7 +283,7 @@ export const Feedback = withRouter(({ match, history }) => {
 
     const filteredDataProviders = responseDataProviders.filter(dataProvider =>
       responseRepresentatives.representatives.some(
-        representative => representative.dataProviderId === dataProvider.dataProviderId
+        representative => representative.dataProviderId === dataProvider.dataProviderId && representative.hasDatasets
       )
     );
 
@@ -370,11 +380,13 @@ export const Feedback = withRouter(({ match, history }) => {
             className={`feedback-messages-help-step`}
             dataflowId={dataflowId}
             emptyMessage={
-              isCustodian && isEmpty(selectedDataProvider)
-                ? resourcesContext.messages['noMessagesCustodian']
-                : isEmpty(selectedDataProvider)
-                ? resourcesContext.messages['noMessagesCustodian']
-                : resourcesContext.messages['noMessages']
+              !isNil(isCustodian)
+                ? !isCustodian
+                  ? resourcesContext.messages['noMessages']
+                  : isEmpty(selectedDataProvider)
+                  ? resourcesContext.messages['noMessagesCustodian']
+                  : resourcesContext.messages['noMessages']
+                : ''
             }
             isCustodian={isCustodian}
             isLoading={isLoading}
@@ -387,10 +399,10 @@ export const Feedback = withRouter(({ match, history }) => {
             onUpdateNewMessageAdded={onUpdateNewMessageAdded}
             providerId={selectedDataProvider?.dataProviderId}
           />
-          {!isCustodian && (
+          {!isNil(isCustodian) && !isCustodian && (
             <label className={styles.helpdeskMessage}>{resourcesContext.messages['feedbackHelpdeskMessage']}</label>
           )}
-          {isCustodian && (
+          {!isNil(isCustodian) && isCustodian && (
             <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
               <InputTextarea
                 className={styles.sendMessageTextarea}

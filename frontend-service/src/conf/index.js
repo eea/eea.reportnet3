@@ -11,12 +11,13 @@ import permissions from './permissions.json';
 import primeIcons from './prime.icons.json';
 import publicFrontpage from './publicFrontpage.json';
 import storage from './storage.config.json';
+import technicalAcceptanceStatus from './technicalAcceptanceStatus.json';
 import theme from './theme.config.json';
 import validations from './validation.config.json';
 import webforms from './webforms.config.json';
 
 const config = {};
-
+config.MB_SIZE = 1024 * 1024;
 config.COMPANY_CODE_KEYWORD = '{%R3_COMPANY_CODE%}';
 config.COUNTRY_CODE_KEYWORD = '{%R3_COUNTRY_CODE%}';
 config.MAX_FILE_EXTENSION_LENGTH = 10;
@@ -25,7 +26,7 @@ config.MAX_INTEGRATION_NAME_LENGTH = 50;
 config.INPUT_MAX_LENGTH = 255;
 config.DESCRIPTION_MAX_LENGTH = 10000;
 
-config.MAX_ATTACHMENT_SIZE = 20 * 1000 * 1024;
+config.MAX_ATTACHMENT_SIZE = 20 * config.MB_SIZE;
 
 config.IMPORT_FILE_DELIMITER = ',';
 
@@ -41,9 +42,10 @@ config.languages = languageCode;
 config.notifications = notifications;
 config.permissions = permissions;
 config.publicFrontpage = publicFrontpage;
-config.validations = validations;
 config.storage = storage;
+config.technicalAcceptanceStatus = technicalAcceptanceStatus;
 config.theme = theme;
+config.validations = validations;
 config.webforms = webforms;
 
 export { config };

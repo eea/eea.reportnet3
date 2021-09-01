@@ -391,7 +391,8 @@ export const createValidationReducer = (state, { type, payload }) => {
         ...state,
         candidateRule: {
           ...state.candidateRule,
-          expressionType: payload
+          expressionType: payload,
+          sqlSentence: payload !== 'sqlSentence' ? null : state.candidateRule.sqlSentence
         }
       };
 
