@@ -86,33 +86,20 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   };
 
   const getHeader = fieldHeader => {
-    let header;
     switch (fieldHeader) {
       case 'obligation':
-        header = resourcesContext.messages['obligationTitle'];
-        break;
+        return resourcesContext.messages['obligationTitle'];
       case 'isReleasable':
-        header = resourcesContext.messages['status'];
-        break;
+        return resourcesContext.messages['status'];
       case 'isReleased':
-        header = resourcesContext.messages['delivered'];
-        break;
+        return resourcesContext.messages['delivered'];
       case 'publicFilesNames':
-        header = resourcesContext.messages['files'];
-        break;
+        return resourcesContext.messages['files'];
       case 'referencePublicFilesNames':
-        header = resourcesContext.messages['referenceDatasets'];
-        break;
+        return resourcesContext.messages['referenceDatasets'];
       default:
-        header = resourcesContext.messages[fieldHeader];
-        break;
+        return resourcesContext.messages[fieldHeader];
     }
-    return header;
-  };
-
-  const getPublicFileName = fileName => {
-    const splittedFileName = fileName.split('-');
-    return splittedFileName[1];
   };
 
   const onChangePage = event => {
@@ -161,7 +148,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         sortField
       );
       setTotalRecords(data.totalRecords);
-      parseDataflows(data.publicDataflows);
+      setPublicInformation(data.publicDataflows);
     } catch (error) {
       console.error('PublicCountryInformation - onLoadPublicCountryInformation.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' });
@@ -176,43 +163,41 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     onLoadPublicCountryInformation(event.sortOrder, event.sortField, firstRow, numberRows);
   };
 
-  const parseDataflows = dataflows => {
-    const parsedDataflows = [];
-    dataflows.forEach(dataflow => {
-      const isReleased = dataflow.datasets?.some(dataset => dataset.isReleased);
-      const publicFilesNames = [];
-      dataflow.datasets?.forEach(dataset => {
-        if (!isNil(dataset.publicFileName)) {
-          publicFilesNames.push({ dataProviderId: dataset.dataProviderId, fileName: dataset.publicFileName });
-        }
-      });
-      const referencePublicFilesNames = [];
-      dataflow.referenceDatasets?.forEach(referenceDataset => {
-        if (!isNil(referenceDataset.publicFileName)) {
-          referencePublicFilesNames.push({ fileName: referenceDataset.publicFileName });
-        }
-      });
+  const setPublicInformation = dataflows => {
+    if (isNil(dataflows)) return [];
 
-      const parsedDataflow = {
+    const publicDataflows = dataflows.map(dataflow => {
+      if (isNil(dataflow.datasets)) return null;
+      const dataset = dataflow.datasets[0];
+
+      const publicFileNames = dataflow.datasets
+        ?.filter(dataset => !isNil(dataset.publicFileName))
+        .map(dataset => ({ dataProviderId: dataset.dataProviderId, fileName: dataset.publicFileName }));
+
+      const referencePublicFileNames = dataflow.referenceDatasets
+        ?.filter(referenceDataset => !isNil(referenceDataset.publicFileName))
+        .map(referenceDataset => ({ fileName: referenceDataset.publicFileName }));
+
+      return {
         deadline: dataflow.expirationDate,
         id: dataflow.id,
         isReleasable: dataflow.isReleasable,
-        isReleased: isReleased,
+        isReleased: dataset.isReleased,
         legalInstrument: dataflow.obligation?.legalInstruments,
         name: dataflow.name,
         obligation: dataflow.obligation,
-        publicFilesNames: publicFilesNames,
-        referencePublicFilesNames: referencePublicFilesNames,
-        releaseDate: isReleased ? dataflow.datasets[0].releaseDate : '-',
-        deliveredStatus:
-          !dataflow.manualAcceptance && isReleased
-            ? config.technicalAcceptanceStatus.DELIVERED.label
-            : DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets),
+        publicFilesNames: publicFileNames,
+        referencePublicFilesNames: referencePublicFileNames,
+        deliveryDate: dataset.releaseDate,
+        deliveryStatus: !dataset.isReleased
+          ? config.datasetStatus.PENDING.label
+          : !dataflow.manualAcceptance
+          ? config.datasetStatus.DELIVERED.label
+          : DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status)),
         restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false
       };
-      parsedDataflows.push(parsedDataflow);
     });
-    setDataflows(parsedDataflows);
+    setDataflows(publicDataflows);
   };
 
   const getOrderedColumns = dataflows => {
@@ -223,8 +208,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       { id: 'legalInstrument', index: 3 },
       { id: 'deadline', index: 4 },
       { id: 'isReleasable', index: 5 },
-      { id: 'releaseDate', index: 6 },
-      { id: 'deliveredStatus', index: 7 },
+      { id: 'deliveryDate', index: 6 },
+      { id: 'deliveryStatus', index: 7 },
       { id: 'referencePublicFilesNames', index: 8 },
       { id: 'publicFilesNames', index: 9 }
     ];
@@ -269,7 +254,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
           {rowData.publicFilesNames.map(publicFileName => (
             <span
               className={styles.filesIcon}
-              key={publicFileName}
+              key={publicFileName.fileName}
               onClick={() => onFileDownload(rowData.id, publicFileName.dataProviderId, publicFileName.fileName)}>
               <FontAwesomeIcon
                 className={styles.cursorPointer}
@@ -283,7 +268,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
                 effect="solid"
                 id={publicFileName.fileName}
                 place="top">
-                <span>{getPublicFileName(publicFileName.fileName)}</span>
+                <span>{publicFileName.fileName.split('-')[1]}</span>
               </ReactTooltip>
             </span>
           ))}
@@ -318,7 +303,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
           {rowData.referencePublicFilesNames.map(referencePublicFilesName => (
             <span
               className={styles.filesIcon}
-              key={referencePublicFilesName}
+              key={referencePublicFilesName.fileName}
               onClick={() => onFileDownload(rowData.id, null, referencePublicFilesName.fileName)}>
               <FontAwesomeIcon
                 className={styles.cursorPointer}

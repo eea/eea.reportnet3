@@ -140,28 +140,15 @@ const parseUsersList = usersListDTO => {
   return usersList;
 };
 
-const getTechnicalAcceptanceStatus = (datasets = []) => {
-  const [providerStatus] = datasets.map(dataset => dataset.technicalAcceptanceStatus);
+const getTechnicalAcceptanceStatus = (datasetsStatus = []) => {
+  if (datasetsStatus.some(status => status === config.datasetStatus.CORRECTION_REQUESTED.key))
+    return config.datasetStatus.CORRECTION_REQUESTED.label;
 
-  const technicalAcceptanceOrderConfig = {
-    0: config.technicalAcceptanceStatus.PENDING,
-    1: config.technicalAcceptanceStatus.CORRECTION_REQUESTED,
-    2: config.technicalAcceptanceStatus.FINAL_FEEDBACK,
-    3: config.technicalAcceptanceStatus.TECHNICALLY_ACCEPTED,
-    4: config.technicalAcceptanceStatus.RELEASED
-  };
+  if (datasetsStatus.some(status => status === config.datasetStatus.FINAL_FEEDBACK.key))
+    return config.datasetStatus.FINAL_FEEDBACK.label;
 
-  const technicalConfig = Object.values(technicalAcceptanceOrderConfig);
-
-  let result = null;
-
-  technicalConfig.forEach(technicalAcceptance => {
-    if (isNil(result) && providerStatus === technicalAcceptance.key) {
-      result = technicalAcceptance.label;
-    }
-  });
-
-  return result;
+  if (datasetsStatus.every(status => status === config.datasetStatus.TECHNICALLY_ACCEPTED.key))
+    return config.datasetStatus.TECHNICALLY_ACCEPTED.label;
 };
 
 export const DataflowUtils = {

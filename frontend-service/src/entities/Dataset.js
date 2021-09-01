@@ -21,7 +21,7 @@ export class Dataset {
     tables,
     tableStatisticPercentages,
     tableStatisticValues,
-    technicalAcceptanceStatus,
+    status,
     totalErrors,
     totalFilteredErrors,
     totalRecords,
@@ -49,7 +49,7 @@ export class Dataset {
     this.tables = tables;
     this.tableStatisticPercentages = tableStatisticPercentages;
     this.tableStatisticValues = tableStatisticValues;
-    this.technicalAcceptanceStatus = technicalAcceptanceStatus;
+    this.status = status;
     this.totalErrors = totalErrors;
     this.totalFilteredErrors = totalFilteredErrors;
     this.totalRecords = totalRecords;
