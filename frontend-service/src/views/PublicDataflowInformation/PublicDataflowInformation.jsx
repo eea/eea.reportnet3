@@ -132,16 +132,9 @@ export const PublicDataflowInformation = withRouter(
     };
 
     const getCountryCode = datasetSchemaName => {
-      let country = {};
-      if (!isNil(config.countriesByGroup)) {
-        const countryFound = Object.keys(config.countriesByGroup).some(countriesGroup => {
-          country = config.countriesByGroup[countriesGroup].find(
-            groupCountry => groupCountry.name === datasetSchemaName
-          );
-          return !isNil(country) ? country : false;
-        });
-        return countryFound ? country.code : '';
-      }
+      return Object.values(config.countriesByGroup)
+        .flat()
+        .find(country => country.name === datasetSchemaName).code;
     };
 
     const getHeader = fieldHeader => {
