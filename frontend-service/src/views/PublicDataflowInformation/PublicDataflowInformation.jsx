@@ -33,6 +33,7 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
+import { DataflowUtils } from 'services/_utils/DataflowUtils';
 
 export const PublicDataflowInformation = withRouter(
   ({
@@ -134,13 +135,13 @@ export const PublicDataflowInformation = withRouter(
     const getCountryCode = datasetSchemaName => {
       let country = {};
       if (!isNil(config.countriesByGroup)) {
-        const countryFinded = Object.keys(config.countriesByGroup).some(countriesGroup => {
+        const countryFound = Object.keys(config.countriesByGroup).some(countriesGroup => {
           country = config.countriesByGroup[countriesGroup].find(
             groupCountry => groupCountry.name === datasetSchemaName
           );
           return !isNil(country) ? country : false;
         });
-        return countryFinded ? country.code : '';
+        return countryFound ? country.code : '';
       }
     };
 
@@ -155,16 +156,11 @@ export const PublicDataflowInformation = withRouter(
         case 'datasetSchemaName':
           header = resourcesContext.messages['countries'];
           break;
-        case 'releaseDate':
-          header = resourcesContext.messages['releaseDate'];
-          break;
-        case 'isReleased':
-          header = resourcesContext.messages['delivered'];
-          break;
         case 'publicsFileName':
           header = resourcesContext.messages['files'];
           break;
         default:
+          header = resourcesContext.messages[fieldHeader];
           break;
       }
       return header;
@@ -189,8 +185,8 @@ export const PublicDataflowInformation = withRouter(
       const representativesWithPriority = [
         { id: 'id', index: 0 },
         { id: 'datasetSchemaName', index: 1 },
-        { id: 'isReleased', index: 2 },
-        { id: 'releaseDate', index: 3 },
+        { id: 'releaseDate', index: 2 },
+        { id: 'deliveredStatus', index: 3 },
         { id: 'publicsFileName', index: 4 }
       ];
 
@@ -229,12 +225,6 @@ export const PublicDataflowInformation = withRouter(
       </div>
     );
 
-    const isReleasedBodyColumn = rowData => (
-      <div className={styles.cellContentPosition}>
-        {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
-      </div>
-    );
-
     const onFileDownload = async (dataProviderId, fileName) => {
       try {
         let fileContent;
@@ -263,7 +253,7 @@ export const PublicDataflowInformation = withRouter(
       try {
         const data = await DataflowService.getPublicDataflowData(dataflowId);
         setDataflowData(data);
-        parseDataflowData(data.datasets);
+        parseDataflowData(data.datasets, data.manualAcceptance);
         setReferenceDatasets(data.referenceDatasets);
       } catch (error) {
         console.error('PublicDataflowInformation - onLoadDataflowData.', error);
@@ -277,7 +267,17 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
-    const parseDataflowData = datasets => {
+    const getReporterDatasets = (datasets, reporterName) => {
+      const reporterDatasets = [];
+      datasets.forEach(dataset => {
+        if (dataset.datasetSchemaName === reporterName) {
+          reporterDatasets.push(dataset);
+        }
+      });
+      return reporterDatasets;
+    };
+
+    const parseDataflowData = (datasets, hasManualAcceptance) => {
       const parsedDatasets = [];
 
       const datasetsSchemaName = !isNil(datasets) && uniq(datasets.map(dataset => dataset.datasetSchemaName));
@@ -293,10 +293,13 @@ export const PublicDataflowInformation = withRouter(
               const parsedDataset = {
                 datasetSchemaName: datasetSchemaName,
                 dataProviderId: dataset.dataProviderId,
-                isReleased: dataset.isReleased,
                 releaseDate: dataset.releaseDate,
                 restrictFromPublic: dataset.restrictFromPublic,
-                publicsFileName: publicsFileName
+                publicsFileName: publicsFileName,
+                deliveredStatus:
+                  !hasManualAcceptance && dataset.isReleased
+                    ? config.technicalAcceptanceStatus.DELIVERED.label
+                    : DataflowUtils.getTechnicalAcceptanceStatus(getReporterDatasets(datasets, datasetSchemaName))
               };
               parsedDatasets.push(parsedDataset);
             }
@@ -317,14 +320,13 @@ export const PublicDataflowInformation = withRouter(
         .filter(
           key =>
             key.includes('datasetSchemaName') ||
-            key.includes('isReleased') ||
+            key.includes('publicsFileName') ||
             key.includes('releaseDate') ||
-            key.includes('publicsFileName')
+            key.includes('deliveredStatus')
         )
         .map(field => {
           let template = null;
           if (field === 'datasetSchemaName') template = countryBodyColumn;
-          if (field === 'isReleased') template = isReleasedBodyColumn;
           if (field === 'publicsFileName') template = downloadFileBodyColumn;
           if (field === 'releaseDate') template = releaseDateBodyColumn;
           return (

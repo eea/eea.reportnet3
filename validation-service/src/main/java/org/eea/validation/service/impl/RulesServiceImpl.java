@@ -781,6 +781,10 @@ public class RulesServiceImpl implements RulesService {
           integritySchema.getOriginDatasetSchemaId().toString(),
           integritySchema.getReferencedDatasetSchemaId().toString());
       rule.setIntegrityConstraintId(integritySchema.getId());
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
+          NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
       if (rule.getSqlSentence().contains("!=")) {
         rule.setSqlSentence(rule.getSqlSentence().replaceAll("!=", "<>"));

@@ -5,7 +5,6 @@ import ReactTooltip from 'react-tooltip';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -32,6 +31,7 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
+import { DataflowUtils } from 'services/_utils/DataflowUtils';
 
 export const PublicCountryInformation = withRouter(({ match, history }) => {
   const {
@@ -88,17 +88,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const getHeader = fieldHeader => {
     let header;
     switch (fieldHeader) {
-      case 'name':
-        header = resourcesContext.messages['name'];
-        break;
       case 'obligation':
         header = resourcesContext.messages['obligationTitle'];
-        break;
-      case 'legalInstrument':
-        header = resourcesContext.messages['legalInstrument'];
-        break;
-      case 'deadline':
-        header = resourcesContext.messages['deadline'];
         break;
       case 'isReleasable':
         header = resourcesContext.messages['status'];
@@ -106,23 +97,14 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       case 'isReleased':
         header = resourcesContext.messages['delivered'];
         break;
-      case 'releaseDate':
-        header = resourcesContext.messages['releaseDate'];
-        break;
       case 'publicFilesNames':
         header = resourcesContext.messages['files'];
-        break;
-      case 'reportingDatasetsStatus':
-        header = resourcesContext.messages['reportingDatasetsStatus'];
-        break;
-      case 'manualAcceptance':
-        header = resourcesContext.messages['manualAcceptance'];
         break;
       case 'referencePublicFilesNames':
         header = resourcesContext.messages['referenceDatasets'];
         break;
       default:
-        header = fieldHeader;
+        header = resourcesContext.messages[fieldHeader];
         break;
     }
     return header;
@@ -217,13 +199,15 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         isReleasable: dataflow.isReleasable,
         isReleased: isReleased,
         legalInstrument: dataflow.obligation?.legalInstruments,
-        manualAcceptance: dataflow.manualAcceptance,
         name: dataflow.name,
         obligation: dataflow.obligation,
         publicFilesNames: publicFilesNames,
         referencePublicFilesNames: referencePublicFilesNames,
         releaseDate: isReleased ? dataflow.datasets[0].releaseDate : '-',
-        reportingDatasetsStatus: dataflow.reportingDatasetsStatus,
+        deliveredStatus:
+          !dataflow.manualAcceptance && isReleased
+            ? config.technicalAcceptanceStatus.DELIVERED.label
+            : DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets),
         restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false
       };
       parsedDataflows.push(parsedDataflow);
@@ -240,11 +224,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       { id: 'deadline', index: 4 },
       { id: 'isReleasable', index: 5 },
       { id: 'releaseDate', index: 6 },
-      { id: 'isReleased', index: 7 },
-      { id: 'manualAcceptance', index: 8 },
-      { id: 'reportingDatasetsStatus', index: 9 },
-      { id: 'referencePublicFilesNames', index: 10 },
-      { id: 'publicFilesNames', index: 11 }
+      { id: 'deliveredStatus', index: 7 },
+      { id: 'referencePublicFilesNames', index: 8 },
+      { id: 'publicFilesNames', index: 9 }
     ];
 
     return dataflows
@@ -262,12 +244,10 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
         if (field === 'isReleasable') template = renderIsReleasableBodyColumn;
         if (field === 'isReleased') template = renderIsReleasedBodyColumn;
         if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
-        if (field === 'manualAcceptance') template = renderManualAcceptanceBodyColumn;
         if (field === 'name') template = renderDataflowNameBodyColumn;
         if (field === 'obligation') template = renderObligationBodyColumn;
         if (field === 'publicFilesNames') template = renderDownloadFileBodyColumn;
         if (field === 'referencePublicFilesNames') template = renderDownloadReferenceFileBodyColumn;
-        if (field === 'reportingDatasetsStatus') template = reportingDatasetsStatusBodyColumn;
         return (
           <Column
             body={template}
@@ -368,18 +348,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const renderIsReleasedBodyColumn = rowData => (
     <div className={styles.checkedValueColumn}>
       {rowData.isReleased && <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />}
-    </div>
-  );
-
-  const renderManualAcceptanceBodyColumn = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.manualAcceptance && <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />}
-    </div>
-  );
-
-  const reportingDatasetsStatusBodyColumn = rowData => (
-    <div className={styles.cellContentPosition}>
-      {capitalize(rowData.reportingDatasetsStatus?.replaceAll('_', ' '))}
     </div>
   );
 

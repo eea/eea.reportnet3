@@ -75,6 +75,15 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
   Optional<RecordValue> findByIdValidation(@Param("id") Long recordId);
 
   /**
+   * Find by id.
+   *
+   * @param id the id
+   * @return the record value
+   */
+  @Query("SELECT rv from RecordValue rv INNER JOIN FETCH rv.fields WHERE rv.id = :id")
+  RecordValue findFieldsByIdRecord(@Param("id") String recordId);
+
+  /**
    * Count records dataset.
    *
    * @return the integer

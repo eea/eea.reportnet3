@@ -7,9 +7,9 @@ import { DataCollectionUtils } from 'services/_utils/DataCollectionUtils';
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { DocumentUtils } from 'services/_utils/DocumentUtils';
 import { EUDatasetUtils } from 'services/_utils/EUDatasetUtils';
-import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 import { ObligationUtils } from 'services/_utils/ObligationUtils';
 import { RepresentativeUtils } from 'services/_utils/RepresentativeUtils';
+import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 
 import { Dataflow } from 'entities/Dataflow';
 
@@ -140,14 +140,39 @@ const parseUsersList = usersListDTO => {
   return usersList;
 };
 
+const getTechnicalAcceptanceStatus = (datasets = []) => {
+  const [providerStatus] = datasets.map(dataset => dataset.technicalAcceptanceStatus);
+
+  const technicalAcceptanceOrderConfig = {
+    0: config.technicalAcceptanceStatus.PENDING,
+    1: config.technicalAcceptanceStatus.CORRECTION_REQUESTED,
+    2: config.technicalAcceptanceStatus.FINAL_FEEDBACK,
+    3: config.technicalAcceptanceStatus.TECHNICALLY_ACCEPTED,
+    4: config.technicalAcceptanceStatus.RELEASED
+  };
+
+  const technicalConfig = Object.values(technicalAcceptanceOrderConfig);
+
+  let result = null;
+
+  technicalConfig.forEach(technicalAcceptance => {
+    if (isNil(result) && providerStatus === technicalAcceptance.key) {
+      result = technicalAcceptance.label;
+    }
+  });
+
+  return result;
+};
+
 export const DataflowUtils = {
-  sortDataflowsByExpirationDate,
-  parseDataflowDTO,
-  parseDataflowListDTO,
-  parsePublicDataflowListDTO,
-  parsePublicDataflowDTO,
-  parseSortedDataflowListDTO,
+  getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
   parseCountriesUserList,
-  parseUsersList
+  parseDataflowDTO,
+  parseDataflowListDTO,
+  parsePublicDataflowDTO,
+  parsePublicDataflowListDTO,
+  parseSortedDataflowListDTO,
+  parseUsersList,
+  sortDataflowsByExpirationDate
 };

@@ -18,17 +18,18 @@ const parseDatasetListDTO = datasetsDTO => datasetsDTO?.map(datasetDTO => parseD
 const parseDatasetDTO = datasetDTO =>
   new Dataset({
     availableInPublic: datasetDTO.availableInPublic,
+    dataProviderId: datasetDTO.dataProviderId,
     datasetId: datasetDTO.id,
     datasetSchemaId: datasetDTO.datasetSchema,
     datasetSchemaName: datasetDTO.dataSetName,
     isReleased: datasetDTO.isReleased,
     isReleasing: datasetDTO.releasing,
+    name: datasetDTO.nameDatasetSchema,
     publicFileName: datasetDTO.publicFileName,
     referenceDataset: datasetDTO.referenceDataset,
     releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased).format('YYYY-MM-DD HH:mm') : '-',
     restrictFromPublic: datasetDTO.restrictFromPublic,
-    name: datasetDTO.nameDatasetSchema,
-    dataProviderId: datasetDTO.dataProviderId,
+    technicalAcceptanceStatus: datasetDTO.status,
     updatable: datasetDTO.updatable
   });
 

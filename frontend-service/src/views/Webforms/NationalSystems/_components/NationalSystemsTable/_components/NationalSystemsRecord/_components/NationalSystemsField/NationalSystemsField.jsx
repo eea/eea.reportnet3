@@ -370,17 +370,15 @@ export const NationalSystemsField = ({
           dialogHeader={resourcesContext.messages['uploadAttachment']}
           dialogOnHide={() => handleDialogs('uploadFile', false)}
           dialogVisible={isDialogVisible.uploadFile}
-          fileLimit={1}
           infoTooltip={infoAttachTooltip}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           maxFileSize={
             !isNil(field.maxSize) && field.maxSize.toString() !== '0'
-              ? field.maxSize * 1000 * 1024
+              ? field.maxSize * config.MB_SIZE
               : config.MAX_ATTACHMENT_SIZE
           }
           mode={'advanced'}
-          multiple={false}
           name={'file'}
           onError={onUploadFileError}
           onUpload={onAttachFile}
