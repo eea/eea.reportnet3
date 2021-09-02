@@ -233,7 +233,7 @@ public class DataflowServiceImpl implements DataflowService {
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
 
     // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
 
     // Get user's dataflows sorted by status and creation date
     List<Long> idsResources =
@@ -276,7 +276,7 @@ public class DataflowServiceImpl implements DataflowService {
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
 
     // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
 
     // First, get reference dataflows in DESIGN that the user has permission
     List<Long> idsResources =
@@ -324,7 +324,7 @@ public class DataflowServiceImpl implements DataflowService {
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
 
     // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatus();
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
     boolean userAdmin = isAdmin();
 
     // Get user's dataflows sorted by status and creation date
@@ -355,85 +355,6 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
 
-
-  /**
-   * Sets the reporting dataset status.
-   *
-   * @param datasetsStatusList the datasets status list
-   * @param dataflowVO the dataflow VO
-   */
-  private void setReportingDatasetStatus(List<DataflowStatusDataset> datasetsStatusList,
-      DataFlowVO dataflowVO) {
-    boolean containsPending = false;
-    int releasedCount = 0;
-    int techAcceptedCount = 0;
-    boolean containsCorrectionR = false;
-    boolean containsFinalFeedback = false;
-    for (int i = 0; i < datasetsStatusList.size() && !containsPending; i++) {
-      switch (datasetsStatusList.get(i).getStatus()) {
-        case PENDING:
-          containsPending = true;
-          break;
-        case RELEASED:
-          releasedCount++;
-          break;
-        case CORRECTION_REQUESTED:
-          containsCorrectionR = true;
-          break;
-        case TECHNICALLY_ACCEPTED:
-          techAcceptedCount++;
-          break;
-        case FINAL_FEEDBACK:
-          containsFinalFeedback = true;
-          break;
-        default:
-          containsPending = true;
-          break;
-      }
-    }
-    if (containsPending) {
-      dataflowVO.setReportingStatus(DatasetStatusEnum.PENDING);
-    } else {
-      if (releasedCount == datasetsStatusList.size()) {
-        dataflowVO.setReportingStatus(DatasetStatusEnum.RELEASED);
-      } else if (techAcceptedCount == datasetsStatusList.size()) {
-        dataflowVO.setReportingStatus(DatasetStatusEnum.TECHNICALLY_ACCEPTED);
-      } else if (containsCorrectionR) {
-        dataflowVO.setReportingStatus(DatasetStatusEnum.CORRECTION_REQUESTED);
-      } else if (containsFinalFeedback) {
-        dataflowVO.setReportingStatus(DatasetStatusEnum.FINAL_FEEDBACK);
-      }
-    }
-  }
-
-  /**
-   * Gets the datasets status.
-   *
-   * @return the datasets status
-   */
-  private Map<Long, List<DataflowStatusDataset>> getDatasetsStatus() {
-    Map<Long, List<DataflowStatusDataset>> map = new HashMap<>();
-
-    List<Long> listDatasets =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET).stream()
-            .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (!listDatasets.isEmpty()) {
-      List<IDatasetStatus> queryResult = dataflowRepository.getDatasetsStatus(listDatasets);
-      for (IDatasetStatus object : queryResult) {
-        List<DataflowStatusDataset> list2 = new ArrayList<>();
-        DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
-        dataflowStatusDataset.setId(object.getId());
-        dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
-        list2.add(dataflowStatusDataset);
-        if (map.get(dataflowStatusDataset.getId()) != null) {
-          map.get(dataflowStatusDataset.getId()).addAll(list2);
-        } else {
-          map.put(dataflowStatusDataset.getId(), list2);
-        }
-      }
-    }
-    return map;
-  }
 
   /**
    * Gets the completed.
@@ -503,6 +424,10 @@ public class DataflowServiceImpl implements DataflowService {
     if (dataflowRepository.findByNameIgnoreCase(dataflowVO.getName()).isPresent()) {
       LOG.info("The dataflow: {} already exists.", dataflowVO.getName());
       throw new EEAException(EEAErrorMessage.DATAFLOW_EXISTS_NAME);
+    }
+    // if type comes null, set the default (REPORTING) type to the dataflow
+    if (null == dataflowVO.getType()) {
+      dataflowVO.setType(TypeDataflowEnum.REPORTING);
     }
     if (TypeDataflowEnum.BUSINESS.equals(dataflowVO.getType())) {
       if (!dataProviderGroupRepository.existsById(dataflowVO.getDataProviderGroupId())) {
@@ -663,30 +588,32 @@ public class DataflowServiceImpl implements DataflowService {
       // add resource to delete(DATAFLOW PART)
       deleteDataflowResources(idDataflow);
 
+
+      NotificationVO notificationVO = NotificationVO.builder().dataflowId(idDataflow)
+          .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_COMPLETED_EVENT,
+            null, notificationVO);
+      } catch (EEAException e) {
+        LOG.error(
+            "Failed sending kafka delete dataflow completed event notification. DataflowId: {}",
+            idDataflow);
+      }
+
     } catch (Exception e) {
       NotificationVO notificationVO = NotificationVO.builder().dataflowId(idDataflow)
           .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_FAILED_EVENT, null,
             notificationVO);
+        LOG.error("Error deleting dataflow with id: {}", idDataflow);
         throw new EEAException(String.format("Error deleting dataflow with id: %s", idDataflow), e);
       } catch (EEAException e1) {
         LOG.error("Failed sending kafka delete dataflow failed event notification. DataflowId: {}",
             idDataflow);
       }
     }
-
-    NotificationVO notificationVO = NotificationVO.builder().dataflowId(idDataflow)
-        .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
-
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_COMPLETED_EVENT, null,
-          notificationVO);
-    } catch (EEAException e) {
-      LOG.error("Failed sending kafka delete dataflow completed event notification. DataflowId: {}",
-          idDataflow);
-    }
-
   }
 
   /**
@@ -720,6 +647,7 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   public List<DataflowPublicVO> getPublicDataflows() {
+
     List<DataflowPublicVO> dataflowPublicList =
         dataflowPublicMapper.entityListToClass(dataflowRepository.findByShowPublicInfoTrue());
     dataflowPublicList.stream().forEach(dataflow -> findObligationPublicDataflow(dataflow));
@@ -746,9 +674,12 @@ public class DataflowServiceImpl implements DataflowService {
 
     List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
     setReportings(dataflowPublicList, providerId);
-
-    dataflowPublicList.stream().forEach(dataflow -> dataflow.setReferenceDatasets(
-        referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflow.getId())));
+    List<Long> dataflowIds = new ArrayList<>();
+    dataflowPublicList.stream().forEach(dataflow -> {
+      dataflow.setReferenceDatasets(
+          referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflow.getId()));
+      dataflowIds.add(dataflow.getId());
+    });
 
     // sort and paging
     sortPublicDataflows(dataflowPublicList, header, asc);
@@ -1383,4 +1314,88 @@ public class DataflowServiceImpl implements DataflowService {
           String.format("Error deleting native dataflow with id: %s", dataflowId), e);
     }
   }
+
+  /**
+   * Sets the reporting dataset status.
+   *
+   * @param datasetsStatusList the datasets status list
+   * @param dataflowVO the dataflow VO
+   */
+  private void setReportingDatasetStatus(List<DataflowStatusDataset> datasetsStatusList,
+      DataFlowVO dataflowVO) {
+    boolean containsPending = false;
+    int releasedCount = 0;
+    int techAcceptedCount = 0;
+    boolean containsCorrectionR = false;
+    boolean containsFinalFeedback = false;
+    if (null != datasetsStatusList) {
+      for (int i = 0; i < datasetsStatusList.size() && !containsPending; i++) {
+        switch (datasetsStatusList.get(i).getStatus()) {
+          case PENDING:
+            containsPending = true;
+            break;
+          case RELEASED:
+            releasedCount++;
+            break;
+          case CORRECTION_REQUESTED:
+            containsCorrectionR = true;
+            break;
+          case TECHNICALLY_ACCEPTED:
+            techAcceptedCount++;
+            break;
+          case FINAL_FEEDBACK:
+            containsFinalFeedback = true;
+            break;
+          default:
+            containsPending = true;
+            break;
+        }
+      }
+
+      if (containsPending) {
+        dataflowVO.setReportingStatus(DatasetStatusEnum.PENDING);
+      } else {
+        if (releasedCount == datasetsStatusList.size()) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.RELEASED);
+        } else if (techAcceptedCount == datasetsStatusList.size()) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.TECHNICALLY_ACCEPTED);
+        } else if (containsCorrectionR) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.CORRECTION_REQUESTED);
+        } else if (containsFinalFeedback) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.FINAL_FEEDBACK);
+        }
+      }
+    }
+  }
+
+
+  /**
+   * Gets the datasets status by user.
+   *
+   * @return the datasets status by user
+   */
+  private Map<Long, List<DataflowStatusDataset>> getDatasetsStatusByUser() {
+    Map<Long, List<DataflowStatusDataset>> map = new HashMap<>();
+
+    List<Long> listDatasets =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if (!listDatasets.isEmpty()) {
+      List<IDatasetStatus> queryResult = dataflowRepository.getDatasetsStatus(listDatasets);
+      for (IDatasetStatus object : queryResult) {
+        List<DataflowStatusDataset> list = new ArrayList<>();
+        DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
+        dataflowStatusDataset.setId(object.getId());
+        dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
+        list.add(dataflowStatusDataset);
+        if (map.get(dataflowStatusDataset.getId()) != null) {
+          map.get(dataflowStatusDataset.getId()).addAll(list);
+        } else {
+          map.put(dataflowStatusDataset.getId(), list);
+        }
+      }
+    }
+    return map;
+  }
+
 }

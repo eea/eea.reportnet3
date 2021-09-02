@@ -3726,6 +3726,29 @@ public class DatasetServiceTest {
   }
 
   /**
+   * Delete import data in design mode test.
+   */
+  @Test
+  public void deleteImportDataInDesignModeTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    tableSchema.setReadOnly(true);
+    tableSchema.setToPrefill(false);
+    List<TableSchema> tableSchemas = new ArrayList<>();
+    tableSchemas.add(tableSchema);
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setTableSchemas(tableSchemas);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    datasetService.deleteImportData(1L, false);
+    Mockito.verify(recordRepository, times(0)).deleteRecordWithId(Mockito.any());
+  }
+
+  /**
    * After tests we remove the files.
    */
   @After

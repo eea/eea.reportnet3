@@ -37,7 +37,7 @@ public class FieldValueIdGenerator implements IdentifierGenerator {
       throws HibernateException {
 
     FieldValue field = (FieldValue) object;
-    String prefix = null;
+    String prefix = Double.toString(Math.random());
     String datasetId = "";
     if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null
         && field.getRecord().getTableValue().getDatasetId() != null) {

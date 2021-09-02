@@ -75,7 +75,7 @@ public interface DataflowRepository
    * @return the list
    */
   @Modifying
-  @Query("select df from Dataflow df where df.type is null and df.id IN :ids order by status, creationDate desc")
+  @Query("select df from Dataflow df where df.type='REPORTING' and df.id IN :ids order by status, creationDate desc")
   List<Dataflow> findByIdInOrderByStatusDescCreationDateDesc(@Param("ids") List<Long> ids);
 
 
@@ -150,7 +150,7 @@ public interface DataflowRepository
    * @param countryCode the country code
    * @return the list
    */
-  @Query("select r.dataflow from Representative r where r.dataflow.showPublicInfo= true and r.dataProvider.code= :countryCode ")
+  @Query("select r.dataflow from Representative r where r.dataflow.showPublicInfo= true and r.dataProvider.code= :countryCode and r.dataflow.status='DRAFT'")
   List<Dataflow> findPublicDataflowsByCountryCode(@Param("countryCode") String countryCode);
 
   /**

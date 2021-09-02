@@ -27,6 +27,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
+import org.eea.lock.service.LockService;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.junit.Before;
@@ -80,6 +81,10 @@ public class DataFlowControllerImplTest {
 
   /** The details. */
   private Map<String, String> details;
+
+  /** The lock service. */
+  @Mock
+  private LockService lockService;
 
 
   /**
@@ -660,6 +665,27 @@ public class DataFlowControllerImplTest {
     when(authentication.getName()).thenReturn("name");
     dataFlowControllerImpl.deleteDataFlow(1L);
     Mockito.verify(dataflowService, times(1)).deleteDataFlow(Mockito.anyLong());
+  }
+
+
+  /**
+   * Test delete dataflow exception.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteDataflowException() throws EEAException {
+    try {
+      when(securityContext.getAuthentication()).thenReturn(authentication);
+      when(authentication.getName()).thenReturn("name");
+      doThrow(new ResponseStatusException(HttpStatus.LOCKED)).when(dataflowService)
+          .deleteDataFlow(Mockito.anyLong());
+      dataFlowControllerImpl.deleteDataFlow(1L);
+
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.LOCKED, e.getStatus());
+      throw e;
+    }
   }
 
   /**

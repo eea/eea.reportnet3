@@ -946,9 +946,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("secondLevelAuthorize(#dataflowIdDestination,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/copy", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void copyDesignsFromDataflow(
-      @RequestParam("sourceDataflow") @LockCriteria(
-          name = "dataflowIdOrigin") final Long dataflowIdOrigin,
+  public void copyDesignsFromDataflow(@RequestParam("sourceDataflow") final Long dataflowIdOrigin,
       @RequestParam("targetDataflow") @LockCriteria(
           name = "dataflowIdDestination") final Long dataflowIdDestination) {
     try {
@@ -1054,9 +1052,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PostMapping(value = "/import")
+  @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
-  public void importSchemas(@RequestParam(value = "dataflowId") Long dataflowId,
+  public void importSchemas(
+      @LockCriteria(name = "dataflowId") @RequestParam(value = "dataflowId") Long dataflowId,
       @RequestParam("file") MultipartFile file) {
+
     if (!TypeStatusEnum.DESIGN
         .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");

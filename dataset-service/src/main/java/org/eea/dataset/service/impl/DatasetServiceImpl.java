@@ -406,9 +406,9 @@ public class DatasetServiceImpl implements DatasetService {
         continue;
       }
 
-      if (TypeStatusEnum.DESIGN.equals(dataflowStatus)
-          && Boolean.FALSE.equals(deletePrefilledTables)) {
-        if (Boolean.FALSE.equals(tableSchema.getToPrefill())) {
+      if (TypeStatusEnum.DESIGN.equals(dataflowStatus)) {
+        if (Boolean.TRUE.equals(deletePrefilledTables) || (Boolean.FALSE
+            .equals(tableSchema.getToPrefill() && Boolean.FALSE.equals(deletePrefilledTables)))) {
           deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
         }
       } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())
@@ -1405,6 +1405,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the referenced dataset id
    */
   @Override
+  @Cacheable(value = "referencedDatasetId")
   public Long getReferencedDatasetId(Long datasetId, String idPk) {
     return datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
   }
@@ -2177,6 +2178,7 @@ public class DatasetServiceImpl implements DatasetService {
   private List<Statistics> processTableStats(final TableValue tableValue, final Long datasetId,
       final Map<String, String> mapIdNameDatasetSchema) {
     // Find record ids with errors
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     List<IDError> recordIdsFromRecordWithValidationBlocker =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema());
