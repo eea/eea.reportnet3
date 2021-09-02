@@ -327,7 +327,7 @@ export const DataflowService = {
 
   getPublicDataflowData: async dataflowId => {
     const publicDataflowDataDTO = await DataflowRepository.getPublicDataflowData(dataflowId);
-    const publicDataflowData = DataflowUtils.parseDataflowDTO(publicDataflowDataDTO.data);
+    const publicDataflowData = DataflowUtils.parsePublicDataflowDTO(publicDataflowDataDTO.data);
     publicDataflowData.datasets = orderBy(publicDataflowData.datasets, 'datasetSchemaName');
     return publicDataflowData;
   },
@@ -358,7 +358,8 @@ export const DataflowService = {
 
   getPublicData: async () => {
     const publicDataflows = await DataflowRepository.getPublicData();
-    return publicDataflows.data.map(publicDataflow => DataflowUtils.parsePublicDataflowDTO(publicDataflow));
+    const parsedPublicDataflows = DataflowUtils.parsePublicDataflowListDTO(publicDataflows.data);
+    return sortBy(parsedPublicDataflows, ['name']);
   },
 
   get: async dataflowId => {
