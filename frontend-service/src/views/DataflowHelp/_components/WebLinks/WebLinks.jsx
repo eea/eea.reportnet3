@@ -1,11 +1,12 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
-import capitalize from 'lodash/capitalize';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './WebLinks.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { config } from 'conf';
 
 import { Button } from 'views/_components/Button';
@@ -47,7 +48,7 @@ export const WebLinks = ({
     isConfirmDeleteVisible: false,
     isDeleting: false,
     isSubmitting: false,
-    webLink: { id: undefined, description: '', url: '' },
+    webLink: { id: undefined, isPublic: false, description: '', url: '' },
     webLinksColumns: []
   });
 
@@ -61,18 +62,23 @@ export const WebLinks = ({
     let webLinkKeys = !isEmpty(webLinks) ? Object.keys(webLinks[0]) : [];
     let webLinkColArray = webLinkKeys
       .filter(key => key !== 'id')
-      .map(key => (
-        <Column
-          body={key === 'url' ? linkTemplate : null}
-          columnResizeMode="expand"
-          field={key}
-          filter={false}
-          filterMatchMode="contains"
-          header={key === 'url' ? key.toUpperCase() : capitalize(key)}
-          key={key}
-          sortable={true}
-        />
-      ));
+      .map(key => {
+        let template = null;
+        if (key === 'url') template = linkTemplate;
+        if (key === 'isPublic') template = isPublicColumnTemplate;
+        return (
+          <Column
+            body={template}
+            columnResizeMode="expand"
+            field={key}
+            filter={false}
+            filterMatchMode="contains"
+            header={getHeader(key)}
+            key={key}
+            sortable={true}
+          />
+        );
+      });
 
     if (isToolbarVisible) webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
 
@@ -106,8 +112,26 @@ export const WebLinks = ({
     return hasErrors;
   };
 
+  const getHeader = fieldHeader => {
+    switch (fieldHeader) {
+      default:
+        return resourcesContext.messages[fieldHeader];
+    }
+  };
+
+  const isPublicColumnTemplate = rowData => (
+    <span>
+      {rowData.isPublic ? (
+        <FontAwesomeIcon aria-label={resourcesContext.messages['isPublic']} icon={AwesomeIcons('check')} />
+      ) : (
+        ''
+      )}
+    </span>
+  );
+
   const fieldsArray = [
     { field: 'description', header: resourcesContext.messages['description'] },
+    { field: 'isPublic', header: resourcesContext.messages['isPublic'] },
     { field: 'url', header: resourcesContext.messages['url'] }
   ];
 
@@ -164,8 +188,12 @@ export const WebLinks = ({
     webLinksDispatch({ type: 'ON_DESCRIPTION_CHANGE', payload: { description: inputValue } });
   };
 
-  const onWebLinkUrlChange = inputValue => {
+  const onUrlChange = inputValue => {
     webLinksDispatch({ type: 'ON_URL_CHANGE', payload: { url: inputValue } });
+  };
+
+  const onIsPublicChange = inputValue => {
+    webLinksDispatch({ type: 'ON_IS_PUBLIC_CHANGE', payload: { isPublic: inputValue } });
   };
 
   const onHideDeleteDialog = () => {
@@ -389,7 +417,7 @@ export const WebLinks = ({
                   id={`urlWebLinks`}
                   name="url"
                   onBlur={() => checkIsCorrectInputValue('url')}
-                  onChange={e => onWebLinkUrlChange(e.target.value)}
+                  onChange={e => onUrlChange(e.target.value)}
                   onFocus={() => setErrors('url', { message: '', hasErrors: false })}
                   onKeyPress={e => {
                     if (e.key === 'Enter' && !checkIsCorrectInputValue('url')) {
@@ -406,6 +434,23 @@ export const WebLinks = ({
                 {webLinksState.errors.url.message !== '' && <ErrorMessage message={webLinksState.errors.url.message} />}
               </div>
             </fieldset>
+
+            <fieldset>
+              <div className={styles.checkboxIsPublic}>
+                <input
+                  checked={webLinksState.webLink.isPublic}
+                  id="isPublic"
+                  onChange={e => {
+                    onIsPublicChange(e.checked);
+                  }}
+                  type="checkbox"
+                />
+                <label htmlFor="isPublic" style={{ display: 'block' }}>
+                  {resourcesContext.messages['checkboxIsPublic']}
+                </label>
+              </div>
+            </fieldset>
+
             <fieldset>
               <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
                 <Button
