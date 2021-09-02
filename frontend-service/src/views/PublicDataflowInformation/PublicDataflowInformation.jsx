@@ -255,9 +255,6 @@ export const PublicDataflowInformation = withRouter(
       const datasetsSchemaName = uniq(datasets.map(dataset => dataset.datasetSchemaName));
       const representatives = datasetsSchemaName.map(datasetSchemaName => {
         const datasetsFromRepresentative = datasets.filter(dataset => dataset.datasetSchemaName === datasetSchemaName);
-
-        if (isNil(datasetsFromRepresentative)) return null;
-
         const dataset = datasetsFromRepresentative[0];
         const publicFileNames = datasetsFromRepresentative
           .filter(dataset => !isNil(dataset.publicFileName))

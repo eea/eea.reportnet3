@@ -564,7 +564,8 @@ public class SQLValidationUtils {
   private static Map<String, String> getFieldsAndSchemasFromSQL(String sql,
       DataSetSchema dataSetSchema, String tableName) {
     Map<String, String> fieldsAndSchemas = new HashMap<>();
-    String auxSQL = sql.toLowerCase().substring(sql.indexOf("select") + 6, sql.indexOf("from"));
+    String lowerSQL = sql.toLowerCase();
+    String auxSQL = lowerSQL.substring(lowerSQL.indexOf("select") + 6, lowerSQL.indexOf("from"));
     if ((auxSQL.contains("*") && auxSQL.contains(","))
         || (!auxSQL.contains("*") && auxSQL.contains(","))) {
       String[] fieldList = auxSQL.split(",");
