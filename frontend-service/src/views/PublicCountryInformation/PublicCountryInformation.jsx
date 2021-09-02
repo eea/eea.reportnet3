@@ -166,37 +166,38 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const setPublicInformation = dataflows => {
     if (isNil(dataflows)) return [];
 
-    const publicDataflows = dataflows.map(dataflow => {
-      if (isNil(dataflow.datasets)) return null;
-      const dataset = dataflow.datasets[0];
+    const publicDataflows = dataflows
+      .filter(dataflow => !isNil(dataflow.datasets))
+      .map(dataflow => {
+        const dataset = dataflow.datasets[0];
 
-      const publicFileNames = dataflow.datasets
-        ?.filter(dataset => !isNil(dataset.publicFileName))
-        .map(dataset => ({ dataProviderId: dataset.dataProviderId, fileName: dataset.publicFileName }));
+        const publicFileNames = dataflow.datasets
+          ?.filter(dataset => !isNil(dataset.publicFileName))
+          .map(dataset => ({ dataProviderId: dataset.dataProviderId, fileName: dataset.publicFileName }));
 
-      const referencePublicFileNames = dataflow.referenceDatasets
-        ?.filter(referenceDataset => !isNil(referenceDataset.publicFileName))
-        .map(referenceDataset => ({ fileName: referenceDataset.publicFileName }));
+        const referencePublicFileNames = dataflow.referenceDatasets
+          ?.filter(referenceDataset => !isNil(referenceDataset.publicFileName))
+          .map(referenceDataset => ({ fileName: referenceDataset.publicFileName }));
 
-      return {
-        deadline: dataflow.expirationDate,
-        id: dataflow.id,
-        isReleasable: dataflow.isReleasable,
-        isReleased: dataset.isReleased,
-        legalInstrument: dataflow.obligation?.legalInstruments,
-        name: dataflow.name,
-        obligation: dataflow.obligation,
-        publicFilesNames: publicFileNames,
-        referencePublicFilesNames: referencePublicFileNames,
-        deliveryDate: dataset.releaseDate,
-        deliveryStatus: !dataset.isReleased
-          ? config.datasetStatus.PENDING.label
-          : !dataflow.manualAcceptance
-          ? config.datasetStatus.DELIVERED.label
-          : DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status)),
-        restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false
-      };
-    });
+        return {
+          deadline: dataflow.expirationDate,
+          id: dataflow.id,
+          isReleasable: dataflow.isReleasable,
+          isReleased: dataset.isReleased,
+          legalInstrument: dataflow.obligation?.legalInstruments,
+          name: dataflow.name,
+          obligation: dataflow.obligation,
+          publicFilesNames: publicFileNames,
+          referencePublicFilesNames: referencePublicFileNames,
+          deliveryDate: dataset.releaseDate,
+          deliveryStatus: !dataset.isReleased
+            ? config.datasetStatus.PENDING.label
+            : !dataflow.manualAcceptance
+            ? config.datasetStatus.DELIVERED.label
+            : DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status)),
+          restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false
+        };
+      });
     setDataflows(publicDataflows);
   };
 
