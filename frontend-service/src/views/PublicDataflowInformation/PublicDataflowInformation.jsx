@@ -47,10 +47,12 @@ export const PublicDataflowInformation = withRouter(
 
     const [contentStyles, setContentStyles] = useState({});
     const [dataflowData, setDataflowData] = useState({});
+    const [documents, setDocuments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
     const [referenceDatasets, setReferenceDatasets] = useState([]);
     const [representatives, setRepresentatives] = useState({});
+    const [webLinks, setWebLinks] = useState([]);
 
     useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOW, dataflowId, history });
 
@@ -233,6 +235,8 @@ export const PublicDataflowInformation = withRouter(
         setDataflowData(data);
         setPublicInformation(data.datasets, data.manualAcceptance);
         setReferenceDatasets(data.referenceDatasets);
+        setDocuments(data.documents);
+        setWebLinks(data.weblinks);
       } catch (error) {
         console.error('PublicDataflowInformation - onLoadDataflowData.', error);
         if (error.response.status === 404 || error.response.status === 400) {
@@ -325,6 +329,56 @@ export const PublicDataflowInformation = withRouter(
       return fieldColumns;
     };
 
+    const renderDocumentsColumns = referenceDatasets => {
+      const fieldColumns = Object.keys(referenceDatasets[0])
+        .filter(
+          key =>
+            key.includes('category') ||
+            key.includes('date') ||
+            key.includes('description') ||
+            key.includes('language') ||
+            key.includes('size') ||
+            key.includes('title')
+        )
+        .map(field => {
+          //let template = null;
+          //if (field === 'publicFileName') template = downloadReferenceDatasetFileBodyColumn;
+          return (
+            <Column
+              //body={template}
+              //className={field === 'publicFileName' ? styles.downloadReferenceDatasetFile : ''}
+              field={field}
+              //header={getDocumentsHeader(field)}
+              key={field}
+              sortable
+            />
+          );
+        });
+
+      return fieldColumns;
+    };
+
+    const renderWebLinksColumns = referenceDatasets => {
+      const fieldColumns = Object.keys(referenceDatasets[0])
+        .filter(key => key.includes('description') || key.includes('url'))
+        .map(field => {
+          //let template = null;
+          //if (field === 'publicFileName') template = downloadReferenceDatasetFileBodyColumn;
+          return (
+            <Column
+              //body={template}
+              //className={field === 'publicFileName' ? styles.downloadReferenceDatasetFile : ''}
+              field={field}
+              //header={getWebLinksHeader(field)}
+              key={field}
+              sortable
+            />
+          );
+        });
+
+      return fieldColumns;
+    };
+
     return (
       <PublicLayout>
         <div className={`${styles.container} rep-container`} style={contentStyles}>
@@ -338,16 +392,26 @@ export const PublicDataflowInformation = withRouter(
                   {renderColumns(representatives)}
                 </DataTable>
                 {!isEmpty(referenceDatasets) && (
-                  <div className={styles.referenceDatasetsWrapper}>
-                    <div className={styles.referenceDatasetsTitle}>
-                      {resourcesContext.messages['referenceDatasets']}
-                    </div>
-                    <DataTable
-                      autoLayout={true}
-                      className={styles.referenceDatasetsTable}
-                      totalRecords={referenceDatasets.length}
-                      value={referenceDatasets}>
+                  <div className={styles.dataTableWrapper}>
+                    <div className={styles.dataTableTitle}>{resourcesContext.messages['referenceDatasets']}</div>
+                    <DataTable autoLayout={true} totalRecords={referenceDatasets.length} value={referenceDatasets}>
                       {renderReferenceDatasetsColumns(referenceDatasets)}
+                    </DataTable>
+                  </div>
+                )}
+                {!isEmpty(documents) && (
+                  <div className={styles.dataTableWrapper}>
+                    <div className={styles.dataTableTitle}>{resourcesContext.messages['documents']}</div>
+                    <DataTable autoLayout={true} totalRecords={documents.length} value={documents}>
+                      {renderDocumentsColumns(referenceDatasets)}
+                    </DataTable>
+                  </div>
+                )}
+                {!isEmpty(webLinks) && (
+                  <div className={styles.dataTableWrapper}>
+                    <div className={styles.dataTableTitle}>{resourcesContext.messages['webLinks']}</div>
+                    <DataTable autoLayout={true} totalRecords={webLinks.length} value={webLinks}>
+                      {renderWebLinksColumns(referenceDatasets)}
                     </DataTable>
                   </div>
                 )}
