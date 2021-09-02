@@ -1,23 +1,17 @@
-import { DataflowConfig } from './config/DataflowConfig';
 import { DocumentConfig } from './config/DocumentConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const DocumentRepository = {
-  getAll: async dataflowId => {
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) });
-  },
+  getAll: async dataflowId => await HTTPRequester.get({ url: getUrl(DocumentConfig.getAll, { dataflowId }) }),
 
-  delete: async documentId => {
-    return await HTTPRequester.delete({ url: getUrl(DocumentConfig.delete, { documentId }) });
-  },
+  delete: async documentId => await HTTPRequester.delete({ url: getUrl(DocumentConfig.delete, { documentId }) }),
 
-  download: async documentId => {
-    return await HTTPRequester.download({
+  download: async documentId =>
+    await HTTPRequester.download({
       url: getUrl(DocumentConfig.download, { documentId }),
       headers: { 'Content-Type': 'application/octet-stream' }
-    });
-  },
+    }),
 
   update: async (dataflowId, description, language, file, isPublic, documentId) => {
     const formData = new FormData();

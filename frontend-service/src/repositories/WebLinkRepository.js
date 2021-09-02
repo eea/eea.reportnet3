@@ -1,10 +1,12 @@
-import { DataflowConfig } from './config/DataflowConfig';
 import { WebLinkConfig } from './config/WebLinkConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const WebLinkRepository = {
-  getAll: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) }),
+  getAll: async dataflowId => await HTTPRequester.get({ url: getUrl(WebLinkConfig.getAll, { dataflowId }) }),
+
+  getAllPublic: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(WebLinkConfig.getAllPublic, { dataflowId }) }),
 
   create: async (dataflowId, webLink) =>
     await HTTPRequester.post({
