@@ -452,7 +452,7 @@
     "emptyTabHeader": "Empty table name",
     "emptyTabHeaderError": "The table name is empty, please enter one.",
     "emptyTitleValidationError": "Empty table name, please enter one",
-    "emptyValidations": "No validations to show",
+    "noValidations": "No validations to show",
     "emptyWebformTable": "This table has no fields or do not match with the webform model.",
     "emptyWebformTables": "Created tables do not match with the webform model, please check it.",
     "enabled": "Status",
@@ -737,7 +737,7 @@
     "nextReportDue": "Next report due",
     "no": "No",
     "noApiKey": "There is no generated API key",
-    "noConstraints": "There are no unique constraints yet",
+    "noConstraints": "No unique constraints to show",
     "noConstraintsWithSelectedParameters": "There are no constraints with the selected parameters",
     "noDashboardSelected": "There is no dashboard selected",
     "noData": "No data to display",
@@ -1245,6 +1245,7 @@
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "Invalid URL. Please check it.",
-    "yes": "Yes"
+    "yes": "Yes",
+    "noQCs": "No QCs to show"
   }
 }

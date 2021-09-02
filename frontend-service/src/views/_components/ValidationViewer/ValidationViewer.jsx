@@ -577,7 +577,7 @@ const ValidationViewer = memo(
         ) : (
           <div className={styles.emptyFilteredData}>
             {!filtered ? (
-              <h3>{resourcesContext.messages['emptyValidations']}</h3>
+              <h3>{resourcesContext.messages['noValidations']}</h3>
             ) : (
               <h3>{resourcesContext.messages['noValidationsWithSelectedParameters']}</h3>
             )}

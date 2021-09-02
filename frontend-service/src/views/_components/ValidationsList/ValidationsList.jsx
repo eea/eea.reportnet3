@@ -511,7 +511,7 @@ const ValidationsList = withRouter(
       if (checkIsEmptyValidations()) {
         return (
           <div className={styles.validationsWithoutTable}>
-            <div className={styles.noValidations}>{resourcesContext.messages['emptyValidations']}</div>
+            <div className={styles.noValidations}>{resourcesContext.messages['noQCs']}</div>
           </div>
         );
       }
