@@ -21,6 +21,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -135,6 +136,42 @@ public class CollaborationControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
+  public void createMessageAttachmentEEAIllegalArgumentExceptionDataflowIdNullTest()
+      throws EEAIllegalArgumentException, EEAForbiddenException {
+    try {
+      collaborationControllerImpl.createMessageAttachment(1L, null,
+          new MockMultipartFile("file.csv", "content".getBytes()));
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createMessageAttachmentEEAIllegalArgumentExceptionFileAttachmentNullTest()
+      throws EEAIllegalArgumentException, EEAForbiddenException {
+    try {
+      collaborationControllerImpl.createMessageAttachment(1L, 1L, null);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createMessageAttachmentEEAIllegalArgumentExceptionFileAttachmentNameNullTest()
+      throws EEAIllegalArgumentException, EEAForbiddenException {
+    try {
+      MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
+      Mockito.when(multipartFile.getOriginalFilename()).thenReturn(null);
+      collaborationControllerImpl.createMessageAttachment(1L, 1L, multipartFile);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentEEAIllegalArgumentExceptionFileSizeTest()
       throws EEAIllegalArgumentException, EEAForbiddenException {
     try {
@@ -216,10 +253,32 @@ public class CollaborationControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void deleteMessageEEAIllegalArgumentExceptionProviderIdNullTest()
+  public void deleteMessageEEAIllegalArgumentExceptionDataflowIdNullTest()
       throws EEAIllegalArgumentException, EEAForbiddenException {
     try {
       collaborationControllerImpl.deleteMessage(null, 1L, 1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteMessageEEAIllegalArgumentExceptionProviderIdNullTest()
+      throws EEAIllegalArgumentException, EEAForbiddenException {
+    try {
+      collaborationControllerImpl.deleteMessage(1L, null, 1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteMessageEEAIllegalArgumentExceptionMessageIdNullTest()
+      throws EEAIllegalArgumentException, EEAForbiddenException {
+    try {
+      collaborationControllerImpl.deleteMessage(1L, 1L, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;

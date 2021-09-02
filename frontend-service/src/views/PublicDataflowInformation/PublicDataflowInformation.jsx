@@ -8,7 +8,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
-import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
 import { getUrl } from 'repositories/_utils/UrlUtils';
@@ -33,6 +32,7 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
+import { DataflowUtils } from 'services/_utils/DataflowUtils';
 
 export const PublicDataflowInformation = withRouter(
   ({
@@ -55,7 +55,7 @@ export const PublicDataflowInformation = withRouter(
     useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOW, dataflowId, history });
 
     useEffect(() => {
-      onLoadDataflowData();
+      onLoadPublicDataflowInformation();
     }, []);
 
     useEffect(() => {
@@ -82,7 +82,7 @@ export const PublicDataflowInformation = withRouter(
                   effect="solid"
                   id={publicFileName}
                   place="top">
-                  <span>{getPublicFileName(publicFileName)}</span>
+                  <span>{publicFileName.split('-')[1]}</span>
                 </ReactTooltip>
               </span>
             ))}
@@ -132,65 +132,39 @@ export const PublicDataflowInformation = withRouter(
     };
 
     const getCountryCode = datasetSchemaName => {
-      let country = {};
-      if (!isNil(config.countriesByGroup)) {
-        const countryFinded = Object.keys(config.countriesByGroup).some(countriesGroup => {
-          country = config.countriesByGroup[countriesGroup].find(
-            groupCountry => groupCountry.name === datasetSchemaName
-          );
-          return !isNil(country) ? country : false;
-        });
-        return countryFinded ? country.code : '';
-      }
-    };
-
-    const getPublicFileName = fileName => {
-      const splittedFileName = fileName.split('-');
-      return splittedFileName[1];
+      return Object.values(config.countriesByGroup)
+        .flat()
+        .find(country => country.name === datasetSchemaName).code;
     };
 
     const getHeader = fieldHeader => {
-      let header;
       switch (fieldHeader) {
         case 'datasetSchemaName':
-          header = resourcesContext.messages['countries'];
-          break;
-        case 'releaseDate':
-          header = resourcesContext.messages['releaseDate'];
-          break;
-        case 'isReleased':
-          header = resourcesContext.messages['delivered'];
-          break;
+          return resourcesContext.messages['countries'];
         case 'publicsFileName':
-          header = resourcesContext.messages['files'];
-          break;
+          return resourcesContext.messages['files'];
         default:
-          break;
+          return resourcesContext.messages[fieldHeader];
       }
-      return header;
     };
 
     const getReferenceDatasetsHeader = fieldHeader => {
-      let header;
       switch (fieldHeader) {
         case 'datasetSchemaName':
-          header = resourcesContext.messages['name'];
-          break;
+          return resourcesContext.messages['name'];
         case 'publicFileName':
-          header = resourcesContext.messages['file'];
-          break;
+          return resourcesContext.messages['file'];
         default:
-          break;
+          return resourcesContext.messages[fieldHeader];
       }
-      return header;
     };
 
     const getOrderedColumns = representatives => {
       const representativesWithPriority = [
         { id: 'id', index: 0 },
         { id: 'datasetSchemaName', index: 1 },
-        { id: 'isReleased', index: 2 },
-        { id: 'releaseDate', index: 3 },
+        { id: 'deliveryDate', index: 2 },
+        { id: 'deliveryStatus', index: 3 },
         { id: 'publicsFileName', index: 4 }
       ];
 
@@ -229,12 +203,6 @@ export const PublicDataflowInformation = withRouter(
       </div>
     );
 
-    const isReleasedBodyColumn = rowData => (
-      <div className={styles.cellContentPosition}>
-        {rowData.isReleased ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
-      </div>
-    );
-
     const onFileDownload = async (dataProviderId, fileName) => {
       try {
         let fileContent;
@@ -259,11 +227,11 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
-    const onLoadDataflowData = async () => {
+    const onLoadPublicDataflowInformation = async () => {
       try {
         const data = await DataflowService.getPublicDataflowData(dataflowId);
         setDataflowData(data);
-        parseDataflowData(data.datasets);
+        setPublicInformation(data.datasets, data.manualAcceptance);
         setReferenceDatasets(data.referenceDatasets);
       } catch (error) {
         console.error('PublicDataflowInformation - onLoadDataflowData.', error);
@@ -277,39 +245,35 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
-    const parseDataflowData = datasets => {
-      const parsedDatasets = [];
+    const setPublicInformation = (datasets, hasManualAcceptance) => {
+      if (isNil(datasets)) return [];
 
-      const datasetsSchemaName = !isNil(datasets) && uniq(datasets.map(dataset => dataset.datasetSchemaName));
+      const datasetsSchemaName = uniq(datasets.map(dataset => dataset.datasetSchemaName));
+      const representatives = datasetsSchemaName.map(datasetSchemaName => {
+        const datasetsFromRepresentative = datasets.filter(dataset => dataset.datasetSchemaName === datasetSchemaName);
 
-      !isNil(datasets) &&
-        datasetsSchemaName.forEach(datasetSchemaName => {
-          const publicsFileName = [];
-          datasets.forEach(dataset => {
-            if (dataset.datasetSchemaName === datasetSchemaName) {
-              if (!isNil(dataset.publicFileName)) {
-                publicsFileName.push(dataset.publicFileName);
-              }
-              const parsedDataset = {
-                datasetSchemaName: datasetSchemaName,
-                dataProviderId: dataset.dataProviderId,
-                isReleased: dataset.isReleased,
-                releaseDate: dataset.releaseDate,
-                restrictFromPublic: dataset.restrictFromPublic,
-                publicsFileName: publicsFileName
-              };
-              parsedDatasets.push(parsedDataset);
-            }
-          });
-        });
+        if (isNil(datasetsFromRepresentative)) return null;
 
-      const uniqParsedDatasets = uniqBy(parsedDatasets, 'datasetSchemaName');
+        const dataset = datasetsFromRepresentative[0];
+        const publicFileNames = datasetsFromRepresentative
+          .filter(dataset => !isNil(dataset.publicFileName))
+          .map(dataset => dataset.publicFileName);
 
-      setRepresentatives(uniqParsedDatasets);
-    };
+        return {
+          datasetSchemaName: datasetSchemaName,
+          dataProviderId: dataset.dataProviderId,
+          deliveryDate: dataset.releaseDate,
+          restrictFromPublic: dataset.restrictFromPublic,
+          publicsFileName: publicFileNames,
+          deliveryStatus: !dataset.isReleased
+            ? config.datasetStatus.PENDING.label
+            : !hasManualAcceptance
+            ? config.datasetStatus.DELIVERED.label
+            : DataflowUtils.getTechnicalAcceptanceStatus(datasetsFromRepresentative.map(dataset => dataset.status))
+        };
+      });
 
-    const releaseDateBodyColumn = rowData => {
-      return <div className={styles.cellContentPosition}>{rowData.releaseDate}</div>;
+      setRepresentatives(representatives);
     };
 
     const renderColumns = representatives => {
@@ -317,16 +281,14 @@ export const PublicDataflowInformation = withRouter(
         .filter(
           key =>
             key.includes('datasetSchemaName') ||
-            key.includes('isReleased') ||
-            key.includes('releaseDate') ||
-            key.includes('publicsFileName')
+            key.includes('publicsFileName') ||
+            key.includes('deliveryDate') ||
+            key.includes('deliveryStatus')
         )
         .map(field => {
           let template = null;
           if (field === 'datasetSchemaName') template = countryBodyColumn;
-          if (field === 'isReleased') template = isReleasedBodyColumn;
           if (field === 'publicsFileName') template = downloadFileBodyColumn;
-          if (field === 'releaseDate') template = releaseDateBodyColumn;
           return (
             <Column
               body={template}
