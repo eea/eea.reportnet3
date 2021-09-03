@@ -4,55 +4,24 @@ import { BusinessDataflowRepository } from 'repositories/BusinessDataflowReposit
 
 import { BusinessDataflowUtils } from 'services/_utils/BusinessDataflowUtils';
 
-import { CoreUtils } from 'repositories/_utils/CoreUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 export const BusinessDataflowService = {
-  getAll: async (accessRole, contextRoles) => {
+  getAll: async (accessRoles, contextRoles) => {
     const businessDataflowsDTO = await BusinessDataflowRepository.getAll();
 
-    const businessDataflows = !accessRole ? businessDataflowsDTO.data : [];
-
-    const isAdmin = accessRole.some(role => role === config.permissions.roles.ADMIN.key);
-
-    const userRoles = [];
-    if (contextRoles) {
-      const dataflowsRoles = contextRoles.filter(role => role.includes(config.permissions.prefixes.DATAFLOW));
-      dataflowsRoles.map((item, i) => {
-        const role = TextUtils.reduceString(item, `${item.replace(/\D/g, '')}-`);
-
-        return (userRoles[i] = {
-          id: parseInt(item.replace(/\D/g, '')),
-          userRole: UserRoleUtils.getUserRoleLabel(role)
-        });
-      });
-    }
-
-    for (let index = 0; index < businessDataflowsDTO.data.length; index++) {
-      const businessDataflow = businessDataflowsDTO.data[index];
-
-      const isOpen = businessDataflow.status === config.dataflowStatus.OPEN;
-
-      if (isOpen) {
-        businessDataflow.status = businessDataflow.releasable ? 'OPEN' : 'CLOSED';
+    const businessDataflows = businessDataflowsDTO.data.map(businessDataflowDTO => {
+      businessDataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(
+        businessDataflowDTO.id,
+        accessRoles,
+        contextRoles
+      );
+      if (businessDataflowDTO.status === config.dataflowStatus.OPEN) {
+        businessDataflowDTO.status = businessDataflowDTO.releasable ? 'OPEN' : 'CLOSED';
       }
+      return businessDataflowDTO;
+    });
 
-      if (isAdmin) {
-        businessDataflow.userRole = config.permissions.roles.ADMIN.key;
-        businessDataflows.push({
-          ...businessDataflow
-        });
-      } else {
-        const isDuplicated = CoreUtils.isDuplicatedInObject(userRoles, 'id');
-        businessDataflows.push({
-          ...businessDataflow,
-          ...(isDuplicated ? UserRoleUtils.getUserRoles(userRoles) : userRoles).find(
-            item => item.id === businessDataflow.id
-          )
-        });
-      }
-    }
     return BusinessDataflowUtils.parseSortedBusinessDataflowListDTO(businessDataflows);
   },
 
