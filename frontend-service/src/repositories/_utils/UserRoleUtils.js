@@ -1,59 +1,45 @@
-import isNil from 'lodash/isNil';
+import isEmpty from 'lodash/isEmpty';
 
 import { config } from 'conf';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const getUserRoleLabel = role => {
   const userRole = Object.values(config.permissions.roles).find(rol => rol.key === role);
   return userRole?.label;
 };
 
-const getUserRoles = (userRoles = []) => {
-  const userRoleToDataflow = [];
-  userRoles.filter(userRol => !userRol.duplicatedRoles && userRoleToDataflow.push(userRol));
+const getUserRoleByDataflow = (dataflowId, accessRoles = [], contextRoles = []) => {
+  if (accessRoles.some(role => role === config.permissions.roles.ADMIN.key)) {
+    return config.permissions.roles.ADMIN.label;
+  } else {
+    const dataflowRoles = contextRoles
+      .filter(role => role.includes(`${config.permissions.prefixes.DATAFLOW}${dataflowId}-`))
+      .map(role => TextUtils.reduceString(role, `${role.replace(/\D/g, '')}-`));
 
-  const duplicatedRoles = userRoles.filter(userRol => userRol.duplicatedRoles);
-  const dataflowDuplicatedRoles = [];
-  for (const duplicatedRol of duplicatedRoles) {
-    if (dataflowDuplicatedRoles[duplicatedRol.id]) {
-      dataflowDuplicatedRoles[duplicatedRol.id].push(duplicatedRol);
-    } else {
-      dataflowDuplicatedRoles[duplicatedRol.id] = [duplicatedRol];
+    if (isEmpty(dataflowRoles)) {
+      return null;
     }
+
+    const dataflowPermissions = [
+      config.permissions.roles.CUSTODIAN,
+      config.permissions.roles.STEWARD,
+      config.permissions.roles.OBSERVER,
+      config.permissions.roles.EDITOR_WRITE,
+      config.permissions.roles.EDITOR_READ,
+      config.permissions.roles.LEAD_REPORTER,
+      config.permissions.roles.NATIONAL_COORDINATOR,
+      config.permissions.roles.REPORTER_WRITE,
+      config.permissions.roles.REPORTER_READ
+    ];
+
+    const permissions = dataflowPermissions.filter(permission => dataflowRoles.includes(permission.key));
+
+    return UserRoleUtils.getUserRoleLabel(permissions[0].key);
   }
-
-  const dataflowPermissionsOrderConfig = {
-    0: config.permissions.roles.ADMIN,
-    1: config.permissions.roles.CUSTODIAN,
-    2: config.permissions.roles.STEWARD,
-    3: config.permissions.roles.OBSERVER,
-    4: config.permissions.roles.EDITOR_WRITE,
-    5: config.permissions.roles.EDITOR_READ,
-    6: config.permissions.roles.LEAD_REPORTER,
-    7: config.permissions.roles.NATIONAL_COORDINATOR,
-    8: config.permissions.roles.REPORTER_WRITE,
-    9: config.permissions.roles.REPORTER_READ
-  };
-
-  const dataflowPermissions = Object.values(dataflowPermissionsOrderConfig);
-
-  dataflowDuplicatedRoles.forEach(dataflowRoles => {
-    let rol = null;
-
-    dataflowPermissions.forEach(permission => {
-      dataflowRoles.forEach(dataflowRol => {
-        if (isNil(rol) && dataflowRol.userRole === permission.label) {
-          rol = dataflowRol;
-        }
-      });
-    });
-
-    userRoleToDataflow.push(rol);
-  });
-
-  return userRoleToDataflow;
 };
 
 export const UserRoleUtils = {
   getUserRoleLabel,
-  getUserRoles
+  getUserRoleByDataflow
 };
