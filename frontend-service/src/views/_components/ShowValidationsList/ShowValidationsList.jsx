@@ -8,14 +8,13 @@ import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniq from 'lodash/uniq';
 
-import styles from './ValidationViewer.module.scss';
+import styles from './ShowValidationsList.module.scss';
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
 import { LevelError } from 'views/_components/LevelError';
 import { Spinner } from 'views/_components/Spinner';
-import { Toolbar } from 'views/_components/Toolbar';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { DatasetService } from 'services/DatasetService';
@@ -24,11 +23,11 @@ import { ValidationService } from 'services/ValidationService';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
-import { validationReducer } from './_functions/Reducers/validationReducer';
+import { showValidationsReducer } from './_functions/Reducers/showValidationsReducer';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const ValidationViewer = memo(
+export const ShowValidationsList = memo(
   ({
     datasetId,
     datasetSchemaId,
@@ -59,6 +58,7 @@ const ValidationViewer = memo(
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingModal, setIsLoadingModal] = useState(true);
     const [fieldValueFilter, setFieldValueFilter] = useState([]);
     const [levelErrorsFilter, setLevelErrorsFilter] = useState([]);
     const [levelErrorsTypesFilter, setLevelErrorsTypesFilter] = useState([]);
@@ -71,7 +71,7 @@ const ValidationViewer = memo(
     const [typeEntitiesTypesFilter, setTypeEntitiesTypesFilter] = useState([]);
     const [validationsAllTypesFilters, setValidationsAllTypesFilters] = useState([]);
 
-    const [validationState, validationDispatch] = useReducer(validationReducer, {
+    const [validationState, validationDispatch] = useReducer(showValidationsReducer, {
       totalErrors: 0,
       totalFilteredGroupedRecords: 0,
       totalFilteredRecords: 0,
@@ -89,6 +89,10 @@ const ValidationViewer = memo(
       );
       setValidationsAllTypesFilters(allTypesFilter);
     }, [levelErrorsTypesFilter, originsTypesFilter, typeEntitiesTypesFilter, fieldsTypesFilter]);
+
+    useEffect(() => {
+      onLoadRulesDescription();
+    }, []);
 
     useEffect(() => {
       const headers = [
@@ -193,6 +197,7 @@ const ValidationViewer = memo(
           typeEntitiesFilter,
           tablesFilter
         );
+        setIsLoadingModal(false);
       } else {
         if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow.toString() !== '0') {
           resetFilters();
@@ -201,10 +206,6 @@ const ValidationViewer = memo(
         }
       }
     }, [visible]);
-
-    useEffect(() => {
-      onLoadRulesDescription();
-    }, []);
 
     const addTableSchemaId = tableErrors => {
       tableErrors.forEach(tableError => {
@@ -533,59 +534,73 @@ const ValidationViewer = memo(
       }
     ];
 
-    return (
-      <div className={styles.validationWrapper}>
-        <Toolbar className={styles.validationToolbar}>
-          <Filters
-            data={fetchedData}
-            filterByList={filterBy}
-            options={filterOptions}
-            sendData={onLoadFilteredValidations}
-            validations
-            validationsAllTypesFilters={validationsAllTypesFilters}
-          />
-        </Toolbar>
-        {!isEmpty(fetchedData) ? (
-          <DataTable
-            autoLayout={true}
-            className={isWebformView ? styles.tableWebform : undefined}
-            first={firstRow}
-            hasDefaultCurrentPage={true}
-            lazy={true}
-            loading={isLoading}
-            onPage={onChangePage}
-            onRowSelect={onRowSelect}
-            onSort={onSort}
-            paginator={true}
-            paginatorRight={isLoading ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
-            reorderableColumns={true}
-            resizableColumns={true}
-            rows={numberRows}
-            rowsPerPageOptions={[5, 10, 15]}
-            selectionMode="single"
-            sortField={sortField}
-            sortOrder={sortOrder}
-            sortable={true}
-            totalRecords={totalFilteredRecords}
-            value={fetchedData}>
-            {columns}
-          </DataTable>
-        ) : isLoading ? (
-          <div className={styles.spinner}>
-            <Spinner className={styles.spinnerPosition} />
+    const renderShowValidations = () => {
+      console.log(isLoadingModal);
+      if (isLoadingModal) {
+        return (
+          <div className={styles.validationsWithoutTable}>
+            <div className={styles.loadingSpinner}>
+              <Spinner className={styles.spinnerPosition} />
+            </div>
           </div>
-        ) : (
-          <div className={styles.emptyFilteredData}>
-            {!filtered ? (
-              <h3>{resourcesContext.messages['noValidations']}</h3>
-            ) : (
-              <h3>{resourcesContext.messages['noValidationsWithSelectedParameters']}</h3>
-            )}
+        );
+      }
+
+      if (isEmpty(fetchedData) && !filtered) {
+        return (
+          <div className={styles.validationsWithoutTable}>
+            <div className={styles.noValidations}>{resourcesContext.messages['noValidations']}</div>
           </div>
-        )}
-      </div>
-    );
+        );
+      }
+
+      return (
+        <div className={styles.validations}>
+          <div className={styles.searchInput}>
+            <Filters
+              data={fetchedData}
+              filterByList={filterBy}
+              options={filterOptions}
+              sendData={onLoadFilteredValidations}
+              validations
+              validationsAllTypesFilters={validationsAllTypesFilters}
+            />
+          </div>
+
+          {!isEmpty(fetchedData) ? (
+            <DataTable
+              autoLayout={true}
+              className={isWebformView ? styles.tableWebform : undefined}
+              first={firstRow}
+              hasDefaultCurrentPage={true}
+              lazy={true}
+              loading={isLoading}
+              onPage={onChangePage}
+              onRowSelect={onRowSelect}
+              onSort={onSort}
+              paginator={true}
+              paginatorRight={isLoading ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
+              reorderableColumns={true}
+              resizableColumns={true}
+              rows={numberRows}
+              rowsPerPageOptions={[5, 10, 15]}
+              selectionMode="single"
+              sortField={sortField}
+              sortOrder={sortOrder}
+              sortable={true}
+              totalRecords={totalFilteredRecords}
+              value={fetchedData}>
+              {columns}
+            </DataTable>
+          ) : (
+            <div className={styles.emptyFilteredData}>
+              {resourcesContext.messages['noQCRulesWithSelectedParameters']}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    return renderShowValidations();
   }
 );
-
-export { ValidationViewer };

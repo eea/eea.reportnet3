@@ -8,7 +8,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './ValidationsList.module.scss';
+import styles from './QCList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -26,20 +26,20 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
-import { tabsValidationsReducer } from './Reducers/tabsValidationsReducer';
+import { qcListReducer } from './Reducers/qcListReducer';
 
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { getExpressionString } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/getExpressionString';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const ValidationsList = withRouter(
+export const QCList = withRouter(
   ({ dataset, datasetSchemaAllTables, datasetSchemaId, reporting = false, setHasValidations = () => {} }) => {
     const notificationContext = useContext(NotificationContext);
     const resourcesContext = useContext(ResourcesContext);
     const validationContext = useContext(ValidationContext);
 
-    const [tabsValidationsState, tabsValidationsDispatch] = useReducer(tabsValidationsReducer, {
+    const [tabsValidationsState, tabsValidationsDispatch] = useReducer(qcListReducer, {
       deletedRuleId: null,
       filtered: false,
       filteredData: [],
@@ -562,5 +562,3 @@ const ValidationsList = withRouter(
     );
   }
 );
-
-export { ValidationsList };
