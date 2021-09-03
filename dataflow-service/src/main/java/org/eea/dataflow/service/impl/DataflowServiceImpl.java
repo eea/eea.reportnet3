@@ -1386,7 +1386,9 @@ public class DataflowServiceImpl implements DataflowService {
         List<DataflowStatusDataset> list = new ArrayList<>();
         DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
         dataflowStatusDataset.setId(object.getId());
-        dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
+        if (null != object.getStatus()) {
+          dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
+        }
         list.add(dataflowStatusDataset);
         if (map.get(dataflowStatusDataset.getId()) != null) {
           map.get(dataflowStatusDataset.getId()).addAll(list);
