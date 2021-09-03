@@ -57,7 +57,7 @@ export const ShowValidationsList = memo(
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingTable, setIsLoadingTable] = useState(false);
     const [isLoadingModal, setIsLoadingModal] = useState(true);
     const [fieldValueFilter, setFieldValueFilter] = useState([]);
     const [levelErrorsFilter, setLevelErrorsFilter] = useState([]);
@@ -197,7 +197,6 @@ export const ShowValidationsList = memo(
           typeEntitiesFilter,
           tablesFilter
         );
-        setIsLoadingModal(false);
       } else {
         if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow.toString() !== '0') {
           resetFilters();
@@ -300,39 +299,45 @@ export const ShowValidationsList = memo(
       tablesFilter,
       isChangedPage
     ) => {
-      setIsLoading(true);
+      setIsLoadingTable(true);
 
-      let datasetErrors = {};
+      try {
+        let datasetErrors = {};
 
-      let pageNums = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
+        let pageNums = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
 
-      const data = await DatasetService.getShowValidationErrors(
-        datasetId,
-        pageNums,
-        numberRows,
-        sortField,
-        sortOrder,
-        fieldValueFilter,
-        levelErrorsFilter,
-        typeEntitiesFilter,
-        tablesFilter
-      );
-      datasetErrors = data;
-      addTableSchemaId(datasetErrors.errors);
-      validationDispatch({
-        type: 'SET_TOTAL_GROUPED_ERRORS',
-        payload: {
-          totalErrors: datasetErrors.totalErrors,
-          totalFilteredGroupedRecords: datasetErrors.totalFilteredErrors
-        }
-      });
+        const data = await DatasetService.getShowValidationErrors(
+          datasetId,
+          pageNums,
+          numberRows,
+          sortField,
+          sortOrder,
+          fieldValueFilter,
+          levelErrorsFilter,
+          typeEntitiesFilter,
+          tablesFilter
+        );
+        datasetErrors = data;
+        addTableSchemaId(datasetErrors.errors);
+        validationDispatch({
+          type: 'SET_TOTAL_GROUPED_ERRORS',
+          payload: {
+            totalErrors: datasetErrors.totalErrors,
+            totalFilteredGroupedRecords: datasetErrors.totalFilteredErrors
+          }
+        });
 
-      validationDispatch({
-        type: 'SET_TOTALS_ERRORS',
-        payload: { totalFilteredRecords: datasetErrors.totalFilteredErrors, totalRecords: datasetErrors.totalRecords }
-      });
-      setFetchedData(datasetErrors.errors);
-      setIsLoading(false);
+        validationDispatch({
+          type: 'SET_TOTALS_ERRORS',
+          payload: { totalFilteredRecords: datasetErrors.totalFilteredErrors, totalRecords: datasetErrors.totalRecords }
+        });
+        setFetchedData(datasetErrors.errors);
+      } catch (error) {
+        console.log(`error`, error);
+      } finally {
+        setIsLoadingTable(false);
+        setIsLoadingModal(false);
+      }
     };
 
     const onLoadFilters = async () => {
@@ -535,7 +540,6 @@ export const ShowValidationsList = memo(
     ];
 
     const renderShowValidations = () => {
-      console.log(isLoadingModal);
       if (isLoadingModal) {
         return (
           <div className={styles.validationsWithoutTable}>
@@ -574,12 +578,12 @@ export const ShowValidationsList = memo(
               first={firstRow}
               hasDefaultCurrentPage={true}
               lazy={true}
-              loading={isLoading}
+              loading={isLoadingTable}
               onPage={onChangePage}
               onRowSelect={onRowSelect}
               onSort={onSort}
               paginator={true}
-              paginatorRight={isLoading ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
+              paginatorRight={isLoadingTable ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
               reorderableColumns={true}
               resizableColumns={true}
               rows={numberRows}
