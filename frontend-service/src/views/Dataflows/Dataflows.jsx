@@ -75,16 +75,25 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const { activeIndex, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
 
-  const tabMenuItems = isCustodian
-    ? [
-        { className: styles.flow_tab, id: 'reporting', label: resourcesContext.messages['reportingDataflowsListTab'] },
-        { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] },
-        { className: styles.flow_tab, id: 'reference', label: resourcesContext.messages['referenceDataflowsListTab'] }
-      ]
-    : [
-        { className: styles.flow_tab, id: 'reporting', label: resourcesContext.messages['reportingDataflowsListTab'] },
-        { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] }
-      ];
+  const tabMenuItems =
+    isCustodian || isAdmin
+      ? [
+          {
+            className: styles.flow_tab,
+            id: 'reporting',
+            label: resourcesContext.messages['reportingDataflowsListTab']
+          },
+          { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] },
+          { className: styles.flow_tab, id: 'reference', label: resourcesContext.messages['referenceDataflowsListTab'] }
+        ]
+      : [
+          {
+            className: styles.flow_tab,
+            id: 'reporting',
+            label: resourcesContext.messages['reportingDataflowsListTab']
+          },
+          { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] }
+        ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
