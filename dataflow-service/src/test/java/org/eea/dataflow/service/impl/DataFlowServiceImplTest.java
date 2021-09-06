@@ -390,6 +390,8 @@ public class DataFlowServiceImplTest {
     List<IDatasetStatus> listObject = Arrays.asList(ida1, ida2);
     when(dataflowRepository.getDatasetsStatus(Mockito.any())).thenReturn(listObject);
 
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+
     dataflowServiceImpl.getDataflows(Mockito.any());
     List<Dataflow> list = new ArrayList<>();
     list.add(new Dataflow());
@@ -1089,10 +1091,13 @@ public class DataFlowServiceImplTest {
     dataflowVO.setId(0L);
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
     Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
         .thenReturn(Arrays.asList(resourceAccessVO));
-    Mockito.when(dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
-        Mockito.any(), Mockito.any())).thenReturn(dataflows);
+
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
     Mockito
         .when(dataflowRepository
