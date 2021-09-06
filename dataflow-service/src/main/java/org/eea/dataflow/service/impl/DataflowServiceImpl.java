@@ -239,21 +239,25 @@ public class DataflowServiceImpl implements DataflowService {
 
     // Get user's datasets
     Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
+    boolean userAdmin = isAdmin();
 
     // Get user's dataflows sorted by status and creation date
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (null != idsResources && !idsResources.isEmpty()) {
-      dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(idsResources)
-          .forEach(dataflow -> {
-            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-            if (!map.isEmpty() && null != datasetsStatusList) {
-              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-            }
-            dataflowVOs.add(dataflowVO);
-          });
+    if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
+      List<Dataflow> dataflows =
+          userAdmin ? dataflowRepository.findInOrderByStatusDescCreationDateDesc()
+              : dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(idsResources);
+
+      dataflows.forEach(dataflow -> {
+        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+        if (!map.isEmpty() && null != datasetsStatusList) {
+          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+        }
+        dataflowVOs.add(dataflowVO);
+      });
       try {
         getOpenedObligations(dataflowVOs);
       } catch (FeignException e) {
@@ -282,21 +286,28 @@ public class DataflowServiceImpl implements DataflowService {
 
     // Get user's datasets
     Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
+    boolean userAdmin = isAdmin();
 
     // First, get reference dataflows in DESIGN that the user has permission
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (null != idsResources && !idsResources.isEmpty()) {
-      dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
-          TypeStatusEnum.DESIGN, idsResources).forEach(dataflow -> {
-            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-            if (!map.isEmpty() && null != datasetsStatusList) {
-              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-            }
-            dataflowVOs.add(dataflowVO);
-          });
+    if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
+
+      List<Dataflow> dataflows = userAdmin
+          ? dataflowRepository
+              .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
+          : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
+              TypeStatusEnum.DESIGN, idsResources);
+
+      dataflows.forEach(dataflow -> {
+        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+        if (!map.isEmpty() && null != datasetsStatusList) {
+          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+        }
+        dataflowVOs.add(dataflowVO);
+      });
     }
 
     // Second, get reference dataflows in DRAFT sorted by status and creation date
