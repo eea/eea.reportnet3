@@ -689,7 +689,7 @@ export const BigButtonList = ({
         <ConfirmDialog
           className={styles.calendarConfirm}
           disabledConfirm={isNil(dataCollectionDueDate)}
-          footerAddon={!dataflowState.isBusinessDataflow && checkShowPublicInfo}
+          footerAddon={checkShowPublicInfo}
           header={resourcesContext.messages['createDataCollection']}
           labelCancel={resourcesContext.messages['close']}
           labelConfirm={resourcesContext.messages['create']}
