@@ -102,7 +102,7 @@
     border-radius: 0 10px 10px 10px;
     margin: 10px 0 3px 25px;
     color: var(--white);
-    background: var(--c-lilac-200);
+    background: var(--c-lilac-300);
     &.automatic {
       background-color: var(--gray-15) !important;
       .messageTextWrapper {
@@ -122,7 +122,7 @@
         color: var(--gray-5);
       }
       .messageAttachment {
-        background-color: var(--c-lilac-100);
+        background-color: var(--c-lilac-200);
         border-radius: 6px;
         padding: 5px;
         display: flex;
