@@ -28,6 +28,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
   const [dataToFilter, setDataToFilter] = useState({
     reporting: content['reporting'],
     business: content['business'],
+    citiesScience: content['citiesScience'],
     reference: content['reference']
   });
   const [filteredData, setFilteredData] = useState(dataToFilter[visibleTab]);
@@ -74,7 +75,12 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
     const inmUserProperties = { ...userContext.userProps };
     const inmPinnedDataflows = intersection(
       inmUserProperties.pinnedDataflows,
-      [...dataToFilter.reporting, ...dataToFilter.reference, ...dataToFilter.business].map(data => data.id.toString())
+      [
+        ...dataToFilter.reporting,
+        ...dataToFilter.reference,
+        ...dataToFilter.business,
+        ...dataToFilter.citiesScience
+      ].map(data => data.id.toString())
     );
     if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
       pull(inmPinnedDataflows, pinnedItem.id.toString());
@@ -141,6 +147,20 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
       { type: 'date', properties: [{ name: 'expirationDate' }] }
     ],
+    citiesScience: [
+      {
+        type: 'input',
+        properties: [
+          { name: 'name' },
+          { name: 'description' },
+          { name: 'legalInstrument' },
+          { name: 'obligationTitle' },
+          { name: 'obligationId' }
+        ]
+      },
+      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
+      { type: 'date', properties: [{ name: 'expirationDate' }] }
+    ],
     business: [
       {
         type: 'input',
@@ -169,6 +189,9 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       case 'business':
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
 
+      case 'citiesScience':
+        return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
+
       case 'reference':
         return <ReferencedDataflowItem dataflow={dataflow} reorderDataflows={reorderDataflows} />;
 
@@ -184,6 +207,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       const emptyDataflowsMessage = {
         business: 'thereAreNoBusinessDataflows',
         reference: 'thereAreNoReferenceDataflows',
+        citiesScience: 'thereAreNoReferenceDataflows',
         reporting: 'thereAreNoReportingDataflows'
       };
 
@@ -222,6 +246,17 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
             data={dataToFilter['business']}
             getFilteredData={onLoadFilteredData}
             options={filterOptions['business']}
+            sortCategory={'pinned'}
+            sortable={true}
+          />
+        )}
+
+        {visibleTab === 'citiesScience' && (
+          <Filters
+            className={'dataflowsListFilters'}
+            data={dataToFilter['citiesScience']}
+            getFilteredData={onLoadFilteredData}
+            options={filterOptions['citiesScience']}
             sortCategory={'pinned'}
             sortable={true}
           />

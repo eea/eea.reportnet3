@@ -57,6 +57,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
     activeIndex: 0,
     business: [],
+    citiesScience: [],
     reporting: [],
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
@@ -64,9 +65,10 @@ const Dataflows = withRouter(({ history, match }) => {
     isCustodian: null,
     isNationalCoordinator: false,
     isReferencedDataflowDialogVisible: false,
+    isCitiesScienceDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
-    loadingStatus: { reporting: true, business: true, reference: true },
+    loadingStatus: { reporting: true, business: true, citiesScience: true, reference: true },
     reference: []
   });
 
@@ -79,11 +81,21 @@ const Dataflows = withRouter(({ history, match }) => {
     ? [
         { className: styles.flow_tab, id: 'reporting', label: resourcesContext.messages['reportingDataflowsListTab'] },
         { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] },
+        {
+          className: styles.flow_tab,
+          id: 'citiesScience',
+          label: resourcesContext.messages['citiesScienceDataflowsListTab']
+        },
         { className: styles.flow_tab, id: 'reference', label: resourcesContext.messages['referenceDataflowsListTab'] }
       ]
     : [
         { className: styles.flow_tab, id: 'reporting', label: resourcesContext.messages['reportingDataflowsListTab'] },
-        { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] }
+        { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] },
+        {
+          className: styles.flow_tab,
+          id: 'citiesScience',
+          label: resourcesContext.messages['citiesScienceDataflowsListTab']
+        }
       ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
@@ -126,6 +138,15 @@ const Dataflows = withRouter(({ history, match }) => {
       title: 'createNewDataflow'
     };
 
+    const createCitiesScienceDataflowBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'plus',
+      isVisible: tabId === 'citiesScience',
+      label: 'createNewDataflow',
+      onClick: () => manageDialogs('isCitiesScienceDataflowDialogVisible', true),
+      title: 'createNewDataflow'
+    };
+
     const userListBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'users',
@@ -136,9 +157,13 @@ const Dataflows = withRouter(({ history, match }) => {
     };
 
     leftSideBarContext.addModels(
-      [createBusinessDataflowBtn, createReferenceDataflowBtn, createReportingDataflowBtn, userListBtn].filter(
-        button => button.isVisible
-      )
+      [
+        createBusinessDataflowBtn,
+        createCitiesScienceDataflowBtn,
+        createReferenceDataflowBtn,
+        createReportingDataflowBtn,
+        userListBtn
+      ].filter(button => button.isVisible)
     );
   }, [isAdmin, isCustodian, isNationalCoordinator, tabId]);
 
@@ -194,6 +219,11 @@ const Dataflows = withRouter(({ history, match }) => {
       if (TextUtils.areEquals(tabId, 'business')) {
         const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } });
+      }
+
+      if (TextUtils.areEquals(tabId, 'citiesScience')) {
+        const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles); // TODO CHANGE TO CORRESPONDING CALL
+        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'citiesScience' } });
       }
     } catch (error) {
       console.error('Dataflows - getDataflows.', error);
@@ -291,6 +321,7 @@ const Dataflows = withRouter(({ history, match }) => {
           content={{
             reporting: dataflowsState['reporting'],
             business: dataflowsState['business'],
+            citiesScience: dataflowsState['citiesScience'],
             reference: dataflowsState['reference']
           }}
           isLoading={loadingStatus[tabId]}
@@ -324,6 +355,17 @@ const Dataflows = withRouter(({ history, match }) => {
           obligation={obligation}
           onCreateDataflow={onCreateDataflow}
           resetObligations={resetObligations}
+        />
+      )}
+
+      {dataflowsState.isCitiesScienceDataflowDialogVisible && (
+        <ManageReportingDataflow
+          isVisible={dataflowsState.isCitiesScienceDataflowDialogVisible}
+          manageDialogs={manageDialogs}
+          obligation={obligation}
+          onCreateDataflow={onCreateDataflow}
+          resetObligations={resetObligations}
+          state={dataflowsState}
         />
       )}
 
