@@ -44,6 +44,9 @@ public class Weblink {
   @JoinColumn(name = "DATAFLOW_ID")
   private Dataflow dataflow;
 
+  /** The is public. */
+  @Column(name = "IS_PUBLIC")
+  private Boolean isPublic;
 
   /**
    * Equals.
