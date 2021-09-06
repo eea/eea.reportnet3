@@ -83,7 +83,6 @@ public interface DataflowRepository
    *
    * @return the list
    */
-  @Modifying
   @Query("select df from Dataflow df where df.type='REPORTING' order by status, creationDate desc")
   List<Dataflow> findInOrderByStatusDescCreationDateDesc();
 
