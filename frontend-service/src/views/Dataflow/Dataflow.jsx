@@ -215,6 +215,7 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowStateData: dataflowState.data,
     history,
     isBusinessDataflow: dataflowState.isBusinessDataflow,
+    isCitiesScienceDataflow: dataflowState.isCitiesScienceDataflow,
     matchParams: match.params,
     representativeId
   });

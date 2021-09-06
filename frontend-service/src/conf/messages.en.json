@@ -1247,6 +1247,7 @@
     "wrongWebLinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
     "citiesScienceDataflowsListTab": "Cities and science",
-    "thereAreNoCitiesScienceDataflows": "There are no cities and science dataflows"
+    "thereAreNoCitiesScienceDataflows": "There are no cities and science dataflows",
+    "citiesScienceDataflowsCrumbLabel": "Cities and science dataflow"
   }
 }
