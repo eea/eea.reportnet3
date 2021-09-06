@@ -7,6 +7,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -237,5 +238,14 @@ public interface DataFlowController {
   @GetMapping("/private/isDataflowType/{type}/entity/{entity}/{entityId}")
   boolean accessEntity(@PathVariable("type") TypeDataflowEnum dataflowType,
       @PathVariable("entity") EntityClassEnum entity, @PathVariable("entityId") Long entityId);
+
+  /**
+   * Gets the all documents by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow
+   */
+  @GetMapping(value = "document/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId);
 
 }

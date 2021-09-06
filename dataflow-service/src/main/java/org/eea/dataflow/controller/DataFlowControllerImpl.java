@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -673,6 +674,30 @@ public class DataFlowControllerImpl implements DataFlowController {
       }
     }
     return false;
+  }
+
+  /**
+   * Gets the all documents by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @GetMapping(value = "document/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find list of all documents by id of a Dataflow",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class,
+      responseContainer = "List")
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
+  public List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId) {
+    List<DocumentVO> documents = new ArrayList<>();
+    try {
+      documents = dataflowService.getAllDocumentsByDataflowId(dataflowId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Not found dataflow {}", dataflowId);
+    }
+    return documents;
   }
 
 }

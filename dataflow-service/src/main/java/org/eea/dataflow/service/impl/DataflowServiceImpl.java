@@ -14,6 +14,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
+import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.dataflow.persistence.domain.Dataflow;
@@ -177,6 +178,10 @@ public class DataflowServiceImpl implements DataflowService {
   /** The fme user repository. */
   @Autowired
   private FMEUserRepository fmeUserRepository;
+
+  /** The document mapper. */
+  @Autowired
+  private DocumentMapper documentMapper;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -1398,6 +1403,28 @@ public class DataflowServiceImpl implements DataflowService {
       }
     }
     return map;
+  }
+
+  /**
+   * Gets the all documents by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public List<DocumentVO> getAllDocumentsByDataflowId(Long dataflowId) throws EEAException {
+    List<DocumentVO> documents = new ArrayList<>();
+    if (null == dataflowId) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    } else {
+      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      dataflow.getDocuments().stream().forEach(document -> {
+        documents.add(documentMapper.entityToClass(document));
+      });
+    }
+    return documents;
   }
 
 }
