@@ -269,7 +269,7 @@ export const BigButtonList = ({
         getDate(),
         isManualTechnicalAcceptance,
         true,
-        isBusinessDataflow ? false : showPublicInfo
+        showPublicInfo
       );
     } catch (error) {
       console.error('BigButtonList - onCreateDataCollections.', error);
