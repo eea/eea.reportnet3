@@ -78,6 +78,14 @@ public interface DataflowRepository
   @Query("select df from Dataflow df where df.type='REPORTING' and df.id IN :ids order by status, creationDate desc")
   List<Dataflow> findByIdInOrderByStatusDescCreationDateDesc(@Param("ids") List<Long> ids);
 
+  /**
+   * Find in order by status desc creation date desc.
+   *
+   * @return the list
+   */
+  @Query("select df from Dataflow df where df.type='REPORTING' order by status, creationDate desc")
+  List<Dataflow> findInOrderByStatusDescCreationDateDesc();
+
 
   /**
    * Find reference by id in order by status desc creation date desc.
