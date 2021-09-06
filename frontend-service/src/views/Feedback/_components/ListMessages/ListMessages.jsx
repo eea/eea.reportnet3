@@ -17,8 +17,6 @@ import { FeedbackService } from 'services/FeedbackService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { TextUtils } from 'repositories/_utils/TextUtils';
-
 export const ListMessages = ({
   canLoad = true,
   className = '',
@@ -158,12 +156,10 @@ export const ListMessages = ({
         )}
         {messages.map((message, i) => (
           <Message
-            attachment={message.messageAttachment}
             dataflowId={dataflowId}
             hasSeparator={
               i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
             }
-            isAttachment={TextUtils.areEquals(message.type, 'ATTACHMENT')}
             isCustodian={isCustodian}
             key={uniqueId('message_')}
             message={message}
