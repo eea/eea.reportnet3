@@ -120,7 +120,8 @@ const Dataflow = withRouter(({ history, match }) => {
     userRoles: [],
     isUserRightManagementDialogVisible: false,
     isAdmin: false,
-    isBusinessDataflowDialogVisible: false
+    isBusinessDataflowDialogVisible: false,
+    isCitiesScienceDataflow: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -518,6 +519,7 @@ const Dataflow = withRouter(({ history, match }) => {
           data: dataflow,
           description: dataflow.description,
           isBusinessDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.BUSINESS),
+          isCitiesScienceDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.CITIES_SCIENCE),
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
