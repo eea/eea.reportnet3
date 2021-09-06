@@ -1,4 +1,5 @@
-import { Fragment, memo } from 'react';
+import { memo } from 'react';
+import ReactDOMServer from 'react-dom/server';
 
 import uniqueId from 'lodash/uniqueId';
 
@@ -6,7 +7,7 @@ import pushNotificationInfo from 'views/_assets/images/gifs/pushNotificationInfo
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import ReactTooltip from 'react-tooltip';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import styles from './TitleWithItem.module.scss';
 
@@ -38,25 +39,17 @@ const TitleWithItem = memo(
             <span className={styles.title}>
               {title}
               {hasInfoTooltip && (
-                <Fragment>
-                  <FontAwesomeIcon
-                    aria-hidden={false}
-                    aria-label="Info"
-                    className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-                    data-for={tooltipId}
-                    data-tip
-                    icon={AwesomeIcons('infoCircle')}
-                  />
-
-                  <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={tooltipId} place="right">
-                    {
+                <TooltipButton
+                  getContent={() =>
+                    ReactDOMServer.renderToStaticMarkup(
                       <div className={styles.infoTooltipWrapper}>
                         <span>{tooltipInfo}</span>
                         <img alt={tooltipInfo} className={imgClassName} src={pushNotificationInfo}></img>
                       </div>
-                    }
-                  </ReactTooltip>
-                </Fragment>
+                    )
+                  }
+                  tooltipClassName={styles.infoTooltip}
+                  uniqueIdentifier={tooltipId}></TooltipButton>
               )}
             </span>
             <span className={styles.subtitle}>{subtitle}</span>
