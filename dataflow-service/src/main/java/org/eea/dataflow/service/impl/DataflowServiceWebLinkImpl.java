@@ -1,9 +1,11 @@
 package org.eea.dataflow.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.transaction.Transactional;
 import org.eea.dataflow.exception.EntityNotFoundException;
 import org.eea.dataflow.exception.ResourceNoFoundException;
 import org.eea.dataflow.exception.WrongDataExceptions;
@@ -223,5 +225,28 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
 
   }
 
+  /**
+   * Gets the all weblinks by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all weblinks by dataflow id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public List<WeblinkVO> getAllWeblinksByDataflowId(Long dataflowId) throws EEAException {
+    List<WeblinkVO> weblinks = new ArrayList<>();
+    if (null == dataflowId) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    } else {
+      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      if (dataflow != null && dataflow.getDocuments() != null) {
+        dataflow.getWeblinks().stream().forEach(weblink -> {
+          weblinks.add(dataflowWebLinkMapper.entityToClass(weblink));
+        });
+      }
+    }
+    return weblinks;
+  }
 }
 

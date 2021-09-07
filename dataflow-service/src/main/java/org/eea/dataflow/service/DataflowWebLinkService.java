@@ -1,5 +1,6 @@
 package org.eea.dataflow.service;
 
+import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
 
@@ -45,4 +46,13 @@ public interface DataflowWebLinkService {
    * @throws EEAException the EEA exception
    */
   void updateWebLink(WeblinkVO weblinkVO) throws EEAException;
+
+  /**
+   * Gets the all weblinks by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all weblinks by dataflow id
+   * @throws EEAException the EEA exception
+   */
+  List<WeblinkVO> getAllWeblinksByDataflowId(Long dataflowId) throws EEAException;
 }
