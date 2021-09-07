@@ -43,12 +43,19 @@ export const ListMessages = ({
     isVisibleConfirmDelete: false,
     isLoadingNewMessages: false,
     listContent: null,
+    messageDeleted: false,
     messageIdToDelete: null,
     resetScrollStates: null,
     separatorIndex: -1
   });
 
-  const { isLoadingNewMessages, isVisibleConfirmDelete, messageIdToDelete, separatorIndex } = listMessagesState;
+  const {
+    isLoadingNewMessages,
+    isVisibleConfirmDelete,
+    messageDeleted,
+    messageIdToDelete,
+    separatorIndex
+  } = listMessagesState;
 
   useEffect(() => {
     dispatchListMessages({ type: 'SET_SEPARATOR_INDEX', payload: getIndexByHeader(messages) });
@@ -88,8 +95,12 @@ export const ListMessages = ({
         messagesWrapperRef.current.scrollTo(0, 5);
       }
     } else {
-      if (newMessageAdded) {
+      console.log(messageDeleted);
+      if (newMessageAdded || messageDeleted) {
         messagesWrapperRef.current.scrollTo(0, lastMessage.offsetTop);
+        if (messageDeleted) {
+          dispatchListMessages({ type: 'SET_IS_MESSAGE_DELETED', payload: false });
+        }
       } else {
         if (!moreMessagesLoaded) {
           if (!isEmpty(domMessages)) {
@@ -98,7 +109,6 @@ export const ListMessages = ({
             }
           }
         } else {
-          console.log('entro');
           messagesWrapperRef.current.scrollTo(0, 5);
         }
       }
@@ -161,6 +171,7 @@ export const ListMessages = ({
     }
     return (
       <div className={styles.scrollMessagesWrapper} ref={listMessagesWrapperRef}>
+        <p className={styles.messageCounter}>{`${messages.length} / 1000`}</p>
         {isLoadingNewMessages && (
           <div className={styles.lazyLoadingWrapper}>
             <Spinner className={styles.lazyLoadingSpinner} />

@@ -31,5 +31,11 @@
     flex-direction: column;
     padding: 1rem 0;
     height: 101%;
+    .messageCounter {
+      font-size: 10pt;
+      font-weight: bold;
+      position: absolute;
+      top: 4rem;
+    }
   }
 }
