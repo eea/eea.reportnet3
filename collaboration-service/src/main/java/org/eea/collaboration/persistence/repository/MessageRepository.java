@@ -6,8 +6,6 @@ import org.eea.collaboration.persistence.domain.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 /**
  * The Interface MessageRepository.
@@ -46,12 +44,10 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
   List<Message> findByDataflowIdAndIdIn(Long dataflowId, Collection<Long> messageIds);
 
   /**
-   * Count by data flow id.
+   * Count by dataflow id.
    *
    * @param dataflowId the dataflow id
    * @return the long
    */
-  @Query(nativeQuery = true,
-      value = "select count(*) from message m where m.dataflow_id = :dataflowId")
-  Long countByDataFlowId(@Param("dataflowId") Long dataflowId);
+  Long countByDataflowId(Long dataflowId);
 }

@@ -1053,7 +1053,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     messageVO.setContent("Released Data");
     messageVO.setAutomatic(true);
     collaborationControllerZuul.createMessage(dataflowId, messageVO);
-    LOG.info("Automatic feedback message created");
+    LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowId,
+        messageVO.getContent());
   }
 
 

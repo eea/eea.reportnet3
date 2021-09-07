@@ -284,7 +284,7 @@ public class CollaborationServiceImpl implements CollaborationService {
         : messageMapper.entityListToClass(messageRepository
             .findByDataflowIdAndProviderId(dataflowId, providerId, pageRequest).getContent()));
 
-    messagePaginatedVO.setTotalMessages(messageRepository.countByDataFlowId(dataflowId));
+    messagePaginatedVO.setTotalMessages(messageRepository.countByDataflowId(dataflowId));
 
     return messagePaginatedVO;
   }
