@@ -57,9 +57,10 @@ export const Feedback = withRouter(({ match, history }) => {
     isDragging: false,
     isLoading: true,
     isSending: false,
-    messageFirstLoad: false,
     messages: [],
     messageToSend: '',
+    moreMessagesLoaded: false,
+    moreMessagesLoading: false,
     newMessageAdded: false,
     selectedDataProvider: {}
   });
@@ -78,6 +79,8 @@ export const Feedback = withRouter(({ match, history }) => {
     isSending,
     messages,
     messageToSend,
+    moreMessagesLoaded,
+    moreMessagesLoading,
     newMessageAdded,
     selectedDataProvider
   } = feedbackState;
@@ -154,15 +157,9 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   };
 
-  const onFirstLoadMessages = loadState => {
-    dispatchFeedback({ type: 'ON_UPDATE_MESSAGE_FIRST_LOAD', payload: loadState });
-  };
-
   const onChangeDataProvider = value => {
     if (isNil(value)) {
       dispatchFeedback({ type: 'RESET_MESSAGES', payload: [] });
-    } else {
-      onFirstLoadMessages(true);
     }
 
     dispatchFeedback({ type: 'SET_SELECTED_DATAPROVIDER', payload: value });
@@ -188,6 +185,7 @@ export const Feedback = withRouter(({ match, history }) => {
   const onGetMoreMessages = async () => {
     if ((isCustodian && isEmpty(selectedDataProvider)) || isLoading) return;
     try {
+      dispatchFeedback({ type: 'ON_TOGGLE_LAZY_LOADING', payload: true });
       const data = await onLoadMessages(
         isCustodian ? selectedDataProvider.dataProviderId : representativeId,
         currentPage,
@@ -390,10 +388,10 @@ export const Feedback = withRouter(({ match, history }) => {
             }
             isCustodian={isCustodian}
             isLoading={isLoading}
-            messageFirstLoad={feedbackState.messageFirstLoad}
             messages={messages}
+            moreMessagesLoaded={moreMessagesLoaded}
+            moreMessagesLoading={moreMessagesLoading}
             newMessageAdded={newMessageAdded}
-            onFirstLoadMessages={onFirstLoadMessages}
             onLazyLoad={onGetMoreMessages}
             onMessageDelete={onMessageDelete}
             onUpdateNewMessageAdded={onUpdateNewMessageAdded}

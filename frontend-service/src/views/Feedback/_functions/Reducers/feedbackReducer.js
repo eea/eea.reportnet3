@@ -7,7 +7,7 @@ export const feedbackReducer = (state, { type, payload }) => {
       return { ...state, messages: state.messages.filter(message => message.id !== payload) };
     case 'ON_LOAD_MORE_MESSAGES':
       let inmAllMessages = [];
-      if (payload.length !== state.messages.length) {
+      if (payload.length !== state.messages.length || state.messages.length >= state.currentPage * 50) {
         inmAllMessages = [...payload, ...state.messages];
       } else {
         inmAllMessages = [...state.messages];
@@ -16,6 +16,8 @@ export const feedbackReducer = (state, { type, payload }) => {
         ...state,
         currentPage: payload.length === 50 ? state.currentPage + 1 : state.currentPage,
         messages: uniqBy(inmAllMessages, 'id'),
+        moreMessagesLoaded: true,
+        moreMessagesLoading: false,
         newMessageAdded: false
       };
     case 'ON_SEND_ATTACHMENT':
@@ -28,6 +30,8 @@ export const feedbackReducer = (state, { type, payload }) => {
         importFileDialogVisible: false,
         draggedFiles: null
       };
+    case 'ON_TOGGLE_LAZY_LOADING':
+      return { ...state, moreMessagesLoading: true };
     case 'ON_SEND_MESSAGE':
       const inmMessages = [...state.messages];
       inmMessages.push(payload.value);
@@ -75,6 +79,7 @@ export const feedbackReducer = (state, { type, payload }) => {
     case 'SET_SELECTED_DATAPROVIDER':
       return {
         ...state,
+        moreMessagesLoaded: false,
         selectedDataProvider: payload,
         currentPage: !isNil(payload) && !isNil(payload.currentPage) ? state.currentPage : 0
       };
@@ -94,11 +99,6 @@ export const feedbackReducer = (state, { type, payload }) => {
       return {
         ...state,
         messageToSend: payload.value
-      };
-    case 'ON_UPDATE_MESSAGE_FIRST_LOAD':
-      return {
-        ...state,
-        messageFirstLoad: payload
       };
     case 'ON_UPDATE_NEW_MESSAGE_ADDED':
       return {

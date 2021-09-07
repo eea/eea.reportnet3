@@ -25,10 +25,10 @@ export const ListMessages = ({
   isCustodian,
   isLoading,
   lazyLoading = true,
-  messageFirstLoad,
   messages = [],
+  moreMessagesLoaded,
+  moreMessagesLoading,
   newMessageAdded,
-  onFirstLoadMessages,
   onLazyLoad,
   onMessageDelete,
   onUpdateNewMessageAdded,
@@ -36,6 +36,7 @@ export const ListMessages = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const listMessagesWrapperRef = useRef();
   const messagesWrapperRef = useRef();
 
   const [listMessagesState, dispatchListMessages] = useReducer(listMessagesReducer, {
@@ -48,16 +49,6 @@ export const ListMessages = ({
   });
 
   const { isLoadingNewMessages, isVisibleConfirmDelete, messageIdToDelete, separatorIndex } = listMessagesState;
-
-  useEffect(() => {
-    if (!isNil(messagesWrapperRef)) {
-      if (messages.length === 1) {
-        messagesWrapperRef.current.scrollTop = 1;
-      } else {
-        messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight;
-      }
-    }
-  }, []);
 
   useEffect(() => {
     dispatchListMessages({ type: 'SET_SEPARATOR_INDEX', payload: getIndexByHeader(messages) });
@@ -79,28 +70,49 @@ export const ListMessages = ({
   };
 
   useEffect(() => {
-    if (newMessageAdded || messageFirstLoad) {
-      if (messageFirstLoad) {
-        dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
+    const domMessages = document.querySelectorAll('.rep-feedback-message');
+    const lastMessage = last(domMessages);
+
+    if (!isCustodian) {
+      if (!moreMessagesLoaded) {
+        const unreadSeparator = document.querySelectorAll('.rep-feedback-unreadSeparator');
+        if (!isEmpty(unreadSeparator)) {
+          const lastSeparator = last(unreadSeparator);
+          messagesWrapperRef.current.scrollTo(0, lastSeparator.offsetTop - 100);
+        } else {
+          if (!moreMessagesLoading) {
+            messagesWrapperRef.current.scrollTo(0, lastMessage?.offsetTop);
+          }
+        }
+      } else {
+        messagesWrapperRef.current.scrollTo(0, 5);
       }
-      const messages = document.querySelectorAll('.rep-feedback-message');
-      if (!isEmpty(messages)) {
-        const lastMessage = last(messages);
-        messagesWrapperRef.current.scrollTop = lastMessage.offsetTop;
-        dispatchListMessages({
-          type: 'UPDATE_SCROLL_STATES',
-          payload: true
-        });
+    } else {
+      if (newMessageAdded) {
+        messagesWrapperRef.current.scrollTo(0, lastMessage.offsetTop);
+      } else {
+        if (!moreMessagesLoaded) {
+          if (!isEmpty(domMessages)) {
+            if (!moreMessagesLoading) {
+              messagesWrapperRef.current.scrollTo(0, lastMessage.offsetTop);
+            }
+          }
+        } else {
+          console.log('entro');
+          messagesWrapperRef.current.scrollTo(0, 5);
+        }
       }
     }
-    setTimeout(() => {
-      dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
-    }, 500);
+    dispatchListMessages({
+      type: 'UPDATE_SCROLL_STATES',
+      payload: true
+    });
+
+    dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
   }, [messages, listMessagesState.listContent]);
 
   useEffect(() => {
     if (listMessagesState.resetScrollStates) {
-      onFirstLoadMessages(false);
       onUpdateNewMessageAdded(false);
       dispatchListMessages({
         type: 'UPDATE_SCROLL_STATES',
@@ -148,7 +160,7 @@ export const ListMessages = ({
       );
     }
     return (
-      <div className={styles.scrollMessagesWrapper}>
+      <div className={styles.scrollMessagesWrapper} ref={listMessagesWrapperRef}>
         {isLoadingNewMessages && (
           <div className={styles.lazyLoadingWrapper}>
             <Spinner className={styles.lazyLoadingSpinner} />

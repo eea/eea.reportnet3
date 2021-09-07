@@ -114,9 +114,9 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
   };
 
   const renderSeparator = () => (
-    <div className={styles.unreadSeparator}>{`${resourcesContext.messages['unreadMessageSeparator']} (${dayjs(
-      message.date
-    ).format('YYYY-MM-DD HH:mm')})`}</div>
+    <div className={`rep-feedback-unreadSeparator ${styles.unreadSeparator}`}>{`${
+      resourcesContext.messages['unreadMessageSeparator']
+    } (${dayjs(message.date).format('YYYY-MM-DD HH:mm')})`}</div>
   );
 
   return hasSeparator ? (
