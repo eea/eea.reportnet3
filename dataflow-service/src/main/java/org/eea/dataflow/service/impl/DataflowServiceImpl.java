@@ -365,6 +365,49 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowVOs;
   }
 
+  /**
+   * Gets the citizen science dataflows.
+   *
+   * @param userId the user id
+   * @return the citizen science dataflows
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<DataFlowVO> getCitizenScienceDataflows(String userId) throws EEAException {
+
+    List<DataFlowVO> dataflowVOs = new ArrayList<>();
+
+    // Get user's datasets
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
+    boolean userAdmin = isAdmin();
+
+    // Get user's dataflows sorted by status and creation date
+    List<Long> idsResources =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if ((null != idsResources && !idsResources.isEmpty()) || userAdmin) {
+      List<Dataflow> dataflows =
+          userAdmin ? dataflowRepository.findCitizenScienceInOrderByStatusDescCreationDateDesc()
+              : dataflowRepository
+                  .findCitizenScienceAndIdInOrderByStatusDescCreationDateDesc(idsResources);
+      dataflows.forEach(dataflow -> {
+        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+        if (!map.isEmpty() && null != datasetsStatusList) {
+          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+        }
+        dataflowVOs.add(dataflowVO);
+      });
+      try {
+        getOpenedObligations(dataflowVOs);
+      } catch (FeignException e) {
+        LOG_ERROR.error(
+            "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
+            e.getMessage(), e);
+      }
+    }
+    return dataflowVOs;
+  }
 
 
   /**

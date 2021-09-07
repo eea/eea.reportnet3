@@ -75,6 +75,15 @@ public interface DataflowService {
    */
   List<DataFlowVO> getBusinessDataflows(String userId) throws EEAException;
 
+  /**
+   * Gets the citizen science dataflows.
+   *
+   * @param userId the user id
+   * @return the citizen science dataflows
+   * @throws EEAException the EEA exception
+   */
+  List<DataFlowVO> getCitizenScienceDataflows(String userId) throws EEAException;
+
 
   /**
    * Gets the completed.
