@@ -133,6 +133,24 @@ public interface DataflowRepository
   List<Dataflow> findBusinessAndIdInOrderByStatusDescCreationDateDesc(@Param("ids") List<Long> ids);
 
 
+  /**
+   * Find citizen science in order by status desc creation date desc.
+   *
+   * @return the list
+   */
+  @Query("select df from Dataflow df where df.type='CITIZEN_SCIENCE' order by status, creationDate desc")
+  List<Dataflow> findCitizenScienceInOrderByStatusDescCreationDateDesc();
+
+
+  /**
+   * Find citizen science and id in order by status desc creation date desc.
+   *
+   * @param ids the ids
+   * @return the list
+   */
+  @Query("select df from Dataflow df where df.type='CITIZEN_SCIENCE' and df.id IN :ids order by status, creationDate desc")
+  List<Dataflow> findCitizenScienceAndIdInOrderByStatusDescCreationDateDesc(
+      @Param("ids") List<Long> ids);
 
   /**
    * Gets the datasets status.
