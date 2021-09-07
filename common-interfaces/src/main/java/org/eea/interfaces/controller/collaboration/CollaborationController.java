@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.collaboration;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -80,10 +81,10 @@ public interface CollaborationController {
    * @param providerId the provider id
    * @param read the read
    * @param page the page
-   * @return the list
+   * @return the message paginated VO
    */
   @GetMapping("/findMessages/dataflow/{dataflowId}")
-  List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
+  MessagePaginatedVO findMessages(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
       @RequestParam(value = "read", required = false) Boolean read, @RequestParam("page") int page);
 

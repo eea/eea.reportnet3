@@ -53,6 +53,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -279,8 +280,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     }
 
     MessageVO message = new MessageVO();
-    message.setContent(datasetStatusMessageVO.getMessage());
+    String messageStatus = "";
+    if (DatasetStatusEnum.TECHNICALLY_ACCEPTED.equals(datasetStatusMessageVO.getStatus())) {
+      messageStatus = "Feedback status changed: Technically Accepted, Feedback message: ";
+    } else if (DatasetStatusEnum.CORRECTION_REQUESTED.equals(datasetStatusMessageVO.getStatus())) {
+      messageStatus = "Feedback status changed: Correction Requested, Feedback message: ";
+    } else {
+      messageStatus = "Feedback status changed, Feedback message: ";
+    }
+    message.setContent(messageStatus + datasetStatusMessageVO.getMessage());
     message.setProviderId(datasetMetabase.getDataProviderId());
+    message.setAutomatic(true);
 
     // Send message to provider
     Optional<DesignDataset> designDataset =
@@ -290,6 +300,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         datasetMetabase.getDataProviderId(), datasetMetabase.getId(), datasetMetabase.getStatus(),
         designDataset.isPresent() ? designDataset.get().getDataSetName() : null,
         EventType.UPDATED_DATASET_STATUS.toString());
+    LOG.info("Automatic feedback message created");
   }
 
 

@@ -31,6 +31,9 @@ public class MessageVO {
   /** The type. */
   private MessageTypeEnum type;
 
+  /** The automatic. */
+  private boolean automatic;
+
   /** The message attachment VO. */
   private MessageAttachmentVO messageAttachmentVO;
 }

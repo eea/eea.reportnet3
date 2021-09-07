@@ -12,6 +12,7 @@ import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.collaboration.CollaborationController;
 import org.eea.interfaces.vo.dataflow.MessageAttachmentVO;
+import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
@@ -182,19 +183,21 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @param providerId the provider id
    * @param read the read
    * @param page the page
-   * @return the list
+   * @return the message paginated VO
    */
   @Override
   @HystrixCommand
   @GetMapping("/findMessages/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
-  public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
+  public MessagePaginatedVO findMessages(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
       @RequestParam(value = "read", required = false) Boolean read,
       @RequestParam("page") int page) {
     try {
-      List<MessageVO> listMessageVO =
+      MessagePaginatedVO messagePaginatedVO =
           collaborationService.findMessages(dataflowId, providerId, read, page);
+      List<MessageVO> listMessageVO = messagePaginatedVO.getListMessageVO();
+
       for (MessageVO messageVO : listMessageVO) {
         if (messageVO.getType() == MessageTypeEnum.ATTACHMENT) {
           try {
@@ -215,7 +218,7 @@ public class CollaborationControllerImpl implements CollaborationController {
           }
         }
       }
-      return listMessageVO;
+      return messagePaginatedVO;
     } catch (EEAForbiddenException e) {
       LOG_ERROR.error("Error finding messages: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);

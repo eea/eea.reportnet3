@@ -24,6 +24,7 @@ import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.MessageAttachmentVO;
+import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
 import org.eea.kafka.domain.EventType;
@@ -112,6 +113,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setUserName(userName);
     message.setDirection(direction);
     message.setType(MessageTypeEnum.TEXT);
+    message.setAutomatic(messageVO.isAutomatic());
     message = messageRepository.save(message);
 
     String eventType = EventType.RECEIVED_MESSAGE.toString();
@@ -264,22 +266,27 @@ public class CollaborationServiceImpl implements CollaborationService {
    * @param providerId the provider id
    * @param read the read
    * @param page the page
-   * @return the list
+   * @return the message paginated VO
    * @throws EEAForbiddenException the EEA forbidden exception
    */
   @Override
-  public List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
+  public MessagePaginatedVO findMessages(Long dataflowId, Long providerId, Boolean read, int page)
       throws EEAForbiddenException {
 
     authorizeAndGetDirection(dataflowId, providerId);
     PageRequest pageRequest = PageRequest.of(page, 50, Sort.by("date").descending());
 
-    return null != read
+    MessagePaginatedVO messagePaginatedVO = new MessagePaginatedVO();
+    messagePaginatedVO.setListMessageVO(null != read
         ? messageMapper.entityListToClass(messageRepository
             .findByDataflowIdAndProviderIdAndRead(dataflowId, providerId, read, pageRequest)
             .getContent())
         : messageMapper.entityListToClass(messageRepository
-            .findByDataflowIdAndProviderId(dataflowId, providerId, pageRequest).getContent());
+            .findByDataflowIdAndProviderId(dataflowId, providerId, pageRequest).getContent()));
+
+    messagePaginatedVO.setTotalMessages(messageRepository.countByDataFlowId(dataflowId));
+
+    return messagePaginatedVO;
   }
 
   /**
