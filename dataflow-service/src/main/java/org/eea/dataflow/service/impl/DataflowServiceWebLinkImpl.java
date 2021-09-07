@@ -240,9 +240,11 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     } else {
       Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
-      dataflow.getWeblinks().stream().forEach(weblink -> {
-        weblinks.add(dataflowWebLinkMapper.entityToClass(weblink));
-      });
+      if (dataflow != null && dataflow.getDocuments() != null) {
+        dataflow.getWeblinks().stream().forEach(weblink -> {
+          weblinks.add(dataflowWebLinkMapper.entityToClass(weblink));
+        });
+      }
     }
     return weblinks;
   }

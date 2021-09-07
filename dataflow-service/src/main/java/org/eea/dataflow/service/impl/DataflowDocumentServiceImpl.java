@@ -138,9 +138,11 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     } else {
       Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
-      dataflow.getDocuments().stream().forEach(document -> {
-        documents.add(documentMapper.entityToClass(document));
-      });
+      if (dataflow != null && dataflow.getDocuments() != null) {
+        dataflow.getDocuments().stream().forEach(document -> {
+          documents.add(documentMapper.entityToClass(document));
+        });
+      }
     }
     return documents;
   }
