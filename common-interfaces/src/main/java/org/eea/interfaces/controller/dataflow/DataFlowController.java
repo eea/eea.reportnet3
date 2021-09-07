@@ -94,6 +94,14 @@ public interface DataFlowController {
   List<DataFlowVO> findBusinessDataflows();
 
   /**
+   * Find citizen science dataflows.
+   *
+   * @return the list
+   */
+  @GetMapping(value = "/citizenDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataFlowVO> findCitizenScienceDataflows();
+
+  /**
    * Adds the contributor.
    *
    * @param dataflowId the dataflow id

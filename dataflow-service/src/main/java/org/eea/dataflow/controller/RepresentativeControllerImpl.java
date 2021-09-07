@@ -143,6 +143,23 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
   /**
+   * Find all data provider organization type.
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/dataProvider/organizationGroups",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("isAuthenticated()")
+  @ApiOperation(value = "Find all DataProvider organization types",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
+      responseContainer = "List")
+  public List<DataProviderCodeVO> findAllDataProviderOrganizationType() {
+    return representativeService.getDataProviderGroupByType(TypeDataProviderEnum.ORGANIZATION);
+  }
+
+  /**
    * Find representatives by id data flow.
    *
    * @param dataflowId the dataflow id

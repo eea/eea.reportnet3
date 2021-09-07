@@ -63,6 +63,15 @@ public interface RepresentativeController {
   @GetMapping(value = "/dataProvider/companyGroups", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataProviderCodeVO> findAllDataProviderCompanyType();
 
+  /**
+   * Find all data provider organization type.
+   *
+   * @return the list
+   */
+  @GetMapping(value = "/dataProvider/organizationGroups",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataProviderCodeVO> findAllDataProviderOrganizationType();
+
 
   /**
    * Find data provider group by dataflow id.
