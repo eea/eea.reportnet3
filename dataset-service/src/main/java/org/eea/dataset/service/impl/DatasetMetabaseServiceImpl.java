@@ -171,6 +171,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant STATUS_TECHNICALLY_ACCEPTED: {@value}. */
+  private static final String STATUS_TECHNICALLY_ACCEPTED =
+      "Feedback status changed: Technically Accepted, Feedback message: ";
+
+  /** The Constant STATUS_CORRECTION_REQUESTED: {@value}. */
+  private static final String STATUS_CORRECTION_REQUESTED =
+      "Feedback status changed: Correction Requested, Feedback message: ";
+
+  /** The Constant STATUS_CHANGED: {@value}. */
+  private static final String STATUS_CHANGED = "Feedback status changed, Feedback message: ";
+
   /**
    * Gets the data set id by dataflow id.
    *
@@ -282,11 +293,11 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     MessageVO message = new MessageVO();
     String messageStatus = "";
     if (DatasetStatusEnum.TECHNICALLY_ACCEPTED.equals(datasetStatusMessageVO.getStatus())) {
-      messageStatus = "Feedback status changed: Technically Accepted, Feedback message: ";
+      messageStatus = STATUS_TECHNICALLY_ACCEPTED;
     } else if (DatasetStatusEnum.CORRECTION_REQUESTED.equals(datasetStatusMessageVO.getStatus())) {
-      messageStatus = "Feedback status changed: Correction Requested, Feedback message: ";
+      messageStatus = STATUS_CORRECTION_REQUESTED;
     } else {
-      messageStatus = "Feedback status changed, Feedback message: ";
+      messageStatus = STATUS_CHANGED;
     }
     message.setContent(messageStatus + datasetStatusMessageVO.getMessage());
     message.setProviderId(datasetMetabase.getDataProviderId());
