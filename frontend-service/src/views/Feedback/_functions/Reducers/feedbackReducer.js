@@ -7,7 +7,6 @@ export const feedbackReducer = (state, { type, payload }) => {
       return { ...state, messages: state.messages.filter(message => message.id !== payload) };
     case 'ON_LOAD_MORE_MESSAGES':
       let inmAllMessages = [];
-      console.log(payload.length, state.messages.length, state.currentPage * 50);
       if (payload.length !== state.messages.length || state.messages.length >= state.currentPage * 50) {
         inmAllMessages = [...payload, ...state.messages];
       } else {

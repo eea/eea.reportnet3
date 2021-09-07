@@ -95,7 +95,6 @@ export const ListMessages = ({
         messagesWrapperRef.current.scrollTo(0, 5);
       }
     } else {
-      console.log(messageDeleted);
       if (newMessageAdded || messageDeleted) {
         messagesWrapperRef.current.scrollTo(0, lastMessage.offsetTop);
         if (messageDeleted) {
@@ -108,8 +107,6 @@ export const ListMessages = ({
               messagesWrapperRef.current.scrollTo(0, lastMessage.offsetTop);
             }
           }
-        } else {
-          messagesWrapperRef.current.scrollTo(0, 5);
         }
       }
     }
