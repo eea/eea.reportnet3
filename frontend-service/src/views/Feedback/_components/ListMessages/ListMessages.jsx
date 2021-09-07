@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer, useRef } from 'react';
+import { useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import last from 'lodash/last';
@@ -76,7 +76,7 @@ export const ListMessages = ({
       .indexOf(false);
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const domMessages = document.querySelectorAll('.rep-feedback-message');
     const lastMessage = last(domMessages);
 
@@ -87,7 +87,7 @@ export const ListMessages = ({
           const lastSeparator = last(unreadSeparator);
           messagesWrapperRef.current.scrollTo(0, lastSeparator.offsetTop - 100);
         } else {
-          if (!moreMessagesLoading) {
+          if (!moreMessagesLoading && !isNil(lastMessage)) {
             messagesWrapperRef.current.scrollTo(0, lastMessage?.offsetTop);
           }
         }
@@ -96,17 +96,15 @@ export const ListMessages = ({
       }
     } else {
       if (newMessageAdded || messageDeleted) {
-        messagesWrapperRef.current.scrollTo(0, lastMessage.offsetTop);
+        if (!isNil(lastMessage)) {
+          messagesWrapperRef.current.scrollTo(0, lastMessage.offsetTop);
+        }
         if (messageDeleted) {
           dispatchListMessages({ type: 'SET_IS_MESSAGE_DELETED', payload: false });
         }
       } else {
-        if (!moreMessagesLoaded) {
-          if (!isEmpty(domMessages)) {
-            if (!moreMessagesLoading) {
-              messagesWrapperRef.current.scrollTo(0, lastMessage.offsetTop);
-            }
-          }
+        if (!moreMessagesLoaded && !isEmpty(domMessages) && !moreMessagesLoading && !isNil(lastMessage)) {
+          messagesWrapperRef.current.scrollTo(0, lastMessage.offsetTop);
         }
       }
     }
@@ -118,7 +116,7 @@ export const ListMessages = ({
     dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
   }, [messages, listMessagesState.listContent]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (listMessagesState.resetScrollStates) {
       onUpdateNewMessageAdded(false);
       dispatchListMessages({
@@ -169,7 +167,7 @@ export const ListMessages = ({
     return (
       <div className={styles.scrollMessagesWrapper} ref={listMessagesWrapperRef}>
         <p className={styles.messageCounter}>{`${messages.length} / 1000`}</p>
-        {isLoadingNewMessages && (
+        {moreMessagesLoading && (
           <div className={styles.lazyLoadingWrapper}>
             <Spinner className={styles.lazyLoadingSpinner} />
           </div>
@@ -193,7 +191,10 @@ export const ListMessages = ({
   };
 
   return (
-    <div className={`${styles.messagesWrapper} ${className}`} onScroll={onScroll} ref={messagesWrapperRef}>
+    <div
+      className={`${styles.messagesWrapper} ${className} ${moreMessagesLoading ? styles.messagesWrapperDisabled : ''}`}
+      onScroll={onScroll}
+      ref={messagesWrapperRef}>
       {listMessagesState.listContent}
       {isVisibleConfirmDelete && (
         <ConfirmDialog
