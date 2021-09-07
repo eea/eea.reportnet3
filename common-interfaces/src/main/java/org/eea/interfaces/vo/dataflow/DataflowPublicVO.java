@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Objects;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
+import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.interfaces.vo.weblink.WeblinkVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -12,7 +14,6 @@ import lombok.ToString;
 /**
  * The type Data flow vo.
  */
-
 @Getter
 @Setter
 @ToString
@@ -26,6 +27,12 @@ public class DataflowPublicVO extends GenericDataflowVO implements Serializable 
 
   /** The reference datasets. */
   private List<ReferenceDatasetPublicVO> referenceDatasets;
+
+  /** The documents. */
+  private List<DocumentVO> documents;
+
+  /** The weblinks. */
+  private List<WeblinkVO> weblinks;
 
   /**
    * Equals.

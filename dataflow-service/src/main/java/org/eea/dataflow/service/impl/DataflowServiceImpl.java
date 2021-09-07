@@ -14,6 +14,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
+import org.eea.dataflow.mapper.DataflowWebLinkMapper;
+import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.dataflow.persistence.domain.Dataflow;
@@ -178,6 +180,14 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private FMEUserRepository fmeUserRepository;
 
+  /** The document mapper. */
+  @Autowired
+  private DocumentMapper documentMapper;
+
+  /** The weblink mapper. */
+  @Autowired
+  private DataflowWebLinkMapper weblinkMapper;
+
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -234,21 +244,25 @@ public class DataflowServiceImpl implements DataflowService {
 
     // Get user's datasets
     Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
+    boolean userAdmin = isAdmin();
 
     // Get user's dataflows sorted by status and creation date
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (null != idsResources && !idsResources.isEmpty()) {
-      dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(idsResources)
-          .forEach(dataflow -> {
-            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-            if (!map.isEmpty() && null != datasetsStatusList) {
-              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-            }
-            dataflowVOs.add(dataflowVO);
-          });
+    if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
+      List<Dataflow> dataflows =
+          userAdmin ? dataflowRepository.findInOrderByStatusDescCreationDateDesc()
+              : dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(idsResources);
+
+      dataflows.forEach(dataflow -> {
+        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+        if (!map.isEmpty() && null != datasetsStatusList) {
+          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+        }
+        dataflowVOs.add(dataflowVO);
+      });
       try {
         getOpenedObligations(dataflowVOs);
       } catch (FeignException e) {
@@ -277,21 +291,28 @@ public class DataflowServiceImpl implements DataflowService {
 
     // Get user's datasets
     Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
+    boolean userAdmin = isAdmin();
 
     // First, get reference dataflows in DESIGN that the user has permission
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (null != idsResources && !idsResources.isEmpty()) {
-      dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
-          TypeStatusEnum.DESIGN, idsResources).forEach(dataflow -> {
-            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-            if (!map.isEmpty() && null != datasetsStatusList) {
-              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-            }
-            dataflowVOs.add(dataflowVO);
-          });
+    if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
+
+      List<Dataflow> dataflows = userAdmin
+          ? dataflowRepository
+              .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
+          : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
+              TypeStatusEnum.DESIGN, idsResources);
+
+      dataflows.forEach(dataflow -> {
+        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+        if (!map.isEmpty() && null != datasetsStatusList) {
+          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+        }
+        dataflowVOs.add(dataflowVO);
+      });
     }
 
     // Second, get reference dataflows in DRAFT sorted by status and creation date
@@ -354,6 +375,49 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowVOs;
   }
 
+  /**
+   * Gets the citizen science dataflows.
+   *
+   * @param userId the user id
+   * @return the citizen science dataflows
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<DataFlowVO> getCitizenScienceDataflows(String userId) throws EEAException {
+
+    List<DataFlowVO> dataflowVOs = new ArrayList<>();
+
+    // Get user's datasets
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
+    boolean userAdmin = isAdmin();
+
+    // Get user's dataflows sorted by status and creation date
+    List<Long> idsResources =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if ((null != idsResources && !idsResources.isEmpty()) || userAdmin) {
+      List<Dataflow> dataflows =
+          userAdmin ? dataflowRepository.findCitizenScienceInOrderByStatusDescCreationDateDesc()
+              : dataflowRepository
+                  .findCitizenScienceAndIdInOrderByStatusDescCreationDateDesc(idsResources);
+      dataflows.forEach(dataflow -> {
+        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+        if (!map.isEmpty() && null != datasetsStatusList) {
+          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+        }
+        dataflowVOs.add(dataflowVO);
+      });
+      try {
+        getOpenedObligations(dataflowVOs);
+      } catch (FeignException e) {
+        LOG_ERROR.error(
+            "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
+            e.getMessage(), e);
+      }
+    }
+    return dataflowVOs;
+  }
 
 
   /**
@@ -1386,7 +1450,9 @@ public class DataflowServiceImpl implements DataflowService {
         List<DataflowStatusDataset> list = new ArrayList<>();
         DataflowStatusDataset dataflowStatusDataset = new DataflowStatusDataset();
         dataflowStatusDataset.setId(object.getId());
-        dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
+        if (null != object.getStatus()) {
+          dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
+        }
         list.add(dataflowStatusDataset);
         if (map.get(dataflowStatusDataset.getId()) != null) {
           map.get(dataflowStatusDataset.getId()).addAll(list);
@@ -1396,6 +1462,50 @@ public class DataflowServiceImpl implements DataflowService {
       }
     }
     return map;
+  }
+
+  /**
+   * Gets the all documents by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public List<DocumentVO> getAllDocumentsByDataflowId(Long dataflowId) throws EEAException {
+    List<DocumentVO> documents = new ArrayList<>();
+    if (null == dataflowId) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    } else {
+      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      dataflow.getDocuments().stream().forEach(document -> {
+        documents.add(documentMapper.entityToClass(document));
+      });
+    }
+    return documents;
+  }
+
+  /**
+   * Gets the all weblinks by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all weblinks by dataflow id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public List<WeblinkVO> getAllWeblinksByDataflowId(Long dataflowId) throws EEAException {
+    List<WeblinkVO> weblinks = new ArrayList<>();
+    if (null == dataflowId) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    } else {
+      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      dataflow.getWeblinks().stream().forEach(weblink -> {
+        weblinks.add(weblinkMapper.entityToClass(weblink));
+      });
+    }
+    return weblinks;
   }
 
 }

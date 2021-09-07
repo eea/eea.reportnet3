@@ -1,0 +1,1 @@
+ALTER TABLE public.weblink ADD column if not exists "is_public" bool NULL;

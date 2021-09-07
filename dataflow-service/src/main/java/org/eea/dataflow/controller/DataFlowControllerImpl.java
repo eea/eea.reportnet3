@@ -18,11 +18,13 @@ import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -213,6 +215,33 @@ public class DataFlowControllerImpl implements DataFlowController {
             .get(AuthenticationDetails.USER_ID);
     try {
       dataflows = dataflowService.getBusinessDataflows(userId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return dataflows;
+  }
+
+
+
+  /**
+   * Find citizen science dataflows.
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/citizenScienceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Citizen Science Dataflows for the logged User",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      responseContainer = "List")
+  public List<DataFlowVO> findCitizenScienceDataflows() {
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
+    try {
+      dataflows = dataflowService.getCitizenScienceDataflows(userId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -641,6 +670,14 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
+  /**
+   * Access entity.
+   *
+   * @param dataflowType the dataflow type
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if successful
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
@@ -673,6 +710,54 @@ public class DataFlowControllerImpl implements DataFlowController {
       }
     }
     return false;
+  }
+
+  /**
+   * Gets the all documents by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @GetMapping(value = "document/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find list of all documents by id of a Dataflow",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class,
+      responseContainer = "List")
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
+  public List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId) {
+    List<DocumentVO> documents = new ArrayList<>();
+    try {
+      documents = dataflowService.getAllDocumentsByDataflowId(dataflowId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Not found dataflow {}", dataflowId);
+    }
+    return documents;
+  }
+
+  /**
+   * Gets the all weblinks by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all weblinks by dataflow
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @GetMapping(value = "weblink/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find list of all weblinks by id of a Dataflow",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = WeblinkVO.class,
+      responseContainer = "List")
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
+  public List<WeblinkVO> getAllWeblinksByDataflow(@PathVariable("dataflowId") Long dataflowId) {
+    List<WeblinkVO> weblinks = new ArrayList<>();
+    try {
+      weblinks = dataflowService.getAllWeblinksByDataflowId(dataflowId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Not found dataflow {}", dataflowId);
+    }
+    return weblinks;
   }
 
 }
