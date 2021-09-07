@@ -138,4 +138,16 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
           e);
     }
   }
+  /*
+   * @Override
+   * 
+   * @HystrixCommand
+   * 
+   * @GetMapping(value = "/{dataflowId}") public List<DocumentVO>
+   * getAllDocumentsByDataflowId(@PathVariable("dataflowId") Long dataflowId) { List<DocumentVO>
+   * documents = new ArrayList<>(); LOG.info("IM HERE"); try { documents =
+   * dataflowService.getAllDocumentsByDataflowId(dataflowId); } catch (EEAException e) { throw new
+   * ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND, e); }
+   * return documents; }
+   */
 }

@@ -43,4 +43,7 @@ public interface DataflowDocumentService {
    * @throws EEAException the EEA exception
    */
   void updateDocument(DocumentVO documentVO) throws EEAException;
+
+
+  // List<DocumentVO> getAllDocumentsByDataflowId(Long dataflowId) throws EEAException;
 }

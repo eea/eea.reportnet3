@@ -120,5 +120,14 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
     documentNew.setDate(document.getDate());
     documentRepository.save(documentNew);
   }
-
+  /*
+   * @Override
+   * 
+   * @Transactional public List<DocumentVO> getAllDocumentsByDataflowId(Long dataflowId) throws
+   * EEAException { List<DocumentVO> documents = new ArrayList<>(); if (null == dataflowId) { throw
+   * new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND); } else { Dataflow dataflow =
+   * dataflowRepository.findById(dataflowId).orElse(null);
+   * dataflow.getDocuments().stream().forEach(document -> {
+   * documents.add(documentMapper.entityToClass(document)); }); } return documents; }
+   */
 }

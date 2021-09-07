@@ -113,4 +113,8 @@ public interface DocumentController {
   void deleteSnapshotSchemaDocument(@PathVariable("idDesignDataset") Long idDesignDataset,
       @RequestParam("fileName") String fileName) throws Exception;
 
+  // @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  // List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId);
+
+
 }

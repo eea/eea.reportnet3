@@ -59,4 +59,8 @@ public interface DataFlowDocumentController {
    */
   @DeleteMapping(value = "/{documentId}")
   void deleteDocument(@PathVariable("documentId") Long documentId);
+
+
+  // @GetMapping(value = "/{dataflowId}")
+  // List<DocumentVO> getAllDocumentsByDataflowId(@PathVariable("dataflowId") Long dataflowId);
 }
