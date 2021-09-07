@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -209,7 +210,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     conn.setSchema("dataset_" + datasetId);
     TableValue tableValue;
     try (PreparedStatement stmt = conn.prepareStatement(query);
-        ResultSet rs = stmt.executeQuery()) {
+        ResultSet rs = stmt.executeQuery();) {
+      ResultSetMetaData rsm = stmt.getMetaData();
       LOG.info("Query executed: {}", query);
       tableValue = new TableValue();
       List<RecordValue> records = new ArrayList<>();
@@ -221,7 +223,15 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         switch (entityTypeEnum) {
           case RECORD:
             record.setId(rs.getString(RECORD_ID));
-            record.setFields(fields);
+            ArrayList<FieldValue> auxFields = new ArrayList<>();
+            for (int indexCol = 1; indexCol <= rsm.getColumnCount(); indexCol++) {
+              FieldValue auxField = new FieldValue();
+              auxField.setColumnName(rsm.getColumnName(indexCol));
+              auxField.setValue(rs.getString(indexCol));
+              auxField.setRecord(record);
+              auxFields.add(auxField);
+            }
+            record.setFields(auxFields);
             records.add(record);
             tableValue.setRecords(records);
             break;
@@ -230,6 +240,13 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             FieldValue field = new FieldValue();
             field.setId(rs.getString(entityName + "_id"));
             fields.add(field);
+            for (int indexCol = 1; indexCol <= rsm.getColumnCount(); indexCol++) {
+              FieldValue auxField2 = new FieldValue();
+              auxField2.setColumnName(rsm.getColumnName(indexCol));
+              auxField2.setValue(rs.getString(indexCol));
+              auxField2.setRecord(record);
+              fields.add(auxField2);
+            }
             record.setFields(fields);
             records.add(record);
             tableValue.setRecords(records);
