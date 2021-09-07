@@ -1,5 +1,7 @@
 package org.eea.dataflow.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.eea.dataflow.service.DataflowDocumentService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -138,16 +140,25 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
           e);
     }
   }
-  /*
-   * @Override
-   * 
-   * @HystrixCommand
-   * 
-   * @GetMapping(value = "/{dataflowId}") public List<DocumentVO>
-   * getAllDocumentsByDataflowId(@PathVariable("dataflowId") Long dataflowId) { List<DocumentVO>
-   * documents = new ArrayList<>(); LOG.info("IM HERE"); try { documents =
-   * dataflowService.getAllDocumentsByDataflowId(dataflowId); } catch (EEAException e) { throw new
-   * ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND, e); }
-   * return documents; }
+
+  /**
+   * Gets the all documents by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow id
    */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/{dataflowId}")
+  public List<DocumentVO> getAllDocumentsByDataflowId(@PathVariable("dataflowId") Long dataflowId) {
+    List<DocumentVO> documents = new ArrayList<>();
+    LOG.info("IM HERE");
+    try {
+      documents = dataflowService.getAllDocumentsByDataflowId(dataflowId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
+          e);
+    }
+    return documents;
+  }
 }

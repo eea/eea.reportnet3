@@ -1,7 +1,10 @@
 package org.eea.interfaces.controller.document;
 
+import java.util.List;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -113,8 +116,14 @@ public interface DocumentController {
   void deleteSnapshotSchemaDocument(@PathVariable("idDesignDataset") Long idDesignDataset,
       @RequestParam("fileName") String fileName) throws Exception;
 
-  // @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  // List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId);
+  /**
+   * Gets the all documents by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow
+   */
+  @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId);
 
 
 }

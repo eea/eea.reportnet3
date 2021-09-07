@@ -1,8 +1,10 @@
 package org.eea.interfaces.controller.dataflow;
 
 
+import java.util.List;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,6 +62,14 @@ public interface DataFlowWebLinkController {
   @PutMapping
   void updateLink(@RequestBody WeblinkVO weblinkVO);
 
+  /**
+   * Gets the all weblinks by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all weblinks by dataflow
+   */
+  @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<WeblinkVO> getAllWeblinksByDataflow(@PathVariable("dataflowId") Long dataflowId);
 
 }
 

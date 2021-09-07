@@ -1,5 +1,7 @@
 package org.eea.dataflow.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Dataflow;
@@ -120,14 +122,27 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
     documentNew.setDate(document.getDate());
     documentRepository.save(documentNew);
   }
-  /*
-   * @Override
-   * 
-   * @Transactional public List<DocumentVO> getAllDocumentsByDataflowId(Long dataflowId) throws
-   * EEAException { List<DocumentVO> documents = new ArrayList<>(); if (null == dataflowId) { throw
-   * new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND); } else { Dataflow dataflow =
-   * dataflowRepository.findById(dataflowId).orElse(null);
-   * dataflow.getDocuments().stream().forEach(document -> {
-   * documents.add(documentMapper.entityToClass(document)); }); } return documents; }
+
+  /**
+   * Gets the all documents by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow id
+   * @throws EEAException the EEA exception
    */
+  @Override
+  @Transactional
+  public List<DocumentVO> getAllDocumentsByDataflowId(Long dataflowId) throws EEAException {
+    List<DocumentVO> documents = new ArrayList<>();
+    if (null == dataflowId) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    } else {
+      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      dataflow.getDocuments().stream().forEach(document -> {
+        documents.add(documentMapper.entityToClass(document));
+      });
+    }
+    return documents;
+  }
+
 }

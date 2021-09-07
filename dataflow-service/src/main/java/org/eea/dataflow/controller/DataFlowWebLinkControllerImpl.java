@@ -1,5 +1,7 @@
 package org.eea.dataflow.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.eea.dataflow.exception.EntityNotFoundException;
 import org.eea.dataflow.exception.ResourceNoFoundException;
 import org.eea.dataflow.exception.WrongDataExceptions;
@@ -12,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -187,6 +190,30 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
 
+  }
+
+  /**
+   * Gets the all weblinks by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all weblinks by dataflow
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find list of all weblinks by id of a Dataflow",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = WeblinkVO.class,
+      responseContainer = "List")
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
+  public List<WeblinkVO> getAllWeblinksByDataflow(@PathVariable("dataflowId") Long dataflowId) {
+    List<WeblinkVO> weblinks = new ArrayList<>();
+    try {
+      weblinks = dataflowWebLinkService.getAllWeblinksByDataflowId(dataflowId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Not found dataflow {}", dataflowId);
+    }
+    return weblinks;
   }
 
 }

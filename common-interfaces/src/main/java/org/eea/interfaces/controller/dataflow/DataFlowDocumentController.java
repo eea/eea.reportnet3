@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataflow;
 
 
+import java.util.List;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -61,6 +62,12 @@ public interface DataFlowDocumentController {
   void deleteDocument(@PathVariable("documentId") Long documentId);
 
 
-  // @GetMapping(value = "/{dataflowId}")
-  // List<DocumentVO> getAllDocumentsByDataflowId(@PathVariable("dataflowId") Long dataflowId);
+  /**
+   * Gets the all documents by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow id
+   */
+  @GetMapping(value = "/private/{dataflowId}")
+  List<DocumentVO> getAllDocumentsByDataflowId(@PathVariable("dataflowId") Long dataflowId);
 }
