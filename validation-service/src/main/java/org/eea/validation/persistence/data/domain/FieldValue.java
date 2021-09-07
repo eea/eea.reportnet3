@@ -76,6 +76,10 @@ public class FieldValue {
   @Transient
   private ErrorTypeEnum levelError;
 
+  /** The column name. */
+  @Transient
+  private String columnName;
+
   /**
    * Hash code.
    *
