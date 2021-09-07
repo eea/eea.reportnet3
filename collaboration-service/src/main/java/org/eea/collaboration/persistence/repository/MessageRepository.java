@@ -42,4 +42,12 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
    * @return the list
    */
   List<Message> findByDataflowIdAndIdIn(Long dataflowId, Collection<Long> messageIds);
+
+  /**
+   * Count by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the long
+   */
+  Long countByDataflowId(Long dataflowId);
 }
