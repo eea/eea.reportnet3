@@ -5,6 +5,8 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 export const DocumentRepository = {
   getAll: async dataflowId => await HTTPRequester.get({ url: getUrl(DocumentConfig.getAll, { dataflowId }) }),
 
+  getAllPublic: async dataflowId => await HTTPRequester.get({ url: getUrl(DocumentConfig.getAllPublic, { dataflowId }) }),
+
   delete: async documentId => await HTTPRequester.delete({ url: getUrl(DocumentConfig.delete, { documentId }) }),
 
   download: async documentId =>

@@ -24,6 +24,8 @@ import { Title } from 'views/_components/Title';
 
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
+import { DocumentService } from 'services/DocumentService';
+import { WebLinkService } from 'services/WebLinkService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -161,6 +163,28 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
+    const getDocumentsHeader = fieldHeader => {
+      switch (fieldHeader) {
+        case 'datasetSchemaName':
+          return resourcesContext.messages['name'];
+        case 'publicFileName':
+          return resourcesContext.messages['file'];
+        default:
+          return resourcesContext.messages[fieldHeader];
+      }
+    };
+
+    const getWebLinksHeader = fieldHeader => {
+      switch (fieldHeader) {
+        case 'datasetSchemaName':
+          return resourcesContext.messages['name'];
+        case 'publicFileName':
+          return resourcesContext.messages['file'];
+        default:
+          return resourcesContext.messages[fieldHeader];
+      }
+    };
+
     const getOrderedColumns = representatives => {
       const representativesWithPriority = [
         { id: 'id', index: 0 },
@@ -232,11 +256,13 @@ export const PublicDataflowInformation = withRouter(
     const onLoadPublicDataflowInformation = async () => {
       try {
         const data = await DataflowService.getPublicDataflowData(dataflowId);
+        const documents = await DocumentService.getAllPublic(dataflowId);
+        const weblinks = await WebLinkService.getAllPublic(dataflowId);
         setDataflowData(data);
         setPublicInformation(data.datasets, data.manualAcceptance);
         setReferenceDatasets(data.referenceDatasets);
-        setDocuments(data.documents);
-        setWebLinks(data.weblinks);
+        setDocuments(documents);
+        setWebLinks(weblinks);
       } catch (error) {
         console.error('PublicDataflowInformation - onLoadDataflowData.', error);
         if (error.response.status === 404 || error.response.status === 400) {
@@ -326,8 +352,8 @@ export const PublicDataflowInformation = withRouter(
       return fieldColumns;
     };
 
-    const renderDocumentsColumns = referenceDatasets => {
-      const fieldColumns = Object.keys(referenceDatasets[0])
+    const renderDocumentsColumns = documents => {
+      const fieldColumns = Object.keys(documents[0])
         .filter(
           key =>
             key.includes('category') ||
@@ -345,7 +371,7 @@ export const PublicDataflowInformation = withRouter(
               //body={template}
               //className={field === 'publicFileName' ? styles.downloadReferenceDatasetFile : ''}
               field={field}
-              //header={getDocumentsHeader(field)}
+              header={getDocumentsHeader(field)}
               key={field}
               sortable
             />
@@ -355,8 +381,8 @@ export const PublicDataflowInformation = withRouter(
       return fieldColumns;
     };
 
-    const renderWebLinksColumns = referenceDatasets => {
-      const fieldColumns = Object.keys(referenceDatasets[0])
+    const renderWebLinksColumns = webLinks => {
+      const fieldColumns = Object.keys(webLinks[0])
         .filter(key => key.includes('description') || key.includes('url'))
         .map(field => {
           //let template = null;
@@ -366,7 +392,7 @@ export const PublicDataflowInformation = withRouter(
               //body={template}
               //className={field === 'publicFileName' ? styles.downloadReferenceDatasetFile : ''}
               field={field}
-              //header={getWebLinksHeader(field)}
+              header={getWebLinksHeader(field)}
               key={field}
               sortable
             />
@@ -400,7 +426,7 @@ export const PublicDataflowInformation = withRouter(
                   <div className={styles.dataTableWrapper}>
                     <div className={styles.dataTableTitle}>{resourcesContext.messages['documents']}</div>
                     <DataTable autoLayout={true} totalRecords={documents.length} value={documents}>
-                      {renderDocumentsColumns(referenceDatasets)}
+                      {renderDocumentsColumns(documents)}
                     </DataTable>
                   </div>
                 )}
@@ -408,7 +434,7 @@ export const PublicDataflowInformation = withRouter(
                   <div className={styles.dataTableWrapper}>
                     <div className={styles.dataTableTitle}>{resourcesContext.messages['webLinks']}</div>
                     <DataTable autoLayout={true} totalRecords={webLinks.length} value={webLinks}>
-                      {renderWebLinksColumns(referenceDatasets)}
+                      {renderWebLinksColumns(webLinks)}
                     </DataTable>
                   </div>
                 )}

@@ -11,7 +11,7 @@ export const WebLinkRepository = {
   create: async (dataflowId, webLink) =>
     await HTTPRequester.post({
       url: getUrl(WebLinkConfig.create, { dataflowId }),
-      data: { description: webLink.description, url: webLink.url.toString() }
+      data: { description: webLink.description, url: webLink.url.toString(), isPublic: webLink.isPublic }
     }),
 
   delete: async webLinkId => await HTTPRequester.delete({ url: getUrl(WebLinkConfig.delete, { webLinkId }) }),
