@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
+import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -254,5 +255,14 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   List<DocumentVO> getAllDocumentsByDataflowId(Long dataflowId) throws EEAException;
+
+  /**
+   * Gets the all weblinks by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all weblinks by dataflow id
+   * @throws EEAException the EEA exception
+   */
+  public List<WeblinkVO> getAllWeblinksByDataflowId(Long dataflowId) throws EEAException;
 
 }
