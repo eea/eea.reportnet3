@@ -210,7 +210,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     conn.setSchema("dataset_" + datasetId);
     TableValue tableValue;
     try (PreparedStatement stmt = conn.prepareStatement(query);
-        ResultSet rs = stmt.executeQuery();) {
+        ResultSet rs = stmt.executeQuery()) {
       ResultSetMetaData rsm = stmt.getMetaData();
       LOG.info("Query executed: {}", query);
       tableValue = new TableValue();
