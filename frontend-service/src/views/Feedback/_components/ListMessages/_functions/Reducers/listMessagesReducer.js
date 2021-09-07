@@ -7,11 +7,6 @@ export const listMessagesReducer = (state, { type, payload }) => {
         messageDeleted: true,
         messageIdToDelete: payload.messageId
       };
-    case 'SET_IS_LOADING':
-      return {
-        ...state,
-        isLoadingNewMessages: payload
-      };
     case 'SET_IS_MESSAGE_DELETED':
       return {
         ...state,

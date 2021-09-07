@@ -41,7 +41,6 @@ export const ListMessages = ({
 
   const [listMessagesState, dispatchListMessages] = useReducer(listMessagesReducer, {
     isVisibleConfirmDelete: false,
-    isLoadingNewMessages: false,
     listContent: null,
     messageDeleted: false,
     messageIdToDelete: null,
@@ -49,13 +48,7 @@ export const ListMessages = ({
     separatorIndex: -1
   });
 
-  const {
-    isLoadingNewMessages,
-    isVisibleConfirmDelete,
-    messageDeleted,
-    messageIdToDelete,
-    separatorIndex
-  } = listMessagesState;
+  const { isVisibleConfirmDelete, messageDeleted, messageIdToDelete, separatorIndex } = listMessagesState;
 
   useEffect(() => {
     dispatchListMessages({ type: 'SET_SEPARATOR_INDEX', payload: getIndexByHeader(messages) });
@@ -66,7 +59,7 @@ export const ListMessages = ({
       type: 'SET_LIST_CONTENT',
       payload: renderMessageList()
     });
-  }, [isCustodian, isLoading, isLoadingNewMessages, messages, separatorIndex]);
+  }, [isCustodian, isLoading, moreMessagesLoading, messages, separatorIndex]);
 
   const getIndexByHeader = messagesArray => {
     return messagesArray
@@ -112,8 +105,6 @@ export const ListMessages = ({
       type: 'UPDATE_SCROLL_STATES',
       payload: true
     });
-
-    dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
   }, [messages, listMessagesState.listContent]);
 
   useLayoutEffect(() => {
@@ -146,7 +137,6 @@ export const ListMessages = ({
   const onScroll = e => {
     if (!isNil(e)) {
       if (e.target.scrollTop <= 0 && lazyLoading && canLoad) {
-        dispatchListMessages({ type: 'SET_IS_LOADING', payload: true });
         onLazyLoad();
         messagesWrapperRef.current.scrollTop = 5;
       }
