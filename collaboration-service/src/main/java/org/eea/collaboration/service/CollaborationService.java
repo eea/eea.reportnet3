@@ -7,6 +7,7 @@ import org.eea.collaboration.persistence.domain.MessageAttachment;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
+import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 
 /**
@@ -66,10 +67,10 @@ public interface CollaborationService {
    * @param providerId the provider id
    * @param read the read
    * @param page the page
-   * @return the list
+   * @return the message paginated VO
    * @throws EEAForbiddenException the EEA forbidden exception
    */
-  List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
+  MessagePaginatedVO findMessages(Long dataflowId, Long providerId, Boolean read, int page)
       throws EEAForbiddenException;
 
   /**
