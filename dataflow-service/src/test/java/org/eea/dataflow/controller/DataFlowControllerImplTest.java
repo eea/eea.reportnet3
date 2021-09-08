@@ -838,6 +838,43 @@ public class DataFlowControllerImplTest {
 
 
   @Test
+  public void findCitizenScienceDataflowsTest() throws EEAException {
+
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+
+    when(authentication.getDetails()).thenReturn(details);
+    when(dataflowService.getDataflows(Mockito.any(), Mockito.any(TypeDataflowEnum.class)))
+        .thenReturn(new ArrayList<>());
+    assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findCitizenScienceDataflows());
+  }
+
+  @Test
+  public void findCitizenScienceDataflowsExceptionTest() throws EEAException {
+
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+
+    when(authentication.getDetails()).thenReturn(details);
+
+    doThrow(new EEAException()).when(dataflowService).getDataflows(Mockito.any(),
+        Mockito.any(TypeDataflowEnum.class));
+    assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findCitizenScienceDataflows());
+  }
+
+
+
+  @Test
   public void accessEntityTest() {
     assertFalse("reference not allowed", dataFlowControllerImpl
         .accessEntity(TypeDataflowEnum.BUSINESS, EntityClassEnum.DATASET, 1L));

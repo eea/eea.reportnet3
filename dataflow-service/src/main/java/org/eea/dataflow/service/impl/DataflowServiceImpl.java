@@ -14,8 +14,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
-import org.eea.dataflow.mapper.DataflowWebLinkMapper;
-import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.dataflow.persistence.domain.Dataflow;
@@ -180,13 +178,6 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private FMEUserRepository fmeUserRepository;
 
-  /** The document mapper. */
-  @Autowired
-  private DocumentMapper documentMapper;
-
-  /** The weblink mapper. */
-  @Autowired
-  private DataflowWebLinkMapper weblinkMapper;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
