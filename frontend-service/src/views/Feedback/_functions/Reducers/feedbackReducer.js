@@ -4,22 +4,21 @@ import uniqBy from 'lodash/uniqBy';
 export const feedbackReducer = (state, { type, payload }) => {
   switch (type) {
     case 'ON_DELETE_MESSAGE':
-      return { ...state, messages: state.messages.filter(message => message.id !== payload) };
+      return {
+        ...state,
+        messages: state.messages.filter(message => message.id !== payload),
+        totalMessages: state.totalMessages - 1
+      };
     case 'ON_LOAD_MORE_MESSAGES':
       let inmAllMessages = [];
-      console.log(Number(payload.length) + Number(state.messages.length), state.totalMessages, state.currentPage);
-      if (Number(payload.length) + Number(state.messages.length) < state.totalMessages) {
+      if (Number(state.messages.length) < state.totalMessages) {
         inmAllMessages = [...payload, ...state.messages];
       } else {
         inmAllMessages = [...state.messages];
       }
-      console.log(inmAllMessages);
       return {
         ...state,
-        currentPage:
-          Number(payload.length) + Number(state.messages.length) < state.totalMessages
-            ? state.currentPage + 1
-            : state.currentPage,
+        currentPage: Number(state.messages.length) < state.totalMessages ? state.currentPage + 1 : state.currentPage,
         messages: uniqBy(inmAllMessages, 'id'),
         moreMessagesLoaded: true,
         moreMessagesLoading: false,
@@ -33,7 +32,8 @@ export const feedbackReducer = (state, { type, payload }) => {
         messages: inmAttachMessages,
         newMessageAdded: true,
         importFileDialogVisible: false,
-        draggedFiles: null
+        draggedFiles: null,
+        totalMessages: state.totalMessages + 1
       };
     case 'ON_TOGGLE_LAZY_LOADING':
       return { ...state, moreMessagesLoading: true };
@@ -44,7 +44,8 @@ export const feedbackReducer = (state, { type, payload }) => {
         ...state,
         messages: inmMessages,
         messageToSend: '',
-        newMessageAdded: true
+        newMessageAdded: true,
+        totalMessages: state.totalMessages + 1
       };
     case 'SET_DATAFLOW_DETAILS':
       return {
@@ -77,7 +78,7 @@ export const feedbackReducer = (state, { type, payload }) => {
     case 'SET_MESSAGES':
       return {
         ...state,
-        currentPage: payload.length === 50 ? 1 : 0,
+        currentPage: payload.msgs.length === 50 ? 1 : 0,
         messages: payload.msgs,
         isLoading: false,
         totalMessages: payload.totalMessages

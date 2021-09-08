@@ -194,7 +194,6 @@ export const Feedback = withRouter(({ match, history }) => {
         true
       );
       await markMessagesAsRead(data);
-
       dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data.messages });
     } catch (error) {
       console.error('Feedback - onGetMoreMessages.', error);
@@ -208,7 +207,6 @@ export const Feedback = withRouter(({ match, history }) => {
   const onGetInitialMessages = async dataProviderId => {
     const data = await onLoadMessages(dataProviderId, 0, false);
     await markMessagesAsRead(data);
-
     dispatchFeedback({
       type: 'SET_MESSAGES',
       payload: { msgs: !isNil(data) ? data.messages : [], totalMessages: data.totalMessages }
