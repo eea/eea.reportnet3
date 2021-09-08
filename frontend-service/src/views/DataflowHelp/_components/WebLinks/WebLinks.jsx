@@ -440,8 +440,8 @@ export const WebLinks = ({
                 <input
                   checked={webLinksState.webLink.isPublic}
                   id="isPublic"
-                  onChange={e => {
-                    onIsPublicChange(e.checked);
+                  onChange={() => {
+                    onIsPublicChange(!webLinksState.webLink.isPublic);
                   }}
                   type="checkbox"
                 />

@@ -256,13 +256,12 @@ export const PublicDataflowInformation = withRouter(
     const onLoadPublicDataflowInformation = async () => {
       try {
         const data = await DataflowService.getPublicDataflowData(dataflowId);
-        const documents = await DocumentService.getAllPublic(dataflowId);
-        const weblinks = await WebLinkService.getAllPublic(dataflowId);
+        console.log('data', data);
         setDataflowData(data);
         setPublicInformation(data.datasets, data.manualAcceptance);
         setReferenceDatasets(data.referenceDatasets);
-        setDocuments(documents);
-        setWebLinks(weblinks);
+        setDocuments(data.documents);
+        setWebLinks(data.webLinks);
       } catch (error) {
         console.error('PublicDataflowInformation - onLoadDataflowData.', error);
         if (error.response.status === 404 || error.response.status === 400) {
