@@ -93,29 +93,21 @@ const ManageDataflowForm = forwardRef(
         onSubmit(true);
 
         try {
+          const service = isCitizenScienceDataflow ? CitizenScienceDataflowService : DataflowService;
+
           if (isEditForm) {
-            isCitizenScienceDataflow
-              ? await CitizenScienceDataflowService.update(
-                  dataflowId,
-                  name,
-                  description,
-                  data.obligation.id,
-                  data.isReleasable,
-                  data.showPublicInfo
-                )
-              : await DataflowService.update(
-                  dataflowId,
-                  name,
-                  description,
-                  data.obligation.id,
-                  data.isReleasable,
-                  data.showPublicInfo
-                );
+            await service.update(
+              dataflowId,
+              name,
+              description,
+              data.obligation.id,
+              data.isReleasable,
+              data.showPublicInfo
+            );
+
             onEdit(name, description, data.obligation.id);
           } else {
-            const creationResponse = isCitizenScienceDataflow
-              ? await CitizenScienceDataflowService.create(name, description, data.obligation.id)
-              : await DataflowService.create(name, description, data.obligation.id);
+            const creationResponse = await service.create(name, description, data.obligation.id);
 
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
