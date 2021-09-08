@@ -420,7 +420,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     });
   };
 
-  const validImportExtensions = `.${designerState.selectedImportExtension}`;
+  const validImportExtensions = designerState?.selectedImportExtension
+    ?.split(', ')
+    .map(ext => `.${ext}`)
+    .join(',');
 
   const infoExtensionsTooltip = `${resourcesContext.messages['supportedFileExtensionsTooltip']} ${validImportExtensions}`;
 
