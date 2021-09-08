@@ -41,7 +41,8 @@ export const feedbackReducer = (state, { type, payload }) => {
       return {
         ...state,
         dataflowName: payload.dataflowName,
-        isBusinessDataflow: payload.isBusinessDataflow
+        isBusinessDataflow: payload.isBusinessDataflow,
+        isCitizenScienceDataflow: payload.isCitizenScienceDataflow
       };
     case 'SET_DATAPROVIDERS':
       return { ...state, dataProviders: payload };
