@@ -17,7 +17,7 @@ export const useBreadCrumbs = ({
   dataflowStateData,
   history,
   isBusinessDataflow = false,
-  isCitiesScienceDataflow = false,
+  isCitizenScienceDataflow = false,
   isLoading,
   matchParams,
   metaData,
@@ -29,7 +29,7 @@ export const useBreadCrumbs = ({
 
   useLayoutEffect(() => {
     !isLoading && setBreadCrumbs();
-  }, [dataflowStateData, matchParams, metaData, isBusinessDataflow, isCitiesScienceDataflow, isLoading]);
+  }, [dataflowStateData, matchParams, metaData, isBusinessDataflow, isCitizenScienceDataflow, isLoading]);
 
   const getDataCollectionCrumb = () => {
     return { label: resourcesContext.messages['dataCollection'], icon: 'dataCollection' };
@@ -40,8 +40,8 @@ export const useBreadCrumbs = ({
       return resourcesContext.messages['businessDataflowCrumbLabel'];
     }
 
-    if (isCitiesScienceDataflow) {
-      return resourcesContext.messages['citiesScienceDataflowsCrumbLabel'];
+    if (isCitizenScienceDataflow) {
+      return resourcesContext.messages['citizenScienceDataflowsCrumbLabel'];
     }
 
     return resourcesContext.messages['dataflow'];

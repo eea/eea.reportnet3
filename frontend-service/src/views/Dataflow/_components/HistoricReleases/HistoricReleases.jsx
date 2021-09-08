@@ -32,7 +32,8 @@ export const HistoricReleases = ({
   dataProviderId,
   datasetId,
   historicReleasesView,
-  isBusinessDataflow
+  isBusinessDataflow,
+  isCitizenScienceDataflow
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -136,6 +137,18 @@ export const HistoricReleases = ({
     </div>
   );
 
+  const getCodeColumnHeader = () => {
+    if (isBusinessDataflow) {
+      return resourcesContext.messages['companyCode'];
+    }
+
+    if (isCitizenScienceDataflow) {
+      return resourcesContext.messages['organizationCode'];
+    }
+
+    return resourcesContext.messages['countryCode'];
+  };
+
   const renderDataCollectionColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
       .filter(
@@ -157,9 +170,7 @@ export const HistoricReleases = ({
             columnResizeMode="expand"
             field={field}
             header={
-              isBusinessDataflow && TextUtils.areEquals(field, 'countryCode')
-                ? resourcesContext.messages['companyCode']
-                : resourcesContext.messages[field]
+              TextUtils.areEquals(field, 'countryCode') ? getCodeColumnHeader() : resourcesContext.messages[field]
             }
             key={field}
             sortable={true}
@@ -181,9 +192,7 @@ export const HistoricReleases = ({
             columnResizeMode="expand"
             field={field}
             header={
-              isBusinessDataflow && TextUtils.areEquals(field, 'countryCode')
-                ? resourcesContext.messages['companyCode']
-                : resourcesContext.messages[field]
+              TextUtils.areEquals(field, 'countryCode') ? getCodeColumnHeader() : resourcesContext.messages[field]
             }
             key={field}
             sortable={true}
@@ -193,8 +202,24 @@ export const HistoricReleases = ({
     return fieldColumns;
   };
 
+  const getMultiselectFilterOption = () => {
+    if (isBusinessDataflow) {
+      return resourcesContext.messages['companyCode'];
+    }
+
+    if (isCitizenScienceDataflow) {
+      return resourcesContext.messages['organizationCode'];
+    }
+
+    return resourcesContext.messages['countryCode'];
+  };
+
+  // TODO CHECK CORRECT USE ON CITIES AND SCIENCE
   const filterOptionsDataCollection = [
-    { type: 'multiselect', properties: [{ name: isBusinessDataflow ? 'company' : 'countryCode' }] },
+    {
+      type: 'multiselect',
+      properties: [{ name: isBusinessDataflow ? 'company' : 'countryCode', label: getMultiselectFilterOption() }]
+    },
     {
       type: 'checkbox',
       properties: [
@@ -207,8 +232,12 @@ export const HistoricReleases = ({
     }
   ];
 
+  // TODO CHECK CORRECT USE ON CITIES AND SCIENCE
   const filterOptionsEUDataset = [
-    { type: 'multiselect', properties: [{ name: isBusinessDataflow ? 'company' : 'countryCode' }] }
+    {
+      type: 'multiselect',
+      properties: [{ name: isBusinessDataflow ? 'company' : 'countryCode', label: getMultiselectFilterOption() }]
+    }
   ];
 
   const renderReportingDatasetColumns = historicReleases => {

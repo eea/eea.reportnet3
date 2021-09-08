@@ -95,6 +95,7 @@ export const useSetColumns = (
   hasWritePermissions,
   initialCellValue,
   isBusinessDataflow,
+  isCitizenScienceDataflow,
   isDataflowOpen,
   isDesignDatasetEditorRead,
   onFileDeleteVisible,
@@ -431,11 +432,23 @@ export const useSetColumns = (
       );
     });
 
+    const getProviderCodeColumnHeader = () => {
+      if (isBusinessDataflow) {
+        return resources.messages['companyCode'];
+      }
+
+      if (isCitizenScienceDataflow) {
+        return resources.messages['organizationCode'];
+      }
+
+      return resources.messages['countryCode'];
+    };
+
     let providerCode = (
       <Column
         body={providerCodeTemplate}
         className={styles.providerCode}
-        header={isBusinessDataflow ? resources.messages['companyCode'] : resources.messages['countryCode']}
+        header={getProviderCodeColumnHeader()}
         key="providerCode"
         sortable={false}
         style={{ width: '100px' }}
@@ -482,11 +495,12 @@ export const useSetColumns = (
   }, [
     colsSchema,
     columnOptions,
-    records.selectedRecord.recordId,
-    initialCellValue,
     hasWebformWritePermissions,
     hasWritePermissions,
-    isBusinessDataflow
+    initialCellValue,
+    isBusinessDataflow,
+    isCitizenScienceDataflow,
+    records.selectedRecord.recordId
   ]);
 
   return {

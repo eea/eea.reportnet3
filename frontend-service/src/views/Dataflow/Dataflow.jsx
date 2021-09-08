@@ -23,7 +23,7 @@ import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
-import { ManageReportingDataflow } from 'views/_components/ManageReportingDataflow';
+import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { MainLayout } from 'views/_components/Layout';
@@ -84,6 +84,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isAdminAssignedBusinessDataflow: false,
     isApiKeyDialogVisible: false,
     isBusinessDataflow: false,
+    isCitizenScienceDataflow: false,
     isCopyDataCollectionToEUDatasetLoading: false,
     isCustodian: false,
     isDataSchemaCorrect: [],
@@ -120,8 +121,7 @@ const Dataflow = withRouter(({ history, match }) => {
     userRoles: [],
     isUserRightManagementDialogVisible: false,
     isAdmin: false,
-    isBusinessDataflowDialogVisible: false,
-    isCitiesScienceDataflow: false
+    isBusinessDataflowDialogVisible: false
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -215,7 +215,7 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowStateData: dataflowState.data,
     history,
     isBusinessDataflow: dataflowState.isBusinessDataflow,
-    isCitiesScienceDataflow: dataflowState.isCitiesScienceDataflow,
+    isCitizenScienceDataflow: dataflowState.isCitizenScienceDataflow,
     matchParams: match.params,
     representativeId
   });
@@ -424,6 +424,18 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const getUsersListDialogHeader = () => {
+    if (dataflowState.isBusinessDataflow) {
+      return resourcesContext.messages['dataflowUsersByCompanyList'];
+    }
+
+    if (dataflowState.isCitizenScienceDataflow) {
+      return resourcesContext.messages['dataflowUsersByOrganizationList'];
+    }
+
+    return resourcesContext.messages['dataflowUsersByCountryList'];
+  };
+
   const manageRoleDialogFooter = (
     <Fragment>
       <Button
@@ -520,7 +532,7 @@ const Dataflow = withRouter(({ history, match }) => {
           data: dataflow,
           description: dataflow.description,
           isBusinessDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.BUSINESS),
-          isCitiesScienceDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.CITIES_SCIENCE),
+          isCitizenScienceDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.CITIZEN_SCIENCE),
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
@@ -848,6 +860,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowState={dataflowState}
           handleRedirect={handleRedirect}
           isBusinessDataflow={dataflowState.isBusinessDataflow}
+          isCitizenScienceDataflow={dataflowState.isCitizenScienceDataflow}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
@@ -930,6 +943,7 @@ const Dataflow = withRouter(({ history, match }) => {
               <RepresentativesList
                 dataflowId={dataflowId}
                 isBusinessDataflow={dataflowState.isBusinessDataflow}
+                isCitizenScienceDataflow={dataflowState.isCitizenScienceDataflow}
                 representativesImport={dataflowState.representativesImport}
                 setDataProviderSelected={setDataProviderSelected}
                 setFormHasRepresentatives={setFormHasRepresentatives}
@@ -1113,9 +1127,7 @@ const Dataflow = withRouter(({ history, match }) => {
               ((isNil(dataProviderId) && dataflowState.isCustodian) ||
                 (isNil(representativeId) && dataflowState.isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
-                ? dataflowState.isBusinessDataflow
-                  ? resourcesContext.messages['dataflowUsersByCompanyList']
-                  : resourcesContext.messages['dataflowUsersByCountryList']
+                ? getUsersListDialogHeader()
                 : resourcesContext.messages['dataflowUsersList']
             }
             onHide={() => manageDialogs('isUserListVisible', false)}
@@ -1123,6 +1135,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <UserList
               dataflowId={dataflowId}
               isBusinessDataflow={dataflowState.isBusinessDataflow}
+              isCitizenScienceDataflow={dataflowState.isCitizenScienceDataflow}
               representativeId={dataflowState.isObserver ? representativeId : dataProviderId}
             />
           </Dialog>
@@ -1131,7 +1144,7 @@ const Dataflow = withRouter(({ history, match }) => {
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />
 
         {dataflowState.isReportingDataflowDialogVisible && (
-          <ManageReportingDataflow
+          <ManageDataflow
             dataflowId={dataflowId}
             isEditForm
             isVisible={dataflowState.isReportingDataflowDialogVisible}

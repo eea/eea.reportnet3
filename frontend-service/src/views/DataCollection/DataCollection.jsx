@@ -49,6 +49,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [dataViewerOptions, setDataViewerOptions] = useState({ activeIndex: null });
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
+  const [isCitizenScienceDataflow, setIsCitizenScienceDataflow] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
@@ -60,7 +61,14 @@ export const DataCollection = withRouter(({ match, history }) => {
   let exportMenuRef = useRef();
   let growlRef = useRef();
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, history, isBusinessDataflow, isLoading });
+  useBreadCrumbs({
+    currentPage: CurrentPage.DATA_COLLECTION,
+    dataflowId,
+    history,
+    isBusinessDataflow,
+    isCitizenScienceDataflow,
+    isLoading
+  });
 
   useCheckNotifications(
     ['DOWNLOAD_EXPORT_DATASET_FILE_ERROR', 'EXPORT_DATA_BY_ID_ERROR', 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD'],
@@ -144,6 +152,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       }
 
       setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
+      setIsCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE));
       setIsLoading(false);
     } catch (error) {
       console.error('DataCollection - onLoadDataflowData.', error);
@@ -232,6 +241,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       hasCountryCode={true}
       hasWritePermissions={false}
       isBusinessDataflow={isBusinessDataflow}
+      isCitizenScienceDataflow={isCitizenScienceDataflow}
       isExportable={false}
       isFilterable={false}
       levelErrorTypes={levelErrorTypes}
