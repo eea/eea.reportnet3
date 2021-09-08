@@ -800,6 +800,29 @@ public class DataflowServiceImpl implements DataflowService {
     dataflowPublicVO.setReferenceDatasets(
         referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflowId));
 
+    Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+    if (dataflow != null) {
+      DataFlowVO dataflowVO = dataflowMapper.entityToClass(dataflow);
+      if (dataflowVO.getDocuments() != null) {
+        List<DocumentVO> publicDocuments = new ArrayList<>();
+        dataflowVO.getDocuments().forEach(document -> {
+          if (Boolean.TRUE.equals(document.getIsPublic())) {
+            publicDocuments.add(document);
+          }
+        });
+        dataflowPublicVO.setDocuments(publicDocuments);
+      }
+      if (dataflowVO.getWeblinks() != null) {
+        List<WeblinkVO> publicWeblinks = new ArrayList<>();
+        dataflowVO.getWeblinks().forEach(weblink -> {
+          if (Boolean.TRUE.equals(weblink.getIsPublic())) {
+            publicWeblinks.add(weblink);
+          }
+        });
+        dataflowPublicVO.setWeblinks(publicWeblinks);
+      }
+    }
+
     findObligationPublicDataflow(dataflowPublicVO);
     return dataflowPublicVO;
   }

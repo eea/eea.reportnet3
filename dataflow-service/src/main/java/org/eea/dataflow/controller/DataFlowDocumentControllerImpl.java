@@ -152,7 +152,6 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @GetMapping(value = "/private/{dataflowId}")
   public List<DocumentVO> getAllDocumentsByDataflowId(@PathVariable("dataflowId") Long dataflowId) {
     List<DocumentVO> documents = new ArrayList<>();
-    LOG.info("IM HERE");
     try {
       documents = dataflowService.getAllDocumentsByDataflowId(dataflowId);
     } catch (EEAException e) {
