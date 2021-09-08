@@ -49,42 +49,17 @@ public interface DataflowService {
   List<DataFlowVO> getByStatus(TypeStatusEnum status) throws EEAException;
 
 
+
   /**
    * Gets the dataflows.
    *
    * @param userId the user id
+   * @param dataflowType the dataflow type
    * @return the dataflows
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getDataflows(String userId) throws EEAException;
+  List<DataFlowVO> getDataflows(String userId, TypeDataflowEnum dataflowType) throws EEAException;
 
-
-  /**
-   * Gets the reference dataflows.
-   *
-   * @param userId the user id
-   * @return the reference dataflows
-   * @throws EEAException the EEA exception
-   */
-  List<DataFlowVO> getReferenceDataflows(String userId) throws EEAException;
-
-  /**
-   * Gets the business dataflows.
-   *
-   * @param userId the user id
-   * @return the business dataflows
-   * @throws EEAException the EEA exception
-   */
-  List<DataFlowVO> getBusinessDataflows(String userId) throws EEAException;
-
-  /**
-   * Gets the citizen science dataflows.
-   *
-   * @param userId the user id
-   * @return the citizen science dataflows
-   * @throws EEAException the EEA exception
-   */
-  List<DataFlowVO> getCitizenScienceDataflows(String userId) throws EEAException;
 
 
   /**

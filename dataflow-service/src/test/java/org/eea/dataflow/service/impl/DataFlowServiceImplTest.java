@@ -392,13 +392,14 @@ public class DataFlowServiceImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
 
-    dataflowServiceImpl.getDataflows(Mockito.any());
+    dataflowServiceImpl.getDataflows(Mockito.any(), TypeDataflowEnum.REPORTING);
     List<Dataflow> list = new ArrayList<>();
     list.add(new Dataflow());
     Mockito.when(dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(Mockito.any()))
         .thenReturn(list);
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dfVO);
-    assertEquals("fail", dataflowsVO, dataflowServiceImpl.getDataflows(Mockito.any()));
+    assertEquals("fail", dataflowsVO,
+        dataflowServiceImpl.getDataflows(Mockito.any(), TypeDataflowEnum.REPORTING));
   }
 
 
@@ -1103,7 +1104,7 @@ public class DataFlowServiceImplTest {
         .when(dataflowRepository
             .findReferenceByStatusInOrderByStatusDescCreationDateDesc(Mockito.any()))
         .thenReturn(dataflows);
-    assertNotNull(dataflowServiceImpl.getReferenceDataflows(""));
+    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.REFERENCE));
   }
 
   @Test
@@ -1124,7 +1125,7 @@ public class DataFlowServiceImplTest {
         .thenReturn(dataflows);
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
 
-    assertNotNull(dataflowServiceImpl.getBusinessDataflows(""));
+    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.BUSINESS));
   }
 
 
