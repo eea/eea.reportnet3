@@ -62,7 +62,8 @@ export const Feedback = withRouter(({ match, history }) => {
     moreMessagesLoaded: false,
     moreMessagesLoading: false,
     newMessageAdded: false,
-    selectedDataProvider: {}
+    selectedDataProvider: {},
+    totalMessages: 0
   });
 
   const {
@@ -82,7 +83,8 @@ export const Feedback = withRouter(({ match, history }) => {
     moreMessagesLoaded,
     moreMessagesLoading,
     newMessageAdded,
-    selectedDataProvider
+    selectedDataProvider,
+    totalMessages
   } = feedbackState;
 
   useEffect(() => {
@@ -207,7 +209,10 @@ export const Feedback = withRouter(({ match, history }) => {
     const data = await onLoadMessages(dataProviderId, 0, false);
     await markMessagesAsRead(data);
 
-    dispatchFeedback({ type: 'SET_MESSAGES', payload: !isNil(data) ? data.messages : [] });
+    dispatchFeedback({
+      type: 'SET_MESSAGES',
+      payload: { msgs: !isNil(data) ? data.messages : [], totalMessages: data.totalMessages }
+    });
   };
 
   const onDrop = event => {
@@ -265,7 +270,11 @@ export const Feedback = withRouter(({ match, history }) => {
         dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
       }
       const data = await FeedbackService.getAllMessages(dataflowId, page, dataProviderId);
-      return { messages: data, unreadMessages: data.filter(msg => !msg.read) };
+      return {
+        messages: data.listMessageVO,
+        unreadMessages: data.listMessageVO.filter(msg => !msg.read),
+        totalMessages: data.totalMessages
+      };
     } catch (error) {
       console.error('Feedback - onLoadMessages.', error);
     } finally {
@@ -396,6 +405,7 @@ export const Feedback = withRouter(({ match, history }) => {
             onMessageDelete={onMessageDelete}
             onUpdateNewMessageAdded={onUpdateNewMessageAdded}
             providerId={selectedDataProvider?.dataProviderId}
+            totalMessages={totalMessages}
           />
           {!isNil(isCustodian) && !isCustodian && (
             <label className={styles.helpdeskMessage}>{resourcesContext.messages['feedbackHelpdeskMessage']}</label>

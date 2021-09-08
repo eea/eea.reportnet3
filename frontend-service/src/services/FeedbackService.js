@@ -15,8 +15,8 @@ export const FeedbackService = {
 
   getAllMessages: async (dataflowId, page, dataProviderId) => {
     const response = await FeedbackRepository.getAllMessages(dataflowId, page, dataProviderId);
-    response.data = reverse(
-      response.data.map(
+    response.data.listMessageVO = reverse(
+      response.data.listMessageVO.map(
         message =>
           new Feedback({
             ...message,
@@ -26,6 +26,7 @@ export const FeedbackService = {
           })
       )
     );
+    console.log(response.data);
     return response.data;
   },
 

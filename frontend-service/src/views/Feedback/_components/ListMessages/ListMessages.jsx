@@ -32,7 +32,8 @@ export const ListMessages = ({
   onLazyLoad,
   onMessageDelete,
   onUpdateNewMessageAdded,
-  providerId
+  providerId,
+  totalMessages
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -156,7 +157,7 @@ export const ListMessages = ({
     }
     return (
       <div className={styles.scrollMessagesWrapper} ref={listMessagesWrapperRef}>
-        <p className={styles.messageCounter}>{`${messages.length} / 1000`}</p>
+        <p className={styles.messageCounter}>{`${messages.length} / ${totalMessages}`}</p>
         {moreMessagesLoading && (
           <div className={styles.lazyLoadingWrapper}>
             <Spinner className={styles.lazyLoadingSpinner} />

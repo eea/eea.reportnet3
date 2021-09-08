@@ -7,14 +7,19 @@ export const feedbackReducer = (state, { type, payload }) => {
       return { ...state, messages: state.messages.filter(message => message.id !== payload) };
     case 'ON_LOAD_MORE_MESSAGES':
       let inmAllMessages = [];
-      if (payload.length !== state.messages.length || state.messages.length >= state.currentPage * 50) {
+      console.log(Number(payload.length) + Number(state.messages.length), state.totalMessages, state.currentPage);
+      if (Number(payload.length) + Number(state.messages.length) < state.totalMessages) {
         inmAllMessages = [...payload, ...state.messages];
       } else {
         inmAllMessages = [...state.messages];
       }
+      console.log(inmAllMessages);
       return {
         ...state,
-        currentPage: payload.length === 50 ? state.currentPage + 1 : state.currentPage,
+        currentPage:
+          Number(payload.length) + Number(state.messages.length) < state.totalMessages
+            ? state.currentPage + 1
+            : state.currentPage,
         messages: uniqBy(inmAllMessages, 'id'),
         moreMessagesLoaded: true,
         moreMessagesLoading: false,
@@ -73,8 +78,9 @@ export const feedbackReducer = (state, { type, payload }) => {
       return {
         ...state,
         currentPage: payload.length === 50 ? 1 : 0,
-        messages: payload,
-        isLoading: false
+        messages: payload.msgs,
+        isLoading: false,
+        totalMessages: payload.totalMessages
       };
     case 'SET_SELECTED_DATAPROVIDER':
       return {
