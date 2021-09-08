@@ -333,7 +333,7 @@ export const ShowValidationsList = memo(
         });
         setFetchedData(datasetErrors.errors);
       } catch (error) {
-        console.log(`error`, error);
+        console.error('ShowValidationsList - onLoadErrors.', error);
       } finally {
         setIsLoadingTable(false);
         setIsLoadingModal(false);
