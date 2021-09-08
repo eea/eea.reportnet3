@@ -1246,8 +1246,11 @@
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "Invalid URL. Please check it.",
     "yes": "Yes",
-    "citiesScienceDataflowsListTab": "Cities and science",
-    "thereAreNoCitiesScienceDataflows": "There are no cities and science dataflows",
-    "citiesScienceDataflowsCrumbLabel": "Cities and science dataflow"
+    "citizenScienceDataflowsListTab": "Citizen science dataflows",
+    "thereAreNoCitizenScienceDataflows": "There are no citizen science dataflows",
+    "citizenScienceDataflowsCrumbLabel": "Citizen science dataflow",
+    "organizationCode": "Organization code",
+    "dataflowUsersByOrganizationList": "Users list by organization",
+    "organization": "Organization"
   }
 }
