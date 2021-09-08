@@ -57,7 +57,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const [dataflowsState, dataflowsDispatch] = useReducer(dataflowsReducer, {
     activeIndex: 0,
     business: [],
-    citiesScience: [],
+    citizenScience: [],
     reporting: [],
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
@@ -65,10 +65,10 @@ const Dataflows = withRouter(({ history, match }) => {
     isCustodian: null,
     isNationalCoordinator: false,
     isReferencedDataflowDialogVisible: false,
-    isCitiesScienceDataflowDialogVisible: false,
+    isCitizenScienceDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
-    loadingStatus: { reporting: true, business: true, citiesScience: true, reference: true },
+    loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     reference: []
   });
 

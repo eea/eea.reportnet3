@@ -28,7 +28,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
   const [dataToFilter, setDataToFilter] = useState({
     reporting: content['reporting'],
     business: content['business'],
-    citiesScience: content['citiesScience'],
+    citizenScience: content['citizenScience'],
     reference: content['reference']
   });
   const [filteredData, setFilteredData] = useState(dataToFilter[visibleTab]);
@@ -79,7 +79,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
         ...dataToFilter.reporting,
         ...dataToFilter.reference,
         ...dataToFilter.business,
-        ...dataToFilter.citiesScience
+        ...dataToFilter.citizenScience
       ].map(data => data.id.toString())
     );
     if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
@@ -147,7 +147,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
       { type: 'date', properties: [{ name: 'expirationDate' }] }
     ],
-    citiesScience: [
+    citizenScience: [
       {
         type: 'input',
         properties: [
@@ -189,7 +189,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       case 'business':
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
 
-      case 'citiesScience':
+      case 'citizenScience':
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
 
       case 'reference':
@@ -207,7 +207,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       const emptyDataflowsMessage = {
         business: 'thereAreNoBusinessDataflows',
         reference: 'thereAreNoReferenceDataflows',
-        citiesScience: 'thereAreNoReferenceDataflows',
+        citizenScience: 'thereAreNoCitizenScienceDataflows',
         reporting: 'thereAreNoReportingDataflows'
       };
 
@@ -251,12 +251,12 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
           />
         )}
 
-        {visibleTab === 'citiesScience' && (
+        {visibleTab === 'citizenScience' && (
           <Filters
             className={'dataflowsListFilters'}
-            data={dataToFilter['citiesScience']}
+            data={dataToFilter['citizenScience']}
             getFilteredData={onLoadFilteredData}
-            options={filterOptions['citiesScience']}
+            options={filterOptions['citizenScience']}
             sortCategory={'pinned'}
             sortable={true}
           />
