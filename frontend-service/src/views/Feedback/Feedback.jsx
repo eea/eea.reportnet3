@@ -181,8 +181,8 @@ export const Feedback = withRouter(({ match, history }) => {
     try {
       const data = await DataflowService.getDetails(dataflowId);
       const name = data.name;
-      const isBusinessDataflow = TextUtils.areEquals(data.type, config.dataflowType.BUSINESS);
-      const isCitizenScienceDataflow = TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE);
+      const isBusinessDataflow = TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value);
+      const isCitizenScienceDataflow = TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value);
       dispatchFeedback({
         type: 'SET_DATAFLOW_DETAILS',
         payload: { name, isBusinessDataflow, isCitizenScienceDataflow }

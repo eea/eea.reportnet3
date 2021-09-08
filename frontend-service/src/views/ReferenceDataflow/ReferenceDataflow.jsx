@@ -75,7 +75,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
 
   useEffect(() => {
-    userContext.setCurrentDataflowType(config.dataflowType.REFERENCE);
+    userContext.setCurrentDataflowType(config.dataflowType.REFERENCE.value);
   }, []);
 
   useEffect(() => {
