@@ -18,6 +18,7 @@ export const TabsSchema = ({
   hasWritePermissions = false,
   hasCountryCode,
   isBusinessDataflow,
+  isCitizenScienceDataflow,
   isExportable = true,
   isFilterable,
   isGroupedValidationDeleted,
@@ -50,6 +51,7 @@ export const TabsSchema = ({
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
                   isBusinessDataflow={isBusinessDataflow}
+                  isCitizenScienceDataflow={isCitizenScienceDataflow}
                   isExportable={isExportable}
                   isFilterable={isFilterable}
                   isGroupedValidationDeleted={isGroupedValidationDeleted}
