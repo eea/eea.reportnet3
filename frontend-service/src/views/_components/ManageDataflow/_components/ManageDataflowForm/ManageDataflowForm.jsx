@@ -1,6 +1,6 @@
 import { forwardRef, useContext, useImperativeHandle, useRef, useState } from 'react';
 
-import styles from './ManageReportingDataflowForm.module.scss';
+import styles from './ManageDataflowForm.module.scss';
 
 import { config } from 'conf';
 
@@ -12,14 +12,31 @@ import { InputText } from 'views/_components/InputText';
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { DataflowService } from 'services/DataflowService';
+import { CitizenScienceDataflowService } from 'services/CitizenScienceDataflowService';
 import { UserService } from 'services/UserService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const ManageReportingDataflowForm = forwardRef(
-  ({ data, dataflowId, getData, isEditForm, onCreate, onEdit, onResetData, onSearch, onSubmit, refresh }, ref) => {
+const ManageDataflowForm = forwardRef(
+  (
+    {
+      data,
+      dataflowId,
+      dialogName,
+      getData,
+      isCitizenScienceDataflow,
+      isEditForm,
+      onCreate,
+      onEdit,
+      onResetData,
+      onSearch,
+      onSubmit,
+      refresh
+    },
+    ref
+  ) => {
     const notificationContext = useContext(NotificationContext);
     const resourcesContext = useContext(ResourcesContext);
     const userContext = useContext(UserContext);
@@ -77,28 +94,40 @@ const ManageReportingDataflowForm = forwardRef(
 
         try {
           if (isEditForm) {
-            await DataflowService.update(
-              dataflowId,
-              name,
-              description,
-              data.obligation.id,
-              data.isReleasable,
-              data.showPublicInfo
-            );
+            isCitizenScienceDataflow
+              ? await CitizenScienceDataflowService.update(
+                  dataflowId,
+                  name,
+                  description,
+                  data.obligation.id,
+                  data.isReleasable,
+                  data.showPublicInfo
+                )
+              : await DataflowService.update(
+                  dataflowId,
+                  name,
+                  description,
+                  data.obligation.id,
+                  data.isReleasable,
+                  data.showPublicInfo
+                );
             onEdit(name, description, data.obligation.id);
           } else {
-            const creationResponse = await DataflowService.create(name, description, data.obligation.id);
+            const creationResponse = isCitizenScienceDataflow
+              ? await CitizenScienceDataflowService.create(name, description, data.obligation.id)
+              : await DataflowService.create(name, description, data.obligation.id);
+
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
               inmUserProperties.pinnedDataflows.push(creationResponse.data.toString());
               await UserService.updateConfiguration(inmUserProperties);
               userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
             }
-            onCreate('isReportingDataflowDialogVisible');
+            onCreate(dialogName);
             onResetData();
           }
         } catch (error) {
-          console.error('ManageReportingDataflowForm - onConfirm.', error);
+          console.error('ManageDataflowForm - onConfirm.', error);
 
           if (error?.response?.data === 'Dataflow name already exists') {
             setErrors(previousErrors => {
@@ -214,4 +243,4 @@ const ManageReportingDataflowForm = forwardRef(
   }
 );
 
-export { ManageReportingDataflowForm };
+export { ManageDataflowForm };
