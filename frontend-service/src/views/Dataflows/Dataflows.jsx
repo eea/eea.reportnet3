@@ -78,26 +78,35 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const { activeIndex, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
 
-  const tabMenuItems = isCustodian
-    ? [
-        { className: styles.flow_tab, id: 'reporting', label: resourcesContext.messages['reportingDataflowsListTab'] },
-        { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] },
-        {
-          className: styles.flow_tab,
-          id: 'citizenScience',
-          label: resourcesContext.messages['citizenScienceDataflowsListTab']
-        },
-        { className: styles.flow_tab, id: 'reference', label: resourcesContext.messages['referenceDataflowsListTab'] }
-      ]
-    : [
-        { className: styles.flow_tab, id: 'reporting', label: resourcesContext.messages['reportingDataflowsListTab'] },
-        { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] },
-        {
-          className: styles.flow_tab,
-          id: 'citizenScience',
-          label: resourcesContext.messages['citizenScienceDataflowsListTab']
-        }
-      ];
+  const tabMenuItems =
+    isCustodian || isAdmin
+      ? [
+          {
+            className: styles.flow_tab,
+            id: 'reporting',
+            label: resourcesContext.messages['reportingDataflowsListTab']
+          },
+          { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] },
+          {
+            className: styles.flow_tab,
+            id: 'citizenScience',
+            label: resourcesContext.messages['citizenScienceDataflowsListTab']
+          },
+          { className: styles.flow_tab, id: 'reference', label: resourcesContext.messages['referenceDataflowsListTab'] }
+        ]
+      : [
+          {
+            className: styles.flow_tab,
+            id: 'reporting',
+            label: resourcesContext.messages['reportingDataflowsListTab']
+          },
+          { className: styles.flow_tab, id: 'business', label: resourcesContext.messages['businessDataflowsListTab'] },
+          {
+            className: styles.flow_tab,
+            id: 'citizenScience',
+            label: resourcesContext.messages['citizenScienceDataflowsListTab']
+          }
+        ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
@@ -208,12 +217,12 @@ const Dataflows = withRouter(({ history, match }) => {
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
-        const data = await DataflowService.getAll(userContext.contextRoles);
+        const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reporting' } });
       }
 
       if (TextUtils.areEquals(tabId, 'reference')) {
-        const data = await ReferenceDataflowService.getAll(userContext.contextRoles);
+        const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reference' } });
       }
 
