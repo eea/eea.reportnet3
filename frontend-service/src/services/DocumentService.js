@@ -5,13 +5,11 @@ import { DocumentUtils } from 'services/_utils/DocumentUtils';
 export const DocumentService = {
   getAll: async dataflowId => {
     const response = await DocumentRepository.getAll(dataflowId);
-    console.log('resp', response);
     return DocumentUtils.parseDocumentListDTO(response.data);
   },
 
   getAllPublic: async dataflowId => {
     const response = await DocumentRepository.getAllPublic(dataflowId);
-    console.log('resp', response);
     return DocumentUtils.parseDocumentListDTO(response.data);
   },
 
