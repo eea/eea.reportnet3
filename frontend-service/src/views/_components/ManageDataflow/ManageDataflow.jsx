@@ -29,6 +29,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageDataflow = ({
   dataflowId,
+  isCitizenScienceDataflow,
   isEditForm = false,
   isVisible,
   manageDialogs,
@@ -37,8 +38,7 @@ export const ManageDataflow = ({
   onEditDataflow,
   resetObligations,
   setCheckedObligation,
-  state,
-  isCitizenScienceDataflow
+  state
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
