@@ -148,7 +148,7 @@ const Dataflows = withRouter(({ history, match }) => {
       title: 'createNewDataflow'
     };
 
-    const createcitizenScienceDataflowBtn = {
+    const createCitizenScienceDataflowBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'plus',
       isVisible: tabId === 'citizenScience' && isCustodian,
@@ -169,7 +169,7 @@ const Dataflows = withRouter(({ history, match }) => {
     leftSideBarContext.addModels(
       [
         createBusinessDataflowBtn,
-        createcitizenScienceDataflowBtn,
+        createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
         createReportingDataflowBtn,
         userListBtn
