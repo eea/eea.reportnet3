@@ -424,17 +424,14 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const getUsersListDialogHeader = () => {
-    if (dataflowState.isBusinessDataflow) {
-      return resourcesContext.messages['dataflowUsersByCompanyList'];
-    }
-
-    if (dataflowState.isCitizenScienceDataflow) {
-      return resourcesContext.messages['dataflowUsersByOrganizationList'];
-    }
-
-    return resourcesContext.messages['dataflowUsersByCountryList'];
-  };
+  const getUsersListDialogHeader = () =>
+    resourcesContext.messages[
+      dataflowState.isBusinessDataflow
+        ? resourcesContext.messages['dataflowUsersByCompanyList']
+        : dataflowState.isCitizenScienceDataflow
+        ? resourcesContext.messages['dataflowUsersByOrganizationList']
+        : resourcesContext.messages['dataflowUsersByCountryList']
+    ];
 
   const manageRoleDialogFooter = (
     <Fragment>
