@@ -113,6 +113,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     importButtonsList: [],
     initialDatasetDescription: '',
     isBusinessDataflow: false,
+    isCitizenScienceDataflow: false,
     isConfigureWebformDialogVisible: false,
     isDataflowOpen: false,
     isDataUpdated: false,
@@ -194,6 +195,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     dataflowId,
     history,
     isBusinessDataflow: designerState.isBusinessDataflow,
+    isCitizenScienceDataflow: designerState.isCitizenScienceDataflow,
     isLoading: designerState.isLoading,
     referenceDataflowId: dataflowId
   });
@@ -301,6 +303,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         metaData,
         dataflowName: metaData.dataflow.name,
         isBusinessDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.BUSINESS),
+        isCitizenScienceDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.CITIZEN_SCIENCE),
         schemaName: metaData.dataset.name
       }
     });
@@ -1588,6 +1591,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
             isBusinessDataflow={designerState.isBusinessDataflow}
+            isCitizenScienceDataflow={designerState.isCitizenScienceDataflow}
             tabs={DatasetDesignerUtils.getTabs({
               datasetSchema: designerState.datasetSchema,
               datasetSchemas: designerState.datasetSchemas,
