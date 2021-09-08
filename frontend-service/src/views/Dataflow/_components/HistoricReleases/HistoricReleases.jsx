@@ -137,17 +137,10 @@ export const HistoricReleases = ({
     </div>
   );
 
-  const getCodeColumnHeader = () => {
-    if (isBusinessDataflow) {
-      return resourcesContext.messages['companyCode'];
-    }
-
-    if (isCitizenScienceDataflow) {
-      return resourcesContext.messages['organizationCode'];
-    }
-
-    return resourcesContext.messages['countryCode'];
-  };
+  const getCodeColumnHeader = () =>
+    resourcesContext.messages[
+      isBusinessDataflow ? 'companyCode' : isCitizenScienceDataflow ? 'organizationCode' : 'countryCode'
+    ];
 
   const renderDataCollectionColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
@@ -202,17 +195,10 @@ export const HistoricReleases = ({
     return fieldColumns;
   };
 
-  const getMultiselectFilterOption = () => {
-    if (isBusinessDataflow) {
-      return resourcesContext.messages['companyCode'];
-    }
-
-    if (isCitizenScienceDataflow) {
-      return resourcesContext.messages['organizationCode'];
-    }
-
-    return resourcesContext.messages['countryCode'];
-  };
+  const getMultiselectFilterOption = () =>
+    resourcesContext.messages[
+      isBusinessDataflow ? 'companyCode' : isCitizenScienceDataflow ? 'organizationCode' : 'countryCode'
+    ];
 
   // TODO CHECK CORRECT USE ON CITIES AND SCIENCE
   const filterOptionsDataCollection = [

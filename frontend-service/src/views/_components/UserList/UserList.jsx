@@ -77,17 +77,9 @@ export const UserList = ({
 
   const onLoadFilteredData = value => setFilteredData(value);
 
-  const getCodeLabel = () => {
-    if (isBusinessDataflow) {
-      return resourcesContext.messages['company'];
-    }
+  const getCodeLabel = () =>
+    resourcesContext.messages[isBusinessDataflow ? 'company' : isCitizenScienceDataflow ? 'organization' : 'countries'];
 
-    if (isCitizenScienceDataflow) {
-      return resourcesContext.messages['organization'];
-    }
-
-    return resourcesContext.messages['countries'];
-  };
   const filterOptionsWithDataflowIdRepresentativeId = [
     {
       type: 'multiselect',

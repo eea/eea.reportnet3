@@ -35,17 +35,14 @@ export const useBreadCrumbs = ({
     return { label: resourcesContext.messages['dataCollection'], icon: 'dataCollection' };
   };
 
-  const getDataflowTypeLabel = () => {
-    if (isBusinessDataflow) {
-      return resourcesContext.messages['businessDataflowCrumbLabel'];
-    }
-
-    if (isCitizenScienceDataflow) {
-      return resourcesContext.messages['citizenScienceDataflowsCrumbLabel'];
-    }
-
-    return resourcesContext.messages['dataflow'];
-  };
+  const getDataflowTypeLabel = () =>
+    resourcesContext.messages[
+      isBusinessDataflow
+        ? 'businessDataflowCrumbLabel'
+        : isCitizenScienceDataflow
+        ? 'citizenScienceDataflowsCrumbLabel'
+        : 'dataflow'
+    ];
 
   const getDataflowCrumb = () => {
     return {

@@ -432,17 +432,10 @@ export const useSetColumns = (
       );
     });
 
-    const getProviderCodeColumnHeader = () => {
-      if (isBusinessDataflow) {
-        return resources.messages['companyCode'];
-      }
-
-      if (isCitizenScienceDataflow) {
-        return resources.messages['organizationCode'];
-      }
-
-      return resources.messages['countryCode'];
-    };
+    const getProviderCodeColumnHeader = () =>
+      resources.messages[
+        isBusinessDataflow ? 'companyCode' : isCitizenScienceDataflow ? 'organizationCode' : 'countryCode'
+      ];
 
     let providerCode = (
       <Column
