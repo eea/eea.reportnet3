@@ -44,10 +44,11 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
   List<Message> findByDataflowIdAndIdIn(Long dataflowId, Collection<Long> messageIds);
 
   /**
-   * Count by dataflow id.
+   * Count by dataflow id and provider id.
    *
    * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @return the long
    */
-  Long countByDataflowId(Long dataflowId);
+  Long countByDataflowIdAndProviderId(Long dataflowId, Long providerId);
 }
