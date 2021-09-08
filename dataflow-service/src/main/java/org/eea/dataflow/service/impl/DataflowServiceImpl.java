@@ -269,6 +269,9 @@ public class DataflowServiceImpl implements DataflowService {
                   .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
               : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
                   TypeStatusEnum.DESIGN, idsResources);
+
+          dataflows.addAll(dataflowRepository
+              .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT));
           break;
       }
 
@@ -288,20 +291,6 @@ public class DataflowServiceImpl implements DataflowService {
             "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
             e.getMessage(), e);
       }
-    }
-
-    // Second, get reference dataflows in DRAFT sorted by status and creation date
-    if (TypeDataflowEnum.REFERENCE.equals(dataflowType)) {
-      dataflowRepository
-          .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT)
-          .forEach(dataflow -> {
-            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-            if (!map.isEmpty() && null != datasetsStatusList) {
-              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-            }
-            dataflowVOs.add(dataflowVO);
-          });
     }
 
     return dataflowVOs;
