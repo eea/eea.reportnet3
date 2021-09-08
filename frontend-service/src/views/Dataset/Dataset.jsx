@@ -94,6 +94,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
   const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
+  const [isCitizenScienceDataflow, setIsCitizenScienceDataflow] = useState(false);
   const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
@@ -130,6 +131,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     dataflowId,
     history,
     isBusinessDataflow,
+    isCitizenScienceDataflow,
     isLoading,
     metaData: metadata,
     referenceDataflowId: dataflowId
@@ -570,6 +572,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     try {
       const data = await DataflowService.get(match.params.dataflowId);
       setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
+      setIsCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE));
       let dataset = [];
       if (isTestDataset) {
         dataset = data.testDatasets.find(dataset => dataset.datasetId.toString() === datasetId);

@@ -1244,6 +1244,12 @@
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "The URL is not valid",
     "yes": "Yes",
-    "noQCs": "No QCs to show"
+    "noQCs": "No QCs to show",
+    "citizenScienceDataflowsListTab": "Citizen science dataflows",
+    "thereAreNoCitizenScienceDataflows": "There are no citizen science dataflows",
+    "citizenScienceDataflowsCrumbLabel": "Citizen science dataflow",
+    "organizationCode": "Organization code",
+    "dataflowUsersByOrganizationList": "Users list by organization",
+    "organization": "Organization"
   }
 }
