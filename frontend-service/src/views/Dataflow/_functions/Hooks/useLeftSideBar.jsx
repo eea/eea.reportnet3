@@ -101,6 +101,18 @@ export const useLeftSideBar = (
         title: 'publicStatusLeftSideBarButton'
       };
 
+      const getUsersListLabelByDataflowType = () => {
+        if (dataflowState.isBusinessDataflow) {
+          return 'dataflowUsersByCompanyList';
+        }
+
+        if (dataflowState.isCitizenScienceDataflow) {
+          return 'dataflowUsersByOrganizationList';
+        }
+
+        return 'dataflowUsersByCountryList';
+      };
+
       const userListBtn = {
         className: 'dataflow-properties-help-step',
         icon: 'users',
@@ -109,18 +121,14 @@ export const useLeftSideBar = (
           ((isNil(dataProviderId) && dataflowState.isCustodian) ||
             (isNil(representativeId) && dataflowState.isObserver)) &&
           dataflowState.status === config.dataflowStatus.OPEN
-            ? dataflowState.isBusinessDataflow
-              ? 'dataflowUsersByCompanyList'
-              : 'dataflowUsersByCountryList'
+            ? getUsersListLabelByDataflowType()
             : 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
         title:
           ((isNil(dataProviderId) && dataflowState.isCustodian) ||
             (isNil(representativeId) && dataflowState.isObserver)) &&
           dataflowState.status === config.dataflowStatus.OPEN
-            ? dataflowState.isBusinessDataflow
-              ? 'dataflowUsersByCompanyList'
-              : 'dataflowUsersByCountryList'
+            ? getUsersListLabelByDataflowType()
             : 'dataflowUsersList'
       };
 

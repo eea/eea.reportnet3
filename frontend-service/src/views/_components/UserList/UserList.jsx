@@ -15,7 +15,12 @@ import { DataflowService } from 'services/DataflowService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const UserList = ({ dataflowId, isBusinessDataflow = false, representativeId }) => {
+export const UserList = ({
+  dataflowId,
+  isBusinessDataflow = false,
+  isCitizenScienceDataflow = false,
+  representativeId
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -72,6 +77,9 @@ export const UserList = ({ dataflowId, isBusinessDataflow = false, representativ
 
   const onLoadFilteredData = value => setFilteredData(value);
 
+  const getCodeLabel = () =>
+    resourcesContext.messages[isBusinessDataflow ? 'company' : isCitizenScienceDataflow ? 'organization' : 'countries'];
+
   const filterOptionsWithDataflowIdRepresentativeId = [
     {
       type: 'multiselect',
@@ -84,7 +92,7 @@ export const UserList = ({ dataflowId, isBusinessDataflow = false, representativ
         {
           name: 'country',
           showInput: true,
-          label: isBusinessDataflow ? resourcesContext.messages['company'] : resourcesContext.messages['countries']
+          label: getCodeLabel()
         }
       ]
     }
@@ -156,13 +164,7 @@ export const UserList = ({ dataflowId, isBusinessDataflow = false, representativ
               <Column field="role" header={resourcesContext.messages['role']} sortable={true} />
               <Column field="email" header={resourcesContext.messages['user']} sortable={true} />
               {isNil(representativeId) && !isNil(dataflowId) && (
-                <Column
-                  field="country"
-                  header={
-                    isBusinessDataflow ? resourcesContext.messages['company'] : resourcesContext.messages['countries']
-                  }
-                  sortable={true}
-                />
+                <Column field="country" header={getCodeLabel()} sortable={true} />
               )}
             </DataTable>
           ) : (

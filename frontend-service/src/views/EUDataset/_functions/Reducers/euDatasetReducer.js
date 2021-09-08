@@ -10,7 +10,12 @@ export const euDatasetReducer = (state, { type, payload }) => {
       };
 
     case 'GET_DATAFLOW_DETAILS':
-      return { ...state, dataflowName: payload.name, isBusinessDataflow: payload.isBusinessDataflow };
+      return {
+        ...state,
+        dataflowName: payload.name,
+        isBusinessDataflow: payload.isBusinessDataflow,
+        isCitizenScienceDataflow: payload.isCitizenScienceDataflow
+      };
 
     case 'GET_EXPORT_EXTENSIONS_LIST':
       return { ...state, exportExtensionsList: payload.internalExtensionList };

@@ -1,5 +1,6 @@
 package org.eea.dataflow.service;
 
+import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.document.DocumentVO;
 
@@ -43,4 +44,14 @@ public interface DataflowDocumentService {
    * @throws EEAException the EEA exception
    */
   void updateDocument(DocumentVO documentVO) throws EEAException;
+
+
+  /**
+   * Gets the all documents by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow id
+   * @throws EEAException the EEA exception
+   */
+  List<DocumentVO> getAllDocumentsByDataflowId(Long dataflowId) throws EEAException;
 }
