@@ -85,13 +85,8 @@ export const ManageIntegrations = ({
   });
 
   const { editorView, externalParameters, parameterKey, parametersErrors } = manageIntegrationsState;
-  const {
-    isDuplicatedIntegrationName,
-    isDuplicatedParameter,
-    isFormEmpty,
-    isParameterEditing,
-    printError
-  } = ManageIntegrationsUtils;
+  const { isDuplicatedIntegrationName, isDuplicatedParameter, isFormEmpty, isParameterEditing, printError } =
+    ManageIntegrationsUtils;
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
@@ -501,26 +496,43 @@ export const ManageIntegrations = ({
     <Button icon="check" label={resourcesContext.messages['ok']} onClick={() => onToggleDialogError('', '', false)} />
   );
 
+  const renderFileInputExtension = option => (
+    <div
+      className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${
+        manageIntegrationsState.operation.value === 'IMPORT' ? styles.fileExtensionNotification : styles[option]
+      }`}
+      key={`${componentName}__${option}`}>
+      <label htmlFor={`${componentName}__${option}`}>
+        {resourcesContext.messages['multipleFileExtensionIntegrations']}
+        <Button
+          className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
+          icon="infoCircle"
+          tooltip={resourcesContext.messages['multipleFileExtensionToolTip']}
+          tooltipOptions={{ position: 'top' }}
+        />
+      </label>
+      <InputText
+        id={`${componentName}__${option}`}
+        maxLength={config.MAX_FILE_EXTENSION_LENGTH}
+        onChange={event => onFillField(event.target.value, option)}
+        onKeyDown={event => onSaveKeyDown(event)}
+        placeholder={resourcesContext.messages['multipleFileExtensionIntegrations']}
+        ref={inputRefs[option]}
+        value={manageIntegrationsState[option]}
+      />
+    </div>
+  );
+
   const renderInputLayout = (options = []) => {
     return options.map(option => {
       return (
         <div
-          className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${
-            manageIntegrationsState.operation.value === 'IMPORT' && option === 'fileExtension'
-              ? styles.fileExtensionNotification
-              : styles[option]
-          }`}
+          className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${styles[option]}`}
           key={`${componentName}__${option}`}>
           <label htmlFor={`${componentName}__${option}`}>{resourcesContext.messages[option]}</label>
           <InputText
             id={`${componentName}__${option}`}
-            maxLength={
-              option === 'fileExtension'
-                ? config.MAX_FILE_EXTENSION_LENGTH
-                : option === 'name'
-                ? config.MAX_INTEGRATION_NAME_LENGTH
-                : config.INPUT_MAX_LENGTH
-            }
+            maxLength={option === 'name' ? config.MAX_INTEGRATION_NAME_LENGTH : config.INPUT_MAX_LENGTH}
             onChange={event => onFillField(event.target.value, option)}
             onKeyDown={event => onSaveKeyDown(event)}
             placeholder={resourcesContext.messages[option]}
@@ -581,7 +593,7 @@ export const ManageIntegrations = ({
             {renderDropdownLayout(['operation'])}
             {!isNil(manageIntegrationsState.operation) &&
             operationsWithFileExtension.includes(manageIntegrationsState.operation.value)
-              ? renderInputLayout(['fileExtension'])
+              ? renderFileInputExtension('fileExtension')
               : null}
             {!isNil(manageIntegrationsState.operation) && manageIntegrationsState.operation.value === 'IMPORT'
               ? renderCheckboxLayout(['notificationRequired'])

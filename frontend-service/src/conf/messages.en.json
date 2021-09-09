@@ -536,7 +536,6 @@
     "fieldRelationsLabel": "Field relations",
     "fieldSchemaName": "Field",
     "fieldTypeColumnTooltip": "Field type",
-    "file": "File",
     "fileDescription": "File description",
     "fileExtension": "File extension",
     "fileExtensionsSelection": "No valid file extensions selected",
@@ -1251,6 +1250,8 @@
     "citizenScienceDataflowsCrumbLabel": "Citizen science dataflow",
     "organizationCode": "Organization code",
     "dataflowUsersByOrganizationList": "Users list by organization",
-    "organization": "Organization"
+    "organization": "Organization",
+    "multipleFileExtensionIntegrations": "File extension/s",
+    "multipleFileExtensionToolTip": "You can put more than one extension separated by commas"
   }
 }
