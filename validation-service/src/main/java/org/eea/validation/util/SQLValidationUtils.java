@@ -509,7 +509,8 @@ public class SQLValidationUtils {
       if (record.getId().equals(rvAux.getId())) {
         for (FieldValue aux : record.getFields()) {
           if ((null != aux.getValue() || null != aux.getColumnName())
-              && field.toLowerCase().contains(aux.getColumnName().toLowerCase())) {
+              && field.toLowerCase().contains(aux.getColumnName().toLowerCase())
+              && (!aux.getColumnName().toLowerCase().contains("_id"))) {
             replacement = aux.getValue();
             break;
           }
