@@ -14,8 +14,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
-import org.eea.dataflow.mapper.DataflowWebLinkMapper;
-import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.dataflow.persistence.domain.Dataflow;
@@ -180,13 +178,6 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private FMEUserRepository fmeUserRepository;
 
-  /** The document mapper. */
-  @Autowired
-  private DocumentMapper documentMapper;
-
-  /** The weblink mapper. */
-  @Autowired
-  private DataflowWebLinkMapper weblinkMapper;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -230,15 +221,18 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowMapper.entityListToClass(dataflows);
   }
 
+
   /**
    * Gets the dataflows.
    *
    * @param userId the user id
+   * @param dataflowType the dataflow type
    * @return the dataflows
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getDataflows(String userId) throws EEAException {
+  public List<DataFlowVO> getDataflows(String userId, TypeDataflowEnum dataflowType)
+      throws EEAException {
 
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
 
@@ -251,9 +245,36 @@ public class DataflowServiceImpl implements DataflowService {
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
     if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
-      List<Dataflow> dataflows =
-          userAdmin ? dataflowRepository.findInOrderByStatusDescCreationDateDesc()
+      List<Dataflow> dataflows = new ArrayList<>();
+      switch (dataflowType) {
+        case REPORTING:
+          dataflows = userAdmin ? dataflowRepository.findInOrderByStatusDescCreationDateDesc()
               : dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(idsResources);
+          break;
+        case CITIZEN_SCIENCE:
+          dataflows =
+              userAdmin ? dataflowRepository.findCitizenScienceInOrderByStatusDescCreationDateDesc()
+                  : dataflowRepository
+                      .findCitizenScienceAndIdInOrderByStatusDescCreationDateDesc(idsResources);
+          break;
+        case BUSINESS:
+          dataflows =
+              userAdmin ? dataflowRepository.findBusinessInOrderByStatusDescCreationDateDesc()
+                  : dataflowRepository
+                      .findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources);
+          break;
+        case REFERENCE:
+          dataflows = userAdmin
+              ? dataflowRepository
+                  .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
+              : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
+                  TypeStatusEnum.DESIGN, idsResources);
+
+          dataflows.addAll(dataflowRepository
+              .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT));
+          break;
+      }
+
 
       dataflows.forEach(dataflow -> {
         DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
@@ -275,149 +296,6 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowVOs;
   }
 
-
-
-  /**
-   * Gets the reference dataflows.
-   *
-   * @param userId the user id
-   * @return the reference dataflows
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public List<DataFlowVO> getReferenceDataflows(String userId) throws EEAException {
-
-    List<DataFlowVO> dataflowVOs = new ArrayList<>();
-
-    // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
-    boolean userAdmin = isAdmin();
-
-    // First, get reference dataflows in DESIGN that the user has permission
-    List<Long> idsResources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
-            .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
-
-      List<Dataflow> dataflows = userAdmin
-          ? dataflowRepository
-              .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
-          : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
-              TypeStatusEnum.DESIGN, idsResources);
-
-      dataflows.forEach(dataflow -> {
-        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-        if (!map.isEmpty() && null != datasetsStatusList) {
-          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-        }
-        dataflowVOs.add(dataflowVO);
-      });
-    }
-
-    // Second, get reference dataflows in DRAFT sorted by status and creation date
-    dataflowRepository
-        .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT)
-        .forEach(dataflow -> {
-          DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-          List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-          if (!map.isEmpty() && null != datasetsStatusList) {
-            setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-          }
-          dataflowVOs.add(dataflowVO);
-        });
-
-
-    return dataflowVOs;
-  }
-
-
-  /**
-   * Gets the business dataflows.
-   *
-   * @param userId the user id
-   * @return the business dataflows
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public List<DataFlowVO> getBusinessDataflows(String userId) throws EEAException {
-
-    List<DataFlowVO> dataflowVOs = new ArrayList<>();
-
-    // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
-    boolean userAdmin = isAdmin();
-
-    // Get user's dataflows sorted by status and creation date
-    List<Long> idsResources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
-            .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if ((null != idsResources && !idsResources.isEmpty()) || userAdmin) {
-      List<Dataflow> dataflows = userAdmin
-          ? dataflowRepository.findBusinessInOrderByStatusDescCreationDateDesc()
-          : dataflowRepository.findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources);
-      dataflows.forEach(dataflow -> {
-        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-        if (!map.isEmpty() && null != datasetsStatusList) {
-          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-        }
-        dataflowVOs.add(dataflowVO);
-      });
-      try {
-        getOpenedObligations(dataflowVOs);
-      } catch (FeignException e) {
-        LOG_ERROR.error(
-            "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
-            e.getMessage(), e);
-      }
-    }
-    return dataflowVOs;
-  }
-
-  /**
-   * Gets the citizen science dataflows.
-   *
-   * @param userId the user id
-   * @return the citizen science dataflows
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public List<DataFlowVO> getCitizenScienceDataflows(String userId) throws EEAException {
-
-    List<DataFlowVO> dataflowVOs = new ArrayList<>();
-
-    // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
-    boolean userAdmin = isAdmin();
-
-    // Get user's dataflows sorted by status and creation date
-    List<Long> idsResources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
-            .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if ((null != idsResources && !idsResources.isEmpty()) || userAdmin) {
-      List<Dataflow> dataflows =
-          userAdmin ? dataflowRepository.findCitizenScienceInOrderByStatusDescCreationDateDesc()
-              : dataflowRepository
-                  .findCitizenScienceAndIdInOrderByStatusDescCreationDateDesc(idsResources);
-      dataflows.forEach(dataflow -> {
-        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-        if (!map.isEmpty() && null != datasetsStatusList) {
-          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-        }
-        dataflowVOs.add(dataflowVO);
-      });
-      try {
-        getOpenedObligations(dataflowVOs);
-      } catch (FeignException e) {
-        LOG_ERROR.error(
-            "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
-            e.getMessage(), e);
-      }
-    }
-    return dataflowVOs;
-  }
 
 
   /**

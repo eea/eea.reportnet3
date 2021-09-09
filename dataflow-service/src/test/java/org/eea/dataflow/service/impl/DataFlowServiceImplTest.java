@@ -392,13 +392,14 @@ public class DataFlowServiceImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
 
-    dataflowServiceImpl.getDataflows(Mockito.any());
+    dataflowServiceImpl.getDataflows(Mockito.any(), TypeDataflowEnum.REPORTING);
     List<Dataflow> list = new ArrayList<>();
     list.add(new Dataflow());
     Mockito.when(dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(Mockito.any()))
         .thenReturn(list);
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dfVO);
-    assertEquals("fail", dataflowsVO, dataflowServiceImpl.getDataflows(Mockito.any()));
+    assertEquals("fail", dataflowsVO,
+        dataflowServiceImpl.getDataflows(Mockito.any(), TypeDataflowEnum.REPORTING));
   }
 
 
@@ -1103,7 +1104,7 @@ public class DataFlowServiceImplTest {
         .when(dataflowRepository
             .findReferenceByStatusInOrderByStatusDescCreationDateDesc(Mockito.any()))
         .thenReturn(dataflows);
-    assertNotNull(dataflowServiceImpl.getReferenceDataflows(""));
+    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.REFERENCE));
   }
 
   @Test
@@ -1124,7 +1125,29 @@ public class DataFlowServiceImplTest {
         .thenReturn(dataflows);
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
 
-    assertNotNull(dataflowServiceImpl.getBusinessDataflows(""));
+    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.BUSINESS));
+  }
+
+
+  @Test
+  public void getCitizenScienceDataflowsTest() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataflowVO.setType(TypeDataflowEnum.CITIZEN_SCIENCE);
+    dataflowVO.setId(0L);
+    ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
+    resourceAccessVO.setId(0L);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
+        .thenReturn(Arrays.asList(resourceAccessVO));
+    Mockito.when(dataflowRepository.findCitizenScienceInOrderByStatusDescCreationDateDesc())
+        .thenReturn(dataflows);
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
+
+    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.CITIZEN_SCIENCE));
   }
 
 
