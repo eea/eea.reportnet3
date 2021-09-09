@@ -6,9 +6,9 @@ import isNil from 'lodash/isNil';
 
 import styles from './WebLinks.module.scss';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { config } from 'conf';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';

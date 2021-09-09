@@ -27,6 +27,7 @@ import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Menu } from 'views/_components/Menu';
+import { QCList } from 'views/_components/QCList';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
@@ -35,7 +36,6 @@ import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
 import { Validations } from 'views/DatasetDesigner/_components/Validations';
-import { QCList } from 'views/_components/QCList';
 import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Webforms } from 'views/Webforms';
 
