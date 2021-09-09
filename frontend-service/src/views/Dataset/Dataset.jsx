@@ -22,15 +22,15 @@ import { Dialog } from 'views/_components/Dialog';
 import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { MainLayout } from 'views/_components/Layout';
 import { Menu } from 'views/_components/Menu';
+import { QCList } from 'views/_components/QCList';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
 import { TabsSchema } from 'views/_components/TabsSchema';
-import { ValidationsList } from 'views/_components/ValidationsList';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
-import { ValidationViewer } from 'views/_components/ValidationViewer';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -1098,7 +1098,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '90%' }}
           visible={validationsVisible}>
-          <ValidationViewer
+          <ShowValidationsList
             datasetId={datasetId}
             datasetName={datasetName}
             datasetSchemaId={datasetSchemaId}
@@ -1122,7 +1122,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           onHide={() => onSetVisible(setValidationListDialogVisible, false)}
           style={{ width: '90%' }}
           visible={validationListDialogVisible}>
-          <ValidationsList
+          <QCList
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={datasetSchemaId}
