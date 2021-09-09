@@ -1,6 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -15,6 +14,7 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
 
