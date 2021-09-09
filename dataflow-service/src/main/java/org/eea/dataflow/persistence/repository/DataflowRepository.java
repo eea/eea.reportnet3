@@ -150,7 +150,7 @@ public interface DataflowRepository
    * @param countryCode the country code
    * @return the list
    */
-  @Query("select r.dataflow from Representative r where r.dataflow.showPublicInfo= true and r.dataProvider.code= :countryCode and r.dataflow.status='DRAFT'")
+  @Query("select r.dataflow from Representative r where r.dataflow.showPublicInfo= true and r.dataProvider.code= :countryCode and r.dataflow.status='DRAFT' and r.hasDatasets=true")
   List<Dataflow> findPublicDataflowsByCountryCode(@Param("countryCode") String countryCode);
 
   /**
