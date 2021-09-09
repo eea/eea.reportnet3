@@ -236,8 +236,12 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             for (int indexCol = 1; indexCol <= rsm.getColumnCount(); indexCol++) {
               FieldValue auxField = new FieldValue();
               auxField.setColumnName(rsm.getColumnName(indexCol));
+              // ColumnType = 1111 -> is Postgres Geometry type
               if (rsm.getColumnType(indexCol) == 1111) {
                 try {
+                  // we try to convert Extended Well-Known Binary (EWKB) into String
+                  // Example : 0101000020E610000095B9F94674CF37C09CBF0985083B5040 -> Point (1,2)
+                  // RSID : 4236
                   final GeometryFactory gm = new GeometryFactory(new PrecisionModel(), 4326);
                   final WKBReader wkbr = new WKBReader(gm);
                   byte[] wkbBytes = wkbr.hexToBytes(rs.getString(indexCol));
@@ -264,15 +268,18 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             for (int indexCol = 1; indexCol <= rsm.getColumnCount(); indexCol++) {
               FieldValue auxField2 = new FieldValue();
               auxField2.setColumnName(rsm.getColumnName(indexCol));
-              if (rsm.getColumnType(indexCol) == 1111 && null != rs.getString(indexCol)) {
-                final GeometryFactory gm = new GeometryFactory(new PrecisionModel(), 4326);
-                final WKBReader wkbr = new WKBReader(gm);
-                byte[] wkbBytes = wkbr.hexToBytes(rs.getString(indexCol));
-                Geometry geom;
+              // ColumnType = 1111 -> is Postgres Geometry type
+              if (rsm.getColumnType(indexCol) == 1111) {
                 try {
-                  geom = wkbr.read(wkbBytes);
+                  // we try to convert Extended Well-Known Binary (EWKB) into String
+                  // Example : 0101000020E610000095B9F94674CF37C09CBF0985083B5040 -> Point (1,2)
+                  // RSID : 4236
+                  final GeometryFactory gm = new GeometryFactory(new PrecisionModel(), 4326);
+                  final WKBReader wkbr = new WKBReader(gm);
+                  byte[] wkbBytes = wkbr.hexToBytes(rs.getString(indexCol));
+                  Geometry geom = wkbr.read(wkbBytes);
                   auxField2.setValue(geom.toText());
-                } catch (ParseException e) {
+                } catch (ParseException | NullPointerException e) {
                   auxField2.setValue(geometryErrorMessage);
                 }
               } else {
