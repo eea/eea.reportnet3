@@ -1252,6 +1252,8 @@
     "dataflowUsersByOrganizationList": "Users list by organization",
     "organization": "Organization",
     "size": "Size",
-    "messages": "messages"
+    "messages": "messages",
+    "updateCitizenScienceDataflow": "Edit citizen science dataflow",
+    "createNewCitizenScienceDataflow": "Create new citizen science dataflow"
   }
 }
