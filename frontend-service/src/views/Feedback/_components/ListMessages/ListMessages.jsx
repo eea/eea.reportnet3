@@ -157,7 +157,10 @@ export const ListMessages = ({
     }
     return (
       <div className={styles.scrollMessagesWrapper} ref={listMessagesWrapperRef}>
-        <p className={styles.messageCounter}>{`${messages.length} / ${totalMessages}`}</p>
+        <p
+          className={
+            styles.messageCounter
+          }>{`${messages.length} ${resourcesContext.messages['of']} ${totalMessages} ${resourcesContext.messages['messages']}`}</p>
         {moreMessagesLoading && (
           <div className={styles.lazyLoadingWrapper}>
             <Spinner className={styles.lazyLoadingSpinner} />
