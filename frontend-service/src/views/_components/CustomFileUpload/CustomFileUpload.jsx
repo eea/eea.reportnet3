@@ -105,7 +105,7 @@ export const CustomFileUpload = ({
   }, [draggedFiles]);
 
   const checkValidExtension = file => {
-    const acceptedExtensions = accept.toLowerCase().split(',');
+    const acceptedExtensions = accept.toLowerCase().split(/,\s*/);
 
     if (file) {
       const extension = file.name.substring(file.name.lastIndexOf('.') + 1, file.name.length) || file.name;
