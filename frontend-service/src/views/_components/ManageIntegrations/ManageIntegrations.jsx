@@ -39,10 +39,10 @@ export const ManageIntegrations = ({
   manageDialogs,
   onUpdateData,
   refreshList,
-  setClonedData,
+  setClonedData = () => {},
   setIsCreating,
   setIsUpdating = () => {},
-  setUpdatedData,
+  setUpdatedData = () => {},
   state,
   updatedData
 }) => {
@@ -85,13 +85,8 @@ export const ManageIntegrations = ({
   });
 
   const { editorView, externalParameters, parameterKey, parametersErrors } = manageIntegrationsState;
-  const {
-    isDuplicatedIntegrationName,
-    isDuplicatedParameter,
-    isFormEmpty,
-    isParameterEditing,
-    printError
-  } = ManageIntegrationsUtils;
+  const { isDuplicatedIntegrationName, isDuplicatedParameter, isFormEmpty, isParameterEditing, printError } =
+    ManageIntegrationsUtils;
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);

@@ -27,6 +27,7 @@ import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Menu } from 'views/_components/Menu';
+import { QCList } from 'views/_components/QCList';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
@@ -35,8 +36,7 @@ import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
 import { Validations } from 'views/DatasetDesigner/_components/Validations';
-import { ValidationsList } from 'views/_components/ValidationsList';
-import { ValidationViewer } from 'views/_components/ValidationViewer';
+import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -1235,7 +1235,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           onHide={() => onHideValidationsDialog()}
           style={{ width: '90%' }}
           visible={designerState.validationListDialogVisible}>
-          <ValidationsList
+          <QCList
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
@@ -1698,7 +1698,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
             style={{ width: '90%' }}
             visible={designerState.isValidationViewerVisible}>
-            <ValidationViewer
+            <ShowValidationsList
               datasetId={datasetId}
               datasetName={designerState.datasetSchemaName}
               datasetSchemaId={designerState.datasetSchemaId}
