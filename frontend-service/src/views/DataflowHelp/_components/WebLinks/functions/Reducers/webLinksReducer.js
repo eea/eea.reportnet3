@@ -67,6 +67,12 @@ export const webLinksReducer = (state, { type, payload }) => {
         webLink: { ...state.webLink, url: payload.url }
       };
 
+    case 'ON_IS_PUBLIC_CHANGE':
+      return {
+        ...state,
+        webLink: { ...state.webLink, isPublic: payload.isPublic }
+      };
+
     case 'SET_ERRORS':
       return {
         ...state,
