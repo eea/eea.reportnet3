@@ -27,6 +27,12 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKBReader;
 
 /**
  * The Class DatasetExtendedRepositoryImpl.
@@ -41,6 +47,9 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
 
   /** The Constant RECORD_ID: {@value}. */
   private static final String RECORD_ID = "record_id";
+
+  @Value("${query.message.geometry.error}")
+  private String geometryErrorMessage;
 
   /** The entity manager. */
   @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
@@ -227,7 +236,23 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             for (int indexCol = 1; indexCol <= rsm.getColumnCount(); indexCol++) {
               FieldValue auxField = new FieldValue();
               auxField.setColumnName(rsm.getColumnName(indexCol));
-              auxField.setValue(rs.getString(indexCol));
+              // ColumnType = 1111 -> is Postgres Geometry type
+              if (rsm.getColumnType(indexCol) == 1111) {
+                try {
+                  // we try to convert Extended Well-Known Binary (EWKB) into String
+                  // Example : 0101000020E610000095B9F94674CF37C09CBF0985083B5040 -> Point (1,2)
+                  // RSID : 4236
+                  final GeometryFactory gm = new GeometryFactory(new PrecisionModel(), 4326);
+                  final WKBReader wkbr = new WKBReader(gm);
+                  byte[] wkbBytes = wkbr.hexToBytes(rs.getString(indexCol));
+                  Geometry geom = wkbr.read(wkbBytes);
+                  auxField.setValue(geom.toText());
+                } catch (ParseException | NullPointerException e) {
+                  auxField.setValue(geometryErrorMessage);
+                }
+              } else {
+                auxField.setValue(rs.getString(indexCol));
+              }
               auxField.setRecord(record);
               auxFields.add(auxField);
             }
@@ -243,7 +268,23 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             for (int indexCol = 1; indexCol <= rsm.getColumnCount(); indexCol++) {
               FieldValue auxField2 = new FieldValue();
               auxField2.setColumnName(rsm.getColumnName(indexCol));
-              auxField2.setValue(rs.getString(indexCol));
+              // ColumnType = 1111 -> is Postgres Geometry type
+              if (rsm.getColumnType(indexCol) == 1111) {
+                try {
+                  // we try to convert Extended Well-Known Binary (EWKB) into String
+                  // Example : 0101000020E610000095B9F94674CF37C09CBF0985083B5040 -> Point (1,2)
+                  // RSID : 4236
+                  final GeometryFactory gm = new GeometryFactory(new PrecisionModel(), 4326);
+                  final WKBReader wkbr = new WKBReader(gm);
+                  byte[] wkbBytes = wkbr.hexToBytes(rs.getString(indexCol));
+                  Geometry geom = wkbr.read(wkbBytes);
+                  auxField2.setValue(geom.toText());
+                } catch (ParseException | NullPointerException e) {
+                  auxField2.setValue(geometryErrorMessage);
+                }
+              } else {
+                auxField2.setValue(rs.getString(indexCol));
+              }
               auxField2.setRecord(record);
               fields.add(auxField2);
             }
