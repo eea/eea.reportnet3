@@ -90,7 +90,7 @@
   height: 1.95rem;
   border: 1px solid var(--c-custom-gray);
   color: var(--main-font-color);
-  :hover {
+  &:hover {
     background-color: var(--c-custom-gray);
     color: var(--main-font-color);
   }
@@ -99,21 +99,26 @@
 .deleteButton {
   color: var(--errors);
   cursor: pointer;
+  &:hover {
+    color: var(--errors);
+  }
 }
 
-.deleteButton:hover {
-  background-color: var(--c-custom-gray);
-  color: var(--errors);
-}
-
-.disabledDeleteButton {
+.disabledButton {
   pointer-events: none !important;
   text-decoration: none;
   opacity: 0.5;
   cursor: not-allowed;
+  &:hover {
+    background-color: transparent;
+  }
 }
-.disabledDeleteButton:hover {
-  background-color: transparent;
+
+.duplicateButton {
+  cursor: pointer;
+  &:hover {
+    background-color: var(--c-custom-gray);
+  }
 }
 
 .fieldSeparator {

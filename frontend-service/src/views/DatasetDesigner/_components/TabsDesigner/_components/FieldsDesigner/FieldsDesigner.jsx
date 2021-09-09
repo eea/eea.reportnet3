@@ -528,6 +528,7 @@ export const FieldsDesigner = ({
                 onFieldDragAndDrop={onFieldDragAndDrop}
                 onFieldDragAndDropStart={onFieldDragAndDropStart}
                 onFieldUpdate={onFieldUpdate}
+                onNewFieldAdd={onFieldAdd}
                 onShowDialogError={onShowDialogError}
                 recordSchemaId={field.recordId}
                 tableSchemaId={table.tableSchemaId}
