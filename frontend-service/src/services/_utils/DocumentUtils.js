@@ -13,8 +13,7 @@ const parseDocumentDTO = documentDTO => {
     isPublic: documentDTO.isPublic,
     language: config.languages.filter(language => language.code === documentDTO.language).map(name => name.name),
     size: documentDTO.size,
-    title: documentDTO.name,
-    url: documentDTO.url
+    title: documentDTO.name
   });
 };
 

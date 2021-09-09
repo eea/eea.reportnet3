@@ -1,4 +1,6 @@
 export const DocumentConfig = {
+  getAll: '/document/{:dataflowId}',
+  getAllPublic: '/document/{:dataflowId}',
   delete: '/document/{:documentId}',
   download: '/document/{:documentId}',
   update:
