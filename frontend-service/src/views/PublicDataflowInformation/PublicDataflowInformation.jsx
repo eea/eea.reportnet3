@@ -383,18 +383,7 @@ export const PublicDataflowInformation = withRouter(
       const fieldColumns = Object.keys(webLinks[0])
         .filter(key => key.includes('description') || key.includes('url'))
         .map(field => {
-          //let template = null;
-          //if (field === 'publicFileName') template = downloadReferenceDatasetFileBodyColumn;
-          return (
-            <Column
-              //body={template}
-              //className={field === 'publicFileName' ? styles.downloadReferenceDatasetFile : ''}
-              field={field}
-              header={getWebLinksHeader(field)}
-              key={field}
-              sortable
-            />
-          );
+          return <Column field={field} header={getWebLinksHeader(field)} key={field} sortable />;
         });
 
       return fieldColumns;

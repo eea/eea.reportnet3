@@ -188,24 +188,17 @@ export const WebLinks = ({
     webLinksDispatch({ type: 'ON_DESCRIPTION_CHANGE', payload: { description: inputValue } });
   };
 
-  const onUrlChange = inputValue => {
-    webLinksDispatch({ type: 'ON_URL_CHANGE', payload: { url: inputValue } });
-  };
+  const onUrlChange = inputValue => webLinksDispatch({ type: 'ON_URL_CHANGE', payload: { url: inputValue } });
 
-  const onIsPublicChange = inputValue => {
+  const onIsPublicChange = inputValue =>
     webLinksDispatch({ type: 'ON_IS_PUBLIC_CHANGE', payload: { isPublic: inputValue } });
-  };
 
-  const onHideDeleteDialog = () => {
-    webLinksDispatch({ type: 'ON_HIDE_DELETE_DIALOG' });
-  };
+  const onHideDeleteDialog = () => webLinksDispatch({ type: 'ON_HIDE_DELETE_DIALOG' });
 
-  const setIsConfirmDeleteVisible = isVisible => {
-    webLinksDispatch({
-      type: 'SET_IS_CONFIRM_DELETE_VISIBLE',
-      payload: { isConfirmDeleteVisible: isVisible }
-    });
-  };
+  const setIsConfirmDeleteVisible = isVisible => ({
+    type: 'SET_IS_CONFIRM_DELETE_VISIBLE',
+    payload: { isConfirmDeleteVisible: isVisible }
+  });
 
   const onSaveRecord = async () => {
     checkIsCorrectInputValue('description');
@@ -440,9 +433,7 @@ export const WebLinks = ({
                 <input
                   checked={webLinksState.webLink.isPublic}
                   id="isPublic"
-                  onChange={() => {
-                    onIsPublicChange(!webLinksState.webLink.isPublic);
-                  }}
+                  onChange={() => onIsPublicChange(!webLinksState.webLink.isPublic)}
                   type="checkbox"
                 />
                 <label htmlFor="isPublic" style={{ display: 'block' }}>
