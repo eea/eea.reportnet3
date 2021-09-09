@@ -1,5 +1,5 @@
 export class Document {
-  constructor({ category, date, description, id, isPublic, language, size, title, url } = {}) {
+  constructor({ category, date, description, id, isPublic, language, size, title } = {}) {
     this.category = category;
     this.date = date;
     this.description = description;
@@ -8,6 +8,5 @@ export class Document {
     this.language = language;
     this.size = size;
     this.title = title;
-    this.url = url;
   }
 }

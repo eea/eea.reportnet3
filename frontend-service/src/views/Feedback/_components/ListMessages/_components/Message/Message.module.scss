@@ -23,6 +23,17 @@
     margin: 10px 25px 3px 0px;
     background: var(--c-corporate-blue);
     align-self: flex-end;
+    &.automatic {
+      background-color: var(--gray-25) !important;
+      .messageTextWrapper {
+        .messageText {
+          color: var(--gray-110);
+        }
+        .datetime {
+          color: var(--gray-110);
+        }
+      }
+    }
     .messageTextWrapper {
       .messageText {
         color: var(--white);
@@ -91,13 +102,24 @@
     border-radius: 0 10px 10px 10px;
     margin: 10px 0 3px 25px;
     color: var(--white);
-    background: var(--c-lilac-100);
+    background: var(--c-lilac-300);
+    &.automatic {
+      background-color: var(--gray-15) !important;
+      .messageTextWrapper {
+        .messageText {
+          color: var(--gray-110);
+        }
+        .datetime {
+          color: var(--gray-110);
+        }
+      }
+    }
     .messageTextWrapper {
       .messageText {
-        color: var(--c-black-400);
+        color: var(--white);
       }
       .datetime {
-        color: var(--gray-75);
+        color: var(--gray-5);
       }
       .messageAttachment {
         background-color: var(--c-lilac-200);
@@ -128,6 +150,7 @@
           flex-direction: row;
           justify-content: space-between;
           align-items: center;
+          font-weight: bold;
           div {
             span {
               font-size: 10pt;
@@ -140,6 +163,7 @@
         }
         .messageAttachmentFileData {
           margin-top: 0.5rem;
+          font-weight: bold;
           span {
             color: var(--c-lilac-400);
             font-size: 8pt;

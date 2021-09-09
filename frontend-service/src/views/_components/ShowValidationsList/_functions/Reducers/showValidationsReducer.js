@@ -1,4 +1,4 @@
-export const validationReducer = (state, { type, payload }) => {
+export const showValidationsReducer = (state, { type, payload }) => {
   switch (type) {
     case 'SET_TOTALS_ERRORS':
       return {

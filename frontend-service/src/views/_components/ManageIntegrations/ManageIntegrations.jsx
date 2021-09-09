@@ -39,10 +39,10 @@ export const ManageIntegrations = ({
   manageDialogs,
   onUpdateData,
   refreshList,
-  setClonedData,
+  setClonedData = () => {},
   setIsCreating,
   setIsUpdating = () => {},
-  setUpdatedData,
+  setUpdatedData = () => {},
   state,
   updatedData
 }) => {
