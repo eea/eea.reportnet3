@@ -195,10 +195,11 @@ export const WebLinks = ({
 
   const onHideDeleteDialog = () => webLinksDispatch({ type: 'ON_HIDE_DELETE_DIALOG' });
 
-  const setIsConfirmDeleteVisible = isVisible => ({
-    type: 'SET_IS_CONFIRM_DELETE_VISIBLE',
-    payload: { isConfirmDeleteVisible: isVisible }
-  });
+  const setIsConfirmDeleteVisible = isVisible =>
+    webLinksDispatch({
+      type: 'SET_IS_CONFIRM_DELETE_VISIBLE',
+      payload: { isConfirmDeleteVisible: isVisible }
+    });
 
   const onSaveRecord = async () => {
     checkIsCorrectInputValue('description');

@@ -24,8 +24,6 @@ import { Title } from 'views/_components/Title';
 
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
-import { DocumentService } from 'services/DocumentService';
-import { WebLinkService } from 'services/WebLinkService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -35,6 +33,7 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
+import { FileUtils } from 'views/_functions/Utils/FileUtils';
 
 export const PublicDataflowInformation = withRouter(
   ({
@@ -163,29 +162,7 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
-    const getDocumentsHeader = fieldHeader => {
-      switch (fieldHeader) {
-        case 'datasetSchemaName':
-          return resourcesContext.messages['name'];
-        case 'publicFileName':
-          return resourcesContext.messages['file'];
-        default:
-          return resourcesContext.messages[fieldHeader];
-      }
-    };
-
-    const getWebLinksHeader = fieldHeader => {
-      switch (fieldHeader) {
-        case 'datasetSchemaName':
-          return resourcesContext.messages['name'];
-        case 'publicFileName':
-          return resourcesContext.messages['file'];
-        default:
-          return resourcesContext.messages[fieldHeader];
-      }
-    };
-
-    const getOrderedColumns = representatives => {
+    const getOrderedRepresentativeColumns = representatives => {
       const representativesWithPriority = [
         { id: 'id', index: 0 },
         { id: 'datasetSchemaName', index: 1 },
@@ -196,6 +173,26 @@ export const PublicDataflowInformation = withRouter(
 
       return representatives
         .map(field => representativesWithPriority.filter(e => field === e.id))
+        .flat()
+        .sort((a, b) => a.index - b.index)
+        .map(orderedField => orderedField.id);
+    };
+
+    const getOrderedDocumentsColumns = documents => {
+      const documentsOrder = [
+        { id: 'id', index: 0 },
+        { id: 'title', index: 1 },
+        { id: 'description', index: 2 },
+        { id: 'category', index: 3 },
+        { id: 'language', index: 4 },
+        { id: 'isPublic', index: 5 },
+        { id: 'uploadDate', index: 6 },
+        { id: 'size', index: 7 },
+        { id: 'file', index: 8 }
+      ];
+
+      return documents
+        .map(field => documentsOrder.filter(e => field === e.id))
         .flat()
         .sort((a, b) => a.index - b.index)
         .map(orderedField => orderedField.id);
@@ -301,8 +298,8 @@ export const PublicDataflowInformation = withRouter(
       setRepresentatives(representatives);
     };
 
-    const renderColumns = representatives => {
-      const fieldColumns = getOrderedColumns(Object.keys(representatives[0]))
+    const renderRepresentativeColumns = representatives => {
+      const fieldColumns = getOrderedRepresentativeColumns(Object.keys(representatives[0]))
         .filter(
           key =>
             key.includes('datasetSchemaName') ||
@@ -350,8 +347,23 @@ export const PublicDataflowInformation = withRouter(
       return fieldColumns;
     };
 
+    const sizeColumnTemplate = rowData => {
+      const formatedRowData = FileUtils.formatBytes(rowData.size);
+      return (
+        <Fragment>
+          {formatedRowData.bytesParsed} {formatedRowData.sizeType}
+        </Fragment>
+      );
+    };
+
+    const linkTemplate = rowData => (
+      <a href={rowData.url} rel="noopener noreferrer" target="_blank">
+        {rowData.url}
+      </a>
+    );
+
     const renderDocumentsColumns = documents => {
-      const fieldColumns = Object.keys(documents[0])
+      const fieldColumns = getOrderedDocumentsColumns(Object.keys(documents[0]))
         .filter(
           key =>
             key.includes('category') ||
@@ -359,17 +371,18 @@ export const PublicDataflowInformation = withRouter(
             key.includes('description') ||
             key.includes('language') ||
             key.includes('size') ||
+            key.includes('file') ||
             key.includes('title')
         )
         .map(field => {
-          //let template = null;
-          //if (field === 'publicFileName') template = downloadReferenceDatasetFileBodyColumn;
+          let template = null;
+          if (field === 'size') template = sizeColumnTemplate;
           return (
             <Column
-              //body={template}
-              //className={field === 'publicFileName' ? styles.downloadReferenceDatasetFile : ''}
+              body={template}
+              className={field === 'publicFileName' ? styles.downloadReferenceDatasetFile : ''}
               field={field}
-              header={getDocumentsHeader(field)}
+              header={resourcesContext.messages[field]}
               key={field}
               sortable
             />
@@ -383,7 +396,11 @@ export const PublicDataflowInformation = withRouter(
       const fieldColumns = Object.keys(webLinks[0])
         .filter(key => key.includes('description') || key.includes('url'))
         .map(field => {
-          return <Column field={field} header={getWebLinksHeader(field)} key={field} sortable />;
+          let template = null;
+          if (field === 'url') template = linkTemplate;
+          return (
+            <Column body={template} field={field} header={resourcesContext.messages[field]} key={field} sortable />
+          );
         });
 
       return fieldColumns;
@@ -399,7 +416,7 @@ export const PublicDataflowInformation = withRouter(
               <Fragment>
                 <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
                 <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
-                  {renderColumns(representatives)}
+                  {renderRepresentativeColumns(representatives)}
                 </DataTable>
                 {!isEmpty(referenceDatasets) && (
                   <div className={styles.dataTableWrapper}>
