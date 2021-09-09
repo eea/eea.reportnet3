@@ -427,10 +427,10 @@ const Dataflow = withRouter(({ history, match }) => {
   const getUsersListDialogHeader = () =>
     resourcesContext.messages[
       dataflowState.isBusinessDataflow
-        ? resourcesContext.messages['dataflowUsersByCompanyList']
+        ? 'dataflowUsersByCompanyList'
         : dataflowState.isCitizenScienceDataflow
-        ? resourcesContext.messages['dataflowUsersByOrganizationList']
-        : resourcesContext.messages['dataflowUsersByCountryList']
+        ? 'dataflowUsersByOrganizationList'
+        : 'dataflowUsersByCountryList'
     ];
 
   const manageRoleDialogFooter = (
