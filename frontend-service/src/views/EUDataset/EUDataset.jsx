@@ -53,6 +53,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     dataViewerOptions: { activeIndex: null },
     exportExtensionsList: [],
     isBusinessDataflow: false,
+    isCitizenScienceDataflow: false,
     isDataUpdated: false,
     isLoading: true,
     isRefreshHighlighted: false,
@@ -70,8 +71,9 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetName,
     dataViewerOptions,
     isBusinessDataflow,
-    isLoading,
+    isCitizenScienceDataflow,
     isGroupedValidationSelected,
+    isLoading,
     levelErrorTypes,
     metadata,
     tableSchema,
@@ -102,6 +104,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     dataflowId,
     history,
     isBusinessDataflow,
+    isCitizenScienceDataflow,
     isLoading,
     metaData: metadata
   });
@@ -121,7 +124,11 @@ export const EUDataset = withRouter(({ history, match }) => {
       const data = await DataflowService.getDetails(match.params.dataflowId);
       euDatasetDispatch({
         type: 'GET_DATAFLOW_DETAILS',
-        payload: { name: data.name, isBusinessDataflow: TextUtils.areEquals(data.type, config.dataflowType.BUSINESS) }
+        payload: {
+          name: data.name,
+          isBusinessDataflow: TextUtils.areEquals(data.type, config.dataflowType.BUSINESS),
+          isCitizenScienceDataflow: TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE)
+        }
       });
     } catch (error) {
       console.error('EUDataset - getDataflowName.', error);
@@ -289,6 +296,7 @@ export const EUDataset = withRouter(({ history, match }) => {
       hasCountryCode={true}
       hasWritePermissions={false}
       isBusinessDataflow={euDatasetState.isBusinessDataflow}
+      isCitizenScienceDataflow={euDatasetState.isCitizenScienceDataflow}
       isExportable={false}
       isFilterable={false}
       isGroupedValidationSelected={isGroupedValidationSelected}

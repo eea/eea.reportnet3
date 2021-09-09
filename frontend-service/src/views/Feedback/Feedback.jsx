@@ -53,6 +53,7 @@ export const Feedback = withRouter(({ match, history }) => {
     importFileDialogVisible: false,
     isAdmin: false,
     isBusinessDataflow: false,
+    isCitizenScienceDataflow: false,
     isCustodian: undefined,
     isDragging: false,
     isLoading: true,
@@ -73,6 +74,7 @@ export const Feedback = withRouter(({ match, history }) => {
     draggedFiles,
     importFileDialogVisible,
     isBusinessDataflow,
+    isCitizenScienceDataflow,
     isAdmin,
     isCustodian,
     isDragging,
@@ -144,7 +146,14 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   }, [messageToSend]);
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history, isBusinessDataflow, isLoading });
+  useBreadCrumbs({
+    currentPage: CurrentPage.DATAFLOW_FEEDBACK,
+    dataflowId,
+    history,
+    isBusinessDataflow,
+    isCitizenScienceDataflow,
+    isLoading
+  });
 
   const markMessagesAsRead = async data => {
     //mark unread messages as read
@@ -172,7 +181,11 @@ export const Feedback = withRouter(({ match, history }) => {
       const data = await DataflowService.getDetails(dataflowId);
       const name = data.name;
       const isBusinessDataflow = TextUtils.areEquals(data.type, config.dataflowType.BUSINESS);
-      dispatchFeedback({ type: 'SET_DATAFLOW_DETAILS', payload: { name, isBusinessDataflow } });
+      const isCitizenScienceDataflow = TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE);
+      dispatchFeedback({
+        type: 'SET_DATAFLOW_DETAILS',
+        payload: { name, isBusinessDataflow, isCitizenScienceDataflow }
+      });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);
       notificationContext.add({

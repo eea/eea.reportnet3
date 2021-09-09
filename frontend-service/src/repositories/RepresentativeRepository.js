@@ -46,6 +46,9 @@ export const RepresentativeRepository = {
 
   getGroupCountries: async () => await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getGroupCountries, {}) }),
 
+  getGroupOrganizations: async () =>
+    await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getGroupOrganizations, {}) }),
+
   updateDataProviderId: async (representativeId, dataProviderId) =>
     await HTTPRequester.update({
       url: getUrl(RepresentativeConfig.updateDataProviderId, {}),
