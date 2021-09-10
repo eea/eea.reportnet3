@@ -1251,6 +1251,8 @@
     "organizationCode": "Organization code",
     "dataflowUsersByOrganizationList": "Users by organization",
     "organization": "Organization",
+    "multipleFileExtensionIntegrations": "File extension/s",
+    "multipleFileExtensionToolTip": "You can put more than one extension separated by commas",
     "size": "Size",
     "messages": "messages",
     "updateCitizenScienceDataflow": "Edit citizen science dataflow",

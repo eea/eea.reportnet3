@@ -426,10 +426,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     });
   };
 
-  const validImportExtensions = `.${designerState.selectedImportExtension}`;
-
-  const infoExtensionsTooltip = `${resourcesContext.messages['supportedFileExtensionsTooltip']} ${validImportExtensions}`;
-
   const getFileExtensions = async () => {
     try {
       const allExtensions = await IntegrationService.getAllExtensionsOperations(
@@ -1719,7 +1715,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload
-            accept={validImportExtensions}
+            accept={DatasetDesignerUtils.getValidExtensions(designerState.selectedImportExtension)}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
@@ -1729,7 +1725,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               setImportSelectedIntegrationId(null);
             }}
             dialogVisible={designerState.isImportDatasetDialogVisible}
-            infoTooltip={infoExtensionsTooltip}
+            infoTooltip={`${
+              resourcesContext.messages['supportedFileExtensionsTooltip']
+            } ${DatasetDesignerUtils.getValidExtensionsTooltip(designerState.selectedImportExtension)}`}
             invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
             isDialog={true}
             name="file"
