@@ -16,6 +16,7 @@ import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -354,11 +355,9 @@ export const ManageIntegrations = ({
       <div className={`${styles.field} ${styles[option]} formField `} key={`${componentName}__${option}`}>
         <label htmlFor={`${componentName}__${option}`}>
           {resourcesContext.messages[option]}
-          <Button
-            className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-            icon="infoCircle"
-            tooltip={resourcesContext.messages['notificationRequiredTooltip']}
-            tooltipOptions={{ position: 'top' }}
+          <TooltipButton
+            message={resourcesContext.messages['notificationRequiredTooltip']}
+            uniqueIdentifier={'notificationRequiredTooltip'}
           />
         </label>
         <div className={styles.checkboxWrapper}>
@@ -504,11 +503,9 @@ export const ManageIntegrations = ({
       key={`${componentName}__${option}`}>
       <label htmlFor={`${componentName}__${option}`}>
         {resourcesContext.messages['multipleFileExtensionIntegrations']}
-        <Button
-          className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-          icon="infoCircle"
-          tooltip={resourcesContext.messages['multipleFileExtensionToolTip']}
-          tooltipOptions={{ position: 'top' }}
+        <TooltipButton
+          message={resourcesContext.messages['multipleFileExtensionToolTip']}
+          uniqueIdentifier={'multipleFileExtensionToolTip'}
         />
       </label>
       <InputText
