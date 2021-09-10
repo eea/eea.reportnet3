@@ -79,19 +79,17 @@ const getTabs = ({ datasetSchema, datasetStatistics, editable, isDataflowOpen, i
   return inmDatasetSchema.tables;
 };
 
-const getValidExtensions = (validExtensions = '') => {
-  return validExtensions
+const getValidExtensions = (validExtensions = '') =>
+  validExtensions
     ?.split(/,\s*/)
     .map(ext => `.${ext}`)
     .join(',');
-};
 
-const getValidExtensionsTooltip = (validExtensions = '') => {
-  return validExtensions
+const getValidExtensionsTooltip = (validExtensions = '') =>
+  validExtensions
     ?.split(/,\s*/)
     .map(ext => ` .${ext}`)
     .join(',');
-};
 
 export const DatasetDesignerUtils = {
   getCountPKUseInAllSchemas,
