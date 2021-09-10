@@ -66,6 +66,7 @@
       margin-right: 0.4rem;
     }
     .bulkDeleteButton {
+      cursor: pointer;
       padding-top: 0.3rem;
       padding-bottom: 0.3rem;
       border-radius: 3px;
@@ -147,6 +148,34 @@
   width: 40vw;
   transition: 0.5s !important;
 }
+.markedForDeletionList {
+  margin-top: 1rem;
+  max-height: 40vh;
+  overflow: scroll;
+  li {
+    display: flex;
+    align-items: center;
+    div {
+      width: 9rem;
+      span {
+        &:first-child {
+          max-width: 4rem;
+          text-overflow: ellipsis;
+        }
+        background-color: var(--statusBox-designer-bg);
+        border-radius: 3px;
+        color: var(--black);
+        font-size: 10pt;
+        font-weight: 600;
+        margin-top: 2px;
+        padding: 4px;
+        width: fit-content;
+        margin-right: 1rem;
+      }
+    }
+  }
+}
+
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
   @include shadow-0em;
 }

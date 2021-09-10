@@ -35,6 +35,7 @@ import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { uniqueId } from 'lodash';
 
 export const FieldsDesigner = ({
   dataflowId,
@@ -115,11 +116,11 @@ export const FieldsDesigner = ({
     }
   }, [exportTableSchema]);
 
-  const onBulkCheck = (checked, fieldId) => {
+  const onBulkCheck = (checked, fieldId, fieldType, fieldName) => {
     if (checked) {
-      setMarkedForDeletion([...markedForDeletion, fieldId]);
+      setMarkedForDeletion([...markedForDeletion, { fieldId, fieldType, fieldName }]);
     } else {
-      setMarkedForDeletion(markedForDeletion.filter(id => id !== fieldId));
+      setMarkedForDeletion(markedForDeletion.filter(markedField => markedField.fieldId !== fieldId));
     }
   };
 
@@ -295,6 +296,27 @@ export const FieldsDesigner = ({
     }
   };
 
+  const deleteFields = async () => {
+    const deletionPromises = markedForDeletion.map(async markedField => {
+      return await DatasetService.deleteFieldDesign(datasetId, markedField.fieldId);
+    });
+    Promise.all(deletionPromises).then(() => {
+      const inmFields = [...fields];
+      const filteredFields = inmFields.filter(
+        inmField => !markedForDeletion.some(markedField => markedField.fieldId === inmField.fieldId)
+      );
+      console.log(inmFields, markedForDeletion);
+      onChangeFields(
+        filteredFields,
+        markedForDeletion.some(markedField => TextUtils.areEquals(markedField.fieldType.fieldType, 'LINK')) ||
+          markedForDeletion.some(markedField => TextUtils.areEquals(markedField.fieldType.fieldType, 'EXTERNAL_LINK')),
+        table.tableSchemaId
+      );
+      setFields(filteredFields);
+      setIsDeleteDialogVisible(false);
+    });
+  };
+
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
@@ -410,16 +432,35 @@ export const FieldsDesigner = ({
   const renderConfirmDialog = () => (
     <ConfirmDialog
       classNameConfirm={'p-button-danger'}
-      header={resourcesContext.messages['deleteFieldTitle']}
+      header={resourcesContext.messages[markedForDeletion.length === 0 ? 'deleteFieldTitle' : 'deleteFieldBulkTitle']}
       labelCancel={resourcesContext.messages['no']}
       labelConfirm={resourcesContext.messages['yes']}
       onConfirm={() => {
-        deleteField(indexToDelete, fieldToDeleteType);
+        if (markedForDeletion.length === 0) {
+          deleteField(indexToDelete, fieldToDeleteType);
+        } else {
+          deleteFields();
+        }
         setIsDeleteDialogVisible(false);
       }}
       onHide={() => setIsDeleteDialogVisible(false)}
       visible={isDeleteDialogVisible}>
-      {resourcesContext.messages['deleteFieldConfirm']}
+      {resourcesContext.messages[markedForDeletion.length === 0 ? 'deleteFieldConfirm' : 'deleteFieldBulkConfirm']}
+      {markedForDeletion.length > 0 ? (
+        <ul className={styles.markedForDeletionList}>
+          {markedForDeletion.map(markedField => (
+            <li key={uniqueId('markedField_')}>
+              <div>
+                <span>{markedField.fieldName}</span>
+              </div>
+              <span>{markedField.fieldType.fieldType}</span>
+              <FontAwesomeIcon icon={AwesomeIcons(markedField.fieldType.fieldTypeIcon)} role="presentation" />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        ''
+      )}
     </ConfirmDialog>
   );
 
@@ -828,7 +869,11 @@ export const FieldsDesigner = ({
               className={styles.bulkDeleteButton}
               onClick={e => {
                 e.preventDefault();
-                setBulkDelete(!bulkDelete);
+                if (markedForDeletion.length > 0) {
+                  setIsDeleteDialogVisible(true);
+                } else {
+                  setBulkDelete(!bulkDelete);
+                }
               }}>
               <FontAwesomeIcon
                 aria-label={resourcesContext.messages['deleteFieldLabel']}

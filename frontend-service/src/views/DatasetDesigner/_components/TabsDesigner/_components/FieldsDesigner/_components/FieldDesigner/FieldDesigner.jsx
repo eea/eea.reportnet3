@@ -1109,7 +1109,7 @@ export const FieldDesigner = ({
         </ReactTooltip> */}
       </div>
     ) : null;
-  console.log(markedForDeletion);
+
   const renderDeleteButton = () =>
     !addField ? (
       !bulkDelete ? (
@@ -1132,13 +1132,15 @@ export const FieldDesigner = ({
         </div>
       ) : (
         <Checkbox
-          checked={markedForDeletion.find(id => id === fieldId)}
+          checked={markedForDeletion.find(markedField => markedField.fieldId === fieldId)}
           className={`${styles.checkBulkDelete} ${
             fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
           } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
           id={`${fieldDesignerState.fieldValue}_mark_to_delete`}
           inputId={`${fieldDesignerState.fieldValue}_mark_to_delete`}
-          onChange={e => onBulkCheck(e.checked, fieldId)}
+          onChange={e =>
+            onBulkCheck(e.checked, fieldId, fieldDesignerState.fieldTypeValue, fieldDesignerState.fieldValue)
+          }
           role="checkbox"
         />
       )

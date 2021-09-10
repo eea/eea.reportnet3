@@ -1252,6 +1252,8 @@
     "dataflowUsersByOrganizationList": "Users list by organization",
     "organization": "Organization",
     "size": "Size",
-    "messages": "messages"
+    "messages": "messages",
+    "deleteFieldBulkTitle": "Delete fields",
+    "deleteFieldBulkConfirm": "Are you sure you want to delete these fields in design?"
   }
 }
