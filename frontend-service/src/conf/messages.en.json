@@ -1256,6 +1256,7 @@
     "size": "Size",
     "messages": "messages",
     "updateCitizenScienceDataflow": "Edit citizen science dataflow",
-    "createNewCitizenScienceDataflow": "Create new citizen science dataflow"
+    "createNewCitizenScienceDataflow": "Create new citizen science dataflow",
+    "reportingDatasets": "Reporting datasets"
   }
 }
