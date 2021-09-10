@@ -647,6 +647,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
     String nameFileFieldValue =
         SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
+    String nameAttachmentValue =
+        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX;
 
     Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
     Files.deleteIfExists(path1);
@@ -656,6 +658,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     Files.deleteIfExists(path3);
     Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
     Files.deleteIfExists(path4);
+    Path path5 = Paths.get(pathSnapshot + nameAttachmentValue);
+    Files.deleteIfExists(path5);
   }
 
   /**
