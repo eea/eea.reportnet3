@@ -53,6 +53,29 @@
       width: 20%;
       margin-right: 0.4rem;
     }
+    &:nth-child(7) {
+      width: 9rem;
+      margin-right: 0.4rem;
+    }
+    &:nth-child(8) {
+      width: 2rem;
+      margin-right: 0.7rem;
+    }
+    &:nth-child(9) {
+      width: 2rem;
+      margin-right: 0.4rem;
+    }
+    .bulkDeleteButton {
+      padding-top: 0.3rem;
+      padding-bottom: 0.3rem;
+      border-radius: 3px;
+      border: 1px solid var(--c-custom-gray);
+      color: var(--main-font-color);
+      &:hover {
+        background-color: var(--c-custom-gray);
+        color: var(--main-font-color);
+      }
+    }
   }
   .PKWrap {
     > label {

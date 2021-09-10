@@ -7,8 +7,6 @@ import styles from './FieldDesigner.module.scss';
 
 import { config } from 'conf';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { AttachmentEditor } from './_components/AttachmentEditor';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
@@ -16,6 +14,7 @@ import { Checkbox } from 'views/_components/Checkbox';
 import { CodelistEditor } from './_components/CodelistEditor';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { LinkSelector } from './_components/LinkSelector';
@@ -33,6 +32,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const FieldDesigner = ({
   addField = false,
+  bulkDelete = false,
   checkDuplicates,
   checkInvalidCharacters,
   codelistItems,
@@ -61,6 +61,8 @@ export const FieldDesigner = ({
   isDataflowOpen,
   isDesignDatasetEditorRead,
   isReferenceDataset,
+  markedForDeletion,
+  onBulkCheck,
   onCodelistAndLinkShow,
   onFieldDelete,
   onFieldDragAndDrop,
@@ -1107,26 +1109,39 @@ export const FieldDesigner = ({
         </ReactTooltip> */}
       </div>
     ) : null;
-
+  console.log(markedForDeletion);
   const renderDeleteButton = () =>
     !addField ? (
-      <div
-        className={`${styles.button} ${styles.deleteButton} ${fieldPKReferenced ? styles.disabledButton : ''} ${
-          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        } ${isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
-        draggable={true}
-        href="#"
-        onClick={e => {
-          e.preventDefault();
-          onFieldDelete(index, fieldDesignerState.fieldTypeValue.fieldType);
-        }}
-        onDragStart={event => {
-          event.preventDefault();
-          event.stopPropagation();
-        }}>
-        <FontAwesomeIcon aria-label={resourcesContext.messages['deleteFieldLabel']} icon={AwesomeIcons('delete')} />
-        <span className="srOnly">{resourcesContext.messages['deleteFieldLabel']}</span>
-      </div>
+      !bulkDelete ? (
+        <div
+          className={`${styles.button} ${styles.deleteButton} ${fieldPKReferenced ? styles.disabledButton : ''} ${
+            fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+          } ${isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
+          draggable={true}
+          href="#"
+          onClick={e => {
+            e.preventDefault();
+            onFieldDelete(index, fieldDesignerState.fieldTypeValue.fieldType);
+          }}
+          onDragStart={event => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}>
+          <FontAwesomeIcon aria-label={resourcesContext.messages['deleteFieldLabel']} icon={AwesomeIcons('delete')} />
+          <span className="srOnly">{resourcesContext.messages['deleteFieldLabel']}</span>
+        </div>
+      ) : (
+        <Checkbox
+          checked={markedForDeletion.find(id => id === fieldId)}
+          className={`${styles.checkBulkDelete} ${
+            fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+          } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
+          id={`${fieldDesignerState.fieldValue}_mark_to_delete`}
+          inputId={`${fieldDesignerState.fieldValue}_mark_to_delete`}
+          onChange={e => onBulkCheck(e.checked, fieldId)}
+          role="checkbox"
+        />
+      )
     ) : null;
 
   const renderInputs = () => (

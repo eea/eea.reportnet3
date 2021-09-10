@@ -11,6 +11,7 @@ import styles from './FieldsDesigner.module.scss';
 
 import { config } from 'conf';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
@@ -20,6 +21,7 @@ import { DataViewer } from 'views/_components/DataViewer';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { FieldDesigner } from './_components/FieldDesigner';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { Toolbar } from 'views/_components/Toolbar';
 
@@ -63,22 +65,24 @@ export const FieldsDesigner = ({
   const validationContext = useContext(ValidationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [toPrefill, setToPrefill] = useState(false);
+  const [bulkDelete, setBulkDelete] = useState(false);
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
-  const [fields, setFields] = useState();
-  const [fieldToDeleteType, setFieldToDeleteType] = useState();
   const [exportTableSchema, setExportTableSchema] = useState(undefined);
   const [exportTableSchemaName, setExportTableSchemaName] = useState('');
+  const [fields, setFields] = useState();
+  const [fieldToDeleteType, setFieldToDeleteType] = useState();
+  const [fixedNumber, setFixedNumber] = useState(false);
   const [indexToDelete, setIndexToDelete] = useState();
   const [initialFieldIndexDragged, setInitialFieldIndexDragged] = useState();
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
-  const [notEmpty, setNotEmpty] = useState(true);
-  const [fixedNumber, setFixedNumber] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
+  const [markedForDeletion, setMarkedForDeletion] = useState([]);
+  const [notEmpty, setNotEmpty] = useState(true);
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
+  const [toPrefill, setToPrefill] = useState(false);
 
   useEffect(() => {
     if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {
@@ -110,6 +114,14 @@ export const FieldsDesigner = ({
       DownloadFile(exportTableSchema, exportTableSchemaName);
     }
   }, [exportTableSchema]);
+
+  const onBulkCheck = (checked, fieldId) => {
+    if (checked) {
+      setMarkedForDeletion([...markedForDeletion, fieldId]);
+    } else {
+      setMarkedForDeletion(markedForDeletion.filter(id => id !== fieldId));
+    }
+  };
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
     setIsCodelistOrLink(
@@ -483,6 +495,7 @@ export const FieldsDesigner = ({
           return (
             <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
               <FieldDesigner
+                bulkDelete={bulkDelete}
                 checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
                 checkInvalidCharacters={name => FieldsDesignerUtils.checkInvalidCharacters(name)}
                 codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
@@ -523,6 +536,8 @@ export const FieldsDesigner = ({
                 isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                 isReferenceDataset={isReferenceDataset}
                 key={field.fieldId}
+                markedForDeletion={markedForDeletion}
+                onBulkCheck={onBulkCheck}
                 onCodelistAndLinkShow={onCodelistAndLinkShow}
                 onFieldDelete={onFieldDelete}
                 onFieldDragAndDrop={onFieldDragAndDrop}
@@ -799,13 +814,33 @@ export const FieldsDesigner = ({
               tooltipOptions={{ position: 'top' }}
             />
           </span>
-          <label className={styles.requiredWrap}>{resourcesContext.messages['required']}</label>
-          <label className={styles.readOnlyWrap}>{resourcesContext.messages['readOnly']}</label>
+          <label>{resourcesContext.messages['required']}</label>
+          <label>{resourcesContext.messages['readOnly']}</label>
           <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}>
             {resourcesContext.messages['newFieldPlaceHolder']}
           </label>
           <label>{resourcesContext.messages['newFieldDescriptionPlaceHolder']}</label>
           <label>{resourcesContext.messages['newFieldTypePlaceHolder']}</label>
+          <label></label>
+          <label></label>
+          <label>
+            <div
+              className={styles.bulkDeleteButton}
+              onClick={e => {
+                e.preventDefault();
+                setBulkDelete(!bulkDelete);
+              }}>
+              <FontAwesomeIcon
+                aria-label={resourcesContext.messages['deleteFieldLabel']}
+                icon={AwesomeIcons(!bulkDelete ? 'check' : 'delete')}
+              />
+              {/* <FontAwesomeIcon
+                aria-label={resourcesContext.messages['deleteFieldLabel']}
+                icon={AwesomeIcons('check')}
+              /> */}
+              <span className="srOnly">{resourcesContext.messages['deleteFieldLabel']}</span>
+            </div>
+          </label>
         </div>
       )}
       {renderAllFields()}
