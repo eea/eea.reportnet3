@@ -200,7 +200,6 @@ export const HistoricReleases = ({
       isBusinessDataflow ? 'companyCode' : isCitizenScienceDataflow ? 'organizationCode' : 'countryCode'
     ];
 
-  // TODO CHECK CORRECT USE ON CITIES AND SCIENCE
   const filterOptionsDataCollection = [
     {
       type: 'multiselect',
@@ -218,7 +217,6 @@ export const HistoricReleases = ({
     }
   ];
 
-  // TODO CHECK CORRECT USE ON CITIES AND SCIENCE
   const filterOptionsEUDataset = [
     {
       type: 'multiselect',
