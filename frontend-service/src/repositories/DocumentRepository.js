@@ -15,6 +15,12 @@ export const DocumentRepository = {
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
+  publicDownload: async documentId =>
+    await HTTPRequester.download({
+      url: getUrl(DocumentConfig.publicDownload, { documentId }),
+      headers: { 'Content-Type': 'application/octet-stream' }
+    }),
+
   update: async (dataflowId, description, language, file, isPublic, documentId) => {
     const formData = new FormData();
     if (file?.name) {
