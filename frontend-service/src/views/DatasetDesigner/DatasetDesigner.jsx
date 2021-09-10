@@ -636,7 +636,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       console.error('DatasetDesigner - onExportDataExternalIntegration.', error);
-      onExportError('EXTERNAL_EXPORT_DESIGN_FAILED_EVENT');
+      notificationContext.add({
+        type: 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT',
+        content: { dataflowId, datasetId, datasetName: designerState.datasetSchemaName }
+      });
     }
   };
 

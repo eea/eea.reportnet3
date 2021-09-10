@@ -553,7 +553,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       console.error('Dataset - onExportDataExternalIntegration.', error);
-      onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
+      notificationContext.add({
+        type: 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT',
+        content: { dataflowId, datasetId, datasetName: datasetSchemaName }
+      });
     }
   };
 

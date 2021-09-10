@@ -24,6 +24,7 @@ import { Title } from 'views/_components/Title';
 
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
+import { DocumentService } from 'services/DocumentService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -226,6 +227,15 @@ export const PublicDataflowInformation = withRouter(
       </div>
     );
 
+    const onDownloadDocument = async document => {
+      try {
+        const { data } = await DocumentService.publicDownload(document.id);
+        DownloadFile(data, document.fileName);
+      } catch (error) {
+        console.error('PublicDataflowInformation - onDownloadDocument.', error);
+      }
+    };
+
     const onFileDownload = async (dataProviderId, fileName) => {
       try {
         let fileContent;
@@ -280,7 +290,6 @@ export const PublicDataflowInformation = withRouter(
         const publicFileNames = datasetsFromRepresentative
           .filter(dataset => !isNil(dataset.publicFileName))
           .map(dataset => dataset.publicFileName);
-
         return {
           datasetSchemaName: datasetSchemaName,
           dataProviderId: dataset.dataProviderId,
@@ -294,7 +303,6 @@ export const PublicDataflowInformation = withRouter(
             : DataflowUtils.getTechnicalAcceptanceStatus(datasetsFromRepresentative.map(dataset => dataset.status))
         };
       });
-
       setRepresentatives(representatives);
     };
 
@@ -356,6 +364,19 @@ export const PublicDataflowInformation = withRouter(
       );
     };
 
+    const downloadDocumentColumnTemplate = rowData => {
+      return (
+        <div className={styles.filesContainer}>
+          <span className={styles.downloadIcon} key={rowData.file} onClick={() => onDownloadDocument(rowData)}>
+            <FontAwesomeIcon data-for={rowData.file} data-tip icon={AwesomeIcons('7z')} />
+            <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id={rowData.file} place="top">
+              <span>{rowData.file}</span>
+            </ReactTooltip>
+          </span>
+        </div>
+      );
+    };
+
     const linkTemplate = rowData => (
       <a href={rowData.url} rel="noopener noreferrer" target="_blank">
         {rowData.url}
@@ -363,7 +384,11 @@ export const PublicDataflowInformation = withRouter(
     );
 
     const renderDocumentsColumns = documents => {
-      const fieldColumns = getOrderedDocumentsColumns(Object.keys(documents[0]))
+      const documentsWithFiles = documents.map(document => {
+        document['file'] = document.title;
+        return document;
+      });
+      const fieldColumns = getOrderedDocumentsColumns(Object.keys(documentsWithFiles[0]))
         .filter(
           key =>
             key.includes('category') ||
@@ -377,6 +402,7 @@ export const PublicDataflowInformation = withRouter(
         .map(field => {
           let template = null;
           if (field === 'size') template = sizeColumnTemplate;
+          if (field === 'file') template = downloadDocumentColumnTemplate;
           return (
             <Column
               body={template}
@@ -415,9 +441,12 @@ export const PublicDataflowInformation = withRouter(
             ) : !isEmpty(representatives) ? (
               <Fragment>
                 <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
-                <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
-                  {renderRepresentativeColumns(representatives)}
-                </DataTable>
+                <div className={styles.dataTableWrapper}>
+                  <div className={styles.dataTableTitle}>{resourcesContext.messages['reportingDatasets']}</div>
+                  <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
+                    {renderRepresentativeColumns(representatives)}
+                  </DataTable>
+                </div>
                 {!isEmpty(referenceDatasets) && (
                   <div className={styles.dataTableWrapper}>
                     <div className={styles.dataTableTitle}>{resourcesContext.messages['referenceDatasets']}</div>
