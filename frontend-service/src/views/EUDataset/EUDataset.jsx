@@ -126,8 +126,8 @@ export const EUDataset = withRouter(({ history, match }) => {
         type: 'GET_DATAFLOW_DETAILS',
         payload: {
           name: data.name,
-          isBusinessDataflow: TextUtils.areEquals(data.type, config.dataflowType.BUSINESS),
-          isCitizenScienceDataflow: TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE)
+          isBusinessDataflow: TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value),
+          isCitizenScienceDataflow: TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value)
         }
       });
     } catch (error) {

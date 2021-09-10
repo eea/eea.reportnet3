@@ -302,8 +302,11 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       payload: {
         metaData,
         dataflowName: metaData.dataflow.name,
-        isBusinessDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.BUSINESS),
-        isCitizenScienceDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.CITIZEN_SCIENCE),
+        isBusinessDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.BUSINESS.value),
+        isCitizenScienceDataflow: TextUtils.areEquals(
+          metaData.dataflow.type,
+          config.dataflowType.CITIZEN_SCIENCE.value
+        ),
         schemaName: metaData.dataset.name
       }
     });
