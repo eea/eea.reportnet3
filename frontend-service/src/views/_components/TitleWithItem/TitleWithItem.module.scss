@@ -18,13 +18,8 @@
   margin-bottom: 1rem;
 }
 
-.infoButton {
-  background-color: var(--white) !important;
-  border-radius: 50% !important;
-  color: var(--datatable-header-info-button-color) !important;
-  font-size: 12pt !important;
-  margin-left: 0.4rem !important;
-  cursor: pointer;
+.infoTooltip {
+  opacity: 1 !important;
 }
 
 .title {

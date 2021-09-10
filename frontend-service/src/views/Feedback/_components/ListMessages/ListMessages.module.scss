@@ -31,5 +31,20 @@
     flex-direction: column;
     padding: 1rem 0;
     height: 101%;
+    .messageCounter {
+      user-select: none;
+      font-size: 10pt;
+      font-weight: bold;
+      position: absolute;
+      top: 4.5rem;
+      background-color: var(--statusBox-info-bg);
+      color: var(--statusBox-info-color);
+      border-radius: 3px;
+      padding: 4px;
+    }
   }
+}
+.messagesWrapperDisabled {
+  pointer-events: none;
+  opacity: 0.4;
 }

@@ -49,6 +49,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const [datasetsSchemas, setDatasetsSchemas] = useState();
   const [documents, setDocuments] = useState([]);
   const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
+  const [isCitizenScienceDataflow, setIsCitizenScienceDataflow] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
@@ -85,7 +86,14 @@ export const DataflowHelp = withRouter(({ history, match }) => {
     }
   }, [userContext]);
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_HELP, dataflowId, history, isBusinessDataflow, isLoading });
+  useBreadCrumbs({
+    currentPage: CurrentPage.DATAFLOW_HELP,
+    dataflowId,
+    history,
+    isBusinessDataflow,
+    isCitizenScienceDataflow,
+    isLoading
+  });
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(
@@ -150,7 +158,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const onLoadDatasetsSchemas = async () => {
     try {
       const data = await DataflowService.get(dataflowId);
-      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value));
+      setIsCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value));
       setIsLoading(false);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {

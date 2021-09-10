@@ -33,6 +33,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 const RepresentativesList = ({
   dataflowId,
   isBusinessDataflow,
+  isCitizenScienceDataflow,
   representativesImport = false,
   setDataProviderSelected,
   setFormHasRepresentatives,
@@ -73,7 +74,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     getInitialData();
-  }, [formState.refresher, isBusinessDataflow]);
+  }, [formState.refresher, isBusinessDataflow, isCitizenScienceDataflow]);
 
   useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
@@ -141,6 +142,9 @@ const RepresentativesList = ({
   const getInitialData = async () => {
     if (isBusinessDataflow) {
       await getDataProviderGroup();
+    }
+    if (isCitizenScienceDataflow) {
+      await getGroupOrganizations();
     } else {
       await getGroupCountries();
     }
@@ -174,6 +178,15 @@ const RepresentativesList = ({
       formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: response.data } });
     } catch (error) {
       console.error('RepresentativesList - getGroupCountries.', error);
+    }
+  };
+
+  const getGroupOrganizations = async () => {
+    try {
+      const response = await RepresentativeService.getGroupOrganizations();
+      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: response.data } });
+    } catch (error) {
+      console.error('RepresentativesList - getGroupOrganizations.', error);
     }
   };
 

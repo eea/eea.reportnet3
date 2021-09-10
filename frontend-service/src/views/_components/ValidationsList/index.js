@@ -1,1 +1,0 @@
-export { ValidationsList } from './ValidationsList';
