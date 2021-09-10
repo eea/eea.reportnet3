@@ -718,6 +718,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    * @return the private dataflow by id
    */
   @Override
+  @HystrixCommand
   @GetMapping("/getPrivateDataflow/{dataflowId}")
   public DataflowPrivateVO getPrivateDataflowById(@PathVariable("dataflowId") Long dataflowId) {
     DataflowPrivateVO dataflowPrivateVO = null;
