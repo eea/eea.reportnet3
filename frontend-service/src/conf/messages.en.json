@@ -1249,9 +1249,11 @@
     "thereAreNoCitizenScienceDataflows": "There are no citizen science dataflows",
     "citizenScienceDataflowsCrumbLabel": "Citizen science dataflow",
     "organizationCode": "Organization code",
-    "dataflowUsersByOrganizationList": "Users list by organization",
+    "dataflowUsersByOrganizationList": "Users by organization",
     "organization": "Organization",
     "size": "Size",
-    "messages": "messages"
+    "messages": "messages",
+    "updateCitizenScienceDataflow": "Edit citizen science dataflow",
+    "createNewCitizenScienceDataflow": "Create new citizen science dataflow"
   }
 }
