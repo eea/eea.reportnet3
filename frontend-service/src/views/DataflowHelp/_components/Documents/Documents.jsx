@@ -74,8 +74,6 @@ const Documents = ({
     if (!isNil(fileToDownload)) DownloadFile(fileToDownload, fileName);
   }, [fileToDownload]);
 
-  const createFileName = title => `${title.split(' ').join('_')}`;
-
   const dateColumnTemplate = rowData => <span>{dayjs(rowData.date).format(userContext.userProps.dateFormat)}</span>;
 
   const documentsEditButtons = rowData => (
@@ -142,7 +140,7 @@ const Documents = ({
   const isPublicColumnTemplate = rowData => (
     <span>
       {rowData.isPublic ? (
-        <FontAwesomeIcon aria-label={resourcesContext.messages['documentIsPublic']} icon={AwesomeIcons('check')} />
+        <FontAwesomeIcon aria-label={resourcesContext.messages['isPublic']} icon={AwesomeIcons('check')} />
       ) : (
         ''
       )}
@@ -172,7 +170,7 @@ const Documents = ({
   const onDownloadDocument = async document => {
     try {
       setDownloadingId(document.id);
-      setFileName(createFileName(document.title));
+      setFileName(`${document.title.split(' ').join('_')}`);
       const { data } = await DocumentService.download(document.id);
       setFileToDownload(data);
     } catch (error) {
@@ -277,7 +275,7 @@ const Documents = ({
           field="isPublic"
           filter={false}
           filterMatchMode="contains"
-          header={resourcesContext.messages['documentIsPublic']}
+          header={resourcesContext.messages['isPublic']}
           sortable={!isEmpty(documents)}
         />
         <Column

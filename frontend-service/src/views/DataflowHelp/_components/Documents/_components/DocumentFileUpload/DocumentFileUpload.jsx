@@ -302,7 +302,7 @@ const DocumentFileUpload = ({
             type="checkbox"
           />
           <label htmlFor="isPublic" style={{ display: 'block' }}>
-            {resourcesContext.messages['documentUploadCheckboxIsPublic']}
+            {resourcesContext.messages['checkboxIsPublic']}
           </label>
         </div>
       </fieldset>

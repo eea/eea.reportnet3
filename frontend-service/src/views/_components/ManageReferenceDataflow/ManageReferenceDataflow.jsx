@@ -6,17 +6,15 @@ import { config } from 'conf';
 
 import styles from './ManageReferenceDataflow.module.scss';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
-import ReactTooltip from 'react-tooltip';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { DataflowService } from 'services/DataflowService';
 import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
@@ -182,16 +180,9 @@ export const ManageReferenceDataflow = ({
             <label>
               <span onClick={() => setPinDataflow(!pinDataflow)}>{resourcesContext.messages['pinDataflow']}</span>
             </label>
-            <FontAwesomeIcon
-              aria-hidden={false}
-              className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-              data-for="pinDataflow"
-              data-tip
-              icon={AwesomeIcons('infoCircle')}
-            />
-            <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="pinDataflow" place="top">
-              <span>{resourcesContext.messages['pinDataflowMessage']}</span>
-            </ReactTooltip>
+            <TooltipButton
+              message={resourcesContext.messages['pinDataflowMessage']}
+              uniqueIdentifier="pinDataflow"></TooltipButton>
           </div>
         )}
         {isEditing && isDesign && (

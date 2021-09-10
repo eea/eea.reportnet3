@@ -1,4 +1,5 @@
 import { Fragment, useContext } from 'react';
+import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 
 import styles from './Message.module.scss';
@@ -11,46 +12,53 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FeedbackService } from 'services/FeedbackService';
 
 import { FileUtils } from 'views/_functions/Utils/FileUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const Message = ({
-  attachment = {
-    extension: '',
-    name: '',
-    size: ''
-  },
-  dataflowId,
-  hasSeparator,
-  isAttachment = false,
-  isCustodian,
-  message,
-  onToggleVisibleDeleteMessage
-}) => {
+export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onToggleVisibleDeleteMessage }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const getMessageContent = () => {
+    let content = message.content.replace(/(?:\r\n|\r|\n)/g, '<br/>');
+
+    if (message.automatic) {
+      const [statusTitle, status, feedbackMessageTitle, ...feedbackMessage] = content.split(/(?::|,)+/);
+
+      if (!isNil(status))
+        content = `<b>${statusTitle}:</b><span style="font-style:italic">${status}</span><br/><b>${feedbackMessageTitle}</b>: ${feedbackMessage.join()}`;
+    }
+    return content;
+  };
+
   const getStyles = () => {
+    const accStyles = [];
+    if (message.automatic) {
+      accStyles.push(styles.automatic);
+    }
+
     if (isCustodian) {
       if (!message.direction) {
-        return styles.sender;
+        accStyles.push(styles.sender);
       } else {
-        return styles.receiver;
+        accStyles.push(styles.receiver);
       }
     } else {
       if (!message.direction) {
-        return styles.receiver;
+        accStyles.push(styles.receiver);
       } else {
-        return styles.sender;
+        accStyles.push(styles.sender);
       }
     }
+    return accStyles.join(' ');
   };
 
   const onFileDownload = async (dataflowId, messageId, dataProviderId) => {
     try {
       const data = await FeedbackService.getMessageAttachment(dataflowId, messageId, dataProviderId);
-      DownloadFile(data, attachment.name);
+      DownloadFile(data, message.messageAttachment.name);
     } catch (error) {
       console.error('Message - onFileDownload.', error);
       notificationContext.add({
@@ -61,28 +69,32 @@ export const Message = ({
   };
 
   const renderAttachment = () => {
-    const { bytesParsed, sizeType } = FileUtils.formatBytes(attachment.size);
+    const { bytesParsed, sizeType } = FileUtils.formatBytes(message.messageAttachment.size);
     return (
       <div className={styles.messageAttachment}>
         <div className={styles.messageAttachmentFile}>
           <div>
-            <FontAwesomeIcon icon={AwesomeIcons(attachment.extension)} role="presentation" />
+            <FontAwesomeIcon icon={AwesomeIcons(message.messageAttachment.extension)} role="presentation" />
             <span data-for="fileName" data-tip>
-              {attachment.name.length > 45 ? `${attachment.name.substring(0, 45)}...` : attachment.name}
+              {message.messageAttachment.name.length > 45
+                ? `${message.messageAttachment.name.substring(0, 45)}...`
+                : message.messageAttachment.name}
             </span>
           </div>
-          <Button
-            className={`p-button-animated-right-blink p-button-secondary-transparent ${styles.downloadFileButton}`}
-            icon="export"
-            iconPos="right"
-            onClick={() => onFileDownload(dataflowId, message.id, message.providerId)}
-            style={{ color: message.direction ? 'var(--white)' : 'var(--c-black-400)' }}
-            tooltip={`${resourcesContext.messages['downloadFile']}: ${attachment.name}`}
-            tooltipOptions={{ position: 'top' }}
-          />
+          {!message.automatic && (
+            <Button
+              className={`p-button-animated-right-blink p-button-secondary-transparent ${styles.downloadFileButton}`}
+              icon="export"
+              iconPos="right"
+              onClick={() => onFileDownload(dataflowId, message.id, message.providerId)}
+              style={{ color: message.direction ? 'var(--white)' : 'var(--c-black-400)' }}
+              tooltip={`${resourcesContext.messages['downloadFile']}: ${message.messageAttachment.name}`}
+              tooltipOptions={{ position: 'top' }}
+            />
+          )}
         </div>
         <div className={styles.messageAttachmentFileData}>
-          <span>{`.${attachment.extension.toUpperCase()} `}</span>
+          <span>{`.${message.messageAttachment.extension.toUpperCase()} `}</span>
           <span>{`${bytesParsed} ${sizeType}`}</span>
         </div>
       </div>
@@ -93,16 +105,16 @@ export const Message = ({
     return (
       <div className={`${styles.message} rep-feedback-message ${getStyles()}`} key={message.id}>
         <div className={styles.messageTextWrapper}>
-          {isAttachment ? (
+          {TextUtils.areEquals(message.type, 'ATTACHMENT') ? (
             renderAttachment()
           ) : (
             <span
               className={`${styles.messageText} ${message.direction ? styles.sender : styles.receiver}`}
-              dangerouslySetInnerHTML={{ __html: message.content.replace(/(?:\r\n|\r|\n)/g, '<br/>') }}></span>
+              dangerouslySetInnerHTML={{ __html: getMessageContent() }}></span>
           )}
           <span className={styles.datetime}>{dayjs(message.date).format('YYYY-MM-DD HH:mm')}</span>
         </div>
-        {isCustodian && (
+        {isCustodian && !message.automatic && (
           <FontAwesomeIcon
             className={styles.deleteMessageButton}
             icon={AwesomeIcons('deleteCircle')}
@@ -115,9 +127,9 @@ export const Message = ({
   };
 
   const renderSeparator = () => (
-    <div className={styles.unreadSeparator}>{`${resourcesContext.messages['unreadMessageSeparator']} (${dayjs(
-      message.date
-    ).format('YYYY-MM-DD HH:mm')})`}</div>
+    <div className={`rep-feedback-unreadSeparator ${styles.unreadSeparator}`}>{`${
+      resourcesContext.messages['unreadMessageSeparator']
+    } (${dayjs(message.date).format('YYYY-MM-DD HH:mm')})`}</div>
   );
 
   return hasSeparator ? (

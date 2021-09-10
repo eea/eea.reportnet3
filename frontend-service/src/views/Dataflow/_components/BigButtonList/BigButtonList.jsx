@@ -49,11 +49,12 @@ export const BigButtonList = ({
   dataProviderId,
   handleRedirect,
   isBusinessDataflow,
+  isCitizenScienceDataflow,
   isLeadReporterOfCountry,
   onCleanUpReceipt,
+  onOpenReleaseConfirmDialog,
   onSaveName,
   onShowManageReportersDialog,
-  onOpenReleaseConfirmDialog,
   onUpdateData,
   setIsCopyDataCollectionToEUDatasetLoading,
   setIsExportEUDatasetLoading,
@@ -640,6 +641,7 @@ export const BigButtonList = ({
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
             isBusinessDataflow={isBusinessDataflow}
+            isCitizenScienceDataflow={isCitizenScienceDataflow}
           />
         </Dialog>
       )}
@@ -656,6 +658,7 @@ export const BigButtonList = ({
             dataflowId={dataflowData.id}
             getManageAcceptanceDataset={getManageAcceptanceDataset}
             isBusinessDataflow={isBusinessDataflow}
+            isCitizenScienceDataflow={isCitizenScienceDataflow}
             isUpdatedManualAcceptanceDatasets={isUpdatedManualAcceptanceDatasets}
             manageDialogs={manageManualAcceptanceDatasetDialog}
             refreshManualAcceptanceDatasets={refreshManualAcceptanceDatasets}

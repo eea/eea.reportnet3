@@ -53,15 +53,18 @@ export const Feedback = withRouter(({ match, history }) => {
     importFileDialogVisible: false,
     isAdmin: false,
     isBusinessDataflow: false,
+    isCitizenScienceDataflow: false,
     isCustodian: undefined,
     isDragging: false,
     isLoading: true,
     isSending: false,
-    messageFirstLoad: false,
     messages: [],
     messageToSend: '',
+    moreMessagesLoaded: false,
+    moreMessagesLoading: false,
     newMessageAdded: false,
-    selectedDataProvider: {}
+    selectedDataProvider: {},
+    totalMessages: 0
   });
 
   const {
@@ -71,6 +74,7 @@ export const Feedback = withRouter(({ match, history }) => {
     draggedFiles,
     importFileDialogVisible,
     isBusinessDataflow,
+    isCitizenScienceDataflow,
     isAdmin,
     isCustodian,
     isDragging,
@@ -78,8 +82,11 @@ export const Feedback = withRouter(({ match, history }) => {
     isSending,
     messages,
     messageToSend,
+    moreMessagesLoaded,
+    moreMessagesLoading,
     newMessageAdded,
-    selectedDataProvider
+    selectedDataProvider,
+    totalMessages
   } = feedbackState;
 
   useEffect(() => {
@@ -139,7 +146,14 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   }, [messageToSend]);
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_FEEDBACK, dataflowId, history, isBusinessDataflow, isLoading });
+  useBreadCrumbs({
+    currentPage: CurrentPage.DATAFLOW_FEEDBACK,
+    dataflowId,
+    history,
+    isBusinessDataflow,
+    isCitizenScienceDataflow,
+    isLoading
+  });
 
   const markMessagesAsRead = async data => {
     //mark unread messages as read
@@ -154,15 +168,9 @@ export const Feedback = withRouter(({ match, history }) => {
     }
   };
 
-  const onFirstLoadMessages = loadState => {
-    dispatchFeedback({ type: 'ON_UPDATE_MESSAGE_FIRST_LOAD', payload: loadState });
-  };
-
   const onChangeDataProvider = value => {
     if (isNil(value)) {
       dispatchFeedback({ type: 'RESET_MESSAGES', payload: [] });
-    } else {
-      onFirstLoadMessages(true);
     }
 
     dispatchFeedback({ type: 'SET_SELECTED_DATAPROVIDER', payload: value });
@@ -172,8 +180,12 @@ export const Feedback = withRouter(({ match, history }) => {
     try {
       const data = await DataflowService.getDetails(dataflowId);
       const name = data.name;
-      const isBusinessDataflow = TextUtils.areEquals(data.type, config.dataflowType.BUSINESS);
-      dispatchFeedback({ type: 'SET_DATAFLOW_DETAILS', payload: { name, isBusinessDataflow } });
+      const isBusinessDataflow = TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value);
+      const isCitizenScienceDataflow = TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value);
+      dispatchFeedback({
+        type: 'SET_DATAFLOW_DETAILS',
+        payload: { name, isBusinessDataflow, isCitizenScienceDataflow }
+      });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);
       notificationContext.add({
@@ -188,13 +200,13 @@ export const Feedback = withRouter(({ match, history }) => {
   const onGetMoreMessages = async () => {
     if ((isCustodian && isEmpty(selectedDataProvider)) || isLoading) return;
     try {
+      dispatchFeedback({ type: 'ON_TOGGLE_LAZY_LOADING', payload: true });
       const data = await onLoadMessages(
         isCustodian ? selectedDataProvider.dataProviderId : representativeId,
         currentPage,
         true
       );
       await markMessagesAsRead(data);
-
       dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data.messages });
     } catch (error) {
       console.error('Feedback - onGetMoreMessages.', error);
@@ -208,8 +220,10 @@ export const Feedback = withRouter(({ match, history }) => {
   const onGetInitialMessages = async dataProviderId => {
     const data = await onLoadMessages(dataProviderId, 0, false);
     await markMessagesAsRead(data);
-
-    dispatchFeedback({ type: 'SET_MESSAGES', payload: !isNil(data) ? data.messages : [] });
+    dispatchFeedback({
+      type: 'SET_MESSAGES',
+      payload: { msgs: !isNil(data) ? data.messages : [], totalMessages: data.totalMessages }
+    });
   };
 
   const onDrop = event => {
@@ -267,7 +281,11 @@ export const Feedback = withRouter(({ match, history }) => {
         dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
       }
       const data = await FeedbackService.getAllMessages(dataflowId, page, dataProviderId);
-      return { messages: data, unreadMessages: data.filter(msg => !msg.read) };
+      return {
+        messages: data.listMessageVO,
+        unreadMessages: data.listMessageVO.filter(msg => !msg.read),
+        totalMessages: data.totalMessages
+      };
     } catch (error) {
       console.error('Feedback - onLoadMessages.', error);
     } finally {
@@ -390,14 +408,15 @@ export const Feedback = withRouter(({ match, history }) => {
             }
             isCustodian={isCustodian}
             isLoading={isLoading}
-            messageFirstLoad={feedbackState.messageFirstLoad}
             messages={messages}
+            moreMessagesLoaded={moreMessagesLoaded}
+            moreMessagesLoading={moreMessagesLoading}
             newMessageAdded={newMessageAdded}
-            onFirstLoadMessages={onFirstLoadMessages}
             onLazyLoad={onGetMoreMessages}
             onMessageDelete={onMessageDelete}
             onUpdateNewMessageAdded={onUpdateNewMessageAdded}
             providerId={selectedDataProvider?.dataProviderId}
+            totalMessages={totalMessages}
           />
           {!isNil(isCustodian) && !isCustodian && (
             <label className={styles.helpdeskMessage}>{resourcesContext.messages['feedbackHelpdeskMessage']}</label>

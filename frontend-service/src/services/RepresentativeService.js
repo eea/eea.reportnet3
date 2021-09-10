@@ -55,6 +55,8 @@ export const RepresentativeService = {
 
   getGroupCountries: async () => await RepresentativeRepository.getGroupCountries(),
 
+  getGroupOrganizations: async () => await RepresentativeRepository.getGroupOrganizations(),
+
   updateDataProviderId: async (representativeId, dataProviderId) =>
     await RepresentativeRepository.updateDataProviderId(representativeId, dataProviderId),
 

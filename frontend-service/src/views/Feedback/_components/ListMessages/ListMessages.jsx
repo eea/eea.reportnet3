@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer, useRef } from 'react';
+import { useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import last from 'lodash/last';
@@ -17,8 +17,6 @@ import { FeedbackService } from 'services/FeedbackService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { TextUtils } from 'repositories/_utils/TextUtils';
-
 export const ListMessages = ({
   canLoad = true,
   className = '',
@@ -27,39 +25,31 @@ export const ListMessages = ({
   isCustodian,
   isLoading,
   lazyLoading = true,
-  messageFirstLoad,
   messages = [],
+  moreMessagesLoaded,
+  moreMessagesLoading,
   newMessageAdded,
-  onFirstLoadMessages,
   onLazyLoad,
   onMessageDelete,
   onUpdateNewMessageAdded,
-  providerId
+  providerId,
+  totalMessages
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const listMessagesWrapperRef = useRef();
   const messagesWrapperRef = useRef();
 
   const [listMessagesState, dispatchListMessages] = useReducer(listMessagesReducer, {
     isVisibleConfirmDelete: false,
-    isLoadingNewMessages: false,
     listContent: null,
+    messageDeleted: false,
     messageIdToDelete: null,
     resetScrollStates: null,
     separatorIndex: -1
   });
 
-  const { isLoadingNewMessages, isVisibleConfirmDelete, messageIdToDelete, separatorIndex } = listMessagesState;
-
-  useEffect(() => {
-    if (!isNil(messagesWrapperRef)) {
-      if (messages.length === 1) {
-        messagesWrapperRef.current.scrollTop = 1;
-      } else {
-        messagesWrapperRef.current.scrollTop = messagesWrapperRef.current.scrollHeight;
-      }
-    }
-  }, []);
+  const { isVisibleConfirmDelete, messageDeleted, messageIdToDelete, separatorIndex } = listMessagesState;
 
   useEffect(() => {
     dispatchListMessages({ type: 'SET_SEPARATOR_INDEX', payload: getIndexByHeader(messages) });
@@ -70,7 +60,7 @@ export const ListMessages = ({
       type: 'SET_LIST_CONTENT',
       payload: renderMessageList()
     });
-  }, [isCustodian, isLoading, isLoadingNewMessages, messages, separatorIndex]);
+  }, [isCustodian, isLoading, moreMessagesLoading, messages, separatorIndex]);
 
   const getIndexByHeader = messagesArray => {
     return messagesArray
@@ -80,29 +70,46 @@ export const ListMessages = ({
       .indexOf(false);
   };
 
-  useEffect(() => {
-    if (newMessageAdded || messageFirstLoad) {
-      if (messageFirstLoad) {
-        dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
+  useLayoutEffect(() => {
+    const domMessages = document.querySelectorAll('.rep-feedback-message');
+    const lastMessage = last(domMessages);
+
+    if (!isCustodian) {
+      if (!moreMessagesLoaded) {
+        const unreadSeparator = document.querySelectorAll('.rep-feedback-unreadSeparator');
+        if (!isEmpty(unreadSeparator)) {
+          const lastSeparator = last(unreadSeparator);
+          messagesWrapperRef.current.scrollTo(0, lastSeparator.offsetTop - 100);
+        } else {
+          if (!moreMessagesLoading && !isNil(lastMessage)) {
+            messagesWrapperRef.current.scrollTo(0, lastMessage?.offsetTop);
+          }
+        }
+      } else {
+        messagesWrapperRef.current.scrollTo(0, 5);
       }
-      const messages = document.querySelectorAll('.rep-feedback-message');
-      if (!isEmpty(messages)) {
-        const lastMessage = last(messages);
-        messagesWrapperRef.current.scrollTop = lastMessage.offsetTop;
-        dispatchListMessages({
-          type: 'UPDATE_SCROLL_STATES',
-          payload: true
-        });
+    } else {
+      if (newMessageAdded || messageDeleted) {
+        if (!isNil(lastMessage)) {
+          messagesWrapperRef.current.scrollTo(0, lastMessage.offsetTop);
+        }
+        if (messageDeleted) {
+          dispatchListMessages({ type: 'SET_IS_MESSAGE_DELETED', payload: false });
+        }
+      } else {
+        if (!moreMessagesLoaded && !isEmpty(domMessages) && !moreMessagesLoading && !isNil(lastMessage)) {
+          messagesWrapperRef.current.scrollTo(0, lastMessage.offsetTop);
+        }
       }
     }
-    setTimeout(() => {
-      dispatchListMessages({ type: 'SET_IS_LOADING', payload: false });
-    }, 500);
+    dispatchListMessages({
+      type: 'UPDATE_SCROLL_STATES',
+      payload: true
+    });
   }, [messages, listMessagesState.listContent]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (listMessagesState.resetScrollStates) {
-      onFirstLoadMessages(false);
       onUpdateNewMessageAdded(false);
       dispatchListMessages({
         type: 'UPDATE_SCROLL_STATES',
@@ -131,7 +138,6 @@ export const ListMessages = ({
   const onScroll = e => {
     if (!isNil(e)) {
       if (e.target.scrollTop <= 0 && lazyLoading && canLoad) {
-        dispatchListMessages({ type: 'SET_IS_LOADING', payload: true });
         onLazyLoad();
         messagesWrapperRef.current.scrollTop = 5;
       }
@@ -150,20 +156,23 @@ export const ListMessages = ({
       );
     }
     return (
-      <div className={styles.scrollMessagesWrapper}>
-        {isLoadingNewMessages && (
+      <div className={styles.scrollMessagesWrapper} ref={listMessagesWrapperRef}>
+        <p
+          className={styles.messageCounter}
+          style={{
+            marginLeft: !isCustodian ? '25px' : 'inherit'
+          }}>{`${messages.length} ${resourcesContext.messages['of']} ${totalMessages} ${resourcesContext.messages['messages']}`}</p>
+        {moreMessagesLoading && (
           <div className={styles.lazyLoadingWrapper}>
             <Spinner className={styles.lazyLoadingSpinner} />
           </div>
         )}
         {messages.map((message, i) => (
           <Message
-            attachment={message.messageAttachment}
             dataflowId={dataflowId}
             hasSeparator={
               i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
             }
-            isAttachment={TextUtils.areEquals(message.type, 'ATTACHMENT')}
             isCustodian={isCustodian}
             key={uniqueId('message_')}
             message={message}
@@ -177,7 +186,10 @@ export const ListMessages = ({
   };
 
   return (
-    <div className={`${styles.messagesWrapper} ${className}`} onScroll={onScroll} ref={messagesWrapperRef}>
+    <div
+      className={`${styles.messagesWrapper} ${className} ${moreMessagesLoading ? styles.messagesWrapperDisabled : ''}`}
+      onScroll={onScroll}
+      ref={messagesWrapperRef}>
       {listMessagesState.listContent}
       {isVisibleConfirmDelete && (
         <ConfirmDialog

@@ -1,5 +1,6 @@
 {
-  "BUSINESS": "BUSINESS",
-  "REPORTING": "REPORTING",
-  "REFERENCE": "REFERENCE"
+  "BUSINESS": { "key": "business", "value": "BUSINESS" },
+  "CITIZEN_SCIENCE": { "key": "citizenScience", "value": "CITIZEN_SCIENCE" },
+  "REFERENCE": { "key": "reference", "value": "REFERENCE" },
+  "REPORTING": { "key": "reporting", "value": "REPORTING" }
 }

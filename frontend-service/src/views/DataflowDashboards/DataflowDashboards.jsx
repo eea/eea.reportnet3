@@ -40,6 +40,7 @@ export const DataflowDashboards = withRouter(
     const [dataflowName, setDataflowName] = useState('');
     const [dataSchema, setDataSchema] = useState();
     const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
+    const [isCitizenScienceDataflow, setCitizenScienceDataflow] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
     useBreadCrumbs({
@@ -47,6 +48,7 @@ export const DataflowDashboards = withRouter(
       dataflowId,
       history,
       isBusinessDataflow,
+      isCitizenScienceDataflow,
       isLoading
     });
 
@@ -59,7 +61,8 @@ export const DataflowDashboards = withRouter(
     const getDataflowDetails = async () => {
       try {
         const data = await DataflowService.getDetails(dataflowId);
-        setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
+        setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value));
+        setCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value));
         setDataflowName(data.name);
         setIsLoading(false);
       } catch (error) {
