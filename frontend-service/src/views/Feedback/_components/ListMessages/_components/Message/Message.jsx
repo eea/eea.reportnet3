@@ -1,4 +1,5 @@
 import { Fragment, useContext } from 'react';
+import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 
 import styles from './Message.module.scss';
@@ -19,6 +20,18 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onToggleVisibleDeleteMessage }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+
+  const getMessageContent = () => {
+    let content = message.content.replace(/(?:\r\n|\r|\n)/g, '<br/>');
+
+    if (message.automatic) {
+      const [statusTitle, status, feedbackMessageTitle, ...feedbackMessage] = content.split(/(?::|,)+/);
+
+      if (!isNil(status))
+        content = `<b>${statusTitle}:</b><span style="font-style:italic">${status}</span><br/><b>${feedbackMessageTitle}</b>: ${feedbackMessage.join()}`;
+    }
+    return content;
+  };
 
   const getStyles = () => {
     const accStyles = [];
@@ -97,7 +110,7 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
           ) : (
             <span
               className={`${styles.messageText} ${message.direction ? styles.sender : styles.receiver}`}
-              dangerouslySetInnerHTML={{ __html: message.content.replace(/(?:\r\n|\r|\n)/g, '<br/>') }}></span>
+              dangerouslySetInnerHTML={{ __html: getMessageContent() }}></span>
           )}
           <span className={styles.datetime}>{dayjs(message.date).format('YYYY-MM-DD HH:mm')}</span>
         </div>
