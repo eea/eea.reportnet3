@@ -82,26 +82,6 @@
       &.parameterValue {
         width: 44%;
       }
-
-      .infoButton {
-        background-color: var(--white) !important;
-        border-radius: 50% !important;
-        color: var(--datatable-header-info-button-color) !important;
-        font-size: 12pt !important;
-        height: 0.7em !important;
-        margin-left: 0.4rem !important;
-        width: 0.7em !important;
-
-        > span {
-          left: 46% !important;
-          margin-left: -0.48em !important;
-          margin-top: -0.7em !important;
-        }
-
-        &:focus {
-          box-shadow: none !important;
-        }
-      }
     }
 
     .parameters {

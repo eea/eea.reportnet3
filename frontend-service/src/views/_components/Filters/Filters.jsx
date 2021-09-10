@@ -309,7 +309,7 @@ export const Filters = ({
         multiselect.forEach(multiselectKey => {
           const option = possibleOptions.get(multiselectKey).filter(distinct);
 
-          if (multiselectKey === entryKey) {
+          if (multiselectKey === entryKey && !isEmpty(entryValue)) {
             entryKeyValue[1] = entryValue?.filter(value => option.some(opt => TextUtils.areEquals(opt, value)));
           }
         });

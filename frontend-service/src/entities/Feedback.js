@@ -1,5 +1,6 @@
 export class Feedback {
-  constructor({ content, date, direction, id, messageAttachment, providerId, read, type } = {}) {
+  constructor({ automatic, content, date, direction, id, messageAttachment, providerId, read, type } = {}) {
+    this.automatic = automatic;
     this.content = content;
     this.date = date;
     this.direction = direction;
