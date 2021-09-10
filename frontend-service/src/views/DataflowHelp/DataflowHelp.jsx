@@ -158,8 +158,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const onLoadDatasetsSchemas = async () => {
     try {
       const data = await DataflowService.get(dataflowId);
-      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
-      setIsCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE));
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value));
+      setIsCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value));
       setIsLoading(false);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {

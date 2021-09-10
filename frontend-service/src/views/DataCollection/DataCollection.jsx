@@ -151,8 +151,8 @@ export const DataCollection = withRouter(({ match, history }) => {
         setDataCollectionName(firstDataCollection.dataCollectionName);
       }
 
-      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
-      setIsCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE));
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value));
+      setIsCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value));
       setIsLoading(false);
     } catch (error) {
       console.error('DataCollection - onLoadDataflowData.', error);

@@ -424,17 +424,14 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const getUsersListDialogHeader = () => {
-    if (dataflowState.isBusinessDataflow) {
-      return resourcesContext.messages['dataflowUsersByCompanyList'];
-    }
-
-    if (dataflowState.isCitizenScienceDataflow) {
-      return resourcesContext.messages['dataflowUsersByOrganizationList'];
-    }
-
-    return resourcesContext.messages['dataflowUsersByCountryList'];
-  };
+  const getUsersListDialogHeader = () =>
+    resourcesContext.messages[
+      dataflowState.isBusinessDataflow
+        ? 'dataflowUsersByCompanyList'
+        : dataflowState.isCitizenScienceDataflow
+        ? 'dataflowUsersByOrganizationList'
+        : 'dataflowUsersByCountryList'
+    ];
 
   const manageRoleDialogFooter = (
     <Fragment>
@@ -531,8 +528,8 @@ const Dataflow = withRouter(({ history, match }) => {
           anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
           description: dataflow.description,
-          isBusinessDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.BUSINESS),
-          isCitizenScienceDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.CITIZEN_SCIENCE),
+          isBusinessDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.BUSINESS.value),
+          isCitizenScienceDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.CITIZEN_SCIENCE.value),
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
@@ -1015,6 +1012,7 @@ const Dataflow = withRouter(({ history, match }) => {
               placeholder={resourcesContext.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={reporterRoleOptions}
+              setIsAdminAssignedBusinessDataflow={setIsAdminAssignedBusinessDataflow}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}
               userType={'reporter'}

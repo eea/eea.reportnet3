@@ -99,7 +99,8 @@
   }
 }
 .helpdeskMessage {
-  margin: 1rem;
-  font-weight: bold;
+  color: var(--main-font-color);
   font-style: italic;
+  font-weight: bold;
+  margin: 1rem;
 }
