@@ -13,6 +13,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.mapper.DataflowPrivateMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.mapper.DataflowWebLinkMapper;
 import org.eea.dataflow.mapper.DocumentMapper;
@@ -44,6 +45,7 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -187,6 +189,9 @@ public class DataflowServiceImpl implements DataflowService {
   /** The weblink mapper. */
   @Autowired
   private DataflowWebLinkMapper weblinkMapper;
+
+  @Autowired
+  private DataflowPrivateMapper dataflowPrivateMapper;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -1485,6 +1490,32 @@ public class DataflowServiceImpl implements DataflowService {
       }
     }
     return map;
+  }
+
+  /**
+   * Gets the private dataflow by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the private dataflow by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public DataflowPrivateVO getPrivateDataflowById(Long dataflowId) throws EEAException {
+    DataflowPrivateVO dataflowPrivateVO = null;
+    if (null != dataflowId) {
+      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      if (null != dataflow) {
+        dataflowPrivateVO = dataflowPrivateMapper.entityToClass(dataflow);
+        dataflowPrivateVO
+            .setDocuments(documentControllerZuul.getAllDocumentsByDataflow(dataflowId));
+      } else {
+        throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+      }
+    } else {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    return dataflowPrivateVO;
   }
 
 }
