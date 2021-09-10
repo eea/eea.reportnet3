@@ -162,7 +162,7 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getDataflows(userId);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REPORTING);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -188,7 +188,7 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getReferenceDataflows(userId);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REFERENCE);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -213,7 +213,7 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getBusinessDataflows(userId);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.BUSINESS);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -240,7 +240,7 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getCitizenScienceDataflows(userId);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.CITIZEN_SCIENCE);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }

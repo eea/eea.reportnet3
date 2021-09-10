@@ -1047,6 +1047,8 @@ public class DatasetSnapshotServiceTest {
     Mockito.doNothing().when(reportingDatasetService).updateReportingDatasetMetabase(Mockito.any());
     Mockito.when(collaborationControllerZuul.createMessage(Mockito.anyLong(), Mockito.any()))
         .thenReturn(new MessageVO());
+    Mockito.when(dataflowControllerZuul.findById(Mockito.anyLong(), Mockito.anyLong()))
+        .thenReturn(new DataFlowVO());
     datasetSnapshotService.createReleaseSnapshots(1L, 1L, true);
     Mockito.verify(validationControllerZuul, times(1)).validateDataSetData(Mockito.any(),
         Mockito.anyBoolean());

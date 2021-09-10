@@ -26,6 +26,7 @@ export const ManualAcceptanceDatasets = ({
   dataflowId,
   getManageAcceptanceDataset,
   isBusinessDataflow,
+  isCitizenScienceDataflow,
   isUpdatedManualAcceptanceDatasets,
   manageDialogs,
   refreshManualAcceptanceDatasets
@@ -121,11 +122,19 @@ export const ManualAcceptanceDatasets = ({
     />
   );
 
+  const getCodeLabelByDataflowType = () =>
+    resourcesContext.messages[
+      isBusinessDataflow ? 'company' : isCitizenScienceDataflow ? 'organization' : 'dataProviderName'
+    ];
+
   const filterOptions = [
     { type: 'input', properties: [{ name: 'datasetName' }] },
     {
       type: 'multiselect',
-      properties: [{ name: isBusinessDataflow ? 'company' : 'dataProviderName' }, { name: 'feedbackStatus' }]
+      properties: [
+        { name: isBusinessDataflow ? 'company' : 'dataProviderName', label: getCodeLabelByDataflowType() },
+        { name: 'feedbackStatus' }
+      ]
     },
     {
       type: 'checkbox',
@@ -143,8 +152,8 @@ export const ManualAcceptanceDatasets = ({
           columnResizeMode="expand"
           field={field}
           header={
-            isBusinessDataflow && TextUtils.areEquals(field, 'dataProviderName')
-              ? resourcesContext.messages['company']
+            TextUtils.areEquals(field, 'dataProviderName')
+              ? getCodeLabelByDataflowType()
               : resourcesContext.messages[field]
           }
           key={field}

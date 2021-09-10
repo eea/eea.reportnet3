@@ -173,14 +173,14 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
   /** The Constant STATUS_TECHNICALLY_ACCEPTED: {@value}. */
   private static final String STATUS_TECHNICALLY_ACCEPTED =
-      "Feedback status changed: Technically Accepted, Feedback message: ";
+      "Feedback status changed: Technically Accepted, Message: ";
 
   /** The Constant STATUS_CORRECTION_REQUESTED: {@value}. */
   private static final String STATUS_CORRECTION_REQUESTED =
-      "Feedback status changed: Correction Requested, Feedback message: ";
+      "Feedback status changed: Correction Requested, Message: ";
 
   /** The Constant STATUS_CHANGED: {@value}. */
-  private static final String STATUS_CHANGED = "Feedback status changed, Feedback message: ";
+  private static final String STATUS_CHANGED = "Feedback status changed, Message: ";
 
   /**
    * Gets the data set id by dataflow id.
