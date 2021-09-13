@@ -14,6 +14,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
@@ -708,6 +709,25 @@ public class DataFlowControllerImpl implements DataFlowController {
       }
     }
     return false;
+  }
+
+  /**
+   * Gets the private dataflow by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the private dataflow by id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/getPrivateDataflow/{dataflowId}")
+  public DataflowPrivateVO getPrivateDataflowById(@PathVariable("dataflowId") Long dataflowId) {
+    DataflowPrivateVO dataflowPrivateVO = null;
+    try {
+      return dataflowService.getPrivateDataflowById(dataflowId);
+    } catch (EEAException e) {
+      LOG_ERROR.info("Not found dataflow with id {}" + dataflowId);
+    }
+    return dataflowPrivateVO;
   }
 
 }
