@@ -3,6 +3,8 @@ import { useContext, useLayoutEffect } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
+
 import { BreadCrumbContext } from 'views/_functions/Contexts/BreadCrumbContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -15,34 +17,37 @@ export const useBreadCrumbs = ({
   currentPage,
   dataflowId,
   dataflowStateData,
+  dataflowType,
   history,
-  isBusinessDataflow = false,
-  isCitizenScienceDataflow = false,
   isLoading,
   matchParams,
   metaData,
-  representativeId,
-  referenceDataflowId
+  referenceDataflowId,
+  representativeId
 }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resourcesContext = useContext(ResourcesContext);
 
   useLayoutEffect(() => {
     !isLoading && setBreadCrumbs();
-  }, [dataflowStateData, matchParams, metaData, isBusinessDataflow, isCitizenScienceDataflow, isLoading]);
+  }, [dataflowStateData, dataflowType, isLoading, matchParams, metaData]);
 
   const getDataCollectionCrumb = () => {
     return { label: resourcesContext.messages['dataCollection'], icon: 'dataCollection' };
   };
 
-  const getDataflowTypeLabel = () =>
-    resourcesContext.messages[
-      isBusinessDataflow
-        ? 'businessDataflowCrumbLabel'
-        : isCitizenScienceDataflow
-        ? 'citizenScienceDataflowsCrumbLabel'
-        : 'dataflow'
-    ];
+  const getDataflowTypeLabel = () => {
+    switch (dataflowType) {
+      case config.dataflowType.BUSINESS.value:
+        return resourcesContext.messages['businessDataflowCrumbLabel'];
+
+      case config.dataflowType.CITIZEN_SCIENCE.value:
+        return resourcesContext.messages['citizenScienceDataflowsCrumbLabel'];
+
+      default:
+        return resourcesContext.messages['dataflow'];
+    }
+  };
 
   const getDataflowCrumb = () => {
     return {

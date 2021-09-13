@@ -12,6 +12,8 @@ import uniqBy from 'lodash/uniqBy';
 
 import styles from './HistoricReleases.module.scss';
 
+import { config } from 'conf';
+
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
@@ -27,14 +29,7 @@ import { historicReleasesReducer } from './_functions/Reducers/historicReleasesR
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const HistoricReleases = ({
-  dataflowId,
-  dataProviderId,
-  datasetId,
-  historicReleasesView,
-  isBusinessDataflow,
-  isCitizenScienceDataflow
-}) => {
+export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -137,10 +132,18 @@ export const HistoricReleases = ({
     </div>
   );
 
-  const getCodeColumnHeader = () =>
-    resourcesContext.messages[
-      isBusinessDataflow ? 'companyCode' : isCitizenScienceDataflow ? 'organizationCode' : 'countryCode'
-    ];
+  const getCodeTextByDataflowType = () => {
+    switch (dataflowType) {
+      case config.dataflowType.BUSINESS.value:
+        return resourcesContext.messages['companyCode'];
+
+      case config.dataflowType.CITIZEN_SCIENCE.value:
+        return resourcesContext.messages['organizationCode'];
+
+      default:
+        return resourcesContext.messages['countryCode'];
+    }
+  };
 
   const renderDataCollectionColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
@@ -163,7 +166,7 @@ export const HistoricReleases = ({
             columnResizeMode="expand"
             field={field}
             header={
-              TextUtils.areEquals(field, 'countryCode') ? getCodeColumnHeader() : resourcesContext.messages[field]
+              TextUtils.areEquals(field, 'countryCode') ? getCodeTextByDataflowType() : resourcesContext.messages[field]
             }
             key={field}
             sortable={true}
@@ -185,7 +188,7 @@ export const HistoricReleases = ({
             columnResizeMode="expand"
             field={field}
             header={
-              TextUtils.areEquals(field, 'countryCode') ? getCodeColumnHeader() : resourcesContext.messages[field]
+              TextUtils.areEquals(field, 'countryCode') ? getCodeTextByDataflowType() : resourcesContext.messages[field]
             }
             key={field}
             sortable={true}
@@ -195,15 +198,15 @@ export const HistoricReleases = ({
     return fieldColumns;
   };
 
-  const getMultiselectFilterOption = () =>
-    resourcesContext.messages[
-      isBusinessDataflow ? 'companyCode' : isCitizenScienceDataflow ? 'organizationCode' : 'countryCode'
-    ];
-
   const filterOptionsDataCollection = [
     {
       type: 'multiselect',
-      properties: [{ name: isBusinessDataflow ? 'company' : 'countryCode', label: getMultiselectFilterOption() }]
+      properties: [
+        {
+          name: TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? 'company' : 'countryCode', // TODO CHECK SERVICE
+          label: getCodeTextByDataflowType()
+        }
+      ]
     },
     {
       type: 'checkbox',
@@ -220,7 +223,12 @@ export const HistoricReleases = ({
   const filterOptionsEUDataset = [
     {
       type: 'multiselect',
-      properties: [{ name: isBusinessDataflow ? 'company' : 'countryCode', label: getMultiselectFilterOption() }]
+      properties: [
+        {
+          name: TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? 'company' : 'countryCode', // TODO CHECK SERVICE
+          label: getCodeTextByDataflowType()
+        }
+      ]
     }
   ];
 

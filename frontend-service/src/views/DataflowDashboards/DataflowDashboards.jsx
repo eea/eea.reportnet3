@@ -24,7 +24,6 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataflowDashboards = withRouter(
   ({
@@ -39,16 +38,14 @@ export const DataflowDashboards = withRouter(
     const [dashboardInitialValues, setDashboardInitialValues] = useState({});
     const [dataflowName, setDataflowName] = useState('');
     const [dataSchema, setDataSchema] = useState();
-    const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
-    const [isCitizenScienceDataflow, setCitizenScienceDataflow] = useState(false);
+    const [dataflowType, setDataflowType] = useState('');
     const [isLoading, setIsLoading] = useState(true);
 
     useBreadCrumbs({
       currentPage: CurrentPage.DATAFLOW_DASHBOARDS,
       dataflowId,
       history,
-      isBusinessDataflow,
-      isCitizenScienceDataflow,
+      dataflowType,
       isLoading
     });
 
@@ -61,8 +58,7 @@ export const DataflowDashboards = withRouter(
     const getDataflowDetails = async () => {
       try {
         const data = await DataflowService.getDetails(dataflowId);
-        setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value));
-        setCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value));
+        setDataflowType(data.type);
         setDataflowName(data.name);
         setIsLoading(false);
       } catch (error) {

@@ -52,8 +52,7 @@ export const Feedback = withRouter(({ match, history }) => {
     draggedFiles: null,
     importFileDialogVisible: false,
     isAdmin: false,
-    isBusinessDataflow: false,
-    isCitizenScienceDataflow: false,
+    dataflowType: '',
     isCustodian: undefined,
     isDragging: false,
     isLoading: true,
@@ -73,8 +72,7 @@ export const Feedback = withRouter(({ match, history }) => {
     dataProviders,
     draggedFiles,
     importFileDialogVisible,
-    isBusinessDataflow,
-    isCitizenScienceDataflow,
+    dataflowType,
     isAdmin,
     isCustodian,
     isDragging,
@@ -149,9 +147,8 @@ export const Feedback = withRouter(({ match, history }) => {
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW_FEEDBACK,
     dataflowId,
+    dataflowType,
     history,
-    isBusinessDataflow,
-    isCitizenScienceDataflow,
     isLoading
   });
 
@@ -180,11 +177,10 @@ export const Feedback = withRouter(({ match, history }) => {
     try {
       const data = await DataflowService.getDetails(dataflowId);
       const name = data.name;
-      const isBusinessDataflow = TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value);
-      const isCitizenScienceDataflow = TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value);
+
       dispatchFeedback({
         type: 'SET_DATAFLOW_DETAILS',
-        payload: { name, isBusinessDataflow, isCitizenScienceDataflow }
+        payload: { name, dataflowType: data.type }
       });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);

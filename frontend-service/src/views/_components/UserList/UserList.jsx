@@ -5,6 +5,8 @@ import isNil from 'lodash/isNil';
 
 import styles from './UserList.module.scss';
 
+import { config } from 'conf';
+
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
@@ -15,12 +17,7 @@ import { DataflowService } from 'services/DataflowService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const UserList = ({
-  dataflowId,
-  isBusinessDataflow = false,
-  isCitizenScienceDataflow = false,
-  representativeId
-}) => {
+export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -77,12 +74,18 @@ export const UserList = ({
 
   const onLoadFilteredData = value => setFilteredData(value);
 
-  const getCodeLabel = () =>
-    isBusinessDataflow
-      ? resourcesContext.messages['company']
-      : isCitizenScienceDataflow
-      ? resourcesContext.messages['organization']
-      : resourcesContext.messages['countries'];
+  const getCodeLabel = () => {
+    switch (dataflowType) {
+      case config.dataflowType.BUSINESS.value:
+        return resourcesContext.messages['company'];
+
+      case config.dataflowType.CITIZEN_SCIENCE.value:
+        return resourcesContext.messages['organization'];
+
+      default:
+        return resourcesContext.messages['countries'];
+    }
+  };
 
   const filterOptionsWithDataflowIdRepresentativeId = [
     {

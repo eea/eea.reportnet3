@@ -102,15 +102,16 @@ export const useLeftSideBar = (
       };
 
       const getUsersListLabelByDataflowType = () => {
-        if (dataflowState.isBusinessDataflow) {
-          return 'dataflowUsersByCompanyList';
-        }
+        switch (dataflowState.dataflowType) {
+          case config.dataflowType.BUSINESS.value:
+            return 'dataflowUsersByCompanyList';
 
-        if (dataflowState.isCitizenScienceDataflow) {
-          return 'dataflowUsersByOrganizationList';
-        }
+          case config.dataflowType.CITIZEN_SCIENCE.value:
+            return 'dataflowUsersByOrganizationList';
 
-        return 'dataflowUsersByCountryList';
+          default:
+            return 'dataflowUsersByCountryList';
+        }
       };
 
       const userListBtn = {

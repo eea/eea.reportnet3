@@ -48,8 +48,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const [dataflowName, setDataflowName] = useState('');
   const [dataViewerOptions, setDataViewerOptions] = useState({ activeIndex: null });
   const [exportButtonsList, setExportButtonsList] = useState([]);
-  const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
-  const [isCitizenScienceDataflow, setIsCitizenScienceDataflow] = useState(false);
+  const [dataflowType, setDataflowType] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
@@ -64,9 +63,8 @@ export const DataCollection = withRouter(({ match, history }) => {
   useBreadCrumbs({
     currentPage: CurrentPage.DATA_COLLECTION,
     dataflowId,
+    dataflowType,
     history,
-    isBusinessDataflow,
-    isCitizenScienceDataflow,
     isLoading
   });
 
@@ -151,8 +149,8 @@ export const DataCollection = withRouter(({ match, history }) => {
         setDataCollectionName(firstDataCollection.dataCollectionName);
       }
 
-      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value));
-      setIsCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value));
+      setDataflowType(data.type);
+
       setIsLoading(false);
     } catch (error) {
       console.error('DataCollection - onLoadDataflowData.', error);
@@ -237,11 +235,10 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const onRenderTabsSchema = (
     <TabsSchema
+      dataflowType={dataflowType}
       datasetSchemaId={datasetSchemaId}
       hasCountryCode={true}
       hasWritePermissions={false}
-      isBusinessDataflow={isBusinessDataflow}
-      isCitizenScienceDataflow={isCitizenScienceDataflow}
       isExportable={false}
       isFilterable={false}
       levelErrorTypes={levelErrorTypes}

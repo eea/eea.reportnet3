@@ -7,6 +7,8 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './ManualAcceptanceDatasets.module.scss';
 
+import { config } from 'conf';
+
 import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
@@ -25,8 +27,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const ManualAcceptanceDatasets = ({
   dataflowId,
   getManageAcceptanceDataset,
-  isBusinessDataflow,
-  isCitizenScienceDataflow,
+  dataflowType,
   isUpdatedManualAcceptanceDatasets,
   manageDialogs,
   refreshManualAcceptanceDatasets
@@ -122,17 +123,28 @@ export const ManualAcceptanceDatasets = ({
     />
   );
 
-  const getCodeLabelByDataflowType = () =>
-    resourcesContext.messages[
-      isBusinessDataflow ? 'company' : isCitizenScienceDataflow ? 'organization' : 'dataProviderName'
-    ];
+  const getCodeLabelByDataflowType = () => {
+    switch (dataflowType) {
+      case config.dataflowType.BUSINESS.value:
+        return resourcesContext.messages['company'];
+
+      case config.dataflowType.CITIZEN_SCIENCE.value:
+        return resourcesContext.messages['organization'];
+
+      default:
+        return resourcesContext.messages['dataProviderName'];
+    }
+  };
 
   const filterOptions = [
     { type: 'input', properties: [{ name: 'datasetName' }] },
     {
       type: 'multiselect',
       properties: [
-        { name: isBusinessDataflow ? 'company' : 'dataProviderName', label: getCodeLabelByDataflowType() },
+        {
+          name: TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? 'company' : 'dataProviderName', // TODO CHECK SERVICE
+          label: getCodeLabelByDataflowType()
+        },
         { name: 'feedbackStatus' }
       ]
     },

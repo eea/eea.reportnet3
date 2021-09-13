@@ -114,6 +114,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     initialDatasetDescription: '',
     isBusinessDataflow: false,
     isCitizenScienceDataflow: false,
+    dataflowType: '',
     isConfigureWebformDialogVisible: false,
     isDataflowOpen: false,
     isDataUpdated: false,
@@ -194,8 +195,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET_DESIGNER : CurrentPage.DATASET_DESIGNER,
     dataflowId,
     history,
-    isBusinessDataflow: designerState.isBusinessDataflow,
-    isCitizenScienceDataflow: designerState.isCitizenScienceDataflow,
+    dataflowType: designerState.dataflowType,
     isLoading: designerState.isLoading,
     referenceDataflowId: dataflowId
   });
@@ -300,13 +300,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     designerDispatch({
       type: 'GET_METADATA',
       payload: {
-        metaData,
         dataflowName: metaData.dataflow.name,
-        isBusinessDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.BUSINESS.value),
-        isCitizenScienceDataflow: TextUtils.areEquals(
-          metaData.dataflow.type,
-          config.dataflowType.CITIZEN_SCIENCE.value
-        ),
+        dataflowType: metaData.dataflow.type,
+        metaData,
         schemaName: metaData.dataset.name
       }
     });
@@ -1357,7 +1353,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   {resourcesContext.messages['referenceDataset']}
                 </label>
               </div>
-              {!designerState.isBusinessDataflow && (
+              {!TextUtils.areEquals(designerState.dataflowType, config.dataflowType.BUSINESS.value) && (
                 <div>
                   <Checkbox
                     ariaLabelledBy="available_in_public_view_label"
@@ -1589,7 +1585,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             datasetId={datasetId}
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
-            isBusinessDataflow={designerState.isBusinessDataflow}
+            dataflowType={designerState.dataflowType}
+            isBusinessDataflow={designerState.isBusinessDataflow} //TODO
             isCitizenScienceDataflow={designerState.isCitizenScienceDataflow}
             tabs={DatasetDesignerUtils.getTabs({
               datasetSchema: designerState.datasetSchema,

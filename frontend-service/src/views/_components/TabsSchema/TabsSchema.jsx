@@ -17,8 +17,7 @@ export const TabsSchema = ({
   dataProviderId,
   hasWritePermissions = false,
   hasCountryCode,
-  isBusinessDataflow,
-  isCitizenScienceDataflow,
+  dataflowType,
   isExportable = true,
   isFilterable,
   isGroupedValidationDeleted,
@@ -47,11 +46,10 @@ export const TabsSchema = ({
               <div className={styles.tabsSchema}>
                 <DataViewer
                   dataProviderId={dataProviderId}
+                  dataflowType={dataflowType}
                   datasetSchemaId={datasetSchemaId}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
-                  isBusinessDataflow={isBusinessDataflow}
-                  isCitizenScienceDataflow={isCitizenScienceDataflow}
                   isExportable={isExportable}
                   isFilterable={isFilterable}
                   isGroupedValidationDeleted={isGroupedValidationDeleted}
