@@ -200,13 +200,17 @@ const Dataflows = withRouter(({ history, match }) => {
 
   useEffect(() => {
     setActiveIndexTabOnBack();
-  }, [isCustodian]);
+  }, [isCustodian, isAdmin]);
 
   const setActiveIndexTabOnBack = () => {
     for (let tabItemIndex = 0; tabItemIndex < tabMenuItems.length; tabItemIndex++) {
       const tabItem = tabMenuItems[tabItemIndex];
 
-      if (TextUtils.areEquals(tabItem.id, userContext.currentDataflowType)) {
+      const [currentTabDataflowType] = Object.keys(config.dataflowType).filter(
+        type => config.dataflowType[type].key === tabItem.id
+      );
+
+      if (TextUtils.areEquals(currentTabDataflowType, userContext.currentDataflowType)) {
         onChangeTab(tabItemIndex);
       }
     }
@@ -232,7 +236,7 @@ const Dataflows = withRouter(({ history, match }) => {
       }
 
       if (TextUtils.areEquals(tabId, 'citizenScience')) {
-        const data = await CitizenScienceDataflowService.getAll(userContext.accessRole);
+        const data = await CitizenScienceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'citizenScience' } });
       }
     } catch (error) {

@@ -52,9 +52,10 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     description: '',
     designDatasetSchemas: [],
     error: null,
-    isCustodian: false,
+    isAdmin: false,
     isApiKeyDialogVisible: false,
     isCreatingReferenceDatasets: false,
+    isCustodian: false,
     isEditDialogVisible: false,
     isManageRequestersDialogVisible: false,
     isPropertiesDialogVisible: false,
@@ -75,7 +76,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
 
   useEffect(() => {
-    userContext.setCurrentDataflowType(config.dataflowType.REFERENCE);
+    userContext.setCurrentDataflowType(config.dataflowType.REFERENCE.value);
   }, []);
 
   useEffect(() => {
@@ -163,13 +164,14 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   };
 
   const onLoadPermissions = () => {
+    const isAdmin = userContext.accessRole.some(role => role === config.permissions.roles.ADMIN.key);
     const isCustodian = userContext.hasContextAccessPermission(
       config.permissions.prefixes.DATAFLOW,
       referenceDataflowId,
       [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key]
     );
 
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isCustodian } });
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, isCustodian } });
   };
 
   const onLoadReferenceDataflow = async () => {
@@ -256,9 +258,9 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   function getLeftSidebarButtonsVisibility() {
     return {
-      apiKeyBtn: true,
+      apiKeyBtn: dataflowState.isCustodian,
       editBtn: dataflowState.status === config.dataflowStatus.DESIGN,
-      manageRequestersBtn: dataflowState.isCustodian,
+      manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
       propertiesBtn: true,
       reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
     };
@@ -351,15 +353,15 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
           visible={dataflowState.isManageRequestersDialogVisible}>
           <ShareRights
-            addConfirmHeader={resourcesContext.messages[`addRequesterConfirmHeader`]}
+            addConfirmHeader={resourcesContext.messages['addRequesterConfirmHeader']}
             addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
             columnHeader={resourcesContext.messages['requestersEmailColumn']}
             dataflowId={referenceDataflowId}
             deleteColumnHeader={resourcesContext.messages['deleteRequesterButtonTableHeader']}
-            deleteConfirmHeader={resourcesContext.messages[`requestersRightsDialogConfirmDeleteHeader`]}
-            deleteConfirmMessage={resourcesContext.messages[`requestersRightsDialogConfirmDeleteQuestion`]}
+            deleteConfirmHeader={resourcesContext.messages['requestersRightsDialogConfirmDeleteHeader']}
+            deleteConfirmMessage={resourcesContext.messages['requestersRightsDialogConfirmDeleteQuestion']}
             deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
-            editConfirmHeader={resourcesContext.messages[`editRequesterConfirmHeader`]}
+            editConfirmHeader={resourcesContext.messages['editRequesterConfirmHeader']}
             getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
             isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
             placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}

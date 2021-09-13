@@ -302,8 +302,11 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       payload: {
         metaData,
         dataflowName: metaData.dataflow.name,
-        isBusinessDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.BUSINESS),
-        isCitizenScienceDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.CITIZEN_SCIENCE),
+        isBusinessDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.BUSINESS.value),
+        isCitizenScienceDataflow: TextUtils.areEquals(
+          metaData.dataflow.type,
+          config.dataflowType.CITIZEN_SCIENCE.value
+        ),
         schemaName: metaData.dataset.name
       }
     });
@@ -422,10 +425,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       payload: { importList: internalExtensionsList.concat(importFromFile).concat(importOtherSystems) }
     });
   };
-
-  const validImportExtensions = `.${designerState.selectedImportExtension}`;
-
-  const infoExtensionsTooltip = `${resourcesContext.messages['supportedFileExtensionsTooltip']} ${validImportExtensions}`;
 
   const getFileExtensions = async () => {
     try {
@@ -637,7 +636,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       console.error('DatasetDesigner - onExportDataExternalIntegration.', error);
-      onExportError('EXTERNAL_EXPORT_DESIGN_FAILED_EVENT');
+      notificationContext.add({
+        type: 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT',
+        content: { dataflowId, datasetId, datasetName: designerState.datasetSchemaName }
+      });
     }
   };
 
@@ -1716,7 +1718,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload
-            accept={validImportExtensions}
+            accept={DatasetDesignerUtils.getValidExtensions(designerState.selectedImportExtension)}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
@@ -1726,7 +1728,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               setImportSelectedIntegrationId(null);
             }}
             dialogVisible={designerState.isImportDatasetDialogVisible}
-            infoTooltip={infoExtensionsTooltip}
+            infoTooltip={`${
+              resourcesContext.messages['supportedFileExtensionsTooltip']
+            } ${DatasetDesignerUtils.getValidExtensionsTooltip(designerState.selectedImportExtension)}`}
             invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
             isDialog={true}
             name="file"

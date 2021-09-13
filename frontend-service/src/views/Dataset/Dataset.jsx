@@ -553,7 +553,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       console.error('Dataset - onExportDataExternalIntegration.', error);
-      onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
+      notificationContext.add({
+        type: 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT',
+        content: { dataflowId, datasetId, datasetName: datasetSchemaName }
+      });
     }
   };
 
@@ -571,8 +574,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onLoadDataflow = async () => {
     try {
       const data = await DataflowService.get(match.params.dataflowId);
-      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
-      setIsCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE));
+      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value));
+      setIsCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value));
       let dataset = [];
       if (isTestDataset) {
         dataset = data.testDatasets.find(dataset => dataset.datasetId.toString() === datasetId);

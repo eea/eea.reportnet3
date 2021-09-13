@@ -11,7 +11,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 import { userReducer } from 'views/_functions/Reducers/userReducer';
 
 const userSettingsDefaultState = {
-  currentDataflowType: config.dataflowType.REPORTING,
+  currentDataflowType: config.dataflowType.REPORTING.value,
   userProps: {
     amPm24h: true,
     basemapLayer: 'Topographic',

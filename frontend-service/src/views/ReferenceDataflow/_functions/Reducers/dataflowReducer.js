@@ -21,7 +21,7 @@ export const dataflowReducer = (state, { type, payload }) => {
     }
 
     case 'LOAD_PERMISSIONS': {
-      return { ...state, isCustodian: payload.isCustodian };
+      return { ...state, isAdmin: payload.isAdmin, isCustodian: payload.isCustodian };
     }
 
     case 'ON_EDIT_DATAFLOW':

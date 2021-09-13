@@ -134,6 +134,15 @@ export const ManageDataflow = ({
     />
   );
 
+  const getModalHeader = () => {
+    if (isCitizenScienceDataflow) {
+      return isEditForm
+        ? resourcesContext.messages['updateCitizenScienceDataflow']
+        : resourcesContext.messages['createNewCitizenScienceDataflow'];
+    }
+    return isEditForm ? resourcesContext.messages['updateDataflow'] : resourcesContext.messages['createNewDataflow'];
+  };
+
   const renderDataflowDialog = () => (
     <Fragment>
       <div className="p-toolbar-group-left">
@@ -206,7 +215,7 @@ export const ManageDataflow = ({
         <Dialog
           className={styles.dialog}
           footer={renderDataflowDialog()}
-          header={resourcesContext.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow']}
+          header={getModalHeader()}
           onHide={() => onHideDataflowDialog()}
           visible={isVisible}>
           <ManageDataflowForm
