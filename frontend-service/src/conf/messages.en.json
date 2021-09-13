@@ -1254,6 +1254,10 @@
     "size": "Size",
     "messages": "messages",
     "deleteFieldBulkTitle": "Delete fields",
-    "deleteFieldBulkConfirm": "Are you sure you want to delete these fields in design?"
+    "deleteFieldBulkConfirm": "Are you sure you want to delete these fields in design?",
+    "bulkDeleteCheckTooltip": "Delete multiple fields",
+    "bulkDeleteConfirmTooltip": "Confirm",
+    "duplicateDisabledTitle": "Duplicate disabled:",
+    "duplicateDisabledMessage": "already exists"
   }
 }

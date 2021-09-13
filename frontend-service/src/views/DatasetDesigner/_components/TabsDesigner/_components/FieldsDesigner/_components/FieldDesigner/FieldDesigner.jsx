@@ -18,7 +18,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { LinkSelector } from './_components/LinkSelector';
-// import ReactTooltip from 'react-tooltip';
+import ReactTooltip from 'react-tooltip';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -202,6 +202,15 @@ export const FieldDesigner = ({
       }
     }
   }, [totalFields]);
+
+  const getDuplicatedName = () => {
+    const filteredFields = fields.filter(field => {
+      console.log(field.name.startsWith(`${fieldDesignerState.fieldValue}_`));
+      return field.name.startsWith(`${fieldDesignerState.fieldValue}_`);
+    });
+    console.log(filteredFields);
+    return `${fieldDesignerState.fieldValue}_${filteredFields.length}`;
+  };
 
   const validField = () =>
     !isNil(fieldDesignerState.fieldTypeValue) &&
@@ -1067,47 +1076,48 @@ export const FieldDesigner = ({
 
   const renderDuplicateButton = () =>
     !addField ? (
-      <div
-        className={`${styles.button} ${styles.duplicateButton} ${
-          checkDuplicates(`${fieldDesignerState.fieldValue}_DUPLICATED`, fieldId) ? styles.disabledButton : ''
-        } ${fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive} ${
-          isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''
-        }`}
-        data-for={fieldDesignerState.fieldValue}
-        data-tip
-        disabled={checkDuplicates(`${fieldDesignerState.fieldValue}_DUPLICATED`, fieldId)}
-        draggable={true}
-        href="#"
-        onClick={e => {
-          e.preventDefault();
-          onFieldAdd({
-            codelistItems: fieldDesignerState.codelistItems,
-            description: fieldDesignerState.fieldDescriptionValue,
-            isDuplicated: true,
-            maxSize: fieldDesignerState.fieldFileProperties.maxSize,
-            pk: false,
-            pkHasMultipleValues: fieldDesignerState.pkHasMultipleValues,
-            pkMustBeUsed: fieldDesignerState.pkMustBeUsed,
-            name: `${fieldDesignerState.fieldValue}_DUPLICATED`,
-            readOnly: fieldDesignerState.fieldReadOnlyValue,
-            recordId: recordSchemaId,
-            // referencedField: fieldDesignerState.fieldLinkValue,
-            referencedField: null,
-            required: fieldDesignerState.fieldRequiredValue,
-            type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-            validExtensions: fieldDesignerState.fieldFileProperties.validExtensions
-          });
-        }}
-        onDragStart={event => {
-          event.preventDefault();
-          event.stopPropagation();
-        }}>
-        <FontAwesomeIcon aria-label={resourcesContext.messages['duplicate']} icon={AwesomeIcons('clone')} />
+      <span data-for={fieldDesignerState.fieldValue} data-tip>
+        <div
+          className={`${styles.button} ${styles.duplicateButton} ${
+            fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+          } ${isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
+          draggable={true}
+          href="#"
+          onClick={e => {
+            e.preventDefault();
+            onFieldAdd({
+              codelistItems: fieldDesignerState.codelistItems,
+              description: fieldDesignerState.fieldDescriptionValue,
+              isDuplicated: true,
+              maxSize: fieldDesignerState.fieldFileProperties.maxSize,
+              pk: false,
+              pkHasMultipleValues: fieldDesignerState.pkHasMultipleValues,
+              pkMustBeUsed: fieldDesignerState.pkMustBeUsed,
+              name: getDuplicatedName(),
+              readOnly: fieldDesignerState.fieldReadOnlyValue,
+              recordId: recordSchemaId,
+              referencedField: fieldDesignerState.fieldLinkValue,
+              required: fieldDesignerState.fieldRequiredValue,
+              type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
+              validExtensions: fieldDesignerState.fieldFileProperties.validExtensions
+            });
+          }}
+          onDragStart={event => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}>
+          <FontAwesomeIcon aria-label={resourcesContext.messages['duplicate']} icon={AwesomeIcons('clone')} />
+        </div>
         <span className="srOnly">{resourcesContext.messages['duplicate']}</span>
-        {/* <ReactTooltip border={true} effect="solid" id={fieldDesignerState.fieldValue} place="top">
-          {resourcesContext.messages['duplicate']}
-        </ReactTooltip> */}
-      </div>
+        <ReactTooltip border={true} effect="solid" id={fieldDesignerState.fieldValue} place="top">
+          {checkDuplicates(`${fieldDesignerState.fieldValue}_DUPLICATED`, fieldId)
+            ? `${resourcesContext.messages['duplicateDisabledTitle']} ${TextUtils.ellipsis(
+                `${fieldDesignerState.fieldValue}_DUPLICATED`,
+                30
+              )} ${resourcesContext.messages['duplicateDisabledMessage']}`
+            : resourcesContext.messages['duplicate']}
+        </ReactTooltip>
+      </span>
     ) : null;
 
   const renderDeleteButton = () =>
@@ -1136,6 +1146,7 @@ export const FieldDesigner = ({
           className={`${styles.checkBulkDelete} ${
             fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
           } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
+          disabled={fieldPKReferenced}
           id={`${fieldDesignerState.fieldValue}_mark_to_delete`}
           inputId={`${fieldDesignerState.fieldValue}_mark_to_delete`}
           onChange={e =>

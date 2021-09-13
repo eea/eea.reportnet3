@@ -54,16 +54,38 @@
       margin-right: 0.4rem;
     }
     &:nth-child(7) {
+      // width: 9rem;
+      &.withCodelistOrLink {
+        width: 4rem;
+        margin-right: 0.4rem;
+      }
+    }
+    &:nth-child(8) {
       width: 9rem;
       margin-right: 0.4rem;
     }
-    &:nth-child(8) {
+    &:nth-child(9) {
       width: 2rem;
       margin-right: 0.7rem;
     }
-    &:nth-child(9) {
+    &:nth-child(10) {
       width: 2rem;
       margin-right: 0.4rem;
+      display: flex;
+      div {
+        &:second-child {
+          background-color: var(--statusBox-designer-bg);
+        }
+      }
+    }
+    .disabledButton {
+      pointer-events: none !important;
+      text-decoration: none;
+      opacity: 0.5;
+      cursor: not-allowed;
+      &:hover {
+        background-color: transparent;
+      }
     }
     .bulkDeleteButton {
       cursor: pointer;
@@ -71,11 +93,13 @@
       padding-bottom: 0.3rem;
       border-radius: 3px;
       border: 1px solid var(--c-custom-gray);
-      color: var(--main-font-color);
       &:hover {
         background-color: var(--c-custom-gray);
-        color: var(--main-font-color);
       }
+    }
+    .bulkConfirmDeleteButton {
+      background-color: var(--errors);
+      color: var(--white);
     }
   }
   .PKWrap {
@@ -153,24 +177,27 @@
   max-height: 40vh;
   overflow: scroll;
   li {
+    margin-bottom: 1rem !important;
     display: flex;
-    align-items: center;
+    // align-items: center;
     div {
-      width: 9rem;
+      &:not(.tooltip) {
+        width: 12rem;
+      }
+      margin-right: 2rem;
       span {
-        &:first-child {
-          max-width: 4rem;
-          text-overflow: ellipsis;
-        }
         background-color: var(--statusBox-designer-bg);
         border-radius: 3px;
         color: var(--black);
         font-size: 10pt;
         font-weight: 600;
+        margin-right: 1rem;
         margin-top: 2px;
         padding: 4px;
-        width: fit-content;
-        margin-right: 1rem;
+      }
+      svg {
+        color: var(--c-corporate-blue);
+        font-size: 10pt;
       }
     }
   }

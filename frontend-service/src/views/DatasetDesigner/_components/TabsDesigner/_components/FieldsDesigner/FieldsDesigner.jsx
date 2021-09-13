@@ -23,6 +23,7 @@ import { DownloadFile } from 'views/_components/DownloadFile';
 import { FieldDesigner } from './_components/FieldDesigner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputTextarea } from 'views/_components/InputTextarea';
+import ReactTooltip from 'react-tooltip';
 import { Toolbar } from 'views/_components/Toolbar';
 
 import { DatasetService } from 'services/DatasetService';
@@ -115,6 +116,10 @@ export const FieldsDesigner = ({
       DownloadFile(exportTableSchema, exportTableSchemaName);
     }
   }, [exportTableSchema]);
+
+  useEffect(() => {
+    ReactTooltip.rebuild();
+  }, [bulkDelete]);
 
   const onBulkCheck = (checked, fieldId, fieldType, fieldName) => {
     if (checked) {
@@ -314,6 +319,8 @@ export const FieldsDesigner = ({
       );
       setFields(filteredFields);
       setIsDeleteDialogVisible(false);
+      setMarkedForDeletion([]);
+      setBulkDelete(false);
     });
   };
 
@@ -432,7 +439,11 @@ export const FieldsDesigner = ({
   const renderConfirmDialog = () => (
     <ConfirmDialog
       classNameConfirm={'p-button-danger'}
-      header={resourcesContext.messages[markedForDeletion.length === 0 ? 'deleteFieldTitle' : 'deleteFieldBulkTitle']}
+      header={
+        markedForDeletion.length === 0
+          ? resourcesContext.messages['deleteFieldTitle']
+          : resourcesContext.messages['deleteFieldBulkTitle']
+      }
       labelCancel={resourcesContext.messages['no']}
       labelConfirm={resourcesContext.messages['yes']}
       onConfirm={() => {
@@ -445,16 +456,32 @@ export const FieldsDesigner = ({
       }}
       onHide={() => setIsDeleteDialogVisible(false)}
       visible={isDeleteDialogVisible}>
-      {resourcesContext.messages[markedForDeletion.length === 0 ? 'deleteFieldConfirm' : 'deleteFieldBulkConfirm']}
+      {markedForDeletion.length === 0
+        ? resourcesContext.messages['deleteFieldConfirm']
+        : resourcesContext.messages['deleteFieldBulkConfirm']}
       {markedForDeletion.length > 0 ? (
         <ul className={styles.markedForDeletionList}>
           {markedForDeletion.map(markedField => (
             <li key={uniqueId('markedField_')}>
               <div>
-                <span>{markedField.fieldName}</span>
+                <span data-for={markedField.fieldName} data-tip>
+                  {TextUtils.ellipsis(markedField.fieldName, 25)}
+                </span>
               </div>
-              <span>{markedField.fieldType.fieldType}</span>
-              <FontAwesomeIcon icon={AwesomeIcons(markedField.fieldType.fieldTypeIcon)} role="presentation" />
+              <div>
+                <span>
+                  {markedField.fieldType.fieldType}
+                  <FontAwesomeIcon icon={AwesomeIcons(markedField.fieldType.fieldTypeIcon)} role="presentation" />
+                </span>
+              </div>
+              <ReactTooltip
+                border={true}
+                className={styles.tooltip}
+                effect="solid"
+                id={markedField.fieldName}
+                place="top">
+                {markedField.fieldName}
+              </ReactTooltip>
             </li>
           ))}
         </ul>
@@ -862,11 +889,16 @@ export const FieldsDesigner = ({
           </label>
           <label>{resourcesContext.messages['newFieldDescriptionPlaceHolder']}</label>
           <label>{resourcesContext.messages['newFieldTypePlaceHolder']}</label>
+          <label className={isCodelistOrLink && styles.withCodelistOrLink}></label>
           <label></label>
           <label></label>
           <label>
             <div
-              className={styles.bulkDeleteButton}
+              className={`${styles.bulkDeleteButton} ${
+                markedForDeletion.length === 0 && bulkDelete ? styles.disabledButton : ''
+              } ${bulkDelete ? styles.bulkConfirmDeleteButton : ''}`}
+              data-for="bulkDeleteTooltip"
+              data-tip
               onClick={e => {
                 e.preventDefault();
                 if (markedForDeletion.length > 0) {
@@ -879,12 +911,30 @@ export const FieldsDesigner = ({
                 aria-label={resourcesContext.messages['deleteFieldLabel']}
                 icon={AwesomeIcons(!bulkDelete ? 'check' : 'delete')}
               />
-              {/* <FontAwesomeIcon
-                aria-label={resourcesContext.messages['deleteFieldLabel']}
-                icon={AwesomeIcons('check')}
-              /> */}
               <span className="srOnly">{resourcesContext.messages['deleteFieldLabel']}</span>
             </div>
+            {bulkDelete && (
+              <div
+                className={`${styles.bulkDeleteButton} ${styles.bulkCancelDeleteButton}`}
+                data-for="bulkDeleteCancelTooltip"
+                data-tip
+                onClick={e => {
+                  e.preventDefault();
+                  setMarkedForDeletion([]);
+                  setBulkDelete(false);
+                }}>
+                <FontAwesomeIcon aria-label={resourcesContext.messages['cancel']} icon={AwesomeIcons('cross')} />
+                <span className="srOnly">{resourcesContext.messages['cancel']}</span>
+              </div>
+            )}
+            <ReactTooltip border={true} effect="solid" id="bulkDeleteTooltip" place="top">
+              {!bulkDelete
+                ? resourcesContext.messages['bulkDeleteCheckTooltip']
+                : resourcesContext.messages['bulkDeleteConfirmTooltip']}
+            </ReactTooltip>
+            <ReactTooltip border={true} effect="solid" id="bulkDeleteCancelTooltip" place="top">
+              {resourcesContext.messages['cancel']}
+            </ReactTooltip>
           </label>
         </div>
       )}
