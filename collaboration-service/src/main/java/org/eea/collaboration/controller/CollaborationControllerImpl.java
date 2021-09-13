@@ -196,7 +196,7 @@ public class CollaborationControllerImpl implements CollaborationController {
     try {
       MessagePaginatedVO messagePaginatedVO =
           collaborationService.findMessages(dataflowId, providerId, read, page);
-      List<MessageVO> listMessageVO = messagePaginatedVO.getListMessageVO();
+      List<MessageVO> listMessageVO = messagePaginatedVO.getListMessage();
 
       for (MessageVO messageVO : listMessageVO) {
         if (messageVO.getType() == MessageTypeEnum.ATTACHMENT) {
@@ -210,7 +210,7 @@ public class CollaborationControllerImpl implements CollaborationController {
             String extension = fileName.substring(indexExtension + 1, fileName.length());
             messageAttachmentVO.setExtension(extension);
             messageAttachmentVO.setSize(messageAttachment.getFileSize());
-            messageVO.setMessageAttachmentVO(messageAttachmentVO);
+            messageVO.setMessageAttachment(messageAttachmentVO);
           } catch (EEAException e) {
             LOG_ERROR.error("Error retrieving message info from the messageId {}, with message: {}",
                 messageVO.getId(), e.getMessage());

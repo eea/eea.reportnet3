@@ -10,7 +10,7 @@ import lombok.Data;
 public class MessagePaginatedVO {
 
   /** The list message VO. */
-  List<MessageVO> listMessageVO;
+  List<MessageVO> listMessage;
 
   /** The total messages. */
   private Long totalMessages;
