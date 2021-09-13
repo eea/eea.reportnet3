@@ -53,7 +53,7 @@ export const Card = ({
       <div className={`${styles.date} ${styles[type]}`}>
         {!isReferenceDataflow && (
           <span>
-            {resourcesContext.messages[isCloneSchemasView ? 'date' : 'nextReportDue']}:
+            {isCloneSchemasView ? resourcesContext.messages['date'] : resourcesContext.messages['nextReportDue']}:
             <span className={styles.dueDate}>{date}</span>
           </span>
         )}

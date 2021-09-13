@@ -359,7 +359,7 @@ export const ManageBusinessDataflow = ({
                   onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
                   optionLabel="label"
                   options={!isAdmin ? [selectedGroup] : groupOfCompanies}
-                  placeholder={resourcesContext.messages[`selectGroupOfCompanies`]}
+                  placeholder={resourcesContext.messages['selectGroupOfCompanies']}
                   tooltip={
                     isAdmin && hasRepresentatives ? resourcesContext.messages['groupOfCompaniesDisabledTooltip'] : ''
                   }
@@ -376,7 +376,7 @@ export const ManageBusinessDataflow = ({
                   onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
                   optionLabel="username"
                   options={!isAdmin ? [selectedFmeUser] : fmeUsers}
-                  placeholder={resourcesContext.messages[`selectFmeUser`]}
+                  placeholder={resourcesContext.messages['selectFmeUser']}
                   value={selectedFmeUser}
                 />
               </div>

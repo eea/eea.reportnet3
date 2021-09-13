@@ -350,11 +350,6 @@ export const ManageIntegrations = ({
     }
   };
 
-  const renderDialogFooterTooltipContent = () => {
-    if (isIntegrationNameDuplicated) return 'duplicatedIntegrationName';
-    return 'fcSubmitButtonDisabled';
-  };
-
   const renderCheckboxLayout = options => {
     return options.map(option => (
       <div className={`${styles.field} ${styles[option]} formField `} key={`${componentName}__${option}`}>
@@ -417,7 +412,9 @@ export const ManageIntegrations = ({
 
       {(isEmptyForm || isIntegrationNameDuplicated) && (
         <ReactTooltip border={true} effect="solid" id="integrationTooltip" place="top">
-          {resourcesContext.messages[renderDialogFooterTooltipContent()]}
+          {isIntegrationNameDuplicated
+            ? resourcesContext.messages['duplicatedIntegrationName']
+            : resourcesContext.messages['fcSubmitButtonDisabled']}
         </ReactTooltip>
       )}
     </Fragment>
