@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
@@ -228,5 +229,16 @@ public interface DataflowService {
    * @return true, if is admin
    */
   boolean isAdmin();
+
+  /**
+   * Gets the private dataflow by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the private dataflow by id
+   * @throws EEAException the EEA exception
+   */
+  DataflowPrivateVO getPrivateDataflowById(Long dataflowId) throws EEAException;
+
+
 
 }

@@ -16,6 +16,7 @@ import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -85,8 +86,13 @@ export const ManageIntegrations = ({
   });
 
   const { editorView, externalParameters, parameterKey, parametersErrors } = manageIntegrationsState;
-  const { isDuplicatedIntegrationName, isDuplicatedParameter, isFormEmpty, isParameterEditing, printError } =
-    ManageIntegrationsUtils;
+  const {
+    isDuplicatedIntegrationName,
+    isDuplicatedParameter,
+    isFormEmpty,
+    isParameterEditing,
+    printError
+  } = ManageIntegrationsUtils;
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
@@ -344,21 +350,14 @@ export const ManageIntegrations = ({
     }
   };
 
-  const renderDialogFooterTooltipContent = () => {
-    if (isIntegrationNameDuplicated) return 'duplicatedIntegrationName';
-    return 'fcSubmitButtonDisabled';
-  };
-
   const renderCheckboxLayout = options => {
     return options.map(option => (
       <div className={`${styles.field} ${styles[option]} formField `} key={`${componentName}__${option}`}>
         <label htmlFor={`${componentName}__${option}`}>
           {resourcesContext.messages[option]}
-          <Button
-            className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-            icon="infoCircle"
-            tooltip={resourcesContext.messages['notificationRequiredTooltip']}
-            tooltipOptions={{ position: 'top' }}
+          <TooltipButton
+            message={resourcesContext.messages['notificationRequiredTooltip']}
+            uniqueIdentifier={'notificationRequiredTooltip'}
           />
         </label>
         <div className={styles.checkboxWrapper}>
@@ -413,7 +412,9 @@ export const ManageIntegrations = ({
 
       {(isEmptyForm || isIntegrationNameDuplicated) && (
         <ReactTooltip border={true} effect="solid" id="integrationTooltip" place="top">
-          {resourcesContext.messages[renderDialogFooterTooltipContent()]}
+          {isIntegrationNameDuplicated
+            ? resourcesContext.messages['duplicatedIntegrationName']
+            : resourcesContext.messages['fcSubmitButtonDisabled']}
         </ReactTooltip>
       )}
     </Fragment>
@@ -496,26 +497,52 @@ export const ManageIntegrations = ({
     <Button icon="check" label={resourcesContext.messages['ok']} onClick={() => onToggleDialogError('', '', false)} />
   );
 
+  const renderFileInputExtension = option => {
+    const isImport = manageIntegrationsState.operation.value === 'IMPORT';
+    return (
+      <div
+        className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${
+          isImport ? styles.fileExtensionNotification : styles[option]
+        }`}
+        key={`${componentName}__${option}`}>
+        <label htmlFor={`${componentName}__${option}`}>
+          {isImport
+            ? resourcesContext.messages['multipleFileExtensionIntegrations']
+            : resourcesContext.messages['fileExtension']}
+          {isImport && (
+            <TooltipButton
+              message={resourcesContext.messages['multipleFileExtensionToolTip']}
+              uniqueIdentifier={'multipleFileExtensionToolTip'}
+            />
+          )}
+        </label>
+        <InputText
+          id={`${componentName}__${option}`}
+          maxLength={config.MAX_FILE_EXTENSION_LENGTH}
+          onChange={event => onFillField(event.target.value, option)}
+          onKeyDown={event => onSaveKeyDown(event)}
+          placeholder={
+            isImport
+              ? resourcesContext.messages['multipleFileExtensionIntegrations']
+              : resourcesContext.messages['fileExtension']
+          }
+          ref={inputRefs[option]}
+          value={manageIntegrationsState[option]}
+        />
+      </div>
+    );
+  };
+
   const renderInputLayout = (options = []) => {
     return options.map(option => {
       return (
         <div
-          className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${
-            manageIntegrationsState.operation.value === 'IMPORT' && option === 'fileExtension'
-              ? styles.fileExtensionNotification
-              : styles[option]
-          }`}
+          className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${styles[option]}`}
           key={`${componentName}__${option}`}>
           <label htmlFor={`${componentName}__${option}`}>{resourcesContext.messages[option]}</label>
           <InputText
             id={`${componentName}__${option}`}
-            maxLength={
-              option === 'fileExtension'
-                ? config.MAX_FILE_EXTENSION_LENGTH
-                : option === 'name'
-                ? config.MAX_INTEGRATION_NAME_LENGTH
-                : config.INPUT_MAX_LENGTH
-            }
+            maxLength={option === 'name' ? config.MAX_INTEGRATION_NAME_LENGTH : config.INPUT_MAX_LENGTH}
             onChange={event => onFillField(event.target.value, option)}
             onKeyDown={event => onSaveKeyDown(event)}
             placeholder={resourcesContext.messages[option]}
@@ -576,7 +603,7 @@ export const ManageIntegrations = ({
             {renderDropdownLayout(['operation'])}
             {!isNil(manageIntegrationsState.operation) &&
             operationsWithFileExtension.includes(manageIntegrationsState.operation.value)
-              ? renderInputLayout(['fileExtension'])
+              ? renderFileInputExtension('fileExtension')
               : null}
             {!isNil(manageIntegrationsState.operation) && manageIntegrationsState.operation.value === 'IMPORT'
               ? renderCheckboxLayout(['notificationRequired'])

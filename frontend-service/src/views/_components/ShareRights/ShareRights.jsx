@@ -47,7 +47,7 @@ export const ShareRights = ({
   placeholder,
   representativeId,
   roleOptions,
-  setIsAdminAssignedBusinessDataflow,
+  setIsAdminAssignedBusinessDataflow = () => {},
   setIsUserRightManagementDialogVisible,
   updateErrorNotificationKey,
   userType
