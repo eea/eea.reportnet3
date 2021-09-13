@@ -353,15 +353,15 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
           visible={dataflowState.isManageRequestersDialogVisible}>
           <ShareRights
-            addConfirmHeader={resourcesContext.messages[`addRequesterConfirmHeader`]}
+            addConfirmHeader={resourcesContext.messages['addRequesterConfirmHeader']}
             addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
             columnHeader={resourcesContext.messages['requestersEmailColumn']}
             dataflowId={referenceDataflowId}
             deleteColumnHeader={resourcesContext.messages['deleteRequesterButtonTableHeader']}
-            deleteConfirmHeader={resourcesContext.messages[`requestersRightsDialogConfirmDeleteHeader`]}
-            deleteConfirmMessage={resourcesContext.messages[`requestersRightsDialogConfirmDeleteQuestion`]}
+            deleteConfirmHeader={resourcesContext.messages['requestersRightsDialogConfirmDeleteHeader']}
+            deleteConfirmMessage={resourcesContext.messages['requestersRightsDialogConfirmDeleteQuestion']}
             deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
-            editConfirmHeader={resourcesContext.messages[`editRequesterConfirmHeader`]}
+            editConfirmHeader={resourcesContext.messages['editRequesterConfirmHeader']}
             getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
             isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
             placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}

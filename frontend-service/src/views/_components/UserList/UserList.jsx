@@ -78,7 +78,11 @@ export const UserList = ({
   const onLoadFilteredData = value => setFilteredData(value);
 
   const getCodeLabel = () =>
-    resourcesContext.messages[isBusinessDataflow ? 'company' : isCitizenScienceDataflow ? 'organization' : 'countries'];
+    isBusinessDataflow
+      ? resourcesContext.messages['company']
+      : isCitizenScienceDataflow
+      ? resourcesContext.messages['organization']
+      : resourcesContext.messages['countries'];
 
   const filterOptionsWithDataflowIdRepresentativeId = [
     {
