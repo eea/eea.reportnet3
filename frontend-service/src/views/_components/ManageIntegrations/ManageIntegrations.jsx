@@ -509,7 +509,9 @@ export const ManageIntegrations = ({
         }`}
         key={`${componentName}__${option}`}>
         <label htmlFor={`${componentName}__${option}`}>
-          {resourcesContext.messages[isImport ? 'multipleFileExtensionIntegrations' : 'fileExtension']}
+          {isImport
+            ? resourcesContext.messages['multipleFileExtensionIntegrations']
+            : resourcesContext.messages['fileExtension']}
           {isImport && (
             <TooltipButton
               message={resourcesContext.messages['multipleFileExtensionToolTip']}
@@ -522,7 +524,11 @@ export const ManageIntegrations = ({
           maxLength={config.MAX_FILE_EXTENSION_LENGTH}
           onChange={event => onFillField(event.target.value, option)}
           onKeyDown={event => onSaveKeyDown(event)}
-          placeholder={resourcesContext.messages['multipleFileExtensionIntegrations']}
+          placeholder={
+            isImport
+              ? resourcesContext.messages['multipleFileExtensionIntegrations']
+              : resourcesContext.messages['fileExtension']
+          }
           ref={inputRefs[option]}
           value={manageIntegrationsState[option]}
         />
