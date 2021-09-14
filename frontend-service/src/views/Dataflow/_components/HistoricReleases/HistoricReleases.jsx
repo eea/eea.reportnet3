@@ -37,7 +37,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   const userContext = useContext(UserContext);
 
   const [historicReleasesState, historicReleasesDispatch] = useReducer(historicReleasesReducer, {
-    countryCodes: [],
+    dataProviderCodes: [],
     data: [],
     filteredData: [],
     filtered: false,
@@ -48,9 +48,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     onLoadHistoricReleases();
   }, []);
 
-  const getCountryCode = historicReleases => {
-    const countryCodes = uniq(historicReleases.map(historicRelease => historicRelease.countryCode));
-    historicReleasesDispatch({ type: 'GET_COUNTRY_CODES', payload: { countryCodes } });
+  const getDataProviderCode = historicReleases => {
+    const dataProviderCodes = uniq(historicReleases.map(historicRelease => historicRelease.dataProviderCode));
+    historicReleasesDispatch({ type: 'GET_DATA_PROVIDER_CODES', payload: { dataProviderCodes } });
   };
 
   const getFiltered = value => historicReleasesDispatch({ type: 'IS_FILTERED', payload: { value } });
@@ -82,7 +82,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           data.map(historic => {
             return {
               releaseDate: historic.releaseDate,
-              countryCode: historic.countryCode
+              dataProviderCode: historic.dataProviderCode
             };
           }),
           'releaseDate'
@@ -97,7 +97,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         type: 'INITIAL_LOAD',
         payload: { data: historicReleases, filteredData: historicReleases, filtered: false }
       });
-      getCountryCode(historicReleases);
+      getDataProviderCode(historicReleases);
     } catch (error) {
       console.error('HistoricReleases - onLoadHistoricReleases.', error);
       notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
@@ -138,7 +138,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     const fieldColumns = Object.keys(historicReleases[0])
       .filter(
         key =>
-          key.includes('countryCode') ||
+          key.includes('dataProviderCode') ||
           key.includes('releaseDate') ||
           key.includes('isDataCollectionReleased') ||
           key.includes('isEUReleased')
@@ -155,7 +155,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             columnResizeMode="expand"
             field={field}
             header={
-              TextUtils.areEquals(field, 'countryCode')
+              TextUtils.areEquals(field, 'dataProviderCode')
                 ? resourcesContext.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]
                 : resourcesContext.messages[field]
             }
@@ -169,7 +169,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const renderEUDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
-      .filter(key => key.includes('countryCode') || key.includes('releaseDate'))
+      .filter(key => key.includes('dataProviderCode') || key.includes('releaseDate'))
       .map(field => {
         let template = null;
         if (field === 'releaseDate') template = releaseDateTemplate;
@@ -179,7 +179,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             columnResizeMode="expand"
             field={field}
             header={
-              TextUtils.areEquals(field, 'countryCode')
+              TextUtils.areEquals(field, 'dataProviderCode')
                 ? resourcesContext.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]
                 : resourcesContext.messages[field]
             }
@@ -196,7 +196,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       type: 'multiselect',
       properties: [
         {
-          name: TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? 'company' : 'countryCode', // TODO CHECK SERVICE
+          name: 'dataProviderCode',
           label: resourcesContext.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]
         }
       ]
@@ -218,7 +218,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       type: 'multiselect',
       properties: [
         {
-          name: TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? 'company' : 'countryCode', // TODO CHECK SERVICE
+          name: 'dataProviderCode',
           label: resourcesContext.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]
         }
       ]

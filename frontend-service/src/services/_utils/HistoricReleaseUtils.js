@@ -4,7 +4,7 @@ const parseHistoricReleaseListDTO = historicReleasesDTO =>
   historicReleasesDTO?.map(
     historicReleaseDTO =>
       new HistoricRelease({
-        countryCode: historicReleaseDTO.countryCode,
+        dataProviderCode: historicReleaseDTO.countryCode,
         datasetId: historicReleaseDTO.datasetId,
         datasetName: historicReleaseDTO.datasetName,
         id: historicReleaseDTO.id,
