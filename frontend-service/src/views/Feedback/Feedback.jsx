@@ -282,8 +282,8 @@ export const Feedback = withRouter(({ match, history }) => {
       }
       const data = await FeedbackService.getAllMessages(dataflowId, page, dataProviderId);
       return {
-        messages: data.listMessageVO,
-        unreadMessages: data.listMessageVO.filter(msg => !msg.read),
+        messages: data.listMessage,
+        unreadMessages: data.listMessage.filter(msg => !msg.read),
         totalMessages: data.totalMessages
       };
     } catch (error) {
@@ -346,9 +346,9 @@ export const Feedback = withRouter(({ match, history }) => {
     Object.defineProperty(
       messageVO,
       'messageAttachment',
-      Object.getOwnPropertyDescriptor(messageVO, 'messageAttachmentVO')
+      Object.getOwnPropertyDescriptor(messageVO, 'messageAttachment')
     );
-    delete messageVO['messageAttachmentVO'];
+    delete messageVO['messageAttachment'];
     dispatchFeedback({ type: 'ON_SEND_ATTACHMENT', payload: messageVO });
   };
 
