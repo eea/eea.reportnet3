@@ -347,7 +347,7 @@ const BigButtonListReference = withRouter(
           layout: 'defaultBigButton',
           onSaveName: onSaveName,
           placeholder: resourcesContext.messages['datasetSchemaNamePlaceholder'],
-          visibility: isDesignStatus
+          visibility: isDesignStatus && dataflowState.isCustodian
         }));
 
     const bigButtonList = [
