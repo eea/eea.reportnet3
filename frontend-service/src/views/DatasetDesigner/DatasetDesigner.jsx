@@ -112,7 +112,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     hasWritePermissions: false,
     importButtonsList: [],
     initialDatasetDescription: '',
-    isBusinessDataflow: false,
     isCitizenScienceDataflow: false,
     dataflowType: '',
     isConfigureWebformDialogVisible: false,
@@ -1582,11 +1581,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         )}
         {designerState.datasetSchema && designerState.tabs && validationContext.isVisible && (
           <Validations
+            dataflowType={designerState.dataflowType}
             datasetId={datasetId}
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
-            dataflowType={designerState.dataflowType}
-            isBusinessDataflow={designerState.isBusinessDataflow} //TODO
             isCitizenScienceDataflow={designerState.isCitizenScienceDataflow}
             tabs={DatasetDesignerUtils.getTabs({
               datasetSchema: designerState.datasetSchema,

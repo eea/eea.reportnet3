@@ -19,6 +19,7 @@ export const ExpressionSelector = ({
   componentName,
   creationFormState,
   isBusinessDataflow,
+  dataflowType,
   onAddNewExpression,
   onAddNewExpressionIf,
   onAddNewExpressionThen,
@@ -182,7 +183,7 @@ export const ExpressionSelector = ({
       return (
         <SqlSentence
           creationFormState={creationFormState}
-          isBusinessDataflow={isBusinessDataflow}
+          dataflowType={dataflowType}
           level={validationContext.level}
           onSetSqlSentence={onSetSqlSentence}
         />

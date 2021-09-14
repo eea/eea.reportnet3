@@ -12,7 +12,7 @@ import { SqlHelp } from './_components/SqlHelp';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSentence, level }) => {
+export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence, level }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
@@ -55,10 +55,47 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
   };
 
   const onCCButtonClick = () => {
-    onSetSqlSentence(`${creationFormState.candidateRule.sqlSentence} ${codeKeyword}`);
+    onSetSqlSentence(`${creationFormState.candidateRule.sqlSentence} ${getCodeKeyword()}`);
   };
 
-  const codeKeyword = isBusinessDataflow ? `${config.COMPANY_CODE_KEYWORD}` : `${config.COUNTRY_CODE_KEYWORD}`;
+  const getCodeKeyword = () => {
+    switch (dataflowType) {
+      case config.dataflowType.BUSINESS.value:
+        return `${config.COMPANY_CODE_KEYWORD}`;
+
+      case config.dataflowType.CITIZEN_SCIENCE.value:
+        return `${config.ORGANIZATION_CODE_KEYWORD}`;
+
+      default:
+        return `${config.COUNTRY_CODE_KEYWORD}`;
+    }
+  };
+
+  const getButtonTooltipMessage = () => {
+    switch (dataflowType) {
+      case config.dataflowType.BUSINESS.value:
+        return resourcesContext.messages['matchStringCompanyTooltip'];
+
+      case config.dataflowType.CITIZEN_SCIENCE.value:
+        return resourcesContext.messages['matchStringOrganizationTooltip'];
+
+      default:
+        return resourcesContext.messages['matchStringTooltip'];
+    }
+  };
+
+  const getInfoText = () => {
+    switch (dataflowType) {
+      case config.dataflowType.BUSINESS.value:
+        return { __html: resourcesContext.messages['sqlSentenceCompanyCodeNote'] };
+
+      case config.dataflowType.CITIZEN_SCIENCE.value:
+        return { __html: resourcesContext.messages['sqlSentenceOrganizationCodeNote'] };
+
+      default:
+        return { __html: resourcesContext.messages['sqlSentenceCountryCodeNote'] };
+    }
+  };
 
   return (
     <div className={styles.section}>
@@ -79,11 +116,7 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
               label={resourcesContext.messages['countryCodeAcronym']}
               onClick={onCCButtonClick}
-              tooltip={
-                isBusinessDataflow
-                  ? resourcesContext.messages['matchStringCompanyTooltip']
-                  : resourcesContext.messages['matchStringTooltip']
-              }
+              tooltip={getButtonTooltipMessage()}
               tooltipOptions={{ position: 'top' }}
             />
           </h3>
@@ -120,13 +153,7 @@ export const SqlSentence = ({ creationFormState, isBusinessDataflow, onSetSqlSen
           <p
             className={styles.levelHelp}
             dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceSpatialTypesNote'] }}></p>
-          <p
-            className={styles.levelHelp}
-            dangerouslySetInnerHTML={
-              isBusinessDataflow
-                ? { __html: resourcesContext.messages['sqlSentenceCompanyCodeNote'] }
-                : { __html: resourcesContext.messages['sqlSentenceCountryCodeNote'] }
-            }></p>
+          <p className={styles.levelHelp} dangerouslySetInnerHTML={getInfoText()}></p>
         </Dialog>
       )}
     </div>
