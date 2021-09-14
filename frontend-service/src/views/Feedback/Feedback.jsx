@@ -282,8 +282,8 @@ export const Feedback = withRouter(({ match, history }) => {
       }
       const data = await FeedbackService.getAllMessages(dataflowId, page, dataProviderId);
       return {
-        messages: data.listMessageVO,
-        unreadMessages: data.listMessageVO.filter(msg => !msg.read),
+        messages: data.listMessage,
+        unreadMessages: data.listMessage.filter(msg => !msg.read),
         totalMessages: data.totalMessages
       };
     } catch (error) {
@@ -341,16 +341,8 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'ON_UPDATE_NEW_MESSAGE_ADDED', payload });
   };
 
-  const onUpload = async event => {
-    const messageVO = JSON.parse(event.xhr.response);
-    Object.defineProperty(
-      messageVO,
-      'messageAttachment',
-      Object.getOwnPropertyDescriptor(messageVO, 'messageAttachmentVO')
-    );
-    delete messageVO['messageAttachmentVO'];
-    dispatchFeedback({ type: 'ON_SEND_ATTACHMENT', payload: messageVO });
-  };
+  const onUpload = async event =>
+    dispatchFeedback({ type: 'ON_SEND_ATTACHMENT', payload: JSON.parse(event.xhr.response) });
 
   const layout = children => {
     return (

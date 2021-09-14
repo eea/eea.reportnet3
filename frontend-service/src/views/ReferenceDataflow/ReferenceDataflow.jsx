@@ -259,7 +259,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   function getLeftSidebarButtonsVisibility() {
     return {
       apiKeyBtn: dataflowState.isCustodian,
-      editBtn: dataflowState.status === config.dataflowStatus.DESIGN,
+      editBtn: dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
       propertiesBtn: true,
       reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
