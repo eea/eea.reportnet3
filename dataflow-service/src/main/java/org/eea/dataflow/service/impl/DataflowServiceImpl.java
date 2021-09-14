@@ -219,10 +219,7 @@ public class DataflowServiceImpl implements DataflowService {
     return result;
   }
 
-  private void removeWebLinksAndDocuments(DataFlowVO result) {
-    result.setWeblinks(null);
-    result.setDocuments(null);
-  }
+
 
   /**
    * Gets the by status.
@@ -1405,6 +1402,16 @@ public class DataflowServiceImpl implements DataflowService {
       throw new EEAException(EEAErrorMessage.DATAFLOW_INCORRECT_ID);
     }
     return dataflowPrivateVO;
+  }
+
+  /**
+   * Removes the web links and documents.
+   *
+   * @param result the result
+   */
+  private void removeWebLinksAndDocuments(DataFlowVO result) {
+    result.setWeblinks(null);
+    result.setDocuments(null);
   }
 
 }
