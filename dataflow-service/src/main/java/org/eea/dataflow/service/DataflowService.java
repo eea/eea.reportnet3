@@ -22,10 +22,11 @@ public interface DataflowService {
    * Gets the by id.
    *
    * @param id the id
+   * @param removeWeblinksAndDocuments the remove weblinks and documents
    * @return the by id
    * @throws EEAException the EEA exception
    */
-  DataFlowVO getById(Long id) throws EEAException;
+  DataFlowVO getById(Long id, boolean removeWeblinksAndDocuments) throws EEAException;
 
   /**
    * Get the dataflow by its id filtering representatives by the user email.

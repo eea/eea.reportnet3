@@ -109,7 +109,7 @@ public class DataFlowControllerImpl implements DataFlowController {
     DataFlowVO result = null;
     try {
       if (isUserRequester(dataflowId)) {
-        result = dataflowService.getById(dataflowId);
+        result = dataflowService.getById(dataflowId, true);
       } else {
         result = dataflowService.getByIdWithRepresentativesFilteredByUserEmail(dataflowId);
       }
