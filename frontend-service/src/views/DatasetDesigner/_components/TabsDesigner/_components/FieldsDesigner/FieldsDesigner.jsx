@@ -572,6 +572,7 @@ export const FieldsDesigner = ({
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
           recordSchemaId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
+          setIsLoading={loading => setIsLoading(loading)}
           tableSchemaId={table.tableSchemaId}
           totalFields={!isNil(fields) ? fields.length : undefined}
         />
@@ -638,6 +639,7 @@ export const FieldsDesigner = ({
                 onNewFieldAdd={onFieldAdd}
                 onShowDialogError={onShowDialogError}
                 recordSchemaId={field.recordId}
+                setIsLoading={loading => setIsLoading(loading)}
                 tableSchemaId={table.tableSchemaId}
                 totalFields={!isNil(fields) ? fields.length : undefined}
               />
@@ -652,6 +654,7 @@ export const FieldsDesigner = ({
 
   const reorderField = async (draggedFieldIdx, droppedFieldName) => {
     try {
+      setIsLoading(true);
       const inmFields = [...fields];
       const droppedFieldIdx = FieldsDesignerUtils.getIndexByFieldName(droppedFieldName, inmFields);
       await DatasetService.updateFieldOrder(
@@ -667,6 +670,8 @@ export const FieldsDesigner = ({
       onChangeFields(inmFields, false, table.tableSchemaId);
     } catch (error) {
       console.error('FieldsDesigner - reorderField.', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 

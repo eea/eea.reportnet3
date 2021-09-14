@@ -72,6 +72,7 @@ export const FieldDesigner = ({
   onNewFieldAdd,
   onShowDialogError,
   recordSchemaId,
+  setIsLoading = () => {},
   tableSchemaId,
   totalFields
 }) => {
@@ -491,6 +492,7 @@ export const FieldDesigner = ({
   }) => {
     console.log('onFieldAdd');
     try {
+      setIsLoading(true);
       const response = await DatasetService.createRecordDesign(datasetId, {
         codelistItems,
         description,
@@ -547,6 +549,7 @@ export const FieldDesigner = ({
         }
       }
       dispatchFieldDesigner({ type: 'SET_ADD_FIELD_SENT', payload: false });
+      setIsLoading(false);
     }
   };
 
@@ -817,6 +820,7 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
+      setIsLoading(true);
       await DatasetService.updateFieldDesign(datasetId, {
         codelistItems,
         description,
@@ -871,6 +875,8 @@ export const FieldDesigner = ({
           });
         }
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -1157,9 +1163,10 @@ export const FieldDesigner = ({
           disabled={fieldPKReferenced || isDataflowOpen || isDesignDatasetEditorRead || isLoading}
           id={`${fieldDesignerState.fieldValue}_mark_to_delete`}
           inputId={`${fieldDesignerState.fieldValue}_mark_to_delete`}
-          onChange={e =>
-            onBulkCheck(e.checked, fieldId, fieldDesignerState.fieldTypeValue, fieldDesignerState.fieldValue)
-          }
+          onChange={e => {
+            console.log(e.shiftKey);
+            onBulkCheck(e.checked, fieldId, fieldDesignerState.fieldTypeValue, fieldDesignerState.fieldValue);
+          }}
           role="checkbox"
         />
       )
