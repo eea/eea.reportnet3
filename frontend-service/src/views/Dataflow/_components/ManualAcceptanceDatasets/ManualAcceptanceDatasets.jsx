@@ -142,7 +142,7 @@ export const ManualAcceptanceDatasets = ({
       type: 'multiselect',
       properties: [
         {
-          name: TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? 'company' : 'dataProviderName', // TODO CHECK SERVICE
+          name: 'dataProviderName',
           label: getCodeLabelByDataflowType()
         },
         { name: 'feedbackStatus' }
