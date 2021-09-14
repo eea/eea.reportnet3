@@ -58,8 +58,22 @@ export const WebLinks = ({
     if (!isNil(inputRef.current)) inputRef.current.focus();
   }, [inputRef, webLinksState.isAddOrEditWebLinkDialogVisible]);
 
+  const getOrderedWeblinkColumns = webLinks => {
+    const representativesWithPriority = [
+      { id: 'description', index: 0 },
+      { id: 'url', index: 1 },
+      { id: 'isPublic', index: 2 }
+    ];
+
+    return webLinks
+      .map(field => representativesWithPriority.filter(e => field === e.id))
+      .flat()
+      .sort((a, b) => a.index - b.index)
+      .map(orderedField => orderedField.id);
+  };
+
   useEffect(() => {
-    let webLinkKeys = !isEmpty(webLinks) ? Object.keys(webLinks[0]) : [];
+    let webLinkKeys = !isEmpty(webLinks) ? getOrderedWeblinkColumns(Object.keys(webLinks[0])) : [];
     let webLinkColArray = webLinkKeys
       .filter(key => key !== 'id')
       .map(key => {
@@ -120,13 +134,15 @@ export const WebLinks = ({
   };
 
   const isPublicColumnTemplate = rowData => (
-    <span>
-      {rowData.isPublic ? (
-        <FontAwesomeIcon aria-label={resourcesContext.messages['isPublic']} icon={AwesomeIcons('check')} />
-      ) : (
-        ''
-      )}
-    </span>
+    <div className={styles.iconStyle}>
+      <span>
+        {rowData.isPublic ? (
+          <FontAwesomeIcon aria-label={resourcesContext.messages['isPublic']} icon={AwesomeIcons('check')} />
+        ) : (
+          ''
+        )}
+      </span>
+    </div>
   );
 
   const fieldsArray = [
