@@ -22,6 +22,8 @@ import { RecordUtils } from 'views/_functions/Utils/RecordUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
   const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
   const [columnOptions, setColumnOptions] = useState([{}]);
@@ -431,24 +433,11 @@ export const useSetColumns = (
       );
     });
 
-    const getProviderCodeColumnHeader = () => {
-      switch (dataflowType) {
-        case config.dataflowType.BUSINESS.value:
-          return resources.messages['companyCode'];
-
-        case config.dataflowType.CITIZEN_SCIENCE.value:
-          return resources.messages['organizationCode'];
-
-        default:
-          return resources.messages['countryCode'];
-      }
-    };
-
     let providerCode = (
       <Column
         body={providerCodeTemplate}
         className={styles.providerCode}
-        header={getProviderCodeColumnHeader()}
+        header={resources.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]}
         key="providerCode"
         sortable={false}
         style={{ width: '100px' }}

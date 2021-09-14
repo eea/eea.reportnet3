@@ -29,6 +29,8 @@ import { historicReleasesReducer } from './_functions/Reducers/historicReleasesR
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+
 export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -132,19 +134,6 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     </div>
   );
 
-  const getCodeTextByDataflowType = () => {
-    switch (dataflowType) {
-      case config.dataflowType.BUSINESS.value:
-        return resourcesContext.messages['companyCode'];
-
-      case config.dataflowType.CITIZEN_SCIENCE.value:
-        return resourcesContext.messages['organizationCode'];
-
-      default:
-        return resourcesContext.messages['countryCode'];
-    }
-  };
-
   const renderDataCollectionColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
       .filter(
@@ -166,7 +155,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             columnResizeMode="expand"
             field={field}
             header={
-              TextUtils.areEquals(field, 'countryCode') ? getCodeTextByDataflowType() : resourcesContext.messages[field]
+              TextUtils.areEquals(field, 'countryCode')
+                ? resourcesContext.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]
+                : resourcesContext.messages[field]
             }
             key={field}
             sortable={true}
@@ -188,7 +179,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             columnResizeMode="expand"
             field={field}
             header={
-              TextUtils.areEquals(field, 'countryCode') ? getCodeTextByDataflowType() : resourcesContext.messages[field]
+              TextUtils.areEquals(field, 'countryCode')
+                ? resourcesContext.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]
+                : resourcesContext.messages[field]
             }
             key={field}
             sortable={true}
@@ -204,7 +197,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       properties: [
         {
           name: TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? 'company' : 'countryCode', // TODO CHECK SERVICE
-          label: getCodeTextByDataflowType()
+          label: resourcesContext.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]
         }
       ]
     },
@@ -226,7 +219,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       properties: [
         {
           name: TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? 'company' : 'countryCode', // TODO CHECK SERVICE
-          label: getCodeTextByDataflowType()
+          label: resourcesContext.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]
         }
       ]
     }

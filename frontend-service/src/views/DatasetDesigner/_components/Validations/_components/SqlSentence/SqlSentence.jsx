@@ -12,6 +12,8 @@ import { SqlHelp } from './_components/SqlHelp';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+
 export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence, level }) => {
   const resourcesContext = useContext(ResourcesContext);
 
@@ -50,38 +52,14 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
     setIsVisibleInfoDialog(true);
   };
 
-  const onHideInfoDiaog = () => {
+  const onHideInfoDialog = () => {
     setIsVisibleInfoDialog(false);
   };
 
   const onCCButtonClick = () => {
-    onSetSqlSentence(`${creationFormState.candidateRule.sqlSentence} ${getCodeKeyword()}`);
-  };
-
-  const getCodeKeyword = () => {
-    switch (dataflowType) {
-      case config.dataflowType.BUSINESS.value:
-        return config.COMPANY_CODE_KEYWORD;
-
-      case config.dataflowType.CITIZEN_SCIENCE.value:
-        return config.ORGANIZATION_CODE_KEYWORD;
-
-      default:
-        return config.COUNTRY_CODE_KEYWORD;
-    }
-  };
-
-  const getButtonTooltipMessage = () => {
-    switch (dataflowType) {
-      case config.dataflowType.BUSINESS.value:
-        return resourcesContext.messages['matchStringCompanyTooltip'];
-
-      case config.dataflowType.CITIZEN_SCIENCE.value:
-        return resourcesContext.messages['matchStringOrganizationTooltip'];
-
-      default:
-        return resourcesContext.messages['matchStringTooltip'];
-    }
+    onSetSqlSentence(
+      `${creationFormState.candidateRule.sqlSentence} ${TextByDataflowTypeUtils.getValidationCodeKeyword(dataflowType)}`
+    );
   };
 
   const getInfoText = () => {
@@ -94,19 +72,6 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
 
       default:
         return { __html: resourcesContext.messages['sqlSentenceCountryCodeNote'] };
-    }
-  };
-
-  const getButtonLabel = () => {
-    switch (dataflowType) {
-      case config.dataflowType.BUSINESS.value:
-        return resourcesContext.messages['countryCodeAcronym'];
-
-      case config.dataflowType.CITIZEN_SCIENCE.value:
-        return resourcesContext.messages['organizationCodeAcronym'];
-
-      default:
-        return resourcesContext.messages['countryCodeAcronym'];
     }
   };
 
@@ -127,9 +92,9 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
-              label={getButtonLabel()}
+              label={resourcesContext.messages[TextByDataflowTypeUtils.getValidationCodeButtonLabel(dataflowType)]}
               onClick={onCCButtonClick}
-              tooltip={getButtonTooltipMessage()}
+              tooltip={resourcesContext.messages[TextByDataflowTypeUtils.getValidationCodeButtonTooltip(dataflowType)]}
               tooltipOptions={{ position: 'top' }}
             />
           </h3>
@@ -153,7 +118,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
       {isVisibleInfoDialog && (
         <Dialog
           header={resourcesContext.messages['sqlSentenceHelpDialogTitle']}
-          onHide={onHideInfoDiaog}
+          onHide={onHideInfoDialog}
           style={{ maxWidth: '41vw' }}
           visible={isVisibleInfoDialog}>
           <p className={styles.levelHelp} dangerouslySetInnerHTML={{ __html: getHelpByLevel(level) }}></p>

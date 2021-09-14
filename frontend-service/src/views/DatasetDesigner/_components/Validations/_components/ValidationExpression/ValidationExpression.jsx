@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './ValidationExpression.module.scss';
 
@@ -15,7 +16,8 @@ import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'views/_components/InputText';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import isNil from 'lodash/isNil';
+
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 const ValidationExpression = ({
   dataflowType,
@@ -240,48 +242,11 @@ const ValidationExpression = ({
       );
     }
 
-    const getCodeKeyword = () => {
-      switch (dataflowType) {
-        case config.dataflowType.BUSINESS.value:
-          return config.COMPANY_CODE_KEYWORD;
-
-        case config.dataflowType.CITIZEN_SCIENCE.value:
-          return config.ORGANIZATION_CODE_KEYWORD;
-
-        default:
-          return config.COUNTRY_CODE_KEYWORD;
-      }
-    };
-
-    const getButtonTooltipMessage = () => {
-      switch (dataflowType) {
-        case config.dataflowType.BUSINESS.value:
-          return resourcesContext.messages['matchStringCompanyTooltip'];
-
-        case config.dataflowType.CITIZEN_SCIENCE.value:
-          return resourcesContext.messages['matchStringOrganizationTooltip'];
-
-        default:
-          return resourcesContext.messages['matchStringTooltip'];
-      }
-    };
-
-    const getButtonLabel = () => {
-      switch (dataflowType) {
-        case config.dataflowType.BUSINESS.value:
-          return resourcesContext.messages['countryCodeAcronym'];
-
-        case config.dataflowType.CITIZEN_SCIENCE.value:
-          return resourcesContext.messages['organizationCodeAcronym'];
-
-        default:
-          return resourcesContext.messages['countryCodeAcronym'];
-      }
-    };
-
     if (operatorType === 'string') {
       if (operatorValue === 'MATCH') {
-        const ccButtonValue = `${expressionValues.expressionValue}${getCodeKeyword()}`;
+        const ccButtonValue = `${expressionValues.expressionValue}${TextByDataflowTypeUtils.getValidationCodeKeyword(
+          dataflowType
+        )}`;
         return (
           <span className={styles.inputStringMatch}>
             <InputText
@@ -294,9 +259,9 @@ const ValidationExpression = ({
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
-              label={getButtonLabel()}
+              label={resourcesContext.messages[TextByDataflowTypeUtils.getValidationCodeButtonLabel(dataflowType)]}
               onClick={() => onCCButtonClick(ccButtonValue)}
-              tooltip={getButtonTooltipMessage()}
+              tooltip={resourcesContext.messages[TextByDataflowTypeUtils.getValidationCodeButtonTooltip(dataflowType)]}
               tooltipOptions={{ position: 'top' }}
             />
           </span>
