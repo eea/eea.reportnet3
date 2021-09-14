@@ -341,16 +341,8 @@ export const Feedback = withRouter(({ match, history }) => {
     dispatchFeedback({ type: 'ON_UPDATE_NEW_MESSAGE_ADDED', payload });
   };
 
-  const onUpload = async event => {
-    const messageVO = JSON.parse(event.xhr.response);
-    Object.defineProperty(
-      messageVO,
-      'messageAttachment',
-      Object.getOwnPropertyDescriptor(messageVO, 'messageAttachment')
-    );
-    delete messageVO['messageAttachment'];
-    dispatchFeedback({ type: 'ON_SEND_ATTACHMENT', payload: messageVO });
-  };
+  const onUpload = async event =>
+    dispatchFeedback({ type: 'ON_SEND_ATTACHMENT', payload: JSON.parse(event.xhr.response) });
 
   const layout = children => {
     return (
