@@ -24,6 +24,7 @@ import { FieldDesigner } from './_components/FieldDesigner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
+import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
 
 import { DatasetService } from 'services/DatasetService';
@@ -80,6 +81,7 @@ export const FieldsDesigner = ({
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
   const [markedForDeletion, setMarkedForDeletion] = useState([]);
   const [notEmpty, setNotEmpty] = useState(true);
@@ -284,6 +286,7 @@ export const FieldsDesigner = ({
 
   const deleteField = async (deletedFieldIndex, deletedFieldType) => {
     try {
+      setIsLoading(true);
       await DatasetService.deleteFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
       const inmFields = [...fields];
       inmFields.splice(deletedFieldIndex, 1);
@@ -298,30 +301,44 @@ export const FieldsDesigner = ({
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const deleteFields = async () => {
+    setIsLoading(true);
+
     const deletionPromises = markedForDeletion.map(async markedField => {
       return await DatasetService.deleteFieldDesign(datasetId, markedField.fieldId);
     });
-    Promise.all(deletionPromises).then(() => {
-      const inmFields = [...fields];
-      const filteredFields = inmFields.filter(
-        inmField => !markedForDeletion.some(markedField => markedField.fieldId === inmField.fieldId)
-      );
-      console.log(inmFields, markedForDeletion);
-      onChangeFields(
-        filteredFields,
-        markedForDeletion.some(markedField => TextUtils.areEquals(markedField.fieldType.fieldType, 'LINK')) ||
-          markedForDeletion.some(markedField => TextUtils.areEquals(markedField.fieldType.fieldType, 'EXTERNAL_LINK')),
-        table.tableSchemaId
-      );
-      setFields(filteredFields);
-      setIsDeleteDialogVisible(false);
-      setMarkedForDeletion([]);
-      setBulkDelete(false);
-    });
+
+    Promise.all(deletionPromises)
+      .then(() => {
+        const inmFields = [...fields];
+        const filteredFields = inmFields.filter(
+          inmField => !markedForDeletion.some(markedField => markedField.fieldId === inmField.fieldId)
+        );
+        console.log(inmFields, markedForDeletion);
+        onChangeFields(
+          filteredFields,
+          markedForDeletion.some(markedField => TextUtils.areEquals(markedField.fieldType.fieldType, 'LINK')) ||
+            markedForDeletion.some(markedField =>
+              TextUtils.areEquals(markedField.fieldType.fieldType, 'EXTERNAL_LINK')
+            ),
+          table.tableSchemaId
+        );
+        setFields(filteredFields);
+        setIsDeleteDialogVisible(false);
+        setMarkedForDeletion([]);
+      })
+      .catch(error => {
+        console.error(`FieldsDesigner - deleteFields.`, error);
+      })
+      .finally(() => {
+        setBulkDelete(false);
+        setIsLoading(false);
+      });
   };
 
   const errorDialogFooter = (
@@ -492,10 +509,15 @@ export const FieldsDesigner = ({
   );
 
   const renderAllFields = () => (
-    <Fragment>
+    <div className={styles.fieldsWrapper}>
+      {isLoading && (
+        <div className={styles.overlay}>
+          <Spinner className={styles.spinner} />
+        </div>
+      )}
       {viewType['tabularData'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
       {!viewType['tabularData'] && renderNewField()}
-    </Fragment>
+    </div>
   );
 
   const renderErrors = (errorTitle, error) => {
@@ -543,6 +565,7 @@ export const FieldsDesigner = ({
           isCodelistOrLink={isCodelistOrLink}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+          isLoading={isLoading}
           isReferenceDataset={isReferenceDataset}
           onCodelistAndLinkShow={onCodelistAndLinkShow}
           onFieldDragAndDrop={onFieldDragAndDrop}
@@ -602,6 +625,7 @@ export const FieldsDesigner = ({
                 isCodelistOrLink={isCodelistOrLink}
                 isDataflowOpen={isDataflowOpen}
                 isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+                isLoading={isLoading}
                 isReferenceDataset={isReferenceDataset}
                 key={field.fieldId}
                 markedForDeletion={markedForDeletion}

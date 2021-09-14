@@ -18,7 +18,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { LinkSelector } from './_components/LinkSelector';
-import ReactTooltip from 'react-tooltip';
+// import ReactTooltip from 'react-tooltip';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -60,6 +60,7 @@ export const FieldDesigner = ({
   isCodelistOrLink,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isLoading = false,
   isReferenceDataset,
   markedForDeletion,
   onBulkCheck,
@@ -247,6 +248,7 @@ export const FieldDesigner = ({
             !fieldDesignerState.addFieldCallSent
           ) {
             dispatchFieldDesigner({ type: 'SET_ADD_FIELD_SENT', payload: true });
+            console.log('Llego 1');
             onFieldAdd({
               type: parseGeospatialTypes(type.fieldType),
               pk: geometricTypes.includes(type.fieldType.toUpperCase()) ? false : fieldDesignerState.fieldPKValue
@@ -289,6 +291,7 @@ export const FieldDesigner = ({
             (fieldDesignerState.fieldTypeValue !== '') & !isNil(fieldDesignerState.fieldValue) &&
             fieldDesignerState.fieldValue !== ''
           ) {
+            console.log('Llego 2');
             onFieldAdd({ description: description });
           }
         } else {
@@ -325,8 +328,10 @@ export const FieldDesigner = ({
               );
               dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
             } else {
+              console.log(name, fieldId);
               if (!checkDuplicates(name, fieldId)) {
                 if (!isNil(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue !== '') {
+                  console.log('Llego 3');
                   onFieldAdd({ name });
                 }
               } else {
@@ -383,6 +388,7 @@ export const FieldDesigner = ({
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
         if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          console.log('Llego 4');
           onFieldAdd({ validExtensions: fieldFileProperties.validExtensions, maxSize: fieldFileProperties.maxSize });
         }
       }
@@ -411,6 +417,7 @@ export const FieldDesigner = ({
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
         if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          console.log('Llego 5');
           onFieldAdd({
             codelistItems,
             type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
@@ -433,6 +440,7 @@ export const FieldDesigner = ({
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
         if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
+          console.log('Llego 6');
           onFieldAdd({ codelistItems });
         }
       }
@@ -481,6 +489,7 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions,
     isDuplicated = false
   }) => {
+    console.log('onFieldAdd');
     try {
       const response = await DatasetService.createRecordDesign(datasetId, {
         codelistItems,
@@ -618,6 +627,7 @@ export const FieldDesigner = ({
     if (!fieldDesignerState.isDragging) {
       if (fieldId === '-1') {
         if (validField()) {
+          console.log('Llego 7');
           onFieldAdd({ pk: checked });
         }
       } else {
@@ -631,6 +641,7 @@ export const FieldDesigner = ({
     if (!fieldDesignerState.isDragging) {
       if (fieldId === '-1') {
         if (validField()) {
+          console.log('Llego 8');
           onFieldAdd({ readOnly: checked });
         }
       } else {
@@ -644,6 +655,7 @@ export const FieldDesigner = ({
     if (!fieldDesignerState.isDragging) {
       if (fieldId === '-1') {
         if (validField()) {
+          console.log('Llego 9');
           onFieldAdd({ required: checked });
         }
       } else {
@@ -668,6 +680,7 @@ export const FieldDesigner = ({
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
+          console.log('Llego 10');
           onFieldAdd({ validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize });
         } else {
           fieldUpdate({ validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize });
@@ -689,6 +702,7 @@ export const FieldDesigner = ({
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
+          console.log('Llego 11');
           onFieldAdd({ codelistItems });
         } else {
           fieldUpdate({ codelistItems });
@@ -737,6 +751,7 @@ export const FieldDesigner = ({
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
+          console.log('Llego 12', fields);
           onFieldAdd({
             codelistItems,
             type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
@@ -906,7 +921,8 @@ export const FieldDesigner = ({
             geometricTypes.includes(fieldDesignerState.fieldTypeValue.fieldType.toUpperCase())) ||
           (hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)) ||
           isDataflowOpen ||
-          isDesignDatasetEditorRead
+          isDesignDatasetEditorRead ||
+          isLoading
         }
         id={`${fieldId}_check_pk`}
         inputId={`${fieldId}_check_pk`}
@@ -939,7 +955,7 @@ export const FieldDesigner = ({
         className={`${styles.checkRequired} datasetSchema-required-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
-        disabled={Boolean(fieldDesignerState.fieldPKValue) || isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={Boolean(fieldDesignerState.fieldPKValue) || isDataflowOpen || isDesignDatasetEditorRead || isLoading}
         id={`${fieldId}_check_required`}
         inputId={`${fieldId}_check_required`}
         label="Default"
@@ -963,7 +979,7 @@ export const FieldDesigner = ({
         className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
         id={`${fieldId}_check_readOnly`}
         inputId={`${fieldId}_check_readOnly`}
         label="Default"
@@ -980,7 +996,7 @@ export const FieldDesigner = ({
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
         label={
           !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
             ? `${fieldDesignerState.codelistItems.join('; ')}`
@@ -1007,6 +1023,7 @@ export const FieldDesigner = ({
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
         disabled={
+          isLoading ||
           isDataflowOpen ||
           isDesignDatasetEditorRead ||
           (!isNil(fieldDesignerState.fieldLinkValue) &&
@@ -1044,7 +1061,7 @@ export const FieldDesigner = ({
         className={`${styles.codelistButton} p-button-secondary-transparent ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
         label={`${resourcesContext.messages['validExtensions']} ${
           !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
           !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
@@ -1076,48 +1093,39 @@ export const FieldDesigner = ({
 
   const renderDuplicateButton = () =>
     !addField ? (
-      <span data-for={fieldDesignerState.fieldValue} data-tip>
-        <div
-          className={`${styles.button} ${styles.duplicateButton} ${
-            fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-          } ${isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
-          draggable={true}
-          href="#"
-          onClick={e => {
-            e.preventDefault();
-            onFieldAdd({
-              codelistItems: fieldDesignerState.codelistItems,
-              description: fieldDesignerState.fieldDescriptionValue,
-              isDuplicated: true,
-              maxSize: fieldDesignerState.fieldFileProperties.maxSize,
-              pk: false,
-              pkHasMultipleValues: fieldDesignerState.pkHasMultipleValues,
-              pkMustBeUsed: fieldDesignerState.pkMustBeUsed,
-              name: getDuplicatedName(),
-              readOnly: fieldDesignerState.fieldReadOnlyValue,
-              recordId: recordSchemaId,
-              referencedField: fieldDesignerState.fieldLinkValue,
-              required: fieldDesignerState.fieldRequiredValue,
-              type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-              validExtensions: fieldDesignerState.fieldFileProperties.validExtensions
-            });
-          }}
-          onDragStart={event => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}>
-          <FontAwesomeIcon aria-label={resourcesContext.messages['duplicate']} icon={AwesomeIcons('clone')} />
-        </div>
+      <div
+        className={`${styles.button} ${styles.duplicateButton} ${
+          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+        } ${isDataflowOpen || isLoading || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
+        // data-for={fieldDesignerState.fieldValue}
+        // data-tip
+        href="#"
+        onClick={e => {
+          e.preventDefault();
+          console.log('Llego 13');
+          onFieldAdd({
+            codelistItems: fieldDesignerState.codelistItems,
+            description: fieldDesignerState.fieldDescriptionValue,
+            isDuplicated: true,
+            maxSize: fieldDesignerState.fieldFileProperties.maxSize,
+            pk: false,
+            pkHasMultipleValues: fieldDesignerState.pkHasMultipleValues,
+            pkMustBeUsed: fieldDesignerState.pkMustBeUsed,
+            name: getDuplicatedName(),
+            readOnly: fieldDesignerState.fieldReadOnlyValue,
+            recordId: recordSchemaId,
+            referencedField: fieldDesignerState.fieldLinkValue,
+            required: fieldDesignerState.fieldRequiredValue,
+            type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
+            validExtensions: fieldDesignerState.fieldFileProperties.validExtensions
+          });
+        }}>
+        <FontAwesomeIcon aria-label={resourcesContext.messages['duplicate']} icon={AwesomeIcons('clone')} />
         <span className="srOnly">{resourcesContext.messages['duplicate']}</span>
-        <ReactTooltip border={true} effect="solid" id={fieldDesignerState.fieldValue} place="top">
-          {checkDuplicates(`${fieldDesignerState.fieldValue}_DUPLICATED`, fieldId)
-            ? `${resourcesContext.messages['duplicateDisabledTitle']} ${TextUtils.ellipsis(
-                `${fieldDesignerState.fieldValue}_DUPLICATED`,
-                30
-              )} ${resourcesContext.messages['duplicateDisabledMessage']}`
-            : resourcesContext.messages['duplicate']}
-        </ReactTooltip>
-      </span>
+        {/* <ReactTooltip border={true} effect="solid" id={fieldDesignerState.fieldValue} place="top">
+          {resourcesContext.messages['duplicate']}
+        </ReactTooltip> */}
+      </div>
     ) : null;
 
   const renderDeleteButton = () =>
@@ -1126,7 +1134,7 @@ export const FieldDesigner = ({
         <div
           className={`${styles.button} ${styles.deleteButton} ${fieldPKReferenced ? styles.disabledButton : ''} ${
             fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-          } ${isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
+          } ${isDataflowOpen || isDesignDatasetEditorRead || isLoading ? styles.linkDisabled : ''}`}
           draggable={true}
           href="#"
           onClick={e => {
@@ -1146,7 +1154,7 @@ export const FieldDesigner = ({
           className={`${styles.checkBulkDelete} ${
             fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
           } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
-          disabled={fieldPKReferenced}
+          disabled={fieldPKReferenced || isDataflowOpen || isDesignDatasetEditorRead || isLoading}
           id={`${fieldDesignerState.fieldValue}_mark_to_delete`}
           inputId={`${fieldDesignerState.fieldValue}_mark_to_delete`}
           onChange={e =>
@@ -1164,7 +1172,7 @@ export const FieldDesigner = ({
         className={`${styles.inputField} ${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
         id={fieldName !== '' ? fieldName : 'newField'}
         keyfilter="schemaTableFields"
         maxLength={60}
@@ -1198,7 +1206,7 @@ export const FieldDesigner = ({
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
         collapsedHeight={33}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
         expandableOnClick={true}
         id={`${fieldName}_description`}
         key={fieldId}
@@ -1225,7 +1233,7 @@ export const FieldDesigner = ({
         className={`${styles.dropdownFieldType} ${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
         inputId={`${fieldName}_fieldType`}
         itemTemplate={fieldTypeTemplate}
         name={resourcesContext.messages['newFieldTypePlaceHolder']}
@@ -1252,8 +1260,10 @@ export const FieldDesigner = ({
   return (
     <Fragment>
       <div
-        className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
-        draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
+        className={`${styles.draggableFieldDiv} ${
+          isLoading ? styles.draggableFieldDivDisabled : ''
+        } fieldRow datasetSchema-fieldDesigner-help-step`}
+        draggable={isDataflowOpen || isDesignDatasetEditorRead || isLoading ? false : !addField}
         onDragEnd={e => {
           onFieldDragEnd(e);
         }}
@@ -1297,6 +1307,7 @@ export const FieldDesigner = ({
                   fieldDesignerState.fieldTypeValue?.value?.toLowerCase()
                 )) ||
               isDesignDatasetEditorRead ||
+              isLoading ||
               (isDataflowOpen && isReferenceDataset)
             }
             icon="horizontalSliders"
