@@ -314,7 +314,7 @@ const BigButtonListReference = withRouter(
         : !isCreateReferenceEnabled
         ? resourcesContext.messages['disabledCreateDataCollectionSchemasWithError']
         : '',
-      visibility: isDesignStatus && (dataflowState.isCustodian || dataflowState.isSteward)
+      visibility: isDesignStatus && dataflowState.isCustodian
     };
 
     const newSchemaBigButton = {
@@ -325,7 +325,7 @@ const BigButtonListReference = withRouter(
       helpClassName: 'dataflow-new-schema-help-step',
       layout: isCloningStatus ? 'defaultBigButton' : 'menuBigButton',
       model: isCloningStatus ? [] : newSchemaModel,
-      visibility: isDesignStatus && (dataflowState.isCustodian || dataflowState.isSteward)
+      visibility: isDesignStatus && dataflowState.isCustodian
     };
 
     const designDatasetButtons = isNil(dataflowState.data.designDatasets)
