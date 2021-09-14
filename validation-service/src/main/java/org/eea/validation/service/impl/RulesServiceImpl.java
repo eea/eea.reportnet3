@@ -1703,6 +1703,13 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
+  /**
+   * Fill QC export data.
+   *
+   * @param csvWriter the csv writer
+   * @param datasetId the dataset id
+   * @param nHeaders the n headers
+   */
   private void fillQCExportData(CSVWriter csvWriter, Long datasetId, int nHeaders) {
 
     String dataSetSchema = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
