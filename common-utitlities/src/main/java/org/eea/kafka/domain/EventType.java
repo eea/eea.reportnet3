@@ -398,11 +398,13 @@ public enum EventType {
   DOWNLOAD_VALIDATIONS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "download_validations_failed_event", true),
 
-  /** The download dataset validations completed event. */
+
+  /** The export qc completed event. */
   EXPORT_QC_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_completed_event",
       true),
 
-  /** The download dataset validations failed event. */
+
+  /** The export qc failed event. */
   EXPORT_QC_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_failed_event", true),
 
   /** The export dataset failed event. */
