@@ -128,6 +128,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @return the by id
    */
+  @Deprecated
   @GetMapping("{id}")
   DataSetVO getById(@PathVariable("id") Long datasetId);
 
