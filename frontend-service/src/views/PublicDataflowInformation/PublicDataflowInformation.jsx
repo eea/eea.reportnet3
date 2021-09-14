@@ -59,6 +59,7 @@ export const PublicDataflowInformation = withRouter(
 
     useEffect(() => {
       onLoadPublicDataflowInformation();
+      onLoadPrivateDataflowInformation();
     }, []);
 
     useEffect(() => {
@@ -260,6 +261,26 @@ export const PublicDataflowInformation = withRouter(
         setWebLinks(data.webLinks);
       } catch (error) {
         console.error('PublicDataflowInformation - onLoadDataflowData.', error);
+        if (error.response.status === 404 || error.response.status === 400) {
+          setIsWrongUrlDataflowId(true);
+        } else {
+          notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' });
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const onLoadPrivateDataflowInformation = async () => {
+      try {
+        const data = await DataflowService.getPrivateDataflow(dataflowId);
+        console.log(`data`, data);
+        // setDataflowData(data);
+        // setPublicInformation(data.datasets, data.manualAcceptance);
+        // setDocuments(data.documents);
+        // setWebLinks(data.webLinks);
+      } catch (error) {
+        console.error('PrivateDataflowInformation - onLoadDataflow.', error);
         if (error.response.status === 404 || error.response.status === 400) {
           setIsWrongUrlDataflowId(true);
         } else {

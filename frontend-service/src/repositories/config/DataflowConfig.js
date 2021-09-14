@@ -16,6 +16,7 @@ export const DataflowConfig = {
   getDatasetsReleasedStatus: '/datasetmetabase/dataflow/{:dataflowId}',
   getDatasetsValidationStatistics:
     '/datasetmetabase/globalStatistics/dataflow/{:dataflowId}/dataSchema/{:datasetSchemaId}',
+  getPrivateDataflow: '/dataflow/getPrivateDataflow/{:dataflowId}',
   getPublicData: '/dataflow/getPublicDataflows',
   getPublicDataflowData: '/dataflow/getPublicDataflow/{:dataflowId}',
   getPublicDataflowsByCountryCode:
