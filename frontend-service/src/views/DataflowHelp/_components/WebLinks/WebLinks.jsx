@@ -73,7 +73,7 @@ export const WebLinks = ({
   };
 
   useEffect(() => {
-    let webLinkKeys = !isEmpty(webLinks) ? getOrderedWeblinkColumns(Object.keys(webLinks[0])) : [];
+    const webLinkKeys = !isEmpty(webLinks) ? getOrderedWeblinkColumns(Object.keys(webLinks[0])) : [];
     let webLinkColArray = webLinkKeys
       .filter(key => key !== 'id')
       .map(key => {
