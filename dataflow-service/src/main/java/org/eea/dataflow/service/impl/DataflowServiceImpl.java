@@ -196,8 +196,12 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Transactional
-  public DataFlowVO getById(Long id) throws EEAException {
-    return getByIdWithCondition(id, true);
+  public DataFlowVO getById(Long id, boolean removeWeblinksAndDocuments) throws EEAException {
+    DataFlowVO result = getByIdWithCondition(id, true);
+    if (removeWeblinksAndDocuments) {
+      removeWebLinksAndDocuments(result);
+    }
+    return result;
   }
 
   /**
@@ -210,7 +214,14 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   @Transactional
   public DataFlowVO getByIdWithRepresentativesFilteredByUserEmail(Long id) throws EEAException {
-    return getByIdWithCondition(id, false);
+    DataFlowVO result = getByIdWithCondition(id, false);
+    removeWebLinksAndDocuments(result);
+    return result;
+  }
+
+  private void removeWebLinksAndDocuments(DataFlowVO result) {
+    result.setWeblinks(null);
+    result.setDocuments(null);
   }
 
   /**
@@ -505,7 +516,7 @@ public class DataflowServiceImpl implements DataflowService {
     // take the jpa entity
 
     try {
-      DataFlowVO dataflowVO = getById(idDataflow);
+      DataFlowVO dataflowVO = getById(idDataflow, false);
 
       // use it to take all datasets Design
 

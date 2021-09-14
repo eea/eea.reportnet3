@@ -225,7 +225,7 @@ public class DataFlowServiceImplTest {
     when(authentication.getName()).thenReturn("name");
     try {
 
-      dataflowServiceImpl.getById(null);
+      dataflowServiceImpl.getById(null, false);
     } catch (EEAException ex) {
       assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, ex.getMessage());
       throw ex;
@@ -278,7 +278,7 @@ public class DataFlowServiceImplTest {
     obligation.setObligationId(1);
     dataFlowVO.setObligation(obligation);
     dataFlowVO.setWeblinks(weblinks);
-    assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
+    assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L, false));
   }
 
   @Test
@@ -323,7 +323,7 @@ public class DataFlowServiceImplTest {
     obligation.setObligationId(1);
     dataFlowVO.setObligation(obligation);
     dataFlowVO.setWeblinks(weblinks);
-    assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L));
+    assertEquals("fail", dataFlowVO, dataflowServiceImpl.getById(1L, false));
   }
 
   /**
@@ -1189,7 +1189,7 @@ public class DataFlowServiceImplTest {
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
         .thenReturn(new ArrayList<>());
 
-    DataFlowVO searchDataflow = dataflowServiceImpl.getById(1L);
+    DataFlowVO searchDataflow = dataflowServiceImpl.getById(1L, false);
 
     assertEquals("Datasets don't match when using getDataflowByID", emptyDataflow, searchDataflow);
   }
