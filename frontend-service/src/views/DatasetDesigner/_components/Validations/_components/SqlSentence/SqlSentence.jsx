@@ -61,13 +61,13 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
   const getCodeKeyword = () => {
     switch (dataflowType) {
       case config.dataflowType.BUSINESS.value:
-        return `${config.COMPANY_CODE_KEYWORD}`;
+        return config.COMPANY_CODE_KEYWORD;
 
       case config.dataflowType.CITIZEN_SCIENCE.value:
-        return `${config.ORGANIZATION_CODE_KEYWORD}`;
+        return config.ORGANIZATION_CODE_KEYWORD;
 
       default:
-        return `${config.COUNTRY_CODE_KEYWORD}`;
+        return config.COUNTRY_CODE_KEYWORD;
     }
   };
 
@@ -97,6 +97,19 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
     }
   };
 
+  const getButtonLabel = () => {
+    switch (dataflowType) {
+      case config.dataflowType.BUSINESS.value:
+        return resourcesContext.messages['countryCodeAcronym'];
+
+      case config.dataflowType.CITIZEN_SCIENCE.value:
+        return resourcesContext.messages['organizationCodeAcronym'];
+
+      default:
+        return resourcesContext.messages['countryCodeAcronym'];
+    }
+  };
+
   return (
     <div className={styles.section}>
       <div className={styles.content}>
@@ -114,7 +127,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
-              label={resourcesContext.messages['countryCodeAcronym']}
+              label={getButtonLabel()}
               onClick={onCCButtonClick}
               tooltip={getButtonTooltipMessage()}
               tooltipOptions={{ position: 'top' }}

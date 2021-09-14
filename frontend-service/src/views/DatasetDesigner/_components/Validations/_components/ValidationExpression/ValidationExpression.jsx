@@ -18,9 +18,9 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import isNil from 'lodash/isNil';
 
 const ValidationExpression = ({
+  dataflowType,
   expressionValues,
   fieldType,
-  isBusinessDataflow,
   isDisabled,
   onExpressionDelete,
   onExpressionFieldUpdate,
@@ -240,11 +240,48 @@ const ValidationExpression = ({
       );
     }
 
+    const getCodeKeyword = () => {
+      switch (dataflowType) {
+        case config.dataflowType.BUSINESS.value:
+          return config.COMPANY_CODE_KEYWORD;
+
+        case config.dataflowType.CITIZEN_SCIENCE.value:
+          return config.ORGANIZATION_CODE_KEYWORD;
+
+        default:
+          return config.COUNTRY_CODE_KEYWORD;
+      }
+    };
+
+    const getButtonTooltipMessage = () => {
+      switch (dataflowType) {
+        case config.dataflowType.BUSINESS.value:
+          return resourcesContext.messages['matchStringCompanyTooltip'];
+
+        case config.dataflowType.CITIZEN_SCIENCE.value:
+          return resourcesContext.messages['matchStringOrganizationTooltip'];
+
+        default:
+          return resourcesContext.messages['matchStringTooltip'];
+      }
+    };
+
+    const getButtonLabel = () => {
+      switch (dataflowType) {
+        case config.dataflowType.BUSINESS.value:
+          return resourcesContext.messages['countryCodeAcronym'];
+
+        case config.dataflowType.CITIZEN_SCIENCE.value:
+          return resourcesContext.messages['organizationCodeAcronym'];
+
+        default:
+          return resourcesContext.messages['countryCodeAcronym'];
+      }
+    };
+
     if (operatorType === 'string') {
       if (operatorValue === 'MATCH') {
-        const ccButtonValue = `${expressionValues.expressionValue}${
-          isBusinessDataflow ? config.COMPANY_CODE_KEYWORD : config.COUNTRY_CODE_KEYWORD
-        }`;
+        const ccButtonValue = `${expressionValues.expressionValue}${getCodeKeyword()}`;
         return (
           <span className={styles.inputStringMatch}>
             <InputText
@@ -257,13 +294,9 @@ const ValidationExpression = ({
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
-              label="CC"
+              label={getButtonLabel()}
               onClick={() => onCCButtonClick(ccButtonValue)}
-              tooltip={
-                isBusinessDataflow
-                  ? resourcesContext.messages['matchStringCompanyTooltip']
-                  : resourcesContext.messages['matchStringTooltip']
-              }
+              tooltip={getButtonTooltipMessage()}
               tooltipOptions={{ position: 'top' }}
             />
           </span>

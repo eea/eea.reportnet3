@@ -1259,6 +1259,7 @@
     "createNewCitizenScienceDataflow": "Create new citizen science dataflow",
     "reportingDatasets": "Reporting datasets",
     "matchStringOrganizationTooltip": "Click to use organization code variable",
-    "sqlSentenceOrganizationCodeNote": "<i>Note: You can include the keyword {%R3_ORGANIZATION_CODE%} to use the organization code in the SQL sentence."
+    "sqlSentenceOrganizationCodeNote": "<i>Note: You can include the keyword {%R3_ORGANIZATION_CODE%} to use the organization code in the SQL sentence.",
+    "organizationCodeAcronym": "OC"
   }
 }
