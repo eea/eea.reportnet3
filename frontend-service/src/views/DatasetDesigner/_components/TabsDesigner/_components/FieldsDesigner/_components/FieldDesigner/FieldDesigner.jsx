@@ -28,6 +28,7 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
+import { FieldsDesignerUtils } from 'views/_functions/Utils/FieldsDesignerUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const FieldDesigner = ({
@@ -206,11 +207,7 @@ export const FieldDesigner = ({
   }, [totalFields]);
 
   const getDuplicatedName = () => {
-    const filteredFields = fields.filter(field => {
-      console.log(field.name.startsWith(`${fieldDesignerState.fieldValue}_`));
-      return field.name.startsWith(`${fieldDesignerState.fieldValue}_`);
-    });
-    console.log(filteredFields);
+    const filteredFields = fields.filter(field => field.name.startsWith(`${fieldDesignerState.fieldValue}_`));
     return `${fieldDesignerState.fieldValue}_${filteredFields.length}`;
   };
 
@@ -249,7 +246,6 @@ export const FieldDesigner = ({
             !fieldDesignerState.addFieldCallSent
           ) {
             dispatchFieldDesigner({ type: 'SET_ADD_FIELD_SENT', payload: true });
-            console.log('Llego 1');
             onFieldAdd({
               type: parseGeospatialTypes(type.fieldType),
               pk: geometricTypes.includes(type.fieldType.toUpperCase()) ? false : fieldDesignerState.fieldPKValue
@@ -292,7 +288,6 @@ export const FieldDesigner = ({
             (fieldDesignerState.fieldTypeValue !== '') & !isNil(fieldDesignerState.fieldValue) &&
             fieldDesignerState.fieldValue !== ''
           ) {
-            console.log('Llego 2');
             onFieldAdd({ description: description });
           }
         } else {
@@ -329,10 +324,8 @@ export const FieldDesigner = ({
               );
               dispatchFieldDesigner({ type: 'SET_NAME', payload: fieldDesignerState.initialFieldValue });
             } else {
-              console.log(name, fieldId);
               if (!checkDuplicates(name, fieldId)) {
                 if (!isNil(fieldDesignerState.fieldTypeValue) && fieldDesignerState.fieldTypeValue !== '') {
-                  console.log('Llego 3');
                   onFieldAdd({ name });
                 }
               } else {
@@ -389,7 +382,6 @@ export const FieldDesigner = ({
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
         if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
-          console.log('Llego 4');
           onFieldAdd({ validExtensions: fieldFileProperties.validExtensions, maxSize: fieldFileProperties.maxSize });
         }
       }
@@ -418,7 +410,6 @@ export const FieldDesigner = ({
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
         if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
-          console.log('Llego 5');
           onFieldAdd({
             codelistItems,
             type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
@@ -441,7 +432,6 @@ export const FieldDesigner = ({
     if (!isUndefined(fieldId)) {
       if (fieldId.toString() === '-1') {
         if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
-          console.log('Llego 6');
           onFieldAdd({ codelistItems });
         }
       }
@@ -490,7 +480,6 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions,
     isDuplicated = false
   }) => {
-    console.log('onFieldAdd');
     try {
       setIsLoading(true);
       const response = await DatasetService.createRecordDesign(datasetId, {
@@ -630,7 +619,6 @@ export const FieldDesigner = ({
     if (!fieldDesignerState.isDragging) {
       if (fieldId === '-1') {
         if (validField()) {
-          console.log('Llego 7');
           onFieldAdd({ pk: checked });
         }
       } else {
@@ -644,7 +632,6 @@ export const FieldDesigner = ({
     if (!fieldDesignerState.isDragging) {
       if (fieldId === '-1') {
         if (validField()) {
-          console.log('Llego 8');
           onFieldAdd({ readOnly: checked });
         }
       } else {
@@ -658,7 +645,6 @@ export const FieldDesigner = ({
     if (!fieldDesignerState.isDragging) {
       if (fieldId === '-1') {
         if (validField()) {
-          console.log('Llego 9');
           onFieldAdd({ required: checked });
         }
       } else {
@@ -683,7 +669,6 @@ export const FieldDesigner = ({
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
-          console.log('Llego 10');
           onFieldAdd({ validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize });
         } else {
           fieldUpdate({ validExtensions: fileProperties.validExtensions, maxSize: fileProperties.maxSize });
@@ -705,7 +690,6 @@ export const FieldDesigner = ({
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
-          console.log('Llego 11');
           onFieldAdd({ codelistItems });
         } else {
           fieldUpdate({ codelistItems });
@@ -754,7 +738,6 @@ export const FieldDesigner = ({
     } else {
       if (!isUndefined(fieldId)) {
         if (fieldId.toString() === '-1') {
-          console.log('Llego 12', fields);
           onFieldAdd({
             codelistItems,
             type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
@@ -1108,7 +1091,6 @@ export const FieldDesigner = ({
         href="#"
         onClick={e => {
           e.preventDefault();
-          console.log('Llego 13');
           onFieldAdd({
             codelistItems: fieldDesignerState.codelistItems,
             description: fieldDesignerState.fieldDescriptionValue,
@@ -1164,8 +1146,42 @@ export const FieldDesigner = ({
           id={`${fieldDesignerState.fieldValue}_mark_to_delete`}
           inputId={`${fieldDesignerState.fieldValue}_mark_to_delete`}
           onChange={e => {
-            console.log(e.shiftKey);
-            onBulkCheck(e.checked, fieldId, fieldDesignerState.fieldTypeValue, fieldDesignerState.fieldValue);
+            if (e.originalEvent.shiftKey && markedForDeletion.length > 0) {
+              const idx = FieldsDesignerUtils.getIndexByFieldId(fieldId, fields);
+              const lastMarkedFieldIdx =
+                markedForDeletion.length > 0 ? markedForDeletion[markedForDeletion.length - 1].fieldIndex : -1;
+              if (lastMarkedFieldIdx !== -1) {
+                const initIdx = idx > lastMarkedFieldIdx ? lastMarkedFieldIdx : idx;
+                const lastIdx = idx > lastMarkedFieldIdx ? idx : lastMarkedFieldIdx;
+                const fieldsSelected = [
+                  {
+                    checked: true,
+                    fieldId,
+                    fieldType: fieldDesignerState.fieldTypeValue,
+                    fieldName: fieldDesignerState.fieldValue,
+                    fieldIndex: index
+                  }
+                ];
+                for (let i = initIdx; i <= lastIdx; i++) {
+                  fieldsSelected.push({
+                    checked: true,
+                    fieldId: fields[i].fieldId,
+                    fieldType: fields[i].type,
+                    fieldName: fields[i].name,
+                    fieldIndex: i
+                  });
+                }
+                onBulkCheck({ fieldsSelected, multiple: true });
+              }
+            } else {
+              onBulkCheck({
+                checked: e.checked,
+                fieldId,
+                fieldType: fieldDesignerState.fieldTypeValue,
+                fieldName: fieldDesignerState.fieldValue,
+                fieldIndex: index
+              });
+            }
           }}
           role="checkbox"
         />

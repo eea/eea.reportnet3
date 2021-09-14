@@ -33,7 +33,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
-import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
+import { FieldsDesignerUtils } from 'views/_functions/Utils/FieldsDesignerUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -123,11 +123,29 @@ export const FieldsDesigner = ({
     ReactTooltip.rebuild();
   }, [bulkDelete]);
 
-  const onBulkCheck = (checked, fieldId, fieldType, fieldName) => {
-    if (checked) {
-      setMarkedForDeletion([...markedForDeletion, { fieldId, fieldType, fieldName }]);
+  const onBulkCheck = ({
+    checked,
+    fieldId,
+    fieldIndex,
+    fieldName,
+    fieldsSelected = [],
+    fieldType,
+    multiple = false
+  }) => {
+    if (multiple) {
+      const inmMarkedForDeletion = [...markedForDeletion];
+      fieldsSelected.forEach(field => {
+        if (!markedForDeletion.some(markedField => markedField.fieldId === field.fieldId)) {
+          inmMarkedForDeletion.push(field);
+        }
+      });
+      setMarkedForDeletion(inmMarkedForDeletion);
     } else {
-      setMarkedForDeletion(markedForDeletion.filter(markedField => markedField.fieldId !== fieldId));
+      if (checked) {
+        setMarkedForDeletion([...markedForDeletion, { fieldId, fieldType, fieldName, fieldIndex }]);
+      } else {
+        setMarkedForDeletion(markedForDeletion.filter(markedField => markedField.fieldId !== fieldId));
+      }
     }
   };
 
@@ -315,11 +333,9 @@ export const FieldsDesigner = ({
 
     Promise.all(deletionPromises)
       .then(() => {
-        const inmFields = [...fields];
-        const filteredFields = inmFields.filter(
+        const filteredFields = fields.filter(
           inmField => !markedForDeletion.some(markedField => markedField.fieldId === inmField.fieldId)
         );
-        console.log(inmFields, markedForDeletion);
         onChangeFields(
           filteredFields,
           markedForDeletion.some(markedField => TextUtils.areEquals(markedField.fieldType.fieldType, 'LINK')) ||
@@ -957,9 +973,16 @@ export const FieldsDesigner = ({
               </div>
             )}
             <ReactTooltip border={true} effect="solid" id="bulkDeleteTooltip" place="top">
-              {!bulkDelete
-                ? resourcesContext.messages['bulkDeleteCheckTooltip']
-                : resourcesContext.messages['bulkDeleteConfirmTooltip']}
+              {!bulkDelete ? (
+                <div>
+                  <p>{resourcesContext.messages['bulkDeleteCheckTooltip']}</p>
+                  <p className={styles.bulkCancelDeleteButtonTooltip}>
+                    {resourcesContext.messages['bulkDeleteCheckTooltipShift']}
+                  </p>
+                </div>
+              ) : (
+                resourcesContext.messages['bulkDeleteConfirmTooltip']
+              )}
             </ReactTooltip>
             <ReactTooltip border={true} effect="solid" id="bulkDeleteCancelTooltip" place="top">
               {resourcesContext.messages['cancel']}

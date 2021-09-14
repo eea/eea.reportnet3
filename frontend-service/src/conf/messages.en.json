@@ -1263,6 +1263,7 @@
     "bulkDeleteCheckTooltip": "Delete multiple fields",
     "bulkDeleteConfirmTooltip": "Confirm",
     "duplicateDisabledTitle": "Duplicate disabled:",
-    "duplicateDisabledMessage": "already exists"
+    "duplicateDisabledMessage": "already exists",
+    "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field"
   }
 }
