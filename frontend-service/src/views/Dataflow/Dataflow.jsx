@@ -81,7 +81,7 @@ const Dataflow = withRouter(({ history, match }) => {
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
-    IsAdminAssignedDataflow: false,
+    isAdminAssignedDataflow: false,
     isApiKeyDialogVisible: false,
     isBusinessDataflow: false,
     isCitizenScienceDataflow: false,
