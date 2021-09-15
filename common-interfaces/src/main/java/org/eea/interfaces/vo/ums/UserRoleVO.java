@@ -20,6 +20,6 @@ public class UserRoleVO {
   private List<String> roles;
 
   /** The country. */
-  private String country;
+  private String datasetProviderName;
 
 }
