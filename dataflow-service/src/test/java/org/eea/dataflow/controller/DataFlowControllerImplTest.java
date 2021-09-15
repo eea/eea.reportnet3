@@ -153,7 +153,7 @@ public class DataFlowControllerImplTest {
     SecurityContextHolder.setContext(securityContext);
 
     doReturn(authorities).when(authentication).getAuthorities();
-    when(dataflowService.getById(Mockito.anyLong())).thenReturn(dataflowVO);
+    when(dataflowService.getById(Mockito.anyLong(), Mockito.anyBoolean())).thenReturn(dataflowVO);
     assertEquals("fail", dataflowVO, dataFlowControllerImpl.findById(1L, null));
   }
 
