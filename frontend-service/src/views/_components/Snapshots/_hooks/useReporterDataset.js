@@ -5,6 +5,8 @@ import { useSnapshotReducer } from './useSnapshotReducer';
 import { SnapshotService } from 'services/SnapshotService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+
 const useReporterDataset = (datasetId, dataflowId) => {
   const notificationContext = useContext(NotificationContext);
 
@@ -35,9 +37,9 @@ const useReporterDataset = (datasetId, dataflowId) => {
 
   const onCreateSnapshot = async () => {
     try {
+      setIsLoadingSnapshotListData(true);
       await SnapshotService.createReporter(datasetId, snapshotState.description);
       snapshotDispatch({ type: 'ON_SNAPSHOT_RESET' });
-      onLoadSnapshotList();
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -70,18 +72,17 @@ const useReporterDataset = (datasetId, dataflowId) => {
     try {
       setIsLoadingSnapshotListData(true);
 
-      //SetTimeout for avoiding the overlapping between the slidebar transition and the api call
-      setTimeout(async () => {
-        const snapshotsData = await SnapshotService.getAllReporter(datasetId);
-        setSnapshotListData(snapshotsData);
-        setIsLoadingSnapshotListData(false);
-      }, 500);
+      const snapshotsData = await SnapshotService.getAllReporter(datasetId);
+      setSnapshotListData(snapshotsData);
+      setIsLoadingSnapshotListData(false);
     } catch (error) {
       console.error('useReporterDataset - onLoadSnapshotList.', error);
       notificationContext.add({ type: 'ALL_REPORTER_ERROR', content: {} });
       setIsLoadingSnapshotListData(false);
     }
   };
+
+  useCheckNotifications(['ADD_DATASET_SNAPSHOT_COMPLETED_EVENT'], onLoadSnapshotList);
 
   const onRestoreSnapshot = async () => {
     try {
