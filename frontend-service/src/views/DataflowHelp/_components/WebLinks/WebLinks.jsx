@@ -58,35 +58,47 @@ export const WebLinks = ({
     if (!isNil(inputRef.current)) inputRef.current.focus();
   }, [inputRef, webLinksState.isAddOrEditWebLinkDialogVisible]);
 
-  const getOrderedWebLinkKeysColumns = () => {
-    return ['description', 'url', 'isPublic'];
+  const webLinksFields = [
+    { name: 'description', label: resourcesContext.messages['description'] },
+    { name: 'url', label: resourcesContext.messages['url'] },
+    { name: 'isPublic', label: resourcesContext.messages['isPublic'] }
+  ];
+
+  const getWebLinksColumns = () => {
+    const webLinksColumns = webLinksFields.map(field => {
+      let template = null;
+      if (field.name === 'url') template = linkTemplate;
+      else if (field.name === 'isPublic') template = isPublicColumnTemplate;
+      return (
+        <Column
+          body={template}
+          columnResizeMode="expand"
+          field={field.name}
+          filter={false}
+          filterMatchMode="contains"
+          header={field.label}
+          key={field.name}
+          sortable={!isEmpty(webLinks)}
+        />
+      );
+    });
+
+    if (isToolbarVisible) {
+      webLinksColumns.push(
+        <Column
+          body={row => webLinkEditButtons(row)}
+          className={styles.crudColumn}
+          header={resourcesContext.messages['actions']}
+          key={'buttonsUniqueId'}
+        />
+      );
+    }
+
+    webLinksDispatch({ type: 'SET_WEB_LINKS_COLUMNS', payload: { webLinksColumns } });
   };
 
   useEffect(() => {
-    const webLinkKeys = !isEmpty(webLinks) ? getOrderedWebLinkKeysColumns() : [];
-    const webLinkColArray = webLinkKeys
-      .filter(key => key !== 'id')
-      .map(key => {
-        let template = null;
-        if (key === 'url') template = linkTemplate;
-        if (key === 'isPublic') template = isPublicColumnTemplate;
-        return (
-          <Column
-            body={template}
-            columnResizeMode="expand"
-            field={key}
-            filter={false}
-            filterMatchMode="contains"
-            header={getHeader(key)}
-            key={key}
-            sortable={true}
-          />
-        );
-      });
-
-    webLinkColArray.push(webLinkEditionColumn);
-
-    webLinksDispatch({ type: 'SET_WEB_LINKS_COLUMNS', payload: { webLinksColumns: webLinkColArray } });
+    getWebLinksColumns();
   }, [webLinks, webLinksState.webLink, isToolbarVisible, isLoading]);
 
   const checkIsValidUrl = url => RegularExpressions['url'].test(url);
@@ -116,13 +128,6 @@ export const WebLinks = ({
     return hasErrors;
   };
 
-  const getHeader = fieldHeader => {
-    switch (fieldHeader) {
-      default:
-        return resourcesContext.messages[fieldHeader];
-    }
-  };
-
   const isPublicColumnTemplate = rowData => (
     <div className={styles.iconStyle}>
       <span>
@@ -134,16 +139,6 @@ export const WebLinks = ({
       </span>
     </div>
   );
-
-  const fieldsArray = [
-    { field: 'description', header: resourcesContext.messages['description'] },
-    { field: 'url', header: resourcesContext.messages['url'] },
-    { field: 'isPublic', header: resourcesContext.messages['isPublic'] }
-  ];
-
-  const emptyWebLinkColumns = fieldsArray.map(item => (
-    <Column field={item.field} header={item.header} key={item.field} />
-  ));
 
   const getValidUrl = (url = '') => {
     let newUrl = window.decodeURIComponent(url);
@@ -326,10 +321,6 @@ export const WebLinks = ({
     );
   };
 
-  const webLinkEditionColumn = (
-    <Column body={row => webLinkEditButtons(row)} key={'buttonsUniqueId'} style={{ width: '5em' }} />
-  );
-
   return (
     <Fragment>
       {isToolbarVisible && (
@@ -357,7 +348,7 @@ export const WebLinks = ({
         sortField={sortFieldWebLinks}
         sortOrder={sortOrderWebLinks}
         value={webLinks}>
-        {!isEmpty(webLinks) ? webLinksState.webLinksColumns : emptyWebLinkColumns}
+        {webLinksState.webLinksColumns}
       </DataTable>
 
       {isLoading && isEmpty(webLinks) && <Spinner style={{ top: 0 }} />}
