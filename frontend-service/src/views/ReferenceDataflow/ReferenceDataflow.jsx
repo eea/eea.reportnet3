@@ -53,6 +53,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     designDatasetSchemas: [],
     error: null,
     isAdmin: false,
+    IsAdminAssignedDataflow: false,
     isApiKeyDialogVisible: false,
     isCreatingReferenceDatasets: false,
     isCustodian: false,
@@ -139,6 +140,12 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_IS_CREATING_REFERENCE_DATASETS', payload: { isCreatingReferenceDatasets } });
   }
 
+  const setIsAdminAssignedDataflow = value => {
+    dataflowDispatch({
+      type: 'SET_IS_ADMIN_ASSIGNED_DATAFLOW',
+      payload: { isAdminAssignedDataflow: value }
+    });
+  };
   const setIsUserRightManagementDialogVisible = isVisible => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
   };
@@ -246,7 +253,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={'cancel'}
         label={resourcesContext.messages['cancel']}
-        onClick={() => manageDialogs(`isManageRequestersDialogVisible`, false)}
+        onClick={() => {
+          manageDialogs(`isManageRequestersDialogVisible`, false);
+          if (dataflowState.isAdminAssignedDataflow) {
+            onLoadReferenceDataflow();
+            onRefreshToken();
+          }
+        }}
       />
     </div>
   );
@@ -350,7 +363,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         <Dialog
           footer={shareRightsFooterDialogFooter}
           header={resourcesContext.messages['manageRequestersRights']}
-          onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
+          onHide={() => {
+            manageDialogs('isManageRequestersDialogVisible', false);
+            if (dataflowState.isAdminAssignedDataflow) {
+              onLoadReferenceDataflow();
+              onRefreshToken();
+            }
+          }}
           visible={dataflowState.isManageRequestersDialogVisible}>
           <ShareRights
             addConfirmHeader={resourcesContext.messages['addRequesterConfirmHeader']}
@@ -366,6 +385,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
             placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}
             roleOptions={requesterRoleOptions}
+            setIsAdminAssignedDataflow={setIsAdminAssignedDataflow}
             setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
             updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
             userType={'requester'}
