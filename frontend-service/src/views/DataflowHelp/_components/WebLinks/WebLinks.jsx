@@ -58,22 +58,12 @@ export const WebLinks = ({
     if (!isNil(inputRef.current)) inputRef.current.focus();
   }, [inputRef, webLinksState.isAddOrEditWebLinkDialogVisible]);
 
-  const getOrderedWeblinkColumns = webLinks => {
-    const representativesWithPriority = [
-      { id: 'description', index: 0 },
-      { id: 'url', index: 1 },
-      { id: 'isPublic', index: 2 }
-    ];
-
-    return webLinks
-      .map(field => representativesWithPriority.filter(e => field === e.id))
-      .flat()
-      .sort((a, b) => a.index - b.index)
-      .map(orderedField => orderedField.id);
+  const getOrderedWebLinkKeysColumns = () => {
+    return ['description', 'url', 'isPublic'];
   };
 
   useEffect(() => {
-    const webLinkKeys = !isEmpty(webLinks) ? getOrderedWeblinkColumns(Object.keys(webLinks[0])) : [];
+    let webLinkKeys = !isEmpty(webLinks) ? getOrderedWebLinkKeysColumns() : [];
     let webLinkColArray = webLinkKeys
       .filter(key => key !== 'id')
       .map(key => {
@@ -94,7 +84,7 @@ export const WebLinks = ({
         );
       });
 
-    if (isToolbarVisible) webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
+    webLinkColArray.push(webLinkEditionColumn);
 
     webLinksDispatch({ type: 'SET_WEB_LINKS_COLUMNS', payload: { webLinksColumns: webLinkColArray } });
   }, [webLinks, webLinksState.webLink, isToolbarVisible, isLoading]);
@@ -147,8 +137,8 @@ export const WebLinks = ({
 
   const fieldsArray = [
     { field: 'description', header: resourcesContext.messages['description'] },
-    { field: 'isPublic', header: resourcesContext.messages['isPublic'] },
-    { field: 'url', header: resourcesContext.messages['url'] }
+    { field: 'url', header: resourcesContext.messages['url'] },
+    { field: 'isPublic', header: resourcesContext.messages['isPublic'] }
   ];
 
   const emptyWebLinkColumns = fieldsArray.map(item => (
