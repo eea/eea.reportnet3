@@ -416,7 +416,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await DatasetService.validate(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
-        content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
+        content: { dataProviderName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
       });
     } catch (error) {
       if (error.response.status === 423) {
@@ -427,7 +427,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         console.error('Dataset - onConfirmValidate.', error);
         notificationContext.add({
           type: 'VALIDATE_DATA_BY_ID_ERROR',
-          content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
+          content: {
+            dataProviderName: datasetName,
+            dataflowId,
+            dataflowName,
+            datasetId,
+            datasetName: datasetSchemaName
+          }
         });
       }
     }

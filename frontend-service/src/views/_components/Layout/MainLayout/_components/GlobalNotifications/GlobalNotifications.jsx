@@ -218,7 +218,7 @@ const GlobalNotifications = () => {
     notificationContext.add({
       type: 'VALIDATE_DATA_INIT',
       content: {
-        countryName: 'REPORTING',
+        dataProviderName: 'REPORTING',
         dataflowId,
         dataflowName,
         datasetId,
@@ -260,7 +260,7 @@ const GlobalNotifications = () => {
     notificationContext.add({
       type: 'VALIDATE_DATA_INIT',
       content: {
-        countryName: 'DESIGN',
+        dataProviderName: 'DESIGN',
         dataflowId,
         dataflowName,
         datasetId,

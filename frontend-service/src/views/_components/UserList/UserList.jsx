@@ -97,7 +97,7 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
       type: 'multiselect',
       properties: [
         {
-          name: 'country',
+          name: 'dataProviderName',
           showInput: true,
           label: getCodeLabel()
         }
@@ -171,7 +171,7 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
               <Column field="role" header={resourcesContext.messages['role']} sortable={true} />
               <Column field="email" header={resourcesContext.messages['user']} sortable={true} />
               {isNil(representativeId) && !isNil(dataflowId) && (
-                <Column field="country" header={getCodeLabel()} sortable={true} />
+                <Column field="dataProviderName" header={getCodeLabel()} sortable={true} />
               )}
             </DataTable>
           ) : (
