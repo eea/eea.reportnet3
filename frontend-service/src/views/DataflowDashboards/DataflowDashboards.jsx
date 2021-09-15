@@ -37,15 +37,15 @@ export const DataflowDashboards = withRouter(
 
     const [dashboardInitialValues, setDashboardInitialValues] = useState({});
     const [dataflowName, setDataflowName] = useState('');
-    const [dataSchema, setDataSchema] = useState();
     const [dataflowType, setDataflowType] = useState('');
+    const [dataSchema, setDataSchema] = useState();
     const [isLoading, setIsLoading] = useState(true);
 
     useBreadCrumbs({
       currentPage: CurrentPage.DATAFLOW_DASHBOARDS,
       dataflowId,
-      history,
       dataflowType,
+      history,
       isLoading
     });
 

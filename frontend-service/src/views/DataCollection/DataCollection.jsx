@@ -44,11 +44,11 @@ export const DataCollection = withRouter(({ match, history }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [dataCollectionName, setDataCollectionName] = useState();
-  const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [dataflowName, setDataflowName] = useState('');
+  const [dataflowType, setDataflowType] = useState('');
+  const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [dataViewerOptions, setDataViewerOptions] = useState({ activeIndex: null });
   const [exportButtonsList, setExportButtonsList] = useState([]);
-  const [dataflowType, setDataflowType] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);

@@ -484,11 +484,11 @@ export const useSetColumns = (
   }, [
     colsSchema,
     columnOptions,
+    dataflowType,
     hasWebformWritePermissions,
     hasWritePermissions,
     initialCellValue,
-    records.selectedRecord.recordId,
-    dataflowType
+    records.selectedRecord.recordId
   ]);
 
   return {

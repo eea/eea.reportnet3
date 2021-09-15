@@ -81,13 +81,14 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
-    availableInPublic: false,
     areLoadedSchemas: false,
     arePrefilledTablesDeleted: false,
     areUpdatingTables: false,
-    dashDialogVisible: false,
+    availableInPublic: false,
     constraintManagingId: '',
+    dashDialogVisible: false,
     dataflowName: '',
+    dataflowType: '',
     datasetDescription: '',
     datasetHasData: false,
     datasetSchema: {},
@@ -105,7 +106,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       selectedTableSchemaId: null,
       tableSchemaId: QuerystringUtils.getUrlParamValue('tab')
     },
-    isDeleteDialogVisible: false,
     exportButtonsList: [],
     exportDatasetFileType: '',
     externalOperationsList: { export: [], import: [], importOtherSystems: [] },
@@ -113,13 +113,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     importButtonsList: [],
     initialDatasetDescription: '',
     isCitizenScienceDataflow: false,
-    dataflowType: '',
     isConfigureWebformDialogVisible: false,
     isDataflowOpen: false,
     isDataUpdated: false,
-    isDuplicatedToManageUnique: false,
+    isDeleteDialogVisible: false,
     isDownloadingQCRules: false,
     isDownloadingValidations: false,
+    isDuplicatedToManageUnique: false,
     isExportTableSchemaDialogVisible: false,
     isImportDatasetDialogVisible: false,
     isImportOtherSystemsDialogVisible: false,
@@ -132,9 +132,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     isRefreshHighlighted: false,
     isTableCreated: false,
     isUniqueConstraintCreating: false,
-    isUniqueConstraintUpdating: false,
     isUniqueConstraintsListDialogVisible: false,
+    isUniqueConstraintUpdating: false,
     isValidateDialogVisible: false,
+    isValidationsTabularView: false,
     isValidationViewerVisible: false,
     levelErrorTypes: [],
     manageUniqueConstraintData: {
@@ -149,8 +150,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     referenceDataset: false,
     refresh: false,
     replaceData: false,
-    selectedImportExtension: null,
     schemaTables: [],
+    selectedImportExtension: null,
+    selectedWebform: undefined,
     tabs: [],
     uniqueConstraintsList: [],
     validationListDialogVisible: false,
@@ -159,9 +161,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       tabularData: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'tabularData'),
       webform: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'webform')
     },
-    webform: null,
-    selectedWebform: undefined,
-    isValidationsTabularView: false
+    webform: null
   });
 
   const {

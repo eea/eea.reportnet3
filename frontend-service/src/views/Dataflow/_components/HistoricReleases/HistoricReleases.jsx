@@ -37,10 +37,10 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   const userContext = useContext(UserContext);
 
   const [historicReleasesState, historicReleasesDispatch] = useReducer(historicReleasesReducer, {
-    dataProviderCodes: [],
     data: [],
-    filteredData: [],
+    dataProviderCodes: [],
     filtered: false,
+    filteredData: [],
     isLoading: true
   });
 

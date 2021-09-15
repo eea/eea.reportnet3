@@ -26,8 +26,8 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManualAcceptanceDatasets = ({
   dataflowId,
-  getManageAcceptanceDataset,
   dataflowType,
+  getManageAcceptanceDataset,
   isUpdatedManualAcceptanceDatasets,
   manageDialogs,
   refreshManualAcceptanceDatasets

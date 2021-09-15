@@ -46,9 +46,9 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const userContext = useContext(UserContext);
 
   const [dataflowName, setDataflowName] = useState();
+  const [dataflowType, setDataflowType] = useState('');
   const [datasetsSchemas, setDatasetsSchemas] = useState();
   const [documents, setDocuments] = useState([]);
-  const [dataflowType, setDataflowType] = useState('');
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
