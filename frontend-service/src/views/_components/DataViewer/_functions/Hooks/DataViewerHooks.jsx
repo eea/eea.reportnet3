@@ -19,10 +19,8 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { MapUtils } from 'views/_functions/Utils/MapUtils';
 import { RecordUtils } from 'views/_functions/Utils/RecordUtils';
-
-import { TextUtils } from 'repositories/_utils/TextUtils';
-
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
   const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
