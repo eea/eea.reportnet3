@@ -72,7 +72,7 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
     }
 
     // we find if the the dataset i in DESIGN or REPORTING
-    String country =
+    String datasetProviderName =
         "DESIGN".equalsIgnoreCase(dataSetMetabaseVO.getDatasetTypeEnum().getValue()) ? "DESIGN"
             : dataSetMetabaseVO.getDataSetName();
 
@@ -86,7 +86,7 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
     notification.put("dataflowId", dataSetMetabaseVO.getDataflowId());
     notification.put("datasetName", datasetName);
     notification.put("dataflowName", dataflowName);
-    notification.put("country", country);
+    notification.put("datasetProviderName", datasetProviderName);
     notification.put("type", type);
     return notification;
   }

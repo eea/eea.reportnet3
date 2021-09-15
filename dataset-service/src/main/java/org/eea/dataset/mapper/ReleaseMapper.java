@@ -50,7 +50,7 @@ public abstract class ReleaseMapper implements IMapper<Snapshot, ReleaseVO> {
   @AfterMapping
   public void afterMapping(Snapshot snapshot, @MappingTarget ReleaseVO releaseVO) {
     if (snapshot.getReportingDataset().getDataProviderId() != null) {
-      releaseVO.setCountryCode(representativeControllerZuul
+      releaseVO.setDatasetProviderCode(representativeControllerZuul
           .findDataProviderById(snapshot.getReportingDataset().getDataProviderId()).getCode());
     }
   }
