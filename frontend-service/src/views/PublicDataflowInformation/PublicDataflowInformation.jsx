@@ -324,8 +324,6 @@ export const PublicDataflowInformation = withRouter(
         };
       });
 
-      console.log(`representatives`, representatives);
-
       setRepresentatives(representatives);
     };
 
