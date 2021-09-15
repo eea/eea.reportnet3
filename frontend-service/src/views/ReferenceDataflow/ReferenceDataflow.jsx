@@ -53,7 +53,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     designDatasetSchemas: [],
     error: null,
     isAdmin: false,
-    IsAdminAssignedDataflow: false,
+    isAdminAssignedDataflow: false,
     isApiKeyDialogVisible: false,
     isCreatingReferenceDatasets: false,
     isCustodian: false,
@@ -154,6 +154,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const setIsUserRightManagementDialogVisible = isVisible => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
+  };
+
+  const onClickAdminAssignedDataflow = () => {
+    setIsLoading(true);
+    onRefreshToken();
+    onLoadReferenceDataflow();
+    setIsAdminAssignedDataflow(false);
   };
 
   const onSaveDatasetName = async (value, index) => {
@@ -264,9 +271,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         onClick={() => {
           manageDialogs(`isManageRequestersDialogVisible`, false);
           if (dataflowState.isAdminAssignedDataflow) {
-            setIsLoading(true);
-            onLoadReferenceDataflow();
-            onRefreshToken();
+            onClickAdminAssignedDataflow();
           }
         }}
       />
@@ -375,9 +380,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           onHide={() => {
             manageDialogs('isManageRequestersDialogVisible', false);
             if (dataflowState.isAdminAssignedDataflow) {
-              setIsLoading(true);
-              onLoadReferenceDataflow();
-              onRefreshToken();
+              onClickAdminAssignedDataflow();
             }
           }}
           visible={dataflowState.isManageRequestersDialogVisible}>
