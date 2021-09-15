@@ -356,7 +356,6 @@
     "documentEditingError": "Failed editing document",
     "isPublic": "Is public",
     "documents": "Documents",
-    "documentsActionColumns": "Actions",
     "documentSize": "Size",
     "checkboxIsPublic": "Mark as public",
     "documentUploadCompletedEvent": "Document upload complete successfully at <a href='{:navigateTo}' title='dataflowName'>{:shortDataflowName}</a>",
@@ -1252,10 +1251,11 @@
     "dataflowUsersByOrganizationList": "Users by organization",
     "organization": "Organization",
     "multipleFileExtensionIntegrations": "File extension/s",
-    "multipleFileExtensionToolTip": "You can put more than one extension separated by commas",
+    "multipleFileExtensionToolTip": "You can include more than one extension separated by commas",
     "size": "Size",
     "messages": "messages",
     "updateCitizenScienceDataflow": "Edit citizen science dataflow",
-    "createNewCitizenScienceDataflow": "Create new citizen science dataflow"
+    "createNewCitizenScienceDataflow": "Create new citizen science dataflow",
+    "reportingDatasets": "Reporting datasets"
   }
 }

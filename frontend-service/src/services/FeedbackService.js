@@ -15,13 +15,13 @@ export const FeedbackService = {
 
   getAllMessages: async (dataflowId, page, dataProviderId) => {
     const response = await FeedbackRepository.getAllMessages(dataflowId, page, dataProviderId);
-    response.data.listMessageVO = reverse(
-      response.data.listMessageVO.map(
+    response.data.listMessage = reverse(
+      response.data.listMessage.map(
         message =>
           new Feedback({
             ...message,
-            messageAttachment: !isNil(message.messageAttachmentVO)
-              ? new FeedbackMessageAttachment(message.messageAttachmentVO)
+            messageAttachment: !isNil(message.messageAttachment)
+              ? new FeedbackMessageAttachment(message.messageAttachment)
               : null
           })
       )

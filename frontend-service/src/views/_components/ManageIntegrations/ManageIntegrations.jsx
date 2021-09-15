@@ -86,8 +86,13 @@ export const ManageIntegrations = ({
   });
 
   const { editorView, externalParameters, parameterKey, parametersErrors } = manageIntegrationsState;
-  const { isDuplicatedIntegrationName, isDuplicatedParameter, isFormEmpty, isParameterEditing, printError } =
-    ManageIntegrationsUtils;
+  const {
+    isDuplicatedIntegrationName,
+    isDuplicatedParameter,
+    isFormEmpty,
+    isParameterEditing,
+    printError
+  } = ManageIntegrationsUtils;
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
@@ -345,11 +350,6 @@ export const ManageIntegrations = ({
     }
   };
 
-  const renderDialogFooterTooltipContent = () => {
-    if (isIntegrationNameDuplicated) return 'duplicatedIntegrationName';
-    return 'fcSubmitButtonDisabled';
-  };
-
   const renderCheckboxLayout = options => {
     return options.map(option => (
       <div className={`${styles.field} ${styles[option]} formField `} key={`${componentName}__${option}`}>
@@ -412,7 +412,9 @@ export const ManageIntegrations = ({
 
       {(isEmptyForm || isIntegrationNameDuplicated) && (
         <ReactTooltip border={true} effect="solid" id="integrationTooltip" place="top">
-          {resourcesContext.messages[renderDialogFooterTooltipContent()]}
+          {isIntegrationNameDuplicated
+            ? resourcesContext.messages['duplicatedIntegrationName']
+            : resourcesContext.messages['fcSubmitButtonDisabled']}
         </ReactTooltip>
       )}
     </Fragment>
@@ -495,30 +497,41 @@ export const ManageIntegrations = ({
     <Button icon="check" label={resourcesContext.messages['ok']} onClick={() => onToggleDialogError('', '', false)} />
   );
 
-  const renderFileInputExtension = option => (
-    <div
-      className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${
-        manageIntegrationsState.operation.value === 'IMPORT' ? styles.fileExtensionNotification : styles[option]
-      }`}
-      key={`${componentName}__${option}`}>
-      <label htmlFor={`${componentName}__${option}`}>
-        {resourcesContext.messages['multipleFileExtensionIntegrations']}
-        <TooltipButton
-          message={resourcesContext.messages['multipleFileExtensionToolTip']}
-          uniqueIdentifier={'multipleFileExtensionToolTip'}
+  const renderFileInputExtension = option => {
+    const isImport = manageIntegrationsState.operation.value === 'IMPORT';
+    return (
+      <div
+        className={`${styles.field} formField ${printError(option, manageIntegrationsState)} ${
+          isImport ? styles.fileExtensionNotification : styles[option]
+        }`}
+        key={`${componentName}__${option}`}>
+        <label htmlFor={`${componentName}__${option}`}>
+          {isImport
+            ? resourcesContext.messages['multipleFileExtensionIntegrations']
+            : resourcesContext.messages['fileExtension']}
+          {isImport && (
+            <TooltipButton
+              message={resourcesContext.messages['multipleFileExtensionToolTip']}
+              uniqueIdentifier={'multipleFileExtensionToolTip'}
+            />
+          )}
+        </label>
+        <InputText
+          id={`${componentName}__${option}`}
+          maxLength={config.MAX_FILE_EXTENSION_LENGTH}
+          onChange={event => onFillField(event.target.value, option)}
+          onKeyDown={event => onSaveKeyDown(event)}
+          placeholder={
+            isImport
+              ? resourcesContext.messages['multipleFileExtensionIntegrations']
+              : resourcesContext.messages['fileExtension']
+          }
+          ref={inputRefs[option]}
+          value={manageIntegrationsState[option]}
         />
-      </label>
-      <InputText
-        id={`${componentName}__${option}`}
-        maxLength={config.MAX_FILE_EXTENSION_LENGTH}
-        onChange={event => onFillField(event.target.value, option)}
-        onKeyDown={event => onSaveKeyDown(event)}
-        placeholder={resourcesContext.messages['multipleFileExtensionIntegrations']}
-        ref={inputRefs[option]}
-        value={manageIntegrationsState[option]}
-      />
-    </div>
-  );
+      </div>
+    );
+  };
 
   const renderInputLayout = (options = []) => {
     return options.map(option => {

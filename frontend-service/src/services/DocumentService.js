@@ -15,6 +15,8 @@ export const DocumentService = {
 
   download: async documentId => await DocumentRepository.download(documentId),
 
+  publicDownload: async documentId => await DocumentRepository.publicDownload(documentId),
+
   upload: async (dataflowId, description, language, file, isPublic) => {
     return await DocumentRepository.upload(dataflowId, description, language, file, isPublic);
   },

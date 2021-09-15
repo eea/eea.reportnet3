@@ -136,9 +136,11 @@ export const ManageDataflow = ({
 
   const getModalHeader = () => {
     if (isCitizenScienceDataflow) {
-      return resourcesContext.messages[isEditForm ? 'updateCitizenScienceDataflow' : 'createNewCitizenScienceDataflow'];
+      return isEditForm
+        ? resourcesContext.messages['updateCitizenScienceDataflow']
+        : resourcesContext.messages['createNewCitizenScienceDataflow'];
     }
-    return resourcesContext.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow'];
+    return isEditForm ? resourcesContext.messages['updateDataflow'] : resourcesContext.messages['createNewDataflow'];
   };
 
   const renderDataflowDialog = () => (
