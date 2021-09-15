@@ -220,6 +220,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
 
     weblinkFound.get().setDescription(weblink.getDescription());
     weblinkFound.get().setUrl(weblink.getUrl());
+    weblinkFound.get().setIsPublic(weblink.getIsPublic());
     webLinkRepository.save(weblinkFound.get());
     LOG.info("Save the link with id : {}", weblink.getId());
 
