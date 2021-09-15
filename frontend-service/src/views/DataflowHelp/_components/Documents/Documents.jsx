@@ -138,13 +138,15 @@ const Documents = ({
   );
 
   const isPublicColumnTemplate = rowData => (
-    <span>
-      {rowData.isPublic ? (
-        <FontAwesomeIcon aria-label={resourcesContext.messages['isPublic']} icon={AwesomeIcons('check')} />
-      ) : (
-        ''
-      )}
-    </span>
+    <div className={styles.iconStyle}>
+      <span>
+        {rowData.isPublic ? (
+          <FontAwesomeIcon aria-label={resourcesContext.messages['isPublic']} icon={AwesomeIcons('check')} />
+        ) : (
+          ''
+        )}
+      </span>
+    </div>
   );
 
   const onCancelDialog = () => {
