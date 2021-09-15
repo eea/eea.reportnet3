@@ -33,7 +33,6 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataflowHelp = withRouter(({ history, match }) => {
   const {

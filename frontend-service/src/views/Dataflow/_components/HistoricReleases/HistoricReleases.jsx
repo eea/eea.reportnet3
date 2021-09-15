@@ -12,8 +12,6 @@ import uniqBy from 'lodash/uniqBy';
 
 import styles from './HistoricReleases.module.scss';
 
-import { config } from 'conf';
-
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';

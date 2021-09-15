@@ -5,8 +5,6 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataflowDashboards.module.css';
 
-import { config } from 'conf';
-
 import { routes } from 'conf/routes';
 
 import { Button } from 'views/_components/Button';

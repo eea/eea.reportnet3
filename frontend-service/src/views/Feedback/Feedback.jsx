@@ -33,7 +33,6 @@ import { feedbackReducer } from './_functions/Reducers/feedbackReducer';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const Feedback = withRouter(({ match, history }) => {
   const {
