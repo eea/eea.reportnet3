@@ -225,7 +225,7 @@ export const PublicDataflowInformation = withRouter(
                   history.push(
                     getUrl(
                       routes.PUBLIC_COUNTRY_INFORMATION,
-                      { countryCode: getCountryCode(rowData.dataProviderName) }, // TODO
+                      { countryCode: getCountryCode(rowData.dataProviderName) },
                       true
                     )
                   );
