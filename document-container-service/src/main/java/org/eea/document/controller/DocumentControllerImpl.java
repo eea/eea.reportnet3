@@ -113,14 +113,16 @@ public class DocumentControllerImpl implements DocumentController {
    * Gets the document.
    *
    * @param documentId the document id
-   *
+   * @param dataflowId the dataflow id
    * @return the document
    */
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
-  @GetMapping(value = "/{documentId}", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  @GetMapping(value = "/{documentId}/dataflow/{dataflowId}",
+      produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   @HystrixCommand
-  public Resource getDocument(@PathVariable("documentId") final Long documentId) {
+  public Resource getDocument(@PathVariable("documentId") final Long documentId,
+      @PathVariable("dataflowId") final Long dataflowId) {
     try {
       DocumentVO document = dataflowController.getDocumentInfoById(documentId);
       if (document == null) {
@@ -173,17 +175,17 @@ public class DocumentControllerImpl implements DocumentController {
    * your own
    *
    * @param documentId the document id
+   * @param dataflowId the dataflow id
    * @param deleteMetabase the delete metabase
-   *
    * @throws Exception the exception
    */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
-  @DeleteMapping(value = "/{documentId}")
+  @DeleteMapping(value = "/{documentId}/dataflow/{dataflowId}")
   public void deleteDocument(@PathVariable("documentId") final Long documentId,
-      @RequestParam(value = "deleteMetabase", required = false,
-          defaultValue = "true") final Boolean deleteMetabase)
+      @PathVariable("dataflowId") final Long dataflowId, @RequestParam(value = "deleteMetabase",
+          required = false, defaultValue = "true") final Boolean deleteMetabase)
       throws Exception {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
@@ -208,7 +210,7 @@ public class DocumentControllerImpl implements DocumentController {
    * Update document.
    *
    * @param file the file
-   * @param dataFlowId the data flow id
+   * @param dataflowId the data flow id
    * @param description the description
    * @param language the language
    * @param idDocument the id document
@@ -217,9 +219,9 @@ public class DocumentControllerImpl implements DocumentController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
-  @PutMapping(value = "/update/{idDocument}/dataflow/{dataFlowId}")
+  @PutMapping(value = "/update/{idDocument}/dataflow/{dataflowId}")
   public void updateDocument(@RequestPart(name = "file", required = false) final MultipartFile file,
-      @PathVariable("dataFlowId") final Long dataFlowId,
+      @PathVariable("dataflowId") final Long dataflowId,
       @RequestParam(name = "description", required = false) final String description,
       @RequestParam(name = "language", required = false) final String language,
       @PathVariable("idDocument") final Long idDocument,
@@ -228,13 +230,13 @@ public class DocumentControllerImpl implements DocumentController {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
     LOG.info("updateDocument");
-    if (dataFlowId == null) {
+    if (dataflowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
     }
     try {
       DocumentVO documentVO = dataflowController.getDocumentInfoById(idDocument);
-      documentVO.setDataflowId(dataFlowId);
+      documentVO.setDataflowId(dataflowId);
       if (StringUtils.isNotBlank(description)) {
         documentVO.setDescription(description);
       }
