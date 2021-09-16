@@ -22,6 +22,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { manualAcceptanceDatasetsReducer } from './_functions/Reducers/manualAcceptanceDatasetsReducer';
 
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManualAcceptanceDatasets = ({
@@ -123,19 +124,6 @@ export const ManualAcceptanceDatasets = ({
     />
   );
 
-  const getCodeLabelByDataflowType = () => {
-    switch (dataflowType) {
-      case config.dataflowType.BUSINESS.value:
-        return resourcesContext.messages['company'];
-
-      case config.dataflowType.CITIZEN_SCIENCE.value:
-        return resourcesContext.messages['organization'];
-
-      default:
-        return resourcesContext.messages['dataProviderName'];
-    }
-  };
-
   const filterOptions = [
     { type: 'input', properties: [{ name: 'datasetName' }] },
     {
@@ -143,7 +131,11 @@ export const ManualAcceptanceDatasets = ({
       properties: [
         {
           name: 'dataProviderName',
-          label: getCodeLabelByDataflowType()
+          label: TextByDataflowTypeUtils.getLabelByDataflowType(
+            resourcesContext.messages,
+            dataflowType,
+            'manualAcceptanceDataProviderNameFilterLabel'
+          )
         },
         { name: 'feedbackStatus' }
       ]
@@ -165,7 +157,11 @@ export const ManualAcceptanceDatasets = ({
           field={field}
           header={
             TextUtils.areEquals(field, 'dataProviderName')
-              ? getCodeLabelByDataflowType()
+              ? TextByDataflowTypeUtils.getLabelByDataflowType(
+                  resourcesContext.messages,
+                  dataflowType,
+                  'manualAcceptanceDataProviderNameColumnHeader'
+                )
               : resourcesContext.messages[field]
           }
           key={field}

@@ -4,8 +4,6 @@ import isNil from 'lodash/isNil';
 
 import styles from './SqlSentence.module.scss';
 
-import { config } from 'conf';
-
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { SqlHelp } from './_components/SqlHelp';
@@ -58,21 +56,11 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
 
   const onCCButtonClick = () => {
     onSetSqlSentence(
-      `${creationFormState.candidateRule.sqlSentence} ${TextByDataflowTypeUtils.getValidationCodeKeyword(dataflowType)}`
+      `${creationFormState.candidateRule.sqlSentence} ${TextByDataflowTypeUtils.getKeyByDataflowType(
+        dataflowType,
+        'sqlSentenceCodeKeyWord'
+      )}`
     );
-  };
-
-  const getInfoText = () => {
-    switch (dataflowType) {
-      case config.dataflowType.BUSINESS.value:
-        return { __html: resourcesContext.messages['sqlSentenceCompanyCodeNote'] };
-
-      case config.dataflowType.CITIZEN_SCIENCE.value:
-        return { __html: resourcesContext.messages['sqlSentenceOrganizationCodeNote'] };
-
-      default:
-        return { __html: resourcesContext.messages['sqlSentenceCountryCodeNote'] };
-    }
   };
 
   return (
@@ -92,9 +80,17 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
-              label={resourcesContext.messages[TextByDataflowTypeUtils.getValidationCodeButtonLabel(dataflowType)]}
+              label={TextByDataflowTypeUtils.getLabelByDataflowType(
+                resourcesContext.messages,
+                dataflowType,
+                'qcCodeAcronymButtonLabel'
+              )}
               onClick={onCCButtonClick}
-              tooltip={resourcesContext.messages[TextByDataflowTypeUtils.getValidationCodeButtonTooltip(dataflowType)]}
+              tooltip={TextByDataflowTypeUtils.getLabelByDataflowType(
+                resourcesContext.messages,
+                dataflowType,
+                'qcCodeAcronymButtonTooltip'
+              )}
               tooltipOptions={{ position: 'top' }}
             />
           </h3>
@@ -121,17 +117,29 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
           onHide={onHideInfoDialog}
           style={{ maxWidth: '41vw' }}
           visible={isVisibleInfoDialog}>
-          <p className={styles.levelHelp} dangerouslySetInnerHTML={{ __html: getHelpByLevel(level) }}></p>
+          <p className={styles.levelHelp} dangerouslySetInnerHTML={{ __html: getHelpByLevel(level) }} />
           <p
             className={styles.note}
-            dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceHelpNote'] }}></p>
+            dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceHelpNote'] }}
+          />
           <p
             className={styles.levelHelp}
-            dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceSpatialNote'] }}></p>
+            dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceSpatialNote'] }}
+          />
           <p
             className={styles.levelHelp}
-            dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceSpatialTypesNote'] }}></p>
-          <p className={styles.levelHelp} dangerouslySetInnerHTML={getInfoText()}></p>
+            dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceSpatialTypesNote'] }}
+          />
+          <p
+            className={styles.levelHelp}
+            dangerouslySetInnerHTML={{
+              __html: TextByDataflowTypeUtils.getLabelByDataflowType(
+                resourcesContext.messages,
+                dataflowType,
+                'sqlSentenceKeyWordNote'
+              )
+            }}
+          />
         </Dialog>
       )}
     </div>

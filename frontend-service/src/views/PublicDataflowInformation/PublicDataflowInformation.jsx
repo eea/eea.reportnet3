@@ -35,6 +35,7 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
 import { FileUtils } from 'views/_functions/Utils/FileUtils';
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const PublicDataflowInformation = withRouter(
@@ -143,17 +144,14 @@ export const PublicDataflowInformation = withRouter(
         .find(country => country.name === dataProviderName).code;
     };
 
-    const getDataProviderNameHeader = () => {
-      if (TextUtils.areEquals(dataflowType, config.dataflowType.CITIZEN_SCIENCE.value)) {
-        return resourcesContext.messages['organizations'];
-      }
-      return resourcesContext.messages['countries'];
-    };
-
     const getHeader = fieldHeader => {
       switch (fieldHeader) {
         case 'dataProviderName':
-          return getDataProviderNameHeader();
+          return TextByDataflowTypeUtils.getLabelByDataflowType(
+            resourcesContext.messages,
+            dataflowType,
+            'publicDataflowDataProviderNameColumnHeader'
+          );
         case 'publicsFileName':
           return resourcesContext.messages['files'];
         default:

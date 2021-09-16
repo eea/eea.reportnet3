@@ -26,7 +26,6 @@ import { HistoricReleaseService } from 'services/HistoricReleaseService';
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
-
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
@@ -154,7 +153,11 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             field={field}
             header={
               TextUtils.areEquals(field, 'dataProviderCode')
-                ? resourcesContext.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]
+                ? TextByDataflowTypeUtils.getLabelByDataflowType(
+                    resourcesContext.messages,
+                    dataflowType,
+                    'historicReleaseDataProviderColumnHeader'
+                  )
                 : resourcesContext.messages[field]
             }
             key={field}
@@ -178,7 +181,11 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             field={field}
             header={
               TextUtils.areEquals(field, 'dataProviderCode')
-                ? resourcesContext.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]
+                ? TextByDataflowTypeUtils.getLabelByDataflowType(
+                    resourcesContext.messages,
+                    dataflowType,
+                    'historicReleaseDataProviderColumnHeader'
+                  )
                 : resourcesContext.messages[field]
             }
             key={field}
@@ -195,7 +202,11 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       properties: [
         {
           name: 'dataProviderCode',
-          label: resourcesContext.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]
+          label: TextByDataflowTypeUtils.getLabelByDataflowType(
+            resourcesContext.messages,
+            dataflowType,
+            'historicReleaseDataProviderFilterLabel'
+          )
         }
       ]
     },
@@ -217,7 +228,11 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       properties: [
         {
           name: 'dataProviderCode',
-          label: resourcesContext.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]
+          label: TextByDataflowTypeUtils.getLabelByDataflowType(
+            resourcesContext.messages,
+            dataflowType,
+            'historicReleaseDataProviderFilterLabel'
+          )
         }
       ]
     }

@@ -435,7 +435,11 @@ export const useSetColumns = (
       <Column
         body={providerCodeTemplate}
         className={styles.providerCode}
-        header={resources.messages[TextByDataflowTypeUtils.getFieldLabel(dataflowType)]}
+        header={TextByDataflowTypeUtils.getLabelByDataflowType(
+          resources.messages,
+          dataflowType,
+          'dataViewerProviderCodeColumnHeader'
+        )}
         key="providerCode"
         sortable={false}
         style={{ width: '100px' }}

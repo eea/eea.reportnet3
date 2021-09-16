@@ -17,6 +17,8 @@ import { DataflowService } from 'services/DataflowService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+
 export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -74,17 +76,6 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
 
   const onLoadFilteredData = value => setFilteredData(value);
 
-  const getCodeLabel = () => {
-    switch (dataflowType) {
-      case config.dataflowType.BUSINESS.value:
-        return resourcesContext.messages['company'];
-      case config.dataflowType.CITIZEN_SCIENCE.value:
-        return resourcesContext.messages['organization'];
-      default:
-        return resourcesContext.messages['countries'];
-    }
-  };
-
   const filterOptionsWithDataflowIdRepresentativeId = [
     {
       type: 'multiselect',
@@ -97,7 +88,11 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
         {
           name: 'dataProviderName',
           showInput: true,
-          label: getCodeLabel()
+          label: TextByDataflowTypeUtils.getLabelByDataflowType(
+            resourcesContext.messages,
+            dataflowType,
+            'userListDataProviderFilterLabel'
+          )
         }
       ]
     }
@@ -169,7 +164,15 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
               <Column field="role" header={resourcesContext.messages['role']} sortable={true} />
               <Column field="email" header={resourcesContext.messages['user']} sortable={true} />
               {isNil(representativeId) && !isNil(dataflowId) && (
-                <Column field="dataProviderName" header={getCodeLabel()} sortable={true} />
+                <Column
+                  field="dataProviderName"
+                  header={TextByDataflowTypeUtils.getLabelByDataflowType(
+                    resourcesContext.messages,
+                    dataflowType,
+                    'userListDataProviderColumnHeader'
+                  )}
+                  sortable={true}
+                />
               )}
             </DataTable>
           ) : (

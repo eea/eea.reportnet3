@@ -18,9 +18,6 @@ import webforms from './webforms.config.json';
 
 const config = {};
 config.MB_SIZE = 1024 * 1024;
-config.COMPANY_CODE_KEYWORD = '{%R3_COMPANY_CODE%}';
-config.COUNTRY_CODE_KEYWORD = '{%R3_COUNTRY_CODE%}';
-config.ORGANIZATION_CODE_KEYWORD = '{%R3_ORGANIZATION_CODE%}';
 config.MAX_FILE_EXTENSION_LENGTH = 10;
 config.MAX_FILE_SIZE = 100000000;
 config.MAX_INTEGRATION_NAME_LENGTH = 50;

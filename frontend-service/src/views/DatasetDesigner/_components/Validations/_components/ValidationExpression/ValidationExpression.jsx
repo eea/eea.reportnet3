@@ -244,8 +244,9 @@ const ValidationExpression = ({
 
     if (operatorType === 'string') {
       if (operatorValue === 'MATCH') {
-        const ccButtonValue = `${expressionValues.expressionValue}${TextByDataflowTypeUtils.getValidationCodeKeyword(
-          dataflowType
+        const ccButtonValue = `${expressionValues.expressionValue}${TextByDataflowTypeUtils.getKeyByDataflowType(
+          dataflowType,
+          'sqlSentenceCodeKeyWord'
         )}`;
         return (
           <span className={styles.inputStringMatch}>
@@ -259,9 +260,17 @@ const ValidationExpression = ({
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
-              label={resourcesContext.messages[TextByDataflowTypeUtils.getValidationCodeButtonLabel(dataflowType)]}
+              label={TextByDataflowTypeUtils.getLabelByDataflowType(
+                resourcesContext.messages,
+                dataflowType,
+                'qcCodeAcronymButtonLabel'
+              )}
               onClick={() => onCCButtonClick(ccButtonValue)}
-              tooltip={resourcesContext.messages[TextByDataflowTypeUtils.getValidationCodeButtonTooltip(dataflowType)]}
+              tooltip={TextByDataflowTypeUtils.getLabelByDataflowType(
+                resourcesContext.messages,
+                dataflowType,
+                'qcCodeAcronymButtonTooltip'
+              )}
               tooltipOptions={{ position: 'top' }}
             />
           </span>
