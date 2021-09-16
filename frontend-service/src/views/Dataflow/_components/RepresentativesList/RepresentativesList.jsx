@@ -148,7 +148,6 @@ const RepresentativesList = ({
       case config.dataflowType.CITIZEN_SCIENCE.value:
         await getGroupOrganizations();
         break;
-
       default:
         await getGroupCountries();
         break;

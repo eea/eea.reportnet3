@@ -78,10 +78,8 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
     switch (dataflowType) {
       case config.dataflowType.BUSINESS.value:
         return resourcesContext.messages['company'];
-
       case config.dataflowType.CITIZEN_SCIENCE.value:
         return resourcesContext.messages['organization'];
-
       default:
         return resourcesContext.messages['countries'];
     }

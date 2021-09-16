@@ -40,10 +40,8 @@ export const useBreadCrumbs = ({
     switch (dataflowType) {
       case config.dataflowType.BUSINESS.value:
         return resourcesContext.messages['businessDataflowCrumbLabel'];
-
       case config.dataflowType.CITIZEN_SCIENCE.value:
         return resourcesContext.messages['citizenScienceDataflowsCrumbLabel'];
-
       default:
         return resourcesContext.messages['dataflow'];
     }
