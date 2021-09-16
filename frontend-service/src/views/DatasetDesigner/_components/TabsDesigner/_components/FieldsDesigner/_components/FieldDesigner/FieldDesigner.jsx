@@ -1138,7 +1138,7 @@ export const FieldDesigner = ({
         </div>
       ) : (
         <Checkbox
-          checked={markedForDeletion.find(markedField => markedField.fieldId === fieldId)}
+          checked={markedForDeletion.some(markedField => markedField.fieldId === fieldId)}
           className={`${styles.checkBulkDelete} ${
             fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
           } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
@@ -1163,13 +1163,15 @@ export const FieldDesigner = ({
                   }
                 ];
                 for (let i = initIdx; i <= lastIdx; i++) {
-                  fieldsSelected.push({
-                    checked: true,
-                    fieldId: fields[i].fieldId,
-                    fieldType: fields[i].type,
-                    fieldName: fields[i].name,
-                    fieldIndex: i
-                  });
+                  if (!fieldsSelected.some(markedField => markedField.fieldId === fields[i].fieldId)) {
+                    fieldsSelected.push({
+                      checked: true,
+                      fieldId: fields[i].fieldId,
+                      fieldType: getFieldTypeValue(fields[i].type),
+                      fieldName: fields[i].name,
+                      fieldIndex: i
+                    });
+                  }
                 }
                 onBulkCheck({ fieldsSelected, multiple: true });
               }
