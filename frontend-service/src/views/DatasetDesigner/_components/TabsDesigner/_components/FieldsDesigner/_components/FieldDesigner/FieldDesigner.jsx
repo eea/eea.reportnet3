@@ -29,6 +29,7 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
 import { FieldsDesignerUtils } from 'views/_functions/Utils/FieldsDesignerUtils';
+import { RecordUtils } from 'views/_functions/Utils/RecordUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const FieldDesigner = ({
@@ -77,38 +78,8 @@ export const FieldDesigner = ({
   tableSchemaId,
   totalFields
 }) => {
-  const fieldTypes = [
-    { fieldType: 'Number_Integer', value: 'Number - Integer', fieldTypeIcon: 'number-integer' },
-    { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
-    { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
-    { fieldType: 'Datetime', value: 'Datetime', fieldTypeIcon: 'clock' },
-    { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
-    { fieldType: 'Textarea', value: 'Multiline text', fieldTypeIcon: 'align-right' },
-    { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
-    { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
-    { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
-    // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
-    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
-    { fieldType: 'MultiPoint', value: 'Multiple points', fieldTypeIcon: 'multiPoint' },
-    { fieldType: 'Linestring', value: 'Line', fieldTypeIcon: 'line' },
-    { fieldType: 'MultiLineString', value: 'Multiple lines', fieldTypeIcon: 'multiLineString' },
-    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
-    { fieldType: 'MultiPolygon', value: 'Multiple polygons', fieldTypeIcon: 'multiPolygon' },
-    // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
-    { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
-    { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
-    { fieldType: 'External_link', value: 'External link', fieldTypeIcon: 'externalLink' },
-    // { fieldType: 'RichText', value: 'Rich text', fieldTypeIcon: 'text' },
-    // { fieldType: 'LinkData', value: 'Link to a data collection', fieldTypeIcon: 'linkData' },
-    // { fieldType: 'Percentage', value: 'Percentage', fieldTypeIcon: 'percentage' },
-    // { fieldType: 'Formula', value: 'Formula', fieldTypeIcon: 'formula' },
-    // { fieldType: 'Fixed', value: 'Fixed select list', fieldTypeIcon: 'list' },
-    { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
-  ];
-
   const geometricTypes = ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'];
-  const getFieldTypeValue = value => fieldTypes.find(field => TextUtils.areEquals(field.fieldType, value));
+
   const initialFieldDesignerState = {
     addFieldCallSent: false,
     codelistItems: codelistItems,
@@ -118,10 +89,10 @@ export const FieldDesigner = ({
     fieldPkMustBeUsed: fieldMustBeUsed || false,
     fieldPKReferencedValue: fieldPKReferenced || false,
     fieldPKValue: fieldPK,
-    fieldPreviousTypeValue: getFieldTypeValue(fieldType) || '',
+    fieldPreviousTypeValue: RecordUtils.getFieldType(fieldType) || '',
     fieldReadOnlyValue: fieldReadOnly,
     fieldRequiredValue: fieldRequired,
-    fieldTypeValue: getFieldTypeValue(fieldType),
+    fieldTypeValue: RecordUtils.getFieldType(fieldType),
     fieldValue: fieldName,
     initialDescriptionValue: undefined,
     initialFieldValue: undefined,
@@ -1097,12 +1068,12 @@ export const FieldDesigner = ({
             isDuplicated: true,
             maxSize: fieldDesignerState.fieldFileProperties.maxSize,
             pk: false,
-            pkHasMultipleValues: fieldDesignerState.pkHasMultipleValues,
-            pkMustBeUsed: fieldDesignerState.pkMustBeUsed,
+            pkHasMultipleValues: fieldDesignerState.fieldPkHasMultipleValues,
+            pkMustBeUsed: fieldDesignerState.fieldPkMustBeUsed,
             name: getDuplicatedName(),
             readOnly: fieldDesignerState.fieldReadOnlyValue,
             recordId: recordSchemaId,
-            referencedField: fieldDesignerState.fieldLinkValue,
+            referencedField: fieldDesignerState.completeLink,
             required: fieldDesignerState.fieldRequiredValue,
             type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
             validExtensions: fieldDesignerState.fieldFileProperties.validExtensions
@@ -1167,7 +1138,7 @@ export const FieldDesigner = ({
                     fieldsSelected.push({
                       checked: true,
                       fieldId: fields[i].fieldId,
-                      fieldType: getFieldTypeValue(fields[i].type),
+                      fieldType: RecordUtils.getFieldType(fields[i].type),
                       fieldName: fields[i].name,
                       fieldIndex: i
                     });
@@ -1269,14 +1240,16 @@ export const FieldDesigner = ({
           event.stopPropagation();
         }}
         optionLabel="value"
-        options={fieldTypes}
+        options={config.fieldTypes}
         placeholder={resourcesContext.messages['newFieldTypePlaceHolder']}
         ref={fieldTypeRef}
         required={true}
         scrollHeight="450px"
         style={{ alignSelf: !fieldDesignerState.isEditing ? 'center' : 'auto', display: 'block' }}
         value={
-          fieldDesignerState.fieldTypeValue !== '' ? fieldDesignerState.fieldTypeValue : getFieldTypeValue(fieldType)
+          fieldDesignerState.fieldTypeValue !== ''
+            ? fieldDesignerState.fieldTypeValue
+            : RecordUtils.getFieldType(fieldType)
         }
       />
     </Fragment>

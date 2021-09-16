@@ -34,7 +34,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { FieldsDesignerUtils } from 'views/_functions/Utils/FieldsDesignerUtils';
-import { MetadataUtils } from 'views/_functions/Utils';
+import { MetadataUtils, RecordUtils } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { uniqueId } from 'lodash';
@@ -110,6 +110,15 @@ export const FieldsDesigner = ({
           ['CODELIST', 'MULTISELECT_CODELIST', 'EXTERNAL_LINK', 'LINK', 'ATTACHMENT'].includes(field.type.toUpperCase())
         ).length > 0
       );
+      if (markedForDeletion.length > 0) {
+        const inmMarkedForDeletion = [...markedForDeletion];
+        inmMarkedForDeletion.forEach(markedField => {
+          const field = fields.find(field => field.fieldId === markedField.fieldId);
+          markedField.fieldType = RecordUtils.getFieldType(field.type);
+          markedField.fieldName = field.name;
+        });
+        setMarkedForDeletion(inmMarkedForDeletion);
+      }
     }
   }, [fields]);
 

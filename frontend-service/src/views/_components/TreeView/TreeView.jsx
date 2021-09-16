@@ -18,6 +18,7 @@ import { TreeViewExpandableItem } from './_components/TreeViewExpandableItem';
 
 import { treeViewReducer } from './_functions/Reducers/treeViewReducer';
 
+import { RecordUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const TreeView = ({ className = '', columnOptions = {}, expandAll = true, property, propertyName }) => {
@@ -297,35 +298,6 @@ const codelistTemplate = rowData => (
   <Chips disabled={true} name="Multiple/single selected items" pasteSeparator=";" value={rowData.codelistItems}></Chips>
 );
 
-const getFieldTypeValue = value => {
-  const fieldTypes = [
-    { fieldType: 'Number_Integer', value: 'Number - Integer', fieldTypeIcon: 'number-integer' },
-    { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
-    { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
-    { fieldType: 'Datetime', value: 'Datetime', fieldTypeIcon: 'clock' },
-    { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
-    // { fieldType: 'Rich_Text', value: 'Rich text', fieldTypeIcon: 'align-right' },
-    { fieldType: 'Textarea', value: 'Multiline text', fieldTypeIcon: 'align-right' },
-    { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
-    { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
-    { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
-    // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
-    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
-    { fieldType: 'MultiPoint', value: 'Multiple points', fieldTypeIcon: 'multiPoint' },
-    { fieldType: 'Linestring', value: 'Line', fieldTypeIcon: 'line' },
-    { fieldType: 'MultiLineString', value: 'Multiple lines', fieldTypeIcon: 'multiLineString' },
-    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
-    { fieldType: 'MultiPolygon', value: 'Multiple polygons', fieldTypeIcon: 'multiPolygon' },
-    // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
-    { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
-    { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
-    { fieldType: 'External_link', value: 'External link', fieldTypeIcon: 'externalLink' },
-    { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
-  ];
-  return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
-};
-
 const itemTemplate = (rowData, key) => {
   return (
     <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -343,9 +315,9 @@ const itemTemplate = (rowData, key) => {
 const typeTemplate = rowData => {
   return (
     <div style={{ display: 'flex', alignItems: 'baseline' }}>
-      <span style={{ margin: '.5em .25em 0 0.5em' }}>{getFieldTypeValue(rowData.type).value}</span>
+      <span style={{ margin: '.5em .25em 0 0.5em' }}>{RecordUtils.getFieldType(rowData.type).value}</span>
       <FontAwesomeIcon
-        icon={AwesomeIcons(getFieldTypeValue(rowData.type).fieldTypeIcon)}
+        icon={AwesomeIcons(RecordUtils.getFieldType(rowData.type).fieldTypeIcon)}
         role="presentation"
         style={{ marginLeft: 'auto', color: 'var(--treeview-table-icon-color)' }}
       />

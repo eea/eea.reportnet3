@@ -75,7 +75,8 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         ...state,
         fieldLinkValue: payload.link,
         fieldPkMustBeUsed: payload.pkMustBeUsed,
-        fieldPkHasMultipleValues: payload.pkHasMultipleValues
+        fieldPkHasMultipleValues: payload.pkHasMultipleValues,
+        completeLink: payload.link
       };
     case 'SET_PK':
       return { ...state, fieldPKValue: payload, fieldRequiredValue: payload ? true : state.fieldRequiredValue };
