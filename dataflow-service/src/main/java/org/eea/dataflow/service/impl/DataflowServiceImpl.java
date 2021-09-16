@@ -685,11 +685,14 @@ public class DataflowServiceImpl implements DataflowService {
     if (null == dataflowPublicVO) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    dataflowPublicVO.setReportingDatasets(
-        datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflowId));
 
-    dataflowPublicVO.setReferenceDatasets(
-        referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflowId));
+    if (!TypeDataflowEnum.BUSINESS.equals(dataflowPublicVO.getType())) {
+      dataflowPublicVO.setReportingDatasets(
+          datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflowId));
+
+      dataflowPublicVO.setReferenceDatasets(
+          referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflowId));
+    }
 
     Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
     if (dataflow != null) {
