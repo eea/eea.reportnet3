@@ -56,6 +56,7 @@ import { useReportingObligations } from 'views/_components/ReportingObligations/
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const Dataflow = withRouter(({ history, match }) => {
@@ -72,6 +73,7 @@ const Dataflow = withRouter(({ history, match }) => {
     anySchemaAvailableInPublic: false,
     currentUrl: '',
     data: {},
+    dataflowType: '',
     dataProviderId: [],
     dataProviderSelected: {},
     deleteInput: '',

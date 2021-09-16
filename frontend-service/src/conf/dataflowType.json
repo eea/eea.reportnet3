@@ -1,6 +1,14 @@
 {
-  "BUSINESS": { "key": "business", "value": "BUSINESS" },
-  "CITIZEN_SCIENCE": { "key": "citizenScience", "value": "CITIZEN_SCIENCE" },
+  "BUSINESS": { "key": "business", "value": "BUSINESS", "labels": { "breadCrumbs": "businessDataflowCrumbLabel" } },
+  "CITIZEN_SCIENCE": {
+    "key": "citizenScience",
+    "value": "CITIZEN_SCIENCE",
+    "labels": { "breadCrumbs": "citizenScienceDataflowsCrumbLabel" }
+  },
   "REFERENCE": { "key": "reference", "value": "REFERENCE" },
-  "REPORTING": { "key": "reporting", "value": "REPORTING" }
+  "REPORTING": {
+    "key": "reporting",
+    "value": "REPORTING",
+    "labels": { "breadCrumbs": "dataflow" }
+  }
 }

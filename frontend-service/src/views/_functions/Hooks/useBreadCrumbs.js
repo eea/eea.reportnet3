@@ -3,14 +3,14 @@ import { useContext, useLayoutEffect } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import { config } from 'conf';
+import { routes } from 'conf/routes';
 
 import { BreadCrumbContext } from 'views/_functions/Contexts/BreadCrumbContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { routes } from 'conf/routes';
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const useBreadCrumbs = ({
   countryCode,
@@ -36,23 +36,12 @@ export const useBreadCrumbs = ({
     return { label: resourcesContext.messages['dataCollection'], icon: 'dataCollection' };
   };
 
-  const getDataflowTypeLabel = () => {
-    switch (dataflowType) {
-      case config.dataflowType.BUSINESS.value:
-        return resourcesContext.messages['businessDataflowCrumbLabel'];
-      case config.dataflowType.CITIZEN_SCIENCE.value:
-        return resourcesContext.messages['citizenScienceDataflowsCrumbLabel'];
-      default:
-        return resourcesContext.messages['dataflow'];
-    }
-  };
-
   const getDataflowCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
       href: getUrl(routes.DATAFLOW, { dataflowId }, true),
       icon: 'clone',
-      label: getDataflowTypeLabel()
+      label: TextByDataflowTypeUtils.getLabelByDataflowType(resourcesContext.messages, dataflowType, 'breadCrumbs')
     };
   };
 
