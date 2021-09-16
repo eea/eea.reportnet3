@@ -91,7 +91,7 @@ class Menu extends Component {
 
   renderMenuitem(item, index) {
     return (
-      <Fragment>
+      <Fragment key={item.label + '_' + index}>
         <li className={'p-menuitem'} data-for={item.label} data-tip key={index}>
           <span
             className={`p-menuitem-link ${item.disabled ? styles.menuItemDisabled : null} ${styles.menuItem}`}
