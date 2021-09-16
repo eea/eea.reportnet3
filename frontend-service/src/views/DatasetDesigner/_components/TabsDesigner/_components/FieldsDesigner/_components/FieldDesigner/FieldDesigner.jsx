@@ -208,7 +208,7 @@ export const FieldDesigner = ({
 
   const getDuplicatedName = () => {
     const filteredFields = fields.filter(field => field.name.startsWith(`${fieldDesignerState.fieldValue}_`));
-    return `${fieldDesignerState.fieldValue}_${filteredFields.length}`;
+    return `${fieldDesignerState.fieldValue}_${filteredFields.length + 1}`;
   };
 
   const validField = () =>
