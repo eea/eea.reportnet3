@@ -664,6 +664,15 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     }
   }, [notificationContext]);
 
+  useEffect(() => {
+    const isNotification = notificationContext.toShow.find(
+      notification => notification.key === 'IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'
+    );
+    if (isNotification) {
+      window.location.reload();
+    }
+  }, [notificationContext]);
+
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
   useCheckNotifications(
@@ -696,8 +705,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     setSqlValidationRunning,
     false
   );
-
-  useCheckNotifications(['IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'], setSchemaImported, true);
 
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
