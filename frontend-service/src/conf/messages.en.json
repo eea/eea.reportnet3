@@ -356,7 +356,6 @@
     "documentEditingError": "Failed editing document",
     "isPublic": "Is public",
     "documents": "Documents",
-    "documentsActionColumns": "Actions",
     "documentSize": "Size",
     "checkboxIsPublic": "Mark as public",
     "documentUploadCompletedEvent": "Document upload complete successfully at <a href='{:navigateTo}' title='dataflowName'>{:shortDataflowName}</a>",
