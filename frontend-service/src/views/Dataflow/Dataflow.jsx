@@ -172,6 +172,8 @@ const Dataflow = withRouter(({ history, match }) => {
     [config.permissions.roles.NATIONAL_COORDINATOR.key]
   );
 
+  const isBusinessDataflow = TextUtils.areEquals(dataflowState.dataflowType, config.dataflowType.BUSINESS.value);
+
   const country =
     uniqDataProviders.length === 1
       ? uniq(map(dataflowState.data.datasets, 'datasetSchemaName'))
@@ -255,23 +257,14 @@ const Dataflow = withRouter(({ history, match }) => {
 
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
-      editBtn:
-        isDesign &&
-        isLeadDesigner &&
-        !dataflowState.isAdmin &&
-        !TextUtils.areEquals(dataflowState.dataflowType, config.dataflowType.BUSINESS.value),
-      editBusinessBtn:
-        (dataflowState.isAdmin || dataflowState.isCustodian) &&
-        TextUtils.areEquals(dataflowState.dataflowType, config.dataflowType.BUSINESS.value),
+      editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin && !isBusinessDataflow,
+      editBusinessBtn: (dataflowState.isAdmin || dataflowState.isCustodian) && isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
-      showPublicInfoBtn:
-        !isDesign &&
-        isLeadDesigner &&
-        !TextUtils.areEquals(dataflowState.dataflowType, config.dataflowType.BUSINESS.value),
+      showPublicInfoBtn: !isDesign && isLeadDesigner && !isBusinessDataflow,
       usersListBtn:
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
@@ -918,11 +911,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
-            footerAddon={
-              dataflowState.anySchemaAvailableInPublic &&
-              !TextUtils.areEquals(dataflowState.dataflowType, config.dataflowType.BUSINESS.value) &&
-              checkRestrictFromPublic
-            }
+            footerAddon={dataflowState.anySchemaAvailableInPublic && !isBusinessDataflow && checkRestrictFromPublic}
             header={resourcesContext.messages['confirmReleaseHeader']}
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}

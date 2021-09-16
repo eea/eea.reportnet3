@@ -116,6 +116,8 @@ export const BigButtonList = ({
   const dataflowName = dataflowState.name;
   const dataflowData = dataflowState.data;
 
+  const isBusinessDataflow = TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value);
+
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
   useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
@@ -270,7 +272,7 @@ export const BigButtonList = ({
         getDate(),
         isManualTechnicalAcceptance,
         true,
-        TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? false : showPublicInfo
+        isBusinessDataflow ? false : showPublicInfo
       );
     } catch (error) {
       console.error('BigButtonList - onCreateDataCollections.', error);
@@ -690,7 +692,7 @@ export const BigButtonList = ({
         <ConfirmDialog
           className={styles.calendarConfirm}
           disabledConfirm={isNil(dataCollectionDueDate)}
-          footerAddon={!TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) && checkShowPublicInfo}
+          footerAddon={!isBusinessDataflow && checkShowPublicInfo}
           header={resourcesContext.messages['createDataCollection']}
           labelCancel={resourcesContext.messages['close']}
           labelConfirm={resourcesContext.messages['create']}
