@@ -156,11 +156,14 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
   };
 
-  const onClickAdminAssignedDataflow = () => {
-    setIsLoading(true);
-    onRefreshToken();
-    onLoadReferenceDataflow();
-    setIsAdminAssignedDataflow(false);
+  const onCloseShareRightsDialog = () => {
+    manageDialogs('isManageRequestersDialogVisible', false);
+    if (dataflowState.isAdminAssignedDataflow) {
+      setIsLoading(true);
+      onRefreshToken();
+      onLoadReferenceDataflow();
+      setIsAdminAssignedDataflow(false);
+    }
   };
 
   const onSaveDatasetName = async (value, index) => {
@@ -268,12 +271,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={'cancel'}
         label={resourcesContext.messages['cancel']}
-        onClick={() => {
-          manageDialogs(`isManageRequestersDialogVisible`, false);
-          if (dataflowState.isAdminAssignedDataflow) {
-            onClickAdminAssignedDataflow();
-          }
-        }}
+        onClick={() => onCloseShareRightsDialog()}
       />
     </div>
   );
@@ -377,12 +375,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         <Dialog
           footer={shareRightsFooterDialogFooter}
           header={resourcesContext.messages['manageRequestersRights']}
-          onHide={() => {
-            manageDialogs('isManageRequestersDialogVisible', false);
-            if (dataflowState.isAdminAssignedDataflow) {
-              onClickAdminAssignedDataflow();
-            }
-          }}
+          onHide={() => onCloseShareRightsDialog()}
           visible={dataflowState.isManageRequestersDialogVisible}>
           <ShareRights
             addConfirmHeader={resourcesContext.messages['addRequesterConfirmHeader']}
