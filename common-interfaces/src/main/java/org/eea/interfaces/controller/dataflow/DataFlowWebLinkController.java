@@ -68,7 +68,7 @@ public interface DataFlowWebLinkController {
    * @param dataflowId the dataflow id
    * @return the all weblinks by dataflow
    */
-  @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataflowId/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<WeblinkVO> getAllWeblinksByDataflow(@PathVariable("dataflowId") Long dataflowId);
 
 }

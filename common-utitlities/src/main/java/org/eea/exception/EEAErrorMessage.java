@@ -99,6 +99,9 @@ public final class EEAErrorMessage {
   /** The Constant DOCUMENT_DOWNLOAD_ERROR: {@value}. */
   public static final String DOCUMENT_DOWNLOAD_ERROR = "Document download error";
 
+  /** The Constant DOCUMENT_NOT_PUBLIC: {@value}. */
+  public static final String DOCUMENT_NOT_PUBLIC = "Document is not public";
+
   /** The Constant TABLE_NOT_FOUND: {@value}. */
   public static final String TABLE_NOT_FOUND =
       "Table with schema %s from the datasetId %s not found";
