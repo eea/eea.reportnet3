@@ -81,7 +81,7 @@ const Dataflow = withRouter(({ history, match }) => {
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
-    isAdminAssignedBusinessDataflow: false,
+    isAdminAssignedDataflow: false,
     isApiKeyDialogVisible: false,
     isBusinessDataflow: false,
     isCitizenScienceDataflow: false,
@@ -315,10 +315,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const handleRedirect = target => history.push(target);
 
-  const setIsAdminAssignedBusinessDataflow = value => {
+  const setIsAdminAssignedDataflow = value => {
     dataflowDispatch({
-      type: 'SET_IS_ADMIN_ASSIGNED_BUSINESS_DATAFLOW',
-      payload: { isAdminAssignedBusinessDataflow: value }
+      type: 'SET_IS_ADMIN_ASSIGNED_DATAFLOW',
+      payload: { isAdminAssignedDataflow: value }
     });
   };
 
@@ -340,7 +340,7 @@ const Dataflow = withRouter(({ history, match }) => {
         label={resourcesContext.messages['close']}
         onClick={() => {
           manageDialogs(`isManage${userType}DialogVisible`, false);
-          if (dataflowState.isAdminAssignedBusinessDataflow) {
+          if (dataflowState.isAdminAssignedDataflow) {
             onLoadReportingDataflow();
             setIsPageLoading(true);
             onRefreshToken();
@@ -959,7 +959,7 @@ const Dataflow = withRouter(({ history, match }) => {
             header={resourcesContext.messages['manageRequestersRights']}
             onHide={() => {
               manageDialogs('isManageRequestersDialogVisible', false);
-              if (dataflowState.isAdminAssignedBusinessDataflow) {
+              if (dataflowState.isAdminAssignedDataflow) {
                 onLoadReportingDataflow();
                 setIsPageLoading(true);
                 onRefreshToken();
@@ -982,7 +982,7 @@ const Dataflow = withRouter(({ history, match }) => {
               placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
-              setIsAdminAssignedBusinessDataflow={setIsAdminAssignedBusinessDataflow}
+              setIsAdminAssignedDataflow={setIsAdminAssignedDataflow}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
               userType={'requester'}
@@ -1012,7 +1012,7 @@ const Dataflow = withRouter(({ history, match }) => {
               placeholder={resourcesContext.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={reporterRoleOptions}
-              setIsAdminAssignedBusinessDataflow={setIsAdminAssignedBusinessDataflow}
+              setIsAdminAssignedDataflow={setIsAdminAssignedDataflow}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}
               userType={'reporter'}

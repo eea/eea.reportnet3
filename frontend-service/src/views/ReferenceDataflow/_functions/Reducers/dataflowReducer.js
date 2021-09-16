@@ -36,8 +36,17 @@ export const dataflowReducer = (state, { type, payload }) => {
     case 'REFRESH_PAGE':
       return { ...state, refresh: !state.refresh };
 
+    case 'SET_IS_ADMIN_ASSIGNED_DATAFLOW':
+      return {
+        ...state,
+        isAdminAssignedDataflow: payload.isAdminAssignedDataflow
+      };
+
     case 'SET_IS_CREATING_REFERENCE_DATASETS':
       return { ...state, isCreatingReferenceDatasets: payload.isCreatingReferenceDatasets };
+
+    case 'SET_IS_LOADING':
+      return { ...state, isLoading: payload.isLoading };
 
     default: {
       throw new Error(`Unhandled action type: ${type}`);
