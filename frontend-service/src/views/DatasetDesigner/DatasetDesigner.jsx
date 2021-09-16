@@ -656,19 +656,17 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   };
 
   useEffect(() => {
-    const isNotification = notificationContext.toShow.find(
+    const validationFinished = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
     );
-    if (isNotification && isNotification.content.datasetId?.toString() === datasetId.toString()) {
+    if (validationFinished && validationFinished.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
     }
-  }, [notificationContext]);
-
-  useEffect(() => {
-    const isNotification = notificationContext.toShow.find(
+    const isImportFieldSchemaCompleted = notificationContext.toShow.some(
       notification => notification.key === 'IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'
     );
-    if (isNotification) {
+
+    if (isImportFieldSchemaCompleted) {
       window.location.reload();
     }
   }, [notificationContext]);
