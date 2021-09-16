@@ -1,5 +1,5 @@
 export const webLinksReducer = (state, { type, payload }) => {
-  const emptyWebLink = { id: undefined, description: '', url: '' };
+  const emptyWebLink = { id: undefined, description: '', isPublic: false, url: '' };
   switch (type) {
     case 'ON_DELETE_END':
       return {

@@ -56,5 +56,11 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
     const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageRequestersBtn, reportingDataflows];
 
     leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
-  }, [dataflowState.userRoles, dataflowState.status, dataflowState.datasetId]);
+  }, [
+    dataflowState.userRoles,
+    dataflowState.status,
+    dataflowState.datasetId,
+    dataflowState.isAdmin,
+    dataflowState.isCustodian
+  ]);
 };
