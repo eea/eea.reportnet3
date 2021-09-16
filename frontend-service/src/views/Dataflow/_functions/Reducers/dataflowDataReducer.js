@@ -70,10 +70,10 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_IS_PAGE_LOADING':
       return { ...state, isPageLoading: payload.isPageLoading };
 
-    case 'SET_IS_ADMIN_ASSIGNED_BUSINESS_DATAFLOW':
+    case 'SET_IS_ADMIN_ASSIGNED_DATAFLOW':
       return {
         ...state,
-        isAdminAssignedBusinessDataflow: payload.isAdminAssignedBusinessDataflow
+        isAdminAssignedDataflow: payload.isAdminAssignedDataflow
       };
 
     case 'SET_UPDATED_DATASET_SCHEMA':
