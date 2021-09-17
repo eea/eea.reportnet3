@@ -286,8 +286,6 @@ export const DataflowService = {
   getApiKey: async (dataflowId, dataProviderId, isCustodian) =>
     await DataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian),
 
-  getPrivateDataflow: async dataflowId => await DataflowRepository.getPrivateDataflow(dataflowId),
-
   getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
     const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
       countryCode,

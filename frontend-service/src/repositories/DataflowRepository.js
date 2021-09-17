@@ -55,9 +55,6 @@ export const DataflowRepository = {
   getRepresentativesUsersList: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getRepresentativesUsersList, { dataflowId }) }),
 
-  getPrivateDataflow: async dataflowId => 'Hola',
-  // await HTTPRequester.get({ url: getUrl(DataflowConfig.getPrivateDataflow, { dataflowId }) }),
-
   getPublicDataflowData: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId }) }),
 
