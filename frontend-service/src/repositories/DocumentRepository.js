@@ -5,19 +5,17 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 export const DocumentRepository = {
   getAll: async dataflowId => await HTTPRequester.get({ url: getUrl(DocumentConfig.getAll, { dataflowId }) }),
 
-  getAllPublic: async dataflowId => await HTTPRequester.get({ url: getUrl(DocumentConfig.getAllPublic, { dataflowId }) }),
+  delete: async (documentId, dataflowId) => await HTTPRequester.delete({ url: getUrl(DocumentConfig.delete, { documentId, dataflowId }) }),
 
-  delete: async documentId => await HTTPRequester.delete({ url: getUrl(DocumentConfig.delete, { documentId }) }),
-
-  download: async documentId =>
+  download: async (documentId, dataflowId) =>
     await HTTPRequester.download({
-      url: getUrl(DocumentConfig.download, { documentId }),
+      url: getUrl(DocumentConfig.download, { documentId, dataflowId }),
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
-  publicDownload: async documentId =>
+  downloadPublic: async (documentId, dataflowId) =>
     await HTTPRequester.download({
-      url: getUrl(DocumentConfig.publicDownload, { documentId }),
+      url: getUrl(DocumentConfig.downloadPublic, { documentId, dataflowId }),
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 

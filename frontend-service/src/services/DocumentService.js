@@ -8,14 +8,9 @@ export const DocumentService = {
     return DocumentUtils.parseDocumentListDTO(response.data);
   },
 
-  getAllPublic: async dataflowId => {
-    const response = await DocumentRepository.getAllPublic(dataflowId);
-    return DocumentUtils.parseDocumentListDTO(response.data);
-  },
+  download: async (documentId, dataflowId) => await DocumentRepository.download(documentId, dataflowId),
 
-  download: async documentId => await DocumentRepository.download(documentId),
-
-  publicDownload: async documentId => await DocumentRepository.publicDownload(documentId),
+  downloadPublic: async (documentId, dataflowId) => await DocumentRepository.downloadPublic(documentId, dataflowId),
 
   upload: async (dataflowId, description, language, file, isPublic) => {
     return await DocumentRepository.upload(dataflowId, description, language, file, isPublic);
@@ -25,5 +20,5 @@ export const DocumentService = {
     return await DocumentRepository.update(dataflowId, description, language, file, isPublic, documentId);
   },
 
-  delete: async documentId => await DocumentRepository.delete(documentId)
+  delete: async (documentId, dataflowId) => await DocumentRepository.delete(documentId, dataflowId)
 };
