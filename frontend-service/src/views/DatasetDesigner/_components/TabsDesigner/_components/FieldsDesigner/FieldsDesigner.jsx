@@ -114,8 +114,10 @@ export const FieldsDesigner = ({
         const inmMarkedForDeletion = [...markedForDeletion];
         inmMarkedForDeletion.forEach(markedField => {
           const field = fields.find(field => field.fieldId === markedField.fieldId);
-          markedField.fieldType = RecordUtils.getFieldType(field.type);
-          markedField.fieldName = field.name;
+          if (!isNil(field)) {
+            markedField.fieldType = RecordUtils.getFieldType(field.type);
+            markedField.fieldName = field.name;
+          }
         });
         setMarkedForDeletion(inmMarkedForDeletion);
       }
@@ -336,34 +338,42 @@ export const FieldsDesigner = ({
   const deleteFields = async () => {
     setIsLoading(true);
 
-    const deletionPromises = markedForDeletion.map(async markedField => {
-      return await DatasetService.deleteFieldDesign(datasetId, markedField.fieldId);
-    });
-
-    Promise.all(deletionPromises)
-      .then(() => {
-        const filteredFields = fields.filter(
-          inmField => !markedForDeletion.some(markedField => markedField.fieldId === inmField.fieldId)
-        );
-        onChangeFields(
-          filteredFields,
-          markedForDeletion.some(markedField => TextUtils.areEquals(markedField.fieldType.fieldType, 'LINK')) ||
-            markedForDeletion.some(markedField =>
-              TextUtils.areEquals(markedField.fieldType.fieldType, 'EXTERNAL_LINK')
-            ),
-          table.tableSchemaId
-        );
-        setFields(filteredFields);
-        setIsDeleteDialogVisible(false);
-        setMarkedForDeletion([]);
-      })
-      .catch(error => {
-        console.error(`FieldsDesigner - deleteFields.`, error);
-      })
-      .finally(() => {
-        setBulkDelete(false);
-        setIsLoading(false);
+    try {
+      const deletionPromises = markedForDeletion.map(async markedField => {
+        return await DatasetService.deleteFieldDesign(datasetId, markedField.fieldId);
       });
+
+      Promise.all(deletionPromises)
+        .then(() => {
+          const filteredFields = fields.filter(
+            inmField => !markedForDeletion.some(markedField => markedField.fieldId === inmField.fieldId)
+          );
+          onChangeFields(
+            filteredFields,
+            markedForDeletion.some(markedField => TextUtils.areEquals(markedField.fieldType.fieldType, 'LINK')) ||
+              markedForDeletion.some(markedField =>
+                TextUtils.areEquals(markedField.fieldType.fieldType, 'EXTERNAL_LINK')
+              ),
+            table.tableSchemaId
+          );
+          setFields(filteredFields);
+          setIsDeleteDialogVisible(false);
+          setMarkedForDeletion([]);
+        })
+        .catch(error => {
+          console.error(`FieldsDesigner - deleteFields.`, error);
+        })
+        .finally(() => {
+          setBulkDelete(false);
+          setIsLoading(false);
+        });
+    } catch (error) {
+      console.error('FieldsDesigner - deleteFields.', error);
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      }
+      setIsLoading(false);
+    }
   };
 
   const errorDialogFooter = (
