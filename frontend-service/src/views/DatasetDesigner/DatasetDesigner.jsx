@@ -546,7 +546,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
         content: {
-          dataProviderName: 'DESIGN',
+          origin: 'DESIGN',
           dataflowId,
           dataflowName: designerState.dataflowName,
           datasetId,
@@ -563,7 +563,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         notificationContext.add({
           type: 'VALIDATE_DATA_BY_ID_ERROR',
           content: {
-            dataProviderName: 'DESIGN',
+            origin: 'DESIGN',
             dataflowId,
             dataflowName: designerState.dataflowName,
             datasetId,
