@@ -35,6 +35,8 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
 import { FileUtils } from 'views/_functions/Utils/FileUtils';
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const PublicDataflowInformation = withRouter(
   ({
@@ -49,6 +51,7 @@ export const PublicDataflowInformation = withRouter(
 
     const [contentStyles, setContentStyles] = useState({});
     const [dataflowData, setDataflowData] = useState({});
+    const [dataflowType, setDataflowType] = useState('');
     const [documents, setDocuments] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
@@ -135,16 +138,20 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
-    const getCountryCode = datasetSchemaName => {
+    const getCountryCode = dataProviderName => {
       return Object.values(config.countriesByGroup)
         .flat()
-        .find(country => country.name === datasetSchemaName).code;
+        .find(country => country.name === dataProviderName).code;
     };
 
     const getHeader = fieldHeader => {
       switch (fieldHeader) {
-        case 'datasetSchemaName':
-          return resourcesContext.messages['countries'];
+        case 'dataProviderName':
+          return TextByDataflowTypeUtils.getLabelByDataflowType(
+            resourcesContext.messages,
+            dataflowType,
+            'publicDataflowDataProviderNameColumnHeader'
+          );
         case 'publicsFileName':
           return resourcesContext.messages['files'];
         default:
@@ -154,7 +161,7 @@ export const PublicDataflowInformation = withRouter(
 
     const getReferenceDatasetsHeader = fieldHeader => {
       switch (fieldHeader) {
-        case 'datasetSchemaName':
+        case 'dataProviderName':
           return resourcesContext.messages['name'];
         case 'publicFileName':
           return resourcesContext.messages['file'];
@@ -166,7 +173,7 @@ export const PublicDataflowInformation = withRouter(
     const getOrderedRepresentativeColumns = representatives => {
       const representativesWithPriority = [
         { id: 'id', index: 0 },
-        { id: 'datasetSchemaName', index: 1 },
+        { id: 'dataProviderName', index: 1 },
         { id: 'deliveryDate', index: 2 },
         { id: 'deliveryStatus', index: 3 },
         { id: 'publicsFileName', index: 4 }
@@ -199,30 +206,39 @@ export const PublicDataflowInformation = withRouter(
         .map(orderedField => orderedField.id);
     };
 
-    const countryBodyColumn = rowData => (
+    const dataProviderNameBodyColumn = rowData => (
       <div onClick={e => e.stopPropagation()}>
         <span className={styles.cellWrapper}>
-          {rowData.datasetSchemaName}
-          <FontAwesomeIcon
-            aria-hidden={false}
-            className={`p-breadcrumb-home ${styles.link}`}
-            data-for="navigateTooltip"
-            data-tip
-            icon={AwesomeIcons('externalUrl')}
-            onClick={e => {
-              e.preventDefault();
-              history.push(
-                getUrl(
-                  routes.PUBLIC_COUNTRY_INFORMATION,
-                  { countryCode: getCountryCode(rowData.datasetSchemaName) },
-                  true
-                )
-              );
-            }}
-          />
-          <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
-            <span>{resourcesContext.messages['navigateToCountry']}</span>
-          </ReactTooltip>
+          {rowData.dataProviderName}
+          {TextUtils.areEquals(dataflowType, config.dataflowType.REPORTING.value) && (
+            <Fragment>
+              <FontAwesomeIcon
+                aria-hidden={false}
+                className={`p-breadcrumb-home ${styles.link}`}
+                data-for="navigateTooltip"
+                data-tip
+                icon={AwesomeIcons('externalUrl')}
+                onClick={e => {
+                  e.preventDefault();
+                  history.push(
+                    getUrl(
+                      routes.PUBLIC_COUNTRY_INFORMATION,
+                      { countryCode: getCountryCode(rowData.dataProviderName) },
+                      true
+                    )
+                  );
+                }}
+              />
+              <ReactTooltip
+                border={true}
+                className={styles.tooltipClass}
+                effect="solid"
+                id="navigateTooltip"
+                place="top">
+                <span>{resourcesContext.messages['navigateToCountry']}</span>
+              </ReactTooltip>
+            </Fragment>
+          )}
         </span>
       </div>
     );
@@ -264,6 +280,7 @@ export const PublicDataflowInformation = withRouter(
       try {
         const data = await DataflowService.getPublicDataflowData(dataflowId);
         setDataflowData(data);
+        setDataflowType(data.type);
         setPublicInformation(data.datasets, data.manualAcceptance);
         setReferenceDatasets(data.referenceDatasets);
         setDocuments(data.documents);
@@ -291,8 +308,9 @@ export const PublicDataflowInformation = withRouter(
           .filter(dataset => !isNil(dataset.publicFileName))
           .map(dataset => dataset.publicFileName);
         return {
-          datasetSchemaName: datasetSchemaName,
+          dataProviderName: datasetSchemaName,
           dataProviderId: dataset.dataProviderId,
+          dataflowType: dataflowType,
           deliveryDate: dataset.releaseDate,
           restrictFromPublic: dataset.restrictFromPublic,
           publicsFileName: publicFileNames,
@@ -303,6 +321,7 @@ export const PublicDataflowInformation = withRouter(
             : DataflowUtils.getTechnicalAcceptanceStatus(datasetsFromRepresentative.map(dataset => dataset.status))
         };
       });
+
       setRepresentatives(representatives);
     };
 
@@ -310,14 +329,14 @@ export const PublicDataflowInformation = withRouter(
       const fieldColumns = getOrderedRepresentativeColumns(Object.keys(representatives[0]))
         .filter(
           key =>
-            key.includes('datasetSchemaName') ||
+            key.includes('dataProviderName') ||
             key.includes('publicsFileName') ||
             key.includes('deliveryDate') ||
             key.includes('deliveryStatus')
         )
         .map(field => {
           let template = null;
-          if (field === 'datasetSchemaName') template = countryBodyColumn;
+          if (field === 'dataProviderName') template = dataProviderNameBodyColumn;
           if (field === 'publicsFileName') template = downloadFileBodyColumn;
           return (
             <Column
@@ -336,7 +355,7 @@ export const PublicDataflowInformation = withRouter(
 
     const renderReferenceDatasetsColumns = referenceDatasets => {
       const fieldColumns = Object.keys(referenceDatasets[0])
-        .filter(key => key.includes('datasetSchemaName') || key.includes('publicFileName'))
+        .filter(key => key.includes('dataProviderName') || key.includes('publicFileName'))
         .map(field => {
           let template = null;
           if (field === 'publicFileName') template = downloadReferenceDatasetFileBodyColumn;
