@@ -33,7 +33,6 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataflowHelp = withRouter(({ history, match }) => {
   const {
@@ -46,10 +45,9 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const userContext = useContext(UserContext);
 
   const [dataflowName, setDataflowName] = useState();
+  const [dataflowType, setDataflowType] = useState('');
   const [datasetsSchemas, setDatasetsSchemas] = useState();
   const [documents, setDocuments] = useState([]);
-  const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
-  const [isCitizenScienceDataflow, setIsCitizenScienceDataflow] = useState(false);
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
@@ -89,9 +87,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW_HELP,
     dataflowId,
+    dataflowType,
     history,
-    isBusinessDataflow,
-    isCitizenScienceDataflow,
     isLoading
   });
 
@@ -158,8 +155,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const onLoadDatasetsSchemas = async () => {
     try {
       const data = await DataflowService.get(dataflowId);
-      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value));
-      setIsCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value));
+      setDataflowType(data.type);
       setIsLoading(false);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {

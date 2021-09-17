@@ -138,13 +138,15 @@ const Documents = ({
   );
 
   const isPublicColumnTemplate = rowData => (
-    <span>
-      {rowData.isPublic ? (
-        <FontAwesomeIcon aria-label={resourcesContext.messages['isPublic']} icon={AwesomeIcons('check')} />
-      ) : (
-        ''
-      )}
-    </span>
+    <div className={styles.iconStyle}>
+      <span>
+        {rowData.isPublic ? (
+          <FontAwesomeIcon aria-label={resourcesContext.messages['isPublic']} icon={AwesomeIcons('check')} />
+        ) : (
+          ''
+        )}
+      </span>
+    </div>
   );
 
   const onCancelDialog = () => {
@@ -156,7 +158,7 @@ const Documents = ({
     notificationContext.add({ type: 'DELETE_DOCUMENT_INIT_INFO' });
 
     try {
-      await DocumentService.delete(document.id);
+      await DocumentService.delete(document.id, dataflowId);
     } catch (error) {
       console.error('Documents - onDeleteDocument.', error);
       notificationContext.add({ type: 'DELETE_DOCUMENT_ERROR', content: {} });
@@ -171,7 +173,7 @@ const Documents = ({
     try {
       setDownloadingId(document.id);
       setFileName(`${document.title.split(' ').join('_')}`);
-      const { data } = await DocumentService.download(document.id);
+      const { data } = await DocumentService.download(document.id, dataflowId);
       setFileToDownload(data);
     } catch (error) {
       console.error('Documents - onDownloadDocument.', error);

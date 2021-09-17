@@ -4,6 +4,7 @@ import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 import remove from 'lodash/remove';
 
+import { config } from 'conf';
 import { DataflowConfig } from 'repositories/config/DataflowConfig';
 
 import styles from './BigButtonList.module.scss';
@@ -46,10 +47,9 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const BigButtonList = ({
   dataflowState,
+  dataflowType,
   dataProviderId,
   handleRedirect,
-  isBusinessDataflow,
-  isCitizenScienceDataflow,
   isLeadReporterOfCountry,
   onCleanUpReceipt,
   onOpenReleaseConfirmDialog,
@@ -115,6 +115,8 @@ export const BigButtonList = ({
   const dataflowId = dataflowState.id;
   const dataflowName = dataflowState.name;
   const dataflowData = dataflowState.data;
+
+  const isBusinessDataflow = TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value);
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
@@ -638,10 +640,9 @@ export const BigButtonList = ({
           <HistoricReleases
             dataProviderId={providerId}
             dataflowId={dataflowId}
+            dataflowType={dataflowType}
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
-            isBusinessDataflow={isBusinessDataflow}
-            isCitizenScienceDataflow={isCitizenScienceDataflow}
           />
         </Dialog>
       )}
@@ -656,9 +657,8 @@ export const BigButtonList = ({
           visible={isManualTechnicalAcceptanceDialogVisible}>
           <ManualAcceptanceDatasets
             dataflowId={dataflowData.id}
+            dataflowType={dataflowType}
             getManageAcceptanceDataset={getManageAcceptanceDataset}
-            isBusinessDataflow={isBusinessDataflow}
-            isCitizenScienceDataflow={isCitizenScienceDataflow}
             isUpdatedManualAcceptanceDatasets={isUpdatedManualAcceptanceDatasets}
             manageDialogs={manageManualAcceptanceDatasetDialog}
             refreshManualAcceptanceDatasets={refreshManualAcceptanceDatasets}

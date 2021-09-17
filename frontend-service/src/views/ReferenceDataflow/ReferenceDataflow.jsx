@@ -53,10 +53,12 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     designDatasetSchemas: [],
     error: null,
     isAdmin: false,
+    isAdminAssignedDataflow: false,
     isApiKeyDialogVisible: false,
     isCreatingReferenceDatasets: false,
     isCustodian: false,
     isEditDialogVisible: false,
+    isLoading: false,
     isManageRequestersDialogVisible: false,
     isPropertiesDialogVisible: false,
     isReferencingDataflowsDialogVisible: false,
@@ -132,6 +134,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       });
       await UserService.logout();
       userContext.onLogout();
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -139,8 +143,27 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_IS_CREATING_REFERENCE_DATASETS', payload: { isCreatingReferenceDatasets } });
   }
 
+  const setIsAdminAssignedDataflow = value => {
+    dataflowDispatch({
+      type: 'SET_IS_ADMIN_ASSIGNED_DATAFLOW',
+      payload: { isAdminAssignedDataflow: value }
+    });
+  };
+
+  const setIsLoading = isLoading => dataflowDispatch({ type: 'SET_IS_LOADING', payload: { isLoading } });
+
   const setIsUserRightManagementDialogVisible = isVisible => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
+  };
+
+  const onCloseShareRightsDialog = () => {
+    manageDialogs('isManageRequestersDialogVisible', false);
+    if (dataflowState.isAdminAssignedDataflow) {
+      setIsLoading(true);
+      onRefreshToken();
+      onLoadReferenceDataflow();
+      setIsAdminAssignedDataflow(false);
+    }
   };
 
   const onSaveDatasetName = async (value, index) => {
@@ -213,6 +236,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       console.error('ReferenceDataflow - onLoadReferenceDataflow.', error);
       notificationContext.add({ type: 'LOADING_REFERENCE_DATAFLOW_ERROR', error });
       history.push(getUrl(routes.DATAFLOWS));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -246,7 +271,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={'cancel'}
         label={resourcesContext.messages['cancel']}
-        onClick={() => manageDialogs(`isManageRequestersDialogVisible`, false)}
+        onClick={() => onCloseShareRightsDialog()}
       />
     </div>
   );
@@ -272,7 +297,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     </MainLayout>
   );
 
-  if (dataflowState.requestStatus === 'pending') return layout(<Spinner />);
+  if (dataflowState.requestStatus === 'pending' || dataflowState.isLoading) return layout(<Spinner />);
 
   return layout(
     <div className="rep-row">
@@ -350,7 +375,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         <Dialog
           footer={shareRightsFooterDialogFooter}
           header={resourcesContext.messages['manageRequestersRights']}
-          onHide={() => manageDialogs('isManageRequestersDialogVisible', false)}
+          onHide={() => onCloseShareRightsDialog()}
           visible={dataflowState.isManageRequestersDialogVisible}>
           <ShareRights
             addConfirmHeader={resourcesContext.messages['addRequesterConfirmHeader']}
@@ -366,6 +391,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
             placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}
             roleOptions={requesterRoleOptions}
+            setIsAdminAssignedDataflow={setIsAdminAssignedDataflow}
             setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
             updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
             userType={'requester'}

@@ -322,8 +322,8 @@ export const DataflowService = {
 
   getRepresentativesUsersList: async dataflowId => {
     const response = await DataflowRepository.getRepresentativesUsersList(dataflowId);
-    const usersList = DataflowUtils.parseCountriesUserList(response.data);
-    return sortBy(usersList, 'country');
+    const usersList = DataflowUtils.parseDataProvidersUserList(response.data);
+    return sortBy(usersList, 'dataProviderName');
   },
 
   getUserList: async (dataflowId, representativeId) => {
