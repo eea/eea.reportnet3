@@ -39,11 +39,11 @@ public interface DataFlowWebLinkController {
   /**
    * Save link.
    *
-   * @param idDataflow the id dataflow
+   * @param dataflowId the dataflow id
    * @param weblinkVO the weblink VO
    */
   @PostMapping(value = "/dataflow/{dataflowId}")
-  void saveLink(@RequestParam(value = "idDataFlow") Long idDataflow,
+  void saveLink(@RequestParam(value = "dataflowId") Long dataflowId,
       @RequestBody WeblinkVO weblinkVO);
 
   /**
