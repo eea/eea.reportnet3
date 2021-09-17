@@ -710,7 +710,8 @@ public class DataFlowServiceImplTest {
 
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("name");
-    doThrow(EEAException.class).when(documentControllerZuul).deleteDocument(1L, Boolean.TRUE);
+    doThrow(EEAException.class).when(documentControllerZuul).deleteDocument(Mockito.any(),
+        Mockito.any(), Mockito.any());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
     when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
         .thenReturn(new ArrayList<>());
