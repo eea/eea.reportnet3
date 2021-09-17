@@ -8,11 +8,6 @@ export const WebLinkService = {
     return WebLinksUtils.parseWebLinkListDTO(response.data);
   },
 
-  getAllPublic: async dataflowId => {
-    const response = await WebLinkRepository.getAllPublic(dataflowId);
-    return WebLinksUtils.parseWebLinkListDTO(response.data);
-  },
-
   create: async (dataflowId, webLinkToCreate) => await WebLinkRepository.create(dataflowId, webLinkToCreate),
 
   delete: async webLinkId => await WebLinkRepository.delete(webLinkId),
