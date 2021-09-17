@@ -15,7 +15,8 @@
       "sqlSentenceKeyWordNote": "sqlSentenceCompanyCodeNote",
       "userListBtnLabel": "dataflowUsersByCompanyList",
       "userListDataProviderColumnHeader": "company",
-      "userListDataProviderFilterLabel": "company"
+      "userListDataProviderFilterLabel": "company",
+      "userListDialogHeader": "dataflowUsersByCompanyList"
     }
   },
   "CITIZEN_SCIENCE": {
@@ -35,7 +36,8 @@
       "sqlSentenceKeyWordNote": "sqlSentenceOrganizationCodeNote",
       "userListBtnLabel": "dataflowUsersByOrganizationList",
       "userListDataProviderColumnHeader": "organization",
-      "userListDataProviderFilterLabel": "organization"
+      "userListDataProviderFilterLabel": "organization",
+      "userListDialogHeader": "dataflowUsersByOrganizationList"
     }
   },
   "REFERENCE": { "key": "reference", "value": "REFERENCE" },
@@ -56,7 +58,8 @@
       "sqlSentenceKeyWordNote": "sqlSentenceCountryCodeNote",
       "userListBtnLabel": "dataflowUsersByCountryList",
       "userListDataProviderColumnHeader": "countries",
-      "userListDataProviderFilterLabel": "countries"
+      "userListDataProviderFilterLabel": "countries",
+      "userListDialogHeader": "dataflowUsersByCountryList"
     }
   }
 }

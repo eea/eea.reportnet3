@@ -56,6 +56,7 @@ import { useReportingObligations } from 'views/_components/ReportingObligations/
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const Dataflow = withRouter(({ history, match }) => {
@@ -420,19 +421,6 @@ const Dataflow = withRouter(({ history, match }) => {
     } catch (error) {
       console.error('Dataflow - onExportLeadReporters.', error);
       notificationContext.add({ type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT' });
-    }
-  };
-
-  const getUsersListDialogHeader = () => {
-    switch (dataflowState.dataflowType) {
-      case config.dataflowType.BUSINESS.value:
-        return resourcesContext.messages['dataflowUsersByCompanyList'];
-
-      case config.dataflowType.CITIZEN_SCIENCE.value:
-        return resourcesContext.messages['dataflowUsersByOrganizationList'];
-
-      default:
-        return resourcesContext.messages['dataflowUsersByCountryList'];
     }
   };
 
@@ -1123,7 +1111,11 @@ const Dataflow = withRouter(({ history, match }) => {
               ((isNil(dataProviderId) && dataflowState.isCustodian) ||
                 (isNil(representativeId) && dataflowState.isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
-                ? getUsersListDialogHeader()
+                ? TextByDataflowTypeUtils.getLabelByDataflowType(
+                    resourcesContext.messages,
+                    dataflowState.dataflowType,
+                    'userListDialogHeader'
+                  )
                 : resourcesContext.messages['dataflowUsersList']
             }
             onHide={() => manageDialogs('isUserListVisible', false)}
