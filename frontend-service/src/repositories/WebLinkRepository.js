@@ -5,9 +5,6 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 export const WebLinkRepository = {
   getAll: async dataflowId => await HTTPRequester.get({ url: getUrl(WebLinkConfig.getAll, { dataflowId }) }),
 
-  getAllPublic: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(WebLinkConfig.getAllPublic, { dataflowId }) }),
-
   create: async (dataflowId, webLink) =>
     await HTTPRequester.post({
       url: getUrl(WebLinkConfig.create, { dataflowId }),

@@ -19,7 +19,6 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { Dashboard } from 'views/_components/Dashboard';
 import { Dialog } from 'views/_components/Dialog';
-import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { MainLayout } from 'views/_components/Layout';
 import { Menu } from 'views/_components/Menu';
 import { QCList } from 'views/_components/QCList';
@@ -29,6 +28,7 @@ import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
 import { TabsSchema } from 'views/_components/TabsSchema';
+import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { Webforms } from 'views/Webforms';
@@ -46,9 +46,9 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useReporterDataset } from 'views/_components/Snapshots/_hooks/useReporterDataset';
 
-import { TextUtils } from 'repositories/_utils/TextUtils';
-import { getUrl } from 'repositories/_utils/UrlUtils';
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'views/_functions/Utils';
+import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const {
@@ -87,20 +87,19 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     import: [],
     importOtherSystems: []
   });
+  const [dataflowType, setDataflowType] = useState('');
   const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
-  const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
-  const [isCitizenScienceDataflow, setIsCitizenScienceDataflow] = useState(false);
   const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
-  const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isDownloadingQCRules, setIsDownloadingQCRules] = useState(false);
+  const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -129,9 +128,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   useBreadCrumbs({
     currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET : CurrentPage.DATASET,
     dataflowId,
+    dataflowType,
     history,
-    isBusinessDataflow,
-    isCitizenScienceDataflow,
     isLoading,
     metaData: metadata,
     referenceDataflowId: dataflowId
@@ -418,7 +416,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await DatasetService.validate(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
-        content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
+        content: { origin: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
       });
     } catch (error) {
       if (error.response.status === 423) {
@@ -429,7 +427,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         console.error('Dataset - onConfirmValidate.', error);
         notificationContext.add({
           type: 'VALIDATE_DATA_BY_ID_ERROR',
-          content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
+          content: {
+            origin: datasetName,
+            dataflowId,
+            dataflowName,
+            datasetId,
+            datasetName: datasetSchemaName
+          }
         });
       }
     }
@@ -574,8 +578,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onLoadDataflow = async () => {
     try {
       const data = await DataflowService.get(match.params.dataflowId);
-      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value));
-      setIsCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value));
+      setDataflowType(data.type);
       let dataset = [];
       if (isTestDataset) {
         dataset = data.testDatasets.find(dataset => dataset.datasetId.toString() === datasetId);

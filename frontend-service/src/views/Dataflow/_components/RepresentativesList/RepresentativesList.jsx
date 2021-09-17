@@ -9,6 +9,8 @@ import uniq from 'lodash/uniq';
 
 import styles from './RepresentativesList.module.scss';
 
+import { config } from 'conf';
+
 import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
@@ -31,8 +33,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const RepresentativesList = ({
   dataflowId,
-  isBusinessDataflow,
-  isCitizenScienceDataflow,
+  dataflowType,
   representativesImport = false,
   setDataProviderSelected,
   setFormHasRepresentatives,
@@ -73,7 +74,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     getInitialData();
-  }, [formState.refresher, isBusinessDataflow, isCitizenScienceDataflow]);
+  }, [dataflowType, formState.refresher]);
 
   useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
@@ -139,13 +140,16 @@ const RepresentativesList = ({
   };
 
   const getInitialData = async () => {
-    if (isBusinessDataflow) {
-      await getDataProviderGroup();
-    }
-    if (isCitizenScienceDataflow) {
-      await getGroupOrganizations();
-    } else {
-      await getGroupCountries();
+    switch (dataflowType) {
+      case config.dataflowType.BUSINESS.value:
+        await getDataProviderGroup();
+        break;
+      case config.dataflowType.CITIZEN_SCIENCE.value:
+        await getGroupOrganizations();
+        break;
+      default:
+        await getGroupCountries();
+        break;
     }
 
     await getRepresentatives();
@@ -434,7 +438,7 @@ const RepresentativesList = ({
         <div className={styles.title}>{resourcesContext.messages['manageRolesDialogHeader']}</div>
         <div>
           <label>{resourcesContext.messages['manageRolesDialogDropdownLabel']} </label>
-          {isBusinessDataflow ? (
+          {TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? (
             <Dropdown
               ariaLabel={'dataProviders'}
               className={styles.dataProvidersDropdown}

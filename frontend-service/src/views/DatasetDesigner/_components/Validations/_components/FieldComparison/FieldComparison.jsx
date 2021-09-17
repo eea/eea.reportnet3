@@ -10,7 +10,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 export const FieldComparison = ({
   componentName,
   creationFormState,
-  isBusinessDataflow,
+  dataflowType,
   onAddNewExpression,
   onExpressionDelete,
   onExpressionFieldUpdate,
@@ -29,10 +29,10 @@ export const FieldComparison = ({
           {creationFormState.candidateRule.expressions &&
             creationFormState.candidateRule.expressions.map((expression, i) => (
               <ValidationExpressionSelector
+                dataflowType={dataflowType}
                 expressionType={creationFormState.candidateRule.expressionType}
                 expressionValues={expression}
                 fieldType={creationFormState.candidateRule.fieldType}
-                isBusinessDataflow={isBusinessDataflow}
                 isDisabled={creationFormState.areRulesDisabled}
                 key={expression.expressionId}
                 onExpressionDelete={onExpressionDelete}
