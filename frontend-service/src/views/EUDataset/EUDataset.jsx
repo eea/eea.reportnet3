@@ -31,7 +31,6 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const EUDataset = withRouter(({ history, match }) => {
   const {
@@ -44,6 +43,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const [euDatasetState, euDatasetDispatch] = useReducer(euDatasetReducer, {
     dataflowName: '',
+    dataflowType: '',
     datasetHasData: false,
     datasetHasErrors: false,
     datasetName: '',
@@ -52,12 +52,10 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetSchemaName: '',
     dataViewerOptions: { activeIndex: null },
     exportExtensionsList: [],
-    isBusinessDataflow: false,
-    isCitizenScienceDataflow: false,
     isDataUpdated: false,
+    isGroupedValidationSelected: false,
     isLoading: true,
     isRefreshHighlighted: false,
-    isGroupedValidationSelected: false,
     levelErrorTypes: [],
     metadata: undefined,
     tableSchema: undefined,
@@ -68,10 +66,9 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const {
     dataflowName,
+    dataflowType,
     datasetName,
     dataViewerOptions,
-    isBusinessDataflow,
-    isCitizenScienceDataflow,
     isGroupedValidationSelected,
     isLoading,
     levelErrorTypes,
@@ -102,9 +99,8 @@ export const EUDataset = withRouter(({ history, match }) => {
   useBreadCrumbs({
     currentPage: CurrentPage.EU_DATASET,
     dataflowId,
+    dataflowType,
     history,
-    isBusinessDataflow,
-    isCitizenScienceDataflow,
     isLoading,
     metaData: metadata
   });
@@ -125,9 +121,8 @@ export const EUDataset = withRouter(({ history, match }) => {
       euDatasetDispatch({
         type: 'GET_DATAFLOW_DETAILS',
         payload: {
-          name: data.name,
-          isBusinessDataflow: TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value),
-          isCitizenScienceDataflow: TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value)
+          dataflowType: data.type,
+          name: data.name
         }
       });
     } catch (error) {
@@ -292,11 +287,10 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const renderTabsSchema = () => (
     <TabsSchema
+      dataflowType={dataflowType}
       datasetSchemaId={euDatasetState.metaData.dataset.datasetSchemaId}
       hasCountryCode={true}
       hasWritePermissions={false}
-      isBusinessDataflow={euDatasetState.isBusinessDataflow}
-      isCitizenScienceDataflow={euDatasetState.isCitizenScienceDataflow}
       isExportable={false}
       isFilterable={false}
       isGroupedValidationSelected={isGroupedValidationSelected}

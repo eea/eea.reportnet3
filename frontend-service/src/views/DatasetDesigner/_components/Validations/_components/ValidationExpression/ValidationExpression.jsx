@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef, useState } from 'react';
 
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './ValidationExpression.module.scss';
 
@@ -15,12 +16,13 @@ import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'views/_components/InputText';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import isNil from 'lodash/isNil';
+
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 const ValidationExpression = ({
+  dataflowType,
   expressionValues,
   fieldType,
-  isBusinessDataflow,
   isDisabled,
   onExpressionDelete,
   onExpressionFieldUpdate,
@@ -242,9 +244,10 @@ const ValidationExpression = ({
 
     if (operatorType === 'string') {
       if (operatorValue === 'MATCH') {
-        const ccButtonValue = `${expressionValues.expressionValue}${
-          isBusinessDataflow ? config.COMPANY_CODE_KEYWORD : config.COUNTRY_CODE_KEYWORD
-        }`;
+        const ccButtonValue = `${expressionValues.expressionValue}${TextByDataflowTypeUtils.getKeyByDataflowType(
+          dataflowType,
+          'sqlSentenceCodeKeyWord'
+        )}`;
         return (
           <span className={styles.inputStringMatch}>
             <InputText
@@ -257,13 +260,17 @@ const ValidationExpression = ({
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
-              label="CC"
+              label={TextByDataflowTypeUtils.getLabelByDataflowType(
+                resourcesContext.messages,
+                dataflowType,
+                'qcCodeAcronymButtonLabel'
+              )}
               onClick={() => onCCButtonClick(ccButtonValue)}
-              tooltip={
-                isBusinessDataflow
-                  ? resourcesContext.messages['matchStringCompanyTooltip']
-                  : resourcesContext.messages['matchStringTooltip']
-              }
+              tooltip={TextByDataflowTypeUtils.getLabelByDataflowType(
+                resourcesContext.messages,
+                dataflowType,
+                'qcCodeAcronymButtonTooltip'
+              )}
               tooltipOptions={{ position: 'top' }}
             />
           </span>
