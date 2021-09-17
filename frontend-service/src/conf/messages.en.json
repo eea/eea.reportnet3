@@ -1256,6 +1256,8 @@
     "messages": "messages",
     "updateCitizenScienceDataflow": "Edit citizen science dataflow",
     "createNewCitizenScienceDataflow": "Create new citizen science dataflow",
-    "reportingDatasets": "Reporting datasets"
+    "reportingDatasets": "Reporting datasets",
+    "importLeadReportersTooltip": "Import result file is downloaded after import process",
+    "exportLeadReportersTemplateTooltip": "Export a CSV template with "
   }
 }
