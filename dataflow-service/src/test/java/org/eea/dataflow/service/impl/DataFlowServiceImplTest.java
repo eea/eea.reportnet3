@@ -1151,6 +1151,27 @@ public class DataFlowServiceImplTest {
     assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.CITIZEN_SCIENCE));
   }
 
+  @Test
+  public void getDataflowsExceptReferenceTest() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataflowVO.setType(TypeDataflowEnum.CITIZEN_SCIENCE);
+    dataflowVO.setId(0L);
+    ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
+    resourceAccessVO.setId(0L);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
+        .thenReturn(Arrays.asList(resourceAccessVO));
+    Mockito
+        .when(dataflowRepository.findDataflowsExceptReferenceInOrderByStatusDescCreationDateDesc())
+        .thenReturn(dataflows);
+    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
+
+    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.ALL_EXCEPT_REFERENCE));
+  }
 
   @Test
   public void getDataflowsByDataProviderIdsTest() {

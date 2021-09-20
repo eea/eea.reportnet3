@@ -286,6 +286,13 @@ public class DataflowServiceImpl implements DataflowService {
           dataflows.addAll(dataflowRepository
               .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT));
           break;
+        default:
+          dataflows = userAdmin
+              ? dataflowRepository.findDataflowsExceptReferenceInOrderByStatusDescCreationDateDesc()
+              : dataflowRepository
+                  .findDataflowsExceptReferenceAndIdInOrderByStatusDescCreationDateDesc(
+                      idsResources);
+          break;
       }
 
 

@@ -247,6 +247,31 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflows;
   }
 
+  /**
+   * Find dataflows for clone.
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/getDataflowsForClone", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Dataflows for clone for the logged User",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      responseContainer = "List")
+  public List<DataFlowVO> findDataflowsForClone() {
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
+    try {
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.ALL_EXCEPT_REFERENCE);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return dataflows;
+  }
+
 
   /**
    * Find completed.
