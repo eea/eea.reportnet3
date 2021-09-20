@@ -1197,7 +1197,7 @@
     "userTypeOfViewSubtitle": "Choose default layout to search obligations and dataflows.",
     "valid": "Valid",
     "validate": "Validate",
-    "validateDataByIdError": "Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:origin})</a>",
+    "validateReportingDataError": "Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:origin})</a>",
     "validateDataInit": "Validating <strong title='{:datasetName}'>{:shortDatasetName} ({:origin})</strong>",
     "validateDataset": "Validate dataset",
     "validateDatasetConfirm": "This action will take some minutes and it will run in background. Do you want to continue with the validation?",
@@ -1262,6 +1262,7 @@
     "organizationCodeAcronym": "OC",
     "companyCodeAcronym": "CC",
     "importLeadReportersTooltip": "Import result file is downloaded after import process",
-    "exportLeadReportersTemplateTooltip": "Export a CSV template with "
+    "exportLeadReportersTemplateTooltip": "Export a CSV template with ",
+    "validateDesignDataError": "Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:origin})</a>"
   }
 }
