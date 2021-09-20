@@ -76,7 +76,7 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   @Override
   @HystrixCommand
   @GetMapping(value = "/referenced/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') OR checkAccessReferenceEntity('DATAFLOW',#id)")
+  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD', 'ADMIN') OR checkAccessReferenceEntity('DATAFLOW',#id)")
   public Set<DataFlowVO> findDataflowsReferencedByDataflowId(@PathVariable("id") Long dataflowId) {
     return referenceDatasetService.getDataflowsReferenced(dataflowId);
   }
