@@ -30,6 +30,7 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSche
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
+import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
@@ -65,6 +66,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import feign.FeignException;
 
 /**
  * The Class JdbcRecordStoreServiceImpl.
@@ -200,6 +202,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The test dataset controller zuul. */
   @Autowired
   private TestDatasetControllerZuul testDatasetControllerZuul;
+
+  /** The document controller zuul. */
+  @Autowired
+  private DocumentControllerZuul documentControllerZuul;
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -454,6 +460,23 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
 
       LOG.info("Snapshot {} data files created", idSnapshot);
+
+      // Until document is not created, wait for it to finish or 30 seconds
+      long startTime = System.currentTimeMillis();
+      while ((System.currentTimeMillis() - startTime) < 30000) {
+        try {
+          String FILE_PATTERN_NAME_RULES = "rulesSnapshot_%s-DesignDataset_%s";
+          String nameFileRules = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset)
+              + LiteralConstants.SNAPSHOT_EXTENSION;
+          documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
+          break;
+        } catch (FeignException e) {
+          LOG.info(
+              "Document: {} still not created from dataset: {} and snpashot: {}, wait {} milliseconds",
+              nameFileRecordValue, idDataset, idSnapshot, timeToWaitBeforeReleasingNotification);
+          Thread.sleep(timeToWaitBeforeReleasingNotification);
+        }
+      }
 
       notificationCreateAndCheckRelease(idDataset, idSnapshot, type, dateRelease);
 
