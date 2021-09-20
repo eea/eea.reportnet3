@@ -272,7 +272,7 @@ export const BigButtonList = ({
         getDate(),
         isManualTechnicalAcceptance,
         true,
-        isBusinessDataflow ? false : showPublicInfo
+        showPublicInfo
       );
     } catch (error) {
       console.error('BigButtonList - onCreateDataCollections.', error);
@@ -692,7 +692,7 @@ export const BigButtonList = ({
         <ConfirmDialog
           className={styles.calendarConfirm}
           disabledConfirm={isNil(dataCollectionDueDate)}
-          footerAddon={!isBusinessDataflow && checkShowPublicInfo}
+          footerAddon={checkShowPublicInfo}
           header={resourcesContext.messages['createDataCollection']}
           labelCancel={resourcesContext.messages['close']}
           labelConfirm={resourcesContext.messages['create']}

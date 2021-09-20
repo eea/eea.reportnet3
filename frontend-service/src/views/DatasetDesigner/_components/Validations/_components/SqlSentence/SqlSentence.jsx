@@ -56,7 +56,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
 
   const onCCButtonClick = () => {
     onSetSqlSentence(
-      `${creationFormState.candidateRule.sqlSentence} ${TextByDataflowTypeUtils.getKeyByDataflowType(
+      `${creationFormState.candidateRule.sqlSentence || ''} ${TextByDataflowTypeUtils.getKeyByDataflowType(
         dataflowType,
         'sqlSentenceCodeKeyWord'
       )}`
