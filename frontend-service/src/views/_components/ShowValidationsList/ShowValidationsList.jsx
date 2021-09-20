@@ -551,11 +551,21 @@ export const ShowValidationsList = memo(
       }
 
       if (isEmpty(fetchedData) && !filtered) {
-        return (
-          <div className={styles.validationsWithoutTable}>
-            <div className={styles.noValidations}>{resourcesContext.messages['noValidations']}</div>
-          </div>
-        );
+        if (!isLoadingTable) {
+          return (
+            <div className={styles.validationsWithoutTable}>
+              <div className={styles.noValidations}>{resourcesContext.messages['noValidations']}</div>
+            </div>
+          );
+        } else {
+          return (
+            <div className={styles.validationsWithoutTable}>
+              <div className={styles.loadingSpinner}>
+                <Spinner className={styles.spinnerPosition} />
+              </div>
+            </div>
+          );
+        }
       }
 
       return (
