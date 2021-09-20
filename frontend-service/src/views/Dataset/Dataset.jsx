@@ -426,7 +426,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       } else {
         console.error('Dataset - onConfirmValidate.', error);
         notificationContext.add({
-          type: 'VALIDATE_DATA_BY_ID_ERROR',
+          type: 'VALIDATE_REPORTING_DATA_ERROR',
           content: {
             origin: datasetName,
             dataflowId,

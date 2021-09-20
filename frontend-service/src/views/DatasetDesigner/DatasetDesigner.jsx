@@ -561,7 +561,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       } else {
         console.error('DatasetDesigner - onConfirmValidate.', error);
         notificationContext.add({
-          type: 'VALIDATE_DATA_BY_ID_ERROR',
+          type: 'VALIDATE_DESIGN_DATA_ERROR',
           content: {
             origin: 'DESIGN',
             dataflowId,
