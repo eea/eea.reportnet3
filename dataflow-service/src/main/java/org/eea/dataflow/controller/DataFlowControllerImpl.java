@@ -265,7 +265,8 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.ALL_EXCEPT_REFERENCE);
+      // type ALL is sent but there will be ALL except REFERENCE type dataflow
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.ALL);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }

@@ -287,6 +287,7 @@ public class DataflowServiceImpl implements DataflowService {
               .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT));
           break;
         default:
+          // case for type ALL but except REFERENCE type dataflow
           dataflows = userAdmin
               ? dataflowRepository.findDataflowsExceptReferenceInOrderByStatusDescCreationDateDesc()
               : dataflowRepository

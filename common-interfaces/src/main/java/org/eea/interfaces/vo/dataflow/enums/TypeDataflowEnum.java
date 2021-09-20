@@ -21,8 +21,8 @@ public enum TypeDataflowEnum {
   /** The citizen science. */
   CITIZEN_SCIENCE("CITIZEN_SCIENCE"),
 
-  /** The all except reference. */
-  ALL_EXCEPT_REFERENCE("ALL_EXCEPT_REFERENCE");
+  /** The all. */
+  ALL("ALL");
 
   /** The value. */
   private final String value;
