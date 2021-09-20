@@ -13,12 +13,11 @@ import { QuerystringUtils } from 'views/_functions/Utils/QuerystringUtils';
 import { TabsUtils } from 'views/_functions/Utils/TabsUtils';
 
 export const TabsSchema = ({
-  datasetSchemaId,
+  dataflowType,
   dataProviderId,
-  hasWritePermissions = false,
+  datasetSchemaId,
   hasCountryCode,
-  isBusinessDataflow,
-  isCitizenScienceDataflow,
+  hasWritePermissions = false,
   isExportable = true,
   isFilterable,
   isGroupedValidationDeleted,
@@ -32,12 +31,12 @@ export const TabsSchema = ({
   reporting,
   selectedRuleId,
   selectedRuleLevelError,
-  selectedTableSchemaId,
   selectedRuleMessage,
+  selectedTableSchemaId,
   showWriteButtons = true,
-  tableSchemaId,
   tables,
-  tableSchemaColumns
+  tableSchemaColumns,
+  tableSchemaId
 }) => {
   let tabs =
     tables && tableSchemaColumns
@@ -47,11 +46,10 @@ export const TabsSchema = ({
               <div className={styles.tabsSchema}>
                 <DataViewer
                   dataProviderId={dataProviderId}
+                  dataflowType={dataflowType}
                   datasetSchemaId={datasetSchemaId}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
-                  isBusinessDataflow={isBusinessDataflow}
-                  isCitizenScienceDataflow={isCitizenScienceDataflow}
                   isExportable={isExportable}
                   isFilterable={isFilterable}
                   isGroupedValidationDeleted={isGroupedValidationDeleted}

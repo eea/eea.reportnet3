@@ -10,7 +10,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 export const ExpressionsTab = ({
   componentName,
   creationFormState,
-  isBusinessDataflow,
+  dataflowType,
   onAddNewExpression,
   onExpressionDelete,
   onExpressionFieldUpdate,
@@ -28,9 +28,9 @@ export const ExpressionsTab = ({
           {creationFormState.candidateRule.expressions &&
             creationFormState.candidateRule.expressions.map((expression, i) => (
               <ValidationExpressionSelector
+                dataflowType={dataflowType}
                 expressionValues={expression}
                 fieldType={creationFormState.candidateRule.fieldType}
-                isBusinessDataflow={isBusinessDataflow}
                 isDisabled={creationFormState.areRulesDisabled}
                 key={expression.expressionId}
                 onExpressionDelete={onExpressionDelete}

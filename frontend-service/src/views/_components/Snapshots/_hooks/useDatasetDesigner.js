@@ -4,6 +4,8 @@ import { useSnapshotReducer } from './useSnapshotReducer';
 import { SnapshotService } from 'services/SnapshotService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+
 const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
   const notificationContext = useContext(NotificationContext);
   const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
@@ -31,11 +33,25 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
     }
   }, [isSnapshotsBarVisible]);
 
+  const onLoadSnapshotList = async () => {
+    try {
+      setIsLoadingSnapshotListData(true);
+      const snapshotsData = await SnapshotService.getAllDesigner(datasetId);
+      setSnapshotListData(snapshotsData);
+      setIsLoadingSnapshotListData(false);
+    } catch (error) {
+      console.error('useDatasetDesigner - onLoadSnapshotList.', error);
+      notificationContext.add({ type: 'SNAPSHOT_ALL_DESIGNER_ERROR', content: { dataflowId, datasetId } });
+    }
+  };
+
+  useCheckNotifications(['ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT'], onLoadSnapshotList);
+
   const onCreateSnapshot = async () => {
     try {
+      setIsLoadingSnapshotListData(true);
       await SnapshotService.createDesigner(datasetId, datasetSchemaId, snapshotState.description);
       snapshotDispatch({ type: 'ON_SNAPSHOT_RESET' });
-      onLoadSnapshotList();
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
@@ -61,20 +77,6 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
       }
     } finally {
       setIsSnapshotDialogVisible(false);
-    }
-  };
-
-  const onLoadSnapshotList = async () => {
-    try {
-      //Settimeout for avoiding the overlaping between the slidebar transition and the api call
-      setTimeout(async () => {
-        const snapshotsData = await SnapshotService.getAllDesigner(datasetId);
-        setSnapshotListData(snapshotsData);
-        setIsLoadingSnapshotListData(false);
-      }, 500);
-    } catch (error) {
-      console.error('useDatasetDesigner - onLoadSnapshotList.', error);
-      notificationContext.add({ type: 'SNAPSHOT_ALL_DESIGNER_ERROR', content: { dataflowId, datasetId } });
     }
   };
 

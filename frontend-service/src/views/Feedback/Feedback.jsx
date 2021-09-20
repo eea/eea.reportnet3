@@ -33,7 +33,6 @@ import { feedbackReducer } from './_functions/Reducers/feedbackReducer';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const Feedback = withRouter(({ match, history }) => {
   const {
@@ -48,12 +47,11 @@ export const Feedback = withRouter(({ match, history }) => {
   const [feedbackState, dispatchFeedback] = useReducer(feedbackReducer, {
     currentPage: 0,
     dataflowName: '',
+    dataflowType: '',
     dataProviders: [],
     draggedFiles: null,
     importFileDialogVisible: false,
     isAdmin: false,
-    isBusinessDataflow: false,
-    isCitizenScienceDataflow: false,
     isCustodian: undefined,
     isDragging: false,
     isLoading: true,
@@ -70,11 +68,10 @@ export const Feedback = withRouter(({ match, history }) => {
   const {
     currentPage,
     dataflowName,
+    dataflowType,
     dataProviders,
     draggedFiles,
     importFileDialogVisible,
-    isBusinessDataflow,
-    isCitizenScienceDataflow,
     isAdmin,
     isCustodian,
     isDragging,
@@ -149,9 +146,8 @@ export const Feedback = withRouter(({ match, history }) => {
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW_FEEDBACK,
     dataflowId,
+    dataflowType,
     history,
-    isBusinessDataflow,
-    isCitizenScienceDataflow,
     isLoading
   });
 
@@ -180,11 +176,10 @@ export const Feedback = withRouter(({ match, history }) => {
     try {
       const data = await DataflowService.getDetails(dataflowId);
       const name = data.name;
-      const isBusinessDataflow = TextUtils.areEquals(data.type, config.dataflowType.BUSINESS.value);
-      const isCitizenScienceDataflow = TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE.value);
+
       dispatchFeedback({
         type: 'SET_DATAFLOW_DETAILS',
-        payload: { name, isBusinessDataflow, isCitizenScienceDataflow }
+        payload: { name, dataflowType: data.type }
       });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);
