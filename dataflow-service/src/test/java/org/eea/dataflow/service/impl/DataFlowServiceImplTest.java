@@ -1170,7 +1170,7 @@ public class DataFlowServiceImplTest {
         .thenReturn(dataflows);
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
 
-    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.ALL_EXCEPT_REFERENCE));
+    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.ALL));
   }
 
   @Test
