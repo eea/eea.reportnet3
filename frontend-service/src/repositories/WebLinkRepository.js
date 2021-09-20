@@ -11,7 +11,7 @@ export const WebLinkRepository = {
       data: { description: webLink.description, url: webLink.url.toString(), isPublic: webLink.isPublic }
     }),
 
-  delete: async webLinkId => await HTTPRequester.delete({ url: getUrl(WebLinkConfig.delete, { webLinkId }) }),
+  delete: async (webLinkId, dataflowId) => await HTTPRequester.delete({ url: getUrl(WebLinkConfig.delete, { webLinkId, dataflowId }) }),
 
   update: async (dataflowId, webLinkToEdit) =>
     await HTTPRequester.update({

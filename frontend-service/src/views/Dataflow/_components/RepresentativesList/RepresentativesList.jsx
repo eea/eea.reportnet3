@@ -16,7 +16,6 @@ import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
-import { DownloadFile } from 'views/_components/DownloadFile';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
@@ -294,22 +293,6 @@ const RepresentativesList = ({
     }
   };
 
-  const onExportLeadReportersTemplate = async () => {
-    try {
-      const { data } = await RepresentativeService.exportTemplateFile(
-        formState.selectedDataProviderGroup?.dataProviderGroupId
-      );
-      if (!isNil(data)) {
-        DownloadFile(data, `GroupId_${formState.selectedDataProviderGroup?.dataProviderGroupId}_Template.csv`);
-      }
-    } catch (error) {
-      console.error('RepresentativesList - onExportLeadReportersTemplate.', error);
-      notificationContext.add({
-        type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_TEMPLATE_FAILED_EVENT'
-      });
-    }
-  };
-
   const onKeyDown = (event, representativeId, dataProviderId, leadReporter) => {
     if (TextUtils.areEquals(event.key, 'Enter')) {
       onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter);
@@ -478,15 +461,6 @@ const RepresentativesList = ({
               value={formState.selectedDataProviderGroup}
             />
           )}
-          <Button
-            className={`${styles.exportTemplate} p-button-secondary ${
-              !isEmpty(formState.selectedDataProviderGroup) ? 'p-button-animated-blink' : ''
-            }`}
-            disabled={isEmpty(formState.selectedDataProviderGroup)}
-            icon={'export'}
-            label={resourcesContext.messages['exportLeadReportersTemplate']}
-            onClick={onExportLeadReportersTemplate}
-          />
         </div>
       </div>
 

@@ -55,6 +55,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     isAdmin: false,
     isAdminAssignedDataflow: false,
     isApiKeyDialogVisible: false,
+    isCustodianUser: false,
     isCreatingReferenceDatasets: false,
     isCustodian: false,
     isEditDialogVisible: false,
@@ -188,13 +189,14 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const onLoadPermissions = () => {
     const isAdmin = userContext.accessRole.some(role => role === config.permissions.roles.ADMIN.key);
+    const isCustodianUser = userContext.accessRole.some(role => role === config.permissions.roles.CUSTODIAN.key);
     const isCustodian = userContext.hasContextAccessPermission(
       config.permissions.prefixes.DATAFLOW,
       referenceDataflowId,
       [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key]
     );
 
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, isCustodian } });
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, isCustodian, isCustodianUser } });
   };
 
   const onLoadReferenceDataflow = async () => {

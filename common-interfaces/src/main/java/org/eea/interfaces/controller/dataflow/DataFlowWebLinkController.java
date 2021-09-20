@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The Interface DataFlowWebLinkController.
@@ -43,7 +42,7 @@ public interface DataFlowWebLinkController {
    * @param weblinkVO the weblink VO
    */
   @PostMapping(value = "/dataflow/{dataflowId}")
-  void saveLink(@RequestParam(value = "dataflowId") Long dataflowId,
+  void saveLink(@PathVariable(value = "dataflowId") Long dataflowId,
       @RequestBody WeblinkVO weblinkVO);
 
   /**
@@ -52,7 +51,7 @@ public interface DataFlowWebLinkController {
    * @param idLink the id link
    * @param dataflowId the dataflow id
    */
-  @DeleteMapping(value = "/{idLink}")
+  @DeleteMapping(value = "/{idLink}/dataflow/{dataflowId}")
   void removeLink(@PathVariable(value = "idLink") Long idLink,
       @PathVariable(value = "dataflowId") Long dataflowId);
 
