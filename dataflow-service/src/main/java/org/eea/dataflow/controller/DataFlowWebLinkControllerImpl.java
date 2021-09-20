@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -104,7 +103,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       @ApiResponse(code = 500, message = "Internal Server Error")})
   public void saveLink(
       @ApiParam(value = "Dataflow Id",
-          example = "0") @RequestParam(value = "dataflowId") Long dataflowId,
+          example = "0") @PathVariable(value = "dataflowId") Long dataflowId,
       @ApiParam(type = "Object", value = "Weblink Object") WeblinkVO weblinkVO) {
 
     try {

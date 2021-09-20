@@ -166,7 +166,7 @@ export const WebLinks = ({
     setDeletingId(id);
 
     try {
-      await WebLinkService.delete(id);
+      await WebLinkService.delete(id, dataflowId);
       onLoadWebLinks();
     } catch (error) {
       console.error('WebLinks - onDeleteWebLink.', error);

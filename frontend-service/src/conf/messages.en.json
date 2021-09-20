@@ -1263,6 +1263,7 @@
     "companyCodeAcronym": "CC",
     "importLeadReportersTooltip": "Import result file is downloaded after import process",
     "exportLeadReportersTemplateTooltip": "Export a CSV template with ",
-    "validateDesignDataError": "Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:origin})</a>"
+    "validateDesignDataError": "Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:origin})</a>",
+    "showPublicBusinessInfoCheckboxTooltip": "Documents and web links only"
   }
 }
