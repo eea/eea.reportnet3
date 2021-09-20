@@ -1264,7 +1264,6 @@
     "importLeadReportersTooltip": "Import result file is downloaded after import process",
     "exportLeadReportersTemplateTooltip": "Export a CSV template with ",
     "validateDesignDataError": "Error validating data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:origin})</a>",
-    "showPublicBusinessInfoCheckboxLabel": "Show publicly dataflow help information",
-    "showPublicBusinessInfoCheckboxTooltip": "Show publicly documents and web links"
+    "showPublicBusinessInfoCheckboxTooltip": "Documents and web links only"
   }
 }

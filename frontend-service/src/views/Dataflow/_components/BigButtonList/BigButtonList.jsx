@@ -171,9 +171,7 @@ export const BigButtonList = ({
         id="show_public_info_label"
         onClick={() => setShowPublicInfo(!showPublicInfo)}
         style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
-        {isBusinessDataflow
-          ? resourcesContext.messages['showPublicBusinessInfoCheckboxLabel']
-          : resourcesContext.messages['showPublicInfo']}
+        {resourcesContext.messages['showPublicInfo']}
       </label>
 
       {isBusinessDataflow && (
