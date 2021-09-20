@@ -4,7 +4,6 @@ import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 import remove from 'lodash/remove';
 
-import { config } from 'conf';
 import { DataflowConfig } from 'repositories/config/DataflowConfig';
 
 import styles from './BigButtonList.module.scss';
@@ -83,14 +82,16 @@ export const BigButtonList = ({
   const [isActiveButton, setIsActiveButton] = useState(true);
   const [isCloningDataflow, setIsCloningDataflow] = useState(false);
   const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
-  const [isCopyDataCollectionToEUDatasetDialogVisible, setIsCopyDataCollectionToEUDatasetDialogVisible] =
-    useState(false);
+  const [isCopyDataCollectionToEUDatasetDialogVisible, setIsCopyDataCollectionToEUDatasetDialogVisible] = useState(
+    false
+  );
   const [isExportEUDatasetDialogVisible, setIsExportEUDatasetDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isImportingDataflow, setIsImportingDataflow] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
-  const [isManageManualAcceptanceDatasetDialogVisible, setIsManageManualAcceptanceDatasetDialogVisible] =
-    useState(false);
+  const [isManageManualAcceptanceDatasetDialogVisible, setIsManageManualAcceptanceDatasetDialogVisible] = useState(
+    false
+  );
   const [isManualTechnicalAcceptance, setIsManualTechnicalAcceptance] = useState(null);
   const [isManualTechnicalAcceptanceDialogVisible, setIsManualTechnicalAcceptanceDialogVisible] = useState(false);
   const [isUpdatedManualAcceptanceDatasets, setIsUpdatedManualAcceptanceDatasets] = useState(false);
@@ -115,8 +116,6 @@ export const BigButtonList = ({
   const dataflowId = dataflowState.id;
   const dataflowName = dataflowState.name;
   const dataflowData = dataflowState.data;
-
-  const isBusinessDataflow = TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value);
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
