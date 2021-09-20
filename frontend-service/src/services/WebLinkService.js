@@ -10,7 +10,7 @@ export const WebLinkService = {
 
   create: async (dataflowId, webLinkToCreate) => await WebLinkRepository.create(dataflowId, webLinkToCreate),
 
-  delete: async webLinkId => await WebLinkRepository.delete(webLinkId),
+  delete: async (webLinkId, dataflowId) => await WebLinkRepository.delete(webLinkId, dataflowId),
 
   update: async (dataflowId, webLinkToUpdate) => await WebLinkRepository.update(dataflowId, webLinkToUpdate)
 };

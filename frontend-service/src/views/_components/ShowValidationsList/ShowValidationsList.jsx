@@ -551,11 +551,21 @@ export const ShowValidationsList = memo(
       }
 
       if (isEmpty(fetchedData) && !filtered) {
-        return (
-          <div className={styles.validationsWithoutTable}>
-            <div className={styles.noValidations}>{resourcesContext.messages['noValidations']}</div>
-          </div>
-        );
+        if (!isLoadingTable) {
+          return (
+            <div className={styles.validationsWithoutTable}>
+              <div className={styles.noValidations}>{resourcesContext.messages['noValidations']}</div>
+            </div>
+          );
+        } else {
+          return (
+            <div className={styles.validationsWithoutTable}>
+              <div className={styles.loadingSpinner}>
+                <Spinner className={styles.spinnerPosition} />
+              </div>
+            </div>
+          );
+        }
       }
 
       return (
@@ -571,36 +581,38 @@ export const ShowValidationsList = memo(
             />
           </div>
 
-          {!isEmpty(fetchedData) ? (
-            <DataTable
-              autoLayout={true}
-              className={isWebformView ? styles.tableWebform : undefined}
-              first={firstRow}
-              hasDefaultCurrentPage={true}
-              lazy={true}
-              loading={isLoadingTable}
-              onPage={onChangePage}
-              onRowSelect={onRowSelect}
-              onSort={onSort}
-              paginator={true}
-              paginatorRight={isLoadingTable ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
-              reorderableColumns={true}
-              resizableColumns={true}
-              rows={numberRows}
-              rowsPerPageOptions={[5, 10, 15]}
-              selectionMode="single"
-              sortField={sortField}
-              sortOrder={sortOrder}
-              sortable={true}
-              totalRecords={totalFilteredRecords}
-              value={fetchedData}>
-              {columns}
-            </DataTable>
-          ) : (
-            <div className={styles.emptyFilteredData}>
-              {resourcesContext.messages['noQCRulesWithSelectedParameters']}
-            </div>
-          )}
+          <div className={styles.validationsWrapper}>
+            {!isEmpty(fetchedData) ? (
+              <DataTable
+                autoLayout={true}
+                className={isWebformView ? styles.tableWebform : undefined}
+                first={firstRow}
+                hasDefaultCurrentPage={true}
+                lazy={true}
+                loading={isLoadingTable}
+                onPage={onChangePage}
+                onRowSelect={onRowSelect}
+                onSort={onSort}
+                paginator={true}
+                paginatorRight={isLoadingTable ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
+                reorderableColumns={true}
+                resizableColumns={true}
+                rows={numberRows}
+                rowsPerPageOptions={[5, 10, 15]}
+                selectionMode="single"
+                sortField={sortField}
+                sortOrder={sortOrder}
+                sortable={true}
+                totalRecords={totalFilteredRecords}
+                value={fetchedData}>
+                {columns}
+              </DataTable>
+            ) : (
+              <div className={styles.emptyFilteredData}>
+                {resourcesContext.messages['noQCRulesWithSelectedParameters']}
+              </div>
+            )}
+          </div>
         </div>
       );
     };

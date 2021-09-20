@@ -718,16 +718,18 @@ export const FieldsDesigner = ({
 
   const updateTableDesign = async ({ fixedNumber, notEmpty, readOnly, toPrefill }) => {
     try {
-      await DatasetService.updateTableDesign(
-        toPrefill,
-        table.tableSchemaId,
-        tableDescriptionValue,
-        readOnly,
-        datasetId,
-        notEmpty,
-        fixedNumber
-      );
-      onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
+      if (initialTableDescription !== tableDescriptionValue) {
+        await DatasetService.updateTableDesign(
+          toPrefill,
+          table.tableSchemaId,
+          tableDescriptionValue,
+          readOnly,
+          datasetId,
+          notEmpty,
+          fixedNumber
+        );
+        onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
+      }
     } catch (error) {
       console.error('FieldsDesigner - updateTableDesign.', error);
     }

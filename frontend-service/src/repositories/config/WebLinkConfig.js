@@ -1,6 +1,6 @@
 export const WebLinkConfig = {
-  getAll: '/weblink/{:dataflowId}',
-  create: '/weblink?dataflowId={:dataflowId}',
-  delete: '/weblink/{:webLinkId}',
-  update: '/weblink'
+  getAll: '/weblink/dataflow/{:dataflowId}',
+  create: '/weblink/dataflow/{:dataflowId}',
+  delete: '/weblink/{:webLinkId}/dataflow/{:dataflowId}',
+  update: '/weblink/dataflow/{:dataflowId}'
 };

@@ -164,7 +164,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
           </div>
         </div>
         {isLoadingSnapshotListData ? (
-          <Spinner />
+          <Spinner className={styles.spinner} />
         ) : snapshotListData.length > 0 ? (
           <SnapshotsList snapshotListData={snapshotListData} />
         ) : (
