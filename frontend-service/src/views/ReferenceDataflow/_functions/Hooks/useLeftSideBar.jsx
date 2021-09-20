@@ -47,7 +47,7 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
     const reportingDataflows = {
       className: 'dataflow-properties-help-step',
       icon: 'clone',
-      isVisible: buttonsVisibility.reportingDataflows && dataflowState.isCustodian,
+      isVisible: buttonsVisibility.reportingDataflows && (dataflowState.isCustodian || dataflowState.isCustodianUser),
       label: 'leftBarReportingDataflowsButton',
       onClick: () => manageDialogs('isReferencingDataflowsDialogVisible', true),
       title: 'leftBarReportingDataflowsButton'

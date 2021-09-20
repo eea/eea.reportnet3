@@ -289,7 +289,7 @@ const BigButtonListReference = withRouter(
                 route: routes.REFERENCE_DATASET,
                 params: { dataflowId: dataflowId, datasetId: referenceDataset.datasetId }
               }),
-            visibility: dataflowState.isCustodian
+            visibility: dataflowState.isCustodian || dataflowState.isCustodianUser
           };
         });
 
