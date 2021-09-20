@@ -50,14 +50,14 @@ export const PublicDataflowInformation = withRouter(
     const notificationContext = useContext(NotificationContext);
 
     const [contentStyles, setContentStyles] = useState({});
-    const [dataflowData, setDataflowData] = useState({});
-    const [dataflowType, setDataflowType] = useState('');
-    const [documents, setDocuments] = useState([]);
+    const [dataflowData, setDataflowData] = useState({ documents: [], referenceDatasets: [], type: '', webLinks: [] });
     const [isLoading, setIsLoading] = useState(true);
     const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
-    const [referenceDatasets, setReferenceDatasets] = useState([]);
     const [representatives, setRepresentatives] = useState({});
-    const [webLinks, setWebLinks] = useState([]);
+
+    const { documents, referenceDatasets, type: dataflowType, webLinks } = dataflowData;
+
+    const isBusinessDataflow = dataflowType === config.dataflowType.BUSINESS.value;
 
     useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOW, dataflowId, history });
 
@@ -280,11 +280,7 @@ export const PublicDataflowInformation = withRouter(
       try {
         const data = await DataflowService.getPublicDataflowData(dataflowId);
         setDataflowData(data);
-        setDataflowType(data.type);
         setPublicInformation(data.datasets, data.manualAcceptance);
-        setReferenceDatasets(data.referenceDatasets);
-        setDocuments(data.documents);
-        setWebLinks(data.webLinks);
       } catch (error) {
         console.error('PublicDataflowInformation - onLoadDataflowData.', error);
         if (error.response.status === 404 || error.response.status === 400) {
@@ -451,52 +447,62 @@ export const PublicDataflowInformation = withRouter(
       return fieldColumns;
     };
 
+    const renderDataflowInformationContent = () => {
+      if (isLoading) {
+        return <Spinner className={styles.isLoading} />;
+      }
+
+      if (isWrongUrlDataflowId) {
+        return <div className={styles.noDatasets}>{resourcesContext.messages['wrongUrlDataflowId']}</div>;
+      }
+
+      if (isEmpty(representatives) && !isBusinessDataflow) {
+        return <div className={styles.noDatasets}>{resourcesContext.messages['noDatasets']}</div>;
+      }
+
+      return (
+        <Fragment>
+          <Title icon="clone" iconSize="4rem" subtitle={dataflowData.description} title={dataflowData.name} />
+          {!isEmpty(representatives) && (
+            <div className={styles.dataTableWrapper}>
+              <div className={styles.dataTableTitle}>{resourcesContext.messages['reportingDatasets']}</div>
+              <DataTable autoLayout totalRecords={representatives.length} value={representatives}>
+                {renderRepresentativeColumns(representatives)}
+              </DataTable>
+            </div>
+          )}
+          {!isEmpty(referenceDatasets) && (
+            <div className={styles.dataTableWrapper}>
+              <div className={styles.dataTableTitle}>{resourcesContext.messages['referenceDatasets']}</div>
+              <DataTable autoLayout totalRecords={referenceDatasets.length} value={referenceDatasets}>
+                {renderReferenceDatasetsColumns(referenceDatasets)}
+              </DataTable>
+            </div>
+          )}
+          {!isEmpty(documents) && (
+            <div className={styles.dataTableWrapper}>
+              <div className={styles.dataTableTitle}>{resourcesContext.messages['documents']}</div>
+              <DataTable autoLayout totalRecords={documents.length} value={documents}>
+                {renderDocumentsColumns(documents)}
+              </DataTable>
+            </div>
+          )}
+          {!isEmpty(webLinks) && (
+            <div className={styles.dataTableWrapper}>
+              <div className={styles.dataTableTitle}>{resourcesContext.messages['webLinks']}</div>
+              <DataTable autoLayout totalRecords={webLinks.length} value={webLinks}>
+                {renderWebLinksColumns(webLinks)}
+              </DataTable>
+            </div>
+          )}
+        </Fragment>
+      );
+    };
+
     return (
       <PublicLayout>
         <div className={`${styles.container} rep-container`} style={contentStyles}>
-          {!isLoading ? (
-            isWrongUrlDataflowId ? (
-              <div className={styles.noDatasets}>{resourcesContext.messages['wrongUrlDataflowId']}</div>
-            ) : !isEmpty(representatives) ? (
-              <Fragment>
-                <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
-                <div className={styles.dataTableWrapper}>
-                  <div className={styles.dataTableTitle}>{resourcesContext.messages['reportingDatasets']}</div>
-                  <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
-                    {renderRepresentativeColumns(representatives)}
-                  </DataTable>
-                </div>
-                {!isEmpty(referenceDatasets) && (
-                  <div className={styles.dataTableWrapper}>
-                    <div className={styles.dataTableTitle}>{resourcesContext.messages['referenceDatasets']}</div>
-                    <DataTable autoLayout={true} totalRecords={referenceDatasets.length} value={referenceDatasets}>
-                      {renderReferenceDatasetsColumns(referenceDatasets)}
-                    </DataTable>
-                  </div>
-                )}
-                {!isEmpty(documents) && (
-                  <div className={styles.dataTableWrapper}>
-                    <div className={styles.dataTableTitle}>{resourcesContext.messages['documents']}</div>
-                    <DataTable autoLayout={true} totalRecords={documents.length} value={documents}>
-                      {renderDocumentsColumns(documents)}
-                    </DataTable>
-                  </div>
-                )}
-                {!isEmpty(webLinks) && (
-                  <div className={styles.dataTableWrapper}>
-                    <div className={styles.dataTableTitle}>{resourcesContext.messages['webLinks']}</div>
-                    <DataTable autoLayout={true} totalRecords={webLinks.length} value={webLinks}>
-                      {renderWebLinksColumns(webLinks)}
-                    </DataTable>
-                  </div>
-                )}
-              </Fragment>
-            ) : (
-              <div className={styles.noDatasets}>{resourcesContext.messages['noDatasets']}</div>
-            )
-          ) : (
-            <Spinner className={styles.isLoading} />
-          )}
+          {renderDataflowInformationContent()}
         </div>
       </PublicLayout>
     );
