@@ -424,8 +424,35 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const onExportLeadReportersTemplate = async () => {
+    try {
+      const { data } = await RepresentativeService.exportTemplateFile(
+        dataflowState.dataProviderSelected?.dataProviderGroupId
+      );
+      if (!isNil(data)) {
+        DownloadFile(data, `GroupId_${dataflowState.dataProviderSelected?.dataProviderGroupId}_Template.csv`);
+      }
+    } catch (error) {
+      console.error('Dataflow - onExportLeadReportersTemplate.', error);
+      notificationContext.add({
+        type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_TEMPLATE_FAILED_EVENT'
+      });
+    }
+  };
+
   const manageRoleDialogFooter = (
     <Fragment>
+      <Button
+        className={`${styles.exportTemplate} p-button-secondary ${
+          !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
+        }`}
+        disabled={isEmpty(dataflowState.dataProviderSelected)}
+        icon={'export'}
+        label={resourcesContext.messages['exportLeadReportersTemplate']}
+        onClick={onExportLeadReportersTemplate}
+        tooltip={`${resourcesContext.messages['exportLeadReportersTemplateTooltip']} ${dataflowState.dataProviderSelected?.label}`}
+        tooltipOptions={{ position: 'top' }}
+      />
       <Button
         className={`${styles.manageLeadReportersButton} p-button-secondary ${
           !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
@@ -434,6 +461,8 @@ const Dataflow = withRouter(({ history, match }) => {
         icon={'import'}
         label={resourcesContext.messages['importLeadReporters']}
         onClick={() => manageDialogs('isImportLeadReportersVisible', true)}
+        tooltip={resourcesContext.messages['importLeadReportersTooltip']}
+        tooltipOptions={{ position: 'top' }}
       />
       <Button
         className={`${styles.manageLeadReportersButton} p-button-secondary p-button-animated-blink`}
