@@ -2740,6 +2740,12 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
   }
 
+  /**
+   * Test import field schemas save code list not empty.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void testImportFieldSchemasSaveCodeListNotEmpty() throws EEAException, IOException {
 
