@@ -462,7 +462,7 @@ export const PublicDataflowInformation = withRouter(
 
       return (
         <Fragment>
-          <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
+          <Title icon="clone" iconSize="4rem" subtitle={dataflowData.description} title={dataflowData.name} />
           {!isEmpty(representatives) && (
             <div className={styles.dataTableWrapper}>
               <div className={styles.dataTableTitle}>{resourcesContext.messages['reportingDatasets']}</div>
