@@ -223,9 +223,6 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       <img
         alt="User avatar"
         className={styles.userAvatar}
-        icon={
-          <FontAwesomeIcon aria-hidden={false} className={styles.userDataIcon} icon={AwesomeIcons('user-profile')} />
-        }
         ref={avatarImage}
         src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
       />

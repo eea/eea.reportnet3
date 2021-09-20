@@ -1,6 +1,14 @@
 export class HistoricRelease {
-  constructor({ countryCode, datasetId, datasetName, id, isDataCollectionReleased, isEUReleased, releaseDate } = {}) {
-    this.countryCode = countryCode;
+  constructor({
+    dataProviderCode,
+    datasetId,
+    datasetName,
+    id,
+    isDataCollectionReleased,
+    isEUReleased,
+    releaseDate
+  } = {}) {
+    this.dataProviderCode = dataProviderCode;
     this.datasetId = datasetId;
     this.datasetName = datasetName;
     this.id = id;

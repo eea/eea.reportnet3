@@ -7,7 +7,6 @@ import { config } from 'conf';
 
 import styles from './ManageBusinessDataflow.module.scss';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
@@ -15,11 +14,10 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { Spinner } from 'views/_components/Spinner';
-import ReactTooltip from 'react-tooltip';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
 import { DataflowService } from 'services/DataflowService';
@@ -254,16 +252,9 @@ export const ManageBusinessDataflow = ({
             <label>
               <span onClick={() => setPinDataflow(!pinDataflow)}>{resourcesContext.messages['pinDataflow']}</span>
             </label>
-            <FontAwesomeIcon
-              aria-hidden={false}
-              className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-              data-for="pinDataflow"
-              data-tip
-              icon={AwesomeIcons('infoCircle')}
-            />
-            <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="pinDataflow" place="top">
-              <span>{resourcesContext.messages['pinDataflowMessage']}</span>
-            </ReactTooltip>
+            <TooltipButton
+              message={resourcesContext.messages['pinDataflowMessage']}
+              uniqueIdentifier="pinDataflow"></TooltipButton>
           </div>
         )}
         {isEditing && isDesign && (
@@ -368,7 +359,7 @@ export const ManageBusinessDataflow = ({
                   onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
                   optionLabel="label"
                   options={!isAdmin ? [selectedGroup] : groupOfCompanies}
-                  placeholder={resourcesContext.messages[`selectGroupOfCompanies`]}
+                  placeholder={resourcesContext.messages['selectGroupOfCompanies']}
                   tooltip={
                     isAdmin && hasRepresentatives ? resourcesContext.messages['groupOfCompaniesDisabledTooltip'] : ''
                   }
@@ -385,7 +376,7 @@ export const ManageBusinessDataflow = ({
                   onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
                   optionLabel="username"
                   options={!isAdmin ? [selectedFmeUser] : fmeUsers}
-                  placeholder={resourcesContext.messages[`selectFmeUser`]}
+                  placeholder={resourcesContext.messages['selectFmeUser']}
                   value={selectedFmeUser}
                 />
               </div>

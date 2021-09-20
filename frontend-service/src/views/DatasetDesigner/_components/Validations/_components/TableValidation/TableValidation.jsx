@@ -39,7 +39,7 @@ import { initValidationRuleRelationCreation } from 'views/DatasetDesigner/_compo
 import { resetValidationRuleCreation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/resetValidationRuleCreation';
 import { setValidationRelation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/setValidationRelation';
 
-export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBusinessDataflow, tabs }) => {
+export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datasetSchemas, tabs }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -94,7 +94,7 @@ export const TableValidation = ({ datasetId, datasetSchema, datasetSchemas, isBu
           <ExpressionSelector
             componentName={componentName}
             creationFormState={creationFormState}
-            isBusinessDataflow={isBusinessDataflow}
+            dataflowType={dataflowType}
             onAddNewRelation={onAddNewRelation}
             onDatasetSchemaChange={onDatasetSchemaChange}
             onDoubleReferencedChange={onDoubleReferencedChange}

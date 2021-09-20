@@ -7,15 +7,13 @@ import { config } from 'conf';
 
 import styles from './ManageDataflow.module.scss';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { ManageDataflowForm } from './_components/ManageDataflowForm';
 import { Dialog } from 'views/_components/Dialog';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
-import ReactTooltip from 'react-tooltip';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { DataflowService } from 'services/DataflowService';
 
@@ -136,6 +134,15 @@ export const ManageDataflow = ({
     />
   );
 
+  const getModalHeader = () => {
+    if (isCitizenScienceDataflow) {
+      return isEditForm
+        ? resourcesContext.messages['updateCitizenScienceDataflow']
+        : resourcesContext.messages['createNewCitizenScienceDataflow'];
+    }
+    return isEditForm ? resourcesContext.messages['updateDataflow'] : resourcesContext.messages['createNewDataflow'];
+  };
+
   const renderDataflowDialog = () => (
     <Fragment>
       <div className="p-toolbar-group-left">
@@ -173,16 +180,9 @@ export const ManageDataflow = ({
                 {resourcesContext.messages['pinDataflow']}
               </span>
             </label>
-            <FontAwesomeIcon
-              aria-hidden={false}
-              className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-              data-for="pinDataflow"
-              data-tip
-              icon={AwesomeIcons('infoCircle')}
-            />
-            <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="pinDataflow" place="top">
-              <span>{resourcesContext.messages['pinDataflowMessage']}</span>
-            </ReactTooltip>
+            <TooltipButton
+              message={resourcesContext.messages['pinDataflowMessage']}
+              uniqueIdentifier="pinDataflow"></TooltipButton>
           </div>
         )}
       </div>
@@ -215,7 +215,7 @@ export const ManageDataflow = ({
         <Dialog
           className={styles.dialog}
           footer={renderDataflowDialog()}
-          header={resourcesContext.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow']}
+          header={getModalHeader()}
           onHide={() => onHideDataflowDialog()}
           visible={isVisible}>
           <ManageDataflowForm

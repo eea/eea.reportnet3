@@ -293,7 +293,7 @@ public class CollaborationControllerImplTest {
     MessageVO messageVO = new MessageVO();
     messageVO.setId(1L);
     messageVO.setType(MessageTypeEnum.TEXT);
-    messagePaginatedVO.setListMessageVO(arrayListMessageVO);
+    messagePaginatedVO.setListMessage(arrayListMessageVO);
     arrayListMessageVO.add(messageVO);
     Mockito.when(collaborationService.findMessages(Mockito.anyLong(), Mockito.anyLong(),
         Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(messagePaginatedVO);
@@ -312,7 +312,7 @@ public class CollaborationControllerImplTest {
     messageVO.setId(1L);
     messageVO.setType(MessageTypeEnum.ATTACHMENT);
     arrayListMessageVO.add(messageVO);
-    messagePaginatedVO.setListMessageVO(arrayListMessageVO);
+    messagePaginatedVO.setListMessage(arrayListMessageVO);
     Mockito.when(collaborationService.findMessages(Mockito.anyLong(), Mockito.anyLong(),
         Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(messagePaginatedVO);
 
@@ -335,7 +335,7 @@ public class CollaborationControllerImplTest {
     messageVO.setId(1L);
     messageVO.setType(MessageTypeEnum.ATTACHMENT);
     arrayListMessageVO.add(messageVO);
-    messagePaginatedVO.setListMessageVO(arrayListMessageVO);
+    messagePaginatedVO.setListMessage(arrayListMessageVO);
     Mockito.when(collaborationService.findMessages(Mockito.anyLong(), Mockito.anyLong(),
         Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(messagePaginatedVO);
 

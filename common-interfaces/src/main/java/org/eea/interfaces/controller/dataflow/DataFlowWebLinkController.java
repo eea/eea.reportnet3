@@ -39,28 +39,32 @@ public interface DataFlowWebLinkController {
   /**
    * Save link.
    *
-   * @param idDataflow the id dataflow
+   * @param dataflowId the dataflow id
    * @param weblinkVO the weblink VO
    */
-  @PostMapping
-  void saveLink(@RequestParam(value = "idDataFlow") Long idDataflow,
+  @PostMapping(value = "/dataflow/{dataflowId}")
+  void saveLink(@RequestParam(value = "dataflowId") Long dataflowId,
       @RequestBody WeblinkVO weblinkVO);
 
   /**
    * Removes the link.
    *
    * @param idLink the id link
+   * @param dataflowId the dataflow id
    */
   @DeleteMapping(value = "/{idLink}")
-  void removeLink(@PathVariable(value = "idLink") Long idLink);
+  void removeLink(@PathVariable(value = "idLink") Long idLink,
+      @PathVariable(value = "dataflowId") Long dataflowId);
 
   /**
    * Update link.
    *
    * @param weblinkVO the weblink VO
+   * @param dataflowId the dataflow id
    */
-  @PutMapping
-  void updateLink(@RequestBody WeblinkVO weblinkVO);
+  @PutMapping(value = "/dataflow/{dataflowId}")
+  void updateLink(@RequestBody WeblinkVO weblinkVO,
+      @PathVariable(value = "dataflowId") Long dataflowId);
 
   /**
    * Gets the all weblinks by dataflow.
@@ -68,7 +72,7 @@ public interface DataFlowWebLinkController {
    * @param dataflowId the dataflow id
    * @return the all weblinks by dataflow
    */
-  @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<WeblinkVO> getAllWeblinksByDataflow(@PathVariable("dataflowId") Long dataflowId);
 
 }

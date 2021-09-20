@@ -1,6 +1,8 @@
 import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
+import ReactTooltip from 'react-tooltip';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import isNil from 'lodash/isNil';
@@ -89,22 +91,28 @@ class Menu extends Component {
 
   renderMenuitem(item, index) {
     return (
-      <li className={'p-menuitem'} key={index}>
-        <span
-          className={`p-menuitem-link ${item.disabled ? styles.menuItemDisabled : null}`}
-          disabled={item.disabled}
-          onClick={e => {
-            e.preventDefault();
-            if (!item.disabled) {
-              item.command();
-            } else {
-              this.setState(state => ({ ...state, menuClick: true }));
-            }
-          }}>
-          {!isNil(item.icon) && <FontAwesomeIcon icon={AwesomeIcons(item.icon)} role="presentation" />}
-          <span>{item.label}</span>
-        </span>
-      </li>
+      <Fragment key={item.label + '_' + index}>
+        <li className={'p-menuitem'} data-for={item.label} data-tip key={index}>
+          <span
+            className={`p-menuitem-link ${item.disabled ? styles.menuItemDisabled : null} ${styles.menuItem}`}
+            disabled={item.disabled}
+            onClick={e => {
+              e.preventDefault();
+              if (!item.disabled) {
+                item.command();
+              } else {
+                this.setState(state => ({ ...state, menuClick: true }));
+              }
+            }}>
+            {!isNil(item.icon) && <FontAwesomeIcon icon={AwesomeIcons(item.icon)} role="presentation" />}
+            <span>{item.label}</span>
+          </span>
+        </li>
+
+        <ReactTooltip className={styles.tooltip} effect="solid" id={item.label} place="right">
+          {item.label}
+        </ReactTooltip>
+      </Fragment>
     );
   }
 

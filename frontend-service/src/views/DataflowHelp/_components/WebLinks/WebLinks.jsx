@@ -1,6 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -8,12 +7,14 @@ import styles from './WebLinks.module.scss';
 
 import { config } from 'conf';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
 
@@ -47,7 +48,7 @@ export const WebLinks = ({
     isConfirmDeleteVisible: false,
     isDeleting: false,
     isSubmitting: false,
-    webLink: { id: undefined, description: '', url: '' },
+    webLink: { id: undefined, isPublic: false, description: '', url: '' },
     webLinksColumns: []
   });
 
@@ -57,26 +58,47 @@ export const WebLinks = ({
     if (!isNil(inputRef.current)) inputRef.current.focus();
   }, [inputRef, webLinksState.isAddOrEditWebLinkDialogVisible]);
 
-  useEffect(() => {
-    let webLinkKeys = !isEmpty(webLinks) ? Object.keys(webLinks[0]) : [];
-    let webLinkColArray = webLinkKeys
-      .filter(key => key !== 'id')
-      .map(key => (
+  const webLinksFields = [
+    { name: 'description', label: resourcesContext.messages['description'] },
+    { name: 'url', label: resourcesContext.messages['url'] },
+    { name: 'isPublic', label: resourcesContext.messages['isPublic'] }
+  ];
+
+  const getWebLinksColumns = () => {
+    const webLinksColumns = webLinksFields.map(field => {
+      let template = null;
+      if (field.name === 'url') template = linkTemplate;
+      else if (field.name === 'isPublic') template = isPublicColumnTemplate;
+      return (
         <Column
-          body={key === 'url' ? linkTemplate : null}
+          body={template}
           columnResizeMode="expand"
-          field={key}
+          field={field.name}
           filter={false}
           filterMatchMode="contains"
-          header={key === 'url' ? key.toUpperCase() : capitalize(key)}
-          key={key}
-          sortable={true}
+          header={field.label}
+          key={field.name}
+          sortable={!isEmpty(webLinks)}
         />
-      ));
+      );
+    });
 
-    if (isToolbarVisible) webLinkColArray = [...webLinkColArray, webLinkEditionColumn];
+    if (isToolbarVisible) {
+      webLinksColumns.push(
+        <Column
+          body={row => webLinkEditButtons(row)}
+          className={styles.crudColumn}
+          header={resourcesContext.messages['actions']}
+          key={'buttonsUniqueId'}
+        />
+      );
+    }
 
-    webLinksDispatch({ type: 'SET_WEB_LINKS_COLUMNS', payload: { webLinksColumns: webLinkColArray } });
+    webLinksDispatch({ type: 'SET_WEB_LINKS_COLUMNS', payload: { webLinksColumns } });
+  };
+
+  useEffect(() => {
+    getWebLinksColumns();
   }, [webLinks, webLinksState.webLink, isToolbarVisible, isLoading]);
 
   const checkIsValidUrl = url => RegularExpressions['url'].test(url);
@@ -106,14 +128,17 @@ export const WebLinks = ({
     return hasErrors;
   };
 
-  const fieldsArray = [
-    { field: 'description', header: resourcesContext.messages['description'] },
-    { field: 'url', header: resourcesContext.messages['url'] }
-  ];
-
-  const emptyWebLinkColumns = fieldsArray.map(item => (
-    <Column field={item.field} header={item.header} key={item.field} />
-  ));
+  const isPublicColumnTemplate = rowData => (
+    <div className={styles.iconStyle}>
+      <span>
+        {rowData.isPublic ? (
+          <FontAwesomeIcon aria-label={resourcesContext.messages['isPublic']} icon={AwesomeIcons('check')} />
+        ) : (
+          ''
+        )}
+      </span>
+    </div>
+  );
 
   const getValidUrl = (url = '') => {
     let newUrl = window.decodeURIComponent(url);
@@ -164,20 +189,18 @@ export const WebLinks = ({
     webLinksDispatch({ type: 'ON_DESCRIPTION_CHANGE', payload: { description: inputValue } });
   };
 
-  const onWebLinkUrlChange = inputValue => {
-    webLinksDispatch({ type: 'ON_URL_CHANGE', payload: { url: inputValue } });
-  };
+  const onUrlChange = inputValue => webLinksDispatch({ type: 'ON_URL_CHANGE', payload: { url: inputValue } });
 
-  const onHideDeleteDialog = () => {
-    webLinksDispatch({ type: 'ON_HIDE_DELETE_DIALOG' });
-  };
+  const onIsPublicChange = inputValue =>
+    webLinksDispatch({ type: 'ON_IS_PUBLIC_CHANGE', payload: { isPublic: inputValue } });
 
-  const setIsConfirmDeleteVisible = isVisible => {
+  const onHideDeleteDialog = () => webLinksDispatch({ type: 'ON_HIDE_DELETE_DIALOG' });
+
+  const setIsConfirmDeleteVisible = isVisible =>
     webLinksDispatch({
       type: 'SET_IS_CONFIRM_DELETE_VISIBLE',
       payload: { isConfirmDeleteVisible: isVisible }
     });
-  };
 
   const onSaveRecord = async () => {
     checkIsCorrectInputValue('description');
@@ -298,10 +321,6 @@ export const WebLinks = ({
     );
   };
 
-  const webLinkEditionColumn = (
-    <Column body={row => webLinkEditButtons(row)} key={'buttonsUniqueId'} style={{ width: '5em' }} />
-  );
-
   return (
     <Fragment>
       {isToolbarVisible && (
@@ -329,7 +348,7 @@ export const WebLinks = ({
         sortField={sortFieldWebLinks}
         sortOrder={sortOrderWebLinks}
         value={webLinks}>
-        {!isEmpty(webLinks) ? webLinksState.webLinksColumns : emptyWebLinkColumns}
+        {webLinksState.webLinksColumns}
       </DataTable>
 
       {isLoading && isEmpty(webLinks) && <Spinner style={{ top: 0 }} />}
@@ -389,7 +408,7 @@ export const WebLinks = ({
                   id={`urlWebLinks`}
                   name="url"
                   onBlur={() => checkIsCorrectInputValue('url')}
-                  onChange={e => onWebLinkUrlChange(e.target.value)}
+                  onChange={e => onUrlChange(e.target.value)}
                   onFocus={() => setErrors('url', { message: '', hasErrors: false })}
                   onKeyPress={e => {
                     if (e.key === 'Enter' && !checkIsCorrectInputValue('url')) {
@@ -406,6 +425,21 @@ export const WebLinks = ({
                 {webLinksState.errors.url.message !== '' && <ErrorMessage message={webLinksState.errors.url.message} />}
               </div>
             </fieldset>
+
+            <fieldset>
+              <div className={styles.checkboxIsPublic}>
+                <input
+                  checked={webLinksState.webLink.isPublic}
+                  id="isPublic"
+                  onChange={() => onIsPublicChange(!webLinksState.webLink.isPublic)}
+                  type="checkbox"
+                />
+                <label htmlFor="isPublic" style={{ display: 'block' }}>
+                  {resourcesContext.messages['checkboxIsPublic']}
+                </label>
+              </div>
+            </fieldset>
+
             <fieldset>
               <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
                 <Button

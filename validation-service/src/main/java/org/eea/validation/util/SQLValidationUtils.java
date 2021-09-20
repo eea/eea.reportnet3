@@ -2,10 +2,8 @@ package org.eea.validation.util;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -277,17 +275,14 @@ public class SQLValidationUtils {
    */
   private static void executeFieldSQLRuleValidation(Rule rule, TableValue tableToEvaluate,
       Optional<DataSetSchema> dataSetSchema, Optional<TableValue> tableValue, String tableName) {
-
     if (!dataSetSchema.isPresent() || !tableValue.isPresent()) {
       return;
     }
-
     TableValue table = tableValue.get();
     String tableSchemaId = table.getIdTableSchema();
     String fieldSchemaId = rule.getReferenceId().toString();
     String fieldSchemaName = getFieldSchemaName(dataSetSchema.get(), tableSchemaId, fieldSchemaId);
     Set<String> fieldsToEvaluate = createHashSet(tableToEvaluate);
-
     for (RecordValue record : table.getRecords()) {
       for (FieldValue field : record.getFields()) {
         if (fieldSchemaId.equals(field.getIdFieldSchema())
@@ -295,7 +290,7 @@ public class SQLValidationUtils {
           FieldValidation fieldValidation = new FieldValidation();
           fieldValidation.setFieldValue(field);
           fieldValidation.setValidation(createValidation(rule, tableName, fieldSchemaName,
-              prepareSQLErrorMessage(field, rule, dataSetSchema, tableName)));
+              prepareSQLErrorMessage(field, rule, dataSetSchema, tableToEvaluate)));
           List<FieldValidation> fieldValidations = field.getFieldValidations();
           if (null == fieldValidations || fieldValidations.isEmpty()) {
             fieldValidations = new ArrayList<>();
@@ -305,7 +300,6 @@ public class SQLValidationUtils {
         }
       }
     }
-
     saveTable(table);
   }
 
@@ -333,7 +327,7 @@ public class SQLValidationUtils {
           RecordValidation recordValidation = new RecordValidation();
           recordValidation.setRecordValue(record);
           recordValidation.setValidation(createValidation(rule, tableName, null,
-              prepareSQLErrorMessage(record, rule, dataSetSchema, tableName)));
+              prepareSQLErrorMessage(record, rule, dataSetSchema, tableToEvaluate)));
           recordValidations.add(recordValidation);
           record.setRecordValidations(recordValidations);
         }
@@ -358,7 +352,7 @@ public class SQLValidationUtils {
       TableValidation tableValidation = new TableValidation();
       tableValidation.setTableValue(table);
       tableValidation.setValidation(createValidation(rule, tableName, null,
-          prepareSQLErrorMessage(table, rule, dataSetSchema, tableName)));
+          prepareSQLErrorMessage(table, rule, dataSetSchema, tableToEvaluate)));
       table.getTableValidations().add(tableValidation);
       saveTable(table);
     }
@@ -378,7 +372,7 @@ public class SQLValidationUtils {
     DataSetMetabaseVO datasetMetabase =
         datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     Validation validationDataset = createValidation(rule, tableName, null,
-        prepareSQLErrorMessage(dataset, rule, dataSetSchema, tableName));
+        prepareSQLErrorMessage(dataset, rule, dataSetSchema, null));
     validationDataset.setTableName(datasetMetabase.getDataSetName());
     if (dataset.getDatasetValidations().isEmpty()) {
       DatasetValidation datasetValidation = new DatasetValidation();
@@ -392,7 +386,7 @@ public class SQLValidationUtils {
       DatasetValidation datasetValidation = new DatasetValidation();
       datasetValidation.setDatasetValue(dataset);
       datasetValidation.setValidation(createValidation(rule, tableName, null,
-          prepareSQLErrorMessage(dataset, rule, dataSetSchema, tableName)));
+          prepareSQLErrorMessage(dataset, rule, dataSetSchema, null)));
       datasetValidations.add(datasetValidation);
       dataset.setDatasetValidations(datasetValidations);
     }
@@ -452,10 +446,11 @@ public class SQLValidationUtils {
    * @param rule the rule
    * @param dataSetSchema the data set schema
    * @param tableName the table name
+   * @param tableToEvaluate
    * @return the string
    */
   private static String prepareSQLErrorMessage(Object object, Rule rule,
-      Optional<DataSetSchema> dataSetSchema, String tableName) {
+      Optional<DataSetSchema> dataSetSchema, TableValue tableToEvaluate) {
     String errorMessage = rule.getThenCondition().get(0);
     if (dataSetSchema.isPresent()) {
       String sql = rule.getSqlSentence();
@@ -464,10 +459,7 @@ public class SQLValidationUtils {
       if (validateMessage(errorMessage)) {
         // get the fields from ruleMessage to replace later
         ArrayList<String> fieldsToReplace = getFieldsToReplace(errorMessage);
-        // get the original field name, and id
-        Map<String, String> fieldsAndSchemas =
-            getFieldsAndSchemasFromSQL(sql, dataSetSchema.get(), tableName);
-        errorMessage = rewriteMessage(object, errorMessage, fieldsToReplace, fieldsAndSchemas);
+        errorMessage = rewriteMessage(object, errorMessage, fieldsToReplace, tableToEvaluate);
       }
     }
     return errorMessage;
@@ -480,20 +472,21 @@ public class SQLValidationUtils {
    * @param errorMessage the error message
    * @param fieldsToReplace the fields to replace
    * @param fieldsAndSchemas the fields and schemas
+   * @param tableToEvaluate
    * @return the string
    */
   private static String rewriteMessage(Object object, String errorMessage,
-      ArrayList<String> fieldsToReplace, Map<String, String> fieldsAndSchemas) {
+      ArrayList<String> fieldsToReplace, TableValue tableToEvaluate) {
     if (object instanceof FieldValue) {
       FieldValue fvAux = (FieldValue) object;
       RecordValue rvAux = recordRepository.findFieldsByIdRecord(fvAux.getRecord().getId());
       for (String field : fieldsToReplace) {
-        errorMessage = errorMessage.replace(field, getReplacement(field, rvAux, fieldsAndSchemas));
+        errorMessage = errorMessage.replace(field, getReplacement(field, rvAux, tableToEvaluate));
       }
     } else if (object instanceof RecordValue) {
       RecordValue rvAux = (RecordValue) object;
       for (String field : fieldsToReplace) {
-        errorMessage = errorMessage.replace(field, getReplacement(field, rvAux, fieldsAndSchemas));
+        errorMessage = errorMessage.replace(field, getReplacement(field, rvAux, tableToEvaluate));
       }
     }
     return errorMessage;
@@ -506,20 +499,25 @@ public class SQLValidationUtils {
    * @param field the field
    * @param rvAux the Auxiliary RecordValue
    * @param fieldsAndSchemas the fields and schemas
+   * @param tableToEvaluate
    * @return the replacement
    */
   private static String getReplacement(String field, RecordValue rvAux,
-      Map<String, String> fieldsAndSchemas) {
+      TableValue tableToEvaluate) {
     String replacement = "";
-    for (Map.Entry fieldNameOrAlias : fieldsAndSchemas.entrySet()) {
-      for (FieldValue fieldAux : rvAux.getFields()) {
-        if (field.toLowerCase().contains(fieldNameOrAlias.getKey().toString().toLowerCase())
-            && fieldAux.getIdFieldSchema().equals(fieldNameOrAlias.getValue())) {
-          replacement = fieldAux.getValue();
+    for (RecordValue record : tableToEvaluate.getRecords()) {
+      if (record.getId().equals(rvAux.getId())) {
+        for (FieldValue aux : record.getFields()) {
+          if ((null != aux.getValue() || null != aux.getColumnName())
+              && field.toLowerCase().contains(aux.getColumnName().toLowerCase())
+              && (!aux.getColumnName().toLowerCase().contains("_id"))) {
+            replacement = aux.getValue();
+            break;
+          }
         }
       }
     }
-    return replacement;
+    return (null == replacement) ? "" : replacement;
   }
 
   /**
@@ -551,82 +549,6 @@ public class SQLValidationUtils {
       auxList.add(m.group());
     }
     return auxList;
-  }
-
-  /**
-   * Gets the fields and schemas from SQL.
-   *
-   * @param sql the sql
-   * @param dataSetSchema the data set schema
-   * @param tableName the table name
-   * @return the fields and schemas from SQL
-   */
-  private static Map<String, String> getFieldsAndSchemasFromSQL(String sql,
-      DataSetSchema dataSetSchema, String tableName) {
-    Map<String, String> fieldsAndSchemas = new HashMap<>();
-    String lowerSQL = sql.toLowerCase();
-    String auxSQL = lowerSQL.substring(lowerSQL.indexOf("select") + 6, lowerSQL.indexOf("from"));
-    if ((auxSQL.contains("*") && auxSQL.contains(","))
-        || (!auxSQL.contains("*") && auxSQL.contains(","))) {
-      String[] fieldList = auxSQL.split(",");
-      // get fields from Schema to replace value
-      List<FieldSchema> indexFields = getNamesAndIdsFromSchema(dataSetSchema, tableName);
-      for (String field : fieldList) {
-        if (field.contains(".*")) {
-          continue;
-        }
-        String queryField = "";
-        String fieldAlias = "";
-        String fieldTrimmed = field.trim();
-        if (fieldTrimmed.contains(".") || fieldTrimmed.contains("as")) {
-
-          fieldAlias = field.substring(fieldTrimmed.indexOf(' ') + 1).trim();
-
-          if (fieldAlias.contains("as")) {
-            fieldAlias = fieldAlias.trim().substring(fieldAlias.indexOf(' ')).trim();
-          }
-          queryField = fieldTrimmed
-              .substring(fieldTrimmed.indexOf('.') + 1, fieldTrimmed.indexOf(' ') + 1).trim();
-        } else {
-          queryField = fieldTrimmed;
-          fieldAlias = fieldTrimmed;
-        }
-        for (FieldSchema auxIndexField : indexFields) {
-          if (auxIndexField.getHeaderName().equalsIgnoreCase(queryField)) {
-
-            fieldsAndSchemas.put(fieldAlias.replace("\"", ""),
-                auxIndexField.getIdFieldSchema().toString());
-          }
-        }
-      }
-    } else {
-      List<FieldSchema> indexFields = getNamesAndIdsFromSchema(dataSetSchema, tableName);
-      for (FieldSchema auxIndexField : indexFields) {
-        fieldsAndSchemas.put(auxIndexField.getHeaderName(),
-            auxIndexField.getIdFieldSchema().toString());
-      }
-    }
-    return fieldsAndSchemas;
-  }
-
-  /**
-   * Gets the names and ids from schema.
-   *
-   * @param dataSetSchema the data set schema
-   * @param tableName the table name
-   * @return the names and ids from schema
-   */
-  private static List<FieldSchema> getNamesAndIdsFromSchema(DataSetSchema dataSetSchema,
-      String tableName) {
-    List<FieldSchema> fieldSchemas = new ArrayList<>();
-    for (TableSchema table : dataSetSchema.getTableSchemas()) {
-      if (table.getNameTableSchema().equals(tableName)) {
-        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-          fieldSchemas.add(field);
-        }
-      }
-    }
-    return fieldSchemas;
   }
 
 }

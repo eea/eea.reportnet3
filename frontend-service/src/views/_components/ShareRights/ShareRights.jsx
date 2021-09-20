@@ -47,7 +47,7 @@ export const ShareRights = ({
   placeholder,
   representativeId,
   roleOptions,
-  setIsAdminAssignedBusinessDataflow,
+  setIsAdminAssignedDataflow = () => {},
   setIsUserRightManagementDialogVisible,
   updateErrorNotificationKey,
   userType
@@ -137,7 +137,7 @@ export const ShareRights = ({
 
   const onDataChange = () => {
     shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: true } });
-    setIsAdminAssignedBusinessDataflow(
+    setIsAdminAssignedDataflow(
       TextUtils.areEquals(userRight.account, userContext.email) ||
         TextUtils.areEquals(shareRightsState.userRightToDelete.account, userContext.email)
     );

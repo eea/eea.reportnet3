@@ -19,7 +19,7 @@ public class UserRoleVO {
   /** The roles. */
   private List<String> roles;
 
-  /** The country. */
-  private String country;
+  /** The data provider name. */
+  private String dataProviderName;
 
 }

@@ -24,6 +24,7 @@ import { Title } from 'views/_components/Title';
 
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
+import { DocumentService } from 'services/DocumentService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -33,6 +34,9 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
+import { FileUtils } from 'views/_functions/Utils/FileUtils';
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const PublicDataflowInformation = withRouter(
   ({
@@ -46,11 +50,14 @@ export const PublicDataflowInformation = withRouter(
     const notificationContext = useContext(NotificationContext);
 
     const [contentStyles, setContentStyles] = useState({});
-    const [dataflowData, setDataflowData] = useState({});
+    const [dataflowData, setDataflowData] = useState({ documents: [], referenceDatasets: [], type: '', webLinks: [] });
     const [isLoading, setIsLoading] = useState(true);
     const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
-    const [referenceDatasets, setReferenceDatasets] = useState([]);
     const [representatives, setRepresentatives] = useState({});
+
+    const { documents, referenceDatasets, type: dataflowType, webLinks } = dataflowData;
+
+    const isBusinessDataflow = dataflowType === config.dataflowType.BUSINESS.value;
 
     useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOW, dataflowId, history });
 
@@ -131,16 +138,20 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
-    const getCountryCode = datasetSchemaName => {
+    const getCountryCode = dataProviderName => {
       return Object.values(config.countriesByGroup)
         .flat()
-        .find(country => country.name === datasetSchemaName).code;
+        .find(country => country.name === dataProviderName).code;
     };
 
     const getHeader = fieldHeader => {
       switch (fieldHeader) {
-        case 'datasetSchemaName':
-          return resourcesContext.messages['countries'];
+        case 'dataProviderName':
+          return TextByDataflowTypeUtils.getLabelByDataflowType(
+            resourcesContext.messages,
+            dataflowType,
+            'publicDataflowDataProviderNameColumnHeader'
+          );
         case 'publicsFileName':
           return resourcesContext.messages['files'];
         default:
@@ -150,7 +161,7 @@ export const PublicDataflowInformation = withRouter(
 
     const getReferenceDatasetsHeader = fieldHeader => {
       switch (fieldHeader) {
-        case 'datasetSchemaName':
+        case 'dataProviderName':
           return resourcesContext.messages['name'];
         case 'publicFileName':
           return resourcesContext.messages['file'];
@@ -159,10 +170,10 @@ export const PublicDataflowInformation = withRouter(
       }
     };
 
-    const getOrderedColumns = representatives => {
+    const getOrderedRepresentativeColumns = representatives => {
       const representativesWithPriority = [
         { id: 'id', index: 0 },
-        { id: 'datasetSchemaName', index: 1 },
+        { id: 'dataProviderName', index: 1 },
         { id: 'deliveryDate', index: 2 },
         { id: 'deliveryStatus', index: 3 },
         { id: 'publicsFileName', index: 4 }
@@ -175,33 +186,71 @@ export const PublicDataflowInformation = withRouter(
         .map(orderedField => orderedField.id);
     };
 
-    const countryBodyColumn = rowData => (
+    const getOrderedDocumentsColumns = documents => {
+      const documentsOrder = [
+        { id: 'id', index: 0 },
+        { id: 'title', index: 1 },
+        { id: 'description', index: 2 },
+        { id: 'category', index: 3 },
+        { id: 'language', index: 4 },
+        { id: 'isPublic', index: 5 },
+        { id: 'uploadDate', index: 6 },
+        { id: 'size', index: 7 },
+        { id: 'file', index: 8 }
+      ];
+
+      return documents
+        .map(field => documentsOrder.filter(e => field === e.id))
+        .flat()
+        .sort((a, b) => a.index - b.index)
+        .map(orderedField => orderedField.id);
+    };
+
+    const dataProviderNameBodyColumn = rowData => (
       <div onClick={e => e.stopPropagation()}>
         <span className={styles.cellWrapper}>
-          {rowData.datasetSchemaName}
-          <FontAwesomeIcon
-            aria-hidden={false}
-            className={`p-breadcrumb-home ${styles.link}`}
-            data-for="navigateTooltip"
-            data-tip
-            icon={AwesomeIcons('externalUrl')}
-            onClick={e => {
-              e.preventDefault();
-              history.push(
-                getUrl(
-                  routes.PUBLIC_COUNTRY_INFORMATION,
-                  { countryCode: getCountryCode(rowData.datasetSchemaName) },
-                  true
-                )
-              );
-            }}
-          />
-          <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
-            <span>{resourcesContext.messages['navigateToCountry']}</span>
-          </ReactTooltip>
+          {rowData.dataProviderName}
+          {TextUtils.areEquals(dataflowType, config.dataflowType.REPORTING.value) && (
+            <Fragment>
+              <FontAwesomeIcon
+                aria-hidden={false}
+                className={`p-breadcrumb-home ${styles.link}`}
+                data-for="navigateTooltip"
+                data-tip
+                icon={AwesomeIcons('externalUrl')}
+                onClick={e => {
+                  e.preventDefault();
+                  history.push(
+                    getUrl(
+                      routes.PUBLIC_COUNTRY_INFORMATION,
+                      { countryCode: getCountryCode(rowData.dataProviderName) },
+                      true
+                    )
+                  );
+                }}
+              />
+              <ReactTooltip
+                border={true}
+                className={styles.tooltipClass}
+                effect="solid"
+                id="navigateTooltip"
+                place="top">
+                <span>{resourcesContext.messages['navigateToCountry']}</span>
+              </ReactTooltip>
+            </Fragment>
+          )}
         </span>
       </div>
     );
+
+    const onDownloadDocument = async document => {
+      try {
+        const { data } = await DocumentService.publicDownload(document.id, dataflowId);
+        DownloadFile(data, document.fileName);
+      } catch (error) {
+        console.error('PublicDataflowInformation - onDownloadDocument.', error);
+      }
+    };
 
     const onFileDownload = async (dataProviderId, fileName) => {
       try {
@@ -232,7 +281,6 @@ export const PublicDataflowInformation = withRouter(
         const data = await DataflowService.getPublicDataflowData(dataflowId);
         setDataflowData(data);
         setPublicInformation(data.datasets, data.manualAcceptance);
-        setReferenceDatasets(data.referenceDatasets);
       } catch (error) {
         console.error('PublicDataflowInformation - onLoadDataflowData.', error);
         if (error.response.status === 404 || error.response.status === 400) {
@@ -255,10 +303,10 @@ export const PublicDataflowInformation = withRouter(
         const publicFileNames = datasetsFromRepresentative
           .filter(dataset => !isNil(dataset.publicFileName))
           .map(dataset => dataset.publicFileName);
-
         return {
-          datasetSchemaName: datasetSchemaName,
+          dataProviderName: datasetSchemaName,
           dataProviderId: dataset.dataProviderId,
+          dataflowType: dataflowType,
           deliveryDate: dataset.releaseDate,
           restrictFromPublic: dataset.restrictFromPublic,
           publicsFileName: publicFileNames,
@@ -273,18 +321,18 @@ export const PublicDataflowInformation = withRouter(
       setRepresentatives(representatives);
     };
 
-    const renderColumns = representatives => {
-      const fieldColumns = getOrderedColumns(Object.keys(representatives[0]))
+    const renderRepresentativeColumns = representatives => {
+      const fieldColumns = getOrderedRepresentativeColumns(Object.keys(representatives[0]))
         .filter(
           key =>
-            key.includes('datasetSchemaName') ||
+            key.includes('dataProviderName') ||
             key.includes('publicsFileName') ||
             key.includes('deliveryDate') ||
             key.includes('deliveryStatus')
         )
         .map(field => {
           let template = null;
-          if (field === 'datasetSchemaName') template = countryBodyColumn;
+          if (field === 'dataProviderName') template = dataProviderNameBodyColumn;
           if (field === 'publicsFileName') template = downloadFileBodyColumn;
           return (
             <Column
@@ -303,7 +351,7 @@ export const PublicDataflowInformation = withRouter(
 
     const renderReferenceDatasetsColumns = referenceDatasets => {
       const fieldColumns = Object.keys(referenceDatasets[0])
-        .filter(key => key.includes('datasetSchemaName') || key.includes('publicFileName'))
+        .filter(key => key.includes('dataProviderName') || key.includes('publicFileName'))
         .map(field => {
           let template = null;
           if (field === 'publicFileName') template = downloadReferenceDatasetFileBodyColumn;
@@ -322,39 +370,139 @@ export const PublicDataflowInformation = withRouter(
       return fieldColumns;
     };
 
+    const sizeColumnTemplate = rowData => {
+      const formatedRowData = FileUtils.formatBytes(rowData.size);
+      return (
+        <Fragment>
+          {formatedRowData.bytesParsed} {formatedRowData.sizeType}
+        </Fragment>
+      );
+    };
+
+    const downloadDocumentColumnTemplate = rowData => {
+      return (
+        <div className={styles.filesContainer}>
+          <span className={styles.downloadIcon} key={rowData.file} onClick={() => onDownloadDocument(rowData)}>
+            <FontAwesomeIcon data-for={rowData.file} data-tip icon={AwesomeIcons('7z')} />
+            <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id={rowData.file} place="top">
+              <span>{rowData.file}</span>
+            </ReactTooltip>
+          </span>
+        </div>
+      );
+    };
+
+    const linkTemplate = rowData => (
+      <a href={rowData.url} rel="noopener noreferrer" target="_blank">
+        {rowData.url}
+      </a>
+    );
+
+    const renderDocumentsColumns = documents => {
+      const documentsWithFiles = documents.map(document => {
+        document['file'] = document.title;
+        return document;
+      });
+      const fieldColumns = getOrderedDocumentsColumns(Object.keys(documentsWithFiles[0]))
+        .filter(
+          key =>
+            key.includes('category') ||
+            key.includes('date') ||
+            key.includes('description') ||
+            key.includes('language') ||
+            key.includes('size') ||
+            key.includes('file') ||
+            key.includes('title')
+        )
+        .map(field => {
+          let template = null;
+          if (field === 'size') template = sizeColumnTemplate;
+          if (field === 'file') template = downloadDocumentColumnTemplate;
+          return (
+            <Column
+              body={template}
+              className={field === 'publicFileName' ? styles.downloadReferenceDatasetFile : ''}
+              field={field}
+              header={resourcesContext.messages[field]}
+              key={field}
+              sortable
+            />
+          );
+        });
+
+      return fieldColumns;
+    };
+
+    const renderWebLinksColumns = webLinks => {
+      const fieldColumns = Object.keys(webLinks[0])
+        .filter(key => key.includes('description') || key.includes('url'))
+        .map(field => {
+          let template = null;
+          if (field === 'url') template = linkTemplate;
+          return (
+            <Column body={template} field={field} header={resourcesContext.messages[field]} key={field} sortable />
+          );
+        });
+
+      return fieldColumns;
+    };
+
+    const renderDataflowInformationContent = () => {
+      if (isLoading) {
+        return <Spinner className={styles.isLoading} />;
+      }
+
+      if (isWrongUrlDataflowId) {
+        return <div className={styles.noDatasets}>{resourcesContext.messages['wrongUrlDataflowId']}</div>;
+      }
+
+      if (isEmpty(representatives) && !isBusinessDataflow) {
+        return <div className={styles.noDatasets}>{resourcesContext.messages['noDatasets']}</div>;
+      }
+
+      return (
+        <Fragment>
+          <Title icon="clone" iconSize="4rem" subtitle={dataflowData.description} title={dataflowData.name} />
+          {!isEmpty(representatives) && (
+            <div className={styles.dataTableWrapper}>
+              <div className={styles.dataTableTitle}>{resourcesContext.messages['reportingDatasets']}</div>
+              <DataTable autoLayout totalRecords={representatives.length} value={representatives}>
+                {renderRepresentativeColumns(representatives)}
+              </DataTable>
+            </div>
+          )}
+          {!isEmpty(referenceDatasets) && (
+            <div className={styles.dataTableWrapper}>
+              <div className={styles.dataTableTitle}>{resourcesContext.messages['referenceDatasets']}</div>
+              <DataTable autoLayout totalRecords={referenceDatasets.length} value={referenceDatasets}>
+                {renderReferenceDatasetsColumns(referenceDatasets)}
+              </DataTable>
+            </div>
+          )}
+          {!isEmpty(documents) && (
+            <div className={styles.dataTableWrapper}>
+              <div className={styles.dataTableTitle}>{resourcesContext.messages['documents']}</div>
+              <DataTable autoLayout totalRecords={documents.length} value={documents}>
+                {renderDocumentsColumns(documents)}
+              </DataTable>
+            </div>
+          )}
+          {!isEmpty(webLinks) && (
+            <div className={styles.dataTableWrapper}>
+              <div className={styles.dataTableTitle}>{resourcesContext.messages['webLinks']}</div>
+              <DataTable autoLayout totalRecords={webLinks.length} value={webLinks}>
+                {renderWebLinksColumns(webLinks)}
+              </DataTable>
+            </div>
+          )}
+        </Fragment>
+      );
+    };
+
     return (
       <PublicLayout>
         <div className={`${styles.container} rep-container`} style={contentStyles}>
-          {!isLoading ? (
-            isWrongUrlDataflowId ? (
-              <div className={styles.noDatasets}>{resourcesContext.messages['wrongUrlDataflowId']}</div>
-            ) : !isEmpty(representatives) ? (
-              <Fragment>
-                <Title icon={'clone'} iconSize={'4rem'} subtitle={dataflowData.description} title={dataflowData.name} />
-                <DataTable autoLayout={true} totalRecords={representatives.length} value={representatives}>
-                  {renderColumns(representatives)}
-                </DataTable>
-                {!isEmpty(referenceDatasets) && (
-                  <div className={styles.referenceDatasetsWrapper}>
-                    <div className={styles.referenceDatasetsTitle}>
-                      {resourcesContext.messages['referenceDatasets']}
-                    </div>
-                    <DataTable
-                      autoLayout={true}
-                      className={styles.referenceDatasetsTable}
-                      totalRecords={referenceDatasets.length}
-                      value={referenceDatasets}>
-                      {renderReferenceDatasetsColumns(referenceDatasets)}
-                    </DataTable>
-                  </div>
-                )}
-              </Fragment>
-            ) : (
-              <div className={styles.noDatasets}>{resourcesContext.messages['noDatasets']}</div>
-            )
-          ) : (
-            <Spinner className={styles.isLoading} />
-          )}
+          {renderDataflowInformationContent()}
         </div>
       </PublicLayout>
     );

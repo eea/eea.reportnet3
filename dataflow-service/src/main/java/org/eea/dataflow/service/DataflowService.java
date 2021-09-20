@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
@@ -21,10 +22,11 @@ public interface DataflowService {
    * Gets the by id.
    *
    * @param id the id
+   * @param removeWeblinksAndDocuments the remove weblinks and documents
    * @return the by id
    * @throws EEAException the EEA exception
    */
-  DataFlowVO getById(Long id) throws EEAException;
+  DataFlowVO getById(Long id, boolean removeWeblinksAndDocuments) throws EEAException;
 
   /**
    * Get the dataflow by its id filtering representatives by the user email.
@@ -47,42 +49,17 @@ public interface DataflowService {
   List<DataFlowVO> getByStatus(TypeStatusEnum status) throws EEAException;
 
 
+
   /**
    * Gets the dataflows.
    *
    * @param userId the user id
+   * @param dataflowType the dataflow type
    * @return the dataflows
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getDataflows(String userId) throws EEAException;
+  List<DataFlowVO> getDataflows(String userId, TypeDataflowEnum dataflowType) throws EEAException;
 
-
-  /**
-   * Gets the reference dataflows.
-   *
-   * @param userId the user id
-   * @return the reference dataflows
-   * @throws EEAException the EEA exception
-   */
-  List<DataFlowVO> getReferenceDataflows(String userId) throws EEAException;
-
-  /**
-   * Gets the business dataflows.
-   *
-   * @param userId the user id
-   * @return the business dataflows
-   * @throws EEAException the EEA exception
-   */
-  List<DataFlowVO> getBusinessDataflows(String userId) throws EEAException;
-
-  /**
-   * Gets the citizen science dataflows.
-   *
-   * @param userId the user id
-   * @return the citizen science dataflows
-   * @throws EEAException the EEA exception
-   */
-  List<DataFlowVO> getCitizenScienceDataflows(String userId) throws EEAException;
 
 
   /**
@@ -253,5 +230,16 @@ public interface DataflowService {
    * @return true, if is admin
    */
   boolean isAdmin();
+
+  /**
+   * Gets the private dataflow by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the private dataflow by id
+   * @throws EEAException the EEA exception
+   */
+  DataflowPrivateVO getPrivateDataflowById(Long dataflowId) throws EEAException;
+
+
 
 }

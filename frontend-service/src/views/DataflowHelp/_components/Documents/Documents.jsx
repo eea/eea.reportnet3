@@ -74,8 +74,6 @@ const Documents = ({
     if (!isNil(fileToDownload)) DownloadFile(fileToDownload, fileName);
   }, [fileToDownload]);
 
-  const createFileName = title => `${title.split(' ').join('_')}`;
-
   const dateColumnTemplate = rowData => <span>{dayjs(rowData.date).format(userContext.userProps.dateFormat)}</span>;
 
   const documentsEditButtons = rowData => (
@@ -140,13 +138,15 @@ const Documents = ({
   );
 
   const isPublicColumnTemplate = rowData => (
-    <span>
-      {rowData.isPublic ? (
-        <FontAwesomeIcon aria-label={resourcesContext.messages['documentIsPublic']} icon={AwesomeIcons('check')} />
-      ) : (
-        ''
-      )}
-    </span>
+    <div className={styles.iconStyle}>
+      <span>
+        {rowData.isPublic ? (
+          <FontAwesomeIcon aria-label={resourcesContext.messages['isPublic']} icon={AwesomeIcons('check')} />
+        ) : (
+          ''
+        )}
+      </span>
+    </div>
   );
 
   const onCancelDialog = () => {
@@ -158,7 +158,7 @@ const Documents = ({
     notificationContext.add({ type: 'DELETE_DOCUMENT_INIT_INFO' });
 
     try {
-      await DocumentService.delete(document.id);
+      await DocumentService.delete(document.id, dataflowId);
     } catch (error) {
       console.error('Documents - onDeleteDocument.', error);
       notificationContext.add({ type: 'DELETE_DOCUMENT_ERROR', content: {} });
@@ -172,8 +172,8 @@ const Documents = ({
   const onDownloadDocument = async document => {
     try {
       setDownloadingId(document.id);
-      setFileName(createFileName(document.title));
-      const { data } = await DocumentService.download(document.id);
+      setFileName(`${document.title.split(' ').join('_')}`);
+      const { data } = await DocumentService.download(document.id, dataflowId);
       setFileToDownload(data);
     } catch (error) {
       console.error('Documents - onDownloadDocument.', error);
@@ -205,6 +205,53 @@ const Documents = ({
   };
 
   const titleColumnTemplate = rowData => <span onClick={() => onDownloadDocument(rowData)}>{rowData.title}</span>;
+
+  const documentsFields = [
+    { name: 'title', label: resourcesContext.messages['title'] },
+    { name: 'description', label: resourcesContext.messages['description'] },
+    { name: 'category', label: resourcesContext.messages['category'] },
+    { name: 'language', label: resourcesContext.messages['language'] },
+    { name: 'isPublic', label: resourcesContext.messages['isPublic'] },
+    { name: 'date', label: resourcesContext.messages['documentUploadDate'] },
+    { name: 'size', label: resourcesContext.messages['documentSize'] },
+    { name: 'url', label: resourcesContext.messages['file'] }
+  ];
+
+  const renderDocumentsColumns = () => {
+    const documentsColumns = documentsFields.map(field => {
+      let template = null;
+      if (field.name === 'title') template = titleColumnTemplate;
+      else if (field.name === 'isPublic') template = isPublicColumnTemplate;
+      else if (field.name === 'date') template = dateColumnTemplate;
+      else if (field.name === 'size') template = sizeColumnTemplate;
+      else if (field.name === 'url') template = downloadColumnTemplate;
+      return (
+        <Column
+          body={template}
+          columnResizeMode="expand"
+          field={field.name}
+          filter={false}
+          filterMatchMode="contains"
+          header={field.label}
+          key={field.name}
+          sortable={!isEmpty(documents)}
+        />
+      );
+    });
+
+    if (isToolbarVisible) {
+      documentsColumns.push(
+        <Column
+          body={documentsEditButtons}
+          className={styles.crudColumn}
+          header={resourcesContext.messages['actions']}
+          key={'buttonsUniqueId'}
+        />
+      );
+    }
+
+    return documentsColumns;
+  };
 
   return (
     <Fragment>
@@ -241,79 +288,7 @@ const Documents = ({
         sortField={sortFieldDocuments}
         sortOrder={sortOrderDocuments}
         value={allDocuments}>
-        <Column
-          body={titleColumnTemplate}
-          columnResizeMode="expand"
-          field="title"
-          filter={false}
-          filterMatchMode="contains"
-          header={resourcesContext.messages['title']}
-          sortable={!isEmpty(documents)}
-        />
-        <Column
-          field="description"
-          filter={false}
-          filterMatchMode="contains"
-          header={resourcesContext.messages['description']}
-          sortable={!isEmpty(documents)}
-        />
-        <Column
-          field="category"
-          filter={false}
-          filterMatchMode="contains"
-          header={resourcesContext.messages['category']}
-          sortable={!isEmpty(documents)}
-        />
-        <Column
-          field="language"
-          filter={false}
-          filterMatchMode="contains"
-          header={resourcesContext.messages['language']}
-          sortable={!isEmpty(documents)}
-        />
-        <Column
-          body={isPublicColumnTemplate}
-          className={styles.iconStyle}
-          field="isPublic"
-          filter={false}
-          filterMatchMode="contains"
-          header={resourcesContext.messages['documentIsPublic']}
-          sortable={!isEmpty(documents)}
-        />
-        <Column
-          body={dateColumnTemplate}
-          field="date"
-          filter={false}
-          filterMatchMode="contains"
-          header={resourcesContext.messages['documentUploadDate']}
-          sortable={!isEmpty(documents)}
-        />
-        <Column
-          body={sizeColumnTemplate}
-          field="size"
-          filter={false}
-          filterMatchMode="contains"
-          header={resourcesContext.messages['documentSize']}
-          sortable={!isEmpty(documents)}
-        />
-        <Column
-          body={downloadColumnTemplate}
-          field="url"
-          filter={false}
-          filterMatchMode="contains"
-          header={resourcesContext.messages['file']}
-          style={{ textAlign: 'center', width: '8em' }}
-        />
-        {isToolbarVisible && !isEmpty(documents) ? (
-          <Column
-            body={documentsEditButtons}
-            className={styles.crudColumn}
-            header={resourcesContext.messages['documentsActionColumns']}
-            style={{ width: '5em' }}
-          />
-        ) : (
-          <Column className={styles.emptyTableHeader} header={resourcesContext.messages['documentsActionColumns']} />
-        )}
+        {renderDocumentsColumns()}
       </DataTable>
 
       {isLoading && isEmpty(documents) && <Spinner style={{ top: 0 }} />}

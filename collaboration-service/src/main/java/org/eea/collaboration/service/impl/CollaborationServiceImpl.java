@@ -183,7 +183,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     messageAttachmentVO.setExtension(extension);
 
     MessageVO messageVO = messageMapper.entityToClass(message);
-    messageVO.setMessageAttachmentVO(messageAttachmentVO);
+    messageVO.setMessageAttachment(messageAttachmentVO);
 
     return messageVO;
   }
@@ -277,7 +277,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     PageRequest pageRequest = PageRequest.of(page, 50, Sort.by("date").descending());
 
     MessagePaginatedVO messagePaginatedVO = new MessagePaginatedVO();
-    messagePaginatedVO.setListMessageVO(null != read
+    messagePaginatedVO.setListMessage(null != read
         ? messageMapper.entityListToClass(messageRepository
             .findByDataflowIdAndProviderIdAndRead(dataflowId, providerId, read, pageRequest)
             .getContent())

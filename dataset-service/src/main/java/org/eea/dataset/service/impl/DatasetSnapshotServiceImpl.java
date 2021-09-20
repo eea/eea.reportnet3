@@ -1048,9 +1048,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     validationControllerZuul.validateDataSetData(dataset.getId(), true);
 
+    String country = dataset.getDataSetName();
+    DataFlowVO dataflowVO = dataflowControllerZuul.findById(dataflowId, dataProviderId);
+    String dataflowName = dataflowVO.getName();
+
     MessageVO messageVO = new MessageVO();
     messageVO.setProviderId(dataProviderId);
-    messageVO.setContent("Released Data");
+    messageVO.setContent(country + " released " + dataflowName + " successfully");
     messageVO.setAutomatic(true);
     collaborationControllerZuul.createMessage(dataflowId, messageVO);
     LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowId,

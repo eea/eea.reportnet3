@@ -24,13 +24,13 @@ const sortDataflowsByExpirationDate = dataflows =>
 
 const parseDataflowListDTO = dataflowsDTO => dataflowsDTO?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
 
-const parsePublicDataflowListDTO = dataflowsDTO =>
-  dataflowsDTO?.map(dataflowDTO => parsePublicDataflowDTO(dataflowDTO));
-
 const parseSortedDataflowListDTO = dataflowDTOs => {
   const dataflows = dataflowDTOs?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
   return sortDataflowsByExpirationDate(dataflows);
 };
+
+const parsePublicDataflowListDTO = dataflowsDTO =>
+  dataflowsDTO?.map(dataflowDTO => parsePublicDataflowDTO(dataflowDTO));
 
 const parsePublicDataflowDTO = publicDataflowDTO =>
   new Dataflow({
@@ -40,13 +40,14 @@ const parsePublicDataflowDTO = publicDataflowDTO =>
     expirationDate:
       publicDataflowDTO.deadlineDate > 0 ? dayjs(publicDataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
     id: publicDataflowDTO.id,
-    isReleasable: publicDataflowDTO.releasable,
     manualAcceptance: publicDataflowDTO.manualAcceptance,
     name: publicDataflowDTO.name,
     obligation: ObligationUtils.parseObligation(publicDataflowDTO.obligation),
     referenceDatasets: DatasetUtils.parseDatasetListDTO(publicDataflowDTO.referenceDatasets),
     reportingDatasetsStatus: publicDataflowDTO.reportingStatus,
-    status: publicDataflowDTO.status === config.dataflowStatus.OPEN ? 'OPEN' : 'CLOSED'
+    status: publicDataflowDTO.status === config.dataflowStatus.OPEN ? 'OPEN' : 'CLOSED',
+    type: publicDataflowDTO.type,
+    webLinks: WebLinksUtils.parseWebLinkListDTO(publicDataflowDTO.weblinks)
   });
 
 const parseDataflowDTO = dataflowDTO =>
@@ -103,7 +104,7 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   return usersList;
 };
 
-const parseCountriesUserList = usersListDTO => {
+const parseDataProvidersUserList = usersListDTO => {
   usersListDTO.forEach((user, usersIndex) => {
     user.roles.forEach((role, roleIndex) => {
       usersListDTO[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(role);
@@ -111,16 +112,18 @@ const parseCountriesUserList = usersListDTO => {
   });
   const usersList = [];
   usersListDTO.forEach(parsedUser => {
-    const { country, email, roles } = parsedUser;
+    const { dataProviderName, email, roles } = parsedUser;
+
     roles.forEach(role => {
-      usersList.push({ country, email, role });
+      usersList.push({ dataProviderName, email, role });
     });
   });
   usersList.forEach(user => {
-    if (isNil(user.country)) {
-      user.country = '';
+    if (isNil(user.dataProviderName)) {
+      user.dataProviderName = '';
     }
   });
+
   return usersList;
 };
 
@@ -154,9 +157,9 @@ const getTechnicalAcceptanceStatus = (datasetsStatus = []) => {
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
-  parseCountriesUserList,
   parseDataflowDTO,
   parseDataflowListDTO,
+  parseDataProvidersUserList,
   parsePublicDataflowDTO,
   parsePublicDataflowListDTO,
   parseSortedDataflowListDTO,

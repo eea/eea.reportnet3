@@ -35,5 +35,5 @@ public class MessageVO {
   private boolean automatic;
 
   /** The message attachment VO. */
-  private MessageAttachmentVO messageAttachmentVO;
+  private MessageAttachmentVO messageAttachment;
 }

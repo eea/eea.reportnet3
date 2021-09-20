@@ -27,6 +27,7 @@ import { Integrations } from './_components/Integrations';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Menu } from 'views/_components/Menu';
+import { QCList } from 'views/_components/QCList';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
@@ -35,8 +36,7 @@ import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
 import { Validations } from 'views/DatasetDesigner/_components/Validations';
-import { ValidationsList } from 'views/_components/ValidationsList';
-import { ValidationViewer } from 'views/_components/ValidationViewer';
+import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -77,17 +77,17 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
-  const [schemaImported, setSchemaImported] = useState(false);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
-    availableInPublic: false,
     areLoadedSchemas: false,
     arePrefilledTablesDeleted: false,
     areUpdatingTables: false,
-    dashDialogVisible: false,
+    availableInPublic: false,
     constraintManagingId: '',
+    dashDialogVisible: false,
     dataflowName: '',
+    dataflowType: '',
     datasetDescription: '',
     datasetHasData: false,
     datasetSchema: {},
@@ -105,21 +105,20 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       selectedTableSchemaId: null,
       tableSchemaId: QuerystringUtils.getUrlParamValue('tab')
     },
-    isDeleteDialogVisible: false,
     exportButtonsList: [],
     exportDatasetFileType: '',
     externalOperationsList: { export: [], import: [], importOtherSystems: [] },
     hasWritePermissions: false,
     importButtonsList: [],
     initialDatasetDescription: '',
-    isBusinessDataflow: false,
     isCitizenScienceDataflow: false,
     isConfigureWebformDialogVisible: false,
     isDataflowOpen: false,
     isDataUpdated: false,
-    isDuplicatedToManageUnique: false,
+    isDeleteDialogVisible: false,
     isDownloadingQCRules: false,
     isDownloadingValidations: false,
+    isDuplicatedToManageUnique: false,
     isExportTableSchemaDialogVisible: false,
     isImportDatasetDialogVisible: false,
     isImportOtherSystemsDialogVisible: false,
@@ -132,9 +131,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     isRefreshHighlighted: false,
     isTableCreated: false,
     isUniqueConstraintCreating: false,
-    isUniqueConstraintUpdating: false,
     isUniqueConstraintsListDialogVisible: false,
+    isUniqueConstraintUpdating: false,
     isValidateDialogVisible: false,
+    isValidationsTabularView: false,
     isValidationViewerVisible: false,
     levelErrorTypes: [],
     manageUniqueConstraintData: {
@@ -149,8 +149,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     referenceDataset: false,
     refresh: false,
     replaceData: false,
-    selectedImportExtension: null,
     schemaTables: [],
+    selectedImportExtension: null,
+    selectedWebform: undefined,
     tabs: [],
     uniqueConstraintsList: [],
     validationListDialogVisible: false,
@@ -159,9 +160,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       tabularData: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'tabularData'),
       webform: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'webform')
     },
-    webform: null,
-    selectedWebform: undefined,
-    isValidationsTabularView: false
+    webform: null
   });
 
   const {
@@ -194,8 +193,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET_DESIGNER : CurrentPage.DATASET_DESIGNER,
     dataflowId,
     history,
-    isBusinessDataflow: designerState.isBusinessDataflow,
-    isCitizenScienceDataflow: designerState.isCitizenScienceDataflow,
+    dataflowType: designerState.dataflowType,
     isLoading: designerState.isLoading,
     referenceDataflowId: dataflowId
   });
@@ -205,13 +203,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     onLoadSchema();
     callSetMetaData();
   }, []);
-
-  useEffect(() => {
-    if (schemaImported) {
-      onLoadSchema();
-      setSchemaImported(false);
-    }
-  }, [schemaImported]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -300,10 +291,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     designerDispatch({
       type: 'GET_METADATA',
       payload: {
-        metaData,
         dataflowName: metaData.dataflow.name,
-        isBusinessDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.BUSINESS),
-        isCitizenScienceDataflow: TextUtils.areEquals(metaData.dataflow.type, config.dataflowType.CITIZEN_SCIENCE),
+        dataflowType: metaData.dataflow.type,
+        metaData,
         schemaName: metaData.dataset.name
       }
     });
@@ -422,10 +412,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       payload: { importList: internalExtensionsList.concat(importFromFile).concat(importOtherSystems) }
     });
   };
-
-  const validImportExtensions = `.${designerState.selectedImportExtension}`;
-
-  const infoExtensionsTooltip = `${resourcesContext.messages['supportedFileExtensionsTooltip']} ${validImportExtensions}`;
 
   const getFileExtensions = async () => {
     try {
@@ -560,7 +546,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
         content: {
-          countryName: 'DESIGN',
+          origin: 'DESIGN',
           dataflowId,
           dataflowName: designerState.dataflowName,
           datasetId,
@@ -575,9 +561,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       } else {
         console.error('DatasetDesigner - onConfirmValidate.', error);
         notificationContext.add({
-          type: 'VALIDATE_DATA_BY_ID_ERROR',
+          type: 'VALIDATE_DESIGN_DATA_ERROR',
           content: {
-            countryName: 'DESIGN',
+            origin: 'DESIGN',
             dataflowId,
             dataflowName: designerState.dataflowName,
             datasetId,
@@ -637,7 +623,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       console.error('DatasetDesigner - onExportDataExternalIntegration.', error);
-      onExportError('EXTERNAL_EXPORT_DESIGN_FAILED_EVENT');
+      notificationContext.add({
+        type: 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT',
+        content: { dataflowId, datasetId, datasetName: designerState.datasetSchemaName }
+      });
     }
   };
 
@@ -654,11 +643,18 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   };
 
   useEffect(() => {
-    const isNotification = notificationContext.toShow.find(
+    const validationFinished = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
     );
-    if (isNotification && isNotification.content.datasetId?.toString() === datasetId.toString()) {
+    if (validationFinished && validationFinished.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
+    }
+    const isImportFieldSchemaCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'
+    );
+
+    if (isImportFieldSchemaCompleted) {
+      window.location.reload();
     }
   }, [notificationContext]);
 
@@ -694,8 +690,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     setSqlValidationRunning,
     false
   );
-
-  useCheckNotifications(['IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'], setSchemaImported, true);
 
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
@@ -1235,7 +1229,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           onHide={() => onHideValidationsDialog()}
           style={{ width: '90%' }}
           visible={designerState.validationListDialogVisible}>
-          <ValidationsList
+          <QCList
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
@@ -1355,7 +1349,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   {resourcesContext.messages['referenceDataset']}
                 </label>
               </div>
-              {!designerState.isBusinessDataflow && (
+              {!TextUtils.areEquals(designerState.dataflowType, config.dataflowType.BUSINESS.value) && (
                 <div>
                   <Checkbox
                     ariaLabelledBy="available_in_public_view_label"
@@ -1530,7 +1524,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 disabled={isDataflowOpen || isDesignDatasetEditorRead}
                 icon="refresh"
                 label={resourcesContext.messages['refresh']}
-                onClick={() => setSchemaImported(true)}
+                onClick={onLoadSchema}
               />
             </div>
           </Toolbar>
@@ -1567,7 +1561,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             onTabChange={onTabChange}
             onUpdateSchema={onUpdateSchema}
             onUpdateTable={onUpdateTable}
-            schemaImported={schemaImported}
             selectedRuleId={dataViewerOptions.selectedRuleId}
             selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
             selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
@@ -1584,10 +1577,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         )}
         {designerState.datasetSchema && designerState.tabs && validationContext.isVisible && (
           <Validations
+            dataflowType={designerState.dataflowType}
             datasetId={datasetId}
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
-            isBusinessDataflow={designerState.isBusinessDataflow}
             isCitizenScienceDataflow={designerState.isCitizenScienceDataflow}
             tabs={DatasetDesignerUtils.getTabs({
               datasetSchema: designerState.datasetSchema,
@@ -1698,7 +1691,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             onHide={() => designerDispatch({ type: 'TOGGLE_VALIDATION_VIEWER_VISIBILITY', payload: false })}
             style={{ width: '90%' }}
             visible={designerState.isValidationViewerVisible}>
-            <ValidationViewer
+            <ShowValidationsList
               datasetId={datasetId}
               datasetName={designerState.datasetSchemaName}
               datasetSchemaId={designerState.datasetSchemaId}
@@ -1716,7 +1709,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload
-            accept={validImportExtensions}
+            accept={DatasetDesignerUtils.getValidExtensions(designerState.selectedImportExtension)}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
@@ -1726,7 +1719,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               setImportSelectedIntegrationId(null);
             }}
             dialogVisible={designerState.isImportDatasetDialogVisible}
-            infoTooltip={infoExtensionsTooltip}
+            infoTooltip={`${
+              resourcesContext.messages['supportedFileExtensionsTooltip']
+            } ${DatasetDesignerUtils.getValidExtensionsTooltip(designerState.selectedImportExtension)}`}
             invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
             isDialog={true}
             name="file"

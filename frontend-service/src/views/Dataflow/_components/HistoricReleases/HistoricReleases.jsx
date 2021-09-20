@@ -26,24 +26,18 @@ import { HistoricReleaseService } from 'services/HistoricReleaseService';
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
-export const HistoricReleases = ({
-  dataflowId,
-  dataProviderId,
-  datasetId,
-  historicReleasesView,
-  isBusinessDataflow,
-  isCitizenScienceDataflow
-}) => {
+export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [historicReleasesState, historicReleasesDispatch] = useReducer(historicReleasesReducer, {
-    countryCodes: [],
     data: [],
-    filteredData: [],
+    dataProviderCodes: [],
     filtered: false,
+    filteredData: [],
     isLoading: true
   });
 
@@ -51,9 +45,9 @@ export const HistoricReleases = ({
     onLoadHistoricReleases();
   }, []);
 
-  const getCountryCode = historicReleases => {
-    const countryCodes = uniq(historicReleases.map(historicRelease => historicRelease.countryCode));
-    historicReleasesDispatch({ type: 'GET_COUNTRY_CODES', payload: { countryCodes } });
+  const getDataProviderCode = historicReleases => {
+    const dataProviderCodes = uniq(historicReleases.map(historicRelease => historicRelease.dataProviderCode));
+    historicReleasesDispatch({ type: 'GET_DATA_PROVIDER_CODES', payload: { dataProviderCodes } });
   };
 
   const getFiltered = value => historicReleasesDispatch({ type: 'IS_FILTERED', payload: { value } });
@@ -85,7 +79,7 @@ export const HistoricReleases = ({
           data.map(historic => {
             return {
               releaseDate: historic.releaseDate,
-              countryCode: historic.countryCode
+              dataProviderCode: historic.dataProviderCode
             };
           }),
           'releaseDate'
@@ -100,7 +94,7 @@ export const HistoricReleases = ({
         type: 'INITIAL_LOAD',
         payload: { data: historicReleases, filteredData: historicReleases, filtered: false }
       });
-      getCountryCode(historicReleases);
+      getDataProviderCode(historicReleases);
     } catch (error) {
       console.error('HistoricReleases - onLoadHistoricReleases.', error);
       notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
@@ -137,16 +131,11 @@ export const HistoricReleases = ({
     </div>
   );
 
-  const getCodeColumnHeader = () =>
-    resourcesContext.messages[
-      isBusinessDataflow ? 'companyCode' : isCitizenScienceDataflow ? 'organizationCode' : 'countryCode'
-    ];
-
   const renderDataCollectionColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
       .filter(
         key =>
-          key.includes('countryCode') ||
+          key.includes('dataProviderCode') ||
           key.includes('releaseDate') ||
           key.includes('isDataCollectionReleased') ||
           key.includes('isEUReleased')
@@ -163,7 +152,13 @@ export const HistoricReleases = ({
             columnResizeMode="expand"
             field={field}
             header={
-              TextUtils.areEquals(field, 'countryCode') ? getCodeColumnHeader() : resourcesContext.messages[field]
+              TextUtils.areEquals(field, 'dataProviderCode')
+                ? TextByDataflowTypeUtils.getLabelByDataflowType(
+                    resourcesContext.messages,
+                    dataflowType,
+                    'historicReleaseDataProviderColumnHeader'
+                  )
+                : resourcesContext.messages[field]
             }
             key={field}
             sortable={true}
@@ -175,7 +170,7 @@ export const HistoricReleases = ({
 
   const renderEUDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
-      .filter(key => key.includes('countryCode') || key.includes('releaseDate'))
+      .filter(key => key.includes('dataProviderCode') || key.includes('releaseDate'))
       .map(field => {
         let template = null;
         if (field === 'releaseDate') template = releaseDateTemplate;
@@ -185,7 +180,13 @@ export const HistoricReleases = ({
             columnResizeMode="expand"
             field={field}
             header={
-              TextUtils.areEquals(field, 'countryCode') ? getCodeColumnHeader() : resourcesContext.messages[field]
+              TextUtils.areEquals(field, 'dataProviderCode')
+                ? TextByDataflowTypeUtils.getLabelByDataflowType(
+                    resourcesContext.messages,
+                    dataflowType,
+                    'historicReleaseDataProviderColumnHeader'
+                  )
+                : resourcesContext.messages[field]
             }
             key={field}
             sortable={true}
@@ -195,16 +196,19 @@ export const HistoricReleases = ({
     return fieldColumns;
   };
 
-  const getMultiselectFilterOption = () =>
-    resourcesContext.messages[
-      isBusinessDataflow ? 'companyCode' : isCitizenScienceDataflow ? 'organizationCode' : 'countryCode'
-    ];
-
-  // TODO CHECK CORRECT USE ON CITIES AND SCIENCE
   const filterOptionsDataCollection = [
     {
       type: 'multiselect',
-      properties: [{ name: isBusinessDataflow ? 'company' : 'countryCode', label: getMultiselectFilterOption() }]
+      properties: [
+        {
+          name: 'dataProviderCode',
+          label: TextByDataflowTypeUtils.getLabelByDataflowType(
+            resourcesContext.messages,
+            dataflowType,
+            'historicReleaseDataProviderFilterLabel'
+          )
+        }
+      ]
     },
     {
       type: 'checkbox',
@@ -218,11 +222,19 @@ export const HistoricReleases = ({
     }
   ];
 
-  // TODO CHECK CORRECT USE ON CITIES AND SCIENCE
   const filterOptionsEUDataset = [
     {
       type: 'multiselect',
-      properties: [{ name: isBusinessDataflow ? 'company' : 'countryCode', label: getMultiselectFilterOption() }]
+      properties: [
+        {
+          name: 'dataProviderCode',
+          label: TextByDataflowTypeUtils.getLabelByDataflowType(
+            resourcesContext.messages,
+            dataflowType,
+            'historicReleaseDataProviderFilterLabel'
+          )
+        }
+      ]
     }
   ];
 

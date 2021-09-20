@@ -126,7 +126,6 @@ const UserImage = () => {
           data-event="click"
           data-for="addAvatar"
           data-tip
-          icon={<FontAwesomeIcon className={styles.userDataIcon} icon={AwesomeIcons('user-profile')} />}
           ref={uploadedImage}
           src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
         />

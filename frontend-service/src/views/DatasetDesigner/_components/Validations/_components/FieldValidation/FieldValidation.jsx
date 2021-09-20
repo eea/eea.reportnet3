@@ -43,7 +43,7 @@ import { initValidationRuleCreation } from 'views/DatasetDesigner/_components/Va
 import { resetValidationRuleCreation } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/resetValidationRuleCreation';
 import { setValidationExpression } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/setValidationExpression';
 
-const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
+const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -98,7 +98,7 @@ const FieldValidation = ({ datasetId, isBusinessDataflow, tabs }) => {
           <ExpressionSelector
             componentName={componentName}
             creationFormState={creationFormState}
-            isBusinessDataflow={isBusinessDataflow}
+            dataflowType={dataflowType}
             onAddNewExpression={onAddNewExpression}
             onExpressionDelete={onExpressionDelete}
             onExpressionFieldUpdate={onExpressionFieldUpdate}

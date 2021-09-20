@@ -9,12 +9,13 @@ import uniq from 'lodash/uniq';
 
 import styles from './RepresentativesList.module.scss';
 
+import { config } from 'conf';
+
 import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
-import { DownloadFile } from 'views/_components/DownloadFile';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
@@ -32,8 +33,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const RepresentativesList = ({
   dataflowId,
-  isBusinessDataflow,
-  isCitizenScienceDataflow,
+  dataflowType,
   representativesImport = false,
   setDataProviderSelected,
   setFormHasRepresentatives,
@@ -74,7 +74,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     getInitialData();
-  }, [formState.refresher, isBusinessDataflow, isCitizenScienceDataflow]);
+  }, [dataflowType, formState.refresher]);
 
   useEffect(() => {
     if (!isNull(formState.selectedDataProviderGroup)) {
@@ -140,13 +140,16 @@ const RepresentativesList = ({
   };
 
   const getInitialData = async () => {
-    if (isBusinessDataflow) {
-      await getDataProviderGroup();
-    }
-    if (isCitizenScienceDataflow) {
-      await getGroupOrganizations();
-    } else {
-      await getGroupCountries();
+    switch (dataflowType) {
+      case config.dataflowType.BUSINESS.value:
+        await getDataProviderGroup();
+        break;
+      case config.dataflowType.CITIZEN_SCIENCE.value:
+        await getGroupOrganizations();
+        break;
+      default:
+        await getGroupCountries();
+        break;
     }
 
     await getRepresentatives();
@@ -287,22 +290,6 @@ const RepresentativesList = ({
     } finally {
       handleDialogs('deleteLeadReporter', false);
       setIsDeleting(false);
-    }
-  };
-
-  const onExportLeadReportersTemplate = async () => {
-    try {
-      const { data } = await RepresentativeService.exportTemplateFile(
-        formState.selectedDataProviderGroup?.dataProviderGroupId
-      );
-      if (!isNil(data)) {
-        DownloadFile(data, `GroupId_${formState.selectedDataProviderGroup?.dataProviderGroupId}_Template.csv`);
-      }
-    } catch (error) {
-      console.error('RepresentativesList - onExportLeadReportersTemplate.', error);
-      notificationContext.add({
-        type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_TEMPLATE_FAILED_EVENT'
-      });
     }
   };
 
@@ -451,7 +438,7 @@ const RepresentativesList = ({
         <div className={styles.title}>{resourcesContext.messages['manageRolesDialogHeader']}</div>
         <div>
           <label>{resourcesContext.messages['manageRolesDialogDropdownLabel']} </label>
-          {isBusinessDataflow ? (
+          {TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? (
             <Dropdown
               ariaLabel={'dataProviders'}
               className={styles.dataProvidersDropdown}
@@ -474,15 +461,6 @@ const RepresentativesList = ({
               value={formState.selectedDataProviderGroup}
             />
           )}
-          <Button
-            className={`${styles.exportTemplate} p-button-secondary ${
-              !isEmpty(formState.selectedDataProviderGroup) ? 'p-button-animated-blink' : ''
-            }`}
-            disabled={isEmpty(formState.selectedDataProviderGroup)}
-            icon={'export'}
-            label={resourcesContext.messages['exportLeadReportersTemplate']}
-            onClick={onExportLeadReportersTemplate}
-          />
         </div>
       </div>
 

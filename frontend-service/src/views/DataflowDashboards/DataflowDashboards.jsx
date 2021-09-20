@@ -5,8 +5,6 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataflowDashboards.module.css';
 
-import { config } from 'conf';
-
 import { routes } from 'conf/routes';
 
 import { Button } from 'views/_components/Button';
@@ -24,7 +22,6 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataflowDashboards = withRouter(
   ({
@@ -38,17 +35,15 @@ export const DataflowDashboards = withRouter(
 
     const [dashboardInitialValues, setDashboardInitialValues] = useState({});
     const [dataflowName, setDataflowName] = useState('');
+    const [dataflowType, setDataflowType] = useState('');
     const [dataSchema, setDataSchema] = useState();
-    const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
-    const [isCitizenScienceDataflow, setCitizenScienceDataflow] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
     useBreadCrumbs({
       currentPage: CurrentPage.DATAFLOW_DASHBOARDS,
       dataflowId,
+      dataflowType,
       history,
-      isBusinessDataflow,
-      isCitizenScienceDataflow,
       isLoading
     });
 
@@ -61,8 +56,7 @@ export const DataflowDashboards = withRouter(
     const getDataflowDetails = async () => {
       try {
         const data = await DataflowService.getDetails(dataflowId);
-        setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
-        setCitizenScienceDataflow(TextUtils.areEquals(data.type, config.dataflowType.CITIZEN_SCIENCE));
+        setDataflowType(data.type);
         setDataflowName(data.name);
         setIsLoading(false);
       } catch (error) {

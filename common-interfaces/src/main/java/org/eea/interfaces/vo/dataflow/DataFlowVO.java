@@ -12,8 +12,6 @@ import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
-import org.eea.interfaces.vo.document.DocumentVO;
-import org.eea.interfaces.vo.weblink.WeblinkVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -49,12 +47,6 @@ public class DataFlowVO extends GenericDataflowVO implements Serializable {
 
   /** The deadline date. */
   private Date creationDate;
-
-  /** The documents. */
-  private List<DocumentVO> documents;
-
-  /** The weblinks. */
-  private List<WeblinkVO> weblinks;
 
   /** The request id. */
   private Long requestId;
