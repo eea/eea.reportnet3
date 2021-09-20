@@ -126,7 +126,7 @@ public interface DocumentController {
    * @param dataflowId the dataflow id
    * @return the all documents by dataflow
    */
-  @GetMapping(value = "/dataflowId/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId);
 
   /**
