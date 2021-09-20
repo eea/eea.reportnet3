@@ -15,6 +15,22 @@
   font-weight: bold;
 }
 
+.emptyFilteredData {
+  $root: &;
+  height: 50vh;
+  @at-root {
+    .validationsWrapper {
+      @at-root {
+        #{$root} #{&} {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
+
 .noValidations {
   height: 100%;
 }

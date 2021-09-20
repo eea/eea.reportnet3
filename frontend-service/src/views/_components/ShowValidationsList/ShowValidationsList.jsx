@@ -571,36 +571,38 @@ export const ShowValidationsList = memo(
             />
           </div>
 
-          {!isEmpty(fetchedData) ? (
-            <DataTable
-              autoLayout={true}
-              className={isWebformView ? styles.tableWebform : undefined}
-              first={firstRow}
-              hasDefaultCurrentPage={true}
-              lazy={true}
-              loading={isLoadingTable}
-              onPage={onChangePage}
-              onRowSelect={onRowSelect}
-              onSort={onSort}
-              paginator={true}
-              paginatorRight={isLoadingTable ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
-              reorderableColumns={true}
-              resizableColumns={true}
-              rows={numberRows}
-              rowsPerPageOptions={[5, 10, 15]}
-              selectionMode="single"
-              sortField={sortField}
-              sortOrder={sortOrder}
-              sortable={true}
-              totalRecords={totalFilteredRecords}
-              value={fetchedData}>
-              {columns}
-            </DataTable>
-          ) : (
-            <div className={styles.emptyFilteredData}>
-              {resourcesContext.messages['noQCRulesWithSelectedParameters']}
-            </div>
-          )}
+          <div className={styles.validationsWrapper}>
+            {!isEmpty(fetchedData) ? (
+              <DataTable
+                autoLayout={true}
+                className={isWebformView ? styles.tableWebform : undefined}
+                first={firstRow}
+                hasDefaultCurrentPage={true}
+                lazy={true}
+                loading={isLoadingTable}
+                onPage={onChangePage}
+                onRowSelect={onRowSelect}
+                onSort={onSort}
+                paginator={true}
+                paginatorRight={isLoadingTable ? <Spinner className={styles.loading} /> : getPaginatorRecordsCount()}
+                reorderableColumns={true}
+                resizableColumns={true}
+                rows={numberRows}
+                rowsPerPageOptions={[5, 10, 15]}
+                selectionMode="single"
+                sortField={sortField}
+                sortOrder={sortOrder}
+                sortable={true}
+                totalRecords={totalFilteredRecords}
+                value={fetchedData}>
+                {columns}
+              </DataTable>
+            ) : (
+              <div className={styles.emptyFilteredData}>
+                {resourcesContext.messages['noQCRulesWithSelectedParameters']}
+              </div>
+            )}
+          </div>
         </div>
       );
     };
