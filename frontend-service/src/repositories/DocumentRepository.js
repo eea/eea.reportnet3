@@ -13,9 +13,9 @@ export const DocumentRepository = {
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
-  downloadPublic: async (documentId, dataflowId) =>
+    publicDownload: async (documentId, dataflowId) =>
     await HTTPRequester.download({
-      url: getUrl(DocumentConfig.downloadPublic, { documentId, dataflowId }),
+      url: getUrl(DocumentConfig.publicDownload, { documentId, dataflowId }),
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 

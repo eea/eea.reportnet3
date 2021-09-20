@@ -7,8 +7,6 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './ManualAcceptanceDatasets.module.scss';
 
-import { config } from 'conf';
-
 import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
