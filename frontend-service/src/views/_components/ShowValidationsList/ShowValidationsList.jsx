@@ -496,7 +496,6 @@ export const ShowValidationsList = memo(
             onSelectValidation(event.data.tableSchemaId);
           }
           break;
-
         default:
           break;
       }

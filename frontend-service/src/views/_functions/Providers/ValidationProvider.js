@@ -16,6 +16,7 @@ const validationReducer = (state, { type, payload }) => {
         ruleToEdit: {},
         tableSchemaId: null
       };
+
     case 'ON_OPEN_QC_CREATION_MODAL_FROM_FIELD':
       return {
         ...state,
@@ -25,12 +26,14 @@ const validationReducer = (state, { type, payload }) => {
         opener: null,
         level: 'field'
       };
+
     case 'ON_OPEN_QC_CREATION_MODAL_FROM_OPENER':
       return {
         ...state,
         isVisible: true,
         level: payload.level
       };
+
     case 'ON_OPEN_QC_CREATION_MODAL_FROM_ROW':
       return {
         ...state,
@@ -39,12 +42,10 @@ const validationReducer = (state, { type, payload }) => {
         opener: null,
         level: 'row'
       };
+
     case 'ON_OPEN_QC_CREATION_MODAL':
-      return {
-        ...state,
-        isVisible: true,
-        opener: null
-      };
+      return { ...state, isVisible: true, opener: null };
+
     case 'ON_OPEN_TO_COPY':
       return {
         ...state,
@@ -55,6 +56,7 @@ const validationReducer = (state, { type, payload }) => {
         referenceId: payload.referenceId,
         updatedRuleId: payload.updatedRuleId
       };
+
     case 'ON_OPEN_TO_EDIT':
       return {
         ...state,
@@ -65,34 +67,22 @@ const validationReducer = (state, { type, payload }) => {
         level: payload.level,
         updatedRuleId: payload.updatedRuleId
       };
+
     case 'ON_OPENER_RESET':
-      return {
-        ...state,
-        opener: null,
-        reOpenOpener: false
-      };
+      return { ...state, opener: null, reOpenOpener: false };
+
     case 'RESET_REOPEN_OPENER':
-      return {
-        ...state,
-        reOpenOpener: false
-      };
+      return { ...state, reOpenOpener: false };
+
     case 'ON_AUTOMATIC_RULE_IS_UPDATED':
-      return {
-        ...state,
-        isAutomaticRuleUpdated: payload
-      };
+      return { ...state, isAutomaticRuleUpdated: payload };
 
     case 'ON_FETCHING_DATA':
-      return {
-        ...state,
-        isFetchingData: payload.isFetchingData,
-        updatedRuleId: payload.updatedRuleId
-      };
+      return { ...state, isFetchingData: payload.isFetchingData, updatedRuleId: payload.updatedRuleId };
+
     case 'ON_SETTING_RULES_DESCRIPTION':
-      return {
-        ...state,
-        rulesDescription: payload
-      };
+      return { ...state, rulesDescription: payload };
+
     default:
       return state;
   }

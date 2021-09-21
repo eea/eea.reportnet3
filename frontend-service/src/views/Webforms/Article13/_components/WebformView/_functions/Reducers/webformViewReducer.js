@@ -11,6 +11,7 @@ export const webformViewReducer = (state, { type, payload }) => {
 
     case 'SET_SINGLE_CALCULATED_DATA':
       return { ...state, singlesCalculatedData: payload };
+
     default:
       return state;
   }

@@ -228,12 +228,10 @@ export class Dropdown extends Component {
       case 40:
         this.onDownKey(event);
         break;
-
       //up
       case 38:
         this.onUpKey(event);
         break;
-
       //space
       case 32:
         if (!this.panel.element.offsetParent) {
@@ -241,20 +239,17 @@ export class Dropdown extends Component {
           event.preventDefault();
         }
         break;
-
       //enter
       case 13:
         this.hide();
         this.onKeyPress(event);
         event.preventDefault();
         break;
-
       //escape and tab
       case 27:
       case 9:
         this.hide();
         break;
-
       default:
         this.search(event);
         break;
@@ -407,18 +402,15 @@ export class Dropdown extends Component {
       case 40:
         this.onDownKey(event);
         break;
-
       //up
       case 38:
         this.onUpKey(event);
         break;
-
       //enter
       case 13:
         this.hide();
         event.preventDefault();
         break;
-
       default:
         break;
     }

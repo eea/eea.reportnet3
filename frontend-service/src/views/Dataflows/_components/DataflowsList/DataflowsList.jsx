@@ -185,16 +185,12 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
     switch (visibleTab) {
       case 'reporting':
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
-
       case 'business':
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
-
       case 'citizenScience':
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
-
       case 'reference':
         return <ReferencedDataflowItem dataflow={dataflow} reorderDataflows={reorderDataflows} />;
-
       default:
         break;
     }

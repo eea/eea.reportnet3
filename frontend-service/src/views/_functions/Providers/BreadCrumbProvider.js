@@ -5,11 +5,8 @@ import { BreadCrumbContext } from 'views/_functions/Contexts/BreadCrumbContext';
 const breadCrumbReducer = (state, { type, payload }) => {
   switch (type) {
     case 'ADD_MODEL':
-      return {
-        ...state,
-        prevModel: state.model,
-        model: payload
-      };
+      return { ...state, prevModel: state.model, model: payload };
+
     default:
       return state;
   }
