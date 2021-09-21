@@ -14,9 +14,7 @@ export const getExpressionString = (validation, tabs) => {
         label: validation.fieldName,
         code: validation.id
       };
-
       return getFieldExpressionString(validation.expressions, field);
-
     case 'RECORD':
       if (!isNil(validation?.condition?.operator) && validation.condition.operator === 'RECORD_IF') {
         return `IF ( ${getComparisonExpressionString(
@@ -28,8 +26,7 @@ export const getExpressionString = (validation, tabs) => {
       } else {
         return getComparisonExpressionString(validation.expressions, tabs);
       }
-
     default:
-      return '';     
+      return '';
   }
 };

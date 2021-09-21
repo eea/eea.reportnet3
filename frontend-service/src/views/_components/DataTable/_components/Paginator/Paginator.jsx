@@ -151,7 +151,7 @@ export class Paginator extends Component {
     this.changePage(0, event.value);
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (
       this.getPage() > 0 &&
       prevProps.totalRecords !== this.props.totalRecords &&
@@ -168,25 +168,20 @@ export class Paginator extends Component {
       case 'FirstPageLink':
         element = <FirstPageLink disabled={this.isFirstPage()} key={key} onClick={this.changePageToFirst} />;
         break;
-
       case 'PrevPageLink':
         element = <PrevPageLink disabled={this.isFirstPage()} key={key} onClick={this.changePageToPrev} />;
         break;
-
       case 'NextPageLink':
         element = <NextPageLink disabled={this.isLastPage()} key={key} onClick={this.changePageToNext} />;
         break;
-
       case 'LastPageLink':
         element = <LastPageLink disabled={this.isLastPage()} key={key} onClick={this.changePageToLast} />;
         break;
-
       case 'PageLinks':
         element = (
           <PageLinks key={key} onClick={this.onPageLinkClick} page={this.getPage()} value={this.updatePageLinks()} />
         );
         break;
-
       case 'CurrentPageReport':
         element = (
           <CurrentPageReport
@@ -201,7 +196,6 @@ export class Paginator extends Component {
           />
         );
         break;
-
       default:
         element = null;
         break;

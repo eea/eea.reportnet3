@@ -254,10 +254,8 @@ export const WebformTable = ({
     switch (webformType) {
       case 'ARTICLE_15':
         return renderArticle15WebformRecords(isMultiple);
-
       case 'ARTICLE_13':
         return renderArticle13WebformRecords();
-
       default:
         return <div />;
     }
