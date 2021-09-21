@@ -47,8 +47,6 @@ export const Filters = ({
   validations,
   validationsAllTypesFilters
 }) => {
-  const isFrontendFilter = isNil(sendData);
-
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -73,11 +71,7 @@ export const Filters = ({
   });
 
   useEffect(() => {
-    getInitialState();
-  }, []);
-
-  useEffect(() => {
-    if (isFrontendFilter) getInitialState();
+    if (isNil(sendData)) getInitialState();
   }, [data]);
 
   useEffect(() => {
