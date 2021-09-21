@@ -246,7 +246,7 @@ export const PublicDataflowInformation = withRouter(
     const onDownloadDocument = async document => {
       try {
         const { data } = await DocumentService.publicDownload(document.id, dataflowId);
-        DownloadFile(data, document.fileName);
+        DownloadFile(data, document.file);
       } catch (error) {
         console.error('PublicDataflowInformation - onDownloadDocument.', error);
       }
