@@ -255,7 +255,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/getCloneableDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/cloneableDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Dataflows for clone for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       responseContainer = "List")

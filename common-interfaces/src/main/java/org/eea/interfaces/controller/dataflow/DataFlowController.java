@@ -105,7 +105,7 @@ public interface DataFlowController {
    *
    * @return the list
    */
-  @GetMapping(value = "/getCloneableDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/cloneableDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findCloneableDataflows();
 
   /**
