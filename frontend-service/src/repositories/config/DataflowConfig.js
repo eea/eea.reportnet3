@@ -8,7 +8,7 @@ export const DataflowConfig = {
   delete: '/dataflow/{:dataflowId}',
   exportSchemas: '/dataschema/export?dataflowId={:dataflowId}',
   getAll: '/dataflow/getDataflows',
-  getCloneableDataflows: '/dataflow/getCloneableDataflows',
+  getCloneableDataflows: '/dataflow/cloneableDataflows',
   getAllDataflowsUserList: '/dataflow/getUserRolesAllDataflows',
   getApiKey: '/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   getApiKeyCustodian: '/user/getApiKey?dataflowId={:dataflowId}',
