@@ -99,23 +99,18 @@ const getOptionsTemplate = (filteredOptions, property) => {
       case 'automatic':
         template.push({ type: option ? 'AUTOMATIC' : 'MANUAL', value: option });
         break;
-
       case 'enabled':
         template.push({ type: option ? 'ENABLED' : 'DISABLED', value: option });
         break;
-
       case 'isCorrect':
         template.push({ type: option ? 'VALID' : 'INVALID', value: option });
         break;
-
       case 'userRole':
         template.push({ type: option, value: option });
         break;
-
       case 'role':
         template.push({ type: getUserRoleLabel(option), value: option });
         break;
-
       default:
         template.push({ type: option?.toString().toUpperCase(), value: option?.toString().toUpperCase() });
     }
