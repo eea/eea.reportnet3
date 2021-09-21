@@ -16,6 +16,7 @@ import org.eea.dataflow.persistence.repository.WebLinkRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -84,6 +85,12 @@ public class DataFlowWebLinkServiceImplTest {
   /** The resources. */
   private List<ResourceAccessVO> badResources;
 
+  /** The dataflow VO. */
+  private DataFlowVO dataflowVO;
+
+  /**
+   * Inits the mocks.
+   */
   @Before
   public void initMocks() {
     weblinkVO = new WeblinkVO();
@@ -103,7 +110,6 @@ public class DataFlowWebLinkServiceImplTest {
     weblink.setDataflow(dataflow);
     weblink.setUrl("http://www.javadesdecero.es/");
     weblink.setDescription("test");
-
 
     weblinkBad = new Weblink();
     weblinkBad.setId(1L);
@@ -125,6 +131,7 @@ public class DataFlowWebLinkServiceImplTest {
     badResources = new ArrayList<>();
     badResources.add(badResource);
 
+    dataflowVO = new DataFlowVO();
 
     MockitoAnnotations.openMocks(this);
   }
@@ -133,7 +140,7 @@ public class DataFlowWebLinkServiceImplTest {
    * Gets the web link.
    *
    * @return the web link
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test
   public void getWebLink() throws EEAException {
@@ -150,7 +157,7 @@ public class DataFlowWebLinkServiceImplTest {
    * Gets the web link empty.
    *
    * @return the web link empty
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test(expected = EntityNotFoundException.class)
   public void getWebLinkEmpty() throws EEAException {
@@ -314,5 +321,44 @@ public class DataFlowWebLinkServiceImplTest {
     weblinkVO.setId(1L);
     dataflowServiceWebLinkImpl.updateWebLink(weblinkVO);
     Mockito.verify(webLinkRepository, times(1)).findById(1L);
+  }
+
+
+  /**
+   * Gets the all weblinks by dataflow id exception test.
+   *
+   * @return the all weblinks by dataflow id exception test
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void getAllWeblinksByDataflowIdExceptionTest() throws EEAException {
+    try {
+      dataflowServiceWebLinkImpl.getAllWeblinksByDataflowId(null);
+    } catch (EEAException exception) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, exception.getMessage());
+      throw exception;
+    }
+  }
+
+  /**
+   * Gets the all weblinks by dataflow id success test.
+   *
+   * @return the all weblinks by dataflow id success test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllWeblinksByDataflowIdSuccessTest() throws EEAException {
+    List<WeblinkVO> weblinksVOExpected = new ArrayList<>();
+    WeblinkVO weblinkVOaux = new WeblinkVO();
+    weblinkVOaux.setId(1L);
+    weblinksVOExpected.add(weblinkVO);
+    dataflowVO.setWeblinks(weblinksVOExpected);
+    List<Weblink> weblinks = new ArrayList<>();
+    weblinks.add(weblink);
+    dataflow.setWeblinks(weblinks);
+    when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(dataflow));
+    when(dataflowWebLinkMapper.entityToClass(Mockito.any())).thenReturn(weblinkVO);
+    List<WeblinkVO> weblinksVO = dataflowServiceWebLinkImpl.getAllWeblinksByDataflowId(1L);
+    assertEquals(weblinksVO, dataflowVO.getWeblinks());
   }
 }
