@@ -5,6 +5,8 @@ import isNull from 'lodash/isNull';
 import orderBy from 'lodash/orderBy';
 import sortBy from 'lodash/sortBy';
 
+import { config } from 'conf';
+
 import { DataflowRepository } from 'repositories/DataflowRepository';
 
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
@@ -16,22 +18,30 @@ import { DatasetTableField } from 'entities/DatasetTableField';
 import { DatasetTableRecord } from 'entities/DatasetTableRecord';
 
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
+import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 export const DataflowService = {
   getAll: async (accessRoles, contextRoles) => {
     const dataflowsDTO = await DataflowRepository.getAll();
 
-    const dataflows = DataflowUtils.parseDataflowsDTO(dataflowsDTO.data, accessRoles, contextRoles);
+    const dataflows = dataflowsDTO.data.map(dataflowDTO => {
+      dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
+      if (dataflowDTO.status === config.dataflowStatus.OPEN) {
+        dataflowDTO.status = dataflowDTO.releasable ? 'OPEN' : 'CLOSED';
+      }
+      return dataflowDTO;
+    });
 
     return DataflowUtils.parseSortedDataflowListDTO(dataflows);
   },
 
-  getCloneableDataflows: async (accessRoles, contextRoles) => {
+  getCloneableDataflows: async () => {
     const dataflowsDTO = await DataflowRepository.getCloneableDataflows();
-
-    const dataflows = DataflowUtils.parseDataflowsDTO(dataflowsDTO.data, accessRoles, contextRoles);
-
-    return DataflowUtils.parseSortedDataflowListDTO(dataflows);
+    return dataflowsDTO.data.map(dataflow => {
+      dataflow.obligationTitle = dataflow.obligation?.oblTitle;
+      dataflow.legalInstrument = dataflow.obligation?.legalInstrument?.sourceAlias;
+      return dataflow;
+    });
   },
 
   create: async (name, description, obligationId, type) =>

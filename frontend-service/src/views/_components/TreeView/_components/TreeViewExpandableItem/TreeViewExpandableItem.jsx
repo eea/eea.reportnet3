@@ -125,10 +125,7 @@ const TreeViewExpandableItem = ({
       </div>
       {isOpen ? <div className={styles.treeChildrenWrapper}>{children}</div> : null}
       {Children.count(children) === 0 && isOpen && !isUndefined(items[0]) ? (
-        <span
-          className={
-            styles.emptyProperty
-          }>{`${resourcesContext.messages['emptyDatasetDesign']} ${items[0].label}`}</span>
+        <span className={styles.emptyProperty}>-</span>
       ) : null}
     </Fragment>
   );

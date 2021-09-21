@@ -27,8 +27,8 @@ export const TableViewSchemas = ({
 
   const fieldTables = {
     expirationDate: resourcesContext.messages['nextReportDue'],
-    obligation: resourcesContext.messages['obligationTitle'],
-    legalInstruments: resourcesContext.messages['legalInstruments']
+    obligation: resourcesContext.messages['obligation'],
+    legalInstrument: resourcesContext.messages['legalInstrument']
   };
 
   const getOrderedFields = dataflows => {
@@ -42,7 +42,7 @@ export const TableViewSchemas = ({
           { id: 'name', index: 0 },
           { id: 'description', index: 1 },
           { id: 'obligationTitle', index: 2 },
-          { id: 'legalInstruments', index: 3 },
+          { id: 'legalInstrument', index: 3 },
           { id: 'status', index: 4 },
           { id: 'expirationDate', index: 5 }
         ];

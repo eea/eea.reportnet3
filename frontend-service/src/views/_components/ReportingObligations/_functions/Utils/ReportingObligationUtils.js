@@ -26,7 +26,7 @@ const parseObligationData = (data, format) => {
   return data.map(data => ({
     id: data.obligationId,
     title: data.title,
-    legalInstrument: !isNil(data.legalInstruments) && data.legalInstruments.alias,
+    legalInstrument: !isNil(data.legalInstrument) && data.legalInstrument.alias,
     dueDate: !isNil(data.expirationDate) ? dayjs(data.expirationDate).format(format) : '-'
   }));
 };

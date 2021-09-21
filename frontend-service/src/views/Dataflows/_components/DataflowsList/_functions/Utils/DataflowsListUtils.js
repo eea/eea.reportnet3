@@ -3,7 +3,7 @@ const parseDataToFilter = (data, pinnedDataflows) => {
     id: dataflow.id,
     description: dataflow.description,
     expirationDate: dataflow.expirationDate,
-    legalInstrument: dataflow.obligation?.legalInstruments?.alias,
+    legalInstrument: dataflow.obligation?.legalInstrument?.alias,
     name: dataflow.name,
     obligationTitle: dataflow.obligation?.title,
     obligationId: dataflow.obligation?.obligationId?.toString(),

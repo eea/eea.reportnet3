@@ -155,21 +155,10 @@ const getTechnicalAcceptanceStatus = (datasetsStatus = []) => {
     return config.datasetStatus.TECHNICALLY_ACCEPTED.label;
 };
 
-const parseDataflowsDTO = (dataflows, accessRoles, contextRoles) => {
-  return dataflows.map(dataflowDTO => {
-    dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
-    if (dataflowDTO.status === config.dataflowStatus.OPEN) {
-      dataflowDTO.status = dataflowDTO.releasable ? 'OPEN' : 'CLOSED';
-    }
-    return dataflowDTO;
-  });
-};
-
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
   parseDataflowDTO,
-  parseDataflowsDTO,
   parseDataflowListDTO,
   parseDataProvidersUserList,
   parsePublicDataflowDTO,

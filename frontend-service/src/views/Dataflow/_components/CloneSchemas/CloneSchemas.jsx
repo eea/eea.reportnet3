@@ -4,7 +4,6 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './CloneSchemas.module.scss';
 
-import { config } from 'conf';
 import { routes } from 'conf/routes';
 
 import { CardsView } from 'views/_components/CardsView';
@@ -69,13 +68,17 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
 
   const onLoadDataflows = async () => {
     try {
+      let data;
       if (isReferenceDataflow) {
-        const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
-        cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: cloneableDataflowList(data) } });
+        data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
       } else {
-        const data = await DataflowService.getCloneableDataflows(userContext.accessRole, userContext.contextRoles);
-        cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: cloneableDataflowList(data) } });
+        data = await DataflowService.getCloneableDataflows();
       }
+
+      cloneSchemasDispatch({
+        type: 'INITIAL_LOAD',
+        payload: { allDataflows: data.filter(dataflow => dataflow.id !== parseInt(dataflowId)) }
+      });
     } catch (error) {
       console.error('CloneSchemas - onLoadDataflows.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
@@ -95,28 +98,6 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
     cloneSchemasDispatch({ type: 'ON_SELECT_DATAFLOW', payload: { id: dataflowData.id, name: dataflowData.name } });
   };
 
-  const cloneableDataflowList = dataflows => {
-    let cloneableDataflows = dataflows.filter(
-      dataflow => dataflow.id !== parseInt(dataflowId) && dataflow.userRole === config.permissions.roles.CUSTODIAN.label
-    );
-
-    let dataflowsToFilter = [];
-
-    cloneableDataflows.forEach(dataflow => {
-      let dataflowToFilter = {};
-      dataflowToFilter.id = dataflow.id;
-      dataflowToFilter.name = dataflow.name;
-      dataflowToFilter.description = dataflow.description;
-      dataflowToFilter.obligationTitle = dataflow.obligation?.title;
-      dataflowToFilter.legalInstruments = dataflow.obligation?.legalInstruments?.alias;
-      dataflowToFilter.status = dataflow.status;
-      dataflowToFilter.expirationDate = dataflow.expirationDate;
-      dataflowsToFilter.push(dataflowToFilter);
-    });
-
-    return dataflowsToFilter;
-  };
-
   const filterOptions = isReferenceDataflow
     ? [
         {
@@ -132,7 +113,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
             { name: 'name' },
             { name: 'description' },
             { name: 'obligationTitle' },
-            { name: 'legalInstruments' }
+            { name: 'legalInstrument' }
           ]
         },
         { type: 'multiselect', properties: [{ name: 'status' }] },
