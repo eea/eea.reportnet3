@@ -55,7 +55,7 @@ class DropdownFilter extends Component {
 
       const selectAllField = {
         checked: true,
-        label: this.context.messages['selectAll'],
+        label: this.context.messages['checkAllFilter'],
         key: 'selectAll'
       };
 

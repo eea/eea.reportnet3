@@ -119,7 +119,7 @@ export const filterReducer = (state, { type, payload }) => {
         tablesIds.push(table.tableId);
       });
       filteredTableData = onFilteringTables(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
-      return { ...state, tableFilter: tablesIds, data: [] };
+      return { ...state, tableFilter: tablesIds, data: {} };
 
     case 'REPORTER_CHECKBOX_ON':
       reporters = state.reporterFilter.filter(reporter => reporter !== payload.label);
@@ -138,7 +138,7 @@ export const filterReducer = (state, { type, payload }) => {
     case 'REPORTER_CHECKBOX_SELECT_ALL_OFF':
       reporters = [...state.reporterFilter, payload.allFilters];
       filteredTableData = onFilteringReporters(state.originalData, state.tableFilter, reporters, state.statusFilter);
-      return { ...state, reporterFilter: reporters[0], data: [] };
+      return { ...state, reporterFilter: reporters[0], data: {} };
 
     case 'STATUS_FILTER_ON':
       status = state.statusFilter.filter(status => status !== payload.msg);

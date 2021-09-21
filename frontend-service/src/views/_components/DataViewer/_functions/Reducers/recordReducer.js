@@ -8,11 +8,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const recordReducer = (state, { type, payload }) => {
   const getRecordIdByIndex = (tableData, recordIdx) => {
-    return tableData
-      .map(e => {
-        return e.recordId;
-      })
-      .indexOf(recordIdx);
+    return tableData.map(e => e.recordId).indexOf(recordIdx);
   };
 
   switch (type) {

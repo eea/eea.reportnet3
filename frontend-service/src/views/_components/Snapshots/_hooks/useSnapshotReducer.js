@@ -2,7 +2,12 @@ import { useContext } from 'react';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const useSnapshotReducer = (setIsSnapshotDialogVisible, onCreateSnapshot, onDeleteSnapshot, onRestoreSnapshot) => {
+export const useSnapshotReducer = (
+  setIsSnapshotDialogVisible,
+  onCreateSnapshot,
+  onDeleteSnapshot,
+  onRestoreSnapshot
+) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const snapshotReducer = (state, { type, payload }) => {
@@ -65,10 +70,11 @@ const useSnapshotReducer = (setIsSnapshotDialogVisible, onCreateSnapshot, onDele
           isConfirmDisabled: false,
           snapShotId: ''
         };
+
       default:
         return state;
     }
   };
+
   return { snapshotReducer };
 };
-export { useSnapshotReducer };
