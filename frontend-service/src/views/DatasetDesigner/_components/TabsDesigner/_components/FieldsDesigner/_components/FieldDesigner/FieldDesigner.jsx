@@ -951,7 +951,7 @@ export const FieldDesigner = ({
               ? resourcesContext.messages['codelistSelection']
               : resourcesContext.messages['multiselectCodelistSelection']
           }
-          onClick={() => onCodelistDropdownSelected()}
+          onClick={onCodelistDropdownSelected}
           style={{ pointerEvents: 'auto' }}
           tooltip={renderTooltipCodelist()}
           tooltipOptions={{ position: 'top' }}
