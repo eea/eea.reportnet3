@@ -183,8 +183,8 @@ public class DataFlowDocumentControllerImplTest {
     try {
       dataFlowDocumentControllerImpl.getAllDocumentsByDataflowId(null);
     } catch (ResponseStatusException exception) {
-      assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-      assertEquals(EEAErrorMessage.DOCUMENT_NOT_FOUND, exception.getReason());
+      assertEquals("bad status", HttpStatus.BAD_REQUEST, exception.getStatus());
+      assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, exception.getReason());
     }
   }
 
