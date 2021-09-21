@@ -73,7 +73,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
         const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: cloneableDataflowList(data) } });
       } else {
-        const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await DataflowService.getCloneableDataflows(userContext.accessRole, userContext.contextRoles);
         cloneSchemasDispatch({ type: 'INITIAL_LOAD', payload: { allDataflows: cloneableDataflowList(data) } });
       }
     } catch (error) {
