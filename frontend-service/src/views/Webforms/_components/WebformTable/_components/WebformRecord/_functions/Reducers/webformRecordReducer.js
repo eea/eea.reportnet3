@@ -16,7 +16,6 @@ export const webformRecordReducer = (state, { type, payload }) => {
       ] = payload.value;
 
       const inmRecord = { ...state.record };
-
       const filteredRecord = inmRecord.elements.filter(field => {
         if (field.type === 'BLOCK') {
           field.elementsRecords.filter(record =>
@@ -36,7 +35,6 @@ export const webformRecordReducer = (state, { type, payload }) => {
           };
 
           const indexOfCorrespondentElementsRecords = getIndexInElementsRecordsArr();
-
           const checkRecordIsNotEmpty = () =>
             !isEmpty(
               field.elementsRecords[indexOfCorrespondentElementsRecords].elements.filter(

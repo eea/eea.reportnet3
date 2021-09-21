@@ -5,20 +5,13 @@ import { LoadingContext } from 'views/_functions/Contexts/LoadingContext';
 const generalLoadingReducer = (state, { type }) => {
   switch (type) {
     case 'SHOW_LOADING':
-      return {
-        ...state,
-        loadingCount: state.loadingCount + 1
-      };
+      return { ...state, loadingCount: state.loadingCount + 1 };
+
     case 'HIDE_LOADING':
-      return {
-        ...state,
-        loadingCount: 0
-      };
+      return { ...state, loadingCount: 0 };
 
     default:
-      return {
-        ...state
-      };
+      return state;
   }
 };
 

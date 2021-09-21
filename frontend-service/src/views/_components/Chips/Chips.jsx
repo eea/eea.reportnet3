@@ -59,7 +59,6 @@ const Chips = ({
           if (checkForDuplicates) setHasErrors(false);
         }
         break;
-
       //enter
       case 9:
       case 13:
@@ -98,7 +97,6 @@ const Chips = ({
         inputElement.current.element.value = '';
         event.preventDefault();
         break;
-
       default:
         if (isMaxedOut()) {
           event.preventDefault();

@@ -190,7 +190,6 @@ export const NationalSystemsField = ({
             value={field.value}
           />
         );
-
       case 'TEXTAREA':
         return (
           <div>
@@ -211,7 +210,6 @@ export const NationalSystemsField = ({
             />
           </div>
         );
-
       case 'CODELIST':
         return (
           <Dropdown
@@ -227,7 +225,6 @@ export const NationalSystemsField = ({
             value={field.value}
           />
         );
-
       case 'DATE':
         return (
           <Calendar
@@ -246,7 +243,6 @@ export const NationalSystemsField = ({
             yearRange="1900:2100"
           />
         );
-
       case 'DATETIME':
         return (
           <Calendar
@@ -263,7 +259,6 @@ export const NationalSystemsField = ({
             yearRange="1900:2100"
           />
         );
-
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
@@ -282,7 +277,6 @@ export const NationalSystemsField = ({
             valuesSeparator=";"
           />
         );
-
       case 'ATTACHMENT':
         return (
           <div className={styles.attachmentWrapper}>
@@ -319,7 +313,6 @@ export const NationalSystemsField = ({
             />
           </div>
         );
-
       default:
         break;
     }
