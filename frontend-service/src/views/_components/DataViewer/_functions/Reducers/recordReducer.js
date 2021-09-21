@@ -17,12 +17,8 @@ export const recordReducer = (state, { type, payload }) => {
 
   switch (type) {
     case 'CANCEL_SAVE_MAP_NEW_POINT':
-      return {
-        ...state,
-        isMapOpen: false,
-        newPoint: '',
-        newPointCRS: 'EPSG:4326'
-      };
+      return { ...state, isMapOpen: false, newPoint: '', newPointCRS: 'EPSG:4326' };
+
     case 'COPY_RECORDS':
       return {
         ...state,
@@ -142,11 +138,13 @@ export const recordReducer = (state, { type, payload }) => {
         mapGeoJson: payload.coordinates,
         selectedMapCells: payload.mapCells
       };
+
     case 'SET_RECORDS_PER_PAGE':
       return { ...state, recordsPerPage: payload };
 
     case 'SET_TOTAL':
       return { ...state, totalRecords: payload };
+
     case 'SET_FIELD_IDS':
       return {
         ...state,
@@ -162,19 +160,16 @@ export const recordReducer = (state, { type, payload }) => {
       parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(TextUtils.splitByChar(payload));
       parsedInmMapGeoJson.properties.srid = state.newPointCRS;
       return { ...state, isMapOpen: false, mapGeoJson: JSON.stringify(parsedInmMapGeoJson), newPoint: '' };
+
     case 'SET_MAP_NEW_POINT':
-      return {
-        ...state,
-        newPoint: `${payload.coordinates[0]}, ${payload.coordinates[1]}`,
-        newPointCRS: payload.crs
-      };
+      return { ...state, newPoint: `${payload.coordinates[0]}, ${payload.coordinates[1]}`, newPointCRS: payload.crs };
+
     case 'SET_MAP_CRS':
-      return {
-        ...state,
-        crs: payload
-      };
+      return { ...state, crs: payload };
+
     case 'TOGGLE_MAP_VISIBILITY':
       return { ...state, isMapOpen: payload };
+
     default:
       return state;
   }

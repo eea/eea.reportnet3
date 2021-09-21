@@ -21,7 +21,12 @@ export const dataflowReducer = (state, { type, payload }) => {
     }
 
     case 'LOAD_PERMISSIONS': {
-      return { ...state, isAdmin: payload.isAdmin, isCustodian: payload.isCustodian, isCustodianUser: payload.isCustodianUser };
+      return {
+        ...state,
+        isAdmin: payload.isAdmin,
+        isCustodian: payload.isCustodian,
+        isCustodianUser: payload.isCustodianUser
+      };
     }
 
     case 'ON_EDIT_DATAFLOW':
@@ -37,10 +42,7 @@ export const dataflowReducer = (state, { type, payload }) => {
       return { ...state, refresh: !state.refresh };
 
     case 'SET_IS_ADMIN_ASSIGNED_DATAFLOW':
-      return {
-        ...state,
-        isAdminAssignedDataflow: payload.isAdminAssignedDataflow
-      };
+      return { ...state, isAdminAssignedDataflow: payload.isAdminAssignedDataflow };
 
     case 'SET_IS_CREATING_REFERENCE_DATASETS':
       return { ...state, isCreatingReferenceDatasets: payload.isCreatingReferenceDatasets };

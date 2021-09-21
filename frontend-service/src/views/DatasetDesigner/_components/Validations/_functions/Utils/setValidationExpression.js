@@ -8,7 +8,6 @@ export const setValidationExpression = (expressionId, field, expressions) => {
     case 'field2':
       targetExpression[field.key] = field.value;
       break;
-
     case 'expressionValue':
       const { value } = field;
       if (value === null) {
@@ -17,13 +16,11 @@ export const setValidationExpression = (expressionId, field, expressions) => {
         targetExpression[field.key] = value;
       }
       break;
-
     case 'operatorType':
       targetExpression[field.key] = field.value;
       targetExpression.operatorValue = '';
       targetExpression.expressionValue = '';
       break;
-
     default:
       targetExpression[field.key] = field.value;
       break;

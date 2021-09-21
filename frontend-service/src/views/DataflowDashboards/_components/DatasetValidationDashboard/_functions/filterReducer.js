@@ -96,40 +96,22 @@ export const filterReducer = (state, { type, payload }) => {
   let tablesIds = [];
   switch (type) {
     case 'INIT_DATA':
-      return {
-        ...state,
-        originalData: payload,
-        data: payload
-      };
+      return { ...state, originalData: payload, data: payload };
+
     case 'TABLE_CHECKBOX_ON':
       tablesIds = !isUndefined(state.tableFilter) ? state.tableFilter.filter(table => table !== payload.tableId) : [];
       filteredTableData = onFilteringData(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
-
-      return {
-        ...state,
-        tableFilter: tablesIds,
-        data: filteredTableData
-      };
+      return { ...state, tableFilter: tablesIds, data: filteredTableData };
 
     case 'TABLE_CHECKBOX_OFF':
       tablesIds = [...state.tableFilter, payload.tableId];
       filteredTableData = onFilteringData(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
-
-      return {
-        ...state,
-        tableFilter: tablesIds,
-        data: filteredTableData
-      };
+      return { ...state, tableFilter: tablesIds, data: filteredTableData };
 
     case 'TABLE_CHECKBOX_SELECT_ALL_ON':
       tablesIds = [];
       filteredTableData = onFilteringData(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
-
-      return {
-        ...state,
-        tableFilter: [],
-        data: filteredTableData
-      };
+      return { ...state, tableFilter: [], data: filteredTableData };
 
     case 'TABLE_CHECKBOX_SELECT_ALL_OFF':
       tablesIds = [];
@@ -137,70 +119,36 @@ export const filterReducer = (state, { type, payload }) => {
         tablesIds.push(table.tableId);
       });
       filteredTableData = onFilteringTables(state.originalData, tablesIds, state.reporterFilter, state.statusFilter);
-
-      return {
-        ...state,
-        tableFilter: tablesIds,
-        data: []
-      };
+      return { ...state, tableFilter: tablesIds, data: [] };
 
     case 'REPORTER_CHECKBOX_ON':
       reporters = state.reporterFilter.filter(reporter => reporter !== payload.label);
       filteredTableData = onFilteringReporters(state.originalData, state.tableFilter, reporters, state.statusFilter);
-
-      return {
-        ...state,
-        reporterFilter: reporters,
-        data: filteredTableData
-      };
+      return { ...state, reporterFilter: reporters, data: filteredTableData };
 
     case 'REPORTER_CHECKBOX_OFF':
       reporters = [...state.reporterFilter, payload.label];
       filteredTableData = onFilteringReporters(state.originalData, state.tableFilter, reporters, state.statusFilter);
-
-      return {
-        ...state,
-        reporterFilter: reporters,
-        data: filteredTableData
-      };
+      return { ...state, reporterFilter: reporters, data: filteredTableData };
 
     case 'REPORTER_CHECKBOX_SELECT_ALL_ON':
       filteredTableData = onFilteringReporters(state.originalData, state.tableFilter, reporters, state.statusFilter);
-
-      return {
-        ...state,
-        reporterFilter: [],
-        data: filteredTableData
-      };
+      return { ...state, reporterFilter: [], data: filteredTableData };
 
     case 'REPORTER_CHECKBOX_SELECT_ALL_OFF':
       reporters = [...state.reporterFilter, payload.allFilters];
       filteredTableData = onFilteringReporters(state.originalData, state.tableFilter, reporters, state.statusFilter);
-
-      return {
-        ...state,
-        reporterFilter: reporters[0],
-        data: []
-      };
+      return { ...state, reporterFilter: reporters[0], data: [] };
 
     case 'STATUS_FILTER_ON':
       status = state.statusFilter.filter(status => status !== payload.msg);
       filteredTableData = onFilteringStatus(state.originalData, status, state.reporterFilter, state.tableFilter);
-
-      return {
-        ...state,
-        statusFilter: status,
-        data: filteredTableData
-      };
+      return { ...state, statusFilter: status, data: filteredTableData };
 
     case 'STATUS_FILTER_OFF':
       status = [...state.statusFilter, payload.msg];
       filteredTableData = onFilteringStatus(state.originalData, status, state.reporterFilter, state.tableFilter);
-      return {
-        ...state,
-        statusFilter: status,
-        data: filteredTableData
-      };
+      return { ...state, statusFilter: status, data: filteredTableData };
 
     default:
       return state;

@@ -34,29 +34,18 @@ const useStatusFilter = dataArray => {
     let filteredStatusData;
     switch (type) {
       case 'INIT_DATA':
-        return {
-          ...state,
-          originalData: payload,
-          dashboardData: payload
-        };
+        return { ...state, originalData: payload, dashboardData: payload };
 
       case 'CHECKBOX_ON':
         payloadLabelsArr = state.filterStatus.filter(status => status !== payload.label);
         filteredStatusData = onFilteringData(state.originalData, payloadLabelsArr);
-        return {
-          ...state,
-          filterStatus: payloadLabelsArr,
-          dashboardData: filteredStatusData
-        };
+        return { ...state, filterStatus: payloadLabelsArr, dashboardData: filteredStatusData };
 
       case 'CHECKBOX_OFF':
         payloadLabelsArr = [...state.filterStatus, payload.label];
         filteredStatusData = onFilteringData(state.originalData, payloadLabelsArr);
-        return {
-          ...state,
-          filterStatus: payloadLabelsArr,
-          dashboardData: filteredStatusData
-        };
+        return { ...state, filterStatus: payloadLabelsArr, dashboardData: filteredStatusData };
+
       default:
         return state;
     }

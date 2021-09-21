@@ -202,13 +202,10 @@ export const ShareRights = ({
       switch (method) {
         case methodTypes.DELETE:
           return await UserRightService.deleteReporter(shareRightsState.userRightToDelete, dataflowId, dataProvider);
-
         case methodTypes.GET_ALL:
           return await UserRightService.getReporters(dataflowId, dataProvider);
-
         case methodTypes.UPDATE:
           return await UserRightService.updateReporter(userRight, dataflowId, dataProvider);
-
         default:
           break;
       }
@@ -218,13 +215,10 @@ export const ShareRights = ({
       switch (method) {
         case methodTypes.DELETE:
           return await UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
-
         case methodTypes.GET_ALL:
           return await UserRightService.getRequesters(dataflowId);
-
         case methodTypes.UPDATE:
           return await UserRightService.updateRequester(userRight, dataflowId);
-
         default:
           break;
       }
