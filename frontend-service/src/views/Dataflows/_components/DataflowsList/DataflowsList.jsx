@@ -5,6 +5,8 @@ import isEmpty from 'lodash/isEmpty';
 import orderBy from 'lodash/orderBy';
 import pull from 'lodash/pull';
 
+import { config } from 'conf';
+
 import styles from './DataflowsList.module.scss';
 
 import { DataflowsItem } from './_components/DataflowsItem';
@@ -183,16 +185,16 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
 
   const renderDataflowItem = dataflow => {
     switch (visibleTab) {
-      case 'reporting':
+      case config.dataflowType.REPORTING.key:
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
 
-      case 'business':
+      case config.dataflowType.BUSINESS.key:
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
 
-      case 'citizenScience':
+      case config.dataflowType.CITIZEN_SCIENCE.key:
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
 
-      case 'reference':
+      case config.dataflowType.REFERENCE.key:
         return <ReferencedDataflowItem dataflow={dataflow} reorderDataflows={reorderDataflows} />;
 
       default:
