@@ -101,6 +101,14 @@ public interface DataFlowController {
   List<DataFlowVO> findCitizenScienceDataflows();
 
   /**
+   * Find dataflows for clone.
+   *
+   * @return the list
+   */
+  @GetMapping(value = "/cloneableDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataFlowVO> findCloneableDataflows();
+
+  /**
    * Adds the contributor.
    *
    * @param dataflowId the dataflow id

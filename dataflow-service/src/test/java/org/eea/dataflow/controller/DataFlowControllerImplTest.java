@@ -872,7 +872,40 @@ public class DataFlowControllerImplTest {
     assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findCitizenScienceDataflows());
   }
 
+  @Test
+  public void findDataflowsForCloneTest() throws EEAException {
 
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+
+    when(authentication.getDetails()).thenReturn(details);
+    when(dataflowService.getDataflows(Mockito.any(), Mockito.any(TypeDataflowEnum.class)))
+        .thenReturn(new ArrayList<>());
+    assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findCloneableDataflows());
+  }
+
+  @Test
+  public void findDataflowsForCloneExceptionTest() throws EEAException {
+
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+
+    when(authentication.getDetails()).thenReturn(details);
+
+    doThrow(new EEAException()).when(dataflowService).getDataflows(Mockito.any(),
+        Mockito.any(TypeDataflowEnum.class));
+    assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findCloneableDataflows());
+  }
 
   @Test
   public void accessEntityTest() {

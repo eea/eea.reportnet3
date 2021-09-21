@@ -153,6 +153,24 @@ public interface DataflowRepository
       @Param("ids") List<Long> ids);
 
   /**
+   * Find dataflows except reference in order by status desc creation date desc.
+   *
+   * @return the list
+   */
+  @Query("select df from Dataflow df where df.type!='REFERENCE' order by status, creationDate desc")
+  List<Dataflow> findDataflowsExceptReferenceInOrderByStatusDescCreationDateDesc();
+
+  /**
+   * Find dataflows except reference and id in order by status desc creation date desc.
+   *
+   * @param ids the ids
+   * @return the list
+   */
+  @Query("select df from Dataflow df where df.type!='REFERENCE' and df.id IN :ids order by status, creationDate desc")
+  List<Dataflow> findDataflowsExceptReferenceAndIdInOrderByStatusDescCreationDateDesc(
+      @Param("ids") List<Long> ids);
+
+  /**
    * Gets the datasets status.
    *
    * @param datasetIds the dataset ids
