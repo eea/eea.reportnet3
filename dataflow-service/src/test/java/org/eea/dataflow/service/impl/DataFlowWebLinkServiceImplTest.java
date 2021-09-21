@@ -332,7 +332,12 @@ public class DataFlowWebLinkServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void getAllWeblinksByDataflowIdExceptionTest() throws EEAException {
-    dataflowServiceWebLinkImpl.getAllWeblinksByDataflowId(null);
+    try {
+      dataflowServiceWebLinkImpl.getAllWeblinksByDataflowId(null);
+    } catch (EEAException exception) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, exception.getMessage());
+      throw exception;
+    }
   }
 
   /**

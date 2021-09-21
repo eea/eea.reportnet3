@@ -208,7 +208,12 @@ public class DataFlowDocumentServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void getAllDocumentsByDataflowIdExceptionTest() throws EEAException {
-    dataflowServiceImpl.getAllDocumentsByDataflowId(null);
+    try {
+      dataflowServiceImpl.getAllDocumentsByDataflowId(null);
+    } catch (EEAException exception) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, exception.getMessage());
+      throw exception;
+    }
   }
 
   /**
