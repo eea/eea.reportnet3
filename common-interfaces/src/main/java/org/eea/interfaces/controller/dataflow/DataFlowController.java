@@ -105,8 +105,8 @@ public interface DataFlowController {
    *
    * @return the list
    */
-  @GetMapping(value = "/getDataflowsForClone", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findDataflowsForClone();
+  @GetMapping(value = "/getCloneableDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataFlowVO> findCloneableDataflows();
 
   /**
    * Adds the contributor.

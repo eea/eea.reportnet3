@@ -255,11 +255,11 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/getDataflowsForClone", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/getCloneableDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Dataflows for clone for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       responseContainer = "List")
-  public List<DataFlowVO> findDataflowsForClone() {
+  public List<DataFlowVO> findCloneableDataflows() {
     List<DataFlowVO> dataflows = new ArrayList<>();
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
