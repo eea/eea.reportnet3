@@ -989,7 +989,7 @@ export const FieldDesigner = ({
               ? '...'
               : `${fieldDesignerState.fieldLinkValue.name}`
           }
-          onClick={() => onLinkDropdownSelected()}
+          onClick={onLinkDropdownSelected}
           style={{ pointerEvents: 'auto' }}
           tooltip={renderTooltipLink()}
           tooltipOptions={{ position: 'top' }}
@@ -1014,7 +1014,7 @@ export const FieldDesigner = ({
           } - ${resourcesContext.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
             resourcesContext.messages['MB']
           }`}
-          onClick={() => onAttachmentDropdownSelected()}
+          onClick={onAttachmentDropdownSelected}
           style={{ pointerEvents: 'auto' }}
           tooltip={renderTooltipAttachment()}
           tooltipOptions={{ position: 'top' }}
