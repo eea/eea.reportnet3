@@ -218,8 +218,6 @@ const getFilter = type => {
       return 'email';
     case 'PHONE':
       return 'phone';
-    // case 'URL':
-    //   return 'url';
     default:
       return 'any';
   }

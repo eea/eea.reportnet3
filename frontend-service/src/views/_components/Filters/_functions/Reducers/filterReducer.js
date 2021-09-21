@@ -25,10 +25,7 @@ export const filterReducer = (state, { type, payload }) => {
       };
 
     case 'FILTERED':
-      return {
-        ...state,
-        filtered: payload.filteredStateValue
-      };
+      return { ...state, filtered: payload.filteredStateValue };
 
     case 'FILTER_DATA':
       return {
@@ -39,10 +36,7 @@ export const filterReducer = (state, { type, payload }) => {
       };
 
     case 'FILTERED_SEARCHED_STATE':
-      return {
-        ...state,
-        filteredSearched: payload.filteredSearchedValue
-      };
+      return { ...state, filteredSearched: payload.filteredSearchedValue };
 
     case 'INITIAL_STATE':
       const getFilterBy = () => {
@@ -99,10 +93,7 @@ export const filterReducer = (state, { type, payload }) => {
       };
 
     case 'SET_CLEARED_FILTERS':
-      return {
-        ...state,
-        clearedFilters: payload
-      };
+      return { ...state, clearedFilters: payload };
 
     case 'TOGGLE_MATCH_MODE':
       return { ...state, matchMode: payload };

@@ -47,8 +47,6 @@ export const Filters = ({
   validations,
   validationsAllTypesFilters
 }) => {
-  const isFrontendFilter = isNil(sendData);
-
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -73,11 +71,7 @@ export const Filters = ({
   });
 
   useEffect(() => {
-    getInitialState();
-  }, []);
-
-  useEffect(() => {
-    if (isFrontendFilter) getInitialState();
+    if (isNil(sendData)) getInitialState();
   }, [data]);
 
   useEffect(() => {
@@ -563,21 +557,16 @@ export const Filters = ({
       switch (filterOption.type) {
         case 'input':
           return filterOption.properties.map(property => renderInputFilter(property.name));
-
         case 'multiselect':
           return filterOption.properties.map(property =>
             renderMultiselectSelectFilter(property.name, property.showInput, property.label)
           );
-
         case 'dropdown':
           return filterOption.properties.map(property => renderDropdown(property.name));
-
         case 'checkbox':
           return filterOption.properties.map((property, i) => renderCheckboxFilter(property.name, property.label, i));
-
         case 'date':
           return filterOption.properties.map(property => renderCalendarFilter(property.name));
-
         default:
           return '';
       }

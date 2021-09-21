@@ -10,10 +10,8 @@ const getObjectiveOptions = value => {
         'Improved management of organic soils',
         'Other agriculture'
       ];
-
     case 'Cross-sectoral':
       return [];
-
     case 'Energy consumption':
       return [
         'Efficiency improvements of buildings',
@@ -23,7 +21,6 @@ const getObjectiveOptions = value => {
         'Demand management/reduction',
         'Other energy consumption'
       ];
-
     case 'Energy supply':
       return [
         'Increase in renewable energy sources in the electricity sector',
@@ -36,7 +33,6 @@ const getObjectiveOptions = value => {
         'Control of fugitive emissions from energy production',
         'Other energy supply'
       ];
-
     case 'Industrial processes':
       return [
         'Installation if abatement technologies',
@@ -45,7 +41,6 @@ const getObjectiveOptions = value => {
         'Replacement of fluorinated gases by gases with a lower GWP value',
         'Other industrial processes'
       ];
-
     case 'Land use land-use change and forestry':
       return [
         'Afforestation and reforestation',
@@ -60,10 +55,8 @@ const getObjectiveOptions = value => {
         'Restoration of degraded lands',
         'Other land use/land-use and forestry'
       ];
-
     case 'Other sectors':
       return ['Other objectives'];
-
     case 'Transport':
       return [
         'Efficiency improvements of vehicles',
@@ -76,7 +69,6 @@ const getObjectiveOptions = value => {
         'Reduce emissions from international air or maritime transport',
         'Other transport'
       ];
-
     case 'Waste management/waste':
       return [
         'Demand management/reduction',
@@ -89,7 +81,6 @@ const getObjectiveOptions = value => {
         'Reduced landfilling',
         'Other waste'
       ];
-
     default:
       return [];
   }

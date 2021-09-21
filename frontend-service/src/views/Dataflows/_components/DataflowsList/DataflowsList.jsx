@@ -187,16 +187,12 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
     switch (visibleTab) {
       case config.dataflowType.REPORTING.key:
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
-
       case config.dataflowType.BUSINESS.key:
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
-
       case config.dataflowType.CITIZEN_SCIENCE.key:
         return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
-
       case config.dataflowType.REFERENCE.key:
         return <ReferencedDataflowItem dataflow={dataflow} reorderDataflows={reorderDataflows} />;
-
       default:
         break;
     }

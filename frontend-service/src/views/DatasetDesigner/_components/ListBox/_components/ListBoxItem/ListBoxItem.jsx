@@ -42,26 +42,21 @@ const ListBoxItem = ({
         if (nextItem) {
           nextItem.focus();
         }
-
         event.preventDefault();
         break;
-
       //up
       case 38:
         var prevItem = findPrevItem(item);
         if (prevItem) {
           prevItem.focus();
         }
-
         event.preventDefault();
         break;
-
       //enter
       case 13:
         onClickListBoxItem(event);
         event.preventDefault();
         break;
-
       default:
         break;
     }
@@ -69,14 +64,12 @@ const ListBoxItem = ({
 
   const findNextItem = item => {
     let nextItem = item.nextElementSibling;
-
     if (nextItem) return DomHandler.hasClass(nextItem, 'p-disabled') ? findNextItem(nextItem) : nextItem;
     else return null;
   };
 
   const findPrevItem = item => {
     let prevItem = item.previousElementSibling;
-
     if (prevItem) return DomHandler.hasClass(prevItem, 'p-disabled') ? findPrevItem(prevItem) : prevItem;
     else return null;
   };
