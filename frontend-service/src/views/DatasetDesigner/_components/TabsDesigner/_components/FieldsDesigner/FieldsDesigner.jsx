@@ -955,7 +955,7 @@ export const FieldsDesigner = ({
           </label>
           <label>{resourcesContext.messages['newFieldDescriptionPlaceHolder']}</label>
           <label>{resourcesContext.messages['newFieldTypePlaceHolder']}</label>
-          <label className={isCodelistOrLink && styles.withCodelistOrLink}></label>
+          <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}></label>
           <label></label>
           <label></label>
           <label>
