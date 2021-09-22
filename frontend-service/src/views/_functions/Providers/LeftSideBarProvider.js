@@ -7,26 +7,17 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 const leftSideBarReducer = (state, { type, payload }) => {
   switch (type) {
     case 'ADD_HELP_STEPS':
-      return {
-        ...state,
-        helpTitle: payload.helpTitle,
-        steps: payload.steps
-      };
+      return { ...state, helpTitle: payload.helpTitle, steps: payload.steps };
+
     case 'ADD_MODEL':
-      return {
-        ...state,
-        models: payload
-      };
+      return { ...state, models: payload };
+
     case 'REMOVE_MODEL':
-      return {
-        ...state,
-        models: []
-      };
+      return { ...state, models: [] };
+
     case 'SET_MENU_STATE':
-      return {
-        ...state,
-        isLeftSideBarOpened: payload.isLeftSideBarOpened
-      };
+      return { ...state, isLeftSideBarOpened: payload.isLeftSideBarOpened };
+
     default:
       return state;
   }

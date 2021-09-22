@@ -86,8 +86,9 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {
     dataflow.users.forEach((user, usersIndex) => {
       user.roles.forEach((role, roleIndex) => {
-        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] =
-          UserRoleUtils.getUserRoleLabel(role);
+        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(
+          role
+        );
       });
     });
   });
@@ -104,7 +105,7 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   return usersList;
 };
 
-const parseCountriesUserList = usersListDTO => {
+const parseDataProvidersUserList = usersListDTO => {
   usersListDTO.forEach((user, usersIndex) => {
     user.roles.forEach((role, roleIndex) => {
       usersListDTO[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(role);
@@ -112,16 +113,18 @@ const parseCountriesUserList = usersListDTO => {
   });
   const usersList = [];
   usersListDTO.forEach(parsedUser => {
-    const { country, email, roles } = parsedUser;
+    const { dataProviderName, email, roles } = parsedUser;
+
     roles.forEach(role => {
-      usersList.push({ country, email, role });
+      usersList.push({ dataProviderName, email, role });
     });
   });
   usersList.forEach(user => {
-    if (isNil(user.country)) {
-      user.country = '';
+    if (isNil(user.dataProviderName)) {
+      user.dataProviderName = '';
     }
   });
+
   return usersList;
 };
 
@@ -155,9 +158,9 @@ const getTechnicalAcceptanceStatus = (datasetsStatus = []) => {
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
-  parseCountriesUserList,
   parseDataflowDTO,
   parseDataflowListDTO,
+  parseDataProvidersUserList,
   parsePublicDataflowDTO,
   parsePublicDataflowListDTO,
   parseSortedDataflowListDTO,

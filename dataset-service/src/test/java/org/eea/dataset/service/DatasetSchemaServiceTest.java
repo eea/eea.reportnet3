@@ -2740,4 +2740,68 @@ public class DatasetSchemaServiceTest {
     Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
   }
 
+  /**
+   * Test import field schemas save code list not empty.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void testImportFieldSchemasSaveCodeListNotEmpty() throws EEAException, IOException {
+
+    String csv =
+        "Field name,PK,Required,ReadOnly,Field description,Field type,Extra information\r\n"
+            + "countryCode,false,false,false,descripcion1,TEXT,field1;field2;field3";
+    MultipartFile multipartFile =
+        new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", csv.getBytes());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setIdDataFlow(1L);
+    datasetSchema.setIdDataSetSchema(new ObjectId());
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.setIdTableSchema(new ObjectId());
+    tableSchema.setNameTableSchema("Tabla1");
+    RecordSchema recordSchema = new RecordSchema();
+    FieldSchema fieldSchema2 = new FieldSchema();
+    fieldSchema2.setHeaderName("countryCode");
+    fieldSchema2.setIdFieldSchema(new ObjectId());
+    fieldSchema2.setType(DataType.TEXT);
+    recordSchema.setFieldSchema(Arrays.asList(fieldSchema2));
+    tableSchema.setRecordSchema(recordSchema);
+    datasetSchema.setTableSchemas(Arrays.asList(tableSchema));
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
+    ReflectionTestUtils.setField(dataSchemaServiceImpl, "delimiter", ',');
+
+    Mockito.when(fileCommon.isDesignDataset(Mockito.anyLong())).thenReturn(true);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setId(1L);
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
+
+    List<FieldSchema> fields = new ArrayList<>();
+    fields.add(fieldSchema2);
+    Mockito.when(fileCommon.findFieldSchemas(Mockito.anyString(), Mockito.any(DataSetSchema.class)))
+        .thenReturn(fields);
+
+    FieldSchemaVO fieldVO = new FieldSchemaVO();
+    fieldVO.setId(new ObjectId().toString());
+    Mockito.when(fieldSchemaNoRulesMapper.entityToClass(Mockito.any())).thenReturn(fieldVO);
+    PkCatalogueSchema catalogue = new PkCatalogueSchema();
+    catalogue.setIdPk(new ObjectId());
+    catalogue.setReferenced(Arrays.asList(new ObjectId()));
+
+
+    Mockito.when(schemasRepository.createFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+    Mockito.when(schemasRepository.deleteFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
+
+    dataSchemaServiceImpl.importFieldsSchema(new ObjectId().toString(), new ObjectId().toString(),
+        1L, multipartFile.getInputStream(), true);
+    Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
+  }
+
 }

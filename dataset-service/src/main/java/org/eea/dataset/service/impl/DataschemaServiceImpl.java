@@ -2933,7 +2933,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           fieldSchema.setDescription(values.get(4));
           fieldSchema.setType(DataType.valueOf(values.get(5)));
           if (values.get(6) != null) {
-            String[] codelist = values.get(6).split(";");
+            String[] codelist = new String[values.get(6).length()];
+            if (Boolean.FALSE.equals(values.get(6).equals(""))) {
+              codelist = values.get(6).split(";");
+            }
             fieldSchema.setCodelistItems(codelist);
           }
         } catch (Exception e) {

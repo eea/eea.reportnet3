@@ -10,7 +10,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 export const IfThenClause = ({
   componentName,
   creationFormState,
-  isBusinessDataflow,
+  dataflowType,
   onAddNewExpressionIf,
   onAddNewExpressionThen,
   onExpressionIfDelete,
@@ -35,9 +35,9 @@ export const IfThenClause = ({
           {creationFormState.candidateRule.expressionsIf &&
             creationFormState.candidateRule.expressionsIf.map((expression, i) => (
               <ValidationExpressionSelector
+                dataflowType={dataflowType}
                 expressionType={creationFormState.candidateRule.expressionType}
                 expressionValues={expression}
-                isBusinessDataflow={isBusinessDataflow}
                 isDisabled={creationFormState.areRulesDisabledIf}
                 key={expression.expressionId}
                 onExpressionDelete={onExpressionIfDelete}
@@ -81,9 +81,9 @@ export const IfThenClause = ({
           {creationFormState.candidateRule.expressionsThen &&
             creationFormState.candidateRule.expressionsThen.map((expression, i) => (
               <ValidationExpressionSelector
+                dataflowType={dataflowType}
                 expressionType={creationFormState.candidateRule.expressionType}
                 expressionValues={expression}
-                isBusinessDataflow={isBusinessDataflow}
                 isDisabled={creationFormState.areRulesDisabledThen}
                 key={expression.expressionId}
                 onExpressionDelete={onExpressionThenDelete}

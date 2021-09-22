@@ -71,7 +71,7 @@ export const Filters = ({
   });
 
   useEffect(() => {
-    getInitialState();
+    if (isNil(sendData)) getInitialState();
   }, [data]);
 
   useEffect(() => {
@@ -455,7 +455,7 @@ export const Filters = ({
     </span>
   );
 
-  const renderInputFilter = property => (
+  const renderInputFilter = (property, label = '') => (
     <span className={styles.input} key={property}>
       {renderOrderFilter(property)}
       <span className={`p-float-label ${styles.label}`}>
@@ -474,7 +474,7 @@ export const Filters = ({
           />
         )}
         <label className={styles.label} htmlFor={`${property}_input`}>
-          {resourcesContext.messages[property]}
+          {isEmpty(label) ? resourcesContext.messages[property] : label}
         </label>
       </span>
     </span>
@@ -556,22 +556,17 @@ export const Filters = ({
     return options.map(filterOption => {
       switch (filterOption.type) {
         case 'input':
-          return filterOption.properties.map(property => renderInputFilter(property.name));
-
+          return filterOption.properties.map(property => renderInputFilter(property.name, property.label));
         case 'multiselect':
           return filterOption.properties.map(property =>
             renderMultiselectSelectFilter(property.name, property.showInput, property.label)
           );
-
         case 'dropdown':
           return filterOption.properties.map(property => renderDropdown(property.name));
-
         case 'checkbox':
           return filterOption.properties.map((property, i) => renderCheckboxFilter(property.name, property.label, i));
-
         case 'date':
           return filterOption.properties.map(property => renderCalendarFilter(property.name));
-
         default:
           return '';
       }

@@ -8,10 +8,8 @@ import defaultAvatar from 'views/_assets/images/avatars/defaultAvatar.png';
 
 import styles from './UserImage.module.scss';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'views/_components/Icon';
 import ReactTooltip from 'react-tooltip';
 
@@ -126,7 +124,6 @@ const UserImage = () => {
           data-event="click"
           data-for="addAvatar"
           data-tip
-          icon={<FontAwesomeIcon className={styles.userDataIcon} icon={AwesomeIcons('user-profile')} />}
           ref={uploadedImage}
           src={isEmpty(userContext.userProps.userImage) ? defaultAvatar : null}
         />

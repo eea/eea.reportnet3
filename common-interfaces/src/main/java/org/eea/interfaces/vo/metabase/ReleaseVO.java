@@ -35,6 +35,6 @@ public class ReleaseVO implements Serializable {
   /** The dataset name. */
   private String datasetName;
 
-  /** The country code. */
-  private String datasetProviderCode;
+  /** The data provider code. */
+  private String dataProviderCode;
 }

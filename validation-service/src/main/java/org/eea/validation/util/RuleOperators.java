@@ -105,6 +105,9 @@ public class RuleOperators {
     if (regex.contains("{%R3_COMPANY_CODE%}")) {
       regex = regex.replace("{%R3_COMPANY_CODE%}", countryCode);
     }
+    if (regex.contains("{%R3_ORGANIZATION_CODE%}")) {
+      regex = regex.replace("{%R3_ORGANIZATION_CODE%}", countryCode);
+    }
     return regex;
   }
 

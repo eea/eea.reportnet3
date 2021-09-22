@@ -286,6 +286,14 @@ public class DataflowServiceImpl implements DataflowService {
           dataflows.addAll(dataflowRepository
               .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT));
           break;
+        default:
+          // case for type ALL but except REFERENCE type dataflow
+          dataflows = userAdmin
+              ? dataflowRepository.findDataflowsExceptReferenceInOrderByStatusDescCreationDateDesc()
+              : dataflowRepository
+                  .findDataflowsExceptReferenceAndIdInOrderByStatusDescCreationDateDesc(
+                      idsResources);
+          break;
       }
 
 
@@ -685,11 +693,14 @@ public class DataflowServiceImpl implements DataflowService {
     if (null == dataflowPublicVO) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    dataflowPublicVO.setReportingDatasets(
-        datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflowId));
 
-    dataflowPublicVO.setReferenceDatasets(
-        referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflowId));
+    if (!TypeDataflowEnum.BUSINESS.equals(dataflowPublicVO.getType())) {
+      dataflowPublicVO.setReportingDatasets(
+          datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflowId));
+
+      dataflowPublicVO.setReferenceDatasets(
+          referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflowId));
+    }
 
     Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
     if (dataflow != null) {
@@ -992,7 +1003,7 @@ public class DataflowServiceImpl implements DataflowService {
   private void deleteDocuments(Long idDataflow, DataFlowVO dataflowVO) throws Exception {
     for (DocumentVO document : dataflowVO.getDocuments()) {
       try {
-        documentControllerZuul.deleteDocument(document.getId(), Boolean.TRUE);
+        documentControllerZuul.deleteDocument(document.getId(), dataflowVO.getId(), Boolean.TRUE);
       } catch (EEAException e) {
         LOG.error("Error deleting document with id {}", document.getId());
         throw new EEAException(new StringBuilder().append("Error Deleting document ")

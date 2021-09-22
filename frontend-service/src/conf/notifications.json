@@ -292,7 +292,14 @@
           }
         },
         {
-          "key": "VALIDATE_DATA_BY_ID_ERROR",
+          "key": "VALIDATE_DESIGN_DATA_ERROR",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "VALIDATE_REPORTING_DATA_ERROR",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]

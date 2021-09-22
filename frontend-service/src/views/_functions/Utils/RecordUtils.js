@@ -150,7 +150,7 @@ const getCodelistItemsInSingleColumn = column => {
 
 const getCodelistItemsWithEmptyOption = (column, noneText) => {
   const codelistItems = column.codelistItems
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+    ?.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
     .map(codelistItem => {
       return { itemType: codelistItem, value: codelistItem };
     });
@@ -218,8 +218,6 @@ const getFilter = type => {
       return 'email';
     case 'PHONE':
       return 'phone';
-    // case 'URL':
-    //   return 'url';
     default:
       return 'any';
   }
