@@ -19,10 +19,7 @@ public enum TypeDataflowEnum {
   BUSINESS("BUSINESS"),
 
   /** The citizen science. */
-  CITIZEN_SCIENCE("CITIZEN_SCIENCE"),
-
-  /** The all. */
-  ALL("ALL");
+  CITIZEN_SCIENCE("CITIZEN_SCIENCE");
 
   /** The value. */
   private final String value;

@@ -317,6 +317,57 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowVOs;
   }
 
+  /**
+   * Gets the cloneable dataflows.
+   *
+   * @param userId the user id
+   * @return the cloneable dataflows
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<DataFlowVO> getCloneableDataflows(String userId) throws EEAException {
+
+    List<DataFlowVO> dataflowVOs = new ArrayList<>();
+
+    // Get user's datasets
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
+    boolean userAdmin = isAdmin();
+
+    // Get user's dataflows sorted by status and creation date
+    List<Long> idsResources =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .filter(resource -> SecurityRoleEnum.DATA_STEWARD.equals(resource.getRole())
+                || SecurityRoleEnum.DATA_CUSTODIAN.equals(resource.getRole()))
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
+      List<Dataflow> dataflows = new ArrayList<>();
+
+      // All dataflows except REFERENCE type dataflow
+      dataflows = userAdmin
+          ? dataflowRepository.findDataflowsExceptReferenceInOrderByStatusDescCreationDateDesc()
+          : dataflowRepository
+              .findDataflowsExceptReferenceAndIdInOrderByStatusDescCreationDateDesc(idsResources);
+
+      dataflows.forEach(dataflow -> {
+        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+        if (!map.isEmpty() && null != datasetsStatusList) {
+          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+        }
+        dataflowVOs.add(dataflowVO);
+      });
+      try {
+        getOpenedObligations(dataflowVOs);
+      } catch (FeignException e) {
+        LOG_ERROR.error(
+            "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
+            e.getMessage(), e);
+      }
+    }
+
+    return dataflowVOs;
+  }
+
 
 
   /**
