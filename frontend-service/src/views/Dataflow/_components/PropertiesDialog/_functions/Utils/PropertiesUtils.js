@@ -1,8 +1,6 @@
 import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
 
-const camelCaseToNormal = str => str.replace(/([A-Z])/g, ' $1').replace(/^./, str2 => str2.toUpperCase());
-
 const parseObligationsData = (data, format) => {
   if (data.obligations) {
     return [
@@ -22,12 +20,12 @@ const parseObligationsData = (data, format) => {
       {
         label: 'legalInstrument',
         data: {
-          shortName: isNil(data.obligations.legalInstruments) ? '' : data.obligations.legalInstruments.alias,
-          legalName: isNil(data.obligations.legalInstruments) ? '' : data.obligations.legalInstruments.title
+          shortName: isNil(data.obligations.legalInstrument) ? '' : data.obligations.legalInstrument.alias,
+          legalName: isNil(data.obligations.legalInstrument) ? '' : data.obligations.legalInstrument.title
         }
       }
     ];
   }
 };
 
-export const PropertiesUtils = { camelCaseToNormal, parseObligationsData };
+export const PropertiesUtils = { parseObligationsData };

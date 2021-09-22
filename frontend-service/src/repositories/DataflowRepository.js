@@ -5,6 +5,8 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 export const DataflowRepository = {
   getAll: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getAll) }),
 
+  getCloneableDataflows: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getCloneableDataflows) }),
+
   getSchemas: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getSchemas, { dataflowId }) }),
 
   cloneSchemas: async (sourceDataflowId, targetDataflowId) =>

@@ -36,7 +36,7 @@ const parseObligation = obligationDTO => {
     description: obligationDTO.description,
     expirationDate: obligationDTO.nextDeadline > 0 ? dayjs(obligationDTO.nextDeadline).format('YYYY-MM-DD') : null,
     issues: obligationDTO.issues,
-    legalInstruments: parseLegalInstrument(obligationDTO.legalInstrument),
+    legalInstrument: parseLegalInstrument(obligationDTO.legalInstrument),
     obligationId: obligationDTO.obligationId,
     reportingFrequency: obligationDTO.reportFreq,
     reportingFrequencyDetail: obligationDTO.reportFreqDetail,
