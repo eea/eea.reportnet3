@@ -426,7 +426,7 @@ export const DatasetService = {
 
   updateFieldDesign: async (datasetId, record) => {
     const datasetTableFieldDesign = new DatasetTableField({});
-    datasetTableFieldDesign.codelistItems = record.codelistItems;
+    datasetTableFieldDesign.codelistItems = record.codelistItems || [];
     datasetTableFieldDesign.description = record.description;
     datasetTableFieldDesign.id = record.fieldSchemaId;
     datasetTableFieldDesign.idRecord = record.recordId;
