@@ -304,5 +304,15 @@ export const useBreadCrumbs = ({
         getReferenceDatasetCrumb()
       ]);
     }
+
+    if (currentPage === CurrentPage.DATAFLOW_REFERENCE_DATASET) {
+      const datasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
+
+      if (dataProviderId) {
+        datasetBreadCrumbs.push(getRepresentativeCrumb());
+      }
+
+      breadCrumbContext.add([...datasetBreadCrumbs, getReferenceDatasetCrumb()]);
+    }
   };
 };

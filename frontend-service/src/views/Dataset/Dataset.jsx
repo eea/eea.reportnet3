@@ -369,13 +369,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   function getCurrentPage() {
     if (isReferenceDataset) {
       return CurrentPage.REFERENCE_DATASET;
-    }
-
-    if (dataProviderId === 0) {
+    } else if (isReferenceDatasetRegularDataflow) {
+      return CurrentPage.DATAFLOW_REFERENCE_DATASET;
+    } else if (dataProviderId === 0) {
       return CurrentPage.TEST_DATASETS;
+    } else {
+      return CurrentPage.DATASET;
     }
-
-    return CurrentPage.DATASET;
   }
 
   const getFileExtensions = async () => {
