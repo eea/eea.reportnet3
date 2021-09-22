@@ -89,7 +89,7 @@ export const PublicCard = ({
           <Fragment>
             <div className={styles.legalInstrumentAndObligation}>
               <p>
-                <strong>{resourcesContext.messages['obligationTitle']}: </strong>
+                <strong>{resourcesContext.messages['obligation']}: </strong>
                 {obligation?.obligationId
                   ? renderRedirectText(obligation?.title, `${baseRod3Url}/obligations/${obligation?.obligationId}`)
                   : obligation?.title}
@@ -98,12 +98,12 @@ export const PublicCard = ({
             <div className={styles.legalInstrumentAndObligation}>
               <p>
                 <strong>{resourcesContext.messages['instrumentColumnTitle']}: </strong>
-                {obligation?.legalInstruments?.id
+                {obligation?.legalInstrument?.id
                   ? renderRedirectText(
-                      obligation?.legalInstruments?.alias,
-                      `${baseRod3Url}/instruments/${obligation?.legalInstruments?.id}`
+                      obligation?.legalInstrument?.alias,
+                      `${baseRod3Url}/instruments/${obligation?.legalInstrument?.id}`
                     )
-                  : obligation?.legalInstruments?.alias}
+                  : obligation?.legalInstrument?.alias}
               </p>
             </div>
           </Fragment>

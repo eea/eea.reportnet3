@@ -1,4 +1,4 @@
-import { Fragment, useReducer, useRef } from 'react';
+import { Fragment, useContext, useReducer, useRef } from 'react';
 
 import capitalize from 'lodash/capitalize';
 import isNull from 'lodash/isNull';
@@ -20,7 +20,10 @@ import { treeViewReducer } from './_functions/Reducers/treeViewReducer';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
 const TreeView = ({ className = '', columnOptions = {}, expandAll = true, property, propertyName }) => {
+  const resourcesContext = useContext(ResourcesContext);
   const dataTableRef = useRef();
   const initialTreeViewState = {
     filters: {
@@ -230,6 +233,8 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
     }
   };
 
+  const getLabel = str => resourcesContext.messages[str] || str;
+
   return (
     !isUndefined(property) &&
     !isNull(property) && (
@@ -242,7 +247,7 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
         {typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean' ? (
           <Fragment>
             <span className={styles.propertyTitle}>
-              {!Number.isInteger(Number(propertyName)) ? `${camelCaseToNormal(propertyName)}: ` : ''}
+              {!Number.isInteger(Number(propertyName)) ? `${getLabel(propertyName)}: ` : ''}
             </span>
             {property !== '' ? (
               <span
@@ -258,7 +263,7 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
         ) : (
           <TreeViewExpandableItem
             expanded={expandAll}
-            items={!Number.isInteger(Number(propertyName)) ? [{ label: camelCaseToNormal(propertyName) }] : []}>
+            items={!Number.isInteger(Number(propertyName)) ? [{ label: getLabel(propertyName) }] : []}>
             {!isUndefined(columnOptions[propertyName]) &&
             !isUndefined(columnOptions[propertyName]['groupable']) &&
             columnOptions[propertyName]['groupable']
@@ -290,8 +295,6 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
     )
   );
 };
-
-const camelCaseToNormal = str => str.replace(/([A-Z])/g, ' $1').replace(/^./, str2 => str2.toUpperCase());
 
 const codelistTemplate = rowData => (
   <Chips disabled={true} name="Multiple/single selected items" pasteSeparator=";" value={rowData.codelistItems}></Chips>

@@ -88,7 +88,7 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
         )}
       </div>
 
-      <div className={`${styles.status}  dataflowList-status-help-step`}>
+      <div className={`${styles.status} dataflowList-status-help-step`}>
         {!isCustodian && !isNil(itemContent.reportingDatasetsStatus) && itemContent.status === 'OPEN' && (
           <p>
             <span>{`${resourcesContext.messages['deliveryStatus']}: `}</span>
@@ -111,11 +111,11 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
 
       <div className={`${styles.obligation} `}>
         <p className="dataflowList-obligation-description-help-step">
-          <span>{`${resourcesContext.messages['legalInstrumentDataflowItem']}: `}</span>
+          <span>{`${resourcesContext.messages['legalInstrument']}: `}</span>
           {itemContent.legalInstrument}
         </p>
         <p>
-          <span>{`${resourcesContext.messages['obligationDataflowItem']}: `}</span>
+          <span>{`${resourcesContext.messages['obligation']}: `}</span>
           {itemContent.obligationTitle}
         </p>
       </div>

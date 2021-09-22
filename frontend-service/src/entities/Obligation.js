@@ -5,7 +5,7 @@ export class Obligation {
     description,
     expirationDate,
     issues,
-    legalInstruments,
+    legalInstrument,
     obligationId,
     organization,
     reportingFrequency,
@@ -19,7 +19,7 @@ export class Obligation {
     this.description = description;
     this.expirationDate = expirationDate;
     this.issues = issues;
-    this.legalInstruments = legalInstruments;
+    this.legalInstrument = legalInstrument;
     this.obligationId = obligationId;
     this.organization = organization;
     this.reportingFrequency = reportingFrequency;
