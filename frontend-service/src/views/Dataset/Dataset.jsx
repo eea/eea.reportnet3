@@ -62,7 +62,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataProviderId, setDataProviderId] = useState(null);
-  const [dataProviderName, setDataProviderName] = useState('');
   const [dataflowName, setDataflowName] = useState('');
   const [dataset, setDataset] = useState({});
   const [datasetFeedbackStatus, setDatasetFeedbackStatus] = useState('');
@@ -131,7 +130,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     dataflowId,
     dataflowType,
     dataProviderId,
-    dataProviderName,
+    dataProviderName: metadata?.dataset.name,
     history,
     isLoading,
     metaData: metadata,
@@ -397,7 +396,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       setDatasetSchemaId(metaData.dataset.datasetSchemaId);
       setDatasetFeedbackStatus(metaData.dataset.datasetFeedbackStatus);
       setDataProviderId(metaData.dataset.dataProviderId || 0);
-      setDataProviderName(metaData.dataset.name);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
