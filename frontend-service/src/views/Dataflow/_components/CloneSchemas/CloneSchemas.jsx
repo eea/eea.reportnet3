@@ -112,7 +112,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
           properties: [
             { name: 'name' },
             { name: 'description' },
-            { name: 'obligationTitle' },
+            { name: 'obligationTitle', label: resourcesContext.messages['obligation'] },
             { name: 'legalInstrument' }
           ]
         },
