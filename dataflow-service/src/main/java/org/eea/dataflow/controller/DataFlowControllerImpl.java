@@ -248,7 +248,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
   /**
-   * Find dataflows for clone.
+   * Find cloneable dataflows.
    *
    * @return the list
    */
@@ -265,8 +265,8 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      // type ALL is sent but there will be ALL except REFERENCE type dataflow
-      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.ALL);
+      // All dataflows except REFERENCE type dataflow
+      dataflows = dataflowService.getCloneableDataflows(userId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
