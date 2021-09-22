@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -38,6 +39,7 @@ export const DataflowService = {
   getCloneableDataflows: async () => {
     const dataflowsDTO = await DataflowRepository.getCloneableDataflows();
     return dataflowsDTO.data.map(dataflow => {
+      dataflow.expirationDate = dataflow.deadlineDate > 0 ? dayjs(dataflow.deadlineDate).format('YYYY-MM-DD') : '-';
       dataflow.obligationTitle = dataflow.obligation?.oblTitle;
       dataflow.legalInstrument = dataflow.obligation?.legalInstrument?.sourceAlias;
       return dataflow;
