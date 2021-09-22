@@ -8,7 +8,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
   const notificationContext = useContext(NotificationContext);
-  const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
+  const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(false);
   const [isSnapshotsBarVisible, setIsSnapshotsBarVisible] = useState(false);
   const [isSnapshotDialogVisible, setIsSnapshotDialogVisible] = useState(false);
   const [snapshotListData, setSnapshotListData] = useState([]);
@@ -28,7 +28,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
   };
 
   useEffect(() => {
-    if (isSnapshotsBarVisible) {
+    if (isSnapshotsBarVisible && !isLoadingSnapshotListData) {
       onLoadSnapshotList();
     }
   }, [isSnapshotsBarVisible]);
