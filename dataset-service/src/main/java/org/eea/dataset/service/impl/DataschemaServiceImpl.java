@@ -785,6 +785,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
    * @param datasetId the dataset id
+   * @param cloningOrImporting the cloning or importing
    * @return the type data
    * @throws EEAException the EEA exception
    */
@@ -1792,7 +1793,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param tableSchemaId the table schema id
-   *
+   * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
   @Override
@@ -2549,27 +2550,24 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param referenceDataset the reference dataset
-   * @param updateTables the update tables
    */
   @Override
   public void updateReferenceDataset(Long datasetId, String datasetSchemaId,
-      boolean referenceDataset, boolean updateTables) {
+      boolean referenceDataset) {
 
     schemasRepository.updateReferenceDataset(datasetSchemaId, referenceDataset);
-    if (referenceDataset && updateTables) {
-      DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
-      // Reference dataset -> readOnly=true, prefilled=true on all the tables
-      // mark prefill and readOnly of all tables of the dataset
-      for (TableSchemaVO table : schema.getTableSchemas()) {
-        table.setToPrefill(true);
-        table.setReadOnly(true);
-        try {
-          updateTableSchema(datasetId, table);
-        } catch (EEAException e) {
-          LOG_ERROR.error(
-              "Error updating the mandatory properties when a dataset becomes Reference. DatasetId {}. Message: {} ",
-              datasetId, e.getMessage(), e);
-        }
+    DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
+    // Reference dataset -> readOnly=true, prefilled=true on all the tables
+    // mark prefill and readOnly of all tables of the dataset
+    for (TableSchemaVO table : schema.getTableSchemas()) {
+      table.setToPrefill(referenceDataset);
+      table.setReadOnly(referenceDataset);
+      try {
+        updateTableSchema(datasetId, table);
+      } catch (EEAException e) {
+        LOG_ERROR.error(
+            "Error updating the mandatory properties when a dataset becomes Reference. DatasetId {}. Message: {} ",
+            datasetId, e.getMessage(), e);
       }
     }
   }
@@ -2614,8 +2612,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetId the dataset id
    * @param file the file
    * @param replace the replace
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Async
   @Override

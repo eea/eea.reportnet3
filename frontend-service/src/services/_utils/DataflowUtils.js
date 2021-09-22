@@ -86,8 +86,9 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {
     dataflow.users.forEach((user, usersIndex) => {
       user.roles.forEach((role, roleIndex) => {
-        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] =
-          UserRoleUtils.getUserRoleLabel(role);
+        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(
+          role
+        );
       });
     });
   });

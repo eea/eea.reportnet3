@@ -2,7 +2,7 @@ import isNil from 'lodash/isNil';
 
 const getSectionValidationRedirectionUrl = sectionDTO => {
   if (!isNil(sectionDTO)) {
-    if (sectionDTO === 'REPORTING') {
+    if (sectionDTO === 'REPORTING' || sectionDTO === 'TEST') {
       return 'DATASET';
     }
 
