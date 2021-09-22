@@ -27,7 +27,7 @@ export const TableViewSchemas = ({
 
   const fieldTables = {
     expirationDate: resourcesContext.messages['nextReportDue'],
-    obligation: resourcesContext.messages['obligation'],
+    obligationTitle: resourcesContext.messages['obligation'],
     legalInstrument: resourcesContext.messages['legalInstrument']
   };
 
