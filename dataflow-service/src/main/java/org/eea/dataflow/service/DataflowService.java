@@ -60,7 +60,14 @@ public interface DataflowService {
    */
   List<DataFlowVO> getDataflows(String userId, TypeDataflowEnum dataflowType) throws EEAException;
 
-
+  /**
+   * Gets the cloneable dataflows.
+   *
+   * @param userId the user id
+   * @return the cloneable dataflows
+   * @throws EEAException the EEA exception
+   */
+  List<DataFlowVO> getCloneableDataflows(String userId) throws EEAException;
 
   /**
    * Gets the completed.

@@ -884,8 +884,7 @@ public class DataFlowControllerImplTest {
     SecurityContextHolder.setContext(securityContext);
 
     when(authentication.getDetails()).thenReturn(details);
-    when(dataflowService.getDataflows(Mockito.any(), Mockito.any(TypeDataflowEnum.class)))
-        .thenReturn(new ArrayList<>());
+    when(dataflowService.getCloneableDataflows(Mockito.any())).thenReturn(new ArrayList<>());
     assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findCloneableDataflows());
   }
 
@@ -902,8 +901,7 @@ public class DataFlowControllerImplTest {
 
     when(authentication.getDetails()).thenReturn(details);
 
-    doThrow(new EEAException()).when(dataflowService).getDataflows(Mockito.any(),
-        Mockito.any(TypeDataflowEnum.class));
+    doThrow(new EEAException()).when(dataflowService).getCloneableDataflows(Mockito.anyString());
     assertEquals("fail", new ArrayList<>(), dataFlowControllerImpl.findCloneableDataflows());
   }
 
