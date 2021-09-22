@@ -785,6 +785,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetSchemaId the dataset schema id
    * @param fieldSchemaVO the field schema VO
    * @param datasetId the dataset id
+   * @param cloningOrImporting the cloning or importing
    * @return the type data
    * @throws EEAException the EEA exception
    */
@@ -1792,7 +1793,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param tableSchemaId the table schema id
-   *
+   * @param datasetId the dataset id
    * @throws EEAException the EEA exception
    */
   @Override
@@ -2549,7 +2550,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema id
    * @param referenceDataset the reference dataset
-   * @param updateTables the update tables
    */
   @Override
   public void updateReferenceDataset(Long datasetId, String datasetSchemaId,
@@ -2612,8 +2612,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetId the dataset id
    * @param file the file
    * @param replace the replace
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Async
   @Override
