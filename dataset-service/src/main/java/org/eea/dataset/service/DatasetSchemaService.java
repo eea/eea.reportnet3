@@ -547,8 +547,7 @@ public interface DatasetSchemaService {
    * @param referenceDataset the reference dataset
    * @param updateTables the update tables
    */
-  void updateReferenceDataset(Long datasetId, String datasetSchemaId, boolean referenceDataset,
-      boolean updateTables);
+  void updateReferenceDataset(Long datasetId, String datasetSchemaId, boolean referenceDataset);
 
 
 

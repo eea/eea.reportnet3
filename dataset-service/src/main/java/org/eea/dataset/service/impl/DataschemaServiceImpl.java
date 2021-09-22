@@ -2553,23 +2553,21 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void updateReferenceDataset(Long datasetId, String datasetSchemaId,
-      boolean referenceDataset, boolean updateTables) {
+      boolean referenceDataset) {
 
     schemasRepository.updateReferenceDataset(datasetSchemaId, referenceDataset);
-    if (referenceDataset && updateTables) {
-      DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
-      // Reference dataset -> readOnly=true, prefilled=true on all the tables
-      // mark prefill and readOnly of all tables of the dataset
-      for (TableSchemaVO table : schema.getTableSchemas()) {
-        table.setToPrefill(true);
-        table.setReadOnly(true);
-        try {
-          updateTableSchema(datasetId, table);
-        } catch (EEAException e) {
-          LOG_ERROR.error(
-              "Error updating the mandatory properties when a dataset becomes Reference. DatasetId {}. Message: {} ",
-              datasetId, e.getMessage(), e);
-        }
+    DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
+    // Reference dataset -> readOnly=true, prefilled=true on all the tables
+    // mark prefill and readOnly of all tables of the dataset
+    for (TableSchemaVO table : schema.getTableSchemas()) {
+      table.setToPrefill(referenceDataset);
+      table.setReadOnly(referenceDataset);
+      try {
+        updateTableSchema(datasetId, table);
+      } catch (EEAException e) {
+        LOG_ERROR.error(
+            "Error updating the mandatory properties when a dataset becomes Reference. DatasetId {}. Message: {} ",
+            datasetId, e.getMessage(), e);
       }
     }
   }
