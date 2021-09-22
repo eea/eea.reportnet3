@@ -1,15 +1,11 @@
 import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 
-import ReactTooltip from 'react-tooltip';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
-import isNil from 'lodash/isNil';
 
 import styles from './Menu.module.scss';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { MenuItem } from './_components/MenuItem/MenuItem';
 
 class Menu extends Component {
   static defaultProps = {
@@ -77,7 +73,7 @@ class Menu extends Component {
 
   renderSubMenu(submenu, index) {
     const className = classNames('p-submenu-header', { 'p-disabled': submenu.disabled }, submenu.className);
-    const items = submenu.items.map((item, index) => this.renderMenuitem(item, index));
+    const items = submenu.items.map((item, index) => <MenuItem index={index} item={item} key={item.label} />);
 
     return (
       <Fragment key={submenu.label + '_' + index}>
@@ -89,36 +85,9 @@ class Menu extends Component {
     );
   }
 
-  renderMenuitem(item, index) {
-    return (
-      <Fragment key={item.label + '_' + index}>
-        <li className={'p-menuitem'} data-for={item.label} data-tip key={index}>
-          <span
-            className={`p-menuitem-link ${item.disabled ? styles.menuItemDisabled : null} ${styles.menuItem}`}
-            disabled={item.disabled}
-            onClick={e => {
-              e.preventDefault();
-              if (!item.disabled) {
-                item.command();
-              } else {
-                this.setState(state => ({ ...state, menuClick: true }));
-              }
-            }}>
-            {!isNil(item.icon) && <FontAwesomeIcon icon={AwesomeIcons(item.icon)} role="presentation" />}
-            <span>{item.label}</span>
-          </span>
-        </li>
-
-        <ReactTooltip className={styles.tooltip} effect="solid" id={item.label} place="right">
-          {item.label}
-        </ReactTooltip>
-      </Fragment>
-    );
-  }
-
   renderItem(item, index) {
     if (item.items) return this.renderSubMenu(item, index);
-    else return this.renderMenuitem(item, index);
+    else return <MenuItem index={index} item={item} />;
   }
 
   render() {

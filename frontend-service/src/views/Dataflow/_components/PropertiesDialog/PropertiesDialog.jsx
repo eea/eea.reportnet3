@@ -71,11 +71,11 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
                       window.open(
                         data.label === 'obligation'
                           ? `${RodUrl.obligations}${dataflowState.obligations.obligationId}`
-                          : `${RodUrl.instruments}${dataflowState.obligations.legalInstruments.id}`
+                          : `${RodUrl.instruments}${dataflowState.obligations.legalInstrument.id}`
                       )
                   }
                 ]}
-                items={[{ label: PropertiesUtils.camelCaseToNormal(data.label) }]}>
+                items={[{ label: resourcesContext.messages[data.label] }]}>
                 <TreeView property={data.data} propertyName={''} />
               </TreeViewExpandableItem>
             </div>

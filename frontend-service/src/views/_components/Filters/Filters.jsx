@@ -455,7 +455,7 @@ export const Filters = ({
     </span>
   );
 
-  const renderInputFilter = property => (
+  const renderInputFilter = (property, label = '') => (
     <span className={styles.input} key={property}>
       {renderOrderFilter(property)}
       <span className={`p-float-label ${styles.label}`}>
@@ -474,7 +474,7 @@ export const Filters = ({
           />
         )}
         <label className={styles.label} htmlFor={`${property}_input`}>
-          {resourcesContext.messages[property]}
+          {isEmpty(label) ? resourcesContext.messages[property] : label}
         </label>
       </span>
     </span>
@@ -556,7 +556,7 @@ export const Filters = ({
     return options.map(filterOption => {
       switch (filterOption.type) {
         case 'input':
-          return filterOption.properties.map(property => renderInputFilter(property.name));
+          return filterOption.properties.map(property => renderInputFilter(property.name, property.label));
         case 'multiselect':
           return filterOption.properties.map(property =>
             renderMultiselectSelectFilter(property.name, property.showInput, property.label)

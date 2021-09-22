@@ -152,7 +152,7 @@ const getCodelistItemsInSingleColumn = column => {
 
 const getCodelistItemsWithEmptyOption = (column, noneText) => {
   const codelistItems = column.codelistItems
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+    ?.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
     .map(codelistItem => {
       return { itemType: codelistItem, value: codelistItem };
     });
