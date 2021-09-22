@@ -10,7 +10,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 const useReporterDataset = (datasetId, dataflowId) => {
   const notificationContext = useContext(NotificationContext);
 
-  const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(true);
+  const [isLoadingSnapshotListData, setIsLoadingSnapshotListData] = useState(false);
   const [isSnapshotsBarVisible, setIsSnapshotsBarVisible] = useState(false);
   const [isSnapshotDialogVisible, setIsSnapshotDialogVisible] = useState(false);
   const [snapshotListData, setSnapshotListData] = useState([]);
@@ -30,7 +30,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
   };
 
   useEffect(() => {
-    if (isSnapshotsBarVisible) {
+    if (isSnapshotsBarVisible && !isLoadingSnapshotListData) {
       onLoadSnapshotList();
     }
   }, [isSnapshotsBarVisible]);
@@ -71,7 +71,6 @@ const useReporterDataset = (datasetId, dataflowId) => {
   const onLoadSnapshotList = async () => {
     try {
       setIsLoadingSnapshotListData(true);
-
       const snapshotsData = await SnapshotService.getAllReporter(datasetId);
       setSnapshotListData(snapshotsData);
       setIsLoadingSnapshotListData(false);
