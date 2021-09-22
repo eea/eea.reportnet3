@@ -20,6 +20,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.lock.service.LockService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,7 +78,8 @@ public class DataSetSnapshotControllerImplTest {
   /** The datasets. */
   private List<ReportingDataset> datasets;
 
-
+  @Mock
+  LockService lockService;
 
   /**
    * Inits the mocks.
@@ -185,6 +187,7 @@ public class DataSetSnapshotControllerImplTest {
   public void testRestoreSnapshot() throws Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(lockService.findByCriteria(Mockito.any())).thenReturn(null);
     dataSetSnapshotControllerImpl.restoreSnapshot(1L, 1L);
     Mockito.verify(datasetSnapshotService, times(1)).restoreSnapshot(Mockito.any(), Mockito.any(),
         Mockito.any());
@@ -217,6 +220,7 @@ public class DataSetSnapshotControllerImplTest {
   public void testRestoreSnapshotsException2() throws Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(lockService.findByCriteria(Mockito.any())).thenReturn(null);
     doThrow(new EEAException()).when(datasetSnapshotService).restoreSnapshot(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean());
     try {

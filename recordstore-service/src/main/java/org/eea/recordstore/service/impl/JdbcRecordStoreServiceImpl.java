@@ -465,9 +465,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       long startTime = System.currentTimeMillis();
       while ((System.currentTimeMillis() - startTime) < 30000) {
         try {
-          String FILE_PATTERN_NAME_RULES = "rulesSnapshot_%s-DesignDataset_%s";
-          String nameFileRules = String.format(FILE_PATTERN_NAME_RULES, idSnapshot, idDataset)
-              + LiteralConstants.SNAPSHOT_EXTENSION;
+          String nameFileRules =
+              String.format("rulesSnapshot_%s-DesignDataset_%s", idSnapshot, idDataset)
+                  + LiteralConstants.SNAPSHOT_EXTENSION;
           documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
           break;
         } catch (FeignException e) {

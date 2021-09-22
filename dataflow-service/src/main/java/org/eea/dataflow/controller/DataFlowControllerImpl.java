@@ -554,9 +554,9 @@ public class DataFlowControllerImpl implements DataFlowController {
     } else if (cloneLockVO != null) {
       throw new ResponseStatusException(HttpStatus.LOCKED,
           "Dataflow is locked because clone is in progress.");
-    } else
+    } else {
       dataflowService.deleteDataFlow(dataflowId);
-
+    }
   }
 
   /**

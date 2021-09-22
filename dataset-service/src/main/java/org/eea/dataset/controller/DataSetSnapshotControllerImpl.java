@@ -2,7 +2,9 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
@@ -15,11 +17,15 @@ import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +71,10 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The dataflow controller zull. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZull;
+
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
 
   /**
    * Gets the by id.
@@ -203,8 +213,19 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      // This method will release the lock
-      datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, true);
+      // Check if the snapshot creation process is running and locked
+      Map<String, Object> createSchemaSnapshot = new HashMap<>();
+      createSchemaSnapshot.put(LiteralConstants.SIGNATURE,
+          LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
+      createSchemaSnapshot.put(LiteralConstants.DATASETID, datasetId);
+      LockVO importLockVO = lockService.findByCriteria(createSchemaSnapshot);
+      if (importLockVO != null) {
+        throw new ResponseStatusException(HttpStatus.LOCKED,
+            "Snapshot restoration is locked because creation is in progress.");
+      } else {
+        // This method will release the lock
+        datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, true);
+      }
     } catch (EEAException e) {
       LOG_ERROR.error("Error restoring a snapshot. Error Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
