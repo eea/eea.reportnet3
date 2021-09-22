@@ -142,7 +142,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
           { name: 'name' },
           { name: 'description' },
           { name: 'legalInstrument' },
-          { name: 'obligationTitle' },
+          { name: 'obligationTitle', label: resourcesContext.messages['obligation'] },
           { name: 'obligationId' }
         ]
       },
@@ -156,7 +156,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
           { name: 'name' },
           { name: 'description' },
           { name: 'legalInstrument' },
-          { name: 'obligationTitle' },
+          { name: 'obligationTitle', label: resourcesContext.messages['obligation'] },
           { name: 'obligationId' }
         ]
       },
@@ -170,7 +170,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
           { name: 'name' },
           { name: 'description' },
           { name: 'legalInstrument' },
-          { name: 'obligationTitle' },
+          { name: 'obligationTitle', label: resourcesContext.messages['obligation'] },
           { name: 'obligationId' }
         ]
       },
