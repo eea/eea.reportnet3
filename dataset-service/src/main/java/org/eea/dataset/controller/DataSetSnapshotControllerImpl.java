@@ -376,7 +376,18 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      datasetSnapshotService.removeSchemaSnapshot(datasetId, idSnapshot);
+      Map<String, Object> createSchemaSnapshot = new HashMap<>();
+      createSchemaSnapshot.put(LiteralConstants.SIGNATURE,
+          LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
+      createSchemaSnapshot.put(LiteralConstants.DATASETID, datasetId);
+      LockVO importLockVO = lockService.findByCriteria(createSchemaSnapshot);
+      if (importLockVO != null) {
+        throw new ResponseStatusException(HttpStatus.LOCKED,
+            "Snapshot restoration is locked because creation is in progress.");
+      } else {
+        // This method will release the lock
+        datasetSnapshotService.removeSchemaSnapshot(datasetId, idSnapshot);
+      }
     } catch (EEAException | IOException e) {
       LOG_ERROR.error("Error deleting a schema snapshot. Error message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
