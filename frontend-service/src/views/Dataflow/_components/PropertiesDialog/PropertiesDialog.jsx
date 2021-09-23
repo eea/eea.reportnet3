@@ -1,42 +1,64 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 
-import uniqueId from 'lodash/uniqueId';
+import dayjs from 'dayjs';
+import isNil from 'lodash/isNil';
 
 import styles from './PropertiesDialog.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
-import { TreeView } from 'views/_components/TreeView';
-import { TreeViewExpandableItem } from 'views/_components/TreeView/_components/TreeViewExpandableItem';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-import { PropertiesUtils } from './_functions/Utils/PropertiesUtils';
 import { RodUrl } from 'repositories/config/RodUrl';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
+  const { description, isPropertiesDialogVisible, name, obligations, status } = dataflowState;
+
   const resourcesContext = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
+  const {
+    userProps: { dateFormat }
+  } = useContext(UserContext);
 
   const [dialogHeight, setDialogHeight] = useState(null);
+  const [isOpen, setIsOpen] = useState(true);
 
   const propertiesRef = useRef(null);
 
   useEffect(() => {
-    if (propertiesRef.current && dataflowState.isPropertiesDialogVisible) {
+    if (propertiesRef.current && isPropertiesDialogVisible) {
       setDialogHeight(propertiesRef.current.getBoundingClientRect().height);
     }
-  }, [propertiesRef.current, dataflowState.isPropertiesDialogVisible]);
+  }, [propertiesRef.current, isPropertiesDialogVisible]);
 
-  const parsedDataflowData = {
-    dataflowName: dataflowState.name,
-    dataflowDescription: dataflowState.description,
-    dataflowStatus: dataflowState.data.status
+  const parseObligations = () => {
+    return {
+      label: 'obligation',
+      data: {
+        comment: obligations.comment,
+        description: obligations.description,
+        id: obligations.obligationId,
+        nextReportDue: !isNil(obligations.expirationDate) ? dayjs(obligations.expirationDate).format(dateFormat) : '-',
+        reportingFrequency: obligations.reportingFrequency,
+        title: obligations.title
+      }
+    };
   };
-  const parsedObligationsData = PropertiesUtils.parseObligationsData(dataflowState, userContext.userProps.dateFormat);
 
-  const dialogFooter = (
+  const parseLegalInstrument = () => {
+    return {
+      label: 'legalInstrument',
+      data: {
+        shortName: isNil(obligations.legalInstrument) ? '' : obligations.legalInstrument.alias,
+        legalName: isNil(obligations.legalInstrument) ? '' : obligations.legalInstrument.title
+      }
+    };
+  };
+
+  const renderDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink button-right-aligned"
       icon="cancel"
@@ -46,40 +68,70 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
   );
 
   return (
-    dataflowState.isPropertiesDialogVisible && (
+    isPropertiesDialogVisible && (
       <Dialog
         className={styles.propertiesDialog}
-        footer={dialogFooter}
+        footer={renderDialogFooter}
         header={resourcesContext.messages['properties']}
         onHide={() => manageDialogs('isPropertiesDialogVisible', false)}
-        visible={dataflowState.isPropertiesDialogVisible}>
+        visible={isPropertiesDialogVisible}>
         <div className={styles.propertiesWrap} ref={propertiesRef} style={{ height: dialogHeight }}>
           <div style={{ marginTop: '1rem', marginBottom: '2rem' }}>
-            <TreeViewExpandableItem items={[{ label: resourcesContext.messages['dataflowDetails'] }]}>
-              <TreeView property={parsedDataflowData} propertyName={''} />
-            </TreeViewExpandableItem>
-          </div>
-          {parsedObligationsData.map((data, i) => (
-            <div key={uniqueId()} style={{ marginTop: '2rem', marginBottom: '1rem' }}>
-              <TreeViewExpandableItem
-                buttons={[
-                  {
-                    className: `p-button-secondary-transparent`,
-                    icon: 'externalUrl',
-                    tooltip: resourcesContext.messages['viewMore'],
-                    onMouseDown: () =>
-                      window.open(
-                        data.label === 'obligation'
-                          ? `${RodUrl.obligations}${dataflowState.obligations.obligationId}`
-                          : `${RodUrl.instruments}${dataflowState.obligations.legalInstrument.id}`
-                      )
-                  }
-                ]}
-                items={[{ label: resourcesContext.messages[data.label] }]}>
-                <TreeView property={data.data} propertyName={''} />
-              </TreeViewExpandableItem>
+            <h3 className={styles.title}>
+              <FontAwesomeIcon
+                className={styles.icon}
+                icon={AwesomeIcons(isOpen ? 'angleDown' : 'angleRight')}
+                onClick={() => setIsOpen(!isOpen)}
+              />
+              {resourcesContext.messages['dataflowDetails']}
+            </h3>
+            <div className={`${styles.content} ${isOpen ? '' : styles.hide}`}>
+              <span>
+                <strong>Dataflow name: </strong>
+                {name}
+              </span>
+              <span>
+                <strong>Dataflow description: </strong>
+                {description}
+              </span>
+              <span>
+                <strong>Dataflow status: </strong>
+                {status}
+              </span>
             </div>
-          ))}
+          </div>
+          <div style={{ marginTop: '2rem', marginBottom: '1rem' }}>
+            <h3 className={styles.title}>
+              <FontAwesomeIcon
+                className={styles.icon}
+                icon={AwesomeIcons(isOpen ? 'angleDown' : 'angleRight')}
+                onClick={() => setIsOpen(!isOpen)}
+              />
+              {resourcesContext.messages['obligation']}
+            </h3>
+            <Button
+              className={'p-button-secondary-transparent'}
+              icon={'externalUrl'}
+              onMouseDown={() => window.open(`${RodUrl.obligations}${obligations.obligationId}`)}
+              tooltip={resourcesContext.messages['viewMore']}
+            />
+          </div>
+          <div style={{ marginTop: '2rem', marginBottom: '1rem' }}>
+            <h3 className={styles.title}>
+              <FontAwesomeIcon
+                className={styles.icon}
+                icon={AwesomeIcons(isOpen ? 'angleDown' : 'angleRight')}
+                onClick={() => setIsOpen(!isOpen)}
+              />
+              {resourcesContext.messages['obligation']}
+            </h3>
+            <Button
+              className={'p-button-secondary-transparent'}
+              icon={'externalUrl'}
+              onMouseDown={() => window.open(`${RodUrl.instruments}${obligations.legalInstrument.id}`)}
+              tooltip={resourcesContext.messages['viewMore']}
+            />
+          </div>
         </div>
       </Dialog>
     )

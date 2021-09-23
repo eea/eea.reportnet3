@@ -3,5 +3,36 @@
 
   .propertiesWrap {
     margin-bottom: 1rem;
+
+    .title {
+      color: var(--breadCrumb-font-color);
+      user-select: none;
+
+      .icon {
+        cursor: pointer;
+      }
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      margin-left: 1rem;
+
+      // height: 100px;
+      // opacity: 1;
+      // transition: all 0.25s ease 0.05s;
+
+      &.hide {
+        height: 0;
+        margin: 0;
+        margin-left: 1rem;
+        opacity: 0;
+        overflow: hidden;
+      }
+
+      > span {
+        margin: 0.25rem 0;
+      }
+    }
   }
 }
