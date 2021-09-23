@@ -1263,6 +1263,7 @@
     "id": "Id",
     "shortName": "Short name",
     "legalName": "Legal name",
-    "sqlSentenceInfoTooltip": "Click to show detailed help info"
+    "sqlSentenceInfoTooltip": "Click to show detailed help info",
+    "quickEdit": "Quick edit"
   }
 }

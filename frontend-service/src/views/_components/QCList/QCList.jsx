@@ -46,6 +46,7 @@ export const QCList = withRouter(
       filteredData: [],
       isDataUpdated: false,
       isDeleteDialogVisible: false,
+      isRowQuickEditionEnabled: false,
       isLoading: true,
       validationId: '',
       validationList: {}
@@ -389,11 +390,25 @@ export const QCList = withRouter(
               validationContext.isFetchingData
             }
             icon={getEditBtnIcon(row.id)}
-            onClick={() => validationContext.onOpenToEdit(row, rowType)}
+            onClick={() => onRowQuickEdit(true)}
             tooltip={resourcesContext.messages['edit']}
             tooltipOptions={{ position: 'top' }}
             type="button"
           />
+          {!tabsValidationsState.isRowQuickEditionEnabled && (
+            <Button
+              className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+              disabled={
+                (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
+                validationContext.isFetchingData
+              }
+              icon={getEditBtnIcon(row.id)}
+              onClick={() => validationContext.onOpenToEdit(row, rowType)}
+              tooltip={resourcesContext.messages['edit']}
+              tooltipOptions={{ position: 'top' }}
+              type="button"
+            />
+          )}
         </div>
       );
     };
@@ -520,6 +535,9 @@ export const QCList = withRouter(
         // setIsSubmitDisabled(false);
       }
     };
+
+    const onRowQuickEdit = quickEdit =>
+      tabsValidationsDispatch({ type: 'ON_ROW_QUICK_EDIT_ENABLED', payload: quickEdit });
 
     const filterOptions = [
       {
