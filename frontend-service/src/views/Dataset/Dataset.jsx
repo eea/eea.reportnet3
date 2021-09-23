@@ -393,7 +393,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       setMetadata(metaData);
       setDataflowName(metaData.dataflow.name);
       setDatasetSchemaId(metaData.dataset.datasetSchemaId);
-      setDataProviderId(metaData.dataset.dataProviderId || 0);
+      setDataProviderId(metaData.dataset.dataProviderId);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
