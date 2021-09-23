@@ -62,7 +62,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataProviderId, setDataProviderId] = useState(null);
-  const [dataflowName, setDataflowName] = useState('');
   const [dataset, setDataset] = useState({});
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
@@ -391,7 +390,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     try {
       const metaData = await MetadataUtils.getMetadata({ datasetId, dataflowId });
       setMetadata(metaData);
-      setDataflowName(metaData.dataflow.name);
       setDatasetSchemaId(metaData.dataset.datasetSchemaId);
       setDataProviderId(metaData.dataset.dataProviderId);
     } catch (error) {
@@ -442,7 +440,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           content: {
             origin: datasetName,
             dataflowId,
-            dataflowName,
+            dataflowName: metadata.dataflow.name,
             datasetId,
             datasetName: datasetSchemaName
           }
@@ -498,7 +496,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         notificationContext.add({
           type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT',
           content: {
-            dataflowName: dataflowName,
+            dataflowName: metadata.dataflow.name,
             datasetName: datasetName
           }
         });
@@ -951,7 +949,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         icon={isReferenceDataset ? 'howTo' : 'dataset'}
         iconSize={isReferenceDataset ? '4rem' : '3.5rem'}
         insideTitle={`${datasetInsideTitle()}`}
-        subtitle={`${dataflowName} - ${datasetName}`}
+        subtitle={`${metadata?.dataflow.name} - ${datasetName}`}
         title={datasetSchemaName}
       />
       <div className={styles.ButtonsBar}>
