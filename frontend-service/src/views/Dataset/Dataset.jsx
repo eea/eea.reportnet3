@@ -126,9 +126,11 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   let importMenuRef = useRef();
 
   useBreadCrumbs({
-    currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET : CurrentPage.DATASET,
+    currentPage: getCurrentPage(),
     dataflowId,
     dataflowType,
+    dataProviderId,
+    dataProviderName: metadata?.dataset.name,
     history,
     isLoading,
     metaData: metadata,
@@ -364,6 +366,18 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     }
   ];
 
+  function getCurrentPage() {
+    if (isReferenceDataset) {
+      return CurrentPage.REFERENCE_DATASET;
+    } else if (isReferenceDatasetRegularDataflow) {
+      return CurrentPage.DATAFLOW_REFERENCE_DATASET;
+    } else if (dataProviderId === 0) {
+      return CurrentPage.TEST_DATASETS;
+    } else {
+      return CurrentPage.DATASET;
+    }
+  }
+
   const getFileExtensions = async () => {
     try {
       const allExtensions = await IntegrationService.getAllExtensionsOperations(dataflowId, datasetSchemaId);
@@ -381,7 +395,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       setDataflowName(metaData.dataflow.name);
       setDatasetSchemaId(metaData.dataset.datasetSchemaId);
       setDatasetFeedbackStatus(metaData.dataset.datasetFeedbackStatus);
-      setDataProviderId(metaData.dataset.dataProviderId);
+      setDataProviderId(metaData.dataset.dataProviderId || 0);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
