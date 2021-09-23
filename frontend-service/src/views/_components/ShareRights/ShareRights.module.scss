@@ -50,6 +50,22 @@
   min-height: 50vh;
 }
 
+.shareRightsModal {
+  $root: &;
+  height: 0;
+  @at-root {
+    .wrapperNoUserRoles {
+      @at-root {
+        #{$root} #{&} {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
+
 .wrapperNoUserRoles,
 .wrapperEmptyFilter {
   display: flex;

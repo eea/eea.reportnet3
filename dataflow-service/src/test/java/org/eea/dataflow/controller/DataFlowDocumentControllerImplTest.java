@@ -5,9 +5,12 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.util.ArrayList;
+import java.util.List;
 import org.eea.dataflow.service.DataflowDocumentService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,12 +40,16 @@ public class DataFlowDocumentControllerImplTest {
   /** The document. */
   DocumentVO document;
 
+  /** The dataflow VO. */
+  DataFlowVO dataflowVO;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
     document = new DocumentVO();
+    dataflowVO = new DataFlowVO();
     MockitoAnnotations.openMocks(this);
   }
 
@@ -163,4 +170,40 @@ public class DataFlowDocumentControllerImplTest {
     dataFlowDocumentControllerImpl.deleteDocument(document.getId());
     verify(dataflowService, times(1)).deleteDocument(Mockito.any());
   }
+
+  /**
+   * Gets the all documents by dataflow id exception test.
+   *
+   * @return the all documents by dataflow id exception test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllDocumentsByDataflowIdExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).getAllDocumentsByDataflowId(Mockito.any());
+    try {
+      dataFlowDocumentControllerImpl.getAllDocumentsByDataflowId(null);
+    } catch (ResponseStatusException exception) {
+      assertEquals("bad status", HttpStatus.BAD_REQUEST, exception.getStatus());
+      assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, exception.getReason());
+    }
+  }
+
+  /**
+   * Gets the all documents by dataflow id success test.
+   *
+   * @return the all documents by dataflow id success test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllDocumentsByDataflowIdSuccessTest() throws EEAException {
+    List<DocumentVO> documentsExpected = new ArrayList<>();
+    DocumentVO documentVO = new DocumentVO();
+    documentVO.setId(1L);
+    documentsExpected.add(documentVO);
+    dataflowVO.setDocuments(documentsExpected);
+    when(dataflowService.getAllDocumentsByDataflowId(Mockito.anyLong()))
+        .thenReturn(documentsExpected);
+    assertEquals(documentsExpected, dataFlowDocumentControllerImpl.getAllDocumentsByDataflowId(1L));
+  }
+
 }

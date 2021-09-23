@@ -9,6 +9,7 @@ import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
+import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
@@ -287,8 +288,15 @@ public class CollaborationControllerImplTest {
 
   @Test
   public void findMessagesTest() throws EEAIllegalArgumentException, EEAForbiddenException {
+    MessagePaginatedVO messagePaginatedVO = new MessagePaginatedVO();
+    ArrayList<MessageVO> arrayListMessageVO = new ArrayList<MessageVO>();
+    MessageVO messageVO = new MessageVO();
+    messageVO.setId(1L);
+    messageVO.setType(MessageTypeEnum.TEXT);
+    messagePaginatedVO.setListMessage(arrayListMessageVO);
+    arrayListMessageVO.add(messageVO);
     Mockito.when(collaborationService.findMessages(Mockito.anyLong(), Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(new ArrayList<MessageVO>());
+        Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(messagePaginatedVO);
     Assert.assertNotNull(collaborationControllerImpl.findMessages(1L, 1L, true, 1));
   }
 
@@ -296,6 +304,7 @@ public class CollaborationControllerImplTest {
   public void findMessagesAttachmentTest()
       throws EEAIllegalArgumentException, EEAForbiddenException, EEAException {
     MessageVO messageVO = new MessageVO();
+    MessagePaginatedVO messagePaginatedVO = new MessagePaginatedVO();
     ArrayList<MessageVO> arrayListMessageVO = new ArrayList<>();
     messageVO.setType(MessageTypeEnum.TEXT);
     arrayListMessageVO.add(messageVO);
@@ -303,8 +312,9 @@ public class CollaborationControllerImplTest {
     messageVO.setId(1L);
     messageVO.setType(MessageTypeEnum.ATTACHMENT);
     arrayListMessageVO.add(messageVO);
+    messagePaginatedVO.setListMessage(arrayListMessageVO);
     Mockito.when(collaborationService.findMessages(Mockito.anyLong(), Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(arrayListMessageVO);
+        Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(messagePaginatedVO);
 
     MessageAttachment messageAttachment = new MessageAttachment();
     messageAttachment.setFileName("file.csv");
@@ -320,12 +330,14 @@ public class CollaborationControllerImplTest {
   public void findMessagesAttachmentEEAExceptionTest()
       throws EEAIllegalArgumentException, EEAForbiddenException, EEAException {
     MessageVO messageVO = new MessageVO();
+    MessagePaginatedVO messagePaginatedVO = new MessagePaginatedVO();
     ArrayList<MessageVO> arrayListMessageVO = new ArrayList<>();
     messageVO.setId(1L);
     messageVO.setType(MessageTypeEnum.ATTACHMENT);
     arrayListMessageVO.add(messageVO);
+    messagePaginatedVO.setListMessage(arrayListMessageVO);
     Mockito.when(collaborationService.findMessages(Mockito.anyLong(), Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(arrayListMessageVO);
+        Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(messagePaginatedVO);
 
     Mockito.when(collaborationService.getMessageAttachment(Mockito.anyLong()))
         .thenThrow(EEAException.class);

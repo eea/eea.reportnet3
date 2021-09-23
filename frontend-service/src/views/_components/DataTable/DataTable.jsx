@@ -273,10 +273,8 @@ export class DataTable extends Component {
     switch (this.props.stateStorage) {
       case 'local':
         return window.localStorage;
-
       case 'session':
         return window.sessionStorage;
-
       default:
         throw new Error(
           this.props.stateStorage +

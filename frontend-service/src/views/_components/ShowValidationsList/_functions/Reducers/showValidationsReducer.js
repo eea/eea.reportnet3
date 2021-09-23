@@ -1,11 +1,7 @@
-export const validationReducer = (state, { type, payload }) => {
+export const showValidationsReducer = (state, { type, payload }) => {
   switch (type) {
     case 'SET_TOTALS_ERRORS':
-      return {
-        ...state,
-        totalFilteredRecords: payload.totalFilteredRecords,
-        totalRecords: payload.totalRecords
-      };
+      return { ...state, totalFilteredRecords: payload.totalFilteredRecords, totalRecords: payload.totalRecords };
 
     case 'SET_TOTAL_GROUPED_ERRORS':
       return {

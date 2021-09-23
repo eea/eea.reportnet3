@@ -31,7 +31,6 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const EUDataset = withRouter(({ history, match }) => {
   const {
@@ -44,6 +43,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const [euDatasetState, euDatasetDispatch] = useReducer(euDatasetReducer, {
     dataflowName: '',
+    dataflowType: '',
     datasetHasData: false,
     datasetHasErrors: false,
     datasetName: '',
@@ -52,11 +52,10 @@ export const EUDataset = withRouter(({ history, match }) => {
     datasetSchemaName: '',
     dataViewerOptions: { activeIndex: null },
     exportExtensionsList: [],
-    isBusinessDataflow: false,
     isDataUpdated: false,
+    isGroupedValidationSelected: false,
     isLoading: true,
     isRefreshHighlighted: false,
-    isGroupedValidationSelected: false,
     levelErrorTypes: [],
     metadata: undefined,
     tableSchema: undefined,
@@ -67,11 +66,11 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const {
     dataflowName,
+    dataflowType,
     datasetName,
     dataViewerOptions,
-    isBusinessDataflow,
-    isLoading,
     isGroupedValidationSelected,
+    isLoading,
     levelErrorTypes,
     metadata,
     tableSchema,
@@ -100,8 +99,8 @@ export const EUDataset = withRouter(({ history, match }) => {
   useBreadCrumbs({
     currentPage: CurrentPage.EU_DATASET,
     dataflowId,
+    dataflowType,
     history,
-    isBusinessDataflow,
     isLoading,
     metaData: metadata
   });
@@ -121,7 +120,10 @@ export const EUDataset = withRouter(({ history, match }) => {
       const data = await DataflowService.getDetails(match.params.dataflowId);
       euDatasetDispatch({
         type: 'GET_DATAFLOW_DETAILS',
-        payload: { name: data.name, isBusinessDataflow: TextUtils.areEquals(data.type, config.dataflowType.BUSINESS) }
+        payload: {
+          dataflowType: data.type,
+          name: data.name
+        }
       });
     } catch (error) {
       console.error('EUDataset - getDataflowName.', error);
@@ -285,10 +287,10 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const renderTabsSchema = () => (
     <TabsSchema
+      dataflowType={dataflowType}
       datasetSchemaId={euDatasetState.metaData.dataset.datasetSchemaId}
       hasCountryCode={true}
       hasWritePermissions={false}
-      isBusinessDataflow={euDatasetState.isBusinessDataflow}
       isExportable={false}
       isFilterable={false}
       isGroupedValidationSelected={isGroupedValidationSelected}

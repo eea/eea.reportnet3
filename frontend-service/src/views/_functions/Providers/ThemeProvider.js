@@ -8,21 +8,13 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 const themeReducer = (state, { type, payload }) => {
   switch (type) {
     case 'TOGGLE_THEME':
-      return {
-        ...state,
-        currentTheme: payload.newTheme
-      };
+      return { ...state, currentTheme: payload.newTheme };
+
     case 'DEFAULT_VISUAL_THEME':
-      //   document.body.style.setProperty('--bg', '#282c35');
-      return {
-        ...state,
-        currentTheme: payload.newTheme
-      };
+      return { ...state, currentTheme: payload.newTheme };
+
     case 'SET_HEADER_COLLAPSE':
-      return {
-        ...state,
-        headerCollapse: payload
-      };
+      return { ...state, headerCollapse: payload };
 
     default:
       return state;

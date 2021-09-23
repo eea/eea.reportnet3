@@ -13,6 +13,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.mapper.DataflowPrivateMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.DataProviderGroup;
@@ -42,6 +43,7 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -178,6 +180,10 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private FMEUserRepository fmeUserRepository;
 
+
+  @Autowired
+  private DataflowPrivateMapper dataflowPrivateMapper;
+
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -190,8 +196,12 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Transactional
-  public DataFlowVO getById(Long id) throws EEAException {
-    return getByIdWithCondition(id, true);
+  public DataFlowVO getById(Long id, boolean removeWeblinksAndDocuments) throws EEAException {
+    DataFlowVO result = getByIdWithCondition(id, true);
+    if (removeWeblinksAndDocuments) {
+      removeWebLinksAndDocuments(result);
+    }
+    return result;
   }
 
   /**
@@ -204,8 +214,12 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   @Transactional
   public DataFlowVO getByIdWithRepresentativesFilteredByUserEmail(Long id) throws EEAException {
-    return getByIdWithCondition(id, false);
+    DataFlowVO result = getByIdWithCondition(id, false);
+    removeWebLinksAndDocuments(result);
+    return result;
   }
+
+
 
   /**
    * Gets the by status.
@@ -220,106 +234,18 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowMapper.entityListToClass(dataflows);
   }
 
+
   /**
    * Gets the dataflows.
    *
    * @param userId the user id
+   * @param dataflowType the dataflow type
    * @return the dataflows
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getDataflows(String userId) throws EEAException {
-
-    List<DataFlowVO> dataflowVOs = new ArrayList<>();
-
-    // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
-
-    // Get user's dataflows sorted by status and creation date
-    List<Long> idsResources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
-            .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (null != idsResources && !idsResources.isEmpty()) {
-      dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(idsResources)
-          .forEach(dataflow -> {
-            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-            if (!map.isEmpty() && null != datasetsStatusList) {
-              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-            }
-            dataflowVOs.add(dataflowVO);
-          });
-      try {
-        getOpenedObligations(dataflowVOs);
-      } catch (FeignException e) {
-        LOG_ERROR.error(
-            "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
-            e.getMessage(), e);
-      }
-    }
-
-    return dataflowVOs;
-  }
-
-
-
-  /**
-   * Gets the reference dataflows.
-   *
-   * @param userId the user id
-   * @return the reference dataflows
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public List<DataFlowVO> getReferenceDataflows(String userId) throws EEAException {
-
-    List<DataFlowVO> dataflowVOs = new ArrayList<>();
-
-    // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
-
-    // First, get reference dataflows in DESIGN that the user has permission
-    List<Long> idsResources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
-            .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (null != idsResources && !idsResources.isEmpty()) {
-      dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
-          TypeStatusEnum.DESIGN, idsResources).forEach(dataflow -> {
-            DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-            List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-            if (!map.isEmpty() && null != datasetsStatusList) {
-              setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-            }
-            dataflowVOs.add(dataflowVO);
-          });
-    }
-
-    // Second, get reference dataflows in DRAFT sorted by status and creation date
-    dataflowRepository
-        .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT)
-        .forEach(dataflow -> {
-          DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-          List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-          if (!map.isEmpty() && null != datasetsStatusList) {
-            setReportingDatasetStatus(datasetsStatusList, dataflowVO);
-          }
-          dataflowVOs.add(dataflowVO);
-        });
-
-
-    return dataflowVOs;
-  }
-
-
-  /**
-   * Gets the business dataflows.
-   *
-   * @param userId the user id
-   * @return the business dataflows
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public List<DataFlowVO> getBusinessDataflows(String userId) throws EEAException {
+  public List<DataFlowVO> getDataflows(String userId, TypeDataflowEnum dataflowType)
+      throws EEAException {
 
     List<DataFlowVO> dataflowVOs = new ArrayList<>();
 
@@ -331,10 +257,46 @@ public class DataflowServiceImpl implements DataflowService {
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if ((null != idsResources && !idsResources.isEmpty()) || userAdmin) {
-      List<Dataflow> dataflows = userAdmin
-          ? dataflowRepository.findBusinessInOrderByStatusDescCreationDateDesc()
-          : dataflowRepository.findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources);
+    if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
+      List<Dataflow> dataflows = new ArrayList<>();
+      switch (dataflowType) {
+        case REPORTING:
+          dataflows = userAdmin ? dataflowRepository.findInOrderByStatusDescCreationDateDesc()
+              : dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(idsResources);
+          break;
+        case CITIZEN_SCIENCE:
+          dataflows =
+              userAdmin ? dataflowRepository.findCitizenScienceInOrderByStatusDescCreationDateDesc()
+                  : dataflowRepository
+                      .findCitizenScienceAndIdInOrderByStatusDescCreationDateDesc(idsResources);
+          break;
+        case BUSINESS:
+          dataflows =
+              userAdmin ? dataflowRepository.findBusinessInOrderByStatusDescCreationDateDesc()
+                  : dataflowRepository
+                      .findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources);
+          break;
+        case REFERENCE:
+          dataflows = userAdmin
+              ? dataflowRepository
+                  .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
+              : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
+                  TypeStatusEnum.DESIGN, idsResources);
+
+          dataflows.addAll(dataflowRepository
+              .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT));
+          break;
+        default:
+          // case for type ALL but except REFERENCE type dataflow
+          dataflows = userAdmin
+              ? dataflowRepository.findDataflowsExceptReferenceInOrderByStatusDescCreationDateDesc()
+              : dataflowRepository
+                  .findDataflowsExceptReferenceAndIdInOrderByStatusDescCreationDateDesc(
+                      idsResources);
+          break;
+      }
+
+
       dataflows.forEach(dataflow -> {
         DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
         List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
@@ -351,6 +313,58 @@ public class DataflowServiceImpl implements DataflowService {
             e.getMessage(), e);
       }
     }
+
+    return dataflowVOs;
+  }
+
+  /**
+   * Gets the cloneable dataflows.
+   *
+   * @param userId the user id
+   * @return the cloneable dataflows
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<DataFlowVO> getCloneableDataflows(String userId) throws EEAException {
+
+    List<DataFlowVO> dataflowVOs = new ArrayList<>();
+
+    // Get user's datasets
+    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
+    boolean userAdmin = isAdmin();
+
+    // Get user's dataflows sorted by status and creation date
+    List<Long> idsResources =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .filter(resource -> SecurityRoleEnum.DATA_STEWARD.equals(resource.getRole())
+                || SecurityRoleEnum.DATA_CUSTODIAN.equals(resource.getRole()))
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
+      List<Dataflow> dataflows = new ArrayList<>();
+
+      // All dataflows except REFERENCE type dataflow
+      dataflows = userAdmin
+          ? dataflowRepository.findDataflowsExceptReferenceInOrderByStatusDescCreationDateDesc()
+          : dataflowRepository
+              .findDataflowsExceptReferenceAndIdInOrderByStatusDescCreationDateDesc(idsResources);
+
+      dataflows.forEach(dataflow -> {
+        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+        if (!map.isEmpty() && null != datasetsStatusList) {
+          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+        }
+        dataflowVOs.add(dataflowVO);
+      });
+      try {
+        getOpenedObligations(dataflowVOs);
+      } catch (FeignException e) {
+        LOG_ERROR.error(
+            "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
+            e.getMessage(), e);
+      }
+    }
+
     return dataflowVOs;
   }
 
@@ -558,7 +572,7 @@ public class DataflowServiceImpl implements DataflowService {
     // take the jpa entity
 
     try {
-      DataFlowVO dataflowVO = getById(idDataflow);
+      DataFlowVO dataflowVO = getById(idDataflow, false);
 
       // use it to take all datasets Design
 
@@ -730,11 +744,37 @@ public class DataflowServiceImpl implements DataflowService {
     if (null == dataflowPublicVO) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    dataflowPublicVO.setReportingDatasets(
-        datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflowId));
 
-    dataflowPublicVO.setReferenceDatasets(
-        referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflowId));
+    if (!TypeDataflowEnum.BUSINESS.equals(dataflowPublicVO.getType())) {
+      dataflowPublicVO.setReportingDatasets(
+          datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflowId));
+
+      dataflowPublicVO.setReferenceDatasets(
+          referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflowId));
+    }
+
+    Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+    if (dataflow != null) {
+      DataFlowVO dataflowVO = dataflowMapper.entityToClass(dataflow);
+      if (dataflowVO.getDocuments() != null) {
+        List<DocumentVO> publicDocuments = new ArrayList<>();
+        dataflowVO.getDocuments().forEach(document -> {
+          if (Boolean.TRUE.equals(document.getIsPublic())) {
+            publicDocuments.add(document);
+          }
+        });
+        dataflowPublicVO.setDocuments(publicDocuments);
+      }
+      if (dataflowVO.getWeblinks() != null) {
+        List<WeblinkVO> publicWeblinks = new ArrayList<>();
+        dataflowVO.getWeblinks().forEach(weblink -> {
+          if (Boolean.TRUE.equals(weblink.getIsPublic())) {
+            publicWeblinks.add(weblink);
+          }
+        });
+        dataflowPublicVO.setWeblinks(publicWeblinks);
+      }
+    }
 
     findObligationPublicDataflow(dataflowPublicVO);
     return dataflowPublicVO;
@@ -1014,7 +1054,7 @@ public class DataflowServiceImpl implements DataflowService {
   private void deleteDocuments(Long idDataflow, DataFlowVO dataflowVO) throws Exception {
     for (DocumentVO document : dataflowVO.getDocuments()) {
       try {
-        documentControllerZuul.deleteDocument(document.getId(), Boolean.TRUE);
+        documentControllerZuul.deleteDocument(document.getId(), dataflowVO.getId(), Boolean.TRUE);
       } catch (EEAException e) {
         LOG.error("Error deleting document with id {}", document.getId());
         throw new EEAException(new StringBuilder().append("Error Deleting document ")
@@ -1398,6 +1438,42 @@ public class DataflowServiceImpl implements DataflowService {
       }
     }
     return map;
+  }
+
+  /**
+   * Gets the private dataflow by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the private dataflow by id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public DataflowPrivateVO getPrivateDataflowById(Long dataflowId) throws EEAException {
+    DataflowPrivateVO dataflowPrivateVO = null;
+    if (null != dataflowId) {
+      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      if (null != dataflow) {
+        dataflowPrivateVO = dataflowPrivateMapper.entityToClass(dataflow);
+        dataflowPrivateVO
+            .setDocuments(documentControllerZuul.getAllDocumentsByDataflow(dataflowId));
+      } else {
+        throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+      }
+    } else {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    return dataflowPrivateVO;
+  }
+
+  /**
+   * Removes the web links and documents.
+   *
+   * @param result the result
+   */
+  private void removeWebLinksAndDocuments(DataFlowVO result) {
+    result.setWeblinks(null);
+    result.setDocuments(null);
   }
 
 }

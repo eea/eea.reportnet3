@@ -113,20 +113,16 @@ export class BodyRow extends Component {
           if (nextRow) {
             nextRow.focus();
           }
-
           event.preventDefault();
           break;
-
         //up arrow
         case 38:
           let prevRow = this.findPrevSelectableRow(row);
           if (prevRow) {
             prevRow.focus();
           }
-
           event.preventDefault();
           break;
-
         //enter
         case 13:
           this.onClick(event);
@@ -141,9 +137,9 @@ export class BodyRow extends Component {
     }
   }
 
-  findNextSelectableCell(cell) {
-    // let nextCell = cell.nextElementSibling;
-  }
+  // findNextSelectableCell(cell) {
+  //   let nextCell = cell.nextElementSibling;
+  // }
 
   findNextSelectableRow(row) {
     let nextRow = row.nextElementSibling;

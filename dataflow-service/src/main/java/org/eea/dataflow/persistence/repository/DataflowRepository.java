@@ -78,6 +78,14 @@ public interface DataflowRepository
   @Query("select df from Dataflow df where df.type='REPORTING' and df.id IN :ids order by status, creationDate desc")
   List<Dataflow> findByIdInOrderByStatusDescCreationDateDesc(@Param("ids") List<Long> ids);
 
+  /**
+   * Find in order by status desc creation date desc.
+   *
+   * @return the list
+   */
+  @Query("select df from Dataflow df where df.type='REPORTING' order by status, creationDate desc")
+  List<Dataflow> findInOrderByStatusDescCreationDateDesc();
+
 
   /**
    * Find reference by id in order by status desc creation date desc.
@@ -125,6 +133,42 @@ public interface DataflowRepository
   List<Dataflow> findBusinessAndIdInOrderByStatusDescCreationDateDesc(@Param("ids") List<Long> ids);
 
 
+  /**
+   * Find citizen science in order by status desc creation date desc.
+   *
+   * @return the list
+   */
+  @Query("select df from Dataflow df where df.type='CITIZEN_SCIENCE' order by status, creationDate desc")
+  List<Dataflow> findCitizenScienceInOrderByStatusDescCreationDateDesc();
+
+
+  /**
+   * Find citizen science and id in order by status desc creation date desc.
+   *
+   * @param ids the ids
+   * @return the list
+   */
+  @Query("select df from Dataflow df where df.type='CITIZEN_SCIENCE' and df.id IN :ids order by status, creationDate desc")
+  List<Dataflow> findCitizenScienceAndIdInOrderByStatusDescCreationDateDesc(
+      @Param("ids") List<Long> ids);
+
+  /**
+   * Find dataflows except reference in order by status desc creation date desc.
+   *
+   * @return the list
+   */
+  @Query("select df from Dataflow df where df.type!='REFERENCE' order by status, creationDate desc")
+  List<Dataflow> findDataflowsExceptReferenceInOrderByStatusDescCreationDateDesc();
+
+  /**
+   * Find dataflows except reference and id in order by status desc creation date desc.
+   *
+   * @param ids the ids
+   * @return the list
+   */
+  @Query("select df from Dataflow df where df.type!='REFERENCE' and df.id IN :ids order by status, creationDate desc")
+  List<Dataflow> findDataflowsExceptReferenceAndIdInOrderByStatusDescCreationDateDesc(
+      @Param("ids") List<Long> ids);
 
   /**
    * Gets the datasets status.
@@ -150,7 +194,7 @@ public interface DataflowRepository
    * @param countryCode the country code
    * @return the list
    */
-  @Query("select r.dataflow from Representative r where r.dataflow.showPublicInfo= true and r.dataProvider.code= :countryCode and r.dataflow.status='DRAFT'")
+  @Query("select r.dataflow from Representative r where r.dataflow.showPublicInfo= true and r.dataProvider.code= :countryCode and r.dataflow.status='DRAFT' and r.hasDatasets=true")
   List<Dataflow> findPublicDataflowsByCountryCode(@Param("countryCode") String countryCode);
 
   /**

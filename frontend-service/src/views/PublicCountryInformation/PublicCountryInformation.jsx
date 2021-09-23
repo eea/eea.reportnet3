@@ -88,7 +88,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const getHeader = fieldHeader => {
     switch (fieldHeader) {
       case 'obligation':
-        return resourcesContext.messages['obligationTitle'];
+        return resourcesContext.messages['obligation'];
       case 'isReleasable':
         return resourcesContext.messages['status'];
       case 'isReleased':
@@ -184,7 +184,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
           id: dataflow.id,
           isReleasable: dataflow.isReleasable,
           isReleased: dataset.isReleased,
-          legalInstrument: dataflow.obligation?.legalInstruments,
+          legalInstrument: dataflow.obligation?.legalInstrument,
           name: dataflow.name,
           obligation: dataflow.obligation,
           publicFilesNames: publicFileNames,

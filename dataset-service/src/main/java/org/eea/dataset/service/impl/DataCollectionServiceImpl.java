@@ -473,7 +473,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         referenceSchemasId.add(dataset.getDatasetSchema());
         if (isCreation) {
           datasetSchemaService.updateReferenceDataset(dataset.getId(), dataset.getDatasetSchema(),
-              true, true);
+              true);
         }
       }
     });

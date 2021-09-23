@@ -735,7 +735,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         }
         if (null != datasetSchemaVO.getReferenceDataset()) {
           dataschemaService.updateReferenceDataset(datasetId, datasetSchemaId,
-              datasetSchemaVO.getReferenceDataset(), false);
+              datasetSchemaVO.getReferenceDataset());
         }
       }
     } catch (EEAException e) {

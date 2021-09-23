@@ -33,7 +33,7 @@ const SelectAllFilters = ({ datasetSchemaId, filterDispatch, filters, id, labels
         type="checkbox"
       />
       <label className={styles.labelItem} htmlFor={`${id}_${'selectAll'}_${datasetSchemaId}`}>
-        {resourcesContext.messages['selectAll']}
+        {resourcesContext.messages['checkAllFilter']}
       </label>
     </li>
   );

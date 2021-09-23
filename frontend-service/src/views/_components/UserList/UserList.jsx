@@ -15,7 +15,9 @@ import { DataflowService } from 'services/DataflowService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const UserList = ({ dataflowId, isBusinessDataflow = false, representativeId }) => {
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+
+export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -82,9 +84,13 @@ export const UserList = ({ dataflowId, isBusinessDataflow = false, representativ
       type: 'multiselect',
       properties: [
         {
-          name: 'country',
+          name: 'dataProviderName',
           showInput: true,
-          label: isBusinessDataflow ? resourcesContext.messages['company'] : resourcesContext.messages['countries']
+          label: TextByDataflowTypeUtils.getLabelByDataflowType(
+            resourcesContext.messages,
+            dataflowType,
+            'userListDataProviderFilterLabel'
+          )
         }
       ]
     }
@@ -157,10 +163,12 @@ export const UserList = ({ dataflowId, isBusinessDataflow = false, representativ
               <Column field="email" header={resourcesContext.messages['user']} sortable={true} />
               {isNil(representativeId) && !isNil(dataflowId) && (
                 <Column
-                  field="country"
-                  header={
-                    isBusinessDataflow ? resourcesContext.messages['company'] : resourcesContext.messages['countries']
-                  }
+                  field="dataProviderName"
+                  header={TextByDataflowTypeUtils.getLabelByDataflowType(
+                    resourcesContext.messages,
+                    dataflowType,
+                    'userListDataProviderColumnHeader'
+                  )}
                   sortable={true}
                 />
               )}

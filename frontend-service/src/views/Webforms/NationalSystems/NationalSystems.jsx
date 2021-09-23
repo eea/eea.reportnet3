@@ -24,10 +24,8 @@ export const NationalSystems = ({ dataProviderId, dataflowId, datasetId, state }
     switch (tableName) {
       case 'Table_1':
         return renderTableErrors(data);
-
       case 'Table_2':
         return renderFileErrors(data);
-
       default:
         break;
     }

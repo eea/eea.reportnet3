@@ -238,7 +238,7 @@ public class UserRoleServiceImpl implements UserRoleService {
             UserRoleVO userRoleVO = new UserRoleVO();
             userRoleVO.setEmail(leadReporter.getEmail());
             userRoleVO.setRoles(Arrays.asList(SecurityRoleEnum.LEAD_REPORTER.toString()));
-            userRoleVO.setCountry(providerIds.get(representative.getDataProviderId()));
+            userRoleVO.setDataProviderName(providerIds.get(representative.getDataProviderId()));
             userRoleList.add(userRoleVO);
           }
         }
@@ -304,7 +304,7 @@ public class UserRoleServiceImpl implements UserRoleService {
         userRoleVO.setEmail(userRepresentation.getEmail());
         userRoleVO.setRoles(Arrays.asList(role));
         if (null != country) {
-          userRoleVO.setCountry(country);
+          userRoleVO.setDataProviderName(country);
         }
         userRoleList.add(userRoleVO);
       } ;

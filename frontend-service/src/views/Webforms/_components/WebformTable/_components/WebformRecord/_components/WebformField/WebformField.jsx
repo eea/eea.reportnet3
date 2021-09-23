@@ -351,7 +351,6 @@ export const WebformField = ({
             yearRange="1900:2100"
           />
         );
-
       case 'EXTERNAL_LINK':
       case 'LINK':
         if (field.pkHasMultipleValues) {
@@ -405,7 +404,6 @@ export const WebformField = ({
             />
           );
         }
-
       case 'MULTISELECT_CODELIST':
         return (
           <MultiSelect
@@ -430,7 +428,6 @@ export const WebformField = ({
             valuesSeparator=";"
           />
         );
-
       case 'CODELIST':
         return (
           <Dropdown
@@ -447,7 +444,6 @@ export const WebformField = ({
             value={field.value}
           />
         );
-
       case 'TEXT':
       case 'RICH_TEXT':
       case 'URL':
@@ -513,14 +509,12 @@ export const WebformField = ({
             />
           </div>
         );
-
       case 'READ_ONLY':
         return (
           <Fragment>
             {field.title}: <strong>{field.value}</strong>
           </Fragment>
         );
-
       case 'ATTACHMENT':
         const colSchema = columnsSchema.filter(colSchema => colSchema.fieldSchemaId === field.fieldSchemaId)[0];
         return (
@@ -562,7 +556,6 @@ export const WebformField = ({
             />
           </div>
         );
-
       default:
         break;
     }

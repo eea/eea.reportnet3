@@ -5,17 +5,15 @@ import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 
-import styles from './ManageReportingDataflow.module.scss';
+import styles from './ManageDataflow.module.scss';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
-import { ManageReportingDataflowForm } from './_components/ManageReportingDataflowForm';
+import { ManageDataflowForm } from './_components/ManageDataflowForm';
 import { Dialog } from 'views/_components/Dialog';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
-import ReactTooltip from 'react-tooltip';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { DataflowService } from 'services/DataflowService';
 
@@ -27,8 +25,9 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const ManageReportingDataflow = ({
+export const ManageDataflow = ({
   dataflowId,
+  isCitizenScienceDataflow,
   isEditForm = false,
   isVisible,
   manageDialogs,
@@ -55,6 +54,10 @@ export const ManageReportingDataflow = ({
     pinDataflow: false,
     isReleasable: state.isReleasable
   };
+
+  const dialogName = isCitizenScienceDataflow
+    ? 'isCitizenScienceDataflowDialogVisible'
+    : 'isReportingDataflowDialogVisible';
 
   const setIsDeleting = isDeleting => reportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
 
@@ -85,7 +88,7 @@ export const ManageReportingDataflow = ({
   const onHideDataflowDialog = () => {
     onResetData();
     resetObligations();
-    manageDialogs('isReportingDataflowDialogVisible', false);
+    manageDialogs(dialogName, false);
   };
 
   const onDeleteDataflow = async () => {
@@ -96,7 +99,7 @@ export const ManageReportingDataflow = ({
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       } else {
-        console.error('ManageReportingDataflow - onDeleteDataflow.', error);
+        console.error('ManageDataflow - onDeleteDataflow.', error);
         notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
       }
       setIsDeleting(false);
@@ -130,6 +133,15 @@ export const ManageReportingDataflow = ({
       onClick={() => action()}
     />
   );
+
+  const getModalHeader = () => {
+    if (isCitizenScienceDataflow) {
+      return isEditForm
+        ? resourcesContext.messages['updateCitizenScienceDataflow']
+        : resourcesContext.messages['createNewCitizenScienceDataflow'];
+    }
+    return isEditForm ? resourcesContext.messages['updateDataflow'] : resourcesContext.messages['createNewDataflow'];
+  };
 
   const renderDataflowDialog = () => (
     <Fragment>
@@ -168,16 +180,9 @@ export const ManageReportingDataflow = ({
                 {resourcesContext.messages['pinDataflow']}
               </span>
             </label>
-            <FontAwesomeIcon
-              aria-hidden={false}
-              className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-              data-for="pinDataflow"
-              data-tip
-              icon={AwesomeIcons('infoCircle')}
-            />
-            <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="pinDataflow" place="top">
-              <span>{resourcesContext.messages['pinDataflowMessage']}</span>
-            </ReactTooltip>
+            <TooltipButton
+              message={resourcesContext.messages['pinDataflowMessage']}
+              uniqueIdentifier="pinDataflow"></TooltipButton>
           </div>
         )}
       </div>
@@ -210,13 +215,15 @@ export const ManageReportingDataflow = ({
         <Dialog
           className={styles.dialog}
           footer={renderDataflowDialog()}
-          header={resourcesContext.messages[isEditForm ? 'updateDataflow' : 'createNewDataflow']}
+          header={getModalHeader()}
           onHide={() => onHideDataflowDialog()}
           visible={isVisible}>
-          <ManageReportingDataflowForm
+          <ManageDataflowForm
             data={reportingDataflowState}
             dataflowId={dataflowId}
+            dialogName={dialogName}
             getData={onLoadData}
+            isCitizenScienceDataflow={isCitizenScienceDataflow}
             isEditForm={isEditForm}
             obligation={reportingDataflowState.obligation}
             onCreate={onCreateDataflow}
@@ -225,7 +232,11 @@ export const ManageReportingDataflow = ({
             onSearch={() => manageDialogs('isReportingObligationsDialogVisible', true)}
             onSubmit={onSubmit}
             ref={formRef}
-            refresh={state.isReportingDataflowDialogVisible}
+            refresh={
+              isCitizenScienceDataflow
+                ? state.isCitizenScienceDataflowDialogVisible
+                : state.isReportingDataflowDialogVisible
+            }
           />
         </Dialog>
       )}

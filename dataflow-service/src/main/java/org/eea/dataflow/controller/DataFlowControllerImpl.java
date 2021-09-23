@@ -14,6 +14,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
@@ -108,7 +109,7 @@ public class DataFlowControllerImpl implements DataFlowController {
     DataFlowVO result = null;
     try {
       if (isUserRequester(dataflowId)) {
-        result = dataflowService.getById(dataflowId);
+        result = dataflowService.getById(dataflowId, true);
       } else {
         result = dataflowService.getByIdWithRepresentativesFilteredByUserEmail(dataflowId);
       }
@@ -161,7 +162,7 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getDataflows(userId);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REPORTING);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -187,7 +188,7 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getReferenceDataflows(userId);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REFERENCE);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -212,7 +213,60 @@ public class DataFlowControllerImpl implements DataFlowController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getBusinessDataflows(userId);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.BUSINESS);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return dataflows;
+  }
+
+
+
+  /**
+   * Find citizen science dataflows.
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/citizenScienceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Citizen Science Dataflows for the logged User",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      responseContainer = "List")
+  public List<DataFlowVO> findCitizenScienceDataflows() {
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
+    try {
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.CITIZEN_SCIENCE);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+    return dataflows;
+  }
+
+  /**
+   * Find cloneable dataflows.
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/cloneableDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Dataflows for clone for the logged User",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      responseContainer = "List")
+  public List<DataFlowVO> findCloneableDataflows() {
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
+    try {
+      // All dataflows except REFERENCE type dataflow
+      dataflows = dataflowService.getCloneableDataflows(userId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -500,9 +554,9 @@ public class DataFlowControllerImpl implements DataFlowController {
     } else if (cloneLockVO != null) {
       throw new ResponseStatusException(HttpStatus.LOCKED,
           "Dataflow is locked because clone is in progress.");
-    } else
+    } else {
       dataflowService.deleteDataFlow(dataflowId);
-
+    }
   }
 
   /**
@@ -641,6 +695,14 @@ public class DataFlowControllerImpl implements DataFlowController {
   }
 
 
+  /**
+   * Access entity.
+   *
+   * @param dataflowType the dataflow type
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if successful
+   */
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
@@ -673,6 +735,25 @@ public class DataFlowControllerImpl implements DataFlowController {
       }
     }
     return false;
+  }
+
+  /**
+   * Gets the private dataflow by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the private dataflow by id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/getPrivateDataflow/{dataflowId}")
+  public DataflowPrivateVO getPrivateDataflowById(@PathVariable("dataflowId") Long dataflowId) {
+    DataflowPrivateVO dataflowPrivateVO = null;
+    try {
+      return dataflowService.getPrivateDataflowById(dataflowId);
+    } catch (EEAException e) {
+      LOG_ERROR.info("Not found dataflow with id {}" + dataflowId);
+    }
+    return dataflowPrivateVO;
   }
 
 }

@@ -457,10 +457,8 @@ export const WebformRecord = ({
     switch (webformType) {
       case 'ARTICLE_15':
         return renderArticle15ErrorMessages(content);
-
       case 'ARTICLE_13':
         return renderArticle13ErrorMessages(content);
-
       default:
         return [];
     }

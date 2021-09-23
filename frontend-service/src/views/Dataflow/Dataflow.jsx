@@ -23,7 +23,7 @@ import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
-import { ManageReportingDataflow } from 'views/_components/ManageReportingDataflow';
+import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { MainLayout } from 'views/_components/Layout';
@@ -56,6 +56,7 @@ import { useReportingObligations } from 'views/_components/ReportingObligations/
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const Dataflow = withRouter(({ history, match }) => {
@@ -72,6 +73,7 @@ const Dataflow = withRouter(({ history, match }) => {
     anySchemaAvailableInPublic: false,
     currentUrl: '',
     data: {},
+    dataflowType: '',
     dataProviderId: [],
     dataProviderSelected: {},
     deleteInput: '',
@@ -81,22 +83,21 @@ const Dataflow = withRouter(({ history, match }) => {
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
-    isAdminAssignedBusinessDataflow: false,
+    isAdminAssignedDataflow: false,
     isApiKeyDialogVisible: false,
-    isBusinessDataflow: false,
+    isBusinessDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
     isCustodian: false,
     isDataSchemaCorrect: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
-    isReportingDataflowDialogVisible: false,
     isExportDialogVisible: false,
     isExportEUDatasetLoading: false,
     isExporting: false,
     isFetchingData: false,
     isImportLeadReportersVisible: false,
-    isManageRequestersDialogVisible: false,
     isManageReportersDialogVisible: false,
+    isManageRequestersDialogVisible: false,
     isManageRolesDialogVisible: false,
     isNationalCoordinator: false,
     isObserver: false,
@@ -107,9 +108,11 @@ const Dataflow = withRouter(({ history, match }) => {
     isReleasable: false,
     isReleaseableDialogVisible: false,
     isReleaseDialogVisible: false,
+    isReportingDataflowDialogVisible: false,
     isShowPublicInfoDialogVisible: false,
     isSnapshotDialogVisible: false,
     isUserListVisible: false,
+    isUserRightManagementDialogVisible: false,
     name: '',
     obligations: {},
     representativesImport: false,
@@ -117,10 +120,7 @@ const Dataflow = withRouter(({ history, match }) => {
     showPublicInfo: false,
     status: '',
     updatedDatasetSchema: [],
-    userRoles: [],
-    isUserRightManagementDialogVisible: false,
-    isAdmin: false,
-    isBusinessDataflowDialogVisible: false
+    userRoles: []
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
@@ -174,6 +174,8 @@ const Dataflow = withRouter(({ history, match }) => {
     [config.permissions.roles.NATIONAL_COORDINATOR.key]
   );
 
+  const isBusinessDataflow = TextUtils.areEquals(dataflowState.dataflowType, config.dataflowType.BUSINESS.value);
+
   const country =
     uniqDataProviders.length === 1
       ? uniq(map(dataflowState.data.datasets, 'datasetSchemaName'))
@@ -212,8 +214,8 @@ const Dataflow = withRouter(({ history, match }) => {
     currentPage: CurrentPage.DATAFLOW,
     dataflowId,
     dataflowStateData: dataflowState.data,
+    dataflowType: dataflowState.dataflowType,
     history,
-    isBusinessDataflow: dataflowState.isBusinessDataflow,
     matchParams: match.params,
     representativeId
   });
@@ -257,14 +259,14 @@ const Dataflow = withRouter(({ history, match }) => {
 
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
-      editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin && !dataflowState.isBusinessDataflow,
-      editBusinessBtn: (dataflowState.isAdmin || dataflowState.isCustodian) && dataflowState.isBusinessDataflow,
+      editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin && !isBusinessDataflow,
+      editBusinessBtn: (dataflowState.isAdmin || dataflowState.isCustodian) && isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
-      showPublicInfoBtn: !isDesign && isLeadDesigner && !dataflowState.isBusinessDataflow,
+      showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
@@ -313,10 +315,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const handleRedirect = target => history.push(target);
 
-  const setIsAdminAssignedBusinessDataflow = value => {
+  const setIsAdminAssignedDataflow = value => {
     dataflowDispatch({
-      type: 'SET_IS_ADMIN_ASSIGNED_BUSINESS_DATAFLOW',
-      payload: { isAdminAssignedBusinessDataflow: value }
+      type: 'SET_IS_ADMIN_ASSIGNED_DATAFLOW',
+      payload: { isAdminAssignedDataflow: value }
     });
   };
 
@@ -338,7 +340,7 @@ const Dataflow = withRouter(({ history, match }) => {
         label={resourcesContext.messages['close']}
         onClick={() => {
           manageDialogs(`isManage${userType}DialogVisible`, false);
-          if (dataflowState.isAdminAssignedBusinessDataflow) {
+          if (dataflowState.isAdminAssignedDataflow) {
             onLoadReportingDataflow();
             setIsPageLoading(true);
             onRefreshToken();
@@ -422,8 +424,35 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
+  const onExportLeadReportersTemplate = async () => {
+    try {
+      const { data } = await RepresentativeService.exportTemplateFile(
+        dataflowState.dataProviderSelected?.dataProviderGroupId
+      );
+      if (!isNil(data)) {
+        DownloadFile(data, `GroupId_${dataflowState.dataProviderSelected?.dataProviderGroupId}_Template.csv`);
+      }
+    } catch (error) {
+      console.error('Dataflow - onExportLeadReportersTemplate.', error);
+      notificationContext.add({
+        type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_TEMPLATE_FAILED_EVENT'
+      });
+    }
+  };
+
   const manageRoleDialogFooter = (
     <Fragment>
+      <Button
+        className={`${styles.exportTemplate} p-button-secondary ${
+          !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
+        }`}
+        disabled={isEmpty(dataflowState.dataProviderSelected)}
+        icon={'export'}
+        label={resourcesContext.messages['exportLeadReportersTemplate']}
+        onClick={onExportLeadReportersTemplate}
+        tooltip={`${resourcesContext.messages['exportLeadReportersTemplateTooltip']} ${dataflowState.dataProviderSelected?.label}`}
+        tooltipOptions={{ position: 'top' }}
+      />
       <Button
         className={`${styles.manageLeadReportersButton} p-button-secondary ${
           !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
@@ -432,6 +461,8 @@ const Dataflow = withRouter(({ history, match }) => {
         icon={'import'}
         label={resourcesContext.messages['importLeadReporters']}
         onClick={() => manageDialogs('isImportLeadReportersVisible', true)}
+        tooltip={resourcesContext.messages['importLeadReportersTooltip']}
+        tooltipOptions={{ position: 'top' }}
       />
       <Button
         className={`${styles.manageLeadReportersButton} p-button-secondary p-button-animated-blink`}
@@ -516,8 +547,8 @@ const Dataflow = withRouter(({ history, match }) => {
         payload: {
           anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
+          dataflowType: dataflow.type,
           description: dataflow.description,
-          isBusinessDataflow: TextUtils.areEquals(dataflow.type, config.dataflowType.BUSINESS),
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
@@ -843,8 +874,8 @@ const Dataflow = withRouter(({ history, match }) => {
           className="dataflow-big-buttons-help-step"
           dataProviderId={dataProviderId}
           dataflowState={dataflowState}
+          dataflowType={dataflowState.dataflowType}
           handleRedirect={handleRedirect}
-          isBusinessDataflow={dataflowState.isBusinessDataflow}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
@@ -898,9 +929,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
-            footerAddon={
-              dataflowState.anySchemaAvailableInPublic && !dataflowState.isBusinessDataflow && checkRestrictFromPublic
-            }
+            footerAddon={dataflowState.anySchemaAvailableInPublic && !isBusinessDataflow && checkRestrictFromPublic}
             header={resourcesContext.messages['confirmReleaseHeader']}
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
@@ -926,7 +955,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <div className={styles.dialog}>
               <RepresentativesList
                 dataflowId={dataflowId}
-                isBusinessDataflow={dataflowState.isBusinessDataflow}
+                dataflowType={dataflowState.dataflowType}
                 representativesImport={dataflowState.representativesImport}
                 setDataProviderSelected={setDataProviderSelected}
                 setFormHasRepresentatives={setFormHasRepresentatives}
@@ -945,7 +974,7 @@ const Dataflow = withRouter(({ history, match }) => {
             header={resourcesContext.messages['manageRequestersRights']}
             onHide={() => {
               manageDialogs('isManageRequestersDialogVisible', false);
-              if (dataflowState.isAdminAssignedBusinessDataflow) {
+              if (dataflowState.isAdminAssignedDataflow) {
                 onLoadReportingDataflow();
                 setIsPageLoading(true);
                 onRefreshToken();
@@ -953,22 +982,22 @@ const Dataflow = withRouter(({ history, match }) => {
             }}
             visible={dataflowState.isManageRequestersDialogVisible}>
             <ShareRights
-              addConfirmHeader={resourcesContext.messages[`addRequesterConfirmHeader`]}
+              addConfirmHeader={resourcesContext.messages['addRequesterConfirmHeader']}
               addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
               columnHeader={resourcesContext.messages['requestersEmailColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
               deleteColumnHeader={resourcesContext.messages['deleteRequesterButtonTableHeader']}
-              deleteConfirmHeader={resourcesContext.messages[`requestersRightsDialogConfirmDeleteHeader`]}
-              deleteConfirmMessage={resourcesContext.messages[`requestersRightsDialogConfirmDeleteQuestion`]}
+              deleteConfirmHeader={resourcesContext.messages['requestersRightsDialogConfirmDeleteHeader']}
+              deleteConfirmMessage={resourcesContext.messages['requestersRightsDialogConfirmDeleteQuestion']}
               deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
-              editConfirmHeader={resourcesContext.messages[`editRequesterConfirmHeader`]}
+              editConfirmHeader={resourcesContext.messages['editRequesterConfirmHeader']}
               getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
               isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
               placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
-              setIsAdminAssignedBusinessDataflow={setIsAdminAssignedBusinessDataflow}
+              setIsAdminAssignedDataflow={setIsAdminAssignedDataflow}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
               userType={'requester'}
@@ -983,21 +1012,22 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
             visible={dataflowState.isManageReportersDialogVisible}>
             <ShareRights
-              addConfirmHeader={resourcesContext.messages[`addReporterConfirmHeader`]}
+              addConfirmHeader={resourcesContext.messages['addReporterConfirmHeader']}
               addErrorNotificationKey={'ADD_REPORTER_ERROR'}
               columnHeader={resourcesContext.messages['reportersEmailColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
               deleteColumnHeader={resourcesContext.messages['deleteReporterButtonTableHeader']}
-              deleteConfirmHeader={resourcesContext.messages[`reportersRightsDialogConfirmDeleteHeader`]}
-              deleteConfirmMessage={resourcesContext.messages[`reportersRightsDialogConfirmDeleteQuestion`]}
+              deleteConfirmHeader={resourcesContext.messages['reportersRightsDialogConfirmDeleteHeader']}
+              deleteConfirmMessage={resourcesContext.messages['reportersRightsDialogConfirmDeleteQuestion']}
               deleteErrorNotificationKey={'DELETE_REPORTER_ERROR'}
-              editConfirmHeader={resourcesContext.messages[`editReporterConfirmHeader`]}
+              editConfirmHeader={resourcesContext.messages['editReporterConfirmHeader']}
               getErrorNotificationKey={'GET_REPORTERS_ERROR'}
               isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
               placeholder={resourcesContext.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={reporterRoleOptions}
+              setIsAdminAssignedDataflow={setIsAdminAssignedDataflow}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}
               userType={'reporter'}
@@ -1110,16 +1140,18 @@ const Dataflow = withRouter(({ history, match }) => {
               ((isNil(dataProviderId) && dataflowState.isCustodian) ||
                 (isNil(representativeId) && dataflowState.isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
-                ? dataflowState.isBusinessDataflow
-                  ? resourcesContext.messages['dataflowUsersByCompanyList']
-                  : resourcesContext.messages['dataflowUsersByCountryList']
+                ? TextByDataflowTypeUtils.getLabelByDataflowType(
+                    resourcesContext.messages,
+                    dataflowState.dataflowType,
+                    'userListDialogHeader'
+                  )
                 : resourcesContext.messages['dataflowUsersList']
             }
             onHide={() => manageDialogs('isUserListVisible', false)}
             visible={dataflowState.isUserListVisible}>
             <UserList
               dataflowId={dataflowId}
-              isBusinessDataflow={dataflowState.isBusinessDataflow}
+              dataflowType={dataflowState.dataflowType}
               representativeId={dataflowState.isObserver ? representativeId : dataProviderId}
             />
           </Dialog>
@@ -1128,7 +1160,7 @@ const Dataflow = withRouter(({ history, match }) => {
         <PropertiesDialog dataflowState={dataflowState} manageDialogs={manageDialogs} />
 
         {dataflowState.isReportingDataflowDialogVisible && (
-          <ManageReportingDataflow
+          <ManageDataflow
             dataflowId={dataflowId}
             isEditForm
             isVisible={dataflowState.isReportingDataflowDialogVisible}

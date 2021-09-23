@@ -1,5 +1,65 @@
 {
-  "BUSINESS": "BUSINESS",
-  "REPORTING": "REPORTING",
-  "REFERENCE": "REFERENCE"
+  "BUSINESS": {
+    "key": "business",
+    "value": "BUSINESS",
+    "labels": {
+      "breadCrumbs": "businessDataflowCrumbLabel",
+      "dataViewerProviderCodeColumnHeader": "companyCode",
+      "historicReleaseDataProviderColumnHeader": "companyCode",
+      "historicReleaseDataProviderFilterLabel": "companyCode",
+      "manualAcceptanceDataProviderNameColumnHeader": "company",
+      "manualAcceptanceDataProviderNameFilterLabel": "company",
+      "qcCodeAcronymButtonLabel": "companyCodeAcronym",
+      "qcCodeAcronymButtonTooltip": "matchStringCompanyTooltip",
+      "sqlSentenceCodeKeyWord": "{%R3_COMPANY_CODE%}",
+      "sqlSentenceKeyWordNote": "sqlSentenceCompanyCodeNote",
+      "userListBtnLabel": "dataflowUsersByCompanyList",
+      "userListDataProviderColumnHeader": "company",
+      "userListDataProviderFilterLabel": "company",
+      "userListDialogHeader": "dataflowUsersByCompanyList"
+    }
+  },
+  "CITIZEN_SCIENCE": {
+    "key": "citizenScience",
+    "value": "CITIZEN_SCIENCE",
+    "labels": {
+      "breadCrumbs": "citizenScienceDataflowsCrumbLabel",
+      "dataViewerProviderCodeColumnHeader": "organizationCode",
+      "historicReleaseDataProviderColumnHeader": "organizationCode",
+      "historicReleaseDataProviderFilterLabel": "organizationCode",
+      "manualAcceptanceDataProviderNameColumnHeader": "organization",
+      "manualAcceptanceDataProviderNameFilterLabel": "organization",
+      "publicDataflowDataProviderNameColumnHeader": "organizations",
+      "qcCodeAcronymButtonLabel": "organizationCodeAcronym",
+      "qcCodeAcronymButtonTooltip": "matchStringOrganizationTooltip",
+      "sqlSentenceCodeKeyWord": "{%R3_ORGANIZATION_CODE%}",
+      "sqlSentenceKeyWordNote": "sqlSentenceOrganizationCodeNote",
+      "userListBtnLabel": "dataflowUsersByOrganizationList",
+      "userListDataProviderColumnHeader": "organization",
+      "userListDataProviderFilterLabel": "organization",
+      "userListDialogHeader": "dataflowUsersByOrganizationList"
+    }
+  },
+  "REFERENCE": { "key": "reference", "value": "REFERENCE" },
+  "REPORTING": {
+    "key": "reporting",
+    "value": "REPORTING",
+    "labels": {
+      "breadCrumbs": "dataflow",
+      "dataViewerProviderCodeColumnHeader": "countryCode",
+      "historicReleaseDataProviderColumnHeader": "countryCode",
+      "historicReleaseDataProviderFilterLabel": "countryCode",
+      "manualAcceptanceDataProviderNameColumnHeader": "dataProviderName",
+      "manualAcceptanceDataProviderNameFilterLabel": "dataProviderName",
+      "publicDataflowDataProviderNameColumnHeader": "countries",
+      "qcCodeAcronymButtonLabel": "countryCodeAcronym",
+      "qcCodeAcronymButtonTooltip": "matchStringTooltip",
+      "sqlSentenceCodeKeyWord": "{%R3_COUNTRY_CODE%}",
+      "sqlSentenceKeyWordNote": "sqlSentenceCountryCodeNote",
+      "userListBtnLabel": "dataflowUsersByCountryList",
+      "userListDataProviderColumnHeader": "countries",
+      "userListDataProviderFilterLabel": "countries",
+      "userListDialogHeader": "dataflowUsersByCountryList"
+    }
+  }
 }

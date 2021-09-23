@@ -52,7 +52,6 @@ export const TabsDesigner = withRouter(
     onTabChange,
     onUpdateSchema,
     onUpdateTable,
-    schemaImported = false,
     selectedRuleId,
     selectedRuleLevelError,
     selectedRuleMessage,
@@ -81,12 +80,6 @@ export const TabsDesigner = withRouter(
         onLoadSchema();
       }
     }, [datasetStatistics]);
-
-    useEffect(() => {
-      if (schemaImported) {
-        onLoadSchema();
-      }
-    }, [schemaImported]);
 
     useEffect(() => {
       if (!isUndefined(scrollFn) && !isNull(scrollFn) && !isEditing) {
@@ -462,8 +455,9 @@ export const TabsDesigner = withRouter(
         await DatasetService.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
         const inmTabs = [...tabs];
         inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
-        inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].tableSchemaName =
-          tableSchemaName;
+        inmTabs[
+          TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')
+        ].tableSchemaName = tableSchemaName;
         setTabs(inmTabs);
       } catch (error) {
         console.error('TabsDesigner - updateTableName.', error);

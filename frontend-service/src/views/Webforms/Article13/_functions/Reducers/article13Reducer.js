@@ -51,6 +51,7 @@ export const article13Reducer = (state, { type, payload }) => {
 
     case 'HAS_ERRORS':
       return { ...state, hasErrors: payload.value };
+
     case 'UPDATE_PAMS_RECORDS':
       const inmTableList = { ...state.tableList };
       Object.values(inmTableList).forEach(element => {

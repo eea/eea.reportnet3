@@ -350,7 +350,9 @@ export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, 
                     ? 'spinnerAnimate'
                     : 'add'
                 }
-                label={resourcesContext.messages[list === 'single' ? 'addSingle' : 'addGroup']}
+                label={
+                  list === 'single' ? resourcesContext.messages['addSingle'] : resourcesContext.messages['addGroup']
+                }
                 onClick={() => onAddPamsRecord(list)}
               />
             </div>

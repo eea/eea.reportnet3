@@ -20,12 +20,13 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { manualAcceptanceDatasetsReducer } from './_functions/Reducers/manualAcceptanceDatasetsReducer';
 
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManualAcceptanceDatasets = ({
   dataflowId,
+  dataflowType,
   getManageAcceptanceDataset,
-  isBusinessDataflow,
   isUpdatedManualAcceptanceDatasets,
   manageDialogs,
   refreshManualAcceptanceDatasets
@@ -125,7 +126,17 @@ export const ManualAcceptanceDatasets = ({
     { type: 'input', properties: [{ name: 'datasetName' }] },
     {
       type: 'multiselect',
-      properties: [{ name: isBusinessDataflow ? 'company' : 'dataProviderName' }, { name: 'feedbackStatus' }]
+      properties: [
+        {
+          name: 'dataProviderName',
+          label: TextByDataflowTypeUtils.getLabelByDataflowType(
+            resourcesContext.messages,
+            dataflowType,
+            'manualAcceptanceDataProviderNameFilterLabel'
+          )
+        },
+        { name: 'feedbackStatus' }
+      ]
     },
     {
       type: 'checkbox',
@@ -143,8 +154,12 @@ export const ManualAcceptanceDatasets = ({
           columnResizeMode="expand"
           field={field}
           header={
-            isBusinessDataflow && TextUtils.areEquals(field, 'dataProviderName')
-              ? resourcesContext.messages['company']
+            TextUtils.areEquals(field, 'dataProviderName')
+              ? TextByDataflowTypeUtils.getLabelByDataflowType(
+                  resourcesContext.messages,
+                  dataflowType,
+                  'manualAcceptanceDataProviderNameColumnHeader'
+                )
               : resourcesContext.messages[field]
           }
           key={field}

@@ -21,9 +21,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+
 const ComparisonExpression = ({
+  dataflowType,
   expressionValues,
-  isBusinessDataflow,
   isDisabled,
   onExpressionDelete,
   onExpressionFieldUpdate,
@@ -412,11 +414,13 @@ const ComparisonExpression = ({
         />
       );
     }
+
     if (operatorType === 'string') {
       if (operatorValue === 'MATCH') {
-        const ccButtonValue = `${expressionValues.expressionValue}${
-          isBusinessDataflow ? config.COMPANY_CODE_KEYWORD : config.COUNTRY_CODE_KEYWORD
-        }`;
+        const ccButtonValue = `${expressionValues.expressionValue}${TextByDataflowTypeUtils.getKeyByDataflowType(
+          dataflowType,
+          'sqlSentenceCodeKeyWord'
+        )}`;
         return (
           <span className={styles.inputStringMatch}>
             <InputText
@@ -429,13 +433,17 @@ const ComparisonExpression = ({
             />
             <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
-              label={resourcesContext.messages['countryCodeAcronym']}
+              label={TextByDataflowTypeUtils.getLabelByDataflowType(
+                resourcesContext.messages,
+                dataflowType,
+                'qcCodeAcronymButtonLabel'
+              )}
               onClick={() => onCCButtonClick(ccButtonValue)}
-              tooltip={
-                isBusinessDataflow
-                  ? resourcesContext.messages['matchStringCompanyTooltip']
-                  : resourcesContext.messages['matchStringTooltip']
-              }
+              tooltip={TextByDataflowTypeUtils.getLabelByDataflowType(
+                resourcesContext.messages,
+                dataflowType,
+                'qcCodeAcronymButtonTooltip'
+              )}
               tooltipOptions={{ position: 'top' }}
             />
           </span>

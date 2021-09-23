@@ -19,18 +19,18 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { Dashboard } from 'views/_components/Dashboard';
 import { Dialog } from 'views/_components/Dialog';
-import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { MainLayout } from 'views/_components/Layout';
 import { Menu } from 'views/_components/Menu';
+import { QCList } from 'views/_components/QCList';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
 import { TabsSchema } from 'views/_components/TabsSchema';
-import { ValidationsList } from 'views/_components/ValidationsList';
+import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
-import { ValidationViewer } from 'views/_components/ValidationViewer';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -46,9 +46,9 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useReporterDataset } from 'views/_components/Snapshots/_hooks/useReporterDataset';
 
-import { TextUtils } from 'repositories/_utils/TextUtils';
-import { getUrl } from 'repositories/_utils/UrlUtils';
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'views/_functions/Utils';
+import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const {
@@ -87,19 +87,19 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     import: [],
     importOtherSystems: []
   });
+  const [dataflowType, setDataflowType] = useState('');
   const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
-  const [isBusinessDataflow, setIsBusinessDataflow] = useState(false);
   const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
-  const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isDownloadingQCRules, setIsDownloadingQCRules] = useState(false);
+  const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -126,10 +126,12 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   let importMenuRef = useRef();
 
   useBreadCrumbs({
-    currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET : CurrentPage.DATASET,
+    currentPage: getCurrentPage(),
     dataflowId,
+    dataflowType,
+    dataProviderId,
+    dataProviderName: metadata?.dataset.name,
     history,
-    isBusinessDataflow,
     isLoading,
     metaData: metadata,
     referenceDataflowId: dataflowId
@@ -364,6 +366,18 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     }
   ];
 
+  function getCurrentPage() {
+    if (isReferenceDataset) {
+      return CurrentPage.REFERENCE_DATASET;
+    } else if (isReferenceDatasetRegularDataflow) {
+      return CurrentPage.DATAFLOW_REFERENCE_DATASET;
+    } else if (dataProviderId === 0) {
+      return CurrentPage.TEST_DATASETS;
+    } else {
+      return CurrentPage.DATASET;
+    }
+  }
+
   const getFileExtensions = async () => {
     try {
       const allExtensions = await IntegrationService.getAllExtensionsOperations(dataflowId, datasetSchemaId);
@@ -381,7 +395,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       setDataflowName(metaData.dataflow.name);
       setDatasetSchemaId(metaData.dataset.datasetSchemaId);
       setDatasetFeedbackStatus(metaData.dataset.datasetFeedbackStatus);
-      setDataProviderId(metaData.dataset.dataProviderId);
+      setDataProviderId(metaData.dataset.dataProviderId || 0);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
@@ -416,7 +430,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await DatasetService.validate(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
-        content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
+        content: { origin: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
       });
     } catch (error) {
       if (error.response.status === 423) {
@@ -426,8 +440,14 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       } else {
         console.error('Dataset - onConfirmValidate.', error);
         notificationContext.add({
-          type: 'VALIDATE_DATA_BY_ID_ERROR',
-          content: { countryName: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
+          type: 'VALIDATE_REPORTING_DATA_ERROR',
+          content: {
+            origin: datasetName,
+            dataflowId,
+            dataflowName,
+            datasetId,
+            datasetName: datasetSchemaName
+          }
         });
       }
     }
@@ -551,7 +571,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       console.error('Dataset - onExportDataExternalIntegration.', error);
-      onExportError('EXTERNAL_EXPORT_REPORTING_FAILED_EVENT');
+      notificationContext.add({
+        type: 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT',
+        content: { dataflowId, datasetId, datasetName: datasetSchemaName }
+      });
     }
   };
 
@@ -569,7 +592,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onLoadDataflow = async () => {
     try {
       const data = await DataflowService.get(match.params.dataflowId);
-      setIsBusinessDataflow(TextUtils.areEquals(data.type, config.dataflowType.BUSINESS));
+      setDataflowType(data.type);
       let dataset = [];
       if (isTestDataset) {
         dataset = data.testDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
@@ -1095,7 +1118,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           onHide={() => onSetVisible(setValidationsVisible, false)}
           style={{ width: '90%' }}
           visible={validationsVisible}>
-          <ValidationViewer
+          <ShowValidationsList
             datasetId={datasetId}
             datasetName={datasetName}
             datasetSchemaId={datasetSchemaId}
@@ -1119,7 +1142,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           onHide={() => onSetVisible(setValidationListDialogVisible, false)}
           style={{ width: '90%' }}
           visible={validationListDialogVisible}>
-          <ValidationsList
+          <QCList
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={datasetSchemaId}

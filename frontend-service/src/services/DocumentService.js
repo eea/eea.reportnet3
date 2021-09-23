@@ -5,10 +5,12 @@ import { DocumentUtils } from 'services/_utils/DocumentUtils';
 export const DocumentService = {
   getAll: async dataflowId => {
     const response = await DocumentRepository.getAll(dataflowId);
-    return DocumentUtils.parseDocumentListDTO(response.data.documents);
+    return DocumentUtils.parseDocumentListDTO(response.data);
   },
 
-  download: async documentId => await DocumentRepository.download(documentId),
+  download: async (documentId, dataflowId) => await DocumentRepository.download(documentId, dataflowId),
+
+  publicDownload: async (documentId, dataflowId) => await DocumentRepository.publicDownload(documentId, dataflowId),
 
   upload: async (dataflowId, description, language, file, isPublic) => {
     return await DocumentRepository.upload(dataflowId, description, language, file, isPublic);
@@ -18,5 +20,5 @@ export const DocumentService = {
     return await DocumentRepository.update(dataflowId, description, language, file, isPublic, documentId);
   },
 
-  delete: async documentId => await DocumentRepository.delete(documentId)
+  delete: async (documentId, dataflowId) => await DocumentRepository.delete(documentId, dataflowId)
 };

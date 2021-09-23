@@ -1,34 +1,37 @@
 import { useContext, useLayoutEffect } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
+
+import { routes } from 'conf/routes';
 
 import { BreadCrumbContext } from 'views/_functions/Contexts/BreadCrumbContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { routes } from 'conf/routes';
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const useBreadCrumbs = ({
   countryCode,
   currentPage,
   dataflowId,
   dataflowStateData,
+  dataflowType,
+  dataProviderId,
+  dataProviderName,
   history,
-  isBusinessDataflow = false,
   isLoading,
   matchParams,
   metaData,
-  representativeId,
-  referenceDataflowId
+  referenceDataflowId,
+  representativeId
 }) => {
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resourcesContext = useContext(ResourcesContext);
 
   useLayoutEffect(() => {
     !isLoading && setBreadCrumbs();
-  }, [dataflowStateData, matchParams, metaData, isBusinessDataflow, isLoading]);
+  }, [dataflowStateData, dataflowType, dataProviderId, dataProviderName, isLoading, matchParams, metaData]);
 
   const getDataCollectionCrumb = () => {
     return { label: resourcesContext.messages['dataCollection'], icon: 'dataCollection' };
@@ -39,9 +42,7 @@ export const useBreadCrumbs = ({
       command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
       href: getUrl(routes.DATAFLOW, { dataflowId }, true),
       icon: 'clone',
-      label: isBusinessDataflow
-        ? resourcesContext.messages['businessDataflowCrumbLabel']
-        : resourcesContext.messages['dataflow']
+      label: TextByDataflowTypeUtils.getLabelByDataflowType(resourcesContext.messages, dataflowType, 'breadCrumbs')
     };
   };
 
@@ -132,12 +133,12 @@ export const useBreadCrumbs = ({
       };
     }
 
-    representativeId = parseInt(breadCrumbContext.prevModel[3].href.split('/').slice(-1)[0]);
     return {
-      command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
+      command: () =>
+        history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
       href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),
       icon: 'representative',
-      label: breadCrumbContext.prevModel[3].label
+      label: dataProviderName
     };
   };
   const getPublicCountriesCrumb = () => {
@@ -186,9 +187,10 @@ export const useBreadCrumbs = ({
 
   const getTestDatasetsCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
-      href: getUrl(getUrl(routes.DATAFLOW, { dataflowId }, true)),
-      icon: 'dataset',
+      command: () =>
+        history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
+      href: getUrl(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
+      icon: 'representative',
       label: resourcesContext.messages['testDatasetBreadcrumbs']
     };
   };
@@ -205,7 +207,7 @@ export const useBreadCrumbs = ({
     if (currentPage === CurrentPage.DATAFLOW_FEEDBACK) {
       const datasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
 
-      if (breadCrumbContext.prevModel.length === 4 && !isNil(breadCrumbContext.prevModel[3].href)) {
+      if (dataProviderId) {
         datasetBreadCrumbs.push(getRepresentativeCrumb());
       }
 
@@ -237,7 +239,7 @@ export const useBreadCrumbs = ({
     if (currentPage === CurrentPage.DATASET) {
       const datasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
 
-      if (breadCrumbContext.prevModel.length === 4 && !isNil(breadCrumbContext.prevModel[3].href)) {
+      if (dataProviderId) {
         datasetBreadCrumbs.push(getRepresentativeCrumb());
       }
 
@@ -273,7 +275,13 @@ export const useBreadCrumbs = ({
     }
 
     if (currentPage === CurrentPage.TEST_DATASETS) {
-      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getTestDatasetsCrumb()]);
+      breadCrumbContext.add([
+        getHomeCrumb(),
+        getDataflowsCrumb(),
+        getDataflowCrumb(),
+        getTestDatasetsCrumb(),
+        getDatasetCrumb()
+      ]);
     }
 
     if (currentPage === CurrentPage.REFERENCE_DATAFLOW) {
@@ -296,6 +304,16 @@ export const useBreadCrumbs = ({
         getReferenceDataflowCrumb(),
         getReferenceDatasetCrumb()
       ]);
+    }
+
+    if (currentPage === CurrentPage.DATAFLOW_REFERENCE_DATASET) {
+      const datasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
+
+      if (dataProviderId) {
+        datasetBreadCrumbs.push(getRepresentativeCrumb());
+      }
+
+      breadCrumbContext.add([...datasetBreadCrumbs, getReferenceDatasetCrumb()]);
     }
   };
 };

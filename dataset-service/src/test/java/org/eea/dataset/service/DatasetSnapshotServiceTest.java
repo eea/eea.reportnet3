@@ -48,6 +48,7 @@ import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
@@ -59,6 +60,7 @@ import org.eea.interfaces.controller.validation.ValidationController.ValidationC
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
+import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -223,6 +225,10 @@ public class DatasetSnapshotServiceTest {
   /** The reporting dataset service. */
   @Mock
   private ReportingDatasetService reportingDatasetService;
+
+  /** The collaboration controller zuul. */
+  @Mock
+  private CollaborationControllerZuul collaborationControllerZuul;
 
   /**
    * The security context.
@@ -1039,6 +1045,10 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(schemaService.getDataSchemaByDatasetId(Mockito.anyBoolean(), Mockito.any()))
         .thenReturn(schema);
     Mockito.doNothing().when(reportingDatasetService).updateReportingDatasetMetabase(Mockito.any());
+    Mockito.when(collaborationControllerZuul.createMessage(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(new MessageVO());
+    Mockito.when(dataflowControllerZuul.findById(Mockito.anyLong(), Mockito.anyLong()))
+        .thenReturn(new DataFlowVO());
     datasetSnapshotService.createReleaseSnapshots(1L, 1L, true);
     Mockito.verify(validationControllerZuul, times(1)).validateDataSetData(Mockito.any(),
         Mockito.anyBoolean());

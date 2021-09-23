@@ -5,18 +5,15 @@ import { BreadCrumbContext } from 'views/_functions/Contexts/BreadCrumbContext';
 const breadCrumbReducer = (state, { type, payload }) => {
   switch (type) {
     case 'ADD_MODEL':
-      return {
-        ...state,
-        prevModel: state.model,
-        model: payload
-      };
+      return { ...state, model: payload };
+
     default:
       return state;
   }
 };
 
 const BreadCrumbProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(breadCrumbReducer, { model: [], prevModel: [], isLeftSideBarOpened: false });
+  const [state, dispatch] = useReducer(breadCrumbReducer, { model: [], isLeftSideBarOpened: false });
 
   return (
     <BreadCrumbContext.Provider

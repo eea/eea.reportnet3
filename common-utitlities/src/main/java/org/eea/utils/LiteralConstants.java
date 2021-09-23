@@ -101,14 +101,14 @@ public final class LiteralConstants {
   /** The Constant SNAPSHOT_FILE_FIELD_SUFFIX: {@value}. */
   public static final String SNAPSHOT_FILE_FIELD_SUFFIX = "_table_FieldValue.snap";
 
+  /** The Constant SNAPSHOT_FILE_ATTACHMENT_SUFFIX: {@value}. */
+  public static final String SNAPSHOT_FILE_ATTACHMENT_SUFFIX = "_table_AttachmentValue.snap";
+
   /** The Constant RULE_TABLE_MANDATORY: {@value}. */
   public static final String RULE_TABLE_MANDATORY = "Mandatory table records check";
 
   /** The Constant READ_ONLY: {@value}. */
   public static final String READ_ONLY = "readOnly";
-
-  /** The Constant SNAPSHOT_FILE_ATTACHMENT_SUFFIX: {@value}. */
-  public static final String SNAPSHOT_FILE_ATTACHMENT_SUFFIX = "_table_AttachmentValue.snap";
 
   /** The Constant INTEGRATION_ID: {@value}. */
   public static final String INTEGRATION_ID = "integrationId";

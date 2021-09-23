@@ -19,7 +19,7 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 import { DataViewerUtils } from '../Utils/DataViewerUtils';
 import { MapUtils } from 'views/_functions/Utils/MapUtils';
 import { RecordUtils } from 'views/_functions/Utils/RecordUtils';
-
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
@@ -94,7 +94,7 @@ export const useSetColumns = (
   hasWebformWritePermissions,
   hasWritePermissions,
   initialCellValue,
-  isBusinessDataflow,
+  dataflowType,
   isDataflowOpen,
   isDesignDatasetEditorRead,
   onFileDeleteVisible,
@@ -435,7 +435,11 @@ export const useSetColumns = (
       <Column
         body={providerCodeTemplate}
         className={styles.providerCode}
-        header={isBusinessDataflow ? resources.messages['companyCode'] : resources.messages['countryCode']}
+        header={TextByDataflowTypeUtils.getLabelByDataflowType(
+          resources.messages,
+          dataflowType,
+          'dataViewerProviderCodeColumnHeader'
+        )}
         key="providerCode"
         sortable={false}
         style={{ width: '100px' }}
@@ -482,11 +486,11 @@ export const useSetColumns = (
   }, [
     colsSchema,
     columnOptions,
-    records.selectedRecord.recordId,
-    initialCellValue,
+    dataflowType,
     hasWebformWritePermissions,
     hasWritePermissions,
-    isBusinessDataflow
+    initialCellValue,
+    records.selectedRecord.recordId
   ]);
 
   return {

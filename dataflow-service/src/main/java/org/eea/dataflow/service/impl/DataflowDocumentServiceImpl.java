@@ -1,6 +1,9 @@
 package org.eea.dataflow.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.transaction.Transactional;
+import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Document;
@@ -9,6 +12,7 @@ import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.service.DataflowDocumentService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +36,10 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
   /** The document mapper. */
   @Autowired
   private DocumentMapper documentMapper;
+
+  /** The dataflow mapper. */
+  @Autowired
+  private DataflowMapper dataflowMapper;
 
   /**
    * The Constant LOG.
@@ -119,6 +127,33 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
     documentNew.setDataflow(document.getDataflow());
     documentNew.setDate(document.getDate());
     documentRepository.save(documentNew);
+  }
+
+  /**
+   * Gets the all documents by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public List<DocumentVO> getAllDocumentsByDataflowId(Long dataflowId) throws EEAException {
+    List<DocumentVO> documents = new ArrayList<>();
+    if (null == dataflowId) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    } else {
+      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      if (dataflow != null) {
+        DataFlowVO dataflowVO = dataflowMapper.entityToClass(dataflow);
+        if (dataflowVO.getDocuments() != null) {
+          dataflowVO.getDocuments().forEach(documentVO -> {
+            documents.add(documentVO);
+          });
+        }
+      }
+    }
+    return documents;
   }
 
 }

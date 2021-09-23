@@ -7,6 +7,8 @@ import { config } from 'conf';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+
 export const useLeftSideBar = (
   dataflowState,
   dataProviderId,
@@ -109,18 +111,14 @@ export const useLeftSideBar = (
           ((isNil(dataProviderId) && dataflowState.isCustodian) ||
             (isNil(representativeId) && dataflowState.isObserver)) &&
           dataflowState.status === config.dataflowStatus.OPEN
-            ? dataflowState.isBusinessDataflow
-              ? 'dataflowUsersByCompanyList'
-              : 'dataflowUsersByCountryList'
+            ? TextByDataflowTypeUtils.getKeyByDataflowType(dataflowState.dataflowType, 'userListBtnLabel')
             : 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
         title:
           ((isNil(dataProviderId) && dataflowState.isCustodian) ||
             (isNil(representativeId) && dataflowState.isObserver)) &&
           dataflowState.status === config.dataflowStatus.OPEN
-            ? dataflowState.isBusinessDataflow
-              ? 'dataflowUsersByCompanyList'
-              : 'dataflowUsersByCountryList'
+            ? TextByDataflowTypeUtils.getKeyByDataflowType(dataflowState.dataflowType, 'userListBtnLabel')
             : 'dataflowUsersList'
       };
 
