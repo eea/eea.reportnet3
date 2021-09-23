@@ -962,12 +962,30 @@ public class DataFlowServiceImplTest {
    */
   @Test
   public void getPublicDataflowByIdTest() throws EEAException {
-    DataflowPublicVO dataflow = new DataflowPublicVO();
-    dataflow.setId(1L);
+    DataflowPublicVO dataflowPublicVO = new DataflowPublicVO();
+    dataflowPublicVO.setId(1L);
     ObligationVO obligation = new ObligationVO();
     obligation.setObligationId(1);
-    dataflow.setObligation(obligation);
-    Mockito.when(dataflowPublicMapper.entityToClass(Mockito.any())).thenReturn(dataflow);
+    dataflowPublicVO.setObligation(obligation);
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setId(1L);
+    DocumentVO documentVO = new DocumentVO();
+    documentVO.setId(1L);
+    documentVO.setIsPublic(true);
+    WeblinkVO weblinkVO = new WeblinkVO();
+    weblinkVO.setId(1L);
+    weblinkVO.setIsPublic(true);
+    List<DocumentVO> documents = new ArrayList<>();
+    documents.add(documentVO);
+    List<WeblinkVO> weblinks = new ArrayList<>();
+    weblinks.add(weblinkVO);
+    dataflowVO.setDocuments(documents);
+    dataflowVO.setWeblinks(weblinks);
+    Mockito.when(dataflowPublicMapper.entityToClass(Mockito.any())).thenReturn(dataflowPublicVO);
+    Mockito.when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataflow));
+    Mockito.when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
     assertNotNull(dataflowServiceImpl.getPublicDataflowById(1L));
   }
 
