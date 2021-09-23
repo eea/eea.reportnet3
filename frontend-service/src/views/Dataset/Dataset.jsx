@@ -64,7 +64,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [dataProviderId, setDataProviderId] = useState(null);
   const [dataflowName, setDataflowName] = useState('');
   const [dataset, setDataset] = useState({});
-  const [datasetFeedbackStatus, setDatasetFeedbackStatus] = useState('');
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
@@ -394,7 +393,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       setMetadata(metaData);
       setDataflowName(metaData.dataflow.name);
       setDatasetSchemaId(metaData.dataset.datasetSchemaId);
-      setDatasetFeedbackStatus(metaData.dataset.datasetFeedbackStatus);
       setDataProviderId(metaData.dataset.dataProviderId || 0);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
@@ -795,9 +793,9 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const datasetInsideTitle = () => {
     if (dataset?.isReleasing) {
       return `${resourcesContext.messages['isReleasing']} `;
-    } else if (!isEmpty(datasetFeedbackStatus)) {
-      return `${datasetFeedbackStatus} `;
-    } else if (isEmpty(datasetFeedbackStatus) && isDatasetReleased) {
+    } else if (!isEmpty(metadata?.dataset.datasetFeedbackStatus)) {
+      return `${metadata?.dataset.datasetFeedbackStatus} `;
+    } else if (isEmpty(metadata?.dataset.datasetFeedbackStatus) && isDatasetReleased) {
       return `${resourcesContext.messages['released'].toString()}`;
     } else {
       return '';
