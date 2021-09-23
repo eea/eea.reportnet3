@@ -391,7 +391,7 @@ export const QCList = withRouter(
             }
             icon={getEditBtnIcon(row.id)}
             onClick={() => onRowQuickEdit(true)}
-            tooltip={resourcesContext.messages['edit']}
+            tooltip={resourcesContext.messages['quickEdit']}
             tooltipOptions={{ position: 'top' }}
             type="button"
           />
