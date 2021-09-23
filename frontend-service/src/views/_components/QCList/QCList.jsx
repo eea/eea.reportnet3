@@ -32,6 +32,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { getExpressionString } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/getExpressionString';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { Checkbox } from '../Checkbox';
 
 export const QCList = withRouter(
   ({ dataset, datasetSchemaAllTables, datasetSchemaId, reporting = false, setHasValidations = () => {} }) => {
@@ -445,6 +446,23 @@ export const QCList = withRouter(
       />
     );
 
+    const enableEditor = (cells, recordId) => {
+      console.log(cells, recordId);
+      const filteredValidation = tabsValidationsState.filteredData.find(validation => validation.id === recordId);
+      console.log(filteredValidation);
+      if (!isNil(filteredValidation)) {
+        return (
+          <Checkbox
+            checked={filteredValidation.enabled}
+            id={filteredValidation.id}
+            inputId={filteredValidation.id}
+            // onChange={() => setAddAnotherOne(!addAnotherOne)}
+            role="checkbox"
+          />
+        );
+      }
+    };
+
     const levelErrorTemplate = rowData => (
       <div className={styles.levelErrorTemplateWrapper}>
         <LevelError type={rowData.levelError.toLowerCase()} />
@@ -463,6 +481,7 @@ export const QCList = withRouter(
           <Column
             body={template}
             columnResizeMode="expand"
+            editor={field === 'enabled' ? row => enableEditor(row, tabsValidationsState.validationId) : null}
             field={field}
             header={getHeader(field)}
             key={field}
@@ -481,6 +500,26 @@ export const QCList = withRouter(
 
     const checkIsEmptyValidations = () =>
       isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
+
+    const onUpdateValidationRule = async () => {
+      try {
+        // setIsSubmitDisabled(true);
+        // const { candidateRule, expressionText } = creationFormState;
+        // candidateRule.expressionText = expressionText;
+        // await ValidationService.updateFieldRule(datasetId, candidateRule);
+        // if (!isNil(candidateRule) && candidateRule.automatic) {
+        //   validationContext.onAutomaticRuleIsUpdated(true);
+        // }
+        // onHide();
+      } catch (error) {
+        console.error('FieldValidation - onUpdateValidationRule.', error);
+        notificationContext.add({
+          type: 'QC_RULE_UPDATING_ERROR'
+        });
+      } finally {
+        // setIsSubmitDisabled(false);
+      }
+    };
 
     const filterOptions = [
       {
@@ -529,6 +568,8 @@ export const QCList = withRouter(
               searchBy={['shortCode', 'name', 'description', 'message']}
             />
           </div>
+
+          {console.log(tabsValidationsState)}
 
           {!isEmpty(tabsValidationsState.filteredData) ? (
             <DataTable
