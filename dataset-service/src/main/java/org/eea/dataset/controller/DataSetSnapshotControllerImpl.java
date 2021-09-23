@@ -383,7 +383,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       LockVO importLockVO = lockService.findByCriteria(createSchemaSnapshot);
       if (importLockVO != null) {
         throw new ResponseStatusException(HttpStatus.LOCKED,
-            "Snapshot restoration is locked because delete is in progress.");
+            "Snapshot remove is locked because creation is in progress.");
       } else {
         // This method will release the lock
         datasetSnapshotService.removeSchemaSnapshot(datasetId, idSnapshot);
