@@ -190,7 +190,7 @@ export const useBreadCrumbs = ({
       command: () =>
         history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
       href: getUrl(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
-      icon: 'dataset',
+      icon: 'representative',
       label: resourcesContext.messages['testDatasetBreadcrumbs']
     };
   };
