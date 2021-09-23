@@ -87,7 +87,7 @@ class Menu extends Component {
 
   renderItem(item, index) {
     if (item.items) return this.renderSubMenu(item, index);
-    else return <MenuItem index={index} item={item} />;
+    else return <MenuItem index={index} item={item} key={item.label} />;
   }
 
   render() {
