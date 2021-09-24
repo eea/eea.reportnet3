@@ -426,7 +426,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await DatasetService.validate(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
-        content: { origin: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
+        content: {
+          origin: datasetName,
+          dataflowId,
+          dataflowName: metadata.dataflow.name,
+          datasetId,
+          datasetName: datasetSchemaName
+        }
       });
     } catch (error) {
       if (error.response.status === 423) {
