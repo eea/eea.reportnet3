@@ -342,10 +342,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       ]
     : [];
 
-  const validImportExtensions = `.${importSelectedIntegrationExtension}`;
-
-  const infoExtensionsTooltip = `${resourcesContext.messages['supportedFileExtensionsTooltip']} ${validImportExtensions}`;
-
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
     const extensionsTypes = !isNil(type.code) && type.code.split('+');
     return {
@@ -640,6 +636,12 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     ],
     onLoadDataflow
   );
+
+  const getValidExtensions = ({ isTooltip = false, validExtensions = '' }) =>
+    validExtensions
+      ?.split(/,\s*/)
+      .map(ext => (isTooltip ? ` .${ext}` : `.${ext}`))
+      .join(',');
 
   const getDataSchema = async () => {
     try {
@@ -1153,7 +1155,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
-          accept={validImportExtensions}
+          accept={getValidExtensions({ validExtensions: importSelectedIntegrationExtension })}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogClassName={styles.Dialog}
@@ -1163,7 +1165,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             setImportSelectedIntegrationId(null);
           }}
           dialogVisible={isImportDatasetDialogVisible}
-          infoTooltip={infoExtensionsTooltip}
+          infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} ${getValidExtensions({
+            isTooltip: true,
+            validExtensions: importSelectedIntegrationExtension
+          })}`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           name="file"

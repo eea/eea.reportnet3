@@ -79,22 +79,10 @@ const getTabs = ({ datasetSchema, datasetStatistics, editable, isDataflowOpen, i
   return inmDatasetSchema.tables;
 };
 
-const getValidExtensions = (validExtensions = '') =>
+const getValidExtensions = ({ isTooltip = false, validExtensions = '' }) =>
   validExtensions
     ?.split(/,\s*/)
-    .map(ext => `.${ext}`)
+    .map(ext => (isTooltip ? ` .${ext}` : `.${ext}`))
     .join(',');
 
-const getValidExtensionsTooltip = (validExtensions = '') =>
-  validExtensions
-    ?.split(/,\s*/)
-    .map(ext => ` .${ext}`)
-    .join(',');
-
-export const DatasetDesignerUtils = {
-  getCountPKUseInAllSchemas,
-  getIndexById,
-  getTabs,
-  getValidExtensions,
-  getValidExtensionsTooltip
-};
+export const DatasetDesignerUtils = { getCountPKUseInAllSchemas, getIndexById, getTabs, getValidExtensions };
