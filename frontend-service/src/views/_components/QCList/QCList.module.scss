@@ -113,10 +113,6 @@
   }
 }
 
-.actionTemplate {
-  display: flex;
-  justify-content: center;
-}
 .editRowButton {
   border: 1px solid var(--c-custom-gray) !important;
   @include shadow-0em;

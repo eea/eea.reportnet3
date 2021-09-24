@@ -1,0 +1,19 @@
+.actionTemplate {
+  display: flex;
+  justify-content: center;
+
+  .editRowButton {
+    border: 1px solid var(--c-custom-gray) !important;
+    margin-left: 3px !important;
+  }
+  .editSaveRowButton {
+    background-color: var(--success-color) !important;
+    border: 1px solid var(--c-custom-gray);
+    margin-left: 3px;
+  }
+  .editCancelRowButton {
+    background-color: var(--errors) !important;
+    border: 1px solid var(--c-custom-gray);
+    margin-left: 3px;
+  }
+}

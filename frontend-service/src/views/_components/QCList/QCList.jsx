@@ -13,10 +13,12 @@ import styles from './QCList.module.scss';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Button } from 'views/_components/Button';
+import { Checkbox } from 'views/_components/Checkbox';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
+import { InputText } from 'views/_components/InputText';
 import { LevelError } from 'views/_components/LevelError';
 import { Spinner } from 'views/_components/Spinner';
 
@@ -32,7 +34,6 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { getExpressionString } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/getExpressionString';
 import { TextUtils } from 'repositories/_utils/TextUtils';
-import { Checkbox } from '../Checkbox';
 
 export const QCList = withRouter(
   ({ dataset, datasetSchemaAllTables, datasetSchemaId, reporting = false, setHasValidations = () => {} }) => {
@@ -46,7 +47,6 @@ export const QCList = withRouter(
       filteredData: [],
       isDataUpdated: false,
       isDeleteDialogVisible: false,
-      isRowQuickEditionEnabled: false,
       isLoading: true,
       validationId: '',
       validationList: {}
@@ -382,34 +382,18 @@ export const QCList = withRouter(
       if (row.entityType === 'TABLE') rowType = 'dataset';
 
       return (
-        <div className={styles.actionTemplate}>
-          <Button
-            className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-            disabled={
-              (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
-              validationContext.isFetchingData
-            }
-            icon={getEditBtnIcon(row.id)}
-            onClick={() => onRowQuickEdit(true)}
-            tooltip={resourcesContext.messages['quickEdit']}
-            tooltipOptions={{ position: 'top' }}
-            type="button"
-          />
-          {!tabsValidationsState.isRowQuickEditionEnabled && (
-            <Button
-              className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-              disabled={
-                (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
-                validationContext.isFetchingData
-              }
-              icon={getEditBtnIcon(row.id)}
-              onClick={() => validationContext.onOpenToEdit(row, rowType)}
-              tooltip={resourcesContext.messages['edit']}
-              tooltipOptions={{ position: 'top' }}
-              type="button"
-            />
-          )}
-        </div>
+        <Button
+          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+          disabled={
+            (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
+            validationContext.isFetchingData
+          }
+          icon={getEditBtnIcon(row.id)}
+          onClick={() => validationContext.onOpenToEdit(row, rowType)}
+          tooltip={resourcesContext.messages['edit']}
+          tooltipOptions={{ position: 'top' }}
+          type="button"
+        />
       );
     };
 
@@ -456,10 +440,24 @@ export const QCList = withRouter(
         className={styles.validationCol}
         header={resourcesContext.messages['actions']}
         key="actions"
+        rowEditor={true}
         sortable={false}
         style={{ width: '100px' }}
       />
     );
+
+    const getEditor = field => {
+      switch (field) {
+        case 'enabled':
+          return row => enableEditor(row, tabsValidationsState.validationId);
+        case 'name':
+        case 'description':
+        case 'message':
+          return row => textEditor(row, tabsValidationsState.validationId, field);
+        default:
+          break;
+      }
+    };
 
     const enableEditor = (cells, recordId) => {
       console.log(cells, recordId);
@@ -484,6 +482,30 @@ export const QCList = withRouter(
       </div>
     );
 
+    const textEditor = (cells, recordId, property) => {
+      const filteredValidation = tabsValidationsState.filteredData.find(validation => validation.id === recordId);
+      console.log(filteredValidation);
+      if (!isNil(filteredValidation)) {
+        console.log(filteredValidation[property], property);
+        return (
+          <InputText
+            id={filteredValidation.id}
+            // keyfilter={RecordUtils.getFilter(type)}
+            // maxLength={textCharacters}
+            // onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+            // onChange={e => onEditorValueChange(cells, e.target.value)}
+            // onFocus={e => {
+            //   e.preventDefault();
+            //   onEditorValueFocus(cells, e.target.value);
+            // }}
+            // onKeyDown={e => onEditorKeyChange(cells, e, record)}
+            type="text"
+            value={filteredValidation[property]}
+          />
+        );
+      }
+    };
+
     const renderColumns = validations => {
       const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
         let template = null;
@@ -496,7 +518,7 @@ export const QCList = withRouter(
           <Column
             body={template}
             columnResizeMode="expand"
-            editor={field === 'enabled' ? row => enableEditor(row, tabsValidationsState.validationId) : null}
+            editor={getEditor(field)}
             field={field}
             header={getHeader(field)}
             key={field}
@@ -593,6 +615,7 @@ export const QCList = withRouter(
             <DataTable
               autoLayout={true}
               className={styles.paginatorValidationViewer}
+              editMode="row"
               hasDefaultCurrentPage={true}
               loading={false}
               onRowClick={event => validationId(event.data.id)}
