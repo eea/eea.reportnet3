@@ -47,6 +47,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { useReporterDataset } from 'views/_components/Snapshots/_hooks/useReporterDataset';
 
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'views/_functions/Utils';
+import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -337,10 +338,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         }
       ]
     : [];
-
-  const validImportExtensions = `.${importSelectedIntegrationExtension}`;
-
-  const infoExtensionsTooltip = `${resourcesContext.messages['supportedFileExtensionsTooltip']} ${validImportExtensions}`;
 
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
     const extensionsTypes = !isNil(type.code) && type.code.split('+');
@@ -1154,7 +1151,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
-          accept={validImportExtensions}
+          accept={DatasetUtils.getValidExtensions({ validExtensions: importSelectedIntegrationExtension })}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogClassName={styles.Dialog}
@@ -1164,7 +1161,12 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             setImportSelectedIntegrationId(null);
           }}
           dialogVisible={isImportDatasetDialogVisible}
-          infoTooltip={infoExtensionsTooltip}
+          infoTooltip={`${
+            resourcesContext.messages['supportedFileExtensionsTooltip']
+          } ${DatasetUtils.getValidExtensions({
+            isTooltip: true,
+            validExtensions: importSelectedIntegrationExtension
+          })}`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           name="file"
