@@ -29,8 +29,10 @@ export const ObligationService = {
   getOpen: async filterData => {
     if (!isEmpty(filterData)) {
       const countryId = !isNil(filterData.countries) ? filterData.countries.value : '';
-      const dateFrom = filterData.expirationDate[0] ? filterData.expirationDate[0].getTime() : '';
-      const dateTo = filterData.expirationDate[1] ? filterData.expirationDate[1].getTime() : '';
+      const dateFrom =
+        !isNil(filterData.expirationDate) && filterData.expirationDate[0] ? filterData.expirationDate[0].getTime() : '';
+      const dateTo =
+        !isNil(filterData.expirationDate) && filterData.expirationDate[1] ? filterData.expirationDate[1].getTime() : '';
       const issueId = !isNil(filterData.issues) ? filterData.issues.value : '';
       const organizationId = !isNil(filterData.organizations) ? filterData.organizations.value : '';
       const openedObligationsDTO = await ObligationRepository.getOpen(
