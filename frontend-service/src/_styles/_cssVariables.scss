@@ -550,4 +550,19 @@
   /* Fileupload */
   --fileupload-bg-color: var(--bg);
   --fileupload-header-bg-color: var(--bg);
+
+  /* Accordion */
+  --accordion-content-bg-color: var(--bg);
+  --accordion-content-border: 1px solid var(--gray-25);
+  --accordion-header-border: 1px solid var(--gray-25);
+  --accordion-header-bg-color: var(--gray-10);
+  --accordion-header-bg-color-hover: var(--gray-25);
+  --accordion-header-icon-color: var(--main-font-color);
+  --accordion-header-border-hover: 1px solid var(--gray-25);
+  --accordion-header-color: var(--main-font-color);
+  --accordion-header-highlight-border-color: 1px solid var(--gray-25);
+  --accordion-header-highlight-color: var(--main-font-color);
+  --accordion-header-highlight-bg-color: var(--gray-10);
+  --accordion-header-highlight-bg-color-hover: var(--gray-25);
+  --accordion-header-highlight-border-hover: 1px solid var(--accordion-header-highlight-bg-color-hover);
 }
