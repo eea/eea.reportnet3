@@ -47,6 +47,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { useReporterDataset } from 'views/_components/Snapshots/_hooks/useReporterDataset';
 
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'views/_functions/Utils';
+import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -637,12 +638,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     onLoadDataflow
   );
 
-  const getValidExtensions = ({ isTooltip = false, validExtensions = '' }) =>
-    validExtensions
-      ?.split(/,\s*/)
-      .map(ext => (isTooltip ? ` .${ext}` : `.${ext}`))
-      .join(',');
-
   const getDataSchema = async () => {
     try {
       const datasetSchema = await DatasetService.getSchema(datasetId);
@@ -1155,7 +1150,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
-          accept={getValidExtensions({ validExtensions: importSelectedIntegrationExtension })}
+          accept={DatasetUtils.getValidExtensions({ validExtensions: importSelectedIntegrationExtension })}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogClassName={styles.Dialog}
@@ -1165,7 +1160,9 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             setImportSelectedIntegrationId(null);
           }}
           dialogVisible={isImportDatasetDialogVisible}
-          infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} ${getValidExtensions({
+          infoTooltip={`${
+            resourcesContext.messages['supportedFileExtensionsTooltip']
+          } ${DatasetUtils.getValidExtensions({
             isTooltip: true,
             validExtensions: importSelectedIntegrationExtension
           })}`}

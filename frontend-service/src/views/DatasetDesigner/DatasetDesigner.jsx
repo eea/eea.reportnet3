@@ -59,7 +59,7 @@ import { useDatasetDesigner } from 'views/_components/Snapshots/_hooks/useDatase
 
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'views/_functions/Utils';
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
-
+import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -1709,7 +1709,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload
-            accept={DatasetDesignerUtils.getValidExtensions({ validExtensions: designerState.selectedImportExtension })}
+            accept={DatasetUtils.getValidExtensions({ validExtensions: designerState.selectedImportExtension })}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
@@ -1721,7 +1721,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             dialogVisible={designerState.isImportDatasetDialogVisible}
             infoTooltip={`${
               resourcesContext.messages['supportedFileExtensionsTooltip']
-            } ${DatasetDesignerUtils.getValidExtensions({
+            } ${DatasetUtils.getValidExtensions({
               isTooltip: true,
               validExtensions: designerState.selectedImportExtension
             })}`}
