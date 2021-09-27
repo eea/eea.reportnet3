@@ -150,6 +150,7 @@ export const useBreadCrumbs = ({
       label: dataProviderName
     };
   };
+
   const getPublicCountriesCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.PUBLIC_COUNTRIES, {}, true)),
@@ -157,6 +158,7 @@ export const useBreadCrumbs = ({
       label: resourcesContext.messages['publicCountriesBreadcrumbs']
     };
   };
+
   const getPublicCountryCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.PUBLIC_COUNTY_INFORMATION, { countryCode }, true)),
@@ -164,6 +166,7 @@ export const useBreadCrumbs = ({
       label: resourcesContext.messages['publicCountryBreadcrumbs']
     };
   };
+
   const getPublicDataflowCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true)),
@@ -171,6 +174,7 @@ export const useBreadCrumbs = ({
       label: resourcesContext.messages['publicDataflowBreadcrumbs']
     };
   };
+
   const getPublicDataflowsCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.PUBLIC_DATAFLOWS, {}, true)),
@@ -178,6 +182,7 @@ export const useBreadCrumbs = ({
       label: resourcesContext.messages['publicDataflowsBreadcrumbs']
     };
   };
+
   const getPublicHomeCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.ACCESS_POINT, {}, true)),
@@ -185,6 +190,7 @@ export const useBreadCrumbs = ({
       label: resourcesContext.messages['homeBreadcrumb']
     };
   };
+
   const getSettingsCrumb = () => {
     return {
       command: () => history.push(getUrl(routes.SETTINGS)),
