@@ -20,6 +20,14 @@ export const PropertyItem = ({ content, title }) => {
 
   const onToggleVisibility = () => setIsOpen(prevState => !prevState);
 
+  const renderContent = () =>
+    content.map(item => (
+      <span key={item.id}>
+        <strong>{item.labelKey}</strong>
+        {item.labelValue || '-'}
+      </span>
+    ));
+
   return (
     <div style={{ marginTop: '1rem', marginBottom: '2rem' }}>
       <h3 className={styles.title}>
@@ -31,20 +39,13 @@ export const PropertyItem = ({ content, title }) => {
         {title}
 
         {/* <Button
-              className={'p-button-secondary-transparent'}
-              icon={'externalUrl'}
-              onMouseDown={() => window.open(`${RodUrl.obligations}${obligations.obligationId}`)}
-              tooltip={resourcesContext.messages['viewMore']}
-            /> */}
+          className={'p-button-secondary-transparent'}
+          icon={'externalUrl'}
+          onMouseDown={() => window.open(`${RodUrl.content}${renderContent.obligationId}`)}
+          tooltip={resourcesContext.messages['viewMore']}
+        /> */}
       </h3>
-      <div className={`${styles.content} ${isOpen ? '' : styles.hide}`}>
-        {content.map(item => (
-          <span key={item.id}>
-            <strong>{item.labelKey}</strong>
-            {item.labelValue || '-'}
-          </span>
-        ))}
-      </div>
+      <div className={`${styles.content} ${isOpen ? '' : styles.hide}`}>{renderContent()}</div>
     </div>
   );
 };
