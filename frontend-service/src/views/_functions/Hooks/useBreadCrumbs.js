@@ -205,124 +205,130 @@ export const useBreadCrumbs = ({
   };
 
   const setBreadCrumbs = () => {
-    if (currentPage === CurrentPage.DATA_COLLECTION) {
-      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataCollectionCrumb()]);
-    }
+    switch (currentPage) {
+      case CurrentPage.DATA_COLLECTION:
+        breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataCollectionCrumb()]);
+        break;
 
-    if (currentPage === CurrentPage.DATAFLOW_DASHBOARDS) {
-      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataflowDashboardsCrumb()]);
-    }
+      case CurrentPage.DATAFLOW_DASHBOARDS:
+        breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataflowDashboardsCrumb()]);
+        break;
 
-    if (currentPage === CurrentPage.DATAFLOW_FEEDBACK) {
-      const datasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
+      case CurrentPage.DATAFLOW_FEEDBACK:
+        const feedbackBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
 
-      if (!representativeId) {
-        breadCrumbContext.add([...datasetBreadCrumbs, getTechnicalFeedbackCrumb()]);
-      } else if (!isEmpty(dataflowStateData)) {
-        breadCrumbContext.add([...datasetBreadCrumbs, getRepresentativeCrumb(), getTechnicalFeedbackCrumb()]);
-      }
-    }
-
-    if (currentPage === CurrentPage.DATAFLOW_HELP) {
-      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataflowHelpCrumb()]);
-    }
-
-    if (currentPage === CurrentPage.DATAFLOWS) {
-      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb()]);
-    }
-
-    if (currentPage === CurrentPage.DATAFLOW) {
-      if (!isEmpty(dataflowStateData)) {
-        const breadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
-        if (representativeId) {
-          breadCrumbs.push(getRepresentativeCrumb());
+        if (!representativeId) {
+          breadCrumbContext.add([...feedbackBreadCrumbs, getTechnicalFeedbackCrumb()]);
+        } else if (!isEmpty(dataflowStateData)) {
+          breadCrumbContext.add([...feedbackBreadCrumbs, getRepresentativeCrumb(), getTechnicalFeedbackCrumb()]);
         }
-        breadCrumbContext.add([...breadCrumbs]);
-      }
-    }
+        break;
 
-    if (currentPage === CurrentPage.DATASET_DESIGNER) {
-      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDatasetDesignerCrumb()]);
-    }
+      case CurrentPage.DATAFLOW_HELP:
+        breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDataflowHelpCrumb()]);
+        break;
 
-    if (currentPage === CurrentPage.DATASET) {
-      const datasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
+      case CurrentPage.DATAFLOWS:
+        breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb()]);
+        break;
 
-      if (dataProviderId) {
-        datasetBreadCrumbs.push(getRepresentativeCrumb());
-      }
+      case CurrentPage.DATAFLOW:
+        if (!isEmpty(dataflowStateData)) {
+          const breadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
+          if (representativeId) {
+            breadCrumbs.push(getRepresentativeCrumb());
+          }
+          breadCrumbContext.add([...breadCrumbs]);
+        }
+        break;
 
-      breadCrumbContext.add([...datasetBreadCrumbs, getDatasetCrumb()]);
-    }
+      case CurrentPage.DATASET_DESIGNER:
+        breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getDatasetDesignerCrumb()]);
+        break;
 
-    if (currentPage === CurrentPage.EU_DATASET) {
-      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getEUDatasetCrumb()]);
-    }
+      case CurrentPage.DATASET:
+        const datasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
 
-    if (currentPage === CurrentPage.USER_SETTINGS) {
-      breadCrumbContext.add([getHomeCrumb(), getSettingsCrumb()]);
-    }
+        if (dataProviderId) {
+          datasetBreadCrumbs.push(getRepresentativeCrumb());
+        }
 
-    if (currentPage === CurrentPage.PUBLIC_COUNTRIES) {
-      breadCrumbContext.add([getPublicHomeCrumb(), getPublicCountriesCrumb()]);
-    }
+        breadCrumbContext.add([...datasetBreadCrumbs, getDatasetCrumb()]);
 
-    if (currentPage === CurrentPage.PUBLIC_COUNTRY) {
-      breadCrumbContext.add([getPublicHomeCrumb(), getPublicCountriesCrumb(), getPublicCountryCrumb()]);
-    }
+        break;
 
-    if (currentPage === CurrentPage.PUBLIC_DATAFLOW) {
-      breadCrumbContext.add([getPublicHomeCrumb(), getPublicDataflowsCrumb(), getPublicDataflowCrumb()]);
-    }
+      case CurrentPage.EU_DATASET:
+        breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb(), getEUDatasetCrumb()]);
+        break;
 
-    if (currentPage === CurrentPage.PUBLIC_DATAFLOWS) {
-      breadCrumbContext.add([getPublicHomeCrumb(), getPublicDataflowsCrumb()]);
-    }
+      case CurrentPage.USER_SETTINGS:
+        breadCrumbContext.add([getHomeCrumb(), getSettingsCrumb()]);
+        break;
 
-    if (currentPage === CurrentPage.PUBLIC_INDEX) {
-      breadCrumbContext.add([]);
-    }
+      case CurrentPage.PUBLIC_COUNTRIES:
+        breadCrumbContext.add([getPublicHomeCrumb(), getPublicCountriesCrumb()]);
+        break;
 
-    if (currentPage === CurrentPage.TEST_DATASETS) {
-      breadCrumbContext.add([
-        getHomeCrumb(),
-        getDataflowsCrumb(),
-        getDataflowCrumb(),
-        getTestDatasetsCrumb(),
-        getDatasetCrumb()
-      ]);
-    }
+      case CurrentPage.PUBLIC_COUNTRY:
+        breadCrumbContext.add([getPublicHomeCrumb(), getPublicCountriesCrumb(), getPublicCountryCrumb()]);
+        break;
 
-    if (currentPage === CurrentPage.REFERENCE_DATAFLOW) {
-      breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getReferenceDataflowCrumb()]);
-    }
+      case CurrentPage.PUBLIC_DATAFLOW:
+        breadCrumbContext.add([getPublicHomeCrumb(), getPublicDataflowsCrumb(), getPublicDataflowCrumb()]);
+        break;
 
-    if (currentPage === CurrentPage.REFERENCE_DATASET_DESIGNER) {
-      breadCrumbContext.add([
-        getHomeCrumb(),
-        getDataflowsCrumb(),
-        getReferenceDataflowCrumb(),
-        getReferenceDatasetDesignerCrumb()
-      ]);
-    }
+      case CurrentPage.PUBLIC_DATAFLOWS:
+        breadCrumbContext.add([getPublicHomeCrumb(), getPublicDataflowsCrumb()]);
+        break;
 
-    if (currentPage === CurrentPage.REFERENCE_DATASET) {
-      breadCrumbContext.add([
-        getHomeCrumb(),
-        getDataflowsCrumb(),
-        getReferenceDataflowCrumb(),
-        getReferenceDatasetCrumb()
-      ]);
-    }
+      case CurrentPage.PUBLIC_INDEX:
+        breadCrumbContext.add([]);
+        break;
 
-    if (currentPage === CurrentPage.DATAFLOW_REFERENCE_DATASET) {
-      const datasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
+      case CurrentPage.TEST_DATASETS:
+        breadCrumbContext.add([
+          getHomeCrumb(),
+          getDataflowsCrumb(),
+          getDataflowCrumb(),
+          getTestDatasetsCrumb(),
+          getDatasetCrumb()
+        ]);
+        break;
 
-      if (dataProviderId) {
-        datasetBreadCrumbs.push(getRepresentativeCrumb());
-      }
+      case CurrentPage.REFERENCE_DATAFLOW:
+        breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb(), getReferenceDataflowCrumb()]);
+        break;
 
-      breadCrumbContext.add([...datasetBreadCrumbs, getReferenceDatasetCrumb()]);
+      case CurrentPage.REFERENCE_DATASET_DESIGNER:
+        breadCrumbContext.add([
+          getHomeCrumb(),
+          getDataflowsCrumb(),
+          getReferenceDataflowCrumb(),
+          getReferenceDatasetDesignerCrumb()
+        ]);
+        break;
+
+      case CurrentPage.REFERENCE_DATASET:
+        breadCrumbContext.add([
+          getHomeCrumb(),
+          getDataflowsCrumb(),
+          getReferenceDataflowCrumb(),
+          getReferenceDatasetCrumb()
+        ]);
+        break;
+
+      case CurrentPage.DATAFLOW_REFERENCE_DATASET:
+        const referenceDatasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
+
+        if (dataProviderId) {
+          referenceDatasetBreadCrumbs.push(getRepresentativeCrumb());
+        }
+
+        breadCrumbContext.add([...referenceDatasetBreadCrumbs, getReferenceDatasetCrumb()]);
+        break;
+
+      default:
+        break;
     }
   };
 };
