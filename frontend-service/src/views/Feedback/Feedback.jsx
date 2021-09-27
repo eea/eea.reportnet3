@@ -89,7 +89,6 @@ export const Feedback = withRouter(({ match, history }) => {
 
   useEffect(() => {
     onGetDataflowDetails();
-    getDataflowData(dataflowId);
     leftSideBarContext.removeModels();
   }, []);
 
@@ -155,19 +154,6 @@ export const Feedback = withRouter(({ match, history }) => {
     representativeId
   });
 
-  const getDataflowData = async dataflowId => {
-    try {
-      dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
-      const dataflow = await DataflowService.get(dataflowId);
-      dispatchFeedback({ type: 'SET_DATAFLOW_DATA', payload: dataflow });
-    } catch (error) {
-      console.error('Feedback - getDataflowData.', error);
-      notificationContext.add({ type: 'LOAD_DATAFLOW_DATA_ERROR' });
-    } finally {
-      dispatchFeedback({ type: 'SET_IS_LOADING', payload: false });
-    }
-  };
-
   const markMessagesAsRead = async data => {
     //mark unread messages as read
     if (data?.unreadMessages.length > 0) {
@@ -191,13 +177,15 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onGetDataflowDetails = async () => {
     try {
+      const dataflow = await DataflowService.get(dataflowId);
       const data = await DataflowService.getDetails(dataflowId);
-      const name = data.name;
 
       dispatchFeedback({
         type: 'SET_DATAFLOW_DETAILS',
-        payload: { name, dataflowType: data.type }
+        payload: { name: data.name, dataflowType: data.type }
       });
+
+      dispatchFeedback({ type: 'SET_DATAFLOW_DATA', payload: dataflow });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);
       notificationContext.add({
