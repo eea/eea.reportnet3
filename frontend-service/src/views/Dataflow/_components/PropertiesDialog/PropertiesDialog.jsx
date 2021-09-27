@@ -43,10 +43,15 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
     ];
   };
 
-  const parseLegalInstrument = () => ({
-    shortName: isNil(obligations.legalInstrument) ? '' : obligations.legalInstrument.alias,
-    legalName: isNil(obligations.legalInstrument) ? '' : obligations.legalInstrument.title
-  });
+  const getLegalInstrumentContent = () => {
+    const legalName = isNil(obligations.legalInstrument) ? '' : obligations.legalInstrument.title;
+    const shortName = isNil(obligations.legalInstrument) ? '' : obligations.legalInstrument.alias;
+
+    return [
+      { id: 0, labelKey: 'Short name: ', labelValue: shortName },
+      { id: 1, labelKey: 'Legal name: ', labelValue: legalName }
+    ];
+  };
 
   const renderDialogFooter = (
     <Button
@@ -75,13 +80,7 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
             title={resourcesContext.messages['dataflowDetails']}
           />
           <PropertyItem content={getObligationsContent()} title={resourcesContext.messages['obligation']} />
-          <PropertyItem
-            content={[
-              { id: 0, labelKey: 'Short name: ', labelValue: parseLegalInstrument().shortName },
-              { id: 1, labelKey: 'Legal name: ', labelValue: parseLegalInstrument().legalName }
-            ]}
-            title={resourcesContext.messages['legalInstrument']}
-          />
+          <PropertyItem content={getLegalInstrumentContent()} title={resourcesContext.messages['legalInstrument']} />
         </div>
       </Dialog>
     )
