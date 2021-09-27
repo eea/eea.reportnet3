@@ -1022,6 +1022,7 @@
     "send": "Send",
     "settings": "Settings",
     "settingsHelp": "User settings help",
+    "shareRightsDisclaimer": "Note: Management of secondary reporter access to this dataflow is the lead reporter responsibility",
     "shortCode": "code",
     "shortName": "Short name",
     "showHideColumns": "Show/Hide columns",

@@ -137,6 +137,12 @@ const parseValue = (type, value, feToBe = false) => {
   return value;
 };
 
+const getValidExtensions = ({ isTooltip = false, validExtensions = '' }) =>
+  validExtensions
+    ?.split(/,\s*/)
+    .map(ext => (isTooltip ? ` .${ext}` : `.${ext}`))
+    .join(',');
+
 // const getPercentage = valArr => {
 //   let total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));
 //   return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
@@ -148,6 +154,7 @@ const parseValue = (type, value, feToBe = false) => {
 
 export const DatasetUtils = {
   getAllLevelErrorsFromRuleValidations,
+  getValidExtensions,
   parseDatasetListDTO,
   parseValue,
   sortDatasetTypeByName,

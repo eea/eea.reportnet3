@@ -386,7 +386,18 @@ export const ShareRights = ({
 
   const renderAccountTemplate = userRight => <div>{userRight.account}</div>;
 
-  const renderDialogLayout = children => <div className={styles.shareRightsModal}>{children}</div>;
+  const renderDialogLayout = children => (
+    <Fragment>
+      <div
+        className={styles.shareRightsModal}
+        style={{ height: isEmpty(shareRightsState.userRightList) ? 0 : 'inherit' }}>
+        {children}
+      </div>
+      {TextUtils.areEquals(userType, 'reporter') && (
+        <span className={styles.shareRightsDisclaimer}>{resourcesContext.messages['shareRightsDisclaimer']}</span>
+      )}
+    </Fragment>
+  );
 
   const getTooltipMessage = userRight => {
     if (hasEmptyData(userRight)) {

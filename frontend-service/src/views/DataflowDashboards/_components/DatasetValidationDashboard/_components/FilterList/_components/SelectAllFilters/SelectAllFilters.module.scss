@@ -1,7 +1,7 @@
 .listItem {
   display: flex;
-  color: #404040;
-  background-color: #ffffff;
+  color: var(--main-font-color);
+  background-color: var(--bg);
   padding: 5px;
   margin: 0;
   align-items: center;
