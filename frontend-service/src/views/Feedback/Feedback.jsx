@@ -46,6 +46,7 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const [feedbackState, dispatchFeedback] = useReducer(feedbackReducer, {
     currentPage: 0,
+    dataflowStateData: {},
     dataflowName: '',
     dataflowType: '',
     dataProviders: [],
@@ -88,6 +89,7 @@ export const Feedback = withRouter(({ match, history }) => {
 
   useEffect(() => {
     onGetDataflowDetails();
+    getDataflowData(dataflowId);
     leftSideBarContext.removeModels();
   }, []);
 
@@ -145,11 +147,26 @@ export const Feedback = withRouter(({ match, history }) => {
 
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW_FEEDBACK,
+    dataflowStateData: feedbackState.dataflowStateData,
     dataflowId,
     dataflowType,
     history,
-    isLoading
+    isLoading,
+    representativeId
   });
+
+  const getDataflowData = async dataflowId => {
+    try {
+      dispatchFeedback({ type: 'SET_IS_LOADING', payload: true });
+      const dataflow = await DataflowService.get(dataflowId);
+      dispatchFeedback({ type: 'SET_DATAFLOW_DATA', payload: dataflow });
+    } catch (error) {
+      console.error('Feedback - getDataflowData.', error);
+      notificationContext.add({ type: 'LOAD_DATAFLOW_DATA_ERROR' });
+    } finally {
+      dispatchFeedback({ type: 'SET_IS_LOADING', payload: false });
+    }
+  };
 
   const markMessagesAsRead = async data => {
     //mark unread messages as read

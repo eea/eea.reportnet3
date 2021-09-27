@@ -1,4 +1,4 @@
-import { useContext, useLayoutEffect } from 'react';
+import { useContext, useEffect } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -29,9 +29,18 @@ export const useBreadCrumbs = ({
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     !isLoading && setBreadCrumbs();
-  }, [dataflowStateData, dataflowType, dataProviderId, dataProviderName, isLoading, matchParams, metaData]);
+  }, [
+    dataflowStateData,
+    dataflowType,
+    dataProviderId,
+    dataProviderName,
+    isLoading,
+    matchParams,
+    metaData,
+    representativeId
+  ]);
 
   const getDataCollectionCrumb = () => {
     return { label: resourcesContext.messages['dataCollection'], icon: 'dataCollection' };
@@ -114,7 +123,7 @@ export const useBreadCrumbs = ({
       if (intRepresentativeId === 0) {
         representativeCrumbLabel = resourcesContext.messages['testDatasetBreadcrumbs'];
       } else {
-        const representatives = dataflowStateData.datasets.map(dataset => {
+        const representatives = dataflowStateData?.datasets.map(dataset => {
           return { name: dataset.datasetSchemaName, dataProviderId: dataset.dataProviderId };
         });
 
@@ -207,7 +216,7 @@ export const useBreadCrumbs = ({
     if (currentPage === CurrentPage.DATAFLOW_FEEDBACK) {
       const datasetBreadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
 
-      if (dataProviderId) {
+      if (representativeId && !isEmpty(dataflowStateData)) {
         datasetBreadCrumbs.push(getRepresentativeCrumb());
       }
 
