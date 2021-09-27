@@ -1263,7 +1263,13 @@
     "wrongCoordinate": "Wrong or incomplete coordinate",
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
-    "wrongWebLinkError": "The URL is not valid",
-    "yes": "Yes"
+    "wrongWebLinkError": "The URL is not valid",    
+    "deleteFieldBulkTitle": "Delete fields",
+    "deleteFieldBulkConfirm": "Are you sure you want to delete these fields in design?",
+    "bulkDeleteCheckTooltip": "Delete multiple fields",
+    "bulkDeleteConfirmTooltip": "Confirm",
+    "duplicateDisabledTitle": "Duplicate disabled:",
+    "duplicateDisabledMessage": "already exists",
+    "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field"
   }
 }

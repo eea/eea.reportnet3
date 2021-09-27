@@ -208,7 +208,7 @@ export const useSetColumns = (
         <Fragment>
           <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {RecordUtils.getFieldTypeValue(column.type)}
+            {RecordUtils.getFieldType(column.type).value}
           </span>
           <br />
           <span style={{ fontWeight: 'bold' }}>{resources.messages['description']}: </span>
@@ -237,7 +237,7 @@ export const useSetColumns = (
         <Fragment>
           <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {RecordUtils.getFieldTypeValue(column.type)}
+            {RecordUtils.getFieldType(column.type).value}
           </span>
           <br />
           <span style={{ fontWeight: 'bold' }}>{resources.messages['description']}: </span>
