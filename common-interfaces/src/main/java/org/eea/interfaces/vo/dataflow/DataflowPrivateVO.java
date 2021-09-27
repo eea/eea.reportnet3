@@ -3,30 +3,24 @@ package org.eea.interfaces.vo.dataflow;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
-import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
+import org.eea.interfaces.vo.document.DocumentVO;
+import org.eea.interfaces.vo.weblink.WeblinkVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * The type Data flow vo.
- */
 @Getter
 @Setter
 @ToString
-public class DataflowPublicVO extends GenericDataflowVO implements Serializable {
-
+public class DataflowPrivateVO extends GenericDataflowVO implements Serializable {
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = -8073212422480973637L;
 
-  /** The datasets. */
-  private List<ReportingDatasetPublicVO> reportingDatasets;
+  /** The documents. */
+  private List<DocumentVO> documents;
 
-  /** The reference datasets. */
-  private List<ReferenceDatasetPublicVO> referenceDatasets;
-
-
+  /** The weblinks. */
+  private List<WeblinkVO> weblinks;
 
   /**
    * Equals.
@@ -42,7 +36,7 @@ public class DataflowPublicVO extends GenericDataflowVO implements Serializable 
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final DataflowPublicVO that = (DataflowPublicVO) o;
+    final DataflowPrivateVO that = (DataflowPrivateVO) o;
     return id.equals(that.id);
   }
 
@@ -53,8 +47,7 @@ public class DataflowPublicVO extends GenericDataflowVO implements Serializable 
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, description, name, deadlineDate, reportingDatasets, referenceDatasets,
-        obligation, status, releasable);
+    return Objects.hash(id, description, name, deadlineDate, weblinks, documents, obligation,
+        status, releasable);
   }
-
 }
