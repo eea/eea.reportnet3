@@ -12,6 +12,8 @@ import uniqBy from 'lodash/uniqBy';
 
 import styles from './HistoricReleases.module.scss';
 
+import { routes } from 'conf/routes';
+
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
@@ -26,6 +28,8 @@ import { HistoricReleaseService } from 'services/HistoricReleaseService';
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { getUrl } from 'repositories/_utils/UrlUtils';
+
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
@@ -119,7 +123,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     <div onClick={e => e.stopPropagation()}>
       <span>
         {rowData.dataProviderCode}{' '}
-        <a href={`${dataflowId}/dataset/${rowData.datasetId}`} title={rowData.dataProviderCode}>
+        <a
+          href={getUrl(routes.DATASET, { dataflowId, datasetId: rowData.datasetId }, true)}
+          title={rowData.dataProviderCode}>
           <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalUrl')} />
         </a>
       </span>
