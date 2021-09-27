@@ -103,7 +103,7 @@
 
         .item {
           align-items: center;
-          border-bottom: 0.05rem solid var(--gray-25);
+          border-bottom: var(--external-integration-item-border);
           cursor: pointer;
           display: flex;
           float: left;
@@ -114,11 +114,11 @@
           width: 100%;
 
           &.selected {
-            background-color: var(--gray-10);
+            background-color: var(--external-integration-item-bg-color-selected);
           }
 
           &:hover {
-            background-color: var(--gray-10);
+            background-color: var(--external-integration-item-bg-color-hover);
           }
 
           .key,
