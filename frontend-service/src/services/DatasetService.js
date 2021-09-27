@@ -17,6 +17,7 @@ import { DatasetTableRecord } from 'entities/DatasetTableRecord';
 import { Validation } from 'entities/Validation';
 
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DatasetService = {
   createRecordDesign: async (datasetId, datasetTableRecordField) => {
@@ -173,7 +174,9 @@ export const DatasetService = {
         !isNil(datasetTableDataDTO.data.status) && capitalize(datasetTableDataDTO.data.status.split('_').join(' ')),
       datasetSchemaId: datasetTableDataDTO.data.datasetSchema,
       datasetSchemaName: datasetTableDataDTO.data.dataSetName,
-      dataProviderId: datasetTableDataDTO.data.dataProviderId
+      dataProviderId: TextUtils.areEquals(datasetTableDataDTO.data.datasetTypeEnum, 'TEST')
+        ? 0
+        : datasetTableDataDTO.data.dataProviderId
     });
   },
 
