@@ -1,5 +1,6 @@
 export const DataflowConfig = {
   cloneSchemas: '/dataschema/copy?sourceDataflow={:sourceDataflowId}&targetDataflow={:targetDataflowId}',
+  countByType: '/dataflow/countByType',
   createUpdate: '/dataflow',
   createApiKey: '/user/createApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   createApiKeyCustodian: '/user/createApiKey?dataflowId={:dataflowId}',

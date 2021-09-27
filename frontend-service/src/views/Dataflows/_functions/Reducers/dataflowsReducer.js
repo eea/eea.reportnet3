@@ -1,7 +1,11 @@
 export const dataflowsReducer = (state, { type, payload }) => {
   switch (type) {
     case 'SET_DATAFLOWS':
-      return { ...state, [payload.type]: payload.data };
+      return {
+        ...state,
+        [payload.type]: payload.data,
+        dataflowsCount: { ...state.dataflowsCount, [payload.type]: payload.data.length }
+      };
 
     case 'HAS_PERMISSION':
       return {
@@ -16,6 +20,15 @@ export const dataflowsReducer = (state, { type, payload }) => {
 
     case 'ON_CHANGE_TAB':
       return { ...state, activeIndex: payload.index };
+
+    case 'SET_DATAFLOWS_COUNT': {
+      return {
+        ...state,
+        dataflowsCount: payload,
+        dataflowsCountLoaded: true,
+        activeIndex: state.activeIndex !== 2 ? (payload.reporting > 0 ? 0 : 1) : state.activeIndex
+      };
+    }
 
     case 'SET_LOADING':
       return { ...state, loadingStatus: { ...state.loadingStatus, [payload.tab]: payload.status } };

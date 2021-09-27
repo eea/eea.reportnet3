@@ -59,6 +59,8 @@ const Dataflows = withRouter(({ history, match }) => {
     activeIndex: 0,
     business: [],
     citizenScience: [],
+    dataflowsCount: {},
+    dataflowsCountLoaded: false,
     reporting: [],
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
@@ -73,10 +75,23 @@ const Dataflows = withRouter(({ history, match }) => {
     reference: []
   });
 
-  const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
-    useReportingObligations();
+  const {
+    obligation,
+    resetObligations,
+    setObligationToPrevious,
+    setCheckedObligation,
+    setToCheckedObligation
+  } = useReportingObligations();
 
-  const { activeIndex, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
+  const {
+    activeIndex,
+    dataflowsCount,
+    dataflowsCountLoaded,
+    isAdmin,
+    isCustodian,
+    isNationalCoordinator,
+    loadingStatus
+  } = dataflowsState;
 
   const tabMenuItems =
     isCustodian || isAdmin
@@ -113,10 +128,19 @@ const Dataflows = withRouter(({ history, match }) => {
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
 
   useEffect(() => {
+    getDataflowsCount();
+
     if (!isNil(dataflowsErrorType)) {
       notificationContext.add({ type: ErrorUtils.parseErrorType(dataflowsErrorType) });
     }
   }, []);
+
+  useEffect(() => {
+    console.log({ dataflowsCount });
+    if (!isEmpty(dataflowsCount) && !dataflowsCountLoaded) {
+      getDataflows();
+    }
+  }, [dataflowsCount]);
 
   useEffect(() => {
     leftSideBarContext.removeModels();
@@ -188,7 +212,7 @@ const Dataflows = withRouter(({ history, match }) => {
   useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       onLoadPermissions();
-      getDataflows();
+      // getDataflows();
     }
   }, [userContext.contextRoles]);
 
@@ -239,6 +263,21 @@ const Dataflows = withRouter(({ history, match }) => {
         const data = await CitizenScienceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'citizenScience' } });
       }
+    } catch (error) {
+      console.error('Dataflows - getDataflows.', error);
+      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getDataflowsCount = async () => {
+    setLoading(true);
+
+    try {
+      const { data } = await DataflowService.countByType();
+      // console.log(data);
+      dataflowsDispatch({ type: 'SET_DATAFLOWS_COUNT', payload: data });
     } catch (error) {
       console.error('Dataflows - getDataflows.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
@@ -329,7 +368,13 @@ const Dataflows = withRouter(({ history, match }) => {
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
-        <TabMenu activeIndex={activeIndex} model={tabMenuItems} onTabChange={event => onChangeTab(event.index)} />
+        <TabMenu
+          activeIndex={activeIndex}
+          headerLabelChildrenCount={dataflowsCount}
+          headerLabelLoading={loadingStatus}
+          model={tabMenuItems}
+          onTabChange={event => onChangeTab(event.index)}
+        />
         <DataflowsList
           className="dataflowList-accepted-help-step"
           content={{
