@@ -81,10 +81,14 @@ const useReporterDataset = (datasetId, dataflowId) => {
     }
   };
 
-  useCheckNotifications(['ADD_DATASET_SNAPSHOT_COMPLETED_EVENT'], onLoadSnapshotList);
+  useCheckNotifications(
+    ['ADD_DATASET_SNAPSHOT_COMPLETED_EVENT', 'RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT'],
+    onLoadSnapshotList
+  );
 
   const onRestoreSnapshot = async () => {
     try {
+      setIsLoadingSnapshotListData(true);
       notificationContext.add({ type: 'RESTORE_DATASET_SNAPSHOT_INIT_INFO' });
       await SnapshotService.restoreReporter(dataflowId, datasetId, snapshotState.snapShotId);
     } catch (error) {

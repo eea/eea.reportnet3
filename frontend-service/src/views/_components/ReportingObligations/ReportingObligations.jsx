@@ -60,7 +60,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
         !isEmpty(reportingObligationState.filterBy.countries) ||
         !isEmpty(reportingObligationState.filterBy.issues) ||
         !isEmpty(reportingObligationState.filterBy.organizations) ||
-        reportingObligationState.filterBy.expirationDate.length !== 0
+        reportingObligationState.filterBy.expirationDate?.length !== 0
       ) {
         reportingObligationDispatch({ type: 'IS_SEARCHED', payload: { value: true } });
       } else {

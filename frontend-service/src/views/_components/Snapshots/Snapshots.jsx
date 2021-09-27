@@ -75,7 +75,7 @@ const Snapshots = ({
             </li>
             <li>
               <strong>{resourcesContext.messages.description}: </strong>
-              <p className={styles.description}>{snapshotContext.snapshotState.description}</p>
+              <span className={styles.description}>{snapshotContext.snapshotState.description}</span>
             </li>
           </ul>
         </ConfirmDialog>
