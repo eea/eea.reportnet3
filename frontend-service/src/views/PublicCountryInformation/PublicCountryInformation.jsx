@@ -87,8 +87,6 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
 
   const getHeader = fieldHeader => {
     switch (fieldHeader) {
-      case 'obligation':
-        return resourcesContext.messages['obligation'];
       case 'isReleasable':
         return resourcesContext.messages['status'];
       case 'isReleased':
