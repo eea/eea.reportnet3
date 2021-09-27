@@ -103,7 +103,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     }
   };
 
-  const releaseDateTemplate = rowData => {
+  const renderReleaseDateTemplate = rowData => {
     return (
       <div className={styles.checkedValueColumn}>
         {dayjs(rowData.releaseDate).format(
@@ -115,7 +115,18 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     );
   };
 
-  const isEUReleasedTemplate = rowData => (
+  const renderDataProviderLinkBodyColumn = rowData => (
+    <div onClick={e => e.stopPropagation()}>
+      <span>
+        {rowData.dataProviderCode}{' '}
+        <a href={`${dataflowId}/dataset/${rowData.datasetId}`} title={rowData.dataProviderCode}>
+          <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalUrl')} />
+        </a>
+      </span>
+    </div>
+  );
+
+  const renderIsEUReleasedTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
       {rowData.isEUReleased ? (
         <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
@@ -123,7 +134,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     </div>
   );
 
-  const isDataCollectionReleasedTemplate = rowData => (
+  const renderIsDataCollectionReleasedTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
       {rowData.isDataCollectionReleased ? (
         <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
@@ -142,9 +153,10 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       )
       .map(field => {
         let template = null;
-        if (field === 'releaseDate') template = releaseDateTemplate;
-        if (field === 'isEUReleased') template = isEUReleasedTemplate;
-        if (field === 'isDataCollectionReleased') template = isDataCollectionReleasedTemplate;
+        if (field === 'dataProviderCode') template = renderDataProviderLinkBodyColumn;
+        if (field === 'releaseDate') template = renderReleaseDateTemplate;
+        if (field === 'isEUReleased') template = renderIsEUReleasedTemplate;
+        if (field === 'isDataCollectionReleased') template = renderIsDataCollectionReleasedTemplate;
 
         return (
           <Column
@@ -173,7 +185,8 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       .filter(key => key.includes('dataProviderCode') || key.includes('releaseDate'))
       .map(field => {
         let template = null;
-        if (field === 'releaseDate') template = releaseDateTemplate;
+        if (field === 'dataProviderCode') template = renderDataProviderLinkBodyColumn;
+        if (field === 'releaseDate') template = renderReleaseDateTemplate;
         return (
           <Column
             body={template}
@@ -243,7 +256,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       .filter(key => key.includes('releaseDate'))
       .map(field => {
         let template = null;
-        if (field === 'releaseDate') template = releaseDateTemplate;
+        if (field === 'releaseDate') template = renderReleaseDateTemplate;
         return (
           <Column
             body={template}
