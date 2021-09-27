@@ -109,6 +109,29 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
               />
               {resourcesContext.messages['obligation']}
             </h3>
+            <div className={`${styles.content}`}>
+              <span>
+                <strong>Title: </strong>
+                {parseObligations().data.title}
+              </span>
+              <span>
+                <strong>Description: </strong>
+                {parseObligations().data.description}
+              </span>
+              <span>
+                <strong>Comment: </strong>
+                {parseObligations().data.comment}
+              </span>
+              <span>
+                <strong>Next Report Due: </strong>
+                {parseObligations().data.nextReportDue}
+              </span>
+              <span>
+                <strong>Id: </strong>
+                {parseObligations().data.id}
+              </span>
+            </div>
+
             <Button
               className={'p-button-secondary-transparent'}
               icon={'externalUrl'}
