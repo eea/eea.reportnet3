@@ -222,6 +222,7 @@
   --datatable-body-row-contextmenu-hightlight-bg: var(--c-corporate-blue);
   --datatable-body-row-contextmenu-hightlight-color: var(--white);
   --datatable-column-resizer-bg: var(--c-corporate-blue);
+  --datatable-toolbar-border: 1px solid var(--gray-25);
 
   /* Paginator */
 
@@ -516,6 +517,11 @@
   --calendar-header-next-prev-color: var(--gray-75);
   --calendar-header-bg: var(--bg);
   --calendar-header-color: var(--gray-75);
+
+  /* External integrations */
+  --external-integration-item-border: 0.05rem solid var(--gray-25);
+  --external-integration-item-bg-color-selected: var(--gray-10);
+  --external-integration-item-bg-color-hover: var(--gray-10);
 
   /* Map */
   --map-marker-color: var(--c-corporate-blue-lighter);

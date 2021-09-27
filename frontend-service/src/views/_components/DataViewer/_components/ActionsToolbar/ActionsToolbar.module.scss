@@ -1,7 +1,7 @@
 .actionsToolbar {
-  border-top: 1px solid var(--gray-25) !important;
-  border-left: 1px solid var(--gray-25) !important;
-  border-right: 1px solid var(--gray-25) !important;
+  border-top: var(--datatable-toolbar-border) !important;
+  border-left: var(--datatable-toolbar-border) !important;
+  border-right: var(--datatable-toolbar-border) !important;
   border-bottom: 0px !important;
   border-top-left-radius: 3px !important;
   border-top-right-radius: 3px !important;

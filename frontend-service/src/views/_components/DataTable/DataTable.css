@@ -173,10 +173,7 @@ body
 body .p-datatable .p-column-resizer-helper {
   background-color: var(--datatable-column-resizer-bg);
 }
-body .p-datatable .p-datatable-scrollable-header,
-body .p-datatable .p-datatable-scrollable-footer {
-  background-color: #f4f4f4;
-}
+
 @media screen and (max-width: 40em) {
   body .p-datatable.p-datatable-responsive .p-paginator-top {
     border-bottom: 1px solid #c8c8c8;
