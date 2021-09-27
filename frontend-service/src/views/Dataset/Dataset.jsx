@@ -61,10 +61,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const userContext = useContext(UserContext);
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
-  const [dataProviderId, setDataProviderId] = useState(null);
   const [dataset, setDataset] = useState({});
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
-  const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
@@ -127,7 +125,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     currentPage: getCurrentPage(),
     dataflowId,
     dataflowType,
-    dataProviderId,
+    dataProviderId: metadata?.dataset.dataProviderId,
     dataProviderName: metadata?.dataset.name,
     history,
     isLoading,
@@ -257,8 +255,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   }, [isTestDataset]);
 
   useEffect(() => {
-    if (datasetSchemaId) getFileExtensions();
-  }, [datasetSchemaId, isImportDatasetDialogVisible]);
+    if (metadata?.dataset.datasetSchemaId) getFileExtensions();
+  }, [metadata?.dataset.datasetSchemaId, isImportDatasetDialogVisible]);
 
   useEffect(() => {
     getExportIntegrationsNames(externalOperationsList.export);
@@ -369,7 +367,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       return CurrentPage.REFERENCE_DATASET;
     } else if (isReferenceDatasetRegularDataflow) {
       return CurrentPage.DATAFLOW_REFERENCE_DATASET;
-    } else if (dataProviderId === 0) {
+    } else if (metadata?.dataset.dataProviderId === 0) {
       return CurrentPage.TEST_DATASETS;
     } else {
       return CurrentPage.DATASET;
@@ -378,7 +376,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getFileExtensions = async () => {
     try {
-      const allExtensions = await IntegrationService.getAllExtensionsOperations(dataflowId, datasetSchemaId);
+      const allExtensions = await IntegrationService.getAllExtensionsOperations(
+        dataflowId,
+        metadata.dataset.datasetSchemaId
+      );
       setExternalOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
     } catch (error) {
       console.error('Dataset - getFileExtensions.', error);
@@ -390,8 +391,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     try {
       const metaData = await MetadataUtils.getMetadata({ datasetId, dataflowId });
       setMetadata(metaData);
-      setDatasetSchemaId(metaData.dataset.datasetSchemaId);
-      setDataProviderId(metaData.dataset.dataProviderId);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
@@ -1076,8 +1075,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       )}
       {isTableView ? (
         <TabsSchema
-          dataProviderId={dataProviderId}
-          datasetSchemaId={datasetSchemaId}
+          dataProviderId={metadata?.dataset.dataProviderId}
+          datasetSchemaId={metadata?.dataset.datasetSchemaId}
           hasWritePermissions={hasWritePermissions}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
@@ -1098,7 +1097,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         />
       ) : (
         <Webforms
-          dataProviderId={dataProviderId}
+          dataProviderId={metadata?.dataset.dataProviderId}
           dataflowId={dataflowId}
           datasetId={datasetId}
           isReleasing={dataset.isReleasing}
@@ -1123,7 +1122,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           <ShowValidationsList
             datasetId={datasetId}
             datasetName={datasetName}
-            datasetSchemaId={datasetSchemaId}
+            datasetSchemaId={metadata?.dataset.datasetSchemaId}
             hasWritePermissions={hasWritePermissions}
             isWebformView={!isTableView}
             levelErrorTypes={levelErrorTypes}
@@ -1147,7 +1146,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           <QCList
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
             datasetSchemaAllTables={datasetSchemaAllTables}
-            datasetSchemaId={datasetSchemaId}
+            datasetSchemaId={metadata?.dataset.datasetSchemaId}
             reporting={true}
           />
         </Dialog>
