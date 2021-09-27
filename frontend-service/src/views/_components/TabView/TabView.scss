@@ -203,7 +203,7 @@ body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li:not(:last-chi
 body .p-tabview .p-tabview-panels {
   background-color: var(--bg);
   padding: 0.571em 1em;
-  border: 1px solid var(--gray-25);
+  border: var(--tabview-border);
   color: var(--main-font-color);
   -moz-border-radius-bottomleft: 3px;
   -webkit-border-bottom-left-radius: 3px;
