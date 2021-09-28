@@ -105,6 +105,7 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
     return (
       <div className={`${styles.message} rep-feedback-message ${getStyles()}`} key={message.id}>
         <div className={styles.messageTextWrapper}>
+          <span className={styles.datetime}>{dayjs(message.date).format('YYYY-MM-DD HH:mm')}</span>
           {TextUtils.areEquals(message.type, 'ATTACHMENT') ? (
             renderAttachment()
           ) : (
@@ -112,7 +113,6 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
               className={`${styles.messageText} ${message.direction ? styles.sender : styles.receiver}`}
               dangerouslySetInnerHTML={{ __html: getMessageContent() }}></span>
           )}
-          <span className={styles.datetime}>{dayjs(message.date).format('YYYY-MM-DD HH:mm')}</span>
         </div>
         {isCustodian && !message.automatic && (
           <FontAwesomeIcon

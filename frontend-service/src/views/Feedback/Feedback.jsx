@@ -365,7 +365,7 @@ export const Feedback = withRouter(({ match, history }) => {
           <div className={`${styles.dataProviderWrapper} feedback-dataProvider-help-step`}>
             <ListBox
               ariaLabel="dataProviders"
-              className={styles.dataProvider}
+              className={`${styles.dataProvider} ${messages.length > 0 && styles.hasCounter}`}
               onChange={e => {
                 onChangeDataProvider(e.target.value);
               }}
@@ -379,12 +379,17 @@ export const Feedback = withRouter(({ match, history }) => {
           <span className={styles.dragAndDropFileMessage}>{resourcesContext.messages['dragAndDropFileMessage']}</span>
         )}
         <div
-          className={`${styles.listMessagesWrapper} ${
-            isCustodian ? styles.flexBasisCustodian : styles.flexBasisProvider
-          }`}
+          className={styles.listMessagesWrapper}
           onDragLeave={isCustodian && !isEmpty(selectedDataProvider) ? onDragLeave : () => {}}
           onDragOver={isCustodian && !isEmpty(selectedDataProvider) ? onDragOver : () => {}}
           onDrop={isCustodian && !isEmpty(selectedDataProvider) ? onDrop : () => {}}>
+          {messages.length > 0 && (
+            <div
+              className={
+                styles.messageCounter
+              }>{`${messages.length} ${resourcesContext.messages['of']} ${totalMessages} ${resourcesContext.messages['messages']}`}</div>
+          )}
+
           <ListMessages
             canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
             className={`feedback-messages-help-step`}
@@ -430,28 +435,31 @@ export const Feedback = withRouter(({ match, history }) => {
                 }
                 value={messageToSend}
               />
-              <Button
-                className={`${
-                  (isCustodian && isEmpty(selectedDataProvider)) || isSending ? '' : 'p-button-animated-right-blink'
-                } p-button-secondary ${styles.attachFileMessageButton}`}
-                disabled={(isCustodian && isEmpty(selectedDataProvider)) || isSending}
-                icon="clipboard"
-                iconPos="right"
-                label={resourcesContext.messages['uploadAttachment']}
-                onClick={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: true })}
-              />
-              <Button
-                className={`${
-                  messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending
-                    ? ''
-                    : 'p-button-animated-right-blink'
-                } p-button-primary ${styles.sendMessageButton}`}
-                disabled={messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending}
-                icon="comment"
-                iconPos="right"
-                label={resourcesContext.messages['send']}
-                onClick={() => onSendMessage(messageToSend)}
-              />
+              <div className={styles.buttonsWrapper}>
+                <Button
+                  className={`${
+                    (isCustodian && isEmpty(selectedDataProvider)) || isSending ? '' : 'p-button-animated-right-blink'
+                  } p-button-secondary ${styles.attachFileMessageButton}`}
+                  disabled={(isCustodian && isEmpty(selectedDataProvider)) || isSending}
+                  icon="clipboard"
+                  iconPos="right"
+                  label={resourcesContext.messages['uploadAttachment']}
+                  onClick={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: true })}
+                />
+
+                <Button
+                  className={`${
+                    messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending
+                      ? ''
+                      : 'p-button-animated-right-blink'
+                  } p-button-primary ${styles.sendMessageButton}`}
+                  disabled={messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending}
+                  icon="comment"
+                  iconPos="right"
+                  label={resourcesContext.messages['send']}
+                  onClick={() => onSendMessage(messageToSend)}
+                />
+              </div>
             </div>
           )}
         </div>
