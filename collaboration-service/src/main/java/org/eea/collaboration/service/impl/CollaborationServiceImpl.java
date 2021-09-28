@@ -251,7 +251,7 @@ public class CollaborationServiceImpl implements CollaborationService {
   public void deleteMessage(Long messageId) throws EEAException {
     try {
       Message message = messageRepository.findById(messageId).orElse(null);
-      if (message != null && message.getType() == MessageTypeEnum.ATTACHMENT) {
+      if (message != null && MessageTypeEnum.ATTACHMENT.equals(message.getType())) {
         messageAttachmentRepository.deleteByMessageId(messageId);
       } else {
         messageRepository.deleteById(messageId);
