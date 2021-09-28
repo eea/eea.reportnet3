@@ -261,6 +261,8 @@ export const Feedback = withRouter(({ match, history }) => {
   const onImportFileError = async ({ xhr }) => {
     if (xhr.status === 423) {
       notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+    } else {
+      notificationContext.add({ type: 'UPLOAD_FILE_ERROR' });
     }
   };
 
