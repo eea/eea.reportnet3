@@ -311,42 +311,15 @@ public class CollaborationControllerImplTest {
     messageVO = new MessageVO();
     messageVO.setId(1L);
     messageVO.setType(MessageTypeEnum.ATTACHMENT);
+    messageVO.setContent("");
     arrayListMessageVO.add(messageVO);
     messagePaginatedVO.setListMessage(arrayListMessageVO);
     Mockito.when(collaborationService.findMessages(Mockito.anyLong(), Mockito.anyLong(),
         Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(messagePaginatedVO);
-
-    MessageAttachment messageAttachment = new MessageAttachment();
-    messageAttachment.setFileName("file.csv");
-    Mockito.when(collaborationService.getMessageAttachment(Mockito.anyLong()))
-        .thenReturn(messageAttachment);
 
     collaborationControllerImpl.findMessages(1L, 1L, true, 0);
     Mockito.verify(collaborationService, times(1)).findMessages(Mockito.anyLong(),
         Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyInt());
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void findMessagesAttachmentEEAExceptionTest()
-      throws EEAIllegalArgumentException, EEAForbiddenException, EEAException {
-    MessageVO messageVO = new MessageVO();
-    MessagePaginatedVO messagePaginatedVO = new MessagePaginatedVO();
-    ArrayList<MessageVO> arrayListMessageVO = new ArrayList<>();
-    messageVO.setId(1L);
-    messageVO.setType(MessageTypeEnum.ATTACHMENT);
-    arrayListMessageVO.add(messageVO);
-    messagePaginatedVO.setListMessage(arrayListMessageVO);
-    Mockito.when(collaborationService.findMessages(Mockito.anyLong(), Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyInt())).thenReturn(messagePaginatedVO);
-
-    Mockito.when(collaborationService.getMessageAttachment(Mockito.anyLong()))
-        .thenThrow(EEAException.class);
-    try {
-      collaborationControllerImpl.findMessages(1L, 1L, true, 0);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-      throw e;
-    }
   }
 
   @Test(expected = ResponseStatusException.class)

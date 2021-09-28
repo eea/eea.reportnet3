@@ -73,7 +73,8 @@ export const DatasetService = {
   createTableDesign: async (datasetId, tableSchemaName) =>
     await DatasetRepository.createTableDesign(datasetId, tableSchemaName),
 
-  deleteData: async (datasetId, arePrefilledTablesDeleted) => await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
+  deleteData: async (datasetId, arePrefilledTablesDeleted) =>
+    await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
 
   deleteAttachment: async (datasetId, fieldId) => await DatasetRepository.deleteAttachment(datasetId, fieldId),
 
@@ -246,7 +247,6 @@ export const DatasetService = {
           entityType: datasetErrorDTO.typeEntity,
           fieldSchemaName: datasetErrorDTO.nameFieldSchema,
           levelError: datasetErrorDTO.levelError,
-          message: datasetErrorDTO.message,
           numberOfRecords: datasetErrorDTO.numberOfRecords,
           objectId: datasetErrorDTO.idObject,
           ruleId: datasetErrorDTO.idRule,
