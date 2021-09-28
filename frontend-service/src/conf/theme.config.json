@@ -313,7 +313,8 @@
     "accordion-header-highlight-color": "var(--main-font-color)",
     "accordion-header-highlight-bg-color": "var(--gray-10)",
     "accordion-header-highlight-bg-color-hover": "var(--gray-25)",
-    "accordion-header-highlight-border-hover": "1px solid var(--accordion-header-highlight-bg-color-hover)"
+    "accordion-header-highlight-border-hover": "1px solid var(--accordion-header-highlight-bg-color-hover)",
+    "property-item-text-color": "var(--black)"
   },
   "dark": {
     "bg": "var(--c-dark-blue)",
@@ -630,7 +631,8 @@
     "accordion-header-highlight-color": "var(--main-font-color)",
     "accordion-header-highlight-bg-color": "var(--gray-50)",
     "accordion-header-highlight-bg-color-hover": "var(--gray-75)",
-    "accordion-header-highlight-border-hover": "1px solid var(--accordion-header-highlight-bg-color-hover)"
+    "accordion-header-highlight-border-hover": "1px solid var(--accordion-header-highlight-bg-color-hover)",
+    "property-item-text-color": "var(--c-corporate-yellow)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,

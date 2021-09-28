@@ -21,14 +21,16 @@ export const PropertyItem = ({ content, title, redirectTo }) => {
   const onToggleVisibility = () => setIsOpen(prevState => !prevState);
 
   return (
-    <div style={{ marginTop: '1rem', marginBottom: '2rem' }}>
-      <h3 className={styles.title}>
-        <FontAwesomeIcon
-          className={styles.icon}
-          icon={AwesomeIcons(isOpen ? 'angleDown' : 'angleRight')}
-          onClick={onToggleVisibility}
-        />
-        {title}
+    <div className={styles.propertyItem}>
+      <div className={styles.titleWrapper}>
+        <h3 className={styles.title}>
+          <FontAwesomeIcon
+            className={styles.icon}
+            icon={AwesomeIcons(isOpen ? 'angleDown' : 'angleRight')}
+            onClick={onToggleVisibility}
+          />
+          {title}
+        </h3>
 
         {!isEmpty(redirectTo) && (
           <Button
@@ -38,7 +40,8 @@ export const PropertyItem = ({ content, title, redirectTo }) => {
             tooltip={resourcesContext.messages['viewMore']}
           />
         )}
-      </h3>
+      </div>
+
       <div className={`${styles.content} ${isOpen ? '' : styles.hide}`}>
         {content.map(item => (
           <span key={item.id}>
