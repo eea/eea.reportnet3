@@ -30,6 +30,11 @@ const DatasetSchema = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const columnOptions = {
+    levelErrorTypes: {
+      hasClass: true,
+      class: styles.levelError,
+      subClasses: [styles.blocker, styles.error, styles.warning, styles.info]
+    },
     fields: {
       columns: ['pk', 'required', 'readOnly', 'name', 'description', 'type', 'format', 'referencedField'],
       filtered: false,

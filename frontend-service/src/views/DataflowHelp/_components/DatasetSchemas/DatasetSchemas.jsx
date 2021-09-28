@@ -282,6 +282,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
                         'description',
                         'expression',
                         'entityType',
+                        'levelError',
                         'message',
                         'datasetSchemaId'
                       );
@@ -295,6 +296,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
                         'description',
                         'expression',
                         'entityType',
+                        'levelError',
                         'message',
                         'automatic',
                         'enabled',
