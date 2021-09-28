@@ -12,6 +12,8 @@ import { PropertyItem } from './_components/PropertyItem';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
+import { RodUrl } from 'repositories/config/RodUrl';
+
 export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
   const { description, isPropertiesDialogVisible, name, obligations, status } = dataflowState;
 
@@ -79,8 +81,16 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
             ]}
             title={resourcesContext.messages['dataflowDetails']}
           />
-          <PropertyItem content={getObligationsContent()} title={resourcesContext.messages['obligation']} />
-          <PropertyItem content={getLegalInstrumentContent()} title={resourcesContext.messages['legalInstrument']} />
+          <PropertyItem
+            content={getObligationsContent()}
+            redirectTo={`${RodUrl.obligations}${obligations.obligationId}`}
+            title={resourcesContext.messages['obligation']}
+          />
+          <PropertyItem
+            content={getLegalInstrumentContent()}
+            redirectTo={`${RodUrl.instruments}${obligations.legalInstrument.id}`}
+            title={resourcesContext.messages['legalInstrument']}
+          />
         </div>
       </Dialog>
     )
