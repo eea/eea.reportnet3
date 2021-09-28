@@ -157,7 +157,8 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @param messageId the message id
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {
+      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
   @DeleteMapping("/deleteMessage/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public void deleteMessage(@PathVariable("dataflowId") Long dataflowId,
@@ -228,7 +229,8 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the message attachment
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {
+      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
   @GetMapping("/findMessages/dataflow/{dataflowId}/getMessageAttachment")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public ResponseEntity<byte[]> getMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
