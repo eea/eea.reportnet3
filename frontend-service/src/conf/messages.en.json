@@ -1264,16 +1264,6 @@
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "The URL is not valid",
-    "yes": "Yes",
-    "propertyItemDataflowName": "Dataflow name: ",
-    "propertyItemDataflowStatus": "Dataflow status: ",
-    "propertyItemDataflowDescription": "Dataflow description: ",
-    "propertyItemObligationTitle": "Title: ",
-    "propertyItemObligationDescription": "Description: ",
-    "propertyItemObligationComment": "Comment: ",
-    "propertyItemObligationNextReportDue": "Next report due: ",
-    "propertyItemObligationId": "Id: ",
-    "propertyItemLegalInstrumentShortName": "Short name: ",
-    "propertyItemLegalInstrumentLegalName": "Legal name: "
+    "yes": "Yes"
   }
 }

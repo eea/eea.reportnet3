@@ -44,8 +44,8 @@ export const PropertyItem = ({ content, title, redirectTo }) => {
       <div className={`${styles.content} ${isOpen ? '' : styles.hide}`}>
         {content.map(item => (
           <span key={item.id}>
-            <strong>{resourcesContext.messages[item.labelKey]}</strong>
-            {item.labelValue || '-'}
+            <strong>{`${item.label}: `}</strong>
+            {item.value || '-'}
           </span>
         ))}
       </div>
@@ -57,8 +57,8 @@ PropertyItem.propTypes = {
   content: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.number.isRequired,
-      labelKey: PropTypes.string.isRequired,
-      labelValue: PropTypes.string.isRequired
+      label: PropTypes.string.isRequired,
+      value: PropTypes.string.isRequired
     })
   ).isRequired,
   redirectTo: PropTypes.string,
