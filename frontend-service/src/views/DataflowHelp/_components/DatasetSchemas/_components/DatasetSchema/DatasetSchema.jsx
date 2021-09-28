@@ -74,6 +74,7 @@ const DatasetSchema = ({
         'description',
         'expression',
         'entityType',
+        'levelError',
         'message',
         'automatic',
         'enabled'

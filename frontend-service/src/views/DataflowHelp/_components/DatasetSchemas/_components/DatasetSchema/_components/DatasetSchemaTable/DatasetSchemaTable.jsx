@@ -156,10 +156,9 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
       return (
         <div className={styles.levelErrorTemplateWrapper}>
           <span
-          // className={`${columnOptions['levelErrorTypes']['class']} ${columnOptions['levelErrorTypes']['subClasses']
-          //   .filter(cl => cl.toUpperCase().includes(rowData.levelError.toString().toUpperCase()))
-          //   .join(' ')}`}
-          >
+            className={`${columnOptions['levelErrorTypes']['class']} ${columnOptions['levelErrorTypes']['subClasses']
+              .filter(cl => cl.toUpperCase().includes(rowData.levelError.toString().toUpperCase()))
+              .join(' ')}`}>
             {rowData.levelError}
           </span>
         </div>
