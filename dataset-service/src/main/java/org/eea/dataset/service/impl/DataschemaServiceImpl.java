@@ -964,7 +964,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private boolean modifiedCodelist(FieldSchemaVO fieldSchemaVO, boolean typeModified,
       Document fieldSchema) {
-    if (fieldSchemaVO.getCodelistItems() != null && fieldSchemaVO.getCodelistItems().length != 0
+    if (fieldSchemaVO.getCodelistItems() != null
         && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
             || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
       // we clean blank space in codelist and multiselect
