@@ -200,22 +200,14 @@ public class CollaborationControllerImpl implements CollaborationController {
 
       for (MessageVO messageVO : listMessageVO) {
         if (messageVO.getType() == MessageTypeEnum.ATTACHMENT) {
-          try {
-            MessageAttachment messageAttachment =
-                collaborationService.getMessageAttachment(messageVO.getId());
-            MessageAttachmentVO messageAttachmentVO = new MessageAttachmentVO();
-            messageAttachmentVO.setName(messageAttachment.getFileName());
-            String fileName = messageAttachment.getFileName();
-            int indexExtension = fileName.lastIndexOf(".");
-            String extension = fileName.substring(indexExtension + 1, fileName.length());
-            messageAttachmentVO.setExtension(extension);
-            messageAttachmentVO.setSize(messageAttachment.getFileSize());
-            messageVO.setMessageAttachment(messageAttachmentVO);
-          } catch (EEAException e) {
-            LOG_ERROR.error("Error retrieving message info from the messageId {}, with message: {}",
-                messageVO.getId(), e.getMessage());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-          }
+          MessageAttachmentVO messageAttachmentVO = new MessageAttachmentVO();
+          messageAttachmentVO.setName(messageVO.getContent());
+          String fileName = messageVO.getContent();
+          int indexExtension = fileName.lastIndexOf(".");
+          String extension = fileName.substring(indexExtension + 1, fileName.length());
+          messageAttachmentVO.setExtension(extension);
+          messageAttachmentVO.setSize(messageVO.getFileSize());
+          messageVO.setMessageAttachment(messageAttachmentVO);
         }
       }
       return messagePaginatedVO;

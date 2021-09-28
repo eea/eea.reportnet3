@@ -98,14 +98,14 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
       Boolean asc, boolean paged) {
     Session session = (Session) entityManager.getDelegate();
     String basicQuery = String.format(
-        "select v.message as message, v.id_rule as idRule, v.level_error as levelError, v.type_entity as typeEntity,v.table_name as tableName,v.short_code as shortCode, v.field_name as fieldName, count(*) as numberOfRecords from dataset_%s.Validation v  where v.id is not null ",
+        "select  v.id_rule as idRule, v.level_error as levelError, v.type_entity as typeEntity,v.table_name as tableName,v.short_code as shortCode, v.field_name as fieldName, count(*) as numberOfRecords from dataset_%s.Validation v  where v.id is not null ",
         datasetId);
     String partLevelError = levelErrorFilter(levelErrorsFilter, true);
     String partTypeEntities = typeEntities(typeEntitiesFilter, true);
     String partTableFilter = originFilter(tableFilter, true, TABLE);
     String partFieldFilter = originFilter(fieldValueFilter, true, FIELD);
     String groupBy =
-        "group by v.message,v.level_error, v.id_rule, v.type_entity,v.table_name,v.short_code,v.field_name ";
+        "group by v.level_error, v.id_rule, v.type_entity,v.table_name,v.short_code,v.field_name ";
     String orderPart = addOrderBy(headerField, asc);
     String page =
         paged ? " LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset() : "";
@@ -120,7 +120,6 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
             ResultSet rs = stmt.executeQuery()) {
           while (rs.next()) {
             GroupValidationVO validation = new GroupValidationVO();
-            validation.setMessage(rs.getString("message"));
             validation.setIdRule(rs.getString("idRule"));
             validation.setLevelError(ErrorTypeEnum.valueOf(rs.getString("levelError")));
             validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString("typeEntity")));
