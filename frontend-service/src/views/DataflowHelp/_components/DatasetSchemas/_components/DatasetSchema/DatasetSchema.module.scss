@@ -22,7 +22,26 @@
   color: var(--statusBox-info-color) !important;
 }
 
+.externalIntegrationsTab {
+  transform: rotate(-90deg);
+}
+.tabs {
+  color: var(--tabview-color) !important;
+}
+
 .warning {
   background-color: var(--statusBox-warning-bg) !important;
   color: var(--statusBox-warning-color) !important;
+}
+
+.property {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  .propertyTitle {
+    font-weight: bold;
+  }
+  .propertyValue {
+    margin-left: 0.5rem;
+  }
 }

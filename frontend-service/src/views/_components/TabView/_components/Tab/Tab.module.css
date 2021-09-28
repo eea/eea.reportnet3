@@ -31,7 +31,7 @@ a.p_tabview_design_add span:first-child:hover {
 
 a.p_tabview_design_add span {
   font-size: 24px;
-  margin-top: -6px;
+  /* margin-top: -6px; */
   position: absolute;
 }
 
@@ -43,4 +43,8 @@ input.p_tabview_input_design {
 .dragArrow {
   color: var(--drag-and-drop-arrow-color);
   opacity: var(--drag-and-drop-arrow-opacity);
+}
+
+.highlight {
+  color: var(--tabview-highlight-color) !important;
 }
