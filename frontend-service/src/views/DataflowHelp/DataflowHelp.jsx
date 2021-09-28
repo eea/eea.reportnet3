@@ -3,6 +3,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import { config } from 'conf';
@@ -12,6 +13,7 @@ import { routes } from 'conf/routes';
 
 import { DatasetSchemas } from './_components/DatasetSchemas';
 import { Documents } from './_components/Documents';
+import { DownloadFile } from 'views/_components/DownloadFile';
 import { MainLayout } from 'views/_components/Layout';
 import { TabPanel } from 'views/_components/TabView/_components/TabPanel';
 import { TabView } from 'views/_components/TabView';
@@ -51,6 +53,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
   const [isLoadingSchemas, setIsLoadingSchemas] = useState(true);
@@ -62,7 +65,6 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const [sortOrderDocuments, setSortOrderDocuments] = useState();
   const [sortOrderWebLinks, setSortOrderWebLinks] = useState();
   const [webLinks, setWebLinks] = useState([]);
-
   useEffect(() => {
     leftSideBarContext.removeModels();
   }, []);
@@ -149,6 +151,41 @@ export const DataflowHelp = withRouter(({ history, match }) => {
     } catch (error) {
       console.error('DataflowHelp - onLoadDatasetSchema.', error);
       notificationContext.add({ type: 'IMPORT_DESIGN_FAILED_EVENT' });
+    }
+  };
+
+  const onDownloadTableDefinitions = async datasetSchemaId => {
+    try {
+      setIsDownloading(true); // TODO MAKE USE OF isDownloading  isDownloading in Button?
+
+      const { data } = await DatasetService.downloadTableDefinitions(datasetSchemaId);
+
+      if (!isNil(data)) {
+        DownloadFile(
+          data,
+          `table_definition_${datasetSchemaId}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip` //TODO CHANGE FILE NAME
+        );
+      }
+    } catch (error) {
+      console.error('DataflowHelp - onDownloadTableDefinitions.', error);
+      notificationContext.add({ type: 'DOWNLOAD_TABLE_DEFINITIONS_FAILED' }); // TODO CHECK NOTIFICATION NAMING
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const onDownloadAllTabsInfo = async datasetSchemaId => {
+    try {
+      setIsDownloading(true); // TODO MAKE USE OF isDownloading in Button?
+
+      const { data } = await DatasetService.downloadAllTabsInfo(datasetSchemaId); // TODO IS DATASET SERVICE OR DATAFLOW ?
+
+      if (!isNil(data)) DownloadFile(data, `${dataflowName}.xlsx`); //TODO CHANGE FILE NAME
+    } catch (error) {
+      console.error('DataflowHelp - onDownloadAllTabsInfo .', error);
+      notificationContext.add({ type: 'DOWNLOAD_ALL_TABS_INFO_FAILED' }); // TODO CHECK NOTIFICATION NAMING
+    } finally {
+      setIsDownloading(false);
     }
   };
 

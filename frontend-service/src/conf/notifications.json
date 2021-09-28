@@ -45,6 +45,12 @@
           "key": "IMPORT_DESIGN_FAILED_EVENT"
         },
         {
+          "key": "DOWNLOAD_ALL_TABS_INFO_FAILED"
+        },
+        {
+          "key": "DOWNLOAD_TABLE_DEFINITIONS_FAILED"
+        },
+        {
           "key": "EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",

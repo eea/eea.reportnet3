@@ -73,7 +73,8 @@ export const DatasetService = {
   createTableDesign: async (datasetId, tableSchemaName) =>
     await DatasetRepository.createTableDesign(datasetId, tableSchemaName),
 
-  deleteData: async (datasetId, arePrefilledTablesDeleted) => await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
+  deleteData: async (datasetId, arePrefilledTablesDeleted) =>
+    await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
 
   deleteAttachment: async (datasetId, fieldId) => await DatasetRepository.deleteAttachment(datasetId, fieldId),
 
@@ -416,6 +417,7 @@ export const DatasetService = {
     table.records = records;
     return table;
   },
+  downloadTableDefinitions: async datasetSchemaId => await DatasetRepository.downloadTableDefinitions(datasetSchemaId),
 
   updateField: async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue, updateInCascade) => {
     const datasetTableField = new DatasetTableField({});
