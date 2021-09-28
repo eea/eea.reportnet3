@@ -46,6 +46,7 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const [feedbackState, dispatchFeedback] = useReducer(feedbackReducer, {
     currentPage: 0,
+    dataflowStateData: {},
     dataflowName: '',
     dataflowType: '',
     dataProviders: [],
@@ -145,10 +146,12 @@ export const Feedback = withRouter(({ match, history }) => {
 
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW_FEEDBACK,
+    dataflowStateData: feedbackState.dataflowStateData,
     dataflowId,
     dataflowType,
     history,
-    isLoading
+    isLoading,
+    representativeId
   });
 
   const markMessagesAsRead = async data => {
@@ -174,13 +177,15 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onGetDataflowDetails = async () => {
     try {
+      const dataflow = await DataflowService.get(dataflowId);
       const data = await DataflowService.getDetails(dataflowId);
-      const name = data.name;
 
       dispatchFeedback({
         type: 'SET_DATAFLOW_DETAILS',
-        payload: { name, dataflowType: data.type }
+        payload: { name: data.name, dataflowType: data.type }
       });
+
+      dispatchFeedback({ type: 'SET_DATAFLOW_DATA', payload: dataflow });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);
       notificationContext.add({

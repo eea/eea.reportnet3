@@ -615,7 +615,9 @@ export const ManageIntegrations = ({
           <span className={styles.buttonWrapper}>
             <span data-for="addParameterTooltip" data-tip>
               <Button
-                className="p-button-rounded p-button-animated-blink"
+                className={`p-button-rounded ${
+                  !isEmpty(parameterKey.trim()) && !isKeyDuplicated ? 'p-button-animated-blink' : ''
+                }`}
                 disabled={isEmpty(parameterKey.trim()) || isKeyDuplicated}
                 icon="add"
                 label={editorView.isEditing ? resourcesContext.messages['update'] : resourcesContext.messages['add']}
