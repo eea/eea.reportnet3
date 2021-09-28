@@ -503,8 +503,8 @@ export class Dropdown extends Component {
       this.clearClickState();
 
       this.hideTimeout = setTimeout(() => {
-        this.panel.element.style.display = 'none';
-        DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
+        this?.panel && (this.panel.element.style.display = 'none');
+        this?.panel && DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
       }, 150);
     }
   }
