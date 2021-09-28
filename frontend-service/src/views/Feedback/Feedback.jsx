@@ -222,7 +222,7 @@ export const Feedback = withRouter(({ match, history }) => {
     await markMessagesAsRead(data);
     dispatchFeedback({
       type: 'SET_MESSAGES',
-      payload: { msgs: !isNil(data) ? data.messages : [], totalMessages: data.totalMessages }
+      payload: { msgs: !isNil(data) ? data.messages : [], totalMessages: !isNil(data) ? data.totalMessages : 0 }
     });
   };
 
