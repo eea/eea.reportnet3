@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import isEmpty from 'lodash/isEmpty';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -10,8 +11,6 @@ import styles from './PropertyItem.module.scss';
 import { Button } from 'views/_components/Button';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-
-import isEmpty from 'lodash/isEmpty';
 
 export const PropertyItem = ({ content, title, redirectTo }) => {
   const resourcesContext = useContext(ResourcesContext);
