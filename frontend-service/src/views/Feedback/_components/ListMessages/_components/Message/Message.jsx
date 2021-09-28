@@ -107,7 +107,13 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
     return (
       <div className={`${styles.message} rep-feedback-message ${getStyles()}`} key={message.id}>
         <div className={styles.messageTextWrapper}>
-          <span className={styles.datetime}>{dayjs(message.date).format(userContext.userProps.dateFormat)}</span>
+          <span className={styles.datetime}>
+            {dayjs(message.date).format(
+              `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
+                userContext.userProps.amPm24h ? '' : ' A'
+              }`
+            )}
+          </span>
           {TextUtils.areEquals(message.type, 'ATTACHMENT') ? (
             renderAttachment()
           ) : (
