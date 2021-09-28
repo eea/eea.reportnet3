@@ -26,6 +26,7 @@ import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
+import { HelpDesk } from 'views/_components/HelpDesk';
 import { MainLayout } from 'views/_components/Layout';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
@@ -95,6 +96,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isExportEUDatasetLoading: false,
     isExporting: false,
     isFetchingData: false,
+    isHelpDesk: false,
     isImportLeadReportersVisible: false,
     isManageReportersDialogVisible: false,
     isManageRequestersDialogVisible: false,
@@ -249,6 +251,7 @@ const Dataflow = withRouter(({ history, match }) => {
         editBtn: false,
         editBusinessBtn: false,
         exportBtn: false,
+        helpDeskBtn: false,
         manageReportersBtn: false,
         manageRequestersBtn: false,
         propertiesBtn: false,
@@ -262,6 +265,7 @@ const Dataflow = withRouter(({ history, match }) => {
       editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin && !isBusinessDataflow,
       editBusinessBtn: (dataflowState.isAdmin || dataflowState.isCustodian) && isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
+      helpDeskBtn: dataflowState.isAdmin,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
       propertiesBtn: true,
@@ -479,12 +483,12 @@ const Dataflow = withRouter(({ history, match }) => {
     </Fragment>
   );
 
-  const renderDataflowUsersListFooter = (
+  const renderModalFooter = modalType => (
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs('isUserListVisible', false)}
+      onClick={() => manageDialogs(modalType, false)}
     />
   );
 
@@ -1135,7 +1139,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isUserListVisible && (
           <Dialog
-            footer={renderDataflowUsersListFooter}
+            footer={renderModalFooter('isUserListVisible')}
             header={
               ((isNil(dataProviderId) && dataflowState.isCustodian) ||
                 (isNil(representativeId) && dataflowState.isObserver)) &&
@@ -1217,6 +1221,14 @@ const Dataflow = withRouter(({ history, match }) => {
             manageDialogs={manageDialogs}
             match={match}
           />
+        )}
+
+        {dataflowState.isHelpDeskVisible && (
+          <Dialog
+            footer={renderModalFooter('isHelpDeskVisible')}
+            header={resourcesContext.messages['datasetsInfo']}
+            onHide={() => manageDialogs('isHelpDeskVisible', false)}
+            visible={dataflowState.isHelpDeskVisible}></Dialog>
         )}
       </div>
     </div>

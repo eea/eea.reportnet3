@@ -1264,6 +1264,7 @@
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "The URL is not valid",
-    "yes": "Yes"
+    "yes": "Yes",
+    "sidebarHelpDeskBtn": "Help desk",
   }
 }

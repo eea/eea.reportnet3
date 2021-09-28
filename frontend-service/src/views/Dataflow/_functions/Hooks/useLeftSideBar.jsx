@@ -122,6 +122,15 @@ export const useLeftSideBar = (
             : 'dataflowUsersList'
       };
 
+      const helpDeskBtn = {
+        className: 'dataflow-help-desk-help-step',
+        icon: 'listClipboard',
+        isVisible: buttonsVisibility.helpDeskBtn,
+        label: 'sidebarHelpDeskBtn',
+        onClick: () => manageDialogs('isHelpDeskVisible', true),
+        title: 'sidebarHelpDeskBtn'
+      };
+
       //DON'T SORT ALPHABETICALLY
       const allButtons = [
         propertiesBtn,
@@ -133,7 +142,8 @@ export const useLeftSideBar = (
         apiKeyBtn,
         manageRequestersBtn,
         manageReportersBtn,
-        userListBtn
+        userListBtn,
+        helpDeskBtn
       ];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
