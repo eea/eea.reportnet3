@@ -36,12 +36,11 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
     const date = !isNil(obligations.expirationDate) ? dayjs(obligations.expirationDate).format(dateFormat) : '-';
 
     return [
-      { id: 0, labelKey: 'title:', labelValue: obligations.title },
-      { id: 1, labelKey: 'description:', labelValue: obligations.description },
-      { id: 2, labelKey: 'comment:', labelValue: obligations.comment },
-      { id: 3, labelKey: 'nextReportDue:', labelValue: date },
-      { id: 5, labelKey: 'Frecuency:', labelValue: obligations.reportingFrequency },
-      { id: 4, labelKey: 'id:', labelValue: obligations.obligationId }
+      { id: 0, labelKey: 'propertyItemObligationTitle', labelValue: obligations.title },
+      { id: 1, labelKey: 'propertyItemObligationDescription', labelValue: obligations.description },
+      { id: 2, labelKey: 'propertyItemObligationComment', labelValue: obligations.comment },
+      { id: 3, labelKey: 'propertyItemObligationNextReportDue', labelValue: date },
+      { id: 4, labelKey: 'propertyItemObligationId', labelValue: obligations.obligationId }
     ];
   };
 
@@ -50,8 +49,8 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
     const shortName = isNil(obligations.legalInstrument) ? '' : obligations.legalInstrument.alias;
 
     return [
-      { id: 0, labelKey: 'Short name: ', labelValue: shortName },
-      { id: 1, labelKey: 'Legal name: ', labelValue: legalName }
+      { id: 0, labelKey: 'propertyItemLegalInstrumentShortName', labelValue: shortName },
+      { id: 1, labelKey: 'propertyItemLegalInstrumentLegalName', labelValue: legalName }
     ];
   };
 
@@ -75,9 +74,9 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
         <div className={styles.propertiesWrap} ref={propertiesRef} style={{ height: dialogHeight }}>
           <PropertyItem
             content={[
-              { id: 0, labelKey: 'Dataflow name:', labelValue: name },
-              { id: 1, labelKey: 'Dataflow description:', labelValue: description },
-              { id: 2, labelKey: 'Dataflow status:', labelValue: status }
+              { id: 0, labelKey: 'propertyItemDataflowName', labelValue: name },
+              { id: 1, labelKey: 'propertyItemDataflowDescription', labelValue: description },
+              { id: 2, labelKey: 'propertyItemDataflowStatus', labelValue: status }
             ]}
             title={resourcesContext.messages['dataflowDetails']}
           />

@@ -42,7 +42,7 @@ export const PropertyItem = ({ content, title, redirectTo }) => {
       <div className={`${styles.content} ${isOpen ? '' : styles.hide}`}>
         {content.map(item => (
           <span key={item.id}>
-            <strong>{item.labelKey}</strong>
+            <strong>{resourcesContext.messages[item.labelKey]}</strong>
             {item.labelValue || '-'}
           </span>
         ))}
