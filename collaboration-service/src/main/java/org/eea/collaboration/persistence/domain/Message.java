@@ -64,4 +64,8 @@ public class Message {
   /** The automatic. */
   @Column(name = "automatic")
   private boolean automatic;
+
+  /** The file size. */
+  @Column(name = "file_size")
+  private String fileSize;
 }
