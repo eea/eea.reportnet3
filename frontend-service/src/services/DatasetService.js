@@ -247,7 +247,6 @@ export const DatasetService = {
           entityType: datasetErrorDTO.typeEntity,
           fieldSchemaName: datasetErrorDTO.nameFieldSchema,
           levelError: datasetErrorDTO.levelError,
-          message: datasetErrorDTO.message,
           numberOfRecords: datasetErrorDTO.numberOfRecords,
           objectId: datasetErrorDTO.idObject,
           ruleId: datasetErrorDTO.idRule,

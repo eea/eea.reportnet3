@@ -1265,6 +1265,10 @@
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "The URL is not valid",
     "yes": "Yes",
+    "downloadTableDefinitions": "Download table definitions",
+    "datasetSchemaDescription": "Dataset description",
+    "primaryKey": "Primary key",
+    "extension": "Extension",
     "downloadAllTabsInfoFailed": "Error downloading tabs info file",
     "downloadTableDefinitionsFailed": "Error downloading table definitions file"
   }

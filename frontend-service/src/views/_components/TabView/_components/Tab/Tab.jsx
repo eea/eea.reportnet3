@@ -46,6 +46,7 @@ const Tab = ({
   onTabMouseWheel,
   onTabNameError,
   rightIcon,
+  rightIconClass = '',
   scrollTo,
   selected,
   tableSchemaId,
@@ -329,7 +330,6 @@ const Tab = ({
           role="tab"
           style={{
             pointerEvents: 'fill',
-            display: 'inline-block',
             height: isNavigationHidden ? '2.6rem' : '2.7rem',
             minWidth: '3.6rem'
           }}
@@ -374,7 +374,15 @@ const Tab = ({
           ) : (
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
-          {rightIcon && !editingHeader && <span className={classNames('p-tabview-right-icon ', rightIcon)}></span>}
+          {rightIcon && !editingHeader && (
+            <span
+              className={classNames(
+                'p-tabview-right-icon ',
+                rightIcon,
+                rightIconClass
+                // selected && !hasErrors ? styles.highlight : ''
+              )}></span>
+          )}
           {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead ? (
             <div
               onClick={e => {

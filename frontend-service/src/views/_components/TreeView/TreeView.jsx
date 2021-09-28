@@ -1,7 +1,6 @@
 import { Fragment, useContext, useReducer, useRef } from 'react';
 
 import capitalize from 'lodash/capitalize';
-import isNull from 'lodash/isNull';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniqueId from 'lodash/uniqueId';
@@ -72,7 +71,7 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
 
   const groupFields = fields => {
     parseData(fields);
-    if (!isUndefined(fields) && !isNull(fields) && fields.length > 0) {
+    if (!isNil(fields) && fields.length > 0) {
       return (
         <DataTable
           ref={dataTableRef}
@@ -235,9 +234,12 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
 
   const getLabel = str => resourcesContext.messages[str] || str;
 
+  if (property && !isNil(property.button)) {
+    console.log({ property });
+  }
+
   return (
-    !isUndefined(property) &&
-    !isNull(property) && (
+    !isNil(property) && (
       <div
         style={{
           paddingTop: '12px',
@@ -260,8 +262,21 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
               '-'
             )}
           </Fragment>
-        ) : (
+        ) : isNil(property.button) ? (
           <TreeViewExpandableItem
+            buttons={
+              !isNil(property.button)
+                ? [
+                    {
+                      className: `p-button-secondary-transparent`,
+                      icon: property.button.icon,
+                      label: property.button.label,
+                      tooltip: property.button.tooltip,
+                      onClick: property.button.onClick
+                    }
+                  ]
+                : undefined
+            }
             expanded={expandAll}
             items={!Number.isInteger(Number(propertyName)) ? [{ label: getLabel(propertyName) }] : []}>
             {!isUndefined(columnOptions[propertyName]) &&
@@ -290,7 +305,7 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
                 ))
               : null}
           </TreeViewExpandableItem>
-        )}
+        ) : null}
       </div>
     )
   );

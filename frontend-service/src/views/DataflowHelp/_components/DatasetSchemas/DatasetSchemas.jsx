@@ -28,7 +28,6 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
-  const [expandAll, setExpandAll] = useState(true);
   const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
   const [extensionsOperationsList, setExtensionsOperationsList] = useState();
   const [uniqueList, setUniqueList] = useState();
@@ -283,7 +282,6 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
                         'description',
                         'expression',
                         'entityType',
-                        'levelError',
                         'message',
                         'datasetSchemaId'
                       );
@@ -297,7 +295,6 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
                         'description',
                         'expression',
                         'entityType',
-                        'levelError',
                         'message',
                         'automatic',
                         'enabled',
@@ -325,7 +322,6 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
         {datasetsSchemas.map((designDataset, i) => (
           <DatasetSchema
             designDataset={designDataset}
-            expandAll={expandAll}
             extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
             index={i}
             isCustodian={isCustodian}
@@ -345,13 +341,13 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
     return (
       isCustodian && (
         <Toolbar className={styles.datasetSchemasToolbar}>
-          <div className="p-toolbar-group-left">
-            <Button
+          <div className="p-toolbar-group-right">
+            {/* <Button
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
               icon={expandAll ? 'angleRight' : 'angleDown'}
               label={expandAll ? resourcesContext.messages['collapseAll'] : resourcesContext.messages['expandAll']}
               onClick={() => setExpandAll(!expandAll)}
-            />
+            /> */}
             <Button
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
                 isLoading ? 'p-button-animated-spin' : ''
