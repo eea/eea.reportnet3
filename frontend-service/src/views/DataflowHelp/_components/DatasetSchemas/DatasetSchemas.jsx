@@ -24,7 +24,7 @@ import { IntegrationService } from 'services/IntegrationService';
 import { UniqueConstraintService } from 'services/UniqueConstraintService';
 import { ValidationService } from 'services/ValidationService';
 
-const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
+const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
   console.log({ datasetsSchemas });
@@ -320,6 +320,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
       <div className="dataflowHelp-datasetSchema-help-step">
         {datasetsSchemas.map((designDataset, i) => (
           <DatasetSchema
+            dataflowName={dataflowName}
             designDataset={designDataset}
             extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
             index={i}

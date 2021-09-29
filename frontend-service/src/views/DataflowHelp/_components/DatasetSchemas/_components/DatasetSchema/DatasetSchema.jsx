@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -13,24 +13,46 @@ import { Accordion, AccordionTab } from 'primereact/accordion';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { DatasetSchemaTable } from './_components/DatasetSchemaTable';
+import { DownloadFile } from 'views/_components/DownloadFile';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactTooltip from 'react-tooltip';
 import { TabPanel } from 'views/_components/TabView/_components/TabPanel';
 import { TabView } from 'views/_components/TabView';
 import { Toolbar } from 'views/_components/Toolbar';
 
+import { DataflowService } from 'services/DataflowService';
+import { DatasetService } from 'services/DatasetService';
+import { ValidationService } from 'services/ValidationService';
+
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+
 const DatasetSchema = ({
+  dataflowName,
   designDataset,
   extensionsOperationsList = [],
-  index,
   onGetReferencedFieldName,
   uniqueList = [],
   qcList
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+
   const [expandAll, setExpandAll] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  useEffect(() => {
+    if (
+      notificationContext.hidden.some(
+        notification =>
+          notification.key === 'EXPORT_QC_FAILED_EVENT' || notification.key === 'EXPORT_QC_COMPLETED_EVENT'
+      )
+    ) {
+      setIsDownloading(false);
+    }
+  }, [notificationContext.hidden]);
 
   const columnOptions = {
     levelErrorTypes: {
@@ -211,9 +233,9 @@ const DatasetSchema = ({
         <div className="p-toolbar-group-left">
           <Button
             className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-            icon={config.icons['export']}
+            icon={isDownloading ? 'spinnerAnimate' : 'export'}
             label={resourcesContext.messages['exportTablesSchema']}
-            onClick={onDownloadTableDefinitions}
+            onClick={() => onDownloadTableDefinitions(parsedDesignDataset.datasetSchemaId)}
           />
           <Button
             className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
@@ -268,6 +290,13 @@ const DatasetSchema = ({
       header={resourcesContext.messages['qcRules']}
       rightIcon={config.icons['horizontalSliders']}
       rightIconClass={styles.tabs}>
+      <Button
+        className={`p-button-rounded p-button-secondary-transparent ${!isDownloading ? 'p-button-animated-blink' : ''}`}
+        disabled={isDownloading}
+        icon={isDownloading ? 'spinnerAnimate' : 'export'}
+        label={resourcesContext.messages['downloadQCsButtonLabel']}
+        onClick={() => onDownloadQCRules(parsedDesignDataset.datasetId)}
+      />
       <DatasetSchemaTable
         columnOptions={columnOptions}
         fields={!isNil(parsedDesignDataset.qc) ? parsedDesignDataset.qc : []}
@@ -340,7 +369,10 @@ const DatasetSchema = ({
   };
 
   const parseDesignDataset = (design, extensionsOperationsList, uniqueList, qcList) => {
+    console.log({ design });
     const parsedDataset = {};
+    parsedDataset.datasetId = design.datasetId;
+    parsedDataset.datasetSchemaId = design.datasetSchemaId;
     parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
     parsedDataset.availableInPublic = design.availableInPublic;
     parsedDataset.referenceDataset = design.referenceDataset;
@@ -421,10 +453,47 @@ const DatasetSchema = ({
 
   const parsedDesignDataset = parseDesignDataset(designDataset, extensionsOperationsList, uniqueList, qcList);
 
-  const onDownloadTableDefinitions = () => {
+  const onDownloadQCRules = async datasetId => {
+    console.log({ datasetId });
+    setIsDownloading(true);
+    notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
+
     try {
+      await ValidationService.generateQCRulesFile(datasetId);
     } catch (error) {
-      console.error(`DatasetSchema - onDownloadTableDefinitions.`, error);
+      console.error('DatasetSchema - onDownloadQCRules.', error);
+      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' });
+      setIsDownloading(false);
+    }
+  };
+
+  const onDownloadTableDefinitions = async datasetSchemaId => {
+    try {
+      setIsDownloading(true);
+      const { data } = await DatasetService.downloadTableDefinitions(datasetSchemaId);
+
+      if (!isNil(data)) {
+        DownloadFile(
+          data,
+          `table_definition_${datasetSchemaId}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip` //TODO CHANGE FILE NAME
+        );
+      }
+    } catch (error) {
+      console.error('DatasetSchema - onDownloadTableDefinitions.', error);
+      notificationContext.add({ type: 'DOWNLOAD_TABLE_DEFINITIONS_FAILED' }); // TODO CHECK NOTIFICATION NAMING
+    }
+  };
+
+  const onDownloadAllTabsInfo = async datasetSchemaId => {
+    try {
+      setIsDownloading(true); // TODO MAKE USE OF isDownloading in Button?
+
+      const { data } = await DataflowService.downloadAllTabsInfo(datasetSchemaId); // TODO IS DATASET SERVICE OR DATAFLOW ?
+
+      if (!isNil(data)) DownloadFile(data, `${dataflowName}.xlsx`); //TODO CHANGE FILE NAME
+    } catch (error) {
+      console.error('DataflowHelp - onDownloadAllTabsInfo .', error);
+      notificationContext.add({ type: 'DOWNLOAD_ALL_TABS_INFO_FAILED' }); // TODO CHECK NOTIFICATION NAMING
     }
   };
 

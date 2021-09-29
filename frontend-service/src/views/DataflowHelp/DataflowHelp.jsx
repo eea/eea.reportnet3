@@ -3,7 +3,6 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
 import { config } from 'conf';
@@ -13,7 +12,6 @@ import { routes } from 'conf/routes';
 
 import { DatasetSchemas } from './_components/DatasetSchemas';
 import { Documents } from './_components/Documents';
-import { DownloadFile } from 'views/_components/DownloadFile';
 import { MainLayout } from 'views/_components/Layout';
 import { TabPanel } from 'views/_components/TabView/_components/TabPanel';
 import { TabView } from 'views/_components/TabView';
@@ -53,7 +51,6 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   const [isCustodian, setIsCustodian] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
   const [isLoadingSchemas, setIsLoadingSchemas] = useState(true);
@@ -154,41 +151,6 @@ export const DataflowHelp = withRouter(({ history, match }) => {
     }
   };
 
-  const onDownloadTableDefinitions = async datasetSchemaId => {
-    try {
-      setIsDownloading(true); // TODO MAKE USE OF isDownloading  isDownloading in Button?
-
-      const { data } = await DatasetService.downloadTableDefinitions(datasetSchemaId);
-
-      if (!isNil(data)) {
-        DownloadFile(
-          data,
-          `table_definition_${datasetSchemaId}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip` //TODO CHANGE FILE NAME
-        );
-      }
-    } catch (error) {
-      console.error('DataflowHelp - onDownloadTableDefinitions.', error);
-      notificationContext.add({ type: 'DOWNLOAD_TABLE_DEFINITIONS_FAILED' }); // TODO CHECK NOTIFICATION NAMING
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
-  const onDownloadAllTabsInfo = async datasetSchemaId => {
-    try {
-      setIsDownloading(true); // TODO MAKE USE OF isDownloading in Button?
-
-      const { data } = await DataflowService.downloadAllTabsInfo(datasetSchemaId); // TODO IS DATASET SERVICE OR DATAFLOW ?
-
-      if (!isNil(data)) DownloadFile(data, `${dataflowName}.xlsx`); //TODO CHANGE FILE NAME
-    } catch (error) {
-      console.error('DataflowHelp - onDownloadAllTabsInfo .', error);
-      notificationContext.add({ type: 'DOWNLOAD_ALL_TABS_INFO_FAILED' }); // TODO CHECK NOTIFICATION NAMING
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
   const onLoadDatasetsSchemas = async () => {
     try {
       const data = await DataflowService.get(dataflowId);
@@ -204,8 +166,11 @@ export const DataflowHelp = withRouter(({ history, match }) => {
             return await onLoadDatasetSchema(datasetSchema.datasetId);
           });
           Promise.all(datasetSchemas).then(completed => {
-            console.log('LLEGO');
-            console.log({ completed });
+            completed.forEach(datasetSchema => {
+              datasetSchema.datasetId = data.designDatasets.find(
+                designDataset => designDataset.datasetSchemaId === datasetSchema.datasetSchemaId
+              ).datasetId;
+            });
             setDatasetsSchemas(completed);
           });
         } else {
@@ -217,8 +182,11 @@ export const DataflowHelp = withRouter(({ history, match }) => {
             return await onLoadDatasetSchema(designDataset.datasetId);
           });
           Promise.all(datasetSchemas).then(completed => {
-            console.log('LLEGO');
-            console.log({ completed });
+            completed.forEach(datasetSchema => {
+              datasetSchema.datasetId = data.designDatasets.find(
+                designDataset => designDataset.datasetSchemaId === datasetSchema.datasetSchemaId
+              ).datasetId;
+            });
             setDatasetsSchemas(completed);
           });
         } else {
@@ -317,6 +285,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
             rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas ? config.icons['spinnerAnimate'] : null}>
             <DatasetSchemas
               dataflowId={dataflowId}
+              dataflowName={dataflowName}
               datasetsSchemas={datasetsSchemas}
               isCustodian={isCustodian}
               onLoadDatasetsSchemas={onLoadDatasetsSchemas}
