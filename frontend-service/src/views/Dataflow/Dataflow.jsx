@@ -492,7 +492,7 @@ const Dataflow = withRouter(({ history, match }) => {
     </Fragment>
   );
 
-  const renderDialogFooter = modalType => (
+  const renderDialogFooterCloseBtn = modalType => (
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
@@ -1141,7 +1141,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isUserListVisible && (
           <Dialog
-            footer={renderDialogFooter('isUserListVisible')}
+            footer={renderDialogFooterCloseBtn('isUserListVisible')}
             header={
               ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
@@ -1226,7 +1226,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isHelpDeskVisible && (
           <Dialog
-            footer={renderDialogFooter('isHelpDeskVisible')}
+            footer={renderDialogFooterCloseBtn('isHelpDeskVisible')}
             header={`${resourcesContext.messages['datasetsInfo']} - ${dataflowState.name}`}
             onHide={() => manageDialogs('isHelpDeskVisible', false)}
             visible={dataflowState.isHelpDeskVisible}>

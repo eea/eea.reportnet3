@@ -245,7 +245,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const renderDialogFooter = modalType => (
+  const renderDialogFooterCloseBtn = modalType => (
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
@@ -319,7 +319,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
       {dataflowState.isPropertiesDialogVisible && (
         <Dialog
-          footer={renderDialogFooter('isPropertiesDialogVisible')}
+          footer={renderDialogFooterCloseBtn('isPropertiesDialogVisible')}
           header={resourcesContext.messages['properties']}
           onHide={() => manageDialogs('isPropertiesDialogVisible', false)}
           visible={dataflowState.isPropertiesDialogVisible}>
@@ -359,7 +359,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
       {dataflowState.isReferencingDataflowsDialogVisible && (
         <Dialog
-          footer={renderDialogFooter('isReferencingDataflowsDialogVisible')}
+          footer={renderDialogFooterCloseBtn('isReferencingDataflowsDialogVisible')}
           header={resourcesContext.messages['referencingDataflowsDialogHeader']}
           onHide={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
           visible={dataflowState.isReferencingDataflowsDialogVisible}>
@@ -397,7 +397,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
       {dataflowState.isHelpDeskVisible && (
         <Dialog
-          footer={renderDialogFooter('isHelpDeskVisible')}
+          footer={renderDialogFooterCloseBtn('isHelpDeskVisible')}
           header={`${resourcesContext.messages['datasetsInfo']} - ${dataflowState.name}`}
           onHide={() => manageDialogs('isHelpDeskVisible', false)}
           visible={dataflowState.isHelpDeskVisible}>
