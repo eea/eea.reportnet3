@@ -317,7 +317,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
   @PostMapping("/{dataflowId}/contributor/add")
-  @ApiOperation(value = "Add one Contributor to a Dataflow")
+  @ApiOperation(value = "Add one Contributor to a Dataflow", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
   public void addContributor(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
@@ -341,7 +341,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
   @DeleteMapping("{dataflowId}/contributor/remove")
-  @ApiOperation(value = "Remove one Contributor from a Dataflow")
+  @ApiOperation(value = "Remove one Contributor from a Dataflow", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
   public void removeContributor(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
@@ -368,7 +368,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','DATA_REQUESTER','ADMIN')")
   @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Create one Dataflow", produces = MediaType.APPLICATION_JSON_VALUE,
-      response = ResponseEntity.class)
+      response = ResponseEntity.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully created Dataflow "),
       @ApiResponse(code = 400,
           message = "1-The date has to be later than today's date \n2-Dataflow Description or Name empty \n3-Dataflow Obligation empty"),
@@ -433,7 +433,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @PreAuthorize("secondLevelAuthorize(#dataFlowVO.id,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
   @PutMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Update a Dataflow", produces = MediaType.APPLICATION_JSON_VALUE,
-      response = ResponseEntity.class)
+      response = ResponseEntity.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully Updated Dataflow "),
       @ApiResponse(code = 400,
           message = "1-The date has to be later than today's date\n2-Dataflow Description or Name empty\n3-Dataflow Obligation empty"),
@@ -504,7 +504,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
   @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get meta information from a Dataflow based on its Id",
-      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class)
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class, hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public DataFlowVO getMetabaseById(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
@@ -530,7 +530,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') OR (hasRole('ADMIN') AND checkAccessEntity('BUSINESS','DATAFLOW',#dataflowId))")
   @DeleteMapping("/{dataflowId}")
-  @ApiOperation(value = "Delete a Dataflow by its Id")
+  @ApiOperation(value = "Delete a Dataflow by its Id", hidden = true)
   @ApiResponse(code = 500, message = "Internal Server Error")
   @HystrixCommand
   public void deleteDataFlow(
@@ -569,11 +569,11 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @PutMapping("/{dataflowId}/updateStatus")
-  @ApiOperation(value = "Update one Dataflow Status")
+  @ApiOperation(value = "Update one Dataflow Status", hidden = true)
   @ApiResponse(code = 500, message = "Internal Server Error")
   public void updateDataFlowStatus(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
-      @ApiParam(value = "Status") @RequestParam("status") TypeStatusEnum status,
+      @ApiParam(value = "Status", example = "DESIGN") @RequestParam("status") TypeStatusEnum status,
       @ApiParam(value = "Date ending of Dataflow") @RequestParam(value = "deadLineDate",
           required = false) Date deadlineDate) {
     try {
@@ -592,6 +592,10 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @GetMapping("/getPublicDataflow/{dataflowId}")
+  @ApiOperation(value = "Gets the public dataflow by Id", hidden = true)
+  @ApiResponses(value = {
+      @ApiResponse(code = 404, message = "Dataflow not found using the dataflowId provided."),
+      @ApiResponse(code = 500, message = "Internal server error")})
   public DataflowPublicVO getPublicDataflow(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
@@ -611,6 +615,7 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @GetMapping("/getPublicDataflows")
+  @ApiOperation(value = "Gets all the public dataflows", hidden = true)
   public List<DataflowPublicVO> getPublicDataflows() {
     return dataflowService.getPublicDataflows();
   }
@@ -627,13 +632,22 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @GetMapping("/public/country/{countryCode}")
+  @ApiOperation(value = "Gets all the public dataflow that use a specific Country Code",
+      hidden = true)
   public DataflowPublicPaginatedVO getPublicDataflowsByCountry(
       @ApiParam(value = "Country Code",
           example = "AL") @PathVariable("countryCode") String countryCode,
-      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
-      @RequestParam(value = "sortField", required = false) String sortField,
-      @RequestParam(value = "asc", defaultValue = "true") boolean asc) {
+      @ApiParam(value = "pageNum: page number to show", example = "0",
+          defaultValue = "0") @RequestParam(value = "pageNum", defaultValue = "0",
+              required = false) Integer pageNum,
+      @ApiParam(value = "pageSize: specifies the maximum number of records per page",
+          example = "10", defaultValue = "10") @RequestParam(value = "pageSize",
+              defaultValue = "10", required = false) Integer pageSize,
+      @ApiParam(
+          value = "sortField: specifies the field which should be used to sort the data retrieved",
+          example = "name") @RequestParam(value = "sortField", required = false) String sortField,
+      @ApiParam(value = "asc: is the sorting order ascending or descending?", example = "false",
+          defaultValue = "true") @RequestParam(value = "asc", defaultValue = "true") boolean asc) {
     return dataflowService.getPublicDataflowsByCountry(countryCode, sortField, asc, pageNum,
         pageSize);
   }
@@ -646,8 +660,11 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @PutMapping("private/updatePublicStatus")
-  public void updateDataFlowPublicStatus(@RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("showPublicInfo") boolean showPublicInfo) {
+  @ApiOperation(value = "Updates a public dataflow status", hidden = true)
+  public void updateDataFlowPublicStatus(
+      @ApiParam(value = "Dataflow Id", example = "1") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(value = "Show Public Info",
+          example = "true") @RequestParam("showPublicInfo") boolean showPublicInfo) {
     dataflowService.updateDataFlowPublicStatus(dataflowId, showPublicInfo);
   }
 
@@ -660,6 +677,8 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Override
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getUserRolesAllDataflows")
+  @ApiOperation(value = "Gets the user roles for all dataflows", hidden = true)
+  @ApiResponse(code = 401, message = EEAErrorMessage.UNAUTHORIZED)
   public List<DataflowUserRoleVO> getUserRolesAllDataflows() {
     List<Long> dataProviderIds = new ArrayList<>();
     List<DataflowUserRoleVO> result = new ArrayList<>();
@@ -689,8 +708,11 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/private/isReferenceDataflowDraft/entity/{entity}/{entityId}")
-  public boolean accessReferenceEntity(@PathVariable("entity") EntityClassEnum entity,
-      @PathVariable("entityId") Long entityId) {
+  @ApiOperation(value = "Checks if a reference dataflow/dataset has draft status.", hidden = true)
+  public boolean accessReferenceEntity(
+      @ApiParam(value = "Entity type",
+          example = "DATAFLOW") @PathVariable("entity") EntityClassEnum entity,
+      @ApiParam(value = "Entity id", example = "124") @PathVariable("entityId") Long entityId) {
     return dataflowService.isReferenceDataflowDraft(entity, entityId);
   }
 
@@ -707,12 +729,38 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/private/isDataflowType/{type}/entity/{entity}/{entityId}")
-  public boolean accessEntity(@PathVariable("type") TypeDataflowEnum dataflowType,
-      @PathVariable("entity") EntityClassEnum entity, @PathVariable("entityId") Long entityId) {
+  @ApiOperation(value = "Checks if the type of the entity passed as parameter is of the type given",
+      hidden = true)
+  public boolean accessEntity(
+      @ApiParam(value = "Dataflow type",
+          example = "BUSINESS") @PathVariable("type") TypeDataflowEnum dataflowType,
+      @ApiParam(value = "Entity type",
+          example = "DATAFLOW") @PathVariable("entity") EntityClassEnum entity,
+      @ApiParam(value = "Entity id", example = "120") @PathVariable("entityId") Long entityId) {
     return dataflowService.isDataflowType(dataflowType, entity, entityId);
   }
 
 
+  /**
+   * Gets the private dataflow by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the private dataflow by id
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/getPrivateDataflow/{dataflowId}")
+  @ApiOperation(value = "Gets a private dataflow based on given Id", hidden = true)
+  public DataflowPrivateVO getPrivateDataflowById(@ApiParam(value = "Dataflow Id",
+      example = "125") @PathVariable("dataflowId") Long dataflowId) {
+    DataflowPrivateVO dataflowPrivateVO = null;
+    try {
+      return dataflowService.getPrivateDataflowById(dataflowId);
+    } catch (EEAException e) {
+      LOG_ERROR.info("Not found dataflow with id {}" + dataflowId);
+    }
+    return dataflowPrivateVO;
+  }
 
   /**
    * Checks if is user requester.
@@ -736,24 +784,4 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     return false;
   }
-
-  /**
-   * Gets the private dataflow by id.
-   *
-   * @param dataflowId the dataflow id
-   * @return the private dataflow by id
-   */
-  @Override
-  @HystrixCommand
-  @GetMapping("/getPrivateDataflow/{dataflowId}")
-  public DataflowPrivateVO getPrivateDataflowById(@PathVariable("dataflowId") Long dataflowId) {
-    DataflowPrivateVO dataflowPrivateVO = null;
-    try {
-      return dataflowService.getPrivateDataflowById(dataflowId);
-    } catch (EEAException e) {
-      LOG_ERROR.info("Not found dataflow with id {}" + dataflowId);
-    }
-    return dataflowPrivateVO;
-  }
-
 }
