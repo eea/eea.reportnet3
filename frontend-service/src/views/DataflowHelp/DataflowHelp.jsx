@@ -178,7 +178,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
     try {
       setIsDownloading(true); // TODO MAKE USE OF isDownloading in Button?
 
-      const { data } = await DatasetService.downloadAllTabsInfo(datasetSchemaId); // TODO IS DATASET SERVICE OR DATAFLOW ?
+      const { data } = await DataflowService.downloadAllTabsInfo(datasetSchemaId); // TODO IS DATASET SERVICE OR DATAFLOW ?
 
       if (!isNil(data)) DownloadFile(data, `${dataflowName}.xlsx`); //TODO CHANGE FILE NAME
     } catch (error) {

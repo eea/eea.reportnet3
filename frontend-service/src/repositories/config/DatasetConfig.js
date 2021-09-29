@@ -7,7 +7,7 @@ export const DatasetConfig = {
   getMetadata: '/datasetmetabase/{:datasetId}',
   getTableData:
     '/dataset/TableValueDataset/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&idRules={:idRules}',
-  downloadTableDefinitions: '/dataset/tableDefinitions/{:datasetSchemaId}', //TODO
+  downloadTableDefinitions: '/dataset/tableDefinitions/{:datasetSchemaId}', // TODO USE CORRECT ENDPOINT
   deleteSchema: '/dataschema/dataset/{:datasetId}',
   deleteAttachment: '/dataset/{:datasetId}/field/{:fieldId}/attachment',
   deleteData: '/dataset/{:datasetId}/deleteImportData?deletePrefilledTables={:deletePrefilledTables}',
