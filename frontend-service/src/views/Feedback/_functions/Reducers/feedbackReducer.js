@@ -111,6 +111,9 @@ export const feedbackReducer = (state, { type, payload }) => {
     case 'RESET_MESSAGES':
       return { ...state, messages: payload };
 
+    case 'SET_DATAFLOW_DATA':
+      return { ...state, dataflowStateData: payload };
+
     default:
       return state;
   }

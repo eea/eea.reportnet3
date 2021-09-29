@@ -330,13 +330,13 @@ const Dataflow = withRouter(({ history, match }) => {
     <div className={styles.buttonsRolesFooter}>
       <Button
         className={`p-button-secondary p-button-animated-blink p-button-left-aligned`}
-        icon={'plus'}
+        icon="plus"
         label={resourcesContext.messages['add']}
         onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
       />
       <Button
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => {
           manageDialogs(`isManage${userType}DialogVisible`, false);
@@ -447,7 +447,7 @@ const Dataflow = withRouter(({ history, match }) => {
           !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
         }`}
         disabled={isEmpty(dataflowState.dataProviderSelected)}
-        icon={'export'}
+        icon="export"
         label={resourcesContext.messages['exportLeadReportersTemplate']}
         onClick={onExportLeadReportersTemplate}
         tooltip={`${resourcesContext.messages['exportLeadReportersTemplateTooltip']} ${dataflowState.dataProviderSelected?.label}`}
@@ -458,7 +458,7 @@ const Dataflow = withRouter(({ history, match }) => {
           !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
         }`}
         disabled={isEmpty(dataflowState.dataProviderSelected)}
-        icon={'import'}
+        icon="import"
         label={resourcesContext.messages['importLeadReporters']}
         onClick={() => manageDialogs('isImportLeadReportersVisible', true)}
         tooltip={resourcesContext.messages['importLeadReportersTooltip']}
@@ -466,13 +466,13 @@ const Dataflow = withRouter(({ history, match }) => {
       />
       <Button
         className={`${styles.manageLeadReportersButton} p-button-secondary p-button-animated-blink`}
-        icon={'export'}
+        icon="export"
         label={resourcesContext.messages['exportLeadReporters']}
         onClick={onExportLeadReporters}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
       />
@@ -482,7 +482,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const renderDataflowUsersListFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
+      icon="cancel"
       label={resourcesContext.messages['close']}
       onClick={() => manageDialogs('isUserListVisible', false)}
     />
@@ -1030,7 +1030,7 @@ const Dataflow = withRouter(({ history, match }) => {
               setIsAdminAssignedDataflow={setIsAdminAssignedDataflow}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}
-              userType={'reporter'}
+              userType="reporter"
             />
           </Dialog>
         )}

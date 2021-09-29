@@ -1263,6 +1263,7 @@
     "id": "Id",
     "shortName": "Short name",
     "legalName": "Legal name",
-    "sqlSentenceInfoTooltip": "Click to show detailed help info"
+    "sqlSentenceInfoTooltip": "Click to show detailed help info",
+    "shareRightsDisclaimer": "Note: Management of secondary reporter access to this dataflow is the lead reporter responsibility"
   }
 }

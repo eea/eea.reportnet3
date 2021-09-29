@@ -47,6 +47,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { useReporterDataset } from 'views/_components/Snapshots/_hooks/useReporterDataset';
 
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'views/_functions/Utils';
+import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -61,12 +62,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const userContext = useContext(UserContext);
 
   const [dashDialogVisible, setDashDialogVisible] = useState(false);
-  const [dataProviderId, setDataProviderId] = useState(null);
-  const [dataflowName, setDataflowName] = useState('');
   const [dataset, setDataset] = useState({});
-  const [datasetFeedbackStatus, setDatasetFeedbackStatus] = useState('');
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
-  const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
   const [datasetName, setDatasetName] = useState('');
   const [datasetHasErrors, setDatasetHasErrors] = useState(false);
@@ -129,7 +126,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     currentPage: getCurrentPage(),
     dataflowId,
     dataflowType,
-    dataProviderId,
+    dataProviderId: metadata?.dataset.dataProviderId,
     dataProviderName: metadata?.dataset.name,
     history,
     isLoading,
@@ -259,8 +256,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   }, [isTestDataset]);
 
   useEffect(() => {
-    if (datasetSchemaId) getFileExtensions();
-  }, [datasetSchemaId, isImportDatasetDialogVisible]);
+    if (metadata?.dataset.datasetSchemaId) getFileExtensions();
+  }, [metadata?.dataset.datasetSchemaId, isImportDatasetDialogVisible]);
 
   useEffect(() => {
     getExportIntegrationsNames(externalOperationsList.export);
@@ -342,10 +339,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       ]
     : [];
 
-  const validImportExtensions = `.${importSelectedIntegrationExtension}`;
-
-  const infoExtensionsTooltip = `${resourcesContext.messages['supportedFileExtensionsTooltip']} ${validImportExtensions}`;
-
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
     const extensionsTypes = !isNil(type.code) && type.code.split('+');
     return {
@@ -371,7 +364,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       return CurrentPage.REFERENCE_DATASET;
     } else if (isReferenceDatasetRegularDataflow) {
       return CurrentPage.DATAFLOW_REFERENCE_DATASET;
-    } else if (dataProviderId === 0) {
+    } else if (metadata?.dataset.dataProviderId === 0) {
       return CurrentPage.TEST_DATASETS;
     } else {
       return CurrentPage.DATASET;
@@ -380,7 +373,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getFileExtensions = async () => {
     try {
-      const allExtensions = await IntegrationService.getAllExtensionsOperations(dataflowId, datasetSchemaId);
+      const allExtensions = await IntegrationService.getAllExtensionsOperations(
+        dataflowId,
+        metadata.dataset.datasetSchemaId
+      );
       setExternalOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
     } catch (error) {
       console.error('Dataset - getFileExtensions.', error);
@@ -392,10 +388,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     try {
       const metaData = await MetadataUtils.getMetadata({ datasetId, dataflowId });
       setMetadata(metaData);
-      setDataflowName(metaData.dataflow.name);
-      setDatasetSchemaId(metaData.dataset.datasetSchemaId);
-      setDatasetFeedbackStatus(metaData.dataset.datasetFeedbackStatus);
-      setDataProviderId(metaData.dataset.dataProviderId || 0);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
@@ -430,7 +422,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await DatasetService.validate(datasetId);
       notificationContext.add({
         type: 'VALIDATE_DATA_INIT',
-        content: { origin: datasetName, dataflowId, dataflowName, datasetId, datasetName: datasetSchemaName }
+        content: {
+          origin: datasetName,
+          dataflowId,
+          dataflowName: metadata.dataflow.name,
+          datasetId,
+          datasetName: datasetSchemaName
+        }
       });
     } catch (error) {
       if (error.response.status === 423) {
@@ -444,7 +442,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           content: {
             origin: datasetName,
             dataflowId,
-            dataflowName,
+            dataflowName: metadata.dataflow.name,
             datasetId,
             datasetName: datasetSchemaName
           }
@@ -500,7 +498,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         notificationContext.add({
           type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT',
           content: {
-            dataflowName: dataflowName,
+            dataflowName: metadata.dataflow.name,
             datasetName: datasetName
           }
         });
@@ -795,9 +793,9 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const datasetInsideTitle = () => {
     if (dataset?.isReleasing) {
       return `${resourcesContext.messages['isReleasing']} `;
-    } else if (!isEmpty(datasetFeedbackStatus)) {
-      return `${datasetFeedbackStatus} `;
-    } else if (isEmpty(datasetFeedbackStatus) && isDatasetReleased) {
+    } else if (!isEmpty(metadata?.dataset.datasetFeedbackStatus)) {
+      return `${metadata?.dataset.datasetFeedbackStatus} `;
+    } else if (isEmpty(metadata?.dataset.datasetFeedbackStatus) && isDatasetReleased) {
       return `${resourcesContext.messages['released'].toString()}`;
     } else {
       return '';
@@ -953,7 +951,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         icon={isReferenceDataset ? 'howTo' : 'dataset'}
         iconSize={isReferenceDataset ? '4rem' : '3.5rem'}
         insideTitle={`${datasetInsideTitle()}`}
-        subtitle={`${dataflowName} - ${datasetName}`}
+        subtitle={`${metadata?.dataflow.name} - ${datasetName}`}
         title={datasetSchemaName}
       />
       <div className={styles.ButtonsBar}>
@@ -1074,8 +1072,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       )}
       {isTableView ? (
         <TabsSchema
-          dataProviderId={dataProviderId}
-          datasetSchemaId={datasetSchemaId}
+          dataProviderId={metadata?.dataset.dataProviderId}
+          datasetSchemaId={metadata?.dataset.datasetSchemaId}
           hasWritePermissions={hasWritePermissions}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
@@ -1096,7 +1094,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         />
       ) : (
         <Webforms
-          dataProviderId={dataProviderId}
+          dataProviderId={metadata?.dataset.dataProviderId}
           dataflowId={dataflowId}
           datasetId={datasetId}
           isReleasing={dataset.isReleasing}
@@ -1121,7 +1119,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           <ShowValidationsList
             datasetId={datasetId}
             datasetName={datasetName}
-            datasetSchemaId={datasetSchemaId}
+            datasetSchemaId={metadata?.dataset.datasetSchemaId}
             hasWritePermissions={hasWritePermissions}
             isWebformView={!isTableView}
             levelErrorTypes={levelErrorTypes}
@@ -1145,7 +1143,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           <QCList
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
             datasetSchemaAllTables={datasetSchemaAllTables}
-            datasetSchemaId={datasetSchemaId}
+            datasetSchemaId={metadata?.dataset.datasetSchemaId}
             reporting={true}
           />
         </Dialog>
@@ -1153,7 +1151,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
-          accept={validImportExtensions}
+          accept={DatasetUtils.getValidExtensions({ validExtensions: importSelectedIntegrationExtension })}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogClassName={styles.Dialog}
@@ -1163,7 +1161,12 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             setImportSelectedIntegrationId(null);
           }}
           dialogVisible={isImportDatasetDialogVisible}
-          infoTooltip={infoExtensionsTooltip}
+          infoTooltip={`${
+            resourcesContext.messages['supportedFileExtensionsTooltip']
+          } ${DatasetUtils.getValidExtensions({
+            isTooltip: true,
+            validExtensions: importSelectedIntegrationExtension
+          })}`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           name="file"

@@ -1,5 +1,6 @@
 package org.eea.collaboration.persistence.domain;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -33,10 +34,6 @@ public class MessageAttachment {
   @Column(name = "file_name")
   private String fileName;
 
-  /** The file size. */
-  @Column(name = "file_size")
-  private String fileSize;
-
   /** The content. */
   @Lob
   @Column(name = "content")
@@ -44,7 +41,7 @@ public class MessageAttachment {
   private byte content[];
 
   /** The message. */
-  @OneToOne
+  @OneToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "message_id")
   private Message message;
 }
