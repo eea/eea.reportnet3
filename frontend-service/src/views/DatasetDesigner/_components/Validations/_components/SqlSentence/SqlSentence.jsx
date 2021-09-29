@@ -6,6 +6,7 @@ import styles from './SqlSentence.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
+import { InputTextarea } from 'views/_components/InputTextarea';
 import { SqlHelp } from './_components/SqlHelp';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -95,11 +96,12 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
               tooltipOptions={{ position: 'top' }}
             />
           </h3>
-          <textarea
+          <InputTextarea
+            className={`p-inputtextarea`}
             id="sqlSentenceText"
             name=""
             onChange={event => onSetSqlSentence(event.target.value)}
-            value={creationFormState.candidateRule.sqlSentence}></textarea>
+            value={creationFormState.candidateRule.sqlSentence}></InputTextarea>
         </div>
       </div>
 

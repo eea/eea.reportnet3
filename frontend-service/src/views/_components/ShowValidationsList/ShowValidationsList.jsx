@@ -222,25 +222,8 @@ export const ShowValidationsList = memo(
       return style;
     };
 
-    const getRuleSchema = data =>
-      validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === data.ruleId);
-
-    const getTooltipMessage = column => {
-      const ruleInfo = getRuleSchema(column);
-      return (
-        <Fragment>
-          <span className={styles.tooltipInfoLabel}>{resourcesContext.messages['ruleName']}: </span>{' '}
-          <span className={styles.tooltipValueLabel}>{ruleInfo?.name}</span>
-          <br />
-          <span className={styles.tooltipInfoLabel}>{resourcesContext.messages['description']}: </span>
-          <span className={styles.tooltipValueLabel}>
-            {!isNil(ruleInfo?.description) && ruleInfo?.description !== ''
-              ? ruleInfo?.description
-              : resourcesContext.messages['noDescription']}
-          </span>
-        </Fragment>
-      );
-    };
+    const getRuleSchema = ruleId =>
+      validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === ruleId);
 
     const levelErrorTemplate = recordData => (
       <div className={styles.levelErrorTemplateWrapper}>
@@ -249,6 +232,7 @@ export const ShowValidationsList = memo(
     );
 
     const ruleCodeTemplate = recordData => {
+      const ruleInfo = getRuleSchema(recordData.ruleId);
       return (
         <div className={styles.ruleCodeTemplateWrapper}>
           <span>{recordData.shortCode}</span>
@@ -261,7 +245,15 @@ export const ShowValidationsList = memo(
                     flexDirection: 'column',
                     alignItems: 'flex-start'
                   }}>
-                  {getTooltipMessage(recordData)}
+                  <span className={styles.tooltipInfoLabel}>{resourcesContext.messages['ruleName']}: </span>{' '}
+                  <span className={styles.tooltipValueLabel}>{ruleInfo?.name}</span>
+                  <br />
+                  <span className={styles.tooltipInfoLabel}>{resourcesContext.messages['description']}: </span>
+                  <span className={styles.tooltipValueLabel}>
+                    {!isNil(ruleInfo?.description) && ruleInfo?.description !== ''
+                      ? ruleInfo?.description
+                      : resourcesContext.messages['noDescription']}
+                  </span>
                 </div>
               )
             }
@@ -271,6 +263,7 @@ export const ShowValidationsList = memo(
         </div>
       );
     };
+
     const onChangePage = event => {
       const isChangedPage = true;
       setNumberRows(event.rows);
@@ -302,8 +295,6 @@ export const ShowValidationsList = memo(
       setIsLoadingTable(true);
 
       try {
-        let datasetErrors = {};
-
         let pageNums = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
 
         const data = await DatasetService.getShowValidationErrors(
@@ -317,21 +308,26 @@ export const ShowValidationsList = memo(
           typeEntitiesFilter,
           tablesFilter
         );
-        datasetErrors = data;
-        addTableSchemaId(datasetErrors.errors);
+
+        data.errors.forEach(row => {
+          const ruleInfo = getRuleSchema(row.ruleId);
+          row.message = ruleInfo?.message.replaceAll('{%', '<').replaceAll('%}', '>');
+        });
+
+        addTableSchemaId(data.errors);
         validationDispatch({
           type: 'SET_TOTAL_GROUPED_ERRORS',
           payload: {
-            totalErrors: datasetErrors.totalErrors,
-            totalFilteredGroupedRecords: datasetErrors.totalFilteredErrors
+            totalErrors: data.totalErrors,
+            totalFilteredGroupedRecords: data.totalFilteredErrors
           }
         });
 
         validationDispatch({
           type: 'SET_TOTALS_ERRORS',
-          payload: { totalFilteredRecords: datasetErrors.totalFilteredErrors, totalRecords: datasetErrors.totalRecords }
+          payload: { totalFilteredRecords: data.totalFilteredErrors, totalRecords: data.totalRecords }
         });
-        setFetchedData(datasetErrors.errors);
+        setFetchedData(data.errors);
       } catch (error) {
         console.error('ShowValidationsList - onLoadErrors.', error);
       } finally {
@@ -436,6 +432,7 @@ export const ShowValidationsList = memo(
             automaticType: validation.automaticType,
             id: validation.id,
             description: validation.description,
+            message: validation.message,
             name: validation.name
           };
         })

@@ -15,4 +15,11 @@ public interface MessageAttachmentRepository extends JpaRepository<MessageAttach
    * @return the message attachment
    */
   MessageAttachment findByMessageId(Long messageId);
+
+  /**
+   * Delete by message id.
+   *
+   * @param messageId the message id
+   */
+  void deleteByMessageId(Long messageId);
 }

@@ -49,10 +49,13 @@
 .shareRightsModal {
   min-height: 50vh;
 }
+.shareRightsDisclaimer {
+  font-style: italic;
+  font-weight: bold;
+}
 
 .shareRightsModal {
   $root: &;
-  height: 0;
   @at-root {
     .wrapperNoUserRoles {
       @at-root {
