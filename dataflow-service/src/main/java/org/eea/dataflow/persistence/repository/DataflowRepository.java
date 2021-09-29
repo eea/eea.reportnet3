@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.eea.dataflow.persistence.domain.Dataflow;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -66,7 +67,6 @@ public interface DataflowRepository
   @CacheEvict(value = "dataflowVO", key = "#idDataflow")
   @Query("DELETE FROM Dataflow d where d.id = :idDataflow")
   void deleteById(@Param("idDataflow") Long idDataflow);
-
 
   /**
    * Find by id in order by status desc creation date desc.
@@ -182,6 +182,26 @@ public interface DataflowRepository
 
 
   /**
+   * Count dataflow by type used by Admin users.
+   *
+   * @param datasetIds the dataset ids
+   * @return the list
+   */
+  @Query(nativeQuery = true,
+      value = "select df.type as type , count(*) as amount from dataflow df group by type")
+  List<IDataflowCount> countDataflowByType();
+
+  /**
+   * Count dataflow by type based on the user access rights.
+   *
+   * @param datasetIds the dataset ids
+   * @return the list
+   */
+  @Query(nativeQuery = true,
+      value = " select aux_dataflows.type as type , count(*) as amount from (select * from dataflow df where df.id IN :ids) aux_dataflows group by type")
+  List<IDataflowCount> countDataflowByTypeAndUser(@Param("ids") List<Long> ids);
+
+  /**
    * Find by available true.
    *
    * @return the list
@@ -249,6 +269,29 @@ public interface DataflowRepository
      * @return the status
      */
     String getStatus();
+  }
+
+
+  /**
+   * The Interface IDataflowCount.
+   */
+  public interface IDataflowCount {
+
+
+    /**
+     * Gets the type.
+     *
+     * @return the type
+     */
+    TypeDataflowEnum getType();
+
+
+    /**
+     * Gets the amount.
+     *
+     * @return the amount
+     */
+    Long getAmount();
   }
 
 
