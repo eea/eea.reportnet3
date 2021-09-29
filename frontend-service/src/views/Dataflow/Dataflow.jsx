@@ -96,7 +96,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isExportEUDatasetLoading: false,
     isExporting: false,
     isFetchingData: false,
-    isHelpDesk: false,
+    isHelpDeskVisible: false,
     isImportLeadReportersVisible: false,
     isManageReportersDialogVisible: false,
     isManageRequestersDialogVisible: false,

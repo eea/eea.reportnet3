@@ -53,7 +53,19 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       title: 'leftBarReportingDataflowsButton'
     };
 
-    const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageRequestersBtn, reportingDataflows];
+    const helpDeskBtn = {
+      className: 'dataflow-help-desk-help-step',
+      // icon: 'thList',
+      icon: 'listClipboard',
+      isVisible: buttonsVisibility.helpDeskBtn,
+      // label: 'datasetsInfo',
+      label: 'sidebarHelpDeskBtn',
+      onClick: () => manageDialogs('isHelpDeskVisible', true),
+      // title: 'datasetsInfo'
+      title: 'sidebarHelpDeskBtn'
+    };
+
+    const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageRequestersBtn, reportingDataflows, helpDeskBtn];
 
     leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
   }, [

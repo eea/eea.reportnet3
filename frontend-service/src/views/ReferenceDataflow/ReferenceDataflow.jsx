@@ -12,6 +12,7 @@ import { config } from 'conf';
 import { ApiKeyDialog } from 'views/_components/ApiKeyDialog';
 import { BigButtonListReference } from './_components/BigButtonListReference';
 import { Button } from 'views/_components/Button';
+import { HelpDesk } from 'views/_components/HelpDesk';
 import { MainLayout } from 'views/_components/Layout';
 import { ReferencingDataflows } from './_components/ReferencingDataflows';
 import { routes } from 'conf/routes';
@@ -59,6 +60,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     isCreatingReferenceDatasets: false,
     isCustodian: false,
     isEditDialogVisible: false,
+    isHelpDeskVisible: false,
     isLoading: false,
     isManageRequestersDialogVisible: false,
     isPropertiesDialogVisible: false,
@@ -261,6 +263,15 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     />
   );
 
+  const renderDialogFooter = modalType => (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon="cancel"
+      label={resourcesContext.messages['close']}
+      onClick={() => manageDialogs(modalType, false)}
+    />
+  );
+
   const shareRightsFooterDialogFooter = (
     <div className={styles.buttonsRolesFooter}>
       <Button
@@ -287,6 +298,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     return {
       apiKeyBtn: dataflowState.isCustodian,
       editBtn: dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian,
+      helpDeskBtn: dataflowState.isAdmin,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
       propertiesBtn: true,
       reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
@@ -398,6 +410,16 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
             userType={'requester'}
           />
+        </Dialog>
+      )}
+
+      {dataflowState.isHelpDeskVisible && (
+        <Dialog
+          footer={renderDialogFooter('isHelpDeskVisible')}
+          header={`${resourcesContext.messages['datasetsInfo']} - ${dataflowState.name}`}
+          onHide={() => manageDialogs('isHelpDeskVisible', false)}
+          visible={dataflowState.isHelpDeskVisible}>
+          <HelpDesk dataflowId={referenceDataflowId} dataflowType={dataflowState.dataflowType} />
         </Dialog>
       )}
     </div>
