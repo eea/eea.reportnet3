@@ -7,9 +7,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import org.eea.collaboration.mapper.MessageMapper;
 import org.eea.collaboration.persistence.domain.Message;
-import org.eea.collaboration.persistence.domain.MessageAttachment;
 import org.eea.collaboration.persistence.repository.MessageAttachmentRepository;
 import org.eea.collaboration.persistence.repository.MessageRepository;
 import org.eea.collaboration.service.helper.CollaborationServiceHelper;
@@ -20,6 +20,7 @@ import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.MessageVO;
+import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.junit.Assert;
@@ -405,9 +406,23 @@ public class CollaborationServiceImplTest {
 
   @Test
   public void deleteMessageAndAttachmentTest() throws EEAException {
-    MessageAttachment messageAttachment = new MessageAttachment();
-    Mockito.when(messageAttachmentRepository.findByMessageId(Mockito.anyLong()))
-        .thenReturn(messageAttachment);
+    Message message = new Message();
+    message.setId(1L);
+    message.setContent("");
+    message.setType(MessageTypeEnum.ATTACHMENT);
+    Mockito.when(messageRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(message));
+    Mockito.doNothing().when(messageAttachmentRepository).deleteByMessageId(Mockito.anyLong());
+    collaborationServiceImpl.deleteMessage(1L);
+    Mockito.verify(messageAttachmentRepository, times(1)).deleteByMessageId(Mockito.anyLong());
+  }
+
+  @Test
+  public void deleteMessageTypeText() throws EEAException {
+    Message message = new Message();
+    message.setId(1L);
+    message.setContent("");
+    message.setType(MessageTypeEnum.TEXT);
+    Mockito.when(messageRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(message));
     Mockito.doNothing().when(messageRepository).deleteById(Mockito.anyLong());
     collaborationServiceImpl.deleteMessage(1L);
     Mockito.verify(messageRepository, times(1)).deleteById(Mockito.anyLong());
