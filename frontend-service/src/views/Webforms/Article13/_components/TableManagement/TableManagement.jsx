@@ -469,6 +469,7 @@ export const TableManagement = ({
           header={resourcesContext.messages['editRow']}
           modal={true}
           onHide={() => manageDialogs('manageRows', false)}
+          style={{ width: '30%' }}
           visible={isDialogVisible.manageRows}
           zIndex={3003}>
           <div className="p-grid p-fluid">

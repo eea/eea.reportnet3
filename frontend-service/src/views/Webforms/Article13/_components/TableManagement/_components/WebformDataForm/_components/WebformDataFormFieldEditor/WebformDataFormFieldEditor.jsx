@@ -35,44 +35,6 @@ const WebformDataFormFieldEditor = ({
   const getId = item =>
     item.substring(item.indexOf('#') + 1, item.indexOf(' ') !== -1 ? item.indexOf(' ') : item.length);
 
-  const getMaxCharactersByType = type => {
-    const longCharacters = 20;
-    const decimalCharacters = 40;
-    const dateCharacters = 10;
-    const datetimeCharacters = 20;
-    const textCharacters = 10000;
-    const richTextCharacters = 10000;
-    const emailCharacters = 256;
-    const phoneCharacters = 256;
-    const urlCharacters = 5000;
-
-    switch (type) {
-      case 'NUMBER_INTEGER':
-        return longCharacters;
-      case 'NUMBER_DECIMAL':
-        return decimalCharacters;
-      case 'POINT':
-        return textCharacters;
-      case 'DATE':
-        return dateCharacters;
-      case 'DATETIME':
-        return datetimeCharacters;
-      case 'TEXT':
-      case 'TEXTAREA':
-        return textCharacters;
-      case 'RICH_TEXT':
-        return richTextCharacters;
-      case 'EMAIL':
-        return emailCharacters;
-      case 'PHONE':
-        return phoneCharacters;
-      case 'URL':
-        return urlCharacters;
-      default:
-        return null;
-    }
-  };
-
   const renderCodelistDropdown = (field, fieldValue) => {
     return (
       <Dropdown
@@ -122,12 +84,11 @@ const WebformDataFormFieldEditor = ({
     ) : (
       <InputText
         disabled={column.readOnly}
+        hasMaxCharCounter
         id={field}
         keyfilter={RecordUtils.getFilter(type)}
-        maxLength={getMaxCharactersByType(type)}
         onChange={e => onChangeForm(field, e.target.value)}
         ref={inputRef}
-        style={{ width: '35%' }}
         type="text"
         value={fieldValue}
       />
@@ -141,13 +102,9 @@ const WebformDataFormFieldEditor = ({
         id={field}
         keyfilter={RecordUtils.getFilter(type)}
         onChange={e => onChangeForm(field, e.target.value)}
-        style={{ width: '60%' }}
         value={fieldValue}
       />
-      <CharacterCounter
-        currentLength={fieldValue.length}
-        style={{ position: 'relative', right: '40%', top: '0.25rem' }}
-      />
+      <CharacterCounter currentLength={fieldValue.length} style={{ position: 'relative', top: '0.25rem' }} />
     </div>
   );
 

@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import isNil from 'lodash/isNil';
 
@@ -52,6 +52,8 @@ export const WebformField = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const inputRef = useRef(null);
+
   const [webformFieldState, webformFieldDispatch] = useReducer(webformFieldReducer, {
     initialFieldValue: '',
     isDeleteAttachmentVisible: false,
@@ -81,7 +83,7 @@ export const WebformField = ({
     selectedFieldSchemaId
   } = webformFieldState;
 
-  const { formatDate, getInputMaxLength, getMultiselectValues } = WebformRecordUtils;
+  const { formatDate, getMultiselectValues } = WebformRecordUtils;
 
   const { getObjectiveOptions } = PaMsUtils;
 
@@ -453,6 +455,7 @@ export const WebformField = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
+            characterCounterStyles={{ top: '-50%', marginBottom: 0 }}
             hasMaxCharCounter
             id={field.fieldId}
             keyfilter={RecordUtils.getFilter(type)}
@@ -464,6 +467,7 @@ export const WebformField = ({
             onChange={event => onFillField(field, option, event.target.value)}
             onFocus={event => onFocusField(event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
+            ref={inputRef}
             value={field.value}
           />
         );
