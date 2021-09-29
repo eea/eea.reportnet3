@@ -34,6 +34,9 @@ public class MessageVO {
   /** The automatic. */
   private boolean automatic;
 
+  /** The file size. */
+  private String fileSize;
+
   /** The message attachment VO. */
   private MessageAttachmentVO messageAttachment;
 }

@@ -1,0 +1,41 @@
+.propertyItem {
+  margin: 1rem 0;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  .titleWrapper {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+
+    .title {
+      color: var(--breadCrumb-font-color);
+      user-select: none;
+
+      .icon {
+        cursor: pointer;
+      }
+    }
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    margin-left: 2rem;
+
+    &.hide {
+      height: 0;
+      margin-left: 1rem;
+      margin: 0;
+      opacity: 0;
+      overflow: hidden;
+    }
+
+    > span {
+      color: var(--property-item-text-color);
+      margin: 0.25rem 0;
+    }
+  }
+}
