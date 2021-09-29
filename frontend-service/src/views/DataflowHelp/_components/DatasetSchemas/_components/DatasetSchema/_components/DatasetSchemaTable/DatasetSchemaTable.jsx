@@ -27,7 +27,6 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
     enabled: [],
     levelError: []
   });
-  console.log({ fields });
 
   const onFilterChange = (event, field) => {
     dataTableRef.current.filter(event.value, field, 'in');
@@ -35,6 +34,18 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
     inmFilters[field] = event.value;
 
     setFilters(inmFilters);
+  };
+
+  const filterReferencedField = columns => {
+    if (type === 'fields') {
+      const hasReferencedFields = fields.some(
+        field => !isNil(field.referencedField) && !isEmpty(field.referencedField)
+      );
+      if (!hasReferencedFields) {
+        return columns.filter(column => column !== 'referencedField');
+      }
+    }
+    return columns;
   };
 
   const getFieldTypeValue = value => {
@@ -91,8 +102,9 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
     }
   };
 
-  const renderColumns = fields =>
-    fields.map(field => (
+  const renderColumns = fields => {
+    console.log({ fields });
+    return fields.map(field => (
       <Column
         body={
           field === 'type'
@@ -150,6 +162,7 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
         }}
       />
     ));
+  };
 
   const levelErrorTemplate = rowData => {
     if (!isNil(rowData.levelError)) {
@@ -173,7 +186,6 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
   };
 
   const referencedFieldTemplate = rowData => {
-    console.log(rowData?.referencedField);
     if (!isNil(rowData?.referencedField) && rowData?.referencedField !== '') {
       return (
         <div>
@@ -257,7 +269,7 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
         marginBottom: '1rem'
       }}
       value={fields}>
-      {renderColumns(columnOptions[type].columns)}
+      {renderColumns(filterReferencedField(columnOptions[type].columns))}
     </DataTable>
   ) : (
     <span>{resourcesContext.messages['webformTableWithLessRecords']}</span>

@@ -31,7 +31,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
   const [extensionsOperationsList, setExtensionsOperationsList] = useState();
   const [uniqueList, setUniqueList] = useState();
-  const [validationList, setValidationList] = useState();
+  const [qcList, setQCList] = useState();
 
   useEffect(() => {
     if (!isEmpty(datasetsSchemas)) {
@@ -42,10 +42,10 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   }, [datasetsSchemas]);
 
   useEffect(() => {
-    if (!isUndefined(extensionsOperationsList) && !isUndefined(uniqueList) && !isUndefined(validationList)) {
+    if (!isUndefined(extensionsOperationsList) && !isUndefined(uniqueList) && !isUndefined(qcList)) {
       setIsLoading(false);
     }
-  }, [extensionsOperationsList, uniqueList, validationList]);
+  }, [extensionsOperationsList, uniqueList, qcList]);
 
   const onGetReferencedFieldName = (referenceField, isExternalLink) => {
     const fieldObj = {};
@@ -244,37 +244,34 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
       const datasetValidations = datasetsSchemas.map(async datasetSchema => {
         return await ValidationService.getAll(datasetSchema.datasetSchemaId, !isCustodian);
       });
-      Promise.all(datasetValidations).then(allValidations => {
-        allValidations = allValidations.filter(allValidation => !isUndefined(allValidation));
+      Promise.all(datasetValidations).then(allQCs => {
+        allQCs = allQCs.filter(qc => !isUndefined(qc));
         if (!isCustodian) {
-          allValidations.forEach(
-            allValidation =>
-              (allValidation = allValidation.validations.filter(validation => validation.enabled !== false))
-          );
+          allQCs.forEach(qc => (qc = qc.validations.filter(validation => validation.enabled !== false)));
         }
-        setValidationList(
-          !isUndefined(allValidations[0])
-            ? allValidations
-                .map(allValidation =>
-                  allValidation.validations.map(validation => {
+        setQCList(
+          !isEmpty(allQCs)
+            ? allQCs
+                .map(allQCs =>
+                  allQCs.validations.map(qc => {
                     const datasetSchema = datasetsSchemas.filter(
-                      datasetSchema => datasetSchema.datasetSchemaId === allValidation.datasetSchemaId
+                      datasetSchema => datasetSchema.datasetSchemaId === allQCs.datasetSchemaId
                     );
 
                     const additionalInfo = getAdditionalValidationInfo(
-                      validation.referenceId,
-                      validation.entityType,
-                      validation.relations,
+                      qc.referenceId,
+                      qc.entityType,
+                      qc.relations,
                       datasetsSchemas,
-                      allValidation.datasetSchemaId
+                      allQCs.datasetSchemaId
                     );
-                    validation.tableName = additionalInfo.tableName || '';
-                    validation.fieldName = additionalInfo.fieldName || '';
-                    validation.expression = getExpressionString(validation, datasetSchema[0].tables);
-                    validation.datasetSchemaId = allValidation.datasetSchemaId;
+                    qc.tableName = additionalInfo.tableName || '';
+                    qc.fieldName = additionalInfo.fieldName || '';
+                    qc.expression = getExpressionString(qc, datasetSchema[0].tables);
+                    qc.datasetSchemaId = allQCs.datasetSchemaId;
                     if (!isCustodian) {
                       return pick(
-                        validation,
+                        qc,
                         'tableName',
                         'fieldName',
                         'shortCode',
@@ -288,7 +285,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
                       );
                     } else {
                       return pick(
-                        validation,
+                        qc,
                         'tableName',
                         'fieldName',
                         'shortCode',
@@ -330,7 +327,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
             key={designDataset.datasetSchemaId}
             onGetReferencedFieldName={onGetReferencedFieldName}
             uniqueList={filterData(designDataset, uniqueList)}
-            validationList={filterData(designDataset, validationList)}
+            qcList={filterData(designDataset, qcList)}
           />
         ))}
       </div>

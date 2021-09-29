@@ -25,7 +25,7 @@ const DatasetSchema = ({
   index,
   onGetReferencedFieldName,
   uniqueList = [],
-  validationList
+  qcList
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
@@ -70,7 +70,7 @@ const DatasetSchema = ({
         fieldName: resourcesContext.messages['field']
       }
     },
-    validations: {
+    qc: {
       columns: [
         'tableName',
         'fieldName',
@@ -134,17 +134,15 @@ const DatasetSchema = ({
     </TabPanel>
   );
 
-  const renderHeader = () => (
-    <TabPanel
-      header={resourcesContext.messages['properties']}
-      rightIcon={config.icons['settings']}
-      rightIconClass={styles.tabs}>
+  const renderProperties = () => (
+    <div>
       {renderIconProperty(resourcesContext.messages['availableInPublic'], designDataset.availableInPublic)}
       {renderIconProperty(resourcesContext.messages['referenceDataset'], designDataset.referenceDataset)}
-    </TabPanel>
+    </div>
   );
 
   const renderIconProperty = (title, value) => {
+    console.log({ value });
     return (
       <div className={styles.property}>
         <span className={styles.propertyTitle}>{`${title}:`}</span>
@@ -175,13 +173,15 @@ const DatasetSchema = ({
         {!isNil(parsedDesignDataset) &&
           !isNil(parsedDesignDataset.tables) &&
           parsedDesignDataset.tables.map(table => {
+            console.log({ table });
+            const { description, readOnly, prefilled, fixedNumber, mandatory } = table.properties;
             return (
-              <AccordionTab header={table.tableSchemaName} key={uniqueId(table.name)}>
-                {renderProperty(resourcesContext.messages['description'], table.tableSchemaDescription)}
-                {renderIconProperty(resourcesContext.messages['readOnly'], table.tableSchemaReadOnly)}
-                {renderIconProperty(resourcesContext.messages['prefilled'], table.tableSchemaToPrefill)}
-                {renderIconProperty(resourcesContext.messages['fixedNumber'], table.tableSchemaFixedNumber)}
-                {renderIconProperty(resourcesContext.messages['notEmpty'], table.tableSchemaNotEmpty)}
+              <AccordionTab header={table.tableSchemaName} key={uniqueId(table.tableSchemaName)}>
+                {renderProperty(resourcesContext.messages['description'], description)}
+                {renderIconProperty(resourcesContext.messages['readOnly'], readOnly)}
+                {renderIconProperty(resourcesContext.messages['prefilled'], prefilled)}
+                {renderIconProperty(resourcesContext.messages['fixedNumber'], fixedNumber)}
+                {renderIconProperty(resourcesContext.messages['notEmpty'], mandatory)}
                 <DatasetSchemaTable
                   columnOptions={columnOptions}
                   fields={!isNil(table) ? table.fields : []}
@@ -207,45 +207,18 @@ const DatasetSchema = ({
     </TabPanel>
   );
 
-  const renderValidations = () => (
+  const renderQCs = () => (
     <TabPanel
-      header={resourcesContext.messages['validations']}
+      header={resourcesContext.messages['qcRules']}
       rightIcon={config.icons['horizontalSliders']}
       rightIconClass={styles.tabs}>
       <DatasetSchemaTable
         columnOptions={columnOptions}
-        fields={!isNil(parsedDesignDataset.validations) ? parsedDesignDataset.validations : []}
-        type="validations"
+        fields={!isNil(parsedDesignDataset.qc) ? parsedDesignDataset.qc : []}
+        type="qc"
       />
     </TabPanel>
   );
-
-  // const renderDatasetSchema = () => {
-  //   if (!isNil(designDataset)) {
-  //     const parsedDesignDataset = parseDesignDataset(
-  //       designDataset,
-  //       extensionsOperationsList,
-  //       uniqueList,
-  //       validationList
-  //     );
-
-  //     return (
-  //       <div>
-  //         <TreeView
-  //           columnOptions={columnOptions}
-  //           excludeBottomBorder={false}
-  //           expandAll={expandAll}
-  //           key={index}
-  //           property={parsedDesignDataset}
-  //           propertyName=""
-  //           rootProperty=""
-  //         />
-  //       </div>
-  //     );
-  //   } else {
-  //     return null;
-  //   }
-  // };
 
   const getFieldFormat = field => {
     switch (field.type.toUpperCase()) {
@@ -310,30 +283,28 @@ const DatasetSchema = ({
     }
   };
 
-  const parseDesignDataset = (design, extensionsOperationsList, uniqueList, validationList) => {
+  const parseDesignDataset = (design, extensionsOperationsList, uniqueList, qcList) => {
     const parsedDataset = {};
     parsedDataset.datasetSchemaDescription = design.datasetSchemaDescription;
     parsedDataset.availableInPublic = design.availableInPublic;
     parsedDataset.referenceDataset = design.referenceDataset;
     if (!isNil(design.tables) && design.tables.length > 0) {
       const tables = design.tables.map(tableDTO => {
-        const tableProperties = [
-          {
-            description:
-              !isNil(tableDTO.tableSchemaDescription) && tableDTO.tableSchemaDescription !== ''
-                ? tableDTO.tableSchemaDescription
-                : '-',
-            readOnly: tableDTO.tableSchemaReadOnly,
-            prefilled: !isNil(tableDTO.tableSchemaToPrefill) ? tableDTO.tableSchemaToPrefill : false,
-            fixedNumber: !isNil(tableDTO.tableSchemaFixedNumber) ? tableDTO.tableSchemaFixedNumber : false,
-            mandatory: tableDTO.tableSchemaNotEmpty
-          }
-        ];
+        const tableProperties = {
+          description:
+            !isNil(tableDTO.tableSchemaDescription) && tableDTO.tableSchemaDescription !== ''
+              ? tableDTO.tableSchemaDescription
+              : '-',
+          readOnly: tableDTO.tableSchemaReadOnly,
+          prefilled: !isNil(tableDTO.tableSchemaToPrefill) ? tableDTO.tableSchemaToPrefill : false,
+          fixedNumber: !isNil(tableDTO.tableSchemaFixedNumber) ? tableDTO.tableSchemaFixedNumber : false,
+          mandatory: tableDTO.tableSchemaNotEmpty
+        };
 
         const table = {};
         table.tableSchemaName = tableDTO.tableSchemaName;
         table.properties = tableProperties;
-        if (!isNull(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
+        if (!isNil(tableDTO.records) && !isNil(tableDTO.records[0].fields) && tableDTO.records[0].fields.length > 0) {
           const containsCodelists = !isEmpty(
             tableDTO.records[0].fields.filter(
               fieldElmt => fieldElmt.type === 'CODELIST' || fieldElmt.type === 'MULTISELECT_CODELIST'
@@ -395,7 +366,7 @@ const DatasetSchema = ({
       parsedDataset.tables = tables;
     }
     parsedDataset.uniques = uniqueList;
-    parsedDataset.validations = validationList;
+    parsedDataset.qc = qcList;
     parsedDataset.extensionsOperations = extensionsOperationsList;
 
     // const dataset = {};
@@ -403,7 +374,7 @@ const DatasetSchema = ({
     return parsedDataset;
   };
 
-  const parsedDesignDataset = parseDesignDataset(designDataset, extensionsOperationsList, uniqueList, validationList);
+  const parsedDesignDataset = parseDesignDataset(designDataset, extensionsOperationsList, uniqueList, qcList);
   console.log({ parsedDesignDataset });
   return (
     <div>
@@ -411,12 +382,12 @@ const DatasetSchema = ({
         className={
           styles.header
         }>{`${resourcesContext.messages['createDatasetSchemaName']}: ${designDataset.datasetSchemaName}`}</h3>
+      {renderProperties()}
       <TabView activeIndex={0} hasQueryString={false} name="DatasetSchemas">
-        {renderHeader()}
         {renderTables()}
         {renderExternalIntegrations()}
         {renderUniques()}
-        {renderValidations()}
+        {renderQCs()}
         {/* <TabPanel header={resourcesContext.messages['webLinks']} headerClassName="dataflowHelp-webLinks-help-step">
             <WebLinks
               dataflowId={dataflowId}
