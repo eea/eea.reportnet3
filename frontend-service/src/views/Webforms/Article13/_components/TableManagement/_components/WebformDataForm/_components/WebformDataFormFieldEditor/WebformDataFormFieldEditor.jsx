@@ -140,14 +140,12 @@ const WebformDataFormFieldEditor = ({
         disabled={column.readOnly}
         id={field}
         keyfilter={RecordUtils.getFilter(type)}
-        maxLength={getMaxCharactersByType(type)}
         onChange={e => onChangeForm(field, e.target.value)}
         style={{ width: '60%' }}
         value={fieldValue}
       />
       <CharacterCounter
         currentLength={fieldValue.length}
-        maxLength={getMaxCharactersByType(type)}
         style={{ position: 'relative', right: '40%', top: '0.25rem' }}
       />
     </div>
