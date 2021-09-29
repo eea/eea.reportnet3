@@ -14,6 +14,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
@@ -760,6 +761,32 @@ public class DataFlowControllerImpl implements DataFlowController {
       LOG_ERROR.info("Not found dataflow with id {}" + dataflowId);
     }
     return dataflowPrivateVO;
+  }
+
+  /**
+   * Gets the dataflows count.
+   *
+   * @return the dataflows count
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/countByType", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Counts Dataflows by type for the logged User",
+      response = DataflowCountVO.class, responseContainer = "List", hidden = true)
+  public List<DataflowCountVO> getDataflowsCount() {
+    List<DataflowCountVO> dataflowTypesCount = null;
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
+    try {
+      dataflowTypesCount = dataflowService.getDataflowsCount(userId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(String.format(
+          "There was an error while retrieving the amount of dataflows of each dataflow type: %s",
+          e.getMessage()));
+    }
+    return dataflowTypesCount;
   }
 
   /**
