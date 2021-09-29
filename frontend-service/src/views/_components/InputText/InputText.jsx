@@ -23,7 +23,7 @@ export class InputText extends Component {
     hasMaxCharCounter: false,
     id: null,
     keyfilter: null,
-    maxLength: 10000,
+    maxLength: null,
     name: '',
     onInput: null,
     onKeyPress: null,
@@ -150,7 +150,7 @@ export class InputText extends Component {
             />
           </div>
         ) : null}
-        {this.props.hasMaxCharCounter && !isNil(this.props.maxLength) ? (
+        {this.props.hasMaxCharCounter ? (
           <CharacterCounter
             currentLength={this.props.value.length}
             inputRef={el => (this.inputElement = el)}

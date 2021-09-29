@@ -18,4 +18,5 @@ const CharacterCounter = ({ currentLength, inputRef, maxLength, style }) => {
     </p>
   );
 };
+
 export { CharacterCounter };
