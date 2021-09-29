@@ -283,7 +283,9 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       helpDeskBtn: dataflowState.isAdmin,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
       propertiesBtn: true,
-      reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
+      reportingDataflowsBtn:
+        dataflowState.status === config.dataflowStatus.OPEN &&
+        (dataflowState.isCustodian || dataflowState.isCustodianUser)
     };
   }
 
