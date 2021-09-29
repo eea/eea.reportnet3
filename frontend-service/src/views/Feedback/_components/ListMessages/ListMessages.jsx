@@ -157,11 +157,6 @@ export const ListMessages = ({
     }
     return (
       <div className={styles.scrollMessagesWrapper} ref={listMessagesWrapperRef}>
-        <p
-          className={styles.messageCounter}
-          style={{
-            marginLeft: !isCustodian ? '25px' : 'inherit'
-          }}>{`${messages.length} ${resourcesContext.messages['of']} ${totalMessages} ${resourcesContext.messages['messages']}`}</p>
         {moreMessagesLoading && (
           <div className={styles.lazyLoadingWrapper}>
             <Spinner className={styles.lazyLoadingSpinner} />

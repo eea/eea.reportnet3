@@ -41,8 +41,8 @@ export const dataflowReducer = (state, { type, payload }) => {
     case 'REFRESH_PAGE':
       return { ...state, refresh: !state.refresh };
 
-    case 'SET_IS_ADMIN_ASSIGNED_DATAFLOW':
-      return { ...state, isAdminAssignedDataflow: payload.isAdminAssignedDataflow };
+    case 'SET_IS_RIGHT_PERMISSIONS_CHANGED':
+      return { ...state, isRightPermissionsChanged: payload.isRightPermissionsChanged };
 
     case 'SET_IS_CREATING_REFERENCE_DATASETS':
       return { ...state, isCreatingReferenceDatasets: payload.isCreatingReferenceDatasets };
