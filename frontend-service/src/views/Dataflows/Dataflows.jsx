@@ -136,8 +136,9 @@ const Dataflows = withRouter(({ history, match }) => {
   }, []);
 
   useEffect(() => {
-    console.log({ dataflowsCount });
+    console.log({ dataflowsCount, dataflowsCountLoaded });
     if (!isEmpty(dataflowsCount) && !dataflowsCountLoaded) {
+      console.log('GET DATAFLOWS 1');
       getDataflows();
     }
   }, [dataflowsCount]);
@@ -218,6 +219,7 @@ const Dataflows = withRouter(({ history, match }) => {
 
   useLayoutEffect(() => {
     if (isEmpty(dataflowsState[tabId]) && !isNil(userContext.contextRoles)) {
+      console.log('GET DATAFLOWS 2');
       getDataflows();
     }
   }, [tabId]);
@@ -275,7 +277,7 @@ const Dataflows = withRouter(({ history, match }) => {
     setLoading(true);
 
     try {
-      const { data } = await DataflowService.countByType();
+      const data = await DataflowService.countByType();
       // console.log(data);
       dataflowsDispatch({ type: 'SET_DATAFLOWS_COUNT', payload: data });
     } catch (error) {

@@ -77,7 +77,7 @@ export const TabMenu = ({
   const renderMenuItemLabel = (item, index) => {
     let icon;
     let label = [];
-    console.log(item, headerLabelLoading, headerLabelChildrenCount);
+    // console.log(item, headerLabelLoading, headerLabelChildrenCount);
     if (!isNil(item.icon)) icon = <span className={classNames('p-menuitem-icon', item.icon)}></span>;
     if (!isNil(item.label)) {
       if (!isNil(headerLabelChildrenCount[item.id])) {
