@@ -27,6 +27,7 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
     enabled: [],
     levelError: []
   });
+  const [pagination, setPagination] = useState({ first: 0, page: 0, rows: 10 });
 
   const onFilterChange = (event, field) => {
     dataTableRef.current.filter(event.value, field, 'in');
@@ -36,16 +37,26 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
     setFilters(inmFilters);
   };
 
-  const filterReferencedField = columns => {
+  const onPaginate = event => {
+    const inmPagination = { first: event.first, page: event.page, rows: event.rows };
+    setPagination(inmPagination);
+  };
+
+  const filterReferencedFieldAndCodelist = columns => {
+    let filteredColumns = columns;
     if (type === 'fields') {
       const hasReferencedFields = fields.some(
         field => !isNil(field.referencedField) && !isEmpty(field.referencedField)
       );
+      const hasCodelists = fields.some(field => !isNil(field.codelistItems) && !isEmpty(field.codelistItems));
       if (!hasReferencedFields) {
-        return columns.filter(column => column !== 'referencedField');
+        filteredColumns = filteredColumns.filter(column => column !== 'referencedField');
+      }
+      if (!hasCodelists) {
+        filteredColumns = filteredColumns.filter(column => column !== 'codelistItems');
       }
     }
-    return columns;
+    return filteredColumns;
   };
 
   const getFieldTypeValue = value => {
@@ -150,8 +161,14 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
             ? '55%'
             : TextUtils.areEquals(field, 'TYPE')
             ? '25%'
-            : TextUtils.areEquals(field, 'REFERENCEDFIELD') || TextUtils.areEquals(field, 'OPERATION')
+            : TextUtils.areEquals(field, 'REFERENCEDFIELD') ||
+              TextUtils.areEquals(field, 'OPERATION') ||
+              TextUtils.areEquals(field, 'CODELISTITEMS')
             ? '30%'
+            : TextUtils.areEquals(field, 'PK') ||
+              TextUtils.areEquals(field, 'REQUIRED') ||
+              TextUtils.areEquals(field, 'READONLY')
+            ? '15%'
             : '20%',
           display:
             !isNil(columnOptions[type]) &&
@@ -259,17 +276,21 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
       </div>
     );
   };
-  // console.log(`fields`, fields);
+
   return !isNil(fields) ? (
     <DataTable
+      getPageChange={onPaginate}
+      paginator={true}
       ref={dataTableRef}
+      rows={pagination.rows}
+      rowsPerPageOptions={[5, 10, 15]}
       style={{
         width: columnOptions[type]['narrow'] ? '25%' : '100%',
         marginTop: '1rem',
         marginBottom: '1rem'
       }}
       value={fields}>
-      {renderColumns(filterReferencedField(columnOptions[type].columns))}
+      {renderColumns(filterReferencedFieldAndCodelist(columnOptions[type].columns))}
     </DataTable>
   ) : (
     <span>{resourcesContext.messages['webformTableWithLessRecords']}</span>

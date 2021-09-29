@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -11,11 +11,13 @@ import { config } from 'conf';
 
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { Button } from 'views/_components/Button';
 import { DatasetSchemaTable } from './_components/DatasetSchemaTable';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactTooltip from 'react-tooltip';
 import { TabPanel } from 'views/_components/TabView/_components/TabPanel';
 import { TabView } from 'views/_components/TabView';
+import { Toolbar } from 'views/_components/Toolbar';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -28,6 +30,7 @@ const DatasetSchema = ({
   qcList
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+  const [expandAll, setExpandAll] = useState(true);
 
   const columnOptions = {
     levelErrorTypes: {
@@ -36,11 +39,47 @@ const DatasetSchema = ({
       subClasses: [styles.blocker, styles.error, styles.warning, styles.info]
     },
     fields: {
-      columns: ['pk', 'required', 'readOnly', 'name', 'description', 'type', 'format', 'referencedField'],
-      filtered: false,
+      columns: [
+        'pk',
+        'required',
+        'readOnly',
+        'name',
+        'description',
+        'type',
+        'codelistItems',
+        'format',
+        'referencedField'
+      ],
+      filtered: true,
+      filterType: {
+        multiselect: {
+          type: [
+            { label: 'Number Integer', value: 'NUMBER_INTEGER' },
+            { label: 'Number Decimal', value: 'NUMBER_DECIMAL' },
+            { label: 'Date', value: 'DATE' },
+            { label: 'Datetime', value: 'DATETIME' },
+            { label: 'Text', value: 'TEXT' },
+            { label: 'Multiline text', value: 'TEXTAREA' },
+            { label: 'Email', value: 'Email' },
+            { label: 'URL', value: 'URL' },
+            { label: 'Phone number', value: 'PHONE' },
+            { label: 'Point', value: 'POINT' },
+            { label: 'Multiple points', value: 'MULTIPOINT' },
+            { label: 'Line', value: 'LINESTRING' },
+            { label: 'Multiple lines', value: 'MULTILINESTRING' },
+            { label: 'Polygon', value: 'POLYGON' },
+            { label: 'Multiple polygons', value: 'MULTIPOLYGON' },
+            { label: 'Single select', value: 'CODELIST' },
+            { label: 'Multiple select', value: 'MULTISELECT_CODELIST' },
+            { label: 'Link', value: 'LINK' },
+            { label: 'External link', value: 'EXTERNAL_LINK' },
+            { label: 'Attachment', value: 'ATTACHMENT' }
+          ]
+        }
+      },
       groupable: true,
       names: {
-        codelistItems: resourcesContext.messages['codelistEditorItems'],
+        codelistItems: resourcesContext.messages['singleMultipleSelectItems'],
         pk: resourcesContext.messages['primaryKey'],
         readOnly: resourcesContext.messages['readOnly'],
         referencedField: resourcesContext.messages['referencedField'],
@@ -88,18 +127,18 @@ const DatasetSchema = ({
       filterType: {
         multiselect: {
           entityType: [
-            { label: 'Field', value: 'FIELD' },
-            { label: 'Record', value: 'RECORD' },
-            { label: 'Table', value: 'TABLE' },
-            { label: 'Dataset', value: 'DATASET' }
+            { label: 'FIELD', value: 'FIELD' },
+            { label: 'RECORD', value: 'RECORD' },
+            { label: 'TABLE', value: 'TABLE' },
+            { label: 'DATASET', value: 'DATASET' }
           ],
           automatic: [
-            { label: 'True', value: 'true' },
-            { label: 'False', value: 'false' }
+            { label: 'Automatic', value: true },
+            { label: 'Manual', value: false }
           ],
           enabled: [
-            { label: 'True', value: 'true' },
-            { label: 'False', value: 'false' }
+            { label: 'Enabled', value: true },
+            { label: 'Disabled', value: false }
           ],
           levelError: [
             { label: 'Info', value: 'INFO', class: styles.levelError, subclass: styles.info },
@@ -142,7 +181,6 @@ const DatasetSchema = ({
   );
 
   const renderIconProperty = (title, value) => {
-    console.log({ value });
     return (
       <div className={styles.property}>
         <span className={styles.propertyTitle}>{`${title}:`}</span>
@@ -169,11 +207,29 @@ const DatasetSchema = ({
       header={resourcesContext.messages['tables']}
       rightIcon={config.icons['table']}
       rightIconClass={styles.tabs}>
-      <Accordion key={uniqueId('tables')} multiple={true}>
+      <Toolbar className={styles.datasetSchemasToolbar}>
+        <div className="p-toolbar-group-left">
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+            icon={config.icons['export']}
+            label={resourcesContext.messages['exportTablesSchema']}
+            onClick={onDownloadTableDefinitions}
+          />
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+            icon={expandAll ? 'angleRight' : 'angleDown'}
+            label={expandAll ? resourcesContext.messages['collapseAll'] : resourcesContext.messages['expandAll']}
+            onClick={() => setExpandAll(!expandAll)}
+          />
+        </div>
+      </Toolbar>
+      <Accordion
+        activeIndex={expandAll ? parsedDesignDataset?.tables?.map((_, i) => i) : 0}
+        key={uniqueId('tables')}
+        multiple={true}>
         {!isNil(parsedDesignDataset) &&
           !isNil(parsedDesignDataset.tables) &&
           parsedDesignDataset.tables.map(table => {
-            console.log({ table });
             const { description, readOnly, prefilled, fixedNumber, mandatory } = table.properties;
             return (
               <AccordionTab header={table.tableSchemaName} key={uniqueId(table.tableSchemaName)}>
@@ -345,7 +401,6 @@ const DatasetSchema = ({
                 field.referencedField = '';
               }
             }
-
             return field;
           });
 
@@ -354,65 +409,40 @@ const DatasetSchema = ({
 
         return table;
       });
-      // tables.button = {
-      //   label: resourcesContext.messages['downloadTableDefinitions'],
-      //   icon: 'export',
-      //   onClick: () => {
-      //     // downloadTableDefinitions(tableDTO.tableSchemaId);
-      //     console.log('downloadTableDefinitions');
-      //   },
-      //   tooltip: resourcesContext.messages['downloadTableDefinitions']
-      // };
+
       parsedDataset.tables = tables;
     }
     parsedDataset.uniques = uniqueList;
     parsedDataset.qc = qcList;
     parsedDataset.extensionsOperations = extensionsOperationsList;
 
-    // const dataset = {};
-    // dataset[design.datasetSchemaName] = parsedDataset;
     return parsedDataset;
   };
 
   const parsedDesignDataset = parseDesignDataset(designDataset, extensionsOperationsList, uniqueList, qcList);
+
+  const onDownloadTableDefinitions = () => {
+    try {
+    } catch (error) {
+      console.error(`DatasetSchema - onDownloadTableDefinitions.`, error);
+    }
+  };
+
   console.log({ parsedDesignDataset });
   return (
     <div>
-      <h3
-        className={
-          styles.header
-        }>{`${resourcesContext.messages['createDatasetSchemaName']}: ${designDataset.datasetSchemaName}`}</h3>
-      {renderProperties()}
+      <div className={styles.datasetSchemaPropertiesWrapper}>
+        <h3
+          className={
+            styles.header
+          }>{`${resourcesContext.messages['createDatasetSchemaName']}: ${designDataset.datasetSchemaName}`}</h3>
+        {renderProperties()}
+      </div>
       <TabView activeIndex={0} hasQueryString={false} name="DatasetSchemas">
         {renderTables()}
         {renderExternalIntegrations()}
         {renderUniques()}
         {renderQCs()}
-        {/* <TabPanel header={resourcesContext.messages['webLinks']} headerClassName="dataflowHelp-webLinks-help-step">
-            <WebLinks
-              dataflowId={dataflowId}
-              isLoading={isLoadingWebLinks}
-              isToolbarVisible={isToolbarVisible}
-              onLoadWebLinks={onLoadWebLinks}
-              setSortFieldWebLinks={setSortFieldWebLinks}
-              setSortOrderWebLinks={setSortOrderWebLinks}
-              sortFieldWebLinks={sortFieldWebLinks}
-              sortOrderWebLinks={sortOrderWebLinks}
-              webLinks={webLinks}
-            />
-          </TabPanel>
-          <TabPanel
-            disabled={isEmpty(datasetsSchemas)}
-            header={resourcesContext.messages['datasetSchemas']}
-            headerClassName="dataflowHelp-schemas-help-step"
-            rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas ? config.icons['spinnerAnimate'] : null}>
-            <DatasetSchemas
-              dataflowId={dataflowId}
-              datasetsSchemas={datasetsSchemas}
-              isCustodian={isCustodian}
-              onLoadDatasetsSchemas={onLoadDatasetsSchemas}
-            />
-          </TabPanel> */}
       </TabView>
     </div>
   );

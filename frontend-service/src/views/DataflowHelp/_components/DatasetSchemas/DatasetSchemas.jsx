@@ -27,7 +27,7 @@ import { ValidationService } from 'services/ValidationService';
 const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
-
+  console.log({ datasetsSchemas });
   const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
   const [extensionsOperationsList, setExtensionsOperationsList] = useState();
   const [uniqueList, setUniqueList] = useState();
@@ -326,8 +326,8 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
             isCustodian={isCustodian}
             key={designDataset.datasetSchemaId}
             onGetReferencedFieldName={onGetReferencedFieldName}
-            uniqueList={filterData(designDataset, uniqueList)}
             qcList={filterData(designDataset, qcList)}
+            uniqueList={filterData(designDataset, uniqueList)}
           />
         ))}
       </div>
@@ -341,12 +341,6 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
       isCustodian && (
         <Toolbar className={styles.datasetSchemasToolbar}>
           <div className="p-toolbar-group-right">
-            {/* <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-              icon={expandAll ? 'angleRight' : 'angleDown'}
-              label={expandAll ? resourcesContext.messages['collapseAll'] : resourcesContext.messages['expandAll']}
-              onClick={() => setExpandAll(!expandAll)}
-            /> */}
             <Button
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
                 isLoading ? 'p-button-animated-spin' : ''

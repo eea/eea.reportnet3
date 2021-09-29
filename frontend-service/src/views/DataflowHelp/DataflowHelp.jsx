@@ -167,6 +167,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
             return await onLoadDatasetSchema(datasetSchema.datasetId);
           });
           Promise.all(datasetSchemas).then(completed => {
+            console.log('LLEGO');
+            console.log({ completed });
             setDatasetsSchemas(completed);
           });
         } else {
@@ -178,6 +180,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
             return await onLoadDatasetSchema(designDataset.datasetId);
           });
           Promise.all(datasetSchemas).then(completed => {
+            console.log('LLEGO');
+            console.log({ completed });
             setDatasetsSchemas(completed);
           });
         } else {
