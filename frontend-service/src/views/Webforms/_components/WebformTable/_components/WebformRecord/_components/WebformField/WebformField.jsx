@@ -453,17 +453,16 @@ export const WebformField = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
+            hasMaxCharCounter
             id={field.fieldId}
             keyfilter={RecordUtils.getFilter(type)}
-            maxLength={getInputMaxLength[type]}
+            // maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value, field.isPrimary, field.updatesGroupInfo);
             }}
             onChange={event => onFillField(field, option, event.target.value)}
-            onFocus={event => {
-              onFocusField(event.target.value);
-            }}
+            onFocus={event => onFocusField(event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
             value={field.value}
           />
@@ -475,21 +474,19 @@ export const WebformField = ({
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
               id={field.fieldId}
-              maxLength={getInputMaxLength[type]}
+              // maxLength={getInputMaxLength[type]}
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
                 else onEditorSubmitValue(field, option, event.target.value);
               }}
               onChange={event => onFillField(field, option, event.target.value)}
-              onFocus={event => {
-                onFocusField(event.target.value);
-              }}
+              onFocus={event => onFocusField(event.target.value)}
               onKeyDown={event => onEditorKeyChange(event, field, option)}
               value={field.value}
             />
             <CharacterCounter
               currentLength={field.value.length}
-              maxLength={getInputMaxLength.RICH_TEXT}
+              // maxLength={getInputMaxLength.RICH_TEXT}
               style={{ position: 'relative', right: '0', top: '0.25rem' }}
             />
           </Fragment>

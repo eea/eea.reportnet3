@@ -1,3 +1,5 @@
+import isNil from 'lodash/isNil';
+
 import styles from './CharacterCounter.module.scss';
 
 const CharacterCounter = ({ currentLength, inputRef, maxLength, style }) => {
@@ -12,7 +14,7 @@ const CharacterCounter = ({ currentLength, inputRef, maxLength, style }) => {
       }`}
       ref={inputRef}
       style={style}>
-      {`${currentLength}/${maxLength}`}
+      {isNil(maxLength) ? `${currentLength}` : `${currentLength}/${maxLength}`}
     </p>
   );
 };
