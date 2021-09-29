@@ -155,7 +155,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<DataFlowVO> findDataflows() {
     List<DataFlowVO> dataflows = new ArrayList<>();
     String userId =
@@ -181,7 +181,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Reference Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<DataFlowVO> findReferenceDataflows() {
     List<DataFlowVO> dataflows = new ArrayList<>();
     String userId =
@@ -206,7 +206,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Business Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<DataFlowVO> findBusinessDataflows() {
     List<DataFlowVO> dataflows = new ArrayList<>();
     String userId =
@@ -233,7 +233,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping(value = "/citizenScienceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Citizen Science Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<DataFlowVO> findCitizenScienceDataflows() {
     List<DataFlowVO> dataflows = new ArrayList<>();
     String userId =
@@ -258,7 +258,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping(value = "/cloneableDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Dataflows for clone for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<DataFlowVO> findCloneableDataflows() {
     List<DataFlowVO> dataflows = new ArrayList<>();
     String userId =
@@ -287,7 +287,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping(value = "/completed", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find list of completed Dataflows",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<DataFlowVO> findCompleted(
       @ApiParam(value = "PageNum: page number to show",
           example = "0") @RequestParam(value = "pageNum", defaultValue = "0") Integer pageNum,
