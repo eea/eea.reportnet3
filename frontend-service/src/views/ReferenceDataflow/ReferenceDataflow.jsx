@@ -187,24 +187,16 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     }
   };
 
-  console.log(`dataflowState`, dataflowState);
-
-  const isAdmin = userContext.accessRole.some(role => role === config.permissions.roles.ADMIN.key);
-  const isCustodianUser = userContext.accessRole.some(role => role === config.permissions.roles.CUSTODIAN.key);
-  const isCustodian = userContext.hasContextAccessPermission(
-    config.permissions.prefixes.DATAFLOW,
-    referenceDataflowId,
-    [config.permissions.roles.CUSTODIAN.key]
-  );
-
-  const isSteward = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, referenceDataflowId, [
-    config.permissions.roles.STEWARD.key
-  ]);
-
-  const isLeadDesigner = isSteward || isCustodian;
-
   const onLoadPermissions = () => {
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, isCustodian: isLeadDesigner, isCustodianUser } });
+    const isAdmin = userContext.accessRole.some(role => role === config.permissions.roles.ADMIN.key);
+    const isCustodianUser = userContext.accessRole.some(role => role === config.permissions.roles.CUSTODIAN.key);
+    const isCustodian = userContext.hasContextAccessPermission(
+      config.permissions.prefixes.DATAFLOW,
+      referenceDataflowId,
+      [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key]
+    );
+
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, isCustodian, isCustodianUser } });
   };
 
   const onLoadReferenceDataflow = async () => {
@@ -295,7 +287,6 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     return {
       apiKeyBtn: dataflowState.isCustodian,
       editBtn: dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian,
-      helpDeskBtn: false,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
       propertiesBtn: true,
       reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
