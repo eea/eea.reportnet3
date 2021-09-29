@@ -131,9 +131,9 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping(value = "/status/{status}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Dataflows based on the Status",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
-      responseContainer = "List")
-  public List<DataFlowVO> findByStatus(@ApiParam(type = "Object",
-      value = "Dataflow status") @PathVariable("status") TypeStatusEnum status) {
+      responseContainer = "List", hidden = true)
+  public List<DataFlowVO> findByStatus(@ApiParam(type = "Object", value = "Dataflow status",
+      example = "DESIGN") @PathVariable("status") TypeStatusEnum status) {
     List<DataFlowVO> dataflows = new ArrayList<>();
     try {
       dataflows = dataflowService.getByStatus(status);
