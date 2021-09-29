@@ -3,7 +3,7 @@ package org.eea.collaboration.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import org.eea.collaboration.persistence.domain.MessageAttachment;
+import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.service.CollaborationService;
 import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAErrorMessage;
@@ -36,7 +36,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 
 /**
  * The Class CollaborationControllerImpl.
@@ -92,8 +91,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the message VO
    */
   @Override
-  @HystrixCommand(commandProperties = {
-      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
+  @HystrixCommand
   @PostMapping("/createMessage/dataflow/{dataflowId}/attachment")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public MessageVO createMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
@@ -112,7 +110,7 @@ public class CollaborationControllerImpl implements CollaborationController {
       String fileName = fileAttachment.getOriginalFilename().replace(",", "");
       String fileSize = String.valueOf(fileAttachment.getSize());
       return collaborationService.createMessageAttachment(dataflowId, providerId, is, fileName,
-          fileSize);
+          fileSize, fileAttachment.getContentType());
     } catch (EEAIllegalArgumentException e) {
       LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
@@ -157,8 +155,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @param messageId the message id
    */
   @Override
-  @HystrixCommand(commandProperties = {
-      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
+  @HystrixCommand
   @DeleteMapping("/deleteMessage/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public void deleteMessage(@PathVariable("dataflowId") Long dataflowId,
@@ -229,8 +226,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the message attachment
    */
   @Override
-  @HystrixCommand(commandProperties = {
-      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
+  @HystrixCommand
   @GetMapping("/findMessages/dataflow/{dataflowId}/getMessageAttachment")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public ResponseEntity<byte[]> getMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
@@ -239,9 +235,9 @@ public class CollaborationControllerImpl implements CollaborationController {
 
     LOG.info("Downloading message attachment from the dataflowId {}", dataflowId);
     try {
-      MessageAttachment messageAttachment = collaborationService.getMessageAttachment(messageId);
-      byte[] file = messageAttachment.getContent();
-      String filename = messageAttachment.getFileName();
+      Message messageAttachment = collaborationService.getMessage(messageId);
+      String filename = messageAttachment.getContent();
+      byte[] file = collaborationService.getMessageAttachment(messageId, dataflowId, filename);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
