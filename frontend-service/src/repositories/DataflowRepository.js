@@ -26,6 +26,9 @@ export const DataflowRepository = {
   getDatasetsReleasedStatus: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsReleasedStatus, { dataflowId }) }),
 
+  downloadAllTabsInfo: async datasetSchemaId =>
+    await HTTPRequester.download({ url: getUrl(DataflowConfig.downloadAllTabsInfo, { datasetSchemaId }) }),
+
   getDatasetsValidationStatistics: async (dataflowId, datasetSchemaId) =>
     await HTTPRequester.get({
       url: getUrl(DataflowConfig.getDatasetsValidationStatistics, { dataflowId, datasetSchemaId })

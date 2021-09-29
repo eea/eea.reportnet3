@@ -1269,6 +1269,8 @@
     "datasetSchemaDescription": "Dataset description",
     "primaryKey": "Primary key",
     "extension": "Extension",
+    "downloadAllTabsInfoFailed": "Error downloading tabs info file",
+    "downloadTableDefinitionsFailed": "Error downloading table definitions file",
     "singleMultipleSelectItems": "Single/Multiple select items",
     "exportTablesSchema": "Export tables definitions"
   }
