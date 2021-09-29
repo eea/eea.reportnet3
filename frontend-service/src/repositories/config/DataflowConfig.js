@@ -13,6 +13,7 @@ export const DataflowConfig = {
   getApiKey: '/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   getApiKeyCustodian: '/user/getApiKey?dataflowId={:dataflowId}',
   getDetails: '/dataflow/{:dataflowId}/getmetabase',
+  getDatasetsSummary: '/dataflow/{:dataflowId}/datasetsSummary',
   getDatasetsFinalFeedback: '/datasetmetabase/dataflow/{:dataflowId}',
   getDatasetsReleasedStatus: '/datasetmetabase/dataflow/{:dataflowId}',
   getDatasetsValidationStatistics:

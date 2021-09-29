@@ -273,7 +273,7 @@ const Dataflow = withRouter(({ history, match }) => {
       editBtn: isDesign && isLeadDesigner && !isAdmin && !isBusinessDataflow,
       editBusinessBtn: (isAdmin || isLeadDesigner) && isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
-      helpDeskBtn: dataflowState.isAdmin,
+      helpDeskBtn: isAdmin,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: isAdmin || isLeadDesigner,
       propertiesBtn: true,
@@ -492,7 +492,7 @@ const Dataflow = withRouter(({ history, match }) => {
     </Fragment>
   );
 
-  const renderModalFooter = modalType => (
+  const renderDialogFooter = modalType => (
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
@@ -1141,7 +1141,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isUserListVisible && (
           <Dialog
-            footer={renderModalFooter('isUserListVisible')}
+            footer={renderDialogFooter('isUserListVisible')}
             header={
               ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
@@ -1226,10 +1226,12 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isHelpDeskVisible && (
           <Dialog
-            footer={renderModalFooter('isHelpDeskVisible')}
-            header={resourcesContext.messages['datasetsInfo']}
+            footer={renderDialogFooter('isHelpDeskVisible')}
+            header={`${resourcesContext.messages['datasetsInfo']} - ${dataflowState.name}`}
             onHide={() => manageDialogs('isHelpDeskVisible', false)}
-            visible={dataflowState.isHelpDeskVisible}></Dialog>
+            visible={dataflowState.isHelpDeskVisible}>
+            <HelpDesk dataflowId={dataflowId} dataflowType={dataflowState.dataflowType} />
+          </Dialog>
         )}
       </div>
     </div>

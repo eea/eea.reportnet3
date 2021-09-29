@@ -1265,6 +1265,8 @@
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "The URL is not valid",
     "yes": "Yes",
-    "sidebarHelpDeskBtn": "Help desk",
+    "sidebarHelpDeskBtn": "Helpdesk",
+    "datasetsInfo": "Datasets info",
+    "loadDatasetsSummaryError": "Error loading datasets list"
   }
 }

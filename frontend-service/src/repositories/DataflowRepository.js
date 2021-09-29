@@ -97,5 +97,8 @@ export const DataflowRepository = {
         releasable: isReleasable,
         showPublicInfo
       }
-    })
+    }),
+
+  getDatasetsSummary: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsSummary, { dataflowId }) })
 };
