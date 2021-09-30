@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
@@ -68,6 +69,13 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   List<DataFlowVO> getCloneableDataflows(String userId) throws EEAException;
+
+  /**
+   * Gets the dataflows count.
+   *
+   * @return the dataflows count
+   */
+  List<DataflowCountVO> getDataflowsCount(String userId) throws EEAException;
 
   /**
    * Gets the completed.
