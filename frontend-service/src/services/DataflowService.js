@@ -369,10 +369,83 @@ export const DataflowService = {
     // const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
     // return datasetsInfoDTO.data;
 
-    const datasetsSummaryDTO = [
-      { name: 'dataset 1', datasetId: 11, type: 'design', providerName: 'company 1', providerCode: 'C1' },
-      { name: 'dataset 2', datasetId: 2, type: 'design', providerName: 'company 2', providerCode: 'C2' }
-    ];
-    return datasetsSummaryDTO;
+    const datasetsInfoDTO = {
+      dataCollections: [
+        {
+          datasetName: 'name1',
+          datasetTypeEnum: 'COLLECTION',
+          id: 1,
+          providerName: 'company 1',
+          providerCode: 'C1'
+        },
+        {
+          datasetName: 'name2',
+          datasetTypeEnum: 'COLLECTION',
+          id: 2,
+          providerName: 'company 2',
+          providerCode: 'C2'
+        }
+      ],
+      designDatasets: [
+        {
+          datasetName: 'design1',
+          datasetTypeEnum: 'DESIGN',
+          id: 3,
+          providerName: 'company 3',
+          providerCode: 'C3'
+        },
+        {
+          datasetName: 'design 2',
+          datasetTypeEnum: 'DESIGN',
+          id: 4,
+          providerName: 'company 3',
+          providerCode: 'C3'
+        }
+      ],
+      euDatasets: [
+        {
+          datasetName: 'euDataset 4',
+          datasetTypeEnum: 'EUDATASET',
+          id: 5,
+          providerName: 'company 11',
+          providerCode: 'C11'
+        }
+      ],
+      referenceDatasets: [
+        {
+          datasetName: 'euDataset 5',
+          datasetTypeEnum: 'REPORTING',
+          id: 6,
+          providerName: 'company 10',
+          providerCode: 'C10'
+        }
+      ],
+      reportingDatasets: [
+        {
+          datasetName: 'reporting 1',
+          datasetTypeEnum: 'REPORTING',
+          id: 7,
+          providerName: 'company 12',
+          providerCode: 'C12'
+        }
+      ],
+      testDatasets: [
+        {
+          creationDate: '2021-09-30T06:38:24.388Z',
+          datasetName: 'test 1',
+          datasetSchema: 'string',
+          datasetTypeEnum: 'TEST',
+          id: 8,
+          idDataflow: 0,
+          status: 'string',
+          providerName: 'company 18',
+          providerCode: 'C18'
+        }
+      ]
+    };
+
+    const parsedDatasetsInfoDTO = DataflowUtils.parseDatasetsInfoDTO(datasetsInfoDTO);
+
+    return sortBy(parsedDatasetsInfoDTO, 'name');
   }
 };
