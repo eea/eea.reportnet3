@@ -40,7 +40,7 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
       { id: 1, label: resourcesContext.messages['description'], value: obligations.description },
       { id: 2, label: resourcesContext.messages['comment'], value: obligations.comment },
       { id: 3, label: resourcesContext.messages['nextReportDue'], value: date },
-      { id: 4, label: resourcesContext.messages['obligationId'], value: obligations.obligationId }
+      { id: 4, label: resourcesContext.messages['obligationId'], value: obligations.obligationId.toString() }
     ];
   };
 
