@@ -4,13 +4,19 @@ import styles from './CharacterCounter.module.scss';
 
 const CharacterCounter = ({ currentLength, inputRef, maxLength, style }) => {
   const getCounterClassName = () => {
-    if (isNil(maxLength)) return '';
+    if (isNil(maxLength)) {
+      return '';
+    }
 
-    return currentLength > maxLength
-      ? styles.errorCharacterCount
-      : maxLength - currentLength <= 10
-      ? styles.warningCharacterCount
-      : '';
+    if (currentLength > maxLength) {
+      return styles.errorCharacterCount;
+    }
+
+    if (maxLength - currentLength <= 10) {
+      return styles.warningCharacterCount;
+    }
+
+    return '';
   };
 
   return (

@@ -459,7 +459,6 @@ export const WebformField = ({
             hasMaxCharCounter
             id={field.fieldId}
             keyfilter={RecordUtils.getFilter(type)}
-            // maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value, field.isPrimary, field.updatesGroupInfo);
