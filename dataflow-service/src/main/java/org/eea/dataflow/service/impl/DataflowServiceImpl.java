@@ -1491,18 +1491,23 @@ public class DataflowServiceImpl implements DataflowService {
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
 
-    List<IDataflowCount> dataflowCountList = isAdmin() ? dataflowRepository.countDataflowByType()
-        : dataflowRepository.countDataflowByTypeAndUser(idsResources);
+    List<IDataflowCount> dataflowCountList = new ArrayList<>();
+
+    if (!idsResources.isEmpty())
+      dataflowCountList = isAdmin() ? dataflowRepository.countDataflowByType()
+          : dataflowRepository.countDataflowByTypeAndUser(idsResources);
 
     List<DataflowCountVO> dataflowCountVOList = new ArrayList<>();
 
     for (IDataflowCount dataflow : dataflowCountList) {
       DataflowCountVO newDataflowCountVO = new DataflowCountVO();
       newDataflowCountVO.setType(dataflow.getType());
-      // If the user is not an Admin we need to count all the reference dataflows, not only the ones
-      // the user has access rights
+      // If the user is not an Admin we need to count the reference dataflows in design with rights,
+      // and the reference dataset in draft
       if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin())
-        newDataflowCountVO.setAmount(dataflowRepository.countReferenceDataflows().getAmount());
+        newDataflowCountVO.setAmount(
+            dataflowRepository.countReferenceDataflowsDesignByUser(idsResources).getAmount()
+                + dataflowRepository.countReferenceDataflowsDraft().getAmount());
       else
         newDataflowCountVO.setAmount(dataflow.getAmount());
 
