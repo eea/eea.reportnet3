@@ -124,14 +124,11 @@ export const useLeftSideBar = (
 
       const helpDeskBtn = {
         className: 'dataflow-help-desk-help-step',
-        // icon: 'thList',
         icon: 'listClipboard',
         isVisible: buttonsVisibility.helpDeskBtn,
-        // label: 'datasetsInfo',
-        label: 'sidebarHelpDeskBtn',
+        label: 'datasetsInfo',
         onClick: () => manageDialogs('isHelpDeskVisible', true),
-        // title: 'datasetsInfo'
-        title: 'sidebarHelpDeskBtn'
+        title: 'datasetsInfo'
       };
 
       //DON'T SORT ALPHABETICALLY
