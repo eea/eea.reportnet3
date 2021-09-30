@@ -1,11 +1,27 @@
 export const dataflowsReducer = (state, { type, payload }) => {
   switch (type) {
     case 'SET_DATAFLOWS':
+      const getIndex = () => {
+        let idx = -1;
+        if (state.dataflowsCount.reporting > 0) {
+          idx = 0;
+        } else if (state.dataflowsCount.business) {
+          idx = 1;
+        } else if (state.dataflowsCount.citizenScience > 0) {
+          idx = 2;
+        } else {
+          idx = 0;
+        }
+        console.log({ idx });
+        return idx;
+      };
+
       return {
         ...state,
         [payload.type]: payload.data,
         dataflowsCountFirstLoad: false,
-        dataflowsCount: { ...state.dataflowsCount, [payload.type]: payload.data.length }
+        dataflowsCount: { ...state.dataflowsCount, [payload.type]: payload.data.length },
+        activeIndex: state.dataflowsCountFirstLoad ? getIndex() : state.activeIndex
       };
 
     case 'HAS_PERMISSION':
@@ -26,8 +42,7 @@ export const dataflowsReducer = (state, { type, payload }) => {
       return {
         ...state,
         dataflowsCount: payload,
-        dataflowsCountFirstLoad: true,
-        activeIndex: state.activeIndex !== 2 ? (payload.reporting > 0 ? 0 : 1) : state.activeIndex
+        dataflowsCountFirstLoad: true
       };
     }
 
