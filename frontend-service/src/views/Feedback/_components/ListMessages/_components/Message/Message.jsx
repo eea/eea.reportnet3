@@ -1,4 +1,4 @@
-import { Fragment, useContext } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 
@@ -20,6 +20,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onToggleVisibleDeleteMessage }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const getMessageContent = () => {
     let content = message.content.replace(/(?:\r\n|\r|\n)/g, '<br/>');
@@ -57,6 +59,7 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
 
   const onFileDownload = async (dataflowId, messageId, dataProviderId) => {
     try {
+      setIsDownloading(true);
       const data = await FeedbackService.getMessageAttachment(dataflowId, messageId, dataProviderId);
       DownloadFile(data, message.messageAttachment.name);
     } catch (error) {
@@ -65,6 +68,8 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
         type: 'FEEDBACK_DOWNLOAD_MESSAGE_ATTACHMENT_ERROR',
         content: {}
       });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -84,7 +89,8 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
           {!message.automatic && (
             <Button
               className={`p-button-animated-right-blink p-button-secondary-transparent ${styles.downloadFileButton}`}
-              icon="export"
+              disabled={isDownloading}
+              icon={isDownloading ? 'spinnerAnimate' : 'export'}
               iconPos="right"
               onClick={() => onFileDownload(dataflowId, message.id, message.providerId)}
               style={{ color: message.direction ? 'var(--white)' : 'var(--c-black-400)' }}
