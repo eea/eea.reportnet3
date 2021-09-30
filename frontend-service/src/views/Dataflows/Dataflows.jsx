@@ -60,7 +60,7 @@ const Dataflows = withRouter(({ history, match }) => {
     business: [],
     citizenScience: [],
     dataflowsCount: {},
-    dataflowsCountLoaded: false,
+    dataflowsCountFirstLoad: false,
     reporting: [],
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
@@ -86,7 +86,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const {
     activeIndex,
     dataflowsCount,
-    dataflowsCountLoaded,
+    dataflowsCountFirstLoad,
     isAdmin,
     isCustodian,
     isNationalCoordinator,
@@ -135,10 +135,8 @@ const Dataflows = withRouter(({ history, match }) => {
     }
   }, []);
 
-  useEffect(() => {
-    console.log({ dataflowsCount, dataflowsCountLoaded });
-    if (!isEmpty(dataflowsCount) && !dataflowsCountLoaded) {
-      console.log('GET DATAFLOWS 1');
+  useLayoutEffect(() => {
+    if (!isEmpty(dataflowsCount) && dataflowsCountFirstLoad) {
       getDataflows();
     }
   }, [dataflowsCount]);
@@ -213,13 +211,11 @@ const Dataflows = withRouter(({ history, match }) => {
   useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       onLoadPermissions();
-      // getDataflows();
     }
   }, [userContext.contextRoles]);
 
   useLayoutEffect(() => {
-    if (isEmpty(dataflowsState[tabId]) && !isNil(userContext.contextRoles)) {
-      console.log('GET DATAFLOWS 2');
+    if (!isNil(userContext.contextRoles)) {
       getDataflows();
     }
   }, [tabId]);
@@ -278,13 +274,10 @@ const Dataflows = withRouter(({ history, match }) => {
 
     try {
       const data = await DataflowService.countByType();
-      // console.log(data);
       dataflowsDispatch({ type: 'SET_DATAFLOWS_COUNT', payload: data });
     } catch (error) {
       console.error('Dataflows - getDataflows.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -295,6 +288,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const onCreateDataflow = dialog => {
     manageDialogs(dialog, false);
     onRefreshToken();
+    getDataflows();
   };
 
   const onHideObligationDialog = () => {

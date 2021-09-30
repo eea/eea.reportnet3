@@ -66,8 +66,6 @@ export const TabMenu = ({
           onClick={event => itemClick(event, item, index)}
           role="presentation"
           target={item.target}>
-          {/* {item.icon && <span className={classNames('p-menuitem-icon', item.icon)}></span>}
-          {item.label && <span className="p-menuitem-text">{item.label}</span>} */}
           {renderMenuItemLabel(item, index)}
         </a>
       </li>
@@ -77,7 +75,6 @@ export const TabMenu = ({
   const renderMenuItemLabel = (item, index) => {
     let icon;
     let label = [];
-    // console.log(item, headerLabelLoading, headerLabelChildrenCount);
     if (!isNil(item.icon)) icon = <span className={classNames('p-menuitem-icon', item.icon)}></span>;
     if (!isNil(item.label)) {
       if (!isNil(headerLabelChildrenCount[item.id])) {

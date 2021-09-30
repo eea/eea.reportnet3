@@ -4,6 +4,7 @@ export const dataflowsReducer = (state, { type, payload }) => {
       return {
         ...state,
         [payload.type]: payload.data,
+        dataflowsCountFirstLoad: false,
         dataflowsCount: { ...state.dataflowsCount, [payload.type]: payload.data.length }
       };
 
@@ -25,8 +26,15 @@ export const dataflowsReducer = (state, { type, payload }) => {
       return {
         ...state,
         dataflowsCount: payload,
-        dataflowsCountLoaded: true,
+        dataflowsCountFirstLoad: true,
         activeIndex: state.activeIndex !== 2 ? (payload.reporting > 0 ? 0 : 1) : state.activeIndex
+      };
+    }
+
+    case 'UPDATE_DATAFLOWS_COUNT': {
+      return {
+        ...state,
+        dataflowsCount: { ...state.dataflowsCount, [payload]: state.dataflowsCount[payload] + 1 }
       };
     }
 

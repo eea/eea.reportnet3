@@ -24,7 +24,6 @@ import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 export const DataflowService = {
   countByType: async () => {
     const dataflowsCountDTO = await DataflowRepository.countByType();
-    console.log(dataflowsCountDTO);
     return DataflowUtils.parseDataflowCount(dataflowsCountDTO.data);
   },
 
