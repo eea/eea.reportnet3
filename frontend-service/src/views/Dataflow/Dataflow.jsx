@@ -26,7 +26,7 @@ import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
-import { HelpDesk } from 'views/_components/HelpDesk';
+import { DatasetsInfo } from 'views/_components/DatasetsInfo';
 import { MainLayout } from 'views/_components/Layout';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
@@ -96,7 +96,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isExportEUDatasetLoading: false,
     isExporting: false,
     isFetchingData: false,
-    isHelpDeskVisible: false,
+    isDatasetsInfoDialogVisible: false,
     isImportLeadReportersVisible: false,
     isManageReportersDialogVisible: false,
     isManageRequestersDialogVisible: false,
@@ -256,10 +256,10 @@ const Dataflow = withRouter(({ history, match }) => {
     if (isEmpty(dataflowState.data)) {
       return {
         apiKeyBtn: false,
+        datasetsInfoBtn: false,
         editBtn: false,
         editBusinessBtn: false,
         exportBtn: false,
-        helpDeskBtn: false,
         manageReportersBtn: false,
         manageRequestersBtn: false,
         propertiesBtn: false,
@@ -270,10 +270,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
+      datasetsInfoBtn: isAdmin,
       editBtn: isDesign && isLeadDesigner && !isAdmin && !isBusinessDataflow,
       editBusinessBtn: (isAdmin || isLeadDesigner) && isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
-      helpDeskBtn: isAdmin,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: isAdmin || isLeadDesigner,
       propertiesBtn: true,
@@ -1224,13 +1224,13 @@ const Dataflow = withRouter(({ history, match }) => {
           />
         )}
 
-        {dataflowState.isHelpDeskVisible && (
+        {dataflowState.isDatasetsInfoDialogVisible && (
           <Dialog
-            footer={renderDialogFooterCloseBtn('isHelpDeskVisible')}
+            footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
             header={`${resourcesContext.messages['datasetsInfo']} - ${dataflowState.name}`}
-            onHide={() => manageDialogs('isHelpDeskVisible', false)}
-            visible={dataflowState.isHelpDeskVisible}>
-            <HelpDesk dataflowId={dataflowId} dataflowType={dataflowState.dataflowType} />
+            onHide={() => manageDialogs('isDatasetsInfoDialogVisible', false)}
+            visible={dataflowState.isDatasetsInfoDialogVisible}>
+            <DatasetsInfo dataflowId={dataflowId} dataflowType={dataflowState.dataflowType} />
           </Dialog>
         )}
       </div>

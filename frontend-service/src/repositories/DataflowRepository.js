@@ -99,6 +99,6 @@ export const DataflowRepository = {
       }
     }),
 
-  getDatasetsSummary: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsSummary, { dataflowId }) })
+  getDatasetsInfo: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsInfo, { dataflowId }) })
 };

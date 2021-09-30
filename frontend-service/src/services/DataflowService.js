@@ -365,9 +365,9 @@ export const DataflowService = {
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
     await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo),
 
-  getDatasetsSummary: async () => {
-    // const datasetsSummaryDTO = await DataflowRepository.getOrganizations();
-    // return datasetsSummaryDTO.data;
+  getDatasetsInfo: async dataflowId => {
+    // const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
+    // return datasetsInfoDTO.data;
 
     const datasetsSummaryDTO = [
       { name: 'dataset 1', datasetId: 11, type: 'design', providerName: 'company 1', providerCode: 'C1' },

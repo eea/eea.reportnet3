@@ -3,7 +3,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import styles from './HelpDesk.module.scss';
+import styles from './DatasetsInfo.module.scss';
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
@@ -17,12 +17,12 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
-export const HelpDesk = ({ dataflowId, dataflowType }) => {
+export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [datasetsSummary, setDatasetsSummary] = useState([]);
-  const [filteredData, setFilteredData] = useState(datasetsSummary);
+  const [datasetsInfo, setDatasetsInfo] = useState([]);
+  const [filteredData, setFilteredData] = useState(datasetsInfo);
   const [isDataFiltered, setIsDataFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,19 +32,19 @@ export const HelpDesk = ({ dataflowId, dataflowType }) => {
 
   useEffect(() => {
     if (!isDataFiltered) {
-      setFilteredData(datasetsSummary);
+      setFilteredData(datasetsInfo);
     }
   }, [isDataFiltered]);
 
   const onLoadDatasetsSummary = async () => {
     try {
       setIsLoading(true);
-      const datasets = await DataflowService.getDatasetsSummary(dataflowId);
+      const datasets = await DataflowService.getDatasetsInfo(dataflowId);
 
-      setDatasetsSummary(datasets);
+      setDatasetsInfo(datasets);
       setFilteredData(datasets);
     } catch (error) {
-      console.error('HelpDesk - onLoadDatasetsSummary.', error);
+      console.error('DatasetsInfo - onLoadDatasetsSummary.', error);
       notificationContext.add({ type: 'LOAD_DATASETS_SUMMARY_ERROR' });
     } finally {
       setIsLoading(false);
@@ -55,12 +55,12 @@ export const HelpDesk = ({ dataflowId, dataflowType }) => {
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
-      {isDataFiltered && datasetsSummary.length !== filteredData.length
+      {isDataFiltered && datasetsInfo.length !== filteredData.length
         ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
         : ''}
-      {resourcesContext.messages['totalRecords']} {datasetsSummary.length}{' '}
+      {resourcesContext.messages['totalRecords']} {datasetsInfo.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
-      {isDataFiltered && datasetsSummary.length === filteredData.length
+      {isDataFiltered && datasetsInfo.length === filteredData.length
         ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
@@ -79,7 +79,7 @@ export const HelpDesk = ({ dataflowId, dataflowType }) => {
           label: TextByDataflowTypeUtils.getLabelByDataflowType(
             resourcesContext.messages,
             dataflowType,
-            'manualAcceptanceDataProviderNameFilterLabel'
+            'datasetsInfoDataProviderNameFilterLabel'
           )
         }
       ]
@@ -88,7 +88,7 @@ export const HelpDesk = ({ dataflowId, dataflowType }) => {
 
   const renderFilters = () => (
     <Filters
-      data={datasetsSummary}
+      data={datasetsInfo}
       getFilteredData={onLoadFilteredData}
       getFilteredSearched={getFilteredState}
       options={filterOptions}
@@ -99,7 +99,7 @@ export const HelpDesk = ({ dataflowId, dataflowType }) => {
     <div className={styles.container}>
       {isLoading ? (
         <Spinner />
-      ) : isEmpty(datasetsSummary) ? (
+      ) : isEmpty(datasetsInfo) ? (
         <div className={styles.noDatasets}>{resourcesContext.messages['noDatasets']}</div>
       ) : (
         <div className={styles.datasets}>
@@ -110,8 +110,8 @@ export const HelpDesk = ({ dataflowId, dataflowType }) => {
               paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
-              summary="datasetsSummary"
-              totalRecords={datasetsSummary.length}
+              summary="datasetsInfo"
+              totalRecords={datasetsInfo.length}
               value={filteredData}>
               <Column field="name" header={resourcesContext.messages['name']} sortable={true} />
               <Column field="type" header={resourcesContext.messages['type']} sortable={true} />
@@ -120,7 +120,7 @@ export const HelpDesk = ({ dataflowId, dataflowType }) => {
                 header={TextByDataflowTypeUtils.getLabelByDataflowType(
                   resourcesContext.messages,
                   dataflowType,
-                  'helpDeskDataProviderColumnHeader'
+                  'datasetsInfoDataProviderColumnHeader'
                 )}
                 sortable={true}
               />

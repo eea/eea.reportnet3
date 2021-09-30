@@ -12,7 +12,7 @@ import { config } from 'conf';
 import { ApiKeyDialog } from 'views/_components/ApiKeyDialog';
 import { BigButtonListReference } from './_components/BigButtonListReference';
 import { Button } from 'views/_components/Button';
-import { HelpDesk } from 'views/_components/HelpDesk';
+import { DatasetsInfo } from 'views/_components/DatasetsInfo';
 import { MainLayout } from 'views/_components/Layout';
 import { ReferencingDataflows } from './_components/ReferencingDataflows';
 import { routes } from 'conf/routes';
@@ -60,7 +60,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     isCreatingReferenceDatasets: false,
     isCustodian: false,
     isEditDialogVisible: false,
-    isHelpDeskVisible: false,
+    isDatasetsInfoDialogVisible: false,
     isLoading: false,
     isManageRequestersDialogVisible: false,
     isPropertiesDialogVisible: false,
@@ -279,8 +279,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   function getLeftSidebarButtonsVisibility() {
     return {
       apiKeyBtn: dataflowState.isCustodian,
+      datasetsInfoBtn: dataflowState.isAdmin,
       editBtn: dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian,
-      helpDeskBtn: dataflowState.isAdmin,
       manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
       propertiesBtn: true,
       reportingDataflowsBtn:
@@ -397,13 +397,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         </Dialog>
       )}
 
-      {dataflowState.isHelpDeskVisible && (
+      {dataflowState.isDatasetsInfoDialogVisible && (
         <Dialog
-          footer={renderDialogFooterCloseBtn('isHelpDeskVisible')}
+          footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
           header={`${resourcesContext.messages['datasetsInfo']} - ${dataflowState.name}`}
-          onHide={() => manageDialogs('isHelpDeskVisible', false)}
-          visible={dataflowState.isHelpDeskVisible}>
-          <HelpDesk dataflowId={referenceDataflowId} dataflowType={dataflowState.dataflowType} />
+          onHide={() => manageDialogs('isDatasetsInfoDialogVisible', false)}
+          visible={dataflowState.isDatasetsInfoDialogVisible}>
+          <DatasetsInfo dataflowId={referenceDataflowId} dataflowType={dataflowState.dataflowType} />
         </Dialog>
       )}
     </div>

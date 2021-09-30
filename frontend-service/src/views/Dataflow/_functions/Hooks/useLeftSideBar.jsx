@@ -122,12 +122,12 @@ export const useLeftSideBar = (
             : 'dataflowUsersList'
       };
 
-      const helpDeskBtn = {
-        className: 'dataflow-help-desk-help-step',
+      const datasetsInfoBtn = {
+        className: 'dataflow-help-datasets-info-step',
         icon: 'listClipboard',
-        isVisible: buttonsVisibility.helpDeskBtn,
+        isVisible: buttonsVisibility.datasetsInfoBtn,
         label: 'datasetsInfo',
-        onClick: () => manageDialogs('isHelpDeskVisible', true),
+        onClick: () => manageDialogs('isDatasetsInfoDialogVisible', true),
         title: 'datasetsInfo'
       };
 
@@ -143,7 +143,7 @@ export const useLeftSideBar = (
         manageRequestersBtn,
         manageReportersBtn,
         userListBtn,
-        helpDeskBtn
+        datasetsInfoBtn
       ];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
