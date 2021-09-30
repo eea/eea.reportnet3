@@ -26,8 +26,6 @@ import { ValidationService } from 'services/ValidationService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
-
 const DatasetSchema = ({
   dataflowName,
   designDataset,
@@ -40,7 +38,8 @@ const DatasetSchema = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const [expandAll, setExpandAll] = useState(true);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [isDownloadingQCs, setIsDownloadingQCs] = useState(false);
+  const [isDownloadingTableDefinition, setIsDownloadingTableDefinition] = useState(false);
 
   useEffect(() => {
     if (
@@ -49,7 +48,7 @@ const DatasetSchema = ({
           notification.key === 'EXPORT_QC_FAILED_EVENT' || notification.key === 'EXPORT_QC_COMPLETED_EVENT'
       )
     ) {
-      setIsDownloading(false);
+      setIsDownloadingQCs(false);
     }
   }, [notificationContext.hidden]);
 
@@ -231,10 +230,13 @@ const DatasetSchema = ({
       <Toolbar className={styles.datasetSchemaToolbar}>
         <div className="p-toolbar-group-left">
           <Button
-            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-            icon={isDownloading ? 'spinnerAnimate' : 'export'}
+            className={`p-button-rounded p-button-secondary-transparent ${
+              !isDownloadingTableDefinition ? 'p-button-animated-blink' : ''
+            }`}
+            disabled={isDownloadingTableDefinition}
+            icon={isDownloadingTableDefinition ? 'spinnerAnimate' : 'export'}
             label={resourcesContext.messages['exportTablesSchema']}
-            onClick={() => onDownloadTableDefinitions(parsedDesignDataset.datasetSchemaId)}
+            onClick={() => onDownloadTableDefinitions(parsedDesignDataset.datasetId)}
           />
           <Button
             className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
@@ -290,9 +292,11 @@ const DatasetSchema = ({
       rightIcon={config.icons['horizontalSliders']}
       rightIconClass={styles.tabs}>
       <Button
-        className={`p-button-rounded p-button-secondary-transparent ${!isDownloading ? 'p-button-animated-blink' : ''}`}
-        disabled={isDownloading}
-        icon={isDownloading ? 'spinnerAnimate' : 'export'}
+        className={`p-button-rounded p-button-secondary-transparent ${
+          !isDownloadingQCs ? 'p-button-animated-blink' : ''
+        }`}
+        disabled={isDownloadingQCs}
+        icon={isDownloadingQCs ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadQCsButtonLabel']}
         onClick={() => onDownloadQCRules(parsedDesignDataset.datasetId)}
       />
@@ -454,7 +458,7 @@ const DatasetSchema = ({
 
   const onDownloadQCRules = async datasetId => {
     console.log({ datasetId });
-    setIsDownloading(true);
+    setIsDownloadingQCs(true);
     notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
 
     try {
@@ -462,13 +466,13 @@ const DatasetSchema = ({
     } catch (error) {
       console.error('DatasetSchema - onDownloadQCRules.', error);
       notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' });
-      setIsDownloading(false);
+      setIsDownloadingQCs(false);
     }
   };
 
   const onDownloadTableDefinitions = async datasetSchemaId => {
     try {
-      setIsDownloading(true);
+      setIsDownloadingTableDefinition(true);
       const { data } = await DatasetService.downloadTableDefinitions(datasetSchemaId);
 
       if (!isNil(data)) {
@@ -480,6 +484,8 @@ const DatasetSchema = ({
     } catch (error) {
       console.error('DatasetSchema - onDownloadTableDefinitions.', error);
       notificationContext.add({ type: 'DOWNLOAD_TABLE_DEFINITIONS_FAILED' }); // TODO CHECK NOTIFICATION NAMING
+    } finally {
+      setIsDownloadingTableDefinition(false);
     }
   };
 
