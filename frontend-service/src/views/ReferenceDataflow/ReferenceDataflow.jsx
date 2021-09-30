@@ -77,6 +77,22 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
 
+  const isAdmin = userContext.accessRole?.some(role => role === config.permissions.roles.ADMIN.key);
+
+  const isCustodianUser = userContext.accessRole?.some(role => role === config.permissions.roles.CUSTODIAN.key);
+
+  const isCustodian = userContext.hasContextAccessPermission(
+    config.permissions.prefixes.DATAFLOW,
+    referenceDataflowId,
+    [config.permissions.roles.CUSTODIAN.key]
+  );
+
+  const isSteward = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, referenceDataflowId, [
+    config.permissions.roles.STEWARD.key
+  ]);
+
+  const isLeadDesigner = isSteward || isCustodian;
+
   const setUpdatedDatasetSchema = updatedData =>
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
 
@@ -190,15 +206,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   };
 
   const onLoadPermissions = () => {
-    const isAdmin = userContext.accessRole.some(role => role === config.permissions.roles.ADMIN.key);
-    const isCustodianUser = userContext.accessRole.some(role => role === config.permissions.roles.CUSTODIAN.key);
-    const isCustodian = userContext.hasContextAccessPermission(
-      config.permissions.prefixes.DATAFLOW,
-      referenceDataflowId,
-      [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key]
-    );
-
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, isCustodian, isCustodianUser } });
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, isCustodian: isLeadDesigner, isCustodianUser } });
   };
 
   const onLoadReferenceDataflow = async () => {
@@ -278,14 +286,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   function getLeftSidebarButtonsVisibility() {
     return {
-      apiKeyBtn: dataflowState.isCustodian,
-      datasetsInfoBtn: dataflowState.isAdmin,
-      editBtn: dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian,
-      manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
+      apiKeyBtn: isLeadDesigner,
+      datasetsInfoBtn: isAdmin,
+      editBtn: dataflowState.status === config.dataflowStatus.DESIGN && isLeadDesigner,
+      manageRequestersBtn: isAdmin || isLeadDesigner,
       propertiesBtn: true,
       reportingDataflowsBtn:
-        dataflowState.status === config.dataflowStatus.OPEN &&
-        (dataflowState.isCustodian || dataflowState.isCustodianUser)
+        dataflowState.status === config.dataflowStatus.OPEN && (isLeadDesigner || dataflowState.isCustodianUser)
     };
   }
 
