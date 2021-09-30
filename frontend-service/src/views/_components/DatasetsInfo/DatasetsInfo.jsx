@@ -71,7 +71,7 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
   const filterOptions = [
     { type: 'input', properties: [{ name: 'name' }] },
     {
-      type: 'multiselect',
+      type: 'dropdown',
       properties: [
         { name: 'type' },
         {
