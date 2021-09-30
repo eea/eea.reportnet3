@@ -205,6 +205,36 @@ public class ZipUtils {
 
   }
 
+
+  /**
+   * Zip array list field schemas.
+   *
+   * @param listBytes the list bytes
+   * @param datasetId the dataset id
+   * @param tableNames the table names
+   * @return the byte[]
+   */
+  public byte[] zipArrayListFieldSchemas(List<byte[]> listBytes, Long datasetId,
+      List<String> tableNames) {
+
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    try (ZipOutputStream zos = new ZipOutputStream(bos)) {
+      int i = 0;
+      for (byte[] tableSchema : listBytes) {
+        String nameFile = tableNames.get(i) + ".csv";
+        InputStream is = new ByteArrayInputStream(tableSchema);
+        zippingClasses(zos, nameFile, is);
+        i++;
+      }
+
+    } catch (Exception e) {
+      LOG_ERROR.error("Error exporting fieldschemas from the dataset {} to a ZIP file. Message {}",
+          datasetId, e.getMessage(), e);
+    }
+    return bos.toByteArray();
+  }
+
+
   private String getMimetype(final String file) throws EEAException {
     String mimeType = null;
     final int location = file.lastIndexOf('.');

@@ -1139,6 +1139,33 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     }
   }
 
+  /**
+   * Export field schemas from dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the response entity
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @GetMapping(value = "/dataset/{datasetId}/exportFieldSchemas",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<byte[]> exportFieldSchemasFromDataset(
+      @PathVariable("datasetId") Long datasetId) {
+    try {
+      byte[] fileZip = dataschemaService.exportZipFieldSchemas(datasetId);
+      String fileName = "fieldschemas_export_dataset_" + datasetId + ".zip";
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      LOG.info("Dataset {} fieldSchemas exported", datasetId);
+      return new ResponseEntity<>(fileZip, httpHeaders, HttpStatus.OK);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error exporting the zip field schemas in dataset {}", datasetId, e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
 
   /**
    * Filter name.
