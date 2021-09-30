@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 
 /**
  * The Class CollaborationControllerImpl.
@@ -91,7 +92,8 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the message VO
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {
+      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
   @PostMapping("/createMessage/dataflow/{dataflowId}/attachment")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public MessageVO createMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
@@ -226,7 +228,8 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @return the message attachment
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {
+      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
   @GetMapping("/findMessages/dataflow/{dataflowId}/getMessageAttachment")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
   public ResponseEntity<byte[]> getMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
