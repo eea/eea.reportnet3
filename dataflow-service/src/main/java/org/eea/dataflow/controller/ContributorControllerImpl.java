@@ -87,13 +87,12 @@ public class ContributorControllerImpl implements ContributorController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') || hasRole('ADMIN')")
   @DeleteMapping(value = "/requester/dataflow/{dataflowId}")
-  @ApiOperation(value = "Delete one requester in a Dataflow")
+  @ApiOperation(value = "Delete one requester in a Dataflow", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted requester"),
       @ApiResponse(code = 204, message = "Successfully deleted requester"),
       @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
       @ApiResponse(code = 404, message = "The email doesn't exist in Repornet"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
-  @ApiParam()
   public void deleteRequester(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(type = "Object",
@@ -127,7 +126,7 @@ public class ContributorControllerImpl implements ContributorController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}")
-  @ApiOperation(value = "Delete one Reporter in a Dataflow")
+  @ApiOperation(value = "Delete one Reporter in a Dataflow", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted reporter"),
       @ApiResponse(code = 204, message = "Successfully deleted reporter"),
       @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
@@ -170,7 +169,7 @@ public class ContributorControllerImpl implements ContributorController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find all Requesters in a Dataflow",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ContributorVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<ContributorVO> findRequestersByGroup(@ApiParam(type = "Long", value = "Dataflow Id",
       example = "0") @PathVariable("dataflowId") Long dataflowId) {
     // we can find requesters,
@@ -192,7 +191,7 @@ public class ContributorControllerImpl implements ContributorController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @ApiOperation(value = "Find all Reporters in a Dataflow",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ContributorVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<ContributorVO> findReportersByGroup(
       @ApiParam(type = "Long", value = "Dataflow Id",
           example = "0") @PathVariable("dataflowId") Long dataflowId,
@@ -217,7 +216,7 @@ public class ContributorControllerImpl implements ContributorController {
   @PutMapping(value = "/requester/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Update one Requester in a Dataflow",
-      produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class)
+      produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update requester"),
       @ApiResponse(code = 204, message = "Successfully updated requester"),
       @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
@@ -269,7 +268,7 @@ public class ContributorControllerImpl implements ContributorController {
   @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Update one Reporter in a Dataflow",
-      produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class)
+      produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update reporter"),
       @ApiResponse(code = 204, message = "Successfully updated reporter"),
       @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
