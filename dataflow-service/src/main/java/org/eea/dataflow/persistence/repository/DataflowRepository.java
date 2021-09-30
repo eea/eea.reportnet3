@@ -192,6 +192,16 @@ public interface DataflowRepository
   List<IDataflowCount> countDataflowByType();
 
   /**
+   * Count reference dataflow available to all users.
+   *
+   * @param datasetIds the dataset ids
+   * @return the list
+   */
+  @Query(nativeQuery = true,
+      value = "select df.type as type , count(*) as amount from dataflow df group by type having type IN ('REFERENCE')")
+  IDataflowCount countReferenceDataflows();
+
+  /**
    * Count dataflow by type based on the user access rights.
    *
    * @param datasetIds the dataset ids

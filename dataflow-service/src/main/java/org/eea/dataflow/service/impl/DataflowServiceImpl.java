@@ -1499,7 +1499,13 @@ public class DataflowServiceImpl implements DataflowService {
     for (IDataflowCount dataflow : dataflowCountList) {
       DataflowCountVO newDataflowCountVO = new DataflowCountVO();
       newDataflowCountVO.setType(dataflow.getType());
-      newDataflowCountVO.setAmount(dataflow.getAmount());
+      // If the user is not an Admin we need to count all the reference dataflows, not only the ones
+      // the user has access rights
+      if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin())
+        newDataflowCountVO.setAmount(dataflowRepository.countReferenceDataflows().getAmount());
+      else
+        newDataflowCountVO.setAmount(dataflow.getAmount());
+
       dataflowCountVOList.add(newDataflowCountVO);
     }
 
