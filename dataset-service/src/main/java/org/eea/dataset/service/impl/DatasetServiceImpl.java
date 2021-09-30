@@ -2581,7 +2581,8 @@ public class DatasetServiceImpl implements DatasetService {
           recordAux.setDataProviderCode(dataproviderVO.getCode());
         }
         List<FieldValue> fields = new ArrayList<>();
-        for (FieldValue field : record.getFields()) {
+        for (FieldValue field : record.getFields() != null ? record.getFields()
+            : new ArrayList<FieldValue>()) {
           FieldValue fieldAux = new FieldValue();
           BeanUtils.copyProperties(fieldAux, field);
           if (dictionaryOriginTargetObjectId != null) {

@@ -3633,6 +3633,54 @@ public class RuleOperatorsTest {
   }
 
   /**
+   * Field string matches empty company test.
+   */
+  @Test
+  public void fieldStringMatchesEmptyCompanyTest() {
+    assertTrue(RuleOperators.fieldStringMatches("", "{%R3_COMPANY_CODE%} test"));
+  }
+
+  /**
+   * Field string matches false company test.
+   */
+  @Test
+  public void fieldStringMatchesFalseCompanyTest() {
+    assertFalse(RuleOperators.fieldStringMatches("C1", "{%R3_COMPANY_CODE%} test"));
+  }
+
+  /**
+   * Field string matches catch company test.
+   */
+  @Test
+  public void fieldStringMatchesCatchCompanyTest() {
+    assertTrue(RuleOperators.fieldStringMatches(null, "{%R3_COMPANY_CODE%} test"));
+  }
+
+  /**
+   * Field string matches empty organization test.
+   */
+  @Test
+  public void fieldStringMatchesEmptyOrganizationTest() {
+    assertTrue(RuleOperators.fieldStringMatches("", "{%R3_ORGANIZATION_CODE%} test"));
+  }
+
+  /**
+   * Field string matches false organization test.
+   */
+  @Test
+  public void fieldStringMatchesFalseOrganizationTest() {
+    assertFalse(RuleOperators.fieldStringMatches("O1", "{%R3_ORGANIZATION_CODE%} test"));
+  }
+
+  /**
+   * Field string matches catch organization test.
+   */
+  @Test
+  public void fieldStringMatchesCatchOrganizationTest() {
+    assertTrue(RuleOperators.fieldStringMatches(null, "{%R3_ORGANIZATION_CODE%} test"));
+  }
+
+  /**
    * Field day equals test.
    */
   @Test

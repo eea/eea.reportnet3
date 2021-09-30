@@ -60,4 +60,12 @@ public class Message {
   @Column(name = "TYPE")
   @Enumerated(EnumType.STRING)
   private MessageTypeEnum type;
+
+  /** The automatic. */
+  @Column(name = "automatic")
+  private boolean automatic;
+
+  /** The file size. */
+  @Column(name = "file_size")
+  private String fileSize;
 }

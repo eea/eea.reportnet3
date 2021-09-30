@@ -1703,9 +1703,16 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
+  /**
+   * Fill QC export data.
+   *
+   * @param csvWriter the csv writer
+   * @param datasetId the dataset id
+   * @param nHeaders the n headers
+   */
   private void fillQCExportData(CSVWriter csvWriter, Long datasetId, int nHeaders) {
 
-    String dataSetSchema = dataSetControllerZuul.getById(datasetId).getIdDatasetSchema();
+    String dataSetSchema = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
 
     DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetSchema));
 
@@ -1718,7 +1725,7 @@ public class RulesServiceImpl implements RulesService {
 
       for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
         fieldNames.put(field.getIdFieldSchema().toString(), field.getHeaderName());
-        tableNames.put("FieldQC: " + field.getIdFieldSchema(), table.getNameTableSchema());
+        tableNames.put(field.getIdFieldSchema().toString(), table.getNameTableSchema());
         tableNames.put(field.getIdRecord().toString(), table.getNameTableSchema());
 
       }
@@ -1736,9 +1743,9 @@ public class RulesServiceImpl implements RulesService {
             tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
                 : "Table not found"; // Table Name
       else
-        fieldsToWrite[0] = tableNames.containsKey("FieldQC: " + rule.getReferenceId())
-            ? tableNames.get("FieldQC: " + rule.getReferenceId())
-            : ""; // Table Name if it has a Field reference ID
+        fieldsToWrite[0] =
+            tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
+                : ""; // Table Name if it has a Field reference ID
       fieldsToWrite[1] =
           fieldNames.containsKey(rule.getReferenceId()) ? fieldNames.get(rule.getReferenceId())
               : ""; // Field Name

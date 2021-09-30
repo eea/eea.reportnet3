@@ -473,7 +473,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         referenceSchemasId.add(dataset.getDatasetSchema());
         if (isCreation) {
           datasetSchemaService.updateReferenceDataset(dataset.getId(), dataset.getDatasetSchema(),
-              true, true);
+              true);
         }
       }
     });
@@ -1124,9 +1124,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private Long persistRD(Statement metabaseStatement, DesignDatasetVO design,
       RepresentativeVO representative, String time, Long dataflowId, String dataProviderLabel)
       throws SQLException {
-    try (ResultSet rs =
-        metabaseStatement.executeQuery(String.format(INSERT_RD_INTO_DATASET, time, dataflowId,
-            dataProviderLabel, design.getDatasetSchema(), representative.getDataProviderId()))) {
+    try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_RD_INTO_DATASET, time,
+        dataflowId, dataProviderLabel.replace("'", "''"), design.getDatasetSchema(),
+        representative.getDataProviderId()))) {
       rs.next();
       Long datasetId = rs.getLong(1);
       metabaseStatement.addBatch(String.format(INSERT_RD_INTO_REPORTING_DATASET, datasetId));

@@ -12,7 +12,6 @@ import lombok.ToString;
 /**
  * The type Data flow vo.
  */
-
 @Getter
 @Setter
 @ToString
@@ -26,6 +25,8 @@ public class DataflowPublicVO extends GenericDataflowVO implements Serializable 
 
   /** The reference datasets. */
   private List<ReferenceDatasetPublicVO> referenceDatasets;
+
+
 
   /**
    * Equals.

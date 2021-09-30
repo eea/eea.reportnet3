@@ -189,7 +189,7 @@ public class DocumentControllerImplTest {
   public void getDocumentExceptionNullTest() throws EEAException {
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(null);
     try {
-      documentController.getDocument(1L);
+      documentController.getDocument(1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       assertEquals(EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
@@ -208,7 +208,7 @@ public class DocumentControllerImplTest {
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .getDocument(Mockito.any(), Mockito.any());
     try {
-      documentController.getDocument(1L);
+      documentController.getDocument(1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       assertEquals(EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
@@ -227,7 +227,7 @@ public class DocumentControllerImplTest {
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
         .getDocument(Mockito.any(), Mockito.any());
     try {
-      documentController.getDocument(1L);
+      documentController.getDocument(1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       assertEquals(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e.getReason());
@@ -247,7 +247,7 @@ public class DocumentControllerImplTest {
     content.setBytes(fileMock.getBytes());
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     when(documentService.getDocument(Mockito.any(), Mockito.any())).thenReturn(content);
-    documentController.getDocument(1L);
+    documentController.getDocument(1L, 1L);
     Mockito.verify(documentService, times(1)).getDocument(Mockito.any(), Mockito.any());
   }
 
@@ -261,7 +261,7 @@ public class DocumentControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(null);
-    documentController.deleteDocument(1L, null);
+    documentController.deleteDocument(1L, 1L, null);
   }
 
   /**
@@ -276,7 +276,7 @@ public class DocumentControllerImplTest {
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
-    documentController.deleteDocument(1L, null);
+    documentController.deleteDocument(1L, 1L, null);
   }
 
   /**
@@ -291,7 +291,7 @@ public class DocumentControllerImplTest {
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
         .deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
-    documentController.deleteDocument(1L, null);
+    documentController.deleteDocument(1L, 1L, null);
   }
 
   /**
@@ -304,7 +304,7 @@ public class DocumentControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(FeignException.class).when(dataflowController).getDocumentInfoById(Mockito.any());
-    documentController.deleteDocument(1L, null);
+    documentController.deleteDocument(1L, 1L, null);
   }
 
   /**
@@ -320,7 +320,7 @@ public class DocumentControllerImplTest {
     content.setBytes(fileMock.getBytes());
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doNothing().when(documentService).deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
-    documentController.deleteDocument(1L, null);
+    documentController.deleteDocument(1L, 1L, null);
     Mockito.verify(documentService, times(1)).deleteDocument(Mockito.any(), Mockito.any(),
         Mockito.any());
   }

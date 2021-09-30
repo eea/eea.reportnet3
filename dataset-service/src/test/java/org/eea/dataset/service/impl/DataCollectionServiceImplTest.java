@@ -306,8 +306,16 @@ public class DataCollectionServiceImplTest {
     representative.setId(1L);
     representative.setLeadReporters(leadReportersVO);
     representative.setHasDatasets(false);
+    representative.setDataProviderId(1L);
     designs.add(design);
     representatives.add(representative);
+    DataProviderVO dataProvider = new DataProviderVO();
+    dataProvider.setId(1L);
+    dataProvider.setLabel("label");
+    List<DataProviderVO> dataProvidersVO = new ArrayList<>();
+    dataProvidersVO.add(dataProvider);
+    Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
+        .thenReturn(dataProvidersVO);
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(designs);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
@@ -620,10 +628,18 @@ public class DataCollectionServiceImplTest {
     representative.setId(1L);
     representative.setLeadReporters(leadReportersVO);
     representative.setHasDatasets(false);
+    representative.setDataProviderId(1L);
     designs.add(design);
     representatives.add(representative);
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(designs);
+    DataProviderVO dataProvider = new DataProviderVO();
+    dataProvider.setId(1L);
+    dataProvider.setLabel("label");
+    List<DataProviderVO> dataProvidersVO = new ArrayList<>();
+    dataProvidersVO.add(dataProvider);
+    Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
+        .thenReturn(dataProvidersVO);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(representatives);
     Mockito.when(metabaseDataSource.getConnection()).thenReturn(connection);

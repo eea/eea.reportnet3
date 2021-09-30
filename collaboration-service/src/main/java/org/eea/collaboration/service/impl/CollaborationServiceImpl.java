@@ -24,6 +24,7 @@ import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.MessageAttachmentVO;
+import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
 import org.eea.kafka.domain.EventType;
@@ -112,6 +113,8 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setUserName(userName);
     message.setDirection(direction);
     message.setType(MessageTypeEnum.TEXT);
+    message.setAutomatic(messageVO.isAutomatic());
+    message.setFileSize("0");
     message = messageRepository.save(message);
 
     String eventType = EventType.RECEIVED_MESSAGE.toString();
@@ -152,6 +155,7 @@ public class CollaborationServiceImpl implements CollaborationService {
       message.setUserName(userName);
       message.setDirection(direction);
       message.setType(MessageTypeEnum.ATTACHMENT);
+      message.setFileSize(fileSize);
       message = messageRepository.save(message);
       byte[] fileContent;
 
@@ -159,7 +163,6 @@ public class CollaborationServiceImpl implements CollaborationService {
 
       MessageAttachment messageAttachment = new MessageAttachment();
       messageAttachment.setFileName(fileName);
-      messageAttachment.setFileSize(fileSize);
       messageAttachment.setContent(fileContent);
       messageAttachment.setMessage(message);
       messageAttachmentRepository.save(messageAttachment);
@@ -181,7 +184,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     messageAttachmentVO.setExtension(extension);
 
     MessageVO messageVO = messageMapper.entityToClass(message);
-    messageVO.setMessageAttachmentVO(messageAttachmentVO);
+    messageVO.setMessageAttachment(messageAttachmentVO);
 
     return messageVO;
   }
@@ -244,17 +247,20 @@ public class CollaborationServiceImpl implements CollaborationService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public void deleteMessage(Long messageId) throws EEAException {
     try {
-      MessageAttachment messageAttachment = messageAttachmentRepository.findByMessageId(messageId);
-      if (messageAttachment != null) {
-        Long messageAttachmentId = messageAttachment.getId();
-        messageAttachmentRepository.deleteById(messageAttachmentId);
+      Message message = messageRepository.findById(messageId).orElse(null);
+      if (message != null && MessageTypeEnum.ATTACHMENT.equals(message.getType())) {
+        messageAttachmentRepository.deleteByMessageId(messageId);
+      } else {
+        messageRepository.deleteById(messageId);
       }
-      messageRepository.deleteById(messageId);
     } catch (EmptyResultDataAccessException e) {
+      LOG_ERROR.error("Error deleting message {}", e.getMessage());
       throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGE_INCORRECT_ID);
     }
+    LOG.info("Message {} deleted", messageId);
   }
 
   /**
@@ -264,22 +270,28 @@ public class CollaborationServiceImpl implements CollaborationService {
    * @param providerId the provider id
    * @param read the read
    * @param page the page
-   * @return the list
+   * @return the message paginated VO
    * @throws EEAForbiddenException the EEA forbidden exception
    */
   @Override
-  public List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
+  public MessagePaginatedVO findMessages(Long dataflowId, Long providerId, Boolean read, int page)
       throws EEAForbiddenException {
 
     authorizeAndGetDirection(dataflowId, providerId);
     PageRequest pageRequest = PageRequest.of(page, 50, Sort.by("date").descending());
 
-    return null != read
+    MessagePaginatedVO messagePaginatedVO = new MessagePaginatedVO();
+    messagePaginatedVO.setListMessage(null != read
         ? messageMapper.entityListToClass(messageRepository
             .findByDataflowIdAndProviderIdAndRead(dataflowId, providerId, read, pageRequest)
             .getContent())
         : messageMapper.entityListToClass(messageRepository
-            .findByDataflowIdAndProviderId(dataflowId, providerId, pageRequest).getContent());
+            .findByDataflowIdAndProviderId(dataflowId, providerId, pageRequest).getContent()));
+
+    messagePaginatedVO
+        .setTotalMessages(messageRepository.countByDataflowIdAndProviderId(dataflowId, providerId));
+
+    return messagePaginatedVO;
   }
 
   /**

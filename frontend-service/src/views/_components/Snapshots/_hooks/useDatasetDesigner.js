@@ -45,7 +45,10 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
     }
   };
 
-  useCheckNotifications(['ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT'], onLoadSnapshotList);
+  useCheckNotifications(
+    ['ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT', 'RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT'],
+    onLoadSnapshotList
+  );
 
   const onCreateSnapshot = async () => {
     try {
@@ -82,6 +85,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
 
   const onRestoreSnapshot = async () => {
     try {
+      setIsLoadingSnapshotListData(true);
       notificationContext.add({ type: 'RESTORE_DATASET_SNAPSHOT_INIT_INFO' });
       await SnapshotService.restoreDesigner(datasetId, snapshotState.snapShotId);
     } catch (error) {

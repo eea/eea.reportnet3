@@ -26,4 +26,7 @@ public class WeblinkVO implements Serializable {
   /** The url. */
   private String url;
 
+  /** The is public. */
+  private Boolean isPublic;
+
 }

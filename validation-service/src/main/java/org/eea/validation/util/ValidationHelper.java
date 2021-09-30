@@ -407,8 +407,16 @@ public class ValidationHelper implements DisposableBean {
     Map<String, Object> mapCriteria = new HashMap<>();
     mapCriteria.put("dataflowId", datasetMetabaseVO.getDataflowId());
     mapCriteria.put("dataProviderId", datasetMetabaseVO.getDataProviderId());
+
+    Map<String, Object> mapCriteriaRestoreSnapshot = new HashMap<>();
+    mapCriteriaRestoreSnapshot.put("datasetId", datasetId);
     if (datasetMetabaseVO.getDataProviderId() != null) {
       createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria,
+          SecurityContextHolder.getContext().getAuthentication().getName());
+      createLockWithSignature(LockSignature.RESTORE_SNAPSHOT, mapCriteriaRestoreSnapshot,
+          SecurityContextHolder.getContext().getAuthentication().getName());
+    } else {
+      createLockWithSignature(LockSignature.RESTORE_SCHEMA_SNAPSHOT, mapCriteriaRestoreSnapshot,
           SecurityContextHolder.getContext().getAuthentication().getName());
     }
   }
@@ -421,12 +429,21 @@ public class ValidationHelper implements DisposableBean {
   private void deleteLockToReleaseProcess(Long datasetId) {
     DataSetMetabaseVO datasetMetabaseVO =
         datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    Map<String, Object> mapCriteriaRestoreSnapshot = new HashMap<>();
+    mapCriteriaRestoreSnapshot.put(LiteralConstants.SIGNATURE,
+        LockSignature.RESTORE_SNAPSHOT.getValue());
+    mapCriteriaRestoreSnapshot.put("datasetId", datasetId);
     if (datasetMetabaseVO.getDataProviderId() != null) {
       Map<String, Object> releaseSnapshots = new HashMap<>();
       releaseSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
       releaseSnapshots.put(LiteralConstants.DATAFLOWID, datasetMetabaseVO.getDataflowId());
       releaseSnapshots.put(LiteralConstants.DATAPROVIDERID, datasetMetabaseVO.getDataProviderId());
       lockService.removeLockByCriteria(releaseSnapshots);
+      lockService.removeLockByCriteria(mapCriteriaRestoreSnapshot);
+    } else {
+      mapCriteriaRestoreSnapshot.put(LiteralConstants.SIGNATURE,
+          LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue());
+      lockService.removeLockByCriteria(mapCriteriaRestoreSnapshot);
     }
   }
 

@@ -2,9 +2,12 @@ package org.eea.interfaces.vo.dataflow;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
+import org.eea.interfaces.vo.weblink.WeblinkVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -48,6 +51,12 @@ public class GenericDataflowVO implements Serializable {
 
   /** The manual acceptance. */
   protected boolean manualAcceptance;
+
+  /** The documents. */
+  protected List<DocumentVO> documents;
+
+  /** The weblinks. */
+  protected List<WeblinkVO> weblinks;
 
 
 }

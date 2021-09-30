@@ -12,6 +12,7 @@ import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.collaboration.CollaborationController;
 import org.eea.interfaces.vo.dataflow.MessageAttachmentVO;
+import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
@@ -182,40 +183,34 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @param providerId the provider id
    * @param read the read
    * @param page the page
-   * @return the list
+   * @return the message paginated VO
    */
   @Override
   @HystrixCommand
   @GetMapping("/findMessages/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
-  public List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
+  public MessagePaginatedVO findMessages(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
       @RequestParam(value = "read", required = false) Boolean read,
       @RequestParam("page") int page) {
     try {
-      List<MessageVO> listMessageVO =
+      MessagePaginatedVO messagePaginatedVO =
           collaborationService.findMessages(dataflowId, providerId, read, page);
+      List<MessageVO> listMessageVO = messagePaginatedVO.getListMessage();
+
       for (MessageVO messageVO : listMessageVO) {
         if (messageVO.getType() == MessageTypeEnum.ATTACHMENT) {
-          try {
-            MessageAttachment messageAttachment =
-                collaborationService.getMessageAttachment(messageVO.getId());
-            MessageAttachmentVO messageAttachmentVO = new MessageAttachmentVO();
-            messageAttachmentVO.setName(messageAttachment.getFileName());
-            String fileName = messageAttachment.getFileName();
-            int indexExtension = fileName.lastIndexOf(".");
-            String extension = fileName.substring(indexExtension + 1, fileName.length());
-            messageAttachmentVO.setExtension(extension);
-            messageAttachmentVO.setSize(messageAttachment.getFileSize());
-            messageVO.setMessageAttachmentVO(messageAttachmentVO);
-          } catch (EEAException e) {
-            LOG_ERROR.error("Error retrieving message info from the messageId {}, with message: {}",
-                messageVO.getId(), e.getMessage());
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
-          }
+          MessageAttachmentVO messageAttachmentVO = new MessageAttachmentVO();
+          messageAttachmentVO.setName(messageVO.getContent());
+          String fileName = messageVO.getContent();
+          int indexExtension = fileName.lastIndexOf(".");
+          String extension = fileName.substring(indexExtension + 1, fileName.length());
+          messageAttachmentVO.setExtension(extension);
+          messageAttachmentVO.setSize(messageVO.getFileSize());
+          messageVO.setMessageAttachment(messageAttachmentVO);
         }
       }
-      return listMessageVO;
+      return messagePaginatedVO;
     } catch (EEAForbiddenException e) {
       LOG_ERROR.error("Error finding messages: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);

@@ -6,8 +6,11 @@ public enum TypeDataProviderEnum {
   /** The country. */
   COUNTRY("COUNTRY"),
 
-  /** The draft. */
-  COMPANY("COMPANY");
+  /** The company. */
+  COMPANY("COMPANY"),
+
+  /** The organization. */
+  ORGANIZATION("ORGANIZATION");
 
   /** The value. */
   private final String value;

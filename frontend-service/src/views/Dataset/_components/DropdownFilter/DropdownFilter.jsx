@@ -107,7 +107,8 @@ class DropdownFilter extends Component {
           style: {
             ...state.style,
             display: 'block',
-            left: `${left}px`
+            left: `${left}px`,
+            top: '45px'
           }
         };
       },

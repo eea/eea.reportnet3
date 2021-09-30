@@ -31,6 +31,12 @@ public class MessageVO {
   /** The type. */
   private MessageTypeEnum type;
 
+  /** The automatic. */
+  private boolean automatic;
+
+  /** The file size. */
+  private String fileSize;
+
   /** The message attachment VO. */
-  private MessageAttachmentVO messageAttachmentVO;
+  private MessageAttachmentVO messageAttachment;
 }
