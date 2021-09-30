@@ -1491,8 +1491,11 @@ public class DataflowServiceImpl implements DataflowService {
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
 
-    List<IDataflowCount> dataflowCountList = isAdmin() ? dataflowRepository.countDataflowByType()
-        : dataflowRepository.countDataflowByTypeAndUser(idsResources);
+    List<IDataflowCount> dataflowCountList = new ArrayList<>();
+
+    if (!idsResources.isEmpty())
+      dataflowCountList = isAdmin() ? dataflowRepository.countDataflowByType()
+          : dataflowRepository.countDataflowByTypeAndUser(idsResources);
 
     List<DataflowCountVO> dataflowCountVOList = new ArrayList<>();
 
