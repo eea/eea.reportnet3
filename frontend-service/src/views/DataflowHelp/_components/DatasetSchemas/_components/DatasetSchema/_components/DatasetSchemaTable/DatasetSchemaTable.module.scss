@@ -5,7 +5,9 @@
 .propertyValueTableName {
   font-weight: bold;
 }
-.warning {
-  background-color: var(--statusBox-warning-bg) !important;
-  color: var(--statusBox-warning-color) !important;
+.noRecords {
+  margin: 1rem 0;
+  display: block;
+  font-weight: bold;
+  font-style: italic;
 }

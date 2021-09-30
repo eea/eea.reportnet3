@@ -10,6 +10,7 @@ import styles from './DatasetSchemas.module.css';
 
 import { Button } from 'views/_components/Button';
 import { DatasetSchema } from './_components/DatasetSchema';
+import { DownloadFile } from 'views/_components/DownloadFile';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
@@ -20,6 +21,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 
+import { DataflowService } from 'services/DataflowService';
 import { IntegrationService } from 'services/IntegrationService';
 import { UniqueConstraintService } from 'services/UniqueConstraintService';
 import { ValidationService } from 'services/ValidationService';
@@ -29,6 +31,7 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
   const notificationContext = useContext(NotificationContext);
   console.log({ datasetsSchemas });
   const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
+  const [isDownloading, setIsDownloading] = useState(false);
   const [extensionsOperationsList, setExtensionsOperationsList] = useState();
   const [uniqueList, setUniqueList] = useState();
   const [qcList, setQCList] = useState();
@@ -46,6 +49,19 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
       setIsLoading(false);
     }
   }, [extensionsOperationsList, uniqueList, qcList]);
+
+  const onDownloadAllSchemasInfo = async datasetSchemaId => {
+    try {
+      setIsDownloading(true); // TODO MAKE USE OF isDownloading in Button?
+
+      const { data } = await DataflowService.downloadAllSchemasInfo(datasetSchemaId);
+
+      if (!isNil(data)) DownloadFile(data, `${dataflowName}.xlsx`);
+    } catch (error) {
+      console.error('DatasetSchema - onDownloadAllSchemasInfo .', error);
+      notificationContext.add({ type: 'DOWNLOAD_ALL_TABS_INFO_FAILED' }); // TODO CHECK NOTIFICATION NAMING
+    }
+  };
 
   const onGetReferencedFieldName = (referenceField, isExternalLink) => {
     const fieldObj = {};
@@ -341,7 +357,18 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
     return (
       isCustodian && (
         <Toolbar className={styles.datasetSchemasToolbar}>
-          <div className="p-toolbar-group-right">
+          <div className="p-toolbar-group-left">
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !isDownloading ? 'p-button-animated-blink' : ''
+              }`}
+              disabled={isDownloading}
+              icon={isDownloading ? 'spinnerAnimate' : 'export'}
+              label={resourcesContext.messages['downloadSchemasInfo']}
+              onClick={() => onDownloadAllSchemasInfo(dataflowId)}
+              tooltip={resourcesContext.messages['downloadSchemasInfoTooltip']}
+              tooltipOptions={{ position: 'top' }}
+            />
             <Button
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
                 isLoading ? 'p-button-animated-spin' : ''

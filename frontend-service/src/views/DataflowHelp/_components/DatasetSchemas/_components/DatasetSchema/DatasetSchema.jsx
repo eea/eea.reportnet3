@@ -20,7 +20,6 @@ import { TabPanel } from 'views/_components/TabView/_components/TabPanel';
 import { TabView } from 'views/_components/TabView';
 import { Toolbar } from 'views/_components/Toolbar';
 
-import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 import { ValidationService } from 'services/ValidationService';
 
@@ -116,12 +115,12 @@ const DatasetSchema = ({
       invisible: ['datasetSchemaId'],
       names: {
         operation: resourcesContext.messages['operation'],
-        fileExtension: resourcesContext.messages['extension'],
+        fileExtension: resourcesContext.messages['extensions'],
         id: resourcesContext.messages['id']
       }
     },
     uniques: {
-      columns: ['table', 'field'],
+      columns: ['tableName', 'fieldName'],
       filtered: true,
       groupable: true,
       narrow: true,
@@ -226,10 +225,10 @@ const DatasetSchema = ({
 
   const renderTables = () => (
     <TabPanel
-      header={resourcesContext.messages['tables']}
+      header={resourcesContext.messages['tablesAndFields']}
       rightIcon={config.icons['table']}
       rightIconClass={styles.tabs}>
-      <Toolbar className={styles.datasetSchemasToolbar}>
+      <Toolbar className={styles.datasetSchemaToolbar}>
         <div className="p-toolbar-group-left">
           <Button
             className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
@@ -484,19 +483,6 @@ const DatasetSchema = ({
     }
   };
 
-  const onDownloadAllTabsInfo = async datasetSchemaId => {
-    try {
-      setIsDownloading(true); // TODO MAKE USE OF isDownloading in Button?
-
-      const { data } = await DataflowService.downloadAllTabsInfo(datasetSchemaId); // TODO IS DATASET SERVICE OR DATAFLOW ?
-
-      if (!isNil(data)) DownloadFile(data, `${dataflowName}.xlsx`); //TODO CHANGE FILE NAME
-    } catch (error) {
-      console.error('DataflowHelp - onDownloadAllTabsInfo .', error);
-      notificationContext.add({ type: 'DOWNLOAD_ALL_TABS_INFO_FAILED' }); // TODO CHECK NOTIFICATION NAMING
-    }
-  };
-
   console.log({ parsedDesignDataset });
   return (
     <div>
@@ -509,9 +495,9 @@ const DatasetSchema = ({
       </div>
       <TabView activeIndex={0} hasQueryString={false} name="DatasetSchemas">
         {renderTables()}
-        {renderExternalIntegrations()}
-        {renderUniques()}
         {renderQCs()}
+        {renderUniques()}
+        {renderExternalIntegrations()}
       </TabView>
     </div>
   );

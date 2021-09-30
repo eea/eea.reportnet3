@@ -6,7 +6,7 @@ export const DataflowConfig = {
   createEmptyDatasetSchema:
     '/dataschema/createEmptyDatasetSchema?dataflowId={:dataflowId}&datasetSchemaName={:datasetSchemaName}',
   delete: '/dataflow/{:dataflowId}',
-  downloadAllTabsInfo: '/dataflow/allTabsInfo/{:datasetSchemaId}', // TODO USE CORRECT ENDPOINT
+  downloadAllSchemasInfo: '/dataflow/allTabsInfo/{:datasetSchemaId}', // TODO USE CORRECT ENDPOINT
   exportSchemas: '/dataschema/export?dataflowId={:dataflowId}',
   getAll: '/dataflow/getDataflows',
   getCloneableDataflows: '/dataflow/cloneableDataflows',

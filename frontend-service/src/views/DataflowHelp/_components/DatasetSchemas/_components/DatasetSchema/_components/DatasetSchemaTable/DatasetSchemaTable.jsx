@@ -113,67 +113,67 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
     }
   };
 
-  const renderColumns = fields => {
-    console.log({ fields });
-    return fields.map(field => (
+  const getTemplate = field => {
+    switch (field) {
+      case 'type':
+        return typeTemplate;
+      case 'automatic':
+      case 'enabled':
+      case 'pk':
+      case 'required':
+      case 'mandatory':
+      case 'prefilled':
+      case 'fixedNumber':
+      case 'readOnly':
+        return rowData => itemTemplate(rowData, field);
+      case 'codelistItems':
+        return codelistTemplate;
+      case 'levelError':
+        return levelErrorTemplate;
+      case 'referencedField':
+        return referencedFieldTemplate;
+      case 'operation':
+        return operationTemplate;
+      default:
+        return null;
+    }
+  };
+
+  const renderColumns = colFields => {
+    console.log({ colFields });
+    return colFields.map(colField => (
       <Column
-        body={
-          field === 'type'
-            ? typeTemplate
-            : field === 'automatic'
-            ? rowData => itemTemplate(rowData, 'automatic')
-            : field === 'enabled'
-            ? rowData => itemTemplate(rowData, 'enabled')
-            : field === 'codelistItems'
-            ? codelistTemplate
-            : field === 'pk'
-            ? rowData => itemTemplate(rowData, 'pk')
-            : field === 'required'
-            ? rowData => itemTemplate(rowData, 'required')
-            : field === 'mandatory'
-            ? rowData => itemTemplate(rowData, 'mandatory')
-            : field === 'prefilled'
-            ? rowData => itemTemplate(rowData, 'prefilled')
-            : field === 'fixedNumber'
-            ? rowData => itemTemplate(rowData, 'fixedNumber')
-            : field === 'readOnly'
-            ? rowData => itemTemplate(rowData, 'readOnly')
-            : field === 'levelError'
-            ? levelErrorTemplate
-            : field === 'referencedField'
-            ? referencedFieldTemplate
-            : null
-        }
+        body={getTemplate(colField)}
         columnResizeMode="expand"
-        field={field}
+        field={colField}
         filter={!isNil(columnOptions) && !isNil(columnOptions[type]) ? columnOptions[type]['filtered'] : false}
-        filterElement={getMultiselectFilter(field)}
+        filterElement={getMultiselectFilter(colField)}
         filterMatchMode="contains"
         header={
-          !isNil(columnOptions[type] && columnOptions[type]['names'] && columnOptions[type]['names'][field])
-            ? columnOptions[type]['names'][field]
-            : capitalize(field)
+          !isNil(columnOptions[type] && columnOptions[type]['names'] && columnOptions[type]['names'][colField])
+            ? columnOptions[type]['names'][colField]
+            : capitalize(colField)
         }
-        key={field}
+        key={colField}
         sortable={true}
         style={{
-          width: TextUtils.areEquals(field, 'DESCRIPTION')
+          width: TextUtils.areEquals(colField, 'DESCRIPTION')
             ? '55%'
-            : TextUtils.areEquals(field, 'TYPE')
+            : TextUtils.areEquals(colField, 'TYPE')
             ? '25%'
-            : TextUtils.areEquals(field, 'REFERENCEDFIELD') ||
-              TextUtils.areEquals(field, 'OPERATION') ||
-              TextUtils.areEquals(field, 'CODELISTITEMS')
+            : TextUtils.areEquals(colField, 'REFERENCEDFIELD') ||
+              TextUtils.areEquals(colField, 'OPERATION') ||
+              TextUtils.areEquals(colField, 'CODELISTITEMS')
             ? '30%'
-            : TextUtils.areEquals(field, 'PK') ||
-              TextUtils.areEquals(field, 'REQUIRED') ||
-              TextUtils.areEquals(field, 'READONLY')
+            : TextUtils.areEquals(colField, 'PK') ||
+              TextUtils.areEquals(colField, 'REQUIRED') ||
+              TextUtils.areEquals(colField, 'READONLY')
             ? '15%'
             : '20%',
           display:
             !isNil(columnOptions[type]) &&
             !isNil(columnOptions[type]['invisible']) &&
-            columnOptions[type]['invisible'].indexOf(field) === 0
+            columnOptions[type]['invisible'].indexOf(colField) === 0
               ? 'none'
               : 'auto'
         }}
@@ -199,6 +199,12 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
   const multiselectItemTemplate = option => {
     if (!isNil(option.value)) {
       return <span className={`${option.class} ${option.subclass}`}>{option.value}</span>;
+    }
+  };
+
+  const operationTemplate = rowData => {
+    if (!isEmpty(rowData.operation)) {
+      return rowData.operation.replaceAll('_', ' ');
     }
   };
 
@@ -276,8 +282,8 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
       </div>
     );
   };
-
-  return !isNil(fields) ? (
+  console.log({ fields });
+  return !isNil(fields) && !isEmpty(fields) ? (
     <DataTable
       getPageChange={onPaginate}
       paginator={true}
@@ -293,6 +299,6 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
       {renderColumns(filterReferencedFieldAndCodelist(columnOptions[type].columns))}
     </DataTable>
   ) : (
-    <span>{resourcesContext.messages['webformTableWithLessRecords']}</span>
+    <span className={styles.noRecords}>{resourcesContext.messages['webformTableWithLessRecords']}</span>
   );
 };
