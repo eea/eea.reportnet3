@@ -1489,14 +1489,17 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public List<DataflowCountVO> getDataflowsCount(String userId) {
 
+    boolean isAdmin = isAdmin();
+    boolean hasReferenceDataflows = false;
+
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
 
     List<IDataflowCount> dataflowCountList = new ArrayList<>();
 
-    if (!idsResources.isEmpty() || isAdmin())
-      dataflowCountList = isAdmin() ? dataflowRepository.countDataflowByType()
+    if (CollectionUtils.isNotEmpty(idsResources) || isAdmin)
+      dataflowCountList = isAdmin ? dataflowRepository.countDataflowByType()
           : dataflowRepository.countDataflowByTypeAndUser(idsResources);
 
     List<DataflowCountVO> dataflowCountVOList = new ArrayList<>();
@@ -1506,14 +1509,23 @@ public class DataflowServiceImpl implements DataflowService {
       newDataflowCountVO.setType(dataflow.getType());
       // If the user is not an Admin we need to count the reference dataflows in design with rights,
       // and the reference dataset in draft
-      if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin())
-        newDataflowCountVO.setAmount(
-            dataflowRepository.countReferenceDataflowsDesignByUser(idsResources).getAmount()
-                + dataflowRepository.countReferenceDataflowsDraft().getAmount());
-      else
+      if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin()) {
+        hasReferenceDataflows = true;
+        continue;
+      } else
         newDataflowCountVO.setAmount(dataflow.getAmount());
 
       dataflowCountVOList.add(newDataflowCountVO);
+    }
+
+    if (!isAdmin) {
+      DataflowCountVO dataflowReferenceCountVO = new DataflowCountVO();
+      dataflowReferenceCountVO.setAmount(hasReferenceDataflows
+          ? dataflowRepository.countReferenceDataflowsDesignByUser(idsResources).getAmount()
+              + dataflowRepository.countReferenceDataflowsDraft().getAmount()
+          : dataflowRepository.countReferenceDataflowsDraft().getAmount());
+      dataflowReferenceCountVO.setType(TypeDataflowEnum.REFERENCE);
+      dataflowCountVOList.add(dataflowReferenceCountVO);
     }
 
     return dataflowCountVOList;
