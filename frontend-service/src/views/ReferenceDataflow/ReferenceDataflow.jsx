@@ -50,6 +50,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const dataflowInitialState = {
     data: {},
+    dataflowType: '',
     description: '',
     designDatasetSchemas: [],
     error: null,
@@ -219,6 +220,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         type: 'LOADING_SUCCESS',
         payload: {
           data: referenceDataflow,
+          dataflowType: referenceDataflow.type,
           description: referenceDataflow.description,
           name: referenceDataflow.name,
           status: referenceDataflow.status

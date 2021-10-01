@@ -44,7 +44,14 @@
       "userListDialogHeader": "dataflowUsersByOrganizationList"
     }
   },
-  "REFERENCE": { "key": "reference", "value": "REFERENCE" },
+  "REFERENCE": {
+    "key": "reference",
+    "value": "REFERENCE",
+    "labels": {
+      "datasetsInfoDataProviderColumnHeader": "countries",
+      "datasetsInfoDataProviderNameFilterLabel": "countries"
+    }
+  },
   "REPORTING": {
     "key": "reporting",
     "value": "REPORTING",
