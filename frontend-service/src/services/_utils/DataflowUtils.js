@@ -167,19 +167,33 @@ const getTechnicalAcceptanceStatus = (datasetsStatus = []) => {
     return config.datasetStatus.TECHNICALLY_ACCEPTED.label;
 };
 
-const parseDatasetsInfoDTO = datasetsInfo => {
-  const datasetsInfoValues = Object.values(datasetsInfo);
+const parseDatasetsInfoDTO = datasetsInfoByProvidersDTO => {
   const datasets = [];
-  datasetsInfoValues.forEach(datasetsInfoValue => {
-    datasetsInfoValue.forEach(datasetDTO => {
-      const dataset = {
-        name: datasetDTO.datasetName,
-        datasetId: datasetDTO.id,
-        type: capitalize(datasetDTO.datasetTypeEnum),
-        dataProviderName: datasetDTO.providerName,
-        dataProviderCode: datasetDTO.providerCode
-      };
-      datasets.push(dataset);
+  datasetsInfoByProvidersDTO.forEach(datasetsInfoByProviderDTO => {
+    const datasetsInfoValues = Object.values(datasetsInfoByProviderDTO);
+    datasetsInfoValues.forEach(datasetsInfoValue => {
+      if (Array.isArray(datasetsInfoValue)) {
+        datasetsInfoValue.forEach(datasetDTO => {
+          const dataset = {
+            name: datasetDTO.datasetName,
+            datasetId: datasetDTO.id,
+            type: capitalize(datasetDTO.datasetTypeEnum),
+            dataProviderName: datasetsInfoByProviderDTO.dataProviderGroupName,
+            dataProviderCode: datasetsInfoByProviderDTO.code
+          };
+          datasets.push(dataset);
+        });
+        // datasetsInfoValue.map(dataset => {
+        //   dataset.name = dataset.datasetName;
+        //   dataset.datasetId = dataset.id;
+        //   dataset.type = capitalize(dataset.datasetTypeEnum);
+        //   dataset.dataProviderName = datasetsInfoByProviderDTO.dataProviderGroupName;
+        //   dataset.dataProviderCode = datasetsInfoByProviderDTO.code;
+
+        //   console.log('dataset :>> ', dataset);
+        //   return dataset;
+        // });
+      }
     });
   });
   return datasets;
