@@ -75,7 +75,7 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
       properties: [
         { name: 'type' },
         {
-          name: 'providerName',
+          name: 'dataProviderName',
           label: TextByDataflowTypeUtils.getLabelByDataflowType(
             resourcesContext.messages,
             dataflowType,
@@ -116,7 +116,7 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
               <Column field="name" header={resourcesContext.messages['name']} sortable={true} />
               <Column field="type" header={resourcesContext.messages['type']} sortable={true} />
               <Column
-                field="providerName"
+                field="dataProviderName"
                 header={TextByDataflowTypeUtils.getLabelByDataflowType(
                   resourcesContext.messages,
                   dataflowType,

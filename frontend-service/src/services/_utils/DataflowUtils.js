@@ -166,8 +166,8 @@ const parseDatasetsInfoDTO = datasetsInfo => {
         name: datasetDTO.datasetName,
         datasetId: datasetDTO.id,
         type: capitalize(datasetDTO.datasetTypeEnum),
-        providerName: datasetDTO.providerName,
-        providerCode: datasetDTO.providerCode
+        dataProviderName: datasetDTO.providerName,
+        dataProviderCode: datasetDTO.providerCode
       };
       datasets.push(dataset);
     });
