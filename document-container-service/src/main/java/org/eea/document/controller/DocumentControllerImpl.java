@@ -379,4 +379,109 @@ public class DocumentControllerImpl implements DocumentController {
     return documents;
   }
 
+  /**
+   * Upload collaboration document.
+   *
+   * @param file the file
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param extension the extension
+   * @param messageId the message id
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/private/upload/{dataflowId}/collaborationattachment")
+  public void uploadCollaborationDocument(@RequestBody final byte[] file,
+      @PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("fileName") final String fileName,
+      @RequestParam("extension") final String extension,
+      @RequestParam("messageId") final Long messageId) {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    if (file == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+    }
+    if (dataflowId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    try {
+      ByteArrayInputStream inStream = new ByteArrayInputStream(file);
+      documentService.uploadCollaborationDocument(inStream, extension, fileName, dataflowId,
+          messageId);
+    } catch (EEAException | IOException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
+  /**
+   * Delete collaboration document.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param messageId the message id
+   * @throws Exception the exception
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/private/{dataflowId}/collaborationattachment")
+  public void deleteCollaborationDocument(@PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("fileName") final String fileName,
+      @RequestParam("messageId") final Long messageId) throws Exception {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    try {
+      if (dataflowId == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+      }
+      documentService.deleteCollaborationDocument(fileName, dataflowId, messageId);
+    } catch (final EEAException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
+  /**
+   * Gets the collaboration document.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param messageId the message id
+   * @return the collaboration document
+   */
+  @Override
+  @GetMapping(value = "/private/{dataflowId}/collaborationattachment")
+  @HystrixCommand
+  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  public byte[] getCollaborationDocument(@PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("fileName") final String fileName,
+      @RequestParam("messageId") final Long messageId) {
+    try {
+
+      if (dataflowId == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      }
+      FileResponse file = documentService.getCollaborationDocument(fileName, dataflowId, messageId);
+
+      ByteArrayResource resource = new ByteArrayResource(file.getBytes());
+      return resource.getByteArray();
+    } catch (final EEAException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
 }

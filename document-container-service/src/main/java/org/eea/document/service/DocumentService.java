@@ -86,4 +86,42 @@ public interface DocumentService {
    */
   void updateDocument(DocumentVO documentVO) throws EEAException;
 
+  /**
+   * Upload collaboration document.
+   *
+   * @param inputStream the input stream
+   * @param contentType the content type
+   * @param filename the filename
+   * @param dataflowId the dataflow id
+   * @param messageId the message id
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  void uploadCollaborationDocument(InputStream inputStream, String contentType, String filename,
+      Long dataflowId, Long messageId) throws EEAException, IOException;
+
+
+  /**
+   * Delete collaboration document.
+   *
+   * @param documentName the document name
+   * @param dataflowId the dataflow id
+   * @param messageId the message id
+   * @throws EEAException the EEA exception
+   */
+  void deleteCollaborationDocument(String documentName, Long dataflowId, Long messageId)
+      throws EEAException;
+
+  /**
+   * Gets the collaboration document.
+   *
+   * @param documentName the document name
+   * @param dataflowId the dataflow id
+   * @param messageId the message id
+   * @return the collaboration document
+   * @throws EEAException the EEA exception
+   */
+  FileResponse getCollaborationDocument(final String documentName, final Long dataflowId,
+      Long messageId) throws EEAException;
+
 }
