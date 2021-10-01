@@ -7,8 +7,8 @@ import utc from 'dayjs/plugin/utc';
 import { Button } from 'views/_components/Button';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'views/_components/Dropdown';
-// import { InputMask } from 'views/_components/InputMask';
-import { InputMask } from 'primereact/inputmask';
+import { InputMask } from 'views/_components/InputMask';
+// import { InputMask } from 'primereact/inputmask';
 import { InputText } from 'views/_components/InputText';
 
 import timezones from 'timezones-list';
@@ -21,7 +21,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   dayjs.extend(utc);
   dayjs.extend(timezone);
 
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [selectedTimeZone, setSelectedTimeZone] = useState({ utcOffset: '+00:00', tzCode: 'Africa/Abidjan' });
 
@@ -34,12 +34,16 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     return (
       <div>
         <Button
-          className="p-button-primary"
+          className=" p-button p-component p-button-primary p-button-animated-blink  p-button-text-icon-left"
           disabled={!dayjs(new Date(date)).isValid()}
           label={resourcesContext.messages['save']}
           onClick={() => onSaveDate(date)}
         />
-        <Button className="p-button-secondary" label={resourcesContext.messages['clear']} onClick={() => setDate('')} />
+        <Button
+          className="p-button p-component p-button-secondary p-button-animated-blink  p-button-text-icon-left"
+          label={resourcesContext.messages['clear']}
+          onClick={() => setDate('')}
+        />
       </div>
     );
   };
@@ -56,10 +60,14 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderInputMask = () => {
     return (
       <InputMask
-        onBlur={e => setDate(new Date(inputValue))}
-        onChange={e => setInputValue(e.target.value)}
-        mask={`99-9999-99 99:99:99`}
+        onComplete={e => setDate(dayjs(inputValue))}
+        onChange={e => {
+          setInputValue(e.target.value);
+        }}
+        slotChar="dd/mm/yyyy hh:mm:ss"
+        mask={`99-99-9999 99:99:99`}
         value={date}
+        autoClear
       />
     );
   };

@@ -5,10 +5,10 @@ import isNil from 'lodash/isNil';
 
 import './InputText.scss';
 
-import KeyFilter from 'views/_functions/PrimeReact/KeyFilter';
-import DomHandler from 'views/_functions/PrimeReact/DomHandler';
-import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
+import DomHandler from 'views/_functions/PrimeReact/DomHandler';
+import KeyFilter from 'views/_functions/PrimeReact/KeyFilter';
+import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
