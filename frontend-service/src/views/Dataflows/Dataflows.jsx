@@ -59,6 +59,8 @@ const Dataflows = withRouter(({ history, match }) => {
     activeIndex: 0,
     business: [],
     citizenScience: [],
+    dataflowsCount: {},
+    dataflowsCountFirstLoad: false,
     reporting: [],
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
@@ -76,7 +78,15 @@ const Dataflows = withRouter(({ history, match }) => {
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
     useReportingObligations();
 
-  const { activeIndex, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
+  const {
+    activeIndex,
+    dataflowsCount,
+    dataflowsCountFirstLoad,
+    isAdmin,
+    isCustodian,
+    isNationalCoordinator,
+    loadingStatus
+  } = dataflowsState;
 
   const tabMenuItems =
     isCustodian || isAdmin
@@ -113,10 +123,18 @@ const Dataflows = withRouter(({ history, match }) => {
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
 
   useEffect(() => {
+    getDataflowsCount();
+
     if (!isNil(dataflowsErrorType)) {
       notificationContext.add({ type: ErrorUtils.parseErrorType(dataflowsErrorType) });
     }
   }, []);
+
+  useLayoutEffect(() => {
+    if (!isEmpty(dataflowsCount) && dataflowsCountFirstLoad) {
+      getDataflows();
+    }
+  }, [dataflowsCount]);
 
   useEffect(() => {
     leftSideBarContext.removeModels();
@@ -188,12 +206,11 @@ const Dataflows = withRouter(({ history, match }) => {
   useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       onLoadPermissions();
-      getDataflows();
     }
   }, [userContext.contextRoles]);
 
   useLayoutEffect(() => {
-    if (isEmpty(dataflowsState[tabId]) && !isNil(userContext.contextRoles)) {
+    if (!isNil(userContext.contextRoles)) {
       getDataflows();
     }
   }, [tabId]);
@@ -247,6 +264,18 @@ const Dataflows = withRouter(({ history, match }) => {
     }
   };
 
+  const getDataflowsCount = async () => {
+    setLoading(true);
+
+    try {
+      const data = await DataflowService.countByType();
+      dataflowsDispatch({ type: 'SET_DATAFLOWS_COUNT', payload: data });
+    } catch (error) {
+      console.error('Dataflows - getDataflows.', error);
+      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
+    }
+  };
+
   const manageDialogs = (dialog, value) => {
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
   };
@@ -254,6 +283,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const onCreateDataflow = dialog => {
     manageDialogs(dialog, false);
     onRefreshToken();
+    getDataflows();
   };
 
   const onHideObligationDialog = () => {
@@ -329,7 +359,13 @@ const Dataflows = withRouter(({ history, match }) => {
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
-        <TabMenu activeIndex={activeIndex} model={tabMenuItems} onTabChange={event => onChangeTab(event.index)} />
+        <TabMenu
+          activeIndex={activeIndex}
+          headerLabelChildrenCount={dataflowsCount}
+          headerLabelLoading={loadingStatus}
+          model={tabMenuItems}
+          onTabChange={event => onChangeTab(event.index)}
+        />
         <DataflowsList
           className="dataflowList-accepted-help-step"
           content={{

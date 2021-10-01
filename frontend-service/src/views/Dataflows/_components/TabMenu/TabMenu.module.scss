@@ -1,0 +1,19 @@
+.icon {
+  color: var(--main-color-font);
+  height: 10px;
+  min-width: 0;
+  width: 14px !important;
+}
+
+.spinner {
+  animation: spinnerAnimation 0.75s linear infinite;
+}
+
+@keyframes spinnerAnimation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
