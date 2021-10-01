@@ -33,6 +33,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 
 /**
  * The Class RecordStoreControllerImpl.
@@ -87,8 +90,14 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @Override
   @HystrixCommand
   @PostMapping(value = "/private/dataset/create/{datasetName}")
-  public void createEmptyDataset(@PathVariable("datasetName") final String datasetName,
-      @RequestParam(value = "idDatasetSchema", required = false) String idDatasetSchema) {
+  @ApiOperation(value = "Creates an empty Dataset with the following parameters", hidden = true)
+  @ApiResponse(code = 500, message = "Couldn't create a new empty Dataset.")
+  public void createEmptyDataset(
+      @ApiParam(value = "Dataset name",
+          example = "Im a Dataset") @PathVariable("datasetName") final String datasetName,
+      @ApiParam(value = "Dataset Id schema", example = "5cf0e9b3b793310e9ceca190",
+          required = false) @RequestParam(value = "idDatasetSchema",
+              required = false) String idDatasetSchema) {
     try {
       recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
     } catch (final RecordStoreAccessException e) {
@@ -108,7 +117,10 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @Override
   @HystrixCommand
   @GetMapping("/private/connection")
-  public ConnectionDataVO getConnectionToDataset(@RequestParam String datasetName) {
+  @ApiOperation(value = "Gets connection to a dataset based on a Dataset name",
+      response = ConnectionDataVO.class, hidden = true)
+  public ConnectionDataVO getConnectionToDataset(@ApiParam(value = "Dataset name",
+      example = "Im a Dataset") @RequestParam String datasetName) {
     ConnectionDataVO vo = null;
     try {
       vo = recordStoreService.getConnectionDataForDataset(datasetName);
@@ -126,6 +138,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/private/connections")
+  @ApiOperation(value = "Gets all the dataset connections", response = ConnectionDataVO.class,
+      responseContainer = "List", hidden = true)
   public List<ConnectionDataVO> getDataSetConnections() {
     List<ConnectionDataVO> vo = null;
     try {
@@ -149,10 +163,16 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @PostMapping(value = "/dataset/{datasetId}/snapshot/create")
-  public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
-      @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset,
-      @RequestParam(value = "dateRelease", required = false) String dateRelease) {
+  @ApiOperation(value = "Creates snapshot data for a given Dataset", hidden = true)
+  @ApiResponse(code = 500, message = "Could not create the snapshot data.")
+  public void createSnapshotData(
+      @ApiParam(value = "Dataset Id", example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "Snapshot Id", example = "0",
+          required = true) @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
+      @ApiParam(value = "Dataset Partition Id", example = "0", required = true) @RequestParam(
+          value = "idPartitionDataset", required = true) Long idPartitionDataset,
+      @ApiParam(value = "Release date", example = "YYYY-MM-DD", required = false) @RequestParam(
+          value = "dateRelease", required = false) String dateRelease) {
     try {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
@@ -189,12 +209,21 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @HystrixCommand
   @PostMapping("/dataset/{datasetId}/snapshot/restore")
   @PreAuthorize("isAuthenticated()")
+  @ApiOperation(value = "Restores snapshot data for a given Dataset", hidden = true)
+  @ApiResponse(code = 500, message = "Could not restore the snapshot data.")
   public void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
-      @RequestParam(value = "partitionId", required = true) Long idPartition,
-      @RequestParam(value = "typeDataset", required = true) DatasetTypeEnum datasetType,
-      @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
-      @RequestParam(value = "deleteData", defaultValue = "true") Boolean deleteData) {
+      @ApiParam(value = "Snapshot Id", example = "0",
+          required = true) @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
+      @ApiParam(value = "Partition Id", example = "0",
+          required = true) @RequestParam(value = "partitionId", required = true) Long idPartition,
+      @ApiParam(value = "Dataset type", example = "REPORTING", required = true) @RequestParam(
+          value = "typeDataset", required = true) DatasetTypeEnum datasetType,
+      @ApiParam(value = "Is it a schema snapshot?", example = "true",
+          required = true) @RequestParam(value = "isSchemaSnapshot",
+              required = true) Boolean isSchemaSnapshot,
+      @ApiParam(value = "Should prior data be erased?", example = "true",
+          defaultValue = "true") @RequestParam(value = "deleteData",
+              defaultValue = "true") Boolean deleteData) {
 
     try {
       restoreSnapshotHelper.processRestoration(datasetId, idSnapshot, idPartition, datasetType,
@@ -215,8 +244,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @Override
   @HystrixCommand
   @PostMapping(value = "/dataset/{datasetId}/snapshot/delete")
-  public void deleteSnapshotData(@PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "idSnapshot", required = true) Long idSnapshot) {
+  @ApiOperation(value = "Delete snapshot data for a given Dataset", hidden = true)
+  @ApiResponse(code = 500, message = "Could not delete the snapshot data")
+  public void deleteSnapshotData(
+      @ApiParam(value = "Dataset Id", example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "Snapshot Id", example = "0",
+          required = true) @RequestParam(value = "idSnapshot", required = true) Long idSnapshot) {
 
     try {
       recordStoreService.deleteDataSnapshot(datasetId, idSnapshot);
@@ -235,7 +268,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/dataset/{datasetSchemaName}")
-  public void deleteDataset(@PathVariable("datasetSchemaName") String datasetSchemaName) {
+  @ApiOperation(value = "Delete dataset data for a given dataset schema name", hidden = true)
+  public void deleteDataset(@ApiParam(value = "Dataset schema name",
+      example = "Im a Schema") @PathVariable("datasetSchemaName") String datasetSchemaName) {
     recordStoreService.deleteDataset(datasetSchemaName);
   }
 
@@ -253,9 +288,14 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @Override
   @HystrixCommand
   @PutMapping("/private/dataset/create/dataCollection/{dataflowId}")
-  public void createSchemas(@RequestBody Map<Long, String> datasetIdsAndSchemaIds,
-      @PathVariable("dataflowId") Long dataflowId, @RequestParam("isCreation") boolean isCreation,
-      @RequestParam("isMaterialized") boolean isMaterialized) {
+  @ApiOperation(value = "Creates a dataset schema for each entry in the map", hidden = true)
+  public void createSchemas(@ApiParam(
+      value = "Map containing associations between datasetIds and schemaIds") @RequestBody Map<Long, String> datasetIdsAndSchemaIds,
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Is creating dataset schemas from scratch?",
+          example = "true") @RequestParam("isCreation") boolean isCreation,
+      @ApiParam(value = "Is the schema view going to be materialized?",
+          example = "true") @RequestParam("isMaterialized") boolean isMaterialized) {
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
@@ -275,8 +315,11 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @PutMapping("/private/createUpdateQueryView")
-  public void createUpdateQueryView(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("isMaterialized") boolean isMaterialized) {
+  @ApiOperation(value = "Creates or updates a View", hidden = true)
+  public void createUpdateQueryView(
+      @ApiParam(value = "Dataset Id", example = "0") @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "Is the schema going to be materialized?",
+          example = "true") @RequestParam("isMaterialized") boolean isMaterialized) {
     recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
   }
 
