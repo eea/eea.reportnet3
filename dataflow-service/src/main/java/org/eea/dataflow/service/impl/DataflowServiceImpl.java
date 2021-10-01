@@ -23,6 +23,7 @@ import org.eea.dataflow.persistence.domain.FMEUser;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.DataflowRepository.IDataflowCount;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
@@ -43,6 +44,7 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
@@ -1474,6 +1476,45 @@ public class DataflowServiceImpl implements DataflowService {
   private void removeWebLinksAndDocuments(DataFlowVO result) {
     result.setWeblinks(null);
     result.setDocuments(null);
+  }
+
+  /**
+   * Gets the dataflows count.
+   *
+   * @param userId the user id
+   * @return the dataflows count
+   */
+  @Override
+  public List<DataflowCountVO> getDataflowsCount(String userId) {
+
+    List<Long> idsResources =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+
+    List<IDataflowCount> dataflowCountList = new ArrayList<>();
+
+    if (!idsResources.isEmpty() || isAdmin())
+      dataflowCountList = isAdmin() ? dataflowRepository.countDataflowByType()
+          : dataflowRepository.countDataflowByTypeAndUser(idsResources);
+
+    List<DataflowCountVO> dataflowCountVOList = new ArrayList<>();
+
+    for (IDataflowCount dataflow : dataflowCountList) {
+      DataflowCountVO newDataflowCountVO = new DataflowCountVO();
+      newDataflowCountVO.setType(dataflow.getType());
+      // If the user is not an Admin we need to count the reference dataflows in design with rights,
+      // and the reference dataset in draft
+      if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin())
+        newDataflowCountVO.setAmount(
+            dataflowRepository.countReferenceDataflowsDesignByUser(idsResources).getAmount()
+                + dataflowRepository.countReferenceDataflowsDraft().getAmount());
+      else
+        newDataflowCountVO.setAmount(dataflow.getAmount());
+
+      dataflowCountVOList.add(newDataflowCountVO);
+    }
+
+    return dataflowCountVOList;
   }
 
 }
