@@ -75,13 +75,8 @@ const Dataflows = withRouter(({ history, match }) => {
     reference: []
   });
 
-  const {
-    obligation,
-    resetObligations,
-    setObligationToPrevious,
-    setCheckedObligation,
-    setToCheckedObligation
-  } = useReportingObligations();
+  const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
+    useReportingObligations();
 
   const {
     activeIndex,

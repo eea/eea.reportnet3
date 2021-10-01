@@ -5,14 +5,13 @@ export const dataflowsReducer = (state, { type, payload }) => {
         let idx = -1;
         if (state.dataflowsCount.reporting > 0) {
           idx = 0;
-        } else if (state.dataflowsCount.business) {
+        } else if (state.dataflowsCount.business > 0) {
           idx = 1;
         } else if (state.dataflowsCount.citizenScience > 0) {
           idx = 2;
         } else {
           idx = 0;
         }
-        console.log({ idx });
         return idx;
       };
 
