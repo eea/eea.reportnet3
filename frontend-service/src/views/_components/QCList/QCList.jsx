@@ -45,6 +45,8 @@ export const QCList = withRouter(
       deletedRuleId: null,
       filtered: false,
       filteredData: [],
+      initialFilteredData: [],
+      initialValidationsList: [],
       isDataUpdated: false,
       isDeleteDialogVisible: false,
       isLoading: true,
@@ -453,14 +455,14 @@ export const QCList = withRouter(
         case 'name':
         case 'description':
         case 'message':
-          return row => textEditor(row, tabsValidationsState.validationId, field);
+          return row => textEditor(row, field);
         default:
           break;
       }
     };
 
-    const enableEditor = (cells, recordId) => {
-      console.log(cells, recordId);
+    const enableEditor = (props, recordId) => {
+      console.log(props, recordId);
       const filteredValidation = tabsValidationsState.filteredData.find(validation => validation.id === recordId);
       console.log(filteredValidation);
       if (!isNil(filteredValidation)) {
@@ -469,7 +471,7 @@ export const QCList = withRouter(
             checked={filteredValidation.enabled}
             id={filteredValidation.id}
             inputId={filteredValidation.id}
-            // onChange={() => setAddAnotherOne(!addAnotherOne)}
+            onChange={e => onRowEditorValueChange(props, e.checked)}
             role="checkbox"
           />
         );
@@ -482,29 +484,29 @@ export const QCList = withRouter(
       </div>
     );
 
-    const textEditor = (cells, recordId, property) => {
-      const filteredValidation = tabsValidationsState.filteredData.find(validation => validation.id === recordId);
-      console.log(filteredValidation);
-      if (!isNil(filteredValidation)) {
-        console.log(filteredValidation[property], property);
-        return (
-          <InputText
-            id={filteredValidation.id}
-            // keyfilter={RecordUtils.getFilter(type)}
-            // maxLength={textCharacters}
-            // onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-            // onChange={e => onEditorValueChange(cells, e.target.value)}
-            // onFocus={e => {
-            //   e.preventDefault();
-            //   onEditorValueFocus(cells, e.target.value);
-            // }}
-            // onKeyDown={e => onEditorKeyChange(cells, e, record)}
-            type="text"
-            value={filteredValidation[property]}
-          />
-        );
-      }
-    };
+    // const textEditor = (cells, recordId, property) => {
+    //   const filteredValidation = tabsValidationsState.filteredData.find(validation => validation.id === recordId);
+    //   console.log(filteredValidation);
+    //   if (!isNil(filteredValidation)) {
+    //     console.log(filteredValidation[property], property);
+    //     return (
+    //       <InputText
+    //         id={filteredValidation.id}
+    //         // keyfilter={RecordUtils.getFilter(type)}
+    //         // maxLength={textCharacters}
+    //         // onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
+    //         // onChange={e => onEditorValueChange(cells, e.target.value)}
+    //         // onFocus={e => {
+    //         //   e.preventDefault();
+    //         //   onEditorValueFocus(cells, e.target.value);
+    //         // }}
+    //         // onKeyDown={e => onEditorKeyChange(cells, e, record)}
+    //         type="text"
+    //         value={filteredValidation[property]}
+    //       />
+    //     );
+    //   }
+    // };
 
     const renderColumns = validations => {
       const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
@@ -538,6 +540,32 @@ export const QCList = withRouter(
     const checkIsEmptyValidations = () =>
       isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
+    const onRowEditorValueChange = (props, value) => {
+      console.log({ props, value });
+      let inmQCs = [...props.value];
+      inmQCs[props.rowIndex][props.field] = value;
+      console.log(tabsValidationsState.validationList);
+      tabsValidationsDispatch({ type: 'UPDATE_FILTER_DATA_AND_VALIDATIONS', payload: inmQCs });
+    };
+
+    const textEditor = (props, field) => {
+      console.log(props.rowData, field, props.rowData[field]);
+      return (
+        <InputText
+          onChange={e => onRowEditorValueChange(props, e.target.value)}
+          type="text"
+          value={props.rowData[field]}
+        />
+      );
+    };
+
+    const onRowEditInit = event => {
+      console.log(event.data);
+      tabsValidationsDispatch({ type: 'SET_INITIAL_DATA' });
+    };
+
+    const onRowEditCancel = () => tabsValidationsDispatch({ type: 'RESET_FILTERED_DATA' });
+
     const onUpdateValidationRule = async () => {
       try {
         // setIsSubmitDisabled(true);
@@ -557,9 +585,6 @@ export const QCList = withRouter(
         // setIsSubmitDisabled(false);
       }
     };
-
-    const onRowQuickEdit = quickEdit =>
-      tabsValidationsDispatch({ type: 'ON_ROW_QUICK_EDIT_ENABLED', payload: quickEdit });
 
     const filterOptions = [
       {
@@ -609,8 +634,6 @@ export const QCList = withRouter(
             />
           </div>
 
-          {console.log(tabsValidationsState)}
-
           {!isEmpty(tabsValidationsState.filteredData) ? (
             <DataTable
               autoLayout={true}
@@ -619,6 +642,9 @@ export const QCList = withRouter(
               hasDefaultCurrentPage={true}
               loading={false}
               onRowClick={event => validationId(event.data.id)}
+              onRowEditCancel={onRowEditCancel}
+              onRowEditInit={onRowEditInit}
+              onRowEditSave={onUpdateValidationRule}
               paginator={true}
               paginatorRight={!isNil(tabsValidationsState.filteredData) && getPaginatorRecordsCount()}
               rows={10}
