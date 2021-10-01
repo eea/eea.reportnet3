@@ -259,7 +259,8 @@ public class DataflowServiceImpl implements DataflowService {
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
+    if (CollectionUtils.isNotEmpty(idsResources) || userAdmin
+        || dataflowType == TypeDataflowEnum.REFERENCE) {
       List<Dataflow> dataflows = new ArrayList<>();
       switch (dataflowType) {
         case REPORTING:
@@ -279,11 +280,12 @@ public class DataflowServiceImpl implements DataflowService {
                       .findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources);
           break;
         case REFERENCE:
-          dataflows = userAdmin
-              ? dataflowRepository
-                  .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
-              : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
-                  TypeStatusEnum.DESIGN, idsResources);
+          if (CollectionUtils.isNotEmpty(idsResources))
+            dataflows = userAdmin
+                ? dataflowRepository
+                    .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
+                : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
+                    TypeStatusEnum.DESIGN, idsResources);
 
           dataflows.addAll(dataflowRepository
               .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT));
