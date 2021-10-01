@@ -61,6 +61,13 @@ public class DocumentServiceImpl implements DocumentService {
    */
   private static final String PATH_DELIMITER_SNAPSHOT_DELETE = "snapshotSchema/";
 
+  /** The Constant PATH_DELIMITER_COLLABORATION_DATAFLOW. */
+  private static final String PATH_DELIMITER_COLLABORATION_DATAFLOW = "/collaboration/dataflow/";
+
+  /** The Constant PATH_DELIMITER_COLLABORATION_DATAFLOW_DELETE. */
+  private static final String PATH_DELIMITER_COLLABORATION_DATAFLOW_DELETE =
+      "collaboration/dataflow/";
+
   /**
    * The oak repository utils.
    */
@@ -376,5 +383,132 @@ public class DocumentServiceImpl implements DocumentService {
     }
   }
 
+
+  /**
+   * Upload collaboration document.
+   *
+   * @param inputStream the input stream
+   * @param contentType the content type
+   * @param filename the filename
+   * @param dataflowId the dataflow id
+   * @param messageId the message id
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Async
+  @Override
+  public void uploadCollaborationDocument(InputStream inputStream, String contentType,
+      String filename, Long dataflowId, Long messageId) throws EEAException, IOException {
+
+    Session session = null;
+    DocumentNodeStore ns = null;
+    try {
+      if (filename == null || contentType == null
+          || StringUtils.isBlank(FilenameUtils.getExtension(filename))) {
+        throw new EEAException(EEAErrorMessage.FILE_FORMAT);
+      }
+
+      LOG.info("Adding the file... {}", filename);
+      // Initialize the session
+      ns = oakRepositoryUtils.initializeNodeStore();
+      Repository repository = oakRepositoryUtils.initializeRepository(ns);
+      session = oakRepositoryUtils.initializeSession(repository);
+
+      // Add a file node with the document
+      String modifiedFilename = oakRepositoryUtils.addFileNode(session,
+          PATH_DELIMITER_COLLABORATION_DATAFLOW + dataflowId, inputStream,
+          messageId + "_" + filename, contentType);
+      if (StringUtils.isBlank(modifiedFilename)) {
+        throw new EEAException(EEAErrorMessage.FILE_NAME);
+      }
+      LOG.info("File collaboration attachment added... {}", filename);
+
+    } catch (RepositoryException | EEAException e) {
+      LOG_ERROR.error("Error in uploadCollaborationDocument, document {} due to {}", filename,
+          e.getMessage(), e);
+      throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
+    } finally {
+      inputStream.close();
+      oakRepositoryUtils.cleanUp(session, ns);
+    }
+
+  }
+
+
+  /**
+   * Delete collaboration document.
+   *
+   * @param documentName the document name
+   * @param dataflowId the dataflow id
+   * @param messageId the message id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Async
+  public void deleteCollaborationDocument(String documentName, Long dataflowId, Long messageId)
+      throws EEAException {
+    Session session = null;
+    DocumentNodeStore ns = null;
+    try {
+      // Initialize the session
+      ns = oakRepositoryUtils.initializeNodeStore();
+      Repository repository = oakRepositoryUtils.initializeRepository(ns);
+      session = oakRepositoryUtils.initializeSession(repository);
+
+      // Delete a file node with the document
+      oakRepositoryUtils.deleteFileNode(session,
+          PATH_DELIMITER_COLLABORATION_DATAFLOW_DELETE + dataflowId,
+          messageId + "_" + documentName);
+      LOG.info("File {} deleted...", documentName);
+      oakRepositoryUtils.deleteBlobsFromRepository(ns);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error deleting file {} in deleteCollaborationDocument due to", documentName,
+          e);
+      if (e.getClass().equals(PathNotFoundException.class)) {
+        throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
+      }
+      throw new EEAException(EEAErrorMessage.EXECUTION_ERROR, e);
+    } finally {
+      oakRepositoryUtils.cleanUp(session, ns);
+    }
+  }
+
+
+  /**
+   * Gets the collaboration document.
+   *
+   * @param documentName the document name
+   * @param dataflowId the dataflow id
+   * @param messageId the message id
+   * @return the collaboration document
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public FileResponse getCollaborationDocument(final String documentName, final Long dataflowId,
+      final Long messageId) throws EEAException {
+    Session session = null;
+    FileResponse fileResponse = null;
+    DocumentNodeStore ns = null;
+    try {
+      // Initialize the session
+      ns = oakRepositoryUtils.initializeNodeStore();
+      Repository repository = oakRepositoryUtils.initializeRepository(ns);
+      session = oakRepositoryUtils.initializeSession(repository);
+
+      // retrieve the file to the controller
+      fileResponse = oakRepositoryUtils.getFileContents(session,
+          PATH_DELIMITER_COLLABORATION_DATAFLOW + dataflowId, messageId + "_" + documentName);
+      LOG.info("Fething the file... {}", documentName);
+    } catch (IOException | RepositoryException e) {
+      LOG_ERROR.error("Error in getDocument due to", e);
+      if (e.getClass().equals(PathNotFoundException.class)) {
+        throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
+      }
+      throw new EEAException(EEAErrorMessage.DOCUMENT_DOWNLOAD_ERROR, e);
+    } finally {
+      oakRepositoryUtils.cleanUp(session, ns);
+    }
+    return fileResponse;
+  }
 
 }

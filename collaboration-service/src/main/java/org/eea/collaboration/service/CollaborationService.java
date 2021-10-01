@@ -3,7 +3,7 @@ package org.eea.collaboration.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import org.eea.collaboration.persistence.domain.MessageAttachment;
+import org.eea.collaboration.persistence.domain.Message;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
@@ -38,7 +38,7 @@ public interface CollaborationService {
    * @throws EEAForbiddenException the EEA forbidden exception
    */
   MessageVO createMessageAttachment(Long dataflowId, Long providerId, InputStream is,
-      String fileName, String fileSize)
+      String fileName, String fileSize, String contentType)
       throws EEAIllegalArgumentException, EEAForbiddenException, IOException;
 
   /**
@@ -80,5 +80,16 @@ public interface CollaborationService {
    * @return the message attachment
    * @throws EEAException the EEA exception
    */
-  MessageAttachment getMessageAttachment(Long messageAttachmentId) throws EEAException;
+  Message getMessage(Long message) throws EEAException;
+
+
+  /**
+   * Gets the message attachment.
+   *
+   * @param messageId the message id
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @return the message attachment
+   */
+  byte[] getMessageAttachment(Long messageId, Long dataflowId, String fileName);
 }

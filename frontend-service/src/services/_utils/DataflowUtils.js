@@ -1,4 +1,6 @@
 import dayjs from 'dayjs';
+
+import camelCase from 'lodash/camelCase';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
@@ -21,6 +23,15 @@ const sortDataflowsByExpirationDate = dataflows =>
     const deadline_2 = b.expirationDate;
     return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
   });
+
+const parseDataflowCount = (dataflowCountDTO, dataflowType) => {
+  const dataflowCount = { reporting: 0, business: 0, citizenScience: 0, reference: 0 };
+
+  dataflowCountDTO.forEach(dataflowType => {
+    dataflowCount[camelCase(dataflowType.type)] = dataflowType.amount;
+  });
+  return dataflowCount;
+};
 
 const parseDataflowListDTO = dataflowsDTO => dataflowsDTO?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
 
@@ -158,6 +169,7 @@ const getTechnicalAcceptanceStatus = (datasetsStatus = []) => {
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
+  parseDataflowCount,
   parseDataflowDTO,
   parseDataflowListDTO,
   parseDataProvidersUserList,

@@ -19,8 +19,6 @@ const formatDate = (date, isInvalidDate) => {
   return [year, month, day].join('-');
 };
 
-const getInputMaxLength = { TEXT: 10000, RICH_TEXT: 10000, EMAIL: 256, NUMBER_INTEGER: 20, NUMBER_DECIMAL: 40 };
-
 const getInputType = {
   DATE: 'date',
   NUMBER_DECIMAL: 'any',
@@ -122,7 +120,6 @@ const parseListOfSinglePams = (records = []) => {
 
 export const WebformRecordUtils = {
   formatDate,
-  getInputMaxLength,
   getInputType,
   getMultiselectValues,
   parseListOfSinglePams,
