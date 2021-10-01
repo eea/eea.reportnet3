@@ -5,7 +5,7 @@
     "labels": {
       "breadCrumbs": "businessDataflowCrumbLabel",
       "dataViewerProviderCodeColumnHeader": "companyCode",
-      "datasetsInfoDataProviderColumnHeader": "company",
+      "datasetsInfoDataProviderColumnHeader": "companyCC",
       "datasetsInfoDataProviderNameFilterLabel": "company",
       "historicReleaseDataProviderColumnHeader": "companyCode",
       "historicReleaseDataProviderFilterLabel": "companyCode",
@@ -27,7 +27,7 @@
     "labels": {
       "breadCrumbs": "citizenScienceDataflowsCrumbLabel",
       "dataViewerProviderCodeColumnHeader": "organizationCode",
-      "datasetsInfoDataProviderColumnHeader": "organization",
+      "datasetsInfoDataProviderColumnHeader": "organizationOC",
       "datasetsInfoDataProviderNameFilterLabel": "organization",
       "historicReleaseDataProviderColumnHeader": "organizationCode",
       "historicReleaseDataProviderFilterLabel": "organizationCode",
@@ -48,7 +48,7 @@
     "key": "reference",
     "value": "REFERENCE",
     "labels": {
-      "datasetsInfoDataProviderColumnHeader": "countries",
+      "datasetsInfoDataProviderColumnHeader": "countriesCC",
       "datasetsInfoDataProviderNameFilterLabel": "countries"
     }
   },
@@ -58,7 +58,7 @@
     "labels": {
       "breadCrumbs": "dataflow",
       "dataViewerProviderCodeColumnHeader": "countryCode",
-      "datasetsInfoDataProviderColumnHeader": "countries",
+      "datasetsInfoDataProviderColumnHeader": "countriesCC",
       "datasetsInfoDataProviderNameFilterLabel": "countries",
       "historicReleaseDataProviderColumnHeader": "countryCode",
       "historicReleaseDataProviderFilterLabel": "countryCode",

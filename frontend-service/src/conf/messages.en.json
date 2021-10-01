@@ -1266,6 +1266,9 @@
     "wrongWebLinkError": "The URL is not valid",
     "yes": "Yes",
     "datasetsInfo": "Datasets info",
-    "loadDatasetsSummaryError": "Error loading datasets list"
+    "loadDatasetsSummaryError": "Error loading datasets list",
+    "companyCC": "Company (CC)",
+    "countriesCC": "Country (CC)",
+    "organizationOC": "Organization (OC)"
   }
 }

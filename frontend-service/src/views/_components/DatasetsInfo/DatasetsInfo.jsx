@@ -66,8 +66,6 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     </Fragment>
   );
 
-  const onLoadFilteredData = value => setFilteredData(value);
-
   const filterOptions = [
     { type: 'input', properties: [{ name: 'name' }] },
     {
@@ -85,6 +83,12 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
       ]
     }
   ];
+
+  const onLoadFilteredData = value => setFilteredData(value);
+
+  const renderDataProviderNameTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>{`${rowData.dataProviderName} (${rowData.dataProviderCode})`}</div>
+  );
 
   const renderFilters = () => (
     <Filters
@@ -116,6 +120,7 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
               <Column field="name" header={resourcesContext.messages['name']} sortable={true} />
               <Column field="type" header={resourcesContext.messages['type']} sortable={true} />
               <Column
+                body={renderDataProviderNameTemplate}
                 field="dataProviderName"
                 header={TextByDataflowTypeUtils.getLabelByDataflowType(
                   resourcesContext.messages,
