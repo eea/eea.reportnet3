@@ -8,12 +8,14 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { config } from 'conf';
+
 import styles from './QCList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-
 import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
+import { Dropdown } from 'views/_components/Dropdown';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
@@ -451,62 +453,81 @@ export const QCList = withRouter(
     const getEditor = field => {
       switch (field) {
         case 'enabled':
-          return row => enableEditor(row, tabsValidationsState.validationId);
+          return row => checkboxEditor(row, 'enabled');
         case 'name':
         case 'description':
         case 'message':
+        case 'shortCode':
           return row => textEditor(row, field);
+        case 'levelError':
+          return row => dropdownEditor(row, 'levelError');
         default:
           break;
       }
     };
 
-    const enableEditor = (props, recordId) => {
-      console.log(props, recordId);
-      const filteredValidation = tabsValidationsState.filteredData.find(validation => validation.id === recordId);
-      console.log(filteredValidation);
-      if (!isNil(filteredValidation)) {
-        return (
+    const checkboxEditor = (props, field) => {
+      return (
+        <div>
           <Checkbox
-            checked={filteredValidation.enabled}
-            id={filteredValidation.id}
-            inputId={filteredValidation.id}
+            checked={props.rowData[field]}
+            id={props.rowData[field]}
+            inputId={props.rowData[field]}
             onChange={e => onRowEditorValueChange(props, e.checked)}
             role="checkbox"
           />
-        );
-      }
+        </div>
+      );
     };
 
-    const levelErrorTemplate = rowData => (
-      <div className={styles.levelErrorTemplateWrapper}>
-        <LevelError type={rowData.levelError.toLowerCase()} />
-      </div>
-    );
+    const getCandidateRule = data => {
+      const rule = {
+        ...data,
+        active: data.enabled,
+        errorMessage: data.message,
+        errorLevel: { value: data.levelError },
+        ruleId: data.id,
+        field: { code: data.referenceId }
+      };
+      return rule;
+    };
 
-    // const textEditor = (cells, recordId, property) => {
-    //   const filteredValidation = tabsValidationsState.filteredData.find(validation => validation.id === recordId);
-    //   console.log(filteredValidation);
-    //   if (!isNil(filteredValidation)) {
-    //     console.log(filteredValidation[property], property);
-    //     return (
-    //       <InputText
-    //         id={filteredValidation.id}
-    //         // keyfilter={RecordUtils.getFilter(type)}
-    //         // maxLength={textCharacters}
-    //         // onBlur={e => onEditorSubmitValue(cells, e.target.value, record)}
-    //         // onChange={e => onEditorValueChange(cells, e.target.value)}
-    //         // onFocus={e => {
-    //         //   e.preventDefault();
-    //         //   onEditorValueFocus(cells, e.target.value);
-    //         // }}
-    //         // onKeyDown={e => onEditorKeyChange(cells, e, record)}
-    //         type="text"
-    //         value={filteredValidation[property]}
-    //       />
-    //     );
-    //   }
-    // };
+    const dropdownEditor = (props, field) => {
+      return (
+        <Dropdown
+          appendTo={document.body}
+          filterPlaceholder={resourcesContext.messages['errorTypePlaceholder']}
+          id="errorType"
+          itemTemplate={rowData => levelErrorTemplate(rowData, true)}
+          onChange={e => onRowEditorValueChange(props, e.target.value.value)}
+          optionLabel="label"
+          optionValue="value"
+          options={config.validations.errorLevels}
+          placeholder={resourcesContext.messages['errorTypePlaceholder']}
+          value={{ label: props.rowData[field], value: props.rowData[field] }}
+        />
+      );
+    };
+
+    const textEditor = (props, field) => {
+      // console.log(props.rowData, field, props.rowData[field]);
+      return (
+        <InputText
+          onChange={e => onRowEditorValueChange(props, e.target.value)}
+          type="text"
+          value={props.rowData[field]}
+        />
+      );
+    };
+
+    const levelErrorTemplate = (rowData, isDropdown = false) => {
+      // console.log(rowData, rowData.levelError, isDropdown);
+      return (
+        <div className={styles.levelErrorTemplateWrapper}>
+          <LevelError type={isDropdown ? rowData.value : rowData.levelError.toLowerCase()} />
+        </div>
+      );
+    };
 
     const renderColumns = validations => {
       const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
@@ -514,7 +535,7 @@ export const QCList = withRouter(
         if (field === 'automatic') template = automaticTemplate;
         if (field === 'enabled') template = enabledTemplate;
         if (field === 'isCorrect') template = correctTemplate;
-        if (field === 'levelError') template = levelErrorTemplate;
+        if (field === 'levelError') template = rowData => levelErrorTemplate(rowData, false);
         if (field === 'expressionText') template = expressionsTemplate;
         return (
           <Column
@@ -544,34 +565,24 @@ export const QCList = withRouter(
       console.log({ props, value });
       let inmQCs = [...props.value];
       inmQCs[props.rowIndex][props.field] = value;
-      console.log(tabsValidationsState.validationList);
+      // console.log(tabsValidationsState.validationList);
       tabsValidationsDispatch({ type: 'UPDATE_FILTER_DATA_AND_VALIDATIONS', payload: inmQCs });
     };
 
-    const textEditor = (props, field) => {
-      console.log(props.rowData, field, props.rowData[field]);
-      return (
-        <InputText
-          onChange={e => onRowEditorValueChange(props, e.target.value)}
-          type="text"
-          value={props.rowData[field]}
-        />
-      );
-    };
-
     const onRowEditInit = event => {
-      console.log(event.data);
       tabsValidationsDispatch({ type: 'SET_INITIAL_DATA' });
     };
 
     const onRowEditCancel = () => tabsValidationsDispatch({ type: 'RESET_FILTERED_DATA' });
 
-    const onUpdateValidationRule = async () => {
+    const onUpdateValidationRule = async event => {
       try {
+        console.log({ event });
         // setIsSubmitDisabled(true);
         // const { candidateRule, expressionText } = creationFormState;
         // candidateRule.expressionText = expressionText;
-        // await ValidationService.updateFieldRule(datasetId, candidateRule);
+
+        await ValidationService.updateFieldRule(dataset.datasetId, getCandidateRule(event.data));
         // if (!isNil(candidateRule) && candidateRule.automatic) {
         //   validationContext.onAutomaticRuleIsUpdated(true);
         // }
