@@ -94,7 +94,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @ApiResponse(code = 500, message = "Couldn't create a new empty Dataset.")
   public void createEmptyDataset(
       @ApiParam(value = "Dataset name",
-          example = "Im a Dataset") @PathVariable("datasetName") final String datasetName,
+          example = "Dataset displayed name") @PathVariable("datasetName") final String datasetName,
       @ApiParam(value = "Dataset Id schema", example = "5cf0e9b3b793310e9ceca190",
           required = false) @RequestParam(value = "idDatasetSchema",
               required = false) String idDatasetSchema) {
@@ -120,7 +120,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @ApiOperation(value = "Gets connection to a dataset based on a Dataset name",
       response = ConnectionDataVO.class, hidden = true)
   public ConnectionDataVO getConnectionToDataset(@ApiParam(value = "Dataset name",
-      example = "Im a Dataset") @RequestParam String datasetName) {
+      example = "Dataset displayed name") @RequestParam String datasetName) {
     ConnectionDataVO vo = null;
     try {
       vo = recordStoreService.getConnectionDataForDataset(datasetName);
@@ -270,7 +270,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @DeleteMapping(value = "/dataset/{datasetSchemaName}")
   @ApiOperation(value = "Delete dataset data for a given dataset schema name", hidden = true)
   public void deleteDataset(@ApiParam(value = "Dataset schema name",
-      example = "Im a Schema") @PathVariable("datasetSchemaName") String datasetSchemaName) {
+      example = "Dataset schema displayed name") @PathVariable("datasetSchemaName") String datasetSchemaName) {
     recordStoreService.deleteDataset(datasetSchemaName);
   }
 
