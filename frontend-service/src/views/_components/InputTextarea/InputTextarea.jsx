@@ -13,7 +13,7 @@ export class InputTextarea extends Component {
     cols: 10,
     displayedHeight: 100,
     expandableOnClick: false,
-    maxLength: 10000,
+    maxLength: null,
     moveCaretToEnd: false,
     onInput: null,
     rows: 1,

@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * The Class EmailControllerImpl.
@@ -28,7 +30,10 @@ public class EmailControllerImpl implements EmailController {
    */
   @Override
   @PostMapping(value = "/private/send", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void sendMessage(@RequestBody EmailVO emailVO) {
+  @ApiOperation(value = "Sends a email message using an E-mail object with the information.",
+      hidden = true)
+  public void sendMessage(
+      @ApiParam(value = "Email object containing the data") @RequestBody EmailVO emailVO) {
     emailService.sendMessage(emailVO);
   }
 }

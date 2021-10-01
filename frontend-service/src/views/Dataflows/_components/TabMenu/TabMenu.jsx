@@ -1,9 +1,25 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
+import isNil from 'lodash/isNil';
+
+import styles from './TabMenu.module.scss';
+
 import classNames from 'classnames';
 
-export const TabMenu = ({ activeIndex, className, id, model, onTabChange, style }) => {
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+export const TabMenu = ({
+  activeIndex,
+  className,
+  headerLabelChildrenCount = {},
+  headerLabelLoading = false,
+  id,
+  model,
+  onTabChange,
+  style
+}) => {
   const [activeIndexTab, setActiveIndexTab] = useState(activeIndex);
 
   const getActiveIndex = () => (onTabChange ? activeIndex : activeIndexTab);
@@ -50,10 +66,39 @@ export const TabMenu = ({ activeIndex, className, id, model, onTabChange, style 
           onClick={event => itemClick(event, item, index)}
           role="presentation"
           target={item.target}>
-          {item.icon && <span className={classNames('p-menuitem-icon', item.icon)}></span>}
-          {item.label && <span className="p-menuitem-text">{item.label}</span>}
+          {renderMenuItemLabel(item, index)}
         </a>
       </li>
+    );
+  };
+
+  const renderMenuItemLabel = (item, index) => {
+    let icon;
+    let label = [];
+    if (!isNil(item.icon)) icon = <span className={classNames('p-menuitem-icon', item.icon)}></span>;
+    if (!isNil(item.label)) {
+      if (!isNil(headerLabelChildrenCount[item.id])) {
+        label.push(<span className="p-menuitem-text">{`${item.label} (`}</span>);
+        if (headerLabelLoading[item.id] && isSelected(index)) {
+          label.push(
+            <span>
+              <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />
+            </span>
+          );
+        } else {
+          label.push(<span className="p-menuitem-text">{headerLabelChildrenCount[item.id]}</span>);
+        }
+        label.push(<span className="p-menuitem-text">{`)`}</span>);
+      } else {
+        label.push(<span className="p-menuitem-text">{item.label}</span>);
+      }
+    }
+
+    return (
+      <div>
+        {icon}
+        {label}
+      </div>
     );
   };
 

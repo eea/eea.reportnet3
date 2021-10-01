@@ -140,4 +140,47 @@ public interface DocumentController {
   Resource getPublicDocument(Long documentId);
 
 
+  /**
+   * Upload collaboration document.
+   *
+   * @param file the file
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param extension the extension
+   * @param messageId the message id
+   */
+  @PostMapping(value = "/private/upload/{dataflowId}/collaborationattachment")
+  void uploadCollaborationDocument(@RequestBody final byte[] file,
+      @PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("fileName") final String fileName,
+      @RequestParam("extension") final String extension,
+      @RequestParam("messageId") final Long messageId);
+
+
+  /**
+   * Delete collaboration document.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param messageId the message id
+   * @throws Exception the exception
+   */
+  @DeleteMapping(value = "/private/{dataflowId}/collaborationattachment")
+  void deleteCollaborationDocument(@PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("fileName") final String fileName,
+      @RequestParam("messageId") final Long messageId) throws Exception;
+
+  /**
+   * Gets the collaboration document.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param messageId the message id
+   * @return the collaboration document
+   */
+  @GetMapping(value = "/private/{dataflowId}/collaborationattachment")
+  byte[] getCollaborationDocument(@PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("fileName") final String fileName,
+      @RequestParam("messageId") final Long messageId);
+
 }

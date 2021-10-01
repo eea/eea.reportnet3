@@ -46,8 +46,6 @@ export const NationalSystemsField = ({
   title,
   tooltip
 }) => {
-  const getInputMaxLength = { TEXT: 10000, RICH_TEXT: 10000, EMAIL: 256, NUMBER_INTEGER: 20, NUMBER_DECIMAL: 40 };
-
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -181,9 +179,9 @@ export const NationalSystemsField = ({
       case 'URL':
         return (
           <InputText
+            hasMaxCharCounter
             id={field.fieldId}
             keyfilter={RecordUtils.getFilter(type)}
-            maxLength={getInputMaxLength[type]}
             onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
             onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
@@ -196,18 +194,14 @@ export const NationalSystemsField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
+              hasMaxCharCounter
               id={field.fieldId}
-              maxLength={getInputMaxLength[type]}
               onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
               onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
               onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
               value={field.value}
             />
-            <CharacterCounter
-              currentLength={field.value.length}
-              maxLength={getInputMaxLength.RICH_TEXT}
-              style={{ position: 'relative', top: '0.25rem' }}
-            />
+            <CharacterCounter currentLength={field.value.length} style={{ position: 'relative', top: '0.25rem' }} />
           </div>
         );
       case 'CODELIST':
