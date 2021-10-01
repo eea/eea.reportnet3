@@ -280,7 +280,7 @@ public class DataflowServiceImpl implements DataflowService {
                       .findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources);
           break;
         case REFERENCE:
-          if (CollectionUtils.isNotEmpty(idsResources))
+          if (CollectionUtils.isNotEmpty(idsResources) || userAdmin)
             dataflows = userAdmin
                 ? dataflowRepository
                     .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
