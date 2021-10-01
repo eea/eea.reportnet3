@@ -3,7 +3,7 @@ package org.eea.collaboration.controller;
 import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.util.ArrayList;
-import org.eea.collaboration.persistence.domain.MessageAttachment;
+import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.service.CollaborationService;
 import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAException;
@@ -74,8 +74,10 @@ public class CollaborationControllerImplTest {
   @Test
   public void createMessageAttachmentTest()
       throws EEAIllegalArgumentException, EEAForbiddenException, IOException {
-    Mockito.when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new MessageVO());
+    Mockito
+        .when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(new MessageVO());
     Assert.assertNotNull(collaborationControllerImpl.createMessageAttachment(1L, 1L,
         new MockMultipartFile("file.csv", "content".getBytes())));
   }
@@ -85,7 +87,7 @@ public class CollaborationControllerImplTest {
       throws EEAIllegalArgumentException, EEAForbiddenException, IOException {
     Mockito
         .when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.any()))
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAIllegalArgumentException.class);
     try {
       collaborationControllerImpl.createMessageAttachment(1L, 1L,
@@ -99,8 +101,10 @@ public class CollaborationControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentEEAForbiddenExceptionTest()
       throws EEAIllegalArgumentException, EEAForbiddenException, IOException {
-    Mockito.when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(EEAForbiddenException.class);
+    Mockito
+        .when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenThrow(EEAForbiddenException.class);
     try {
       collaborationControllerImpl.createMessageAttachment(1L, 1L,
           new MockMultipartFile("file.csv", "content".getBytes()));
@@ -113,8 +117,10 @@ public class CollaborationControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentIOExceptionTest()
       throws EEAIllegalArgumentException, EEAForbiddenException, IOException {
-    Mockito.when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(IOException.class);
+    Mockito
+        .when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenThrow(IOException.class);
     try {
       collaborationControllerImpl.createMessageAttachment(1L, 1L,
           new MockMultipartFile("file.csv", "content".getBytes()));
@@ -337,19 +343,23 @@ public class CollaborationControllerImplTest {
 
   @Test
   public void testGetMessageAttachment() throws EEAException {
-    MessageAttachment messageAttachment = new MessageAttachment();
-    messageAttachment.setFileName("file.csv");
-    messageAttachment.setContent("file.csv".getBytes());
-    Mockito.when(collaborationService.getMessageAttachment(Mockito.anyLong()))
-        .thenReturn(messageAttachment);
+
+    Message message = new Message();
+    message.setContent("file.csv");
+
+    Mockito.when(
+        collaborationService.getMessageAttachment(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+        .thenReturn("file.csv".getBytes());
+    Mockito.when(collaborationService.getMessage(Mockito.anyLong())).thenReturn(message);
     collaborationControllerImpl.getMessageAttachment(1L, 1L, 1L);
-    Mockito.verify(collaborationService, times(1)).getMessageAttachment(Mockito.anyLong());
+    Mockito.verify(collaborationService, times(1)).getMessageAttachment(Mockito.anyLong(),
+        Mockito.any(), Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
   public void testGetMessageAttachmentException() throws EEAException {
-    Mockito.when(collaborationService.getMessageAttachment(Mockito.anyLong()))
-        .thenThrow(EEAException.class);
+    Mockito.when(collaborationService.getMessage(Mockito.anyLong())).thenThrow(EEAException.class);
+
     try {
       collaborationControllerImpl.getMessageAttachment(1L, 1L, 1L);
     } catch (ResponseStatusException e) {

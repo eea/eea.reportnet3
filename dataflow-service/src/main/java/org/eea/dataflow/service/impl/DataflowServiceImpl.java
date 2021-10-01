@@ -1493,7 +1493,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     List<IDataflowCount> dataflowCountList = new ArrayList<>();
 
-    if (!idsResources.isEmpty())
+    if (!idsResources.isEmpty() || isAdmin())
       dataflowCountList = isAdmin() ? dataflowRepository.countDataflowByType()
           : dataflowRepository.countDataflowByTypeAndUser(idsResources);
 

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import org.eea.collaboration.mapper.MessageMapper;
 import org.eea.collaboration.persistence.domain.Message;
-import org.eea.collaboration.persistence.repository.MessageAttachmentRepository;
 import org.eea.collaboration.persistence.repository.MessageRepository;
 import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAErrorMessage;
@@ -18,6 +17,7 @@ import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
@@ -53,6 +53,9 @@ public class CollaborationServiceImplTest {
   private UserManagementControllerZull userManagementControllerZull;
 
   @Mock
+  private DocumentControllerZuul documentControllerZuul;
+
+  @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
   @Mock
@@ -60,9 +63,6 @@ public class CollaborationServiceImplTest {
 
   @Mock
   private MessageRepository messageRepository;
-
-  @Mock
-  private MessageAttachmentRepository messageAttachmentRepository;
 
   @Mock
   private MessageMapper messageMapper;
@@ -207,9 +207,15 @@ public class CollaborationServiceImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     Mockito.when(messageMapper.entityToClass(Mockito.any())).thenReturn(messageVO);
+
+    Message message = new Message();
+    message.setContent("file.csv");
+    message.setId(1L);
+    Mockito.when(messageRepository.save(Mockito.any())).thenReturn(message);
+
     collaborationServiceImpl.createMessageAttachment(1L, 1L,
         new MockMultipartFile("file.csv", "content".getBytes()).getInputStream(), "fileName",
-        "fileSize");
+        "fileSize", "test/test");
     Mockito.verify(messageMapper, Mockito.times(1)).entityToClass(Mockito.any());
   }
 
@@ -399,9 +405,14 @@ public class CollaborationServiceImplTest {
 
   @Test
   public void deleteMessageTest() throws EEAException {
-    Mockito.doNothing().when(messageRepository).deleteById(Mockito.anyLong());
+    Mockito.doNothing().when(messageRepository).delete(Mockito.any());
+    Message message = new Message();
+    message.setId(1L);
+    message.setContent("test");
+    message.setType(MessageTypeEnum.TEXT);
+    Mockito.when(messageRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(message));
     collaborationServiceImpl.deleteMessage(1L);
-    Mockito.verify(messageRepository, times(1)).deleteById(Mockito.anyLong());
+    Mockito.verify(messageRepository, times(1)).delete(Mockito.any());
   }
 
   @Test
@@ -411,9 +422,9 @@ public class CollaborationServiceImplTest {
     message.setContent("");
     message.setType(MessageTypeEnum.ATTACHMENT);
     Mockito.when(messageRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(message));
-    Mockito.doNothing().when(messageAttachmentRepository).deleteByMessageId(Mockito.anyLong());
+
     collaborationServiceImpl.deleteMessage(1L);
-    Mockito.verify(messageAttachmentRepository, times(1)).deleteByMessageId(Mockito.anyLong());
+    Mockito.verify(messageRepository, times(1)).delete(Mockito.any());
   }
 
   @Test
@@ -423,15 +434,15 @@ public class CollaborationServiceImplTest {
     message.setContent("");
     message.setType(MessageTypeEnum.TEXT);
     Mockito.when(messageRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(message));
-    Mockito.doNothing().when(messageRepository).deleteById(Mockito.anyLong());
+    Mockito.doNothing().when(messageRepository).delete(Mockito.any());
     collaborationServiceImpl.deleteMessage(1L);
-    Mockito.verify(messageRepository, times(1)).deleteById(Mockito.anyLong());
+    Mockito.verify(messageRepository, times(1)).delete(Mockito.any());
   }
 
   @Test(expected = EEAIllegalArgumentException.class)
   public void deleteMessageEEAIllegalArgumentExceptionTest() throws EEAException {
     Mockito.doThrow(new EmptyResultDataAccessException(1)).when(messageRepository)
-        .deleteById(Mockito.anyLong());
+        .findById(Mockito.any());
 
     try {
       collaborationServiceImpl.deleteMessage(1L);
@@ -483,8 +494,9 @@ public class CollaborationServiceImplTest {
 
   @Test
   public void getMessageAttachmentTest() throws EEAException {
-    collaborationServiceImpl.getMessageAttachment(1L);
-    Mockito.verify(messageAttachmentRepository, times(1)).findByMessageId(Mockito.any());
+    collaborationServiceImpl.getMessageAttachment(1L, 1L, "test.csv");
+    Mockito.verify(documentControllerZuul, times(1)).getCollaborationDocument(Mockito.anyLong(),
+        Mockito.any(), Mockito.any());
   }
 
   @Test
