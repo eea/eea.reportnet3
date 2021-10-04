@@ -30,7 +30,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     let res = timezones.map(zone => ({ utcOffset: zone.utc, tzCode: zone.tzCode }));
     return uniqBy(res, 'utcOffset');
   };
-
   const renderButtons = () => {
     return (
       <div className={styles.buttonRight}>
@@ -53,7 +52,17 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
 
   const renderCalendar = () => {
     return (
-      <Calendar inline monthNavigator onChange={e => setDate(e.value)} showWeek value={date} yearRange="1900:2100" />
+      <Calendar
+        inline
+        monthNavigator
+        onChange={e => {
+          console.log('Calendar', e.value);
+          setDate(e.value);
+        }}
+        showWeek
+        value={date}
+        yearRange="1900:2100"
+      />
     );
   };
 
@@ -61,16 +70,18 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     return <InputText onChange={e => setDate(new Date(e.target.value))} value={date} />;
   };
   const renderInputMask = () => {
+    console.log(`Date.parse(inputValue)`, Date.parse(inputValue));
     return (
       <InputMask
         autoClear
         mask={`99-99-9999 99:99:99`}
         onChange={e => {
           setInputValue(e.target.value);
+          console.log('input mask ', e.target.value, ' input value', dayjs(inputValue));
         }}
-        onComplete={e => setDate(dayjs(inputValue))}
+        onComplete={e => setDate(Date.parse(inputValue))}
         slotChar="dd/mm/yyyy hh:mm:ss"
-        value={date}
+        value={inputValue}
       />
     );
   };
@@ -90,10 +101,12 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderTimezoneDropdown = () => {};
 
   return (
-    <div>
+    <div style={{ width: '500px' }}>
       {renderCalendar()}
-      {renderInputMask()}
-      {renderDropdown()}
+      <div style={{ display: 'flex' }}>
+        {renderInputMask()}
+        GMT{renderDropdown()}
+      </div>
       {renderInput()}
       {renderTimezoneDropdown()}
       {renderButtons()}
