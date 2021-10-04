@@ -1,4 +1,4 @@
-import { Component, Fragment } from 'react';
+import { Component } from 'react';
 import classNames from 'classnames';
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';

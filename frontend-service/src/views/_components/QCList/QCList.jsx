@@ -20,8 +20,8 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
-import { InputText } from 'views/_components/InputText';
 import { LevelError } from 'views/_components/LevelError';
+import { QCFieldEditor } from './_components/QCFieldEditor';
 import { Spinner } from 'views/_components/Spinner';
 
 import { ValidationService } from 'services/ValidationService';
@@ -471,8 +471,8 @@ export const QCList = withRouter(
         <div>
           <Checkbox
             checked={props.rowData[field]}
-            id={props.rowData[field]}
-            inputId={props.rowData[field]}
+            id={props.rowData[field]?.toString()}
+            inputId={props.rowData[field]?.toString()}
             onChange={e => onRowEditorValueChange(props, e.checked)}
             role="checkbox"
           />
@@ -512,11 +512,12 @@ export const QCList = withRouter(
     const textEditor = (props, field) => {
       // console.log(props.rowData, field, props.rowData[field]);
       return (
-        <InputText
-          onChange={e => onRowEditorValueChange(props, e.target.value)}
-          type="text"
-          value={props.rowData[field]}
-        />
+        <QCFieldEditor initialValue={props.rowData[field]} onSaveField={onRowEditorValueChange} qcs={props} />
+        // <InputText
+        //   onChange={e => onRowEditorValueChange(props, e.target.value)}
+        //   type="text"
+        //   value={props.rowData[field]}
+        // />
       );
     };
 
@@ -564,9 +565,11 @@ export const QCList = withRouter(
     const onRowEditorValueChange = (props, value) => {
       console.log({ props, value });
       let inmQCs = [...props.value];
-      inmQCs[props.rowIndex][props.field] = value;
-      // console.log(tabsValidationsState.validationList);
-      tabsValidationsDispatch({ type: 'UPDATE_FILTER_DATA_AND_VALIDATIONS', payload: inmQCs });
+      console.log(inmQCs[props.rowIndex][props.field], value);
+      if (inmQCs[props.rowIndex][props.field] !== value) {
+        inmQCs[props.rowIndex][props.field] = value;
+        tabsValidationsDispatch({ type: 'UPDATE_FILTER_DATA_AND_VALIDATIONS', payload: inmQCs });
+      }
     };
 
     const onRowEditInit = event => {
