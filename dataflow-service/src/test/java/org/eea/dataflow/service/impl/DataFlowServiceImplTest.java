@@ -1224,7 +1224,7 @@ public class DataFlowServiceImplTest {
     Mockito.when(dataflowRepository.countDataflowByType()).thenReturn(listObject);
 
 
-    assertNotNull(dataflowServiceImpl.getDataflowsCount("1L"));
+    assertNotNull(dataflowServiceImpl.getDataflowsCount());
   }
 
   /**
@@ -1261,7 +1261,7 @@ public class DataFlowServiceImplTest {
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     Mockito.when(dataflowRepository.countReferenceDataflowsDraft()).thenReturn(idc1);
 
-    assertNotNull(dataflowServiceImpl.getDataflowsCount("1L"));
+    assertNotNull(dataflowServiceImpl.getDataflowsCount());
   }
 
   @Test
