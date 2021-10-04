@@ -217,7 +217,7 @@ export class BodyCell extends Component {
         content = (
           <div className={styles.actionTemplate}>
             <Button
-              className={`${`p-button-rounded p-button-secondary-transparent ${styles.editSaveRowButton}`} p-button-animated-blink`}
+              className={`${`p-button-rounded p-button-primary-transparent ${styles.editSaveRowButton}`} p-button-animated-blink`}
               icon="check"
               onClick={this.props.onRowEditSave}
               tooltip={this.context.messages['save']}
@@ -247,9 +247,6 @@ export class BodyCell extends Component {
             />
             {this.props.body(this.props.rowData, this.props)}
           </div>
-          // <button className="p-row-editor-init p-link" onClick={this.props.onRowEditInit}>
-          //   <span className="p-row-editor-init-icon pi pi-fw pi-pencil p-clickable"></span>
-          // </button>
         );
       }
     } else {

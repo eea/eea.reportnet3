@@ -56,7 +56,7 @@ const parsePublicDataflowDTO = publicDataflowDTO =>
     obligation: ObligationUtils.parseObligation(publicDataflowDTO.obligation),
     referenceDatasets: DatasetUtils.parseDatasetListDTO(publicDataflowDTO.referenceDatasets),
     reportingDatasetsStatus: publicDataflowDTO.reportingStatus,
-    status: publicDataflowDTO.status === config.dataflowStatus.OPEN && publicDataflowDTO.releasable ? 'Open' : 'Closed',
+    status: publicDataflowDTO.status === config.dataflowStatus.OPEN && publicDataflowDTO.releasable ? 'open' : 'closed',
     type: publicDataflowDTO.type,
     webLinks: WebLinksUtils.parseWebLinkListDTO(publicDataflowDTO.weblinks)
   });

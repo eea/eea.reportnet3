@@ -340,7 +340,7 @@ export const QCList = withRouter(
       };
 
       return (
-        <div className={styles.actionTemplate}>
+        <Fragment>
           <Button
             className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
             disabled={
@@ -374,7 +374,7 @@ export const QCList = withRouter(
             tooltipOptions={{ position: 'top' }}
             type="button"
           />
-        </div>
+        </Fragment>
       );
     };
 
@@ -468,9 +468,10 @@ export const QCList = withRouter(
 
     const checkboxEditor = (props, field) => {
       return (
-        <div>
+        <div className={styles.checkboxEditorWrapper}>
           <Checkbox
             checked={props.rowData[field]}
+            className={styles.checkboxEditor}
             id={props.rowData[field]?.toString()}
             inputId={props.rowData[field]?.toString()}
             onChange={e => onRowEditorValueChange(props, e.checked)}
@@ -481,13 +482,43 @@ export const QCList = withRouter(
     };
 
     const getCandidateRule = data => {
+      console.log(data);
+      const getExpressionType = () => {
+        let expressionType = '';
+        if (isNil(data.sqlSentence)) {
+          if (data.expressionsIf && data.expressionsIf.length > 0) {
+            expressionType = 'ifThenClause';
+          }
+
+          if (data.entityType === 'TABLE') {
+            expressionType = 'fieldRelations';
+          }
+
+          if (data.entityType === 'RECORD' && data.expressions.length > 0) {
+            expressionType = 'fieldComparison';
+          }
+
+          if (data.entityType === 'FIELD' && data.expressions.length > 0) {
+            expressionType = 'fieldTab';
+          }
+        } else {
+          expressionType = 'sqlSentence';
+        }
+
+        console.log({ expressionType });
+        return expressionType;
+      };
+
       const rule = {
         ...data,
         active: data.enabled,
         errorMessage: data.message,
         errorLevel: { value: data.levelError },
         ruleId: data.id,
-        field: { code: data.referenceId }
+        field: { code: data.referenceId },
+        table: { code: data.referenceId },
+        recordSchemaId: data.referenceId,
+        expressionType: getExpressionType()
       };
       return rule;
     };
@@ -509,17 +540,9 @@ export const QCList = withRouter(
       );
     };
 
-    const textEditor = (props, field) => {
-      // console.log(props.rowData, field, props.rowData[field]);
-      return (
-        <QCFieldEditor initialValue={props.rowData[field]} onSaveField={onRowEditorValueChange} qcs={props} />
-        // <InputText
-        //   onChange={e => onRowEditorValueChange(props, e.target.value)}
-        //   type="text"
-        //   value={props.rowData[field]}
-        // />
-      );
-    };
+    const textEditor = (props, field) => (
+      <QCFieldEditor initialValue={props.rowData[field]} onSaveField={onRowEditorValueChange} qcs={props} />
+    );
 
     const levelErrorTemplate = (rowData, isDropdown = false) => {
       // console.log(rowData, rowData.levelError, isDropdown);
@@ -581,22 +604,18 @@ export const QCList = withRouter(
     const onUpdateValidationRule = async event => {
       try {
         console.log({ event });
-        // setIsSubmitDisabled(true);
-        // const { candidateRule, expressionText } = creationFormState;
-        // candidateRule.expressionText = expressionText;
-
-        await ValidationService.updateFieldRule(dataset.datasetId, getCandidateRule(event.data));
-        // if (!isNil(candidateRule) && candidateRule.automatic) {
-        //   validationContext.onAutomaticRuleIsUpdated(true);
-        // }
-        // onHide();
+        if (TextUtils.areEquals(event.data.entityType, 'TABLE')) {
+          await ValidationService.updateTableRule(dataset.datasetId, getCandidateRule(event.data));
+        } else if (TextUtils.areEquals(event.data.entityType, 'RECORD')) {
+          await ValidationService.updateRowRule(dataset.datasetId, getCandidateRule(event.data));
+        } else {
+          await ValidationService.updateFieldRule(dataset.datasetId, getCandidateRule(event.data));
+        }
       } catch (error) {
         console.error('FieldValidation - onUpdateValidationRule.', error);
         notificationContext.add({
           type: 'QC_RULE_UPDATING_ERROR'
         });
-      } finally {
-        // setIsSubmitDisabled(false);
       }
     };
 

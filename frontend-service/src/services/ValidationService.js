@@ -145,6 +145,7 @@ export const ValidationService = {
   },
 
   updateRowRule: async (datasetId, validationRule) => {
+    console.log({ validationRule });
     const { expressions, expressionType, expressionsIf, expressionsThen } = validationRule;
     const validation = {
       automatic: validationRule.automatic,
@@ -157,7 +158,8 @@ export const ValidationService = {
       shortCode: validationRule.shortCode,
       sqlSentence: validationRule.sqlSentence,
       thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-      type: validationRule.ruleType,
+      // type: validationRule.ruleType,
+      type: 'RECORD',
       whenCondition: null
     };
     if (!validationRule.automatic) {
@@ -195,6 +197,7 @@ export const ValidationService = {
     };
 
     if (!validationRule.automatic) {
+      debugger;
       validation.integrityVO =
         isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)
           ? {

@@ -191,7 +191,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
             ? config.datasetStatus.DELIVERED.label
             : DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status)),
           restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false,
-          status: dataflow.status
+          status: resourcesContext.messages[dataflow.status]
         };
       });
     setDataflows(publicDataflows);
