@@ -1483,7 +1483,6 @@ public class DataflowServiceImpl implements DataflowService {
   /**
    * Gets the dataflows count.
    *
-   * @param userId the user id
    * @return the dataflows count
    */
   @Override
