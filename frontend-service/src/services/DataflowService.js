@@ -22,6 +22,11 @@ import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 export const DataflowService = {
+  countByType: async () => {
+    const dataflowsCountDTO = await DataflowRepository.countByType();
+    return DataflowUtils.parseDataflowCount(dataflowsCountDTO.data);
+  },
+
   getAll: async (accessRoles, contextRoles) => {
     const dataflowsDTO = await DataflowRepository.getAll();
 

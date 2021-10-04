@@ -23,6 +23,7 @@ import org.eea.dataflow.persistence.domain.FMEUser;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.DataflowRepository.IDataflowCount;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
@@ -43,6 +44,7 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
@@ -257,7 +259,8 @@ public class DataflowServiceImpl implements DataflowService {
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
+    if (CollectionUtils.isNotEmpty(idsResources) || userAdmin
+        || dataflowType == TypeDataflowEnum.REFERENCE) {
       List<Dataflow> dataflows = new ArrayList<>();
       switch (dataflowType) {
         case REPORTING:
@@ -277,11 +280,12 @@ public class DataflowServiceImpl implements DataflowService {
                       .findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources);
           break;
         case REFERENCE:
-          dataflows = userAdmin
-              ? dataflowRepository
-                  .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
-              : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
-                  TypeStatusEnum.DESIGN, idsResources);
+          if (CollectionUtils.isNotEmpty(idsResources) || userAdmin)
+            dataflows = userAdmin
+                ? dataflowRepository
+                    .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
+                : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
+                    TypeStatusEnum.DESIGN, idsResources);
 
           dataflows.addAll(dataflowRepository
               .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT));
@@ -1474,6 +1478,59 @@ public class DataflowServiceImpl implements DataflowService {
   private void removeWebLinksAndDocuments(DataFlowVO result) {
     result.setWeblinks(null);
     result.setDocuments(null);
+  }
+
+  /**
+   * Gets the dataflows count.
+   *
+   * @param userId the user id
+   * @return the dataflows count
+   */
+  @Override
+  public List<DataflowCountVO> getDataflowsCount(String userId) {
+
+    boolean isAdmin = isAdmin();
+    boolean hasReferenceDataflows = false;
+
+    List<Long> idsResources =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+
+    List<IDataflowCount> dataflowCountList = new ArrayList<>();
+
+    if (CollectionUtils.isNotEmpty(idsResources) || isAdmin) {
+      dataflowCountList = isAdmin ? dataflowRepository.countDataflowByType()
+          : dataflowRepository.countDataflowByTypeAndUser(idsResources);
+    }
+
+    List<DataflowCountVO> dataflowCountVOList = new ArrayList<>();
+
+    for (IDataflowCount dataflow : dataflowCountList) {
+      DataflowCountVO newDataflowCountVO = new DataflowCountVO();
+      newDataflowCountVO.setType(dataflow.getType());
+      // If the user is not an Admin we need to count the reference dataflows in design with rights,
+      // and the reference dataset in draft
+      if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin) {
+        hasReferenceDataflows = true;
+        continue;
+      } else {
+        newDataflowCountVO.setAmount(dataflow.getAmount());
+      }
+
+      dataflowCountVOList.add(newDataflowCountVO);
+    }
+
+    if (!isAdmin) {
+      DataflowCountVO dataflowReferenceCountVO = new DataflowCountVO();
+      dataflowReferenceCountVO.setAmount(hasReferenceDataflows
+          ? dataflowRepository.countReferenceDataflowsDesignByUser(idsResources).getAmount()
+              + dataflowRepository.countReferenceDataflowsDraft().getAmount()
+          : dataflowRepository.countReferenceDataflowsDraft().getAmount());
+      dataflowReferenceCountVO.setType(TypeDataflowEnum.REFERENCE);
+      dataflowCountVOList.add(dataflowReferenceCountVO);
+    }
+
+    return dataflowCountVOList;
   }
 
 }
