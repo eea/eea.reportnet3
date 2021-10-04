@@ -183,16 +183,6 @@ const parseDatasetsInfoDTO = datasetsInfoByProvidersDTO => {
           };
           datasets.push(dataset);
         });
-        // datasetsInfoValue.map(dataset => {
-        //   dataset.name = dataset.datasetName;
-        //   dataset.datasetId = dataset.id;
-        //   dataset.type = capitalize(dataset.datasetTypeEnum);
-        //   dataset.dataProviderName = datasetsInfoByProviderDTO.dataProviderGroupName;
-        //   dataset.dataProviderCode = datasetsInfoByProviderDTO.code;
-
-        //   console.log('dataset :>> ', dataset);
-        //   return dataset;
-        // });
       }
     });
   });
