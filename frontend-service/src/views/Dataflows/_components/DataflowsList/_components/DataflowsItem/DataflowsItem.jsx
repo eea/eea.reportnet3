@@ -18,7 +18,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
 
-const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }) => {
+const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = () => {} }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -65,18 +65,28 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
         <FontAwesomeIcon icon={AwesomeIcons('clone')} role="presentation" />
       </div>
 
-      <div className={`${styles.deliveryDate} dataflowList-delivery-date-help-step`}>
-        <p>
-          <span>{`${resourcesContext.messages['deliveryDate']}: `}</span>
-          <span className={`${styles.dateBlock}`}>
-            {TextUtils.areEquals(itemContent.expirationDate, '-')
-              ? resourcesContext.messages['pending']
-              : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
-          </span>
-        </p>
+      <div className={`${styles.dataflowDates}`}>
+        <div>
+          {(isCustodian || isAdmin) && (
+            <div>
+              <span>{`${resourcesContext.messages['creationDate']}: `}</span>
+              <span className={`${styles.dateBlock}`}>
+                {dayjs(itemContent.creationDate).format(userContext.userProps.dateFormat)}
+              </span>
+            </div>
+          )}
+          <div>
+            <span>{`${resourcesContext.messages['deliveryDate']}: `}</span>
+            <span className={`${styles.dateBlock}`}>
+              {TextUtils.areEquals(itemContent.expirationDate, '-')
+                ? resourcesContext.messages['pending']
+                : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div className={`${styles.text} dataflowList-name-description-help-step`}>
+      <div className={`${styles.text}`}>
         <h3 className={`${styles.title}`} data-for={idTooltip} data-tip>
           {itemContent.name}
         </h3>

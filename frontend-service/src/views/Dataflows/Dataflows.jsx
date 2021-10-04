@@ -1,7 +1,6 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './Dataflows.module.scss';
@@ -78,15 +77,7 @@ const Dataflows = withRouter(({ history, match }) => {
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
     useReportingObligations();
 
-  const {
-    activeIndex,
-    dataflowsCount,
-    dataflowsCountFirstLoad,
-    isAdmin,
-    isCustodian,
-    isNationalCoordinator,
-    loadingStatus
-  } = dataflowsState;
+  const { activeIndex, dataflowsCount, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
 
   const tabMenuItems =
     isCustodian || isAdmin
@@ -129,12 +120,6 @@ const Dataflows = withRouter(({ history, match }) => {
       notificationContext.add({ type: ErrorUtils.parseErrorType(dataflowsErrorType) });
     }
   }, []);
-
-  useLayoutEffect(() => {
-    if (!isEmpty(dataflowsCount) && dataflowsCountFirstLoad) {
-      getDataflows();
-    }
-  }, [dataflowsCount]);
 
   useEffect(() => {
     leftSideBarContext.removeModels();
@@ -206,6 +191,7 @@ const Dataflows = withRouter(({ history, match }) => {
   useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       onLoadPermissions();
+      getDataflows();
     }
   }, [userContext.contextRoles]);
 
@@ -283,7 +269,6 @@ const Dataflows = withRouter(({ history, match }) => {
   const onCreateDataflow = dialog => {
     manageDialogs(dialog, false);
     onRefreshToken();
-    getDataflows();
   };
 
   const onHideObligationDialog = () => {
@@ -374,6 +359,8 @@ const Dataflows = withRouter(({ history, match }) => {
             citizenScience: dataflowsState['citizenScience'],
             reference: dataflowsState['reference']
           }}
+          isAdmin={isAdmin}
+          isCustodian={isCustodian}
           isLoading={loadingStatus[tabId]}
           visibleTab={tabId}
         />

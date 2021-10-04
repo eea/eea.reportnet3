@@ -59,10 +59,6 @@
       .containerLink {
         color: var(--white);
         background-image: url('/views/_assets/images/logos/logo-blanco.png');
-        .deliveryDate {
-          color: var(--white);
-          text-align: right;
-        }
       }
     }
   }
@@ -129,18 +125,6 @@
     opacity: 0.6;
   }
 
-  .deliveryDate {
-    grid-column: 3/3;
-    grid-row: 1/2;
-    color: var(--gray-110);
-    font-size: 1rem;
-    text-align: right;
-    margin-right: 3rem;
-    span {
-      font-weight: normal;
-    }
-  }
-
   .dateBlock {
     white-space: nowrap;
     font-weight: bold !important;
@@ -200,11 +184,6 @@
     .icon {
       display: none;
     }
-    .deliveryDate {
-      grid-column: 2/2;
-      font-size: 0.9rem;
-    }
-
     .status {
       grid-column: 2/3;
       justify-content: center;
@@ -231,11 +210,6 @@
   @media (max-width: 415px) {
     .role {
       grid-row: 1/2;
-    }
-    .deliveryDate {
-      grid-column: 1/1;
-      grid-row: 2/3;
-      text-align: left;
     }
     .text {
       grid-row: 3/4;
