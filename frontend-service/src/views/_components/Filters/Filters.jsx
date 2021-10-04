@@ -338,7 +338,7 @@ export const Filters = ({
     }
   };
 
-  const renderCalendarFilter = property => {
+  const renderCalendarFilter = (property, label) => {
     const inputId = uniqueId();
     return (
       <span className={styles.input} key={property} ref={dateRef}>
@@ -373,7 +373,7 @@ export const Filters = ({
             />
           )}
           <label className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label} htmlFor={inputId}>
-            {resourcesContext.messages[property]}
+            {isEmpty(label) ? resourcesContext.messages[property] : label}
           </label>
         </span>
         <label className="srOnly" htmlFor={inputId}>
@@ -566,7 +566,7 @@ export const Filters = ({
         case 'checkbox':
           return filterOption.properties.map((property, i) => renderCheckboxFilter(property.name, property.label, i));
         case 'date':
-          return filterOption.properties.map(property => renderCalendarFilter(property.name));
+          return filterOption.properties.map(property => renderCalendarFilter(property.name, property.label));
         default:
           return '';
       }
