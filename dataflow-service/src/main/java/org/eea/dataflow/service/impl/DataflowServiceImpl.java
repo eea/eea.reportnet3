@@ -1498,9 +1498,10 @@ public class DataflowServiceImpl implements DataflowService {
 
     List<IDataflowCount> dataflowCountList = new ArrayList<>();
 
-    if (CollectionUtils.isNotEmpty(idsResources) || isAdmin)
+    if (CollectionUtils.isNotEmpty(idsResources) || isAdmin) {
       dataflowCountList = isAdmin ? dataflowRepository.countDataflowByType()
           : dataflowRepository.countDataflowByTypeAndUser(idsResources);
+    }
 
     List<DataflowCountVO> dataflowCountVOList = new ArrayList<>();
 
@@ -1509,11 +1510,12 @@ public class DataflowServiceImpl implements DataflowService {
       newDataflowCountVO.setType(dataflow.getType());
       // If the user is not an Admin we need to count the reference dataflows in design with rights,
       // and the reference dataset in draft
-      if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin()) {
+      if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin) {
         hasReferenceDataflows = true;
         continue;
-      } else
+      } else {
         newDataflowCountVO.setAmount(dataflow.getAmount());
+      }
 
       dataflowCountVOList.add(newDataflowCountVO);
     }
