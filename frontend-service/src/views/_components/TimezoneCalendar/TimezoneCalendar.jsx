@@ -2,6 +2,8 @@ import { useContext, useState } from 'react';
 
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
+import timezones from 'timezones-list';
+import uniqBy from 'lodash/uniqBy';
 import utc from 'dayjs/plugin/utc';
 
 import styles from './TimezoneCalendar.module.scss';
@@ -12,15 +14,13 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
 import { InputText } from 'views/_components/InputText';
 
-import timezones from 'timezones-list';
-
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { uniqBy } from 'lodash';
 
 export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
-  const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(timezone);
+
+  const resourcesContext = useContext(ResourcesContext);
 
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
@@ -55,9 +55,10 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
       <Calendar
         inline
         monthNavigator
-        onChange={e => {
-          console.log('Calendar', e.value);
-          setDate(e.value);
+        onChange={event => {
+          console.log('Calendar', event.value);
+          setDate(event.value);
+          setInputValue(dayjs(event.value).format('DD-MM-YYYYTHH:mm:ss'));
         }}
         showWeek
         value={date}
