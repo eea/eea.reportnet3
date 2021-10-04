@@ -12,7 +12,8 @@ const parseSortedBusinessDataflowListDTO = businessDataflowDTOs => {
 
 const parseBusinessDataflowDTO = businessDataflowDTO =>
   new BusinessDataflow({
-    creationDate: businessDataflowDTO.creationDate,
+    creationDate:
+      businessDataflowDTO.creationDate > 0 ? dayjs(businessDataflowDTO.creationDate).format('YYYY-MM-DD') : '-',
     description: businessDataflowDTO.description,
     expirationDate:
       businessDataflowDTO.deadlineDate > 0 ? dayjs(businessDataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
