@@ -4,11 +4,12 @@ import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
+import styles from './TimezoneCalendar.module.scss';
+
 import { Button } from 'views/_components/Button';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
-// import { InputMask } from 'primereact/inputmask';
 import { InputText } from 'views/_components/InputText';
 
 import timezones from 'timezones-list';
@@ -32,15 +33,17 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
 
   const renderButtons = () => {
     return (
-      <div>
+      <div className={styles.buttonRight}>
         <Button
-          className=" p-button p-component p-button-primary p-button-animated-blink  p-button-text-icon-left"
+          className="p-button p-component p-button-primary p-button-animated-blink p-button-text-icon-left"
           disabled={!dayjs(new Date(date)).isValid()}
+          icon="save"
           label={resourcesContext.messages['save']}
           onClick={() => onSaveDate(date)}
         />
         <Button
-          className="p-button p-component p-button-secondary p-button-animated-blink  p-button-text-icon-left"
+          className="p-button p-component p-button-secondary p-button-animated-blink p-button-text-icon-left"
+          icon="trash"
           label={resourcesContext.messages['clear']}
           onClick={() => setDate('')}
         />
@@ -60,14 +63,14 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderInputMask = () => {
     return (
       <InputMask
-        onComplete={e => setDate(dayjs(inputValue))}
+        autoClear
+        mask={`99-99-9999 99:99:99`}
         onChange={e => {
           setInputValue(e.target.value);
         }}
+        onComplete={e => setDate(dayjs(inputValue))}
         slotChar="dd/mm/yyyy hh:mm:ss"
-        mask={`99-99-9999 99:99:99`}
         value={date}
-        autoClear
       />
     );
   };
