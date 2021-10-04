@@ -776,11 +776,9 @@ public class DataFlowControllerImpl implements DataFlowController {
       response = DataflowCountVO.class, responseContainer = "List", hidden = true)
   public List<DataflowCountVO> getDataflowsCount() {
     List<DataflowCountVO> dataflowTypesCount = null;
-    String userId =
-        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
-            .get(AuthenticationDetails.USER_ID);
+
     try {
-      dataflowTypesCount = dataflowService.getDataflowsCount(userId);
+      dataflowTypesCount = dataflowService.getDataflowsCount();
     } catch (EEAException e) {
       LOG_ERROR.error(String.format(
           "There was an error while retrieving the amount of dataflows of each dataflow type: %s",
