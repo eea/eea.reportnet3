@@ -3,6 +3,8 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
+
 import styles from './DatasetsInfo.module.scss';
 
 import { Column } from 'primereact/column';
@@ -91,6 +93,31 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
       <div className={styles.checkedValueColumn}>{`${rowData.dataProviderName} (${rowData.dataProviderCode})`}</div>
     );
 
+  const renderTypeTemplate = rowData => {
+    switch (rowData.type) {
+      case 'DESIGN':
+        return resourcesContext.messages['design'];
+
+      case 'TEST':
+        return resourcesContext.messages['testDataset'];
+
+      case 'REPORTING':
+        return resourcesContext.messages['reportingDataset'];
+
+      case 'COLLECTION':
+        return resourcesContext.messages['dataCollection'];
+
+      case 'EUDATASET':
+        return resourcesContext.messages['euDataset'];
+
+      case 'REFERENCE':
+        return resourcesContext.messages['referenceDataset'];
+
+      default:
+        break;
+    }
+  };
+
   const renderFilters = () => (
     <Filters
       data={datasetsInfo}
@@ -119,7 +146,12 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
               totalRecords={datasetsInfo.length}
               value={filteredData}>
               <Column field="name" header={resourcesContext.messages['name']} sortable={true} />
-              <Column field="type" header={resourcesContext.messages['type']} sortable={true} />
+              <Column
+                body={renderTypeTemplate}
+                field="type"
+                header={resourcesContext.messages['type']}
+                sortable={true}
+              />
               <Column
                 body={renderDataProviderNameTemplate}
                 field="dataProviderName"
@@ -130,7 +162,7 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
                 )}
                 sortable={true}
               />
-              <Column field="datasetId" header={resourcesContext.messages['datasetId']} sortable={true} />
+              <Column field="id" header={resourcesContext.messages['datasetId']} sortable={true} />
             </DataTable>
           ) : (
             <div className={styles.emptyFilteredData}>

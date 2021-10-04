@@ -371,125 +371,53 @@ export const DataflowService = {
     await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo),
 
   getDatasetsInfo: async dataflowId => {
-    // const datasetsInfoByProvidersDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
+    // const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
 
-    const datasetsInfoByProvidersDTO = [
+    const datasetsInfoDTO = [
       {
-        code: 'C1',
-        dataCollections: [
-          {
-            datasetName: 'name1',
-            datasetTypeEnum: 'COLLECTION',
-            id: 1
-          },
-          {
-            datasetName: 'name2',
-            datasetTypeEnum: 'COLLECTION',
-            id: 2
-          }
-        ],
-        dataProviderGroupName: 'company 1',
-        designDatasets: [
-          {
-            datasetName: 'design1',
-            datasetTypeEnum: 'DESIGN',
-            id: 3
-          },
-          {
-            datasetName: 'design 2',
-            datasetTypeEnum: 'DESIGN',
-            id: 4
-          }
-        ],
-        euDatasets: [
-          {
-            datasetName: 'euDataset 4',
-            datasetTypeEnum: 'EUDATASET',
-            id: 5
-          }
-        ],
-        referenceDatasets: [
-          {
-            datasetName: 'euDataset 5',
-            datasetTypeEnum: 'EUDATASET',
-            id: 6
-          }
-        ],
-        reportingDatasets: [
-          {
-            datasetName: 'reporting 1',
-            datasetTypeEnum: 'REPORTING',
-            id: 7
-          }
-        ],
-        testDatasets: [
-          {
-            datasetName: 'test 1',
-            datasetTypeEnum: 'TEST',
-            id: 8
-          }
-        ]
+        id: 1,
+        name: 'design dataset',
+        type: 'DESIGN',
+        dataProviderName: null,
+        dataProviderCode: null
       },
       {
-        code: 'C2',
-        dataCollections: [
-          {
-            datasetName: 'name1',
-            datasetTypeEnum: 'COLLECTION',
-            id: 1
-          },
-          {
-            datasetName: 'name2',
-            datasetTypeEnum: 'COLLECTION',
-            id: 2
-          }
-        ],
-        dataProviderGroupName: 'company 2',
-        designDatasets: [
-          {
-            datasetName: 'design1',
-            datasetTypeEnum: 'DESIGN',
-            id: 3
-          },
-          {
-            datasetName: 'design 2',
-            datasetTypeEnum: 'DESIGN',
-            id: 4
-          }
-        ],
-        euDatasets: [
-          {
-            datasetName: 'euDataset 4',
-            datasetTypeEnum: 'EUDATASET',
-            id: 5
-          }
-        ],
-        referenceDatasets: [
-          {
-            datasetName: 'euDataset 5',
-            datasetTypeEnum: 'EUDATASET',
-            id: 6
-          }
-        ],
-        reportingDatasets: [
-          {
-            datasetName: 'reporting 1',
-            datasetTypeEnum: 'REPORTING',
-            id: 7
-          }
-        ],
-        testDatasets: [
-          {
-            datasetName: 'test 1',
-            datasetTypeEnum: 'TEST',
-            id: 8
-          }
-        ]
+        id: 2,
+        name: 'reporting',
+        type: 'REPORTING',
+        dataProviderName: 'Spain',
+        dataProviderCode: 'SP'
+      },
+      {
+        id: 3,
+        name: 'dataset test',
+        type: 'TEST',
+        dataProviderName: null,
+        dataProviderCode: null
+      },
+      {
+        id: 4,
+        name: 'eu dataset',
+        type: 'EUDATASET',
+        dataProviderName: null,
+        dataProviderCode: null
+      },
+      {
+        id: 5,
+        name: 'data collection dataset',
+        type: 'COLLECTION',
+        dataProviderName: null,
+        dataProviderCode: null
+      },
+      {
+        id: 6,
+        name: 'reference dataset',
+        type: 'REFERENCE',
+        dataProviderName: null,
+        dataProviderCode: null
       }
     ];
 
-    const parsedDatasetsInfoDTO = DataflowUtils.parseDatasetsInfoDTO(datasetsInfoByProvidersDTO);
-
-    return sortBy(parsedDatasetsInfoDTO, 'dataProviderName');
+    return sortBy(datasetsInfoDTO, 'type');
   }
 };

@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 
 import camelCase from 'lodash/camelCase';
-import capitalize from 'lodash/capitalize';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
@@ -166,28 +165,6 @@ const getTechnicalAcceptanceStatus = (datasetsStatus = []) => {
     return config.datasetStatus.TECHNICALLY_ACCEPTED.label;
 };
 
-const parseDatasetsInfoDTO = datasetsInfoByProvidersDTO => {
-  const datasets = [];
-  datasetsInfoByProvidersDTO.forEach(datasetsInfoByProviderDTO => {
-    const datasetsInfoValues = Object.values(datasetsInfoByProviderDTO);
-    datasetsInfoValues.forEach(datasetsInfoValue => {
-      if (Array.isArray(datasetsInfoValue)) {
-        datasetsInfoValue.forEach(datasetDTO => {
-          const dataset = {
-            name: datasetDTO.datasetName,
-            datasetId: datasetDTO.id,
-            type: capitalize(datasetDTO.datasetTypeEnum),
-            dataProviderName: datasetsInfoByProviderDTO.dataProviderGroupName,
-            dataProviderCode: datasetsInfoByProviderDTO.code
-          };
-          datasets.push(dataset);
-        });
-      }
-    });
-  });
-  return datasets;
-};
-
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
@@ -195,7 +172,6 @@ export const DataflowUtils = {
   parseDataflowDTO,
   parseDataflowListDTO,
   parseDataProvidersUserList,
-  parseDatasetsInfoDTO,
   parsePublicDataflowDTO,
   parsePublicDataflowListDTO,
   parseSortedDataflowListDTO,

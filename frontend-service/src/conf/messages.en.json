@@ -1271,6 +1271,8 @@
     "loadDatasetsSummaryError": "Error loading datasets list",
     "companyCC": "Company (CC)",
     "countriesCC": "Country (CC)",
-    "organizationOC": "Organization (OC)"
+    "organizationOC": "Organization (OC)",
+    "reportingDataset": "Reporting dataset",
+    "testDataset": "Test dataset"
   }
 }
