@@ -56,7 +56,7 @@ const parsePublicDataflowDTO = publicDataflowDTO =>
     obligation: ObligationUtils.parseObligation(publicDataflowDTO.obligation),
     referenceDatasets: DatasetUtils.parseDatasetListDTO(publicDataflowDTO.referenceDatasets),
     reportingDatasetsStatus: publicDataflowDTO.reportingStatus,
-    status: publicDataflowDTO.status === config.dataflowStatus.OPEN ? 'OPEN' : 'CLOSED',
+    status: publicDataflowDTO.status === config.dataflowStatus.OPEN && publicDataflowDTO.releasable ? 'Open' : 'Closed',
     type: publicDataflowDTO.type,
     webLinks: WebLinksUtils.parseWebLinkListDTO(publicDataflowDTO.weblinks)
   });
@@ -64,7 +64,7 @@ const parsePublicDataflowDTO = publicDataflowDTO =>
 const parseDataflowDTO = dataflowDTO =>
   new Dataflow({
     anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
-    creationDate: dataflowDTO.creationDate,
+    creationDate: dataflowDTO.creationDate > 0 ? dayjs(dataflowDTO.creationDate).format('YYYY-MM-DD') : '-',
     dataCollections: DataCollectionUtils.parseDataCollectionListDTO(dataflowDTO.dataCollections),
     dataProviderGroupId: dataflowDTO.dataProviderGroupId,
     dataProviderGroupName: dataflowDTO.dataProviderGroupName,
@@ -97,9 +97,8 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {
     dataflow.users.forEach((user, usersIndex) => {
       user.roles.forEach((role, roleIndex) => {
-        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(
-          role
-        );
+        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] =
+          UserRoleUtils.getUserRoleLabel(role);
       });
     });
   });
