@@ -95,22 +95,22 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
 
   const renderTypeTemplate = rowData => {
     switch (rowData.type) {
-      case 'DESIGN':
+      case config.datasetType.DESIGN:
         return resourcesContext.messages['design'];
 
-      case 'TEST':
+      case config.datasetType.TEST:
         return resourcesContext.messages['testDataset'];
 
-      case 'REPORTING':
+      case config.datasetType.REPORTING:
         return resourcesContext.messages['reportingDataset'];
 
-      case 'COLLECTION':
+      case config.datasetType.DATACOLLECTION:
         return resourcesContext.messages['dataCollection'];
 
-      case 'EUDATASET':
+      case config.datasetType.EUDATASET:
         return resourcesContext.messages['euDataset'];
 
-      case 'REFERENCE':
+      case config.datasetType.REFERENCE:
         return resourcesContext.messages['referenceDataset'];
 
       default:
