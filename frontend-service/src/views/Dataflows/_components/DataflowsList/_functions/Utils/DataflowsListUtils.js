@@ -1,6 +1,7 @@
 const parseDataToFilter = (data, pinnedDataflows) => {
   return data?.map(dataflow => ({
     id: dataflow.id,
+    creationDate: dataflow.creationDate,
     description: dataflow.description,
     expirationDate: dataflow.expirationDate,
     legalInstrument: dataflow.obligation?.legalInstrument?.alias,
