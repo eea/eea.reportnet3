@@ -86,9 +86,10 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
 
   const onLoadFilteredData = value => setFilteredData(value);
 
-  const renderDataProviderNameTemplate = rowData => (
-    <div className={styles.checkedValueColumn}>{`${rowData.dataProviderName} (${rowData.dataProviderCode})`}</div>
-  );
+  const renderDataProviderNameTemplate = rowData =>
+    !isEmpty(rowData.dataProviderName) && (
+      <div className={styles.checkedValueColumn}>{`${rowData.dataProviderName} (${rowData.dataProviderCode})`}</div>
+    );
 
   const renderFilters = () => (
     <Filters
