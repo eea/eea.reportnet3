@@ -64,7 +64,7 @@ const parsePublicDataflowDTO = publicDataflowDTO =>
 const parseDataflowDTO = dataflowDTO =>
   new Dataflow({
     anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
-    creationDate: dataflowDTO.creationDate,
+    creationDate: dataflowDTO.creationDate > 0 ? dayjs(dataflowDTO.creationDate).format('YYYY-MM-DD') : '-',
     dataCollections: DataCollectionUtils.parseDataCollectionListDTO(dataflowDTO.dataCollections),
     dataProviderGroupId: dataflowDTO.dataProviderGroupId,
     dataProviderGroupName: dataflowDTO.dataProviderGroupName,

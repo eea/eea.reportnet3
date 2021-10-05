@@ -22,7 +22,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { DataflowsListUtils } from './_functions/Utils/DataflowsListUtils';
 
-const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibleTab }) => {
+const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoading, visibleTab }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -39,8 +39,8 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
   useLayoutEffect(() => {
     const parsedDataflows = orderBy(
       DataflowsListUtils.parseDataToFilter(content[visibleTab], userContext.userProps.pinnedDataflows),
-      ['pinned', 'expirationDate', 'status', 'id'],
-      ['asc', 'asc', 'asc', 'asc']
+      ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+      ['asc', 'asc', 'asc', 'asc', 'asc']
     );
     setDataToFilter({ ...dataToFilter, [visibleTab]: parsedDataflows });
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
@@ -51,8 +51,8 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
   useEffect(() => {
     const parsedDataflows = orderBy(
       filteredData,
-      ['pinned', 'expirationDate', 'status', 'id'],
-      ['asc', 'asc', 'asc', 'asc']
+      ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+      ['asc', 'asc', 'asc', 'asc', 'asc']
     );
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
@@ -109,8 +109,8 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
 
     const orderedFilteredData = orderBy(
       changedFilteredData,
-      ['pinned', 'expirationDate', 'status', 'id'],
-      ['asc', 'asc', 'asc', 'asc']
+      ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+      ['asc', 'asc', 'asc', 'asc', 'asc']
     );
 
     const orderedPinned = orderedFilteredData.map(el => el.pinned);
@@ -128,8 +128,8 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
       ...dataToFilter,
       [visibleTab]: orderBy(
         changedInitialData,
-        ['pinned', 'expirationDate', 'status', 'id'],
-        ['asc', 'asc', 'asc', 'asc']
+        ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+        ['asc', 'asc', 'asc', 'asc', 'asc']
       )
     });
   };
@@ -147,7 +147,14 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
         ]
       },
       { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
-      { type: 'date', properties: [{ name: 'expirationDate' }] }
+      {
+        type: 'date',
+        properties: [{ name: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'] }]
+      },
+      (isCustodian || isAdmin) && {
+        type: 'date',
+        properties: [{ name: 'creationDate', label: resourcesContext.messages['creationDateFilterLabel'] }]
+      }
     ],
     citizenScience: [
       {
@@ -161,7 +168,14 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
         ]
       },
       { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
-      { type: 'date', properties: [{ name: 'expirationDate' }] }
+      {
+        type: 'date',
+        properties: [{ name: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'] }]
+      },
+      (isCustodian || isAdmin) && {
+        type: 'date',
+        properties: [{ name: 'creationDate', label: resourcesContext.messages['creationDateFilterLabel'] }]
+      }
     ],
     business: [
       {
@@ -175,7 +189,14 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
         ]
       },
       { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
-      { type: 'date', properties: [{ name: 'expirationDate' }] }
+      {
+        type: 'date',
+        properties: [{ name: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'] }]
+      },
+      (isCustodian || isAdmin) && {
+        type: 'date',
+        properties: [{ name: 'creationDate', label: resourcesContext.messages['creationDateFilterLabel'] }]
+      }
     ],
     reference: [
       { type: 'input', properties: [{ name: 'name' }, { name: 'description' }] },
@@ -186,11 +207,32 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
   const renderDataflowItem = dataflow => {
     switch (visibleTab) {
       case config.dataflowType.REPORTING.key:
-        return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
+        return (
+          <DataflowsItem
+            isAdmin={isAdmin}
+            isCustodian={isCustodian}
+            itemContent={dataflow}
+            reorderDataflows={reorderDataflows}
+          />
+        );
       case config.dataflowType.BUSINESS.key:
-        return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
+        return (
+          <DataflowsItem
+            isAdmin={isAdmin}
+            isCustodian={isCustodian}
+            itemContent={dataflow}
+            reorderDataflows={reorderDataflows}
+          />
+        );
       case config.dataflowType.CITIZEN_SCIENCE.key:
-        return <DataflowsItem isCustodian={isCustodian} itemContent={dataflow} reorderDataflows={reorderDataflows} />;
+        return (
+          <DataflowsItem
+            isAdmin={isAdmin}
+            isCustodian={isCustodian}
+            itemContent={dataflow}
+            reorderDataflows={reorderDataflows}
+          />
+        );
       case config.dataflowType.REFERENCE.key:
         return <ReferencedDataflowItem dataflow={dataflow} reorderDataflows={reorderDataflows} />;
       default:
@@ -232,7 +274,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
             className={'dataflowsListFilters'}
             data={dataToFilter['reporting']}
             getFilteredData={onLoadFilteredData}
-            options={filterOptions['reporting']}
+            options={filterOptions['reporting'].filter(Boolean)}
             sortCategory={'pinned'}
             sortable={true}
           />
@@ -243,7 +285,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
             className={'dataflowsListFilters'}
             data={dataToFilter['business']}
             getFilteredData={onLoadFilteredData}
-            options={filterOptions['business']}
+            options={filterOptions['business'].filter(Boolean)}
             sortCategory={'pinned'}
             sortable={true}
           />
@@ -254,7 +296,7 @@ const DataflowsList = ({ className, content = {}, isCustodian, isLoading, visibl
             className={'dataflowsListFilters'}
             data={dataToFilter['citizenScience']}
             getFilteredData={onLoadFilteredData}
-            options={filterOptions['citizenScience']}
+            options={filterOptions['citizenScience'].filter(Boolean)}
             sortCategory={'pinned'}
             sortable={true}
           />
