@@ -114,13 +114,14 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   };
 
   return (
-    <div style={{ width: '500px' }}>
+    <div className={styles.container}>
       {renderCalendar()}
-      <div style={{ display: 'flex' }}>
+      <div className={styles.inputMaskWrapper}>
         {renderInputMask()}
-        GMT{renderDropdown()}
+        <span className={styles.label}>GMT</span>
+        {renderDropdown()}
       </div>
-      {renderInput()}
+      {/* {renderInput()} */}
       {renderButtons()}
     </div>
   );

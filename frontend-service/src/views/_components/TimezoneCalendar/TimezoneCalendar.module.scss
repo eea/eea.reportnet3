@@ -3,6 +3,18 @@
   justify-content: flex-end;
 
   & button {
-    margin: 0.5rem 0 0.5rem 0.5rem;
+    margin: 1rem 0 0.5rem 0.5rem;
+  }
+}
+.container {
+  max-width: 500px;
+}
+.inputMaskWrapper {
+  display: flex;
+  margin-top: 0.5rem;
+
+  .label {
+    padding: 0 0.5rem;
+    align-self: center;
   }
 }
