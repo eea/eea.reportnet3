@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
@@ -30,6 +30,15 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     let res = timezones.map(zone => ({ utcOffset: zone.utc, tzCode: zone.tzCode }));
     return uniqBy(res, 'utcOffset');
   };
+
+  useEffect(() => {
+    //todo timezone setter
+  }, [selectedTimeZone]);
+
+  useEffect(() => {
+    console.log(`use effect date  >>>  `, date);
+  }, [date]);
+
   const renderButtons = () => {
     return (
       <div className={styles.buttonRight}>
@@ -53,14 +62,18 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderCalendar = () => {
     return (
       <Calendar
+        baseZIndex={9999}
+        dateFormat="yy/mm/dd"
+        hourFormat="24"
         inline
         monthNavigator
         onChange={e => {
-          console.log('Calendar', e.value);
           setDate(e.value);
         }}
+        showTime={true}
         showWeek
         value={date}
+        yearNavigator
         yearRange="1900:2100"
       />
     );
@@ -69,19 +82,21 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderInput = () => {
     return <InputText onChange={e => setDate(new Date(e.target.value))} value={date} />;
   };
+
   const renderInputMask = () => {
-    console.log(`Date.parse(inputValue)`, Date.parse(inputValue));
+    console.log('inputValue', inputValue, `dayjs(new Date(inputValue))`, dayjs(new Date(inputValue)).format());
     return (
       <InputMask
         autoClear
-        mask={`99-99-9999 99:99:99`}
-        onChange={e => {
-          setInputValue(e.target.value);
-          console.log('input mask ', e.target.value, ' input value', dayjs(inputValue));
+        mask={`9999/99/99 99:99`}
+        onChange={e => setInputValue(e.target.value)}
+        onComplete={e => {
+          setDate(dayjs(inputValue).format());
+          setInputValue('');
         }}
-        onComplete={e => setDate(Date.parse(inputValue))}
-        slotChar="dd/mm/yyyy hh:mm:ss"
-        value={inputValue}
+        // slotChar="yy/mm/dd hh:mm"
+        value={dayjs(date).format()}
+        // value={inputValue} // 19650917112
       />
     );
   };
@@ -98,8 +113,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     );
   };
 
-  const renderTimezoneDropdown = () => {};
-
   return (
     <div style={{ width: '500px' }}>
       {renderCalendar()}
@@ -108,7 +121,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
         GMT{renderDropdown()}
       </div>
       {renderInput()}
-      {renderTimezoneDropdown()}
       {renderButtons()}
     </div>
   );
