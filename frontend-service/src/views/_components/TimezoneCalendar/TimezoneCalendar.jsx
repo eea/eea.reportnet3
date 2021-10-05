@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
@@ -18,24 +18,36 @@ import timezones from 'timezones-list';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { uniqBy } from 'lodash';
 
+const offsetOptions = [
+  { value: -1, label: '-01:00' },
+  { value: 0, label: '+00:00' },
+  { value: 1, label: '+01:00' },
+  { value: 2, label: '+02:00' }
+];
+
 export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(timezone);
   dayjs.extend(customParseFormat);
 
+  const calendarRef = useRef();
+
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
-  const [selectedTimeZone, setSelectedTimeZone] = useState({ utcOffset: '+00:00', tzCode: 'Africa/Abidjan' });
+  // const [selectedTimeZone, setSelectedTimeZone] = useState({ utcOffset: '+00:00', tzCode: 'Africa/Abidjan' });
+  const [selectedOffset, setSelectedOffset] = useState({ value: 2, label: '+02:00' });
 
-  const getUtcOffsets = () => {
-    let res = timezones.map(zone => ({ utcOffset: zone.utc, tzCode: zone.tzCode }));
-    return uniqBy(res, 'utcOffset');
-  };
+  console.log(`date`, date);
 
-  useEffect(() => {
-    //todo timezone setter
-  }, [selectedTimeZone]);
+  // const getUtcOffsets = () => {
+  //   let res = timezones.map(zone => ({ utcOffset: zone.utc, tzCode: zone.tzCode }));
+  //   return uniqBy(res, 'utcOffset');
+  // };
+
+  // useEffect(() => {
+  //   //todo timezone setter
+  // }, [selectedTimeZone]);
 
   const renderButtons = () => {
     return (
@@ -51,25 +63,30 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
           className="p-button p-component p-button-secondary p-button-animated-blink p-button-text-icon-left"
           icon="trash"
           label={resourcesContext.messages['clear']}
-          onClick={() => setDate('')}
+          onClick={() => {
+            setDate('');
+            setInputValue('');
+          }}
         />
       </div>
     );
   };
 
+  console.log(`calendarRef.current`, calendarRef.current);
+
   const renderCalendar = () => {
     return (
       <Calendar
-        dateFormat="DD/MM/YY hh:mm:ss"
+        dateFormat="DD/MM/YYYY HH:mm:ss"
         inline
         monthNavigator
         onChange={e => {
-          // console.log('Calendar', e.value);
+          console.log('Calendar', e.value);
           setDate(e.value);
-          // console.log(dayjs(e.value).format('DD/MM/YYYY hh:mm:ss').toString());
-          setInputValue(dayjs(e.value).format('DD/MM/YYYY hh:mm:ss').toString());
+          setInputValue(dayjs(e.value).format('DD/MM/YYYY HH:mm:ss').toString());
         }}
         // showTime={true}
+        ref={calendarRef}
         showWeek
         value={date}
         yearNavigator
@@ -83,25 +100,17 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   };
 
   const renderInputMask = () => {
-    // console.log(`Date.parse(inputValue)`, Date.parse(inputValue));
+    console.log(`Date.parse(inputValue)`, Date.parse(inputValue));
     return (
       <InputMask
         autoClear
         mask={`99/99/9999 99:99:99`}
         onChange={e => {
           setInputValue(e.target.value);
-          // console.log('input mask ', e.target.value, ' input value', dayjs(inputValue), new Date(e.target.value));
         }}
         onComplete={e => {
-          // console.log(e.value);
-          // console.log(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss'));
-          // console.log(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss'));
-          // console.log(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss').format('DD/MM/YYYY hh:mm:ss'));
-          // console.log(new Date(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss').format('DD/MM/YYYY hh:mm:ss')));
-
-          setDate(new Date(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss').format('DD/MM/YYYY hh:mm:ss')));
+          setDate(new Date(dayjs(e.value, 'DD/MM/YYYY HH:mm:ss').format('ddd/MMMDD/YYYY HH:mm:ssZZ')));
         }}
-        // slotChart="dd/mm/yyyy hh:mm:ss"
         value={inputValue}
       />
     );
@@ -109,12 +118,15 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderDropdown = () => {
     return (
       <Dropdown
-        onChange={e => setSelectedTimeZone(e.value)}
-        optionLabel="utcOffset"
-        optionValue="tzCode"
-        options={getUtcOffsets()}
+        // onChange={e => setSelectedTimeZone(e.value)}
+        onChange={e => setSelectedOffset(e.value)}
+        optionLabel="label"
+        optionValue="value"
+        // options={getUtcOffsets()}
+        options={offsetOptions}
         placeholder="Select GMT offset"
-        value={selectedTimeZone}
+        // value={selectedTimeZone}
+        value={selectedOffset}
       />
     );
   };
