@@ -70,7 +70,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
         onChange={e => {
           setDate(e.value);
         }}
-        showTime={true}
+        // showTime={true}
         showWeek
         value={date}
         yearNavigator
