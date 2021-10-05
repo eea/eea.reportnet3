@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
@@ -21,7 +21,8 @@ import { uniqBy } from 'lodash';
 const offsetOptions = [
   { value: -1, label: '-01:00' },
   { value: 0, label: '+00:00' },
-  { value: 1, label: '+01:00' }
+  { value: 1, label: '+01:00' },
+  { value: 2, label: '+02:00' }
 ];
 
 export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
@@ -30,10 +31,12 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   dayjs.extend(timezone);
   dayjs.extend(customParseFormat);
 
+  const calendarRef = useRef();
+
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
   // const [selectedTimeZone, setSelectedTimeZone] = useState({ utcOffset: '+00:00', tzCode: 'Africa/Abidjan' });
-  const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
+  const [selectedOffset, setSelectedOffset] = useState({ value: 2, label: '+02:00' });
 
   console.log(`date`, date);
 
@@ -69,10 +72,12 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     );
   };
 
+  console.log(`calendarRef.current`, calendarRef.current);
+
   const renderCalendar = () => {
     return (
       <Calendar
-        dateFormat="DD/MM/YY HH:mm:ss"
+        dateFormat="DD/MM/YYYY HH:mm:ss"
         inline
         monthNavigator
         onChange={e => {
@@ -80,7 +85,8 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
           setDate(e.value);
           setInputValue(dayjs(e.value).format('DD/MM/YYYY HH:mm:ss').toString());
         }}
-        showTime={true}
+        // showTime={true}
+        ref={calendarRef}
         showWeek
         value={date}
         yearNavigator
@@ -103,12 +109,8 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
           setInputValue(e.target.value);
         }}
         onComplete={e => {
-          console.log('input mask ', e.value);
-          console.log(dayjs(inputValue, 'DD/MM/YYYY HH:mm:ss'));
-
           setDate(new Date(dayjs(e.value, 'DD/MM/YYYY HH:mm:ss').format('ddd/MMMDD/YYYY HH:mm:ssZZ')));
         }}
-        // slotChart="dd/mm/yyyy HH:mm:ss"
         value={inputValue}
       />
     );
