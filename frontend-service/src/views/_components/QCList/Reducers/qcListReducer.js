@@ -22,13 +22,20 @@ export const qcListReducer = (state, { type, payload }) => {
       return { ...state, validationList: payload.validationsServiceList };
 
     case 'RESET_FILTERED_DATA':
-      return { ...state, filteredData: state.initialFilteredData, initialFilteredData: [] };
+      return {
+        ...state,
+        filteredData: state.initialFilteredData,
+        // initialFilteredData: [],
+        validationList: { ...state.validationList, validations: state.initialValidationsList },
+        editingRows: state.editingRows - 1
+      };
 
     case 'SET_INITIAL_DATA':
       return {
         ...state,
         initialFilteredData: state.filteredData,
-        initialValidationsList: state.validationList.validations
+        initialValidationsList: state.validationList.validations,
+        editingRows: state.editingRows + 1
       };
 
     case 'SET_DELETED_RULE_ID':
@@ -40,6 +47,9 @@ export const qcListReducer = (state, { type, payload }) => {
         filteredData: payload,
         validationList: { ...state.validationList, validations: payload }
       };
+
+    case 'UPDATE_EDITING_ROWS_COUNT':
+      return { ...state, editingRows: payload };
 
     default: {
       return state;

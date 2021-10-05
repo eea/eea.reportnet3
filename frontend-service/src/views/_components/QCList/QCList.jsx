@@ -51,6 +51,7 @@ export const QCList = withRouter(
       initialValidationsList: [],
       isDataUpdated: false,
       isDeleteDialogVisible: false,
+      editingRows: 0,
       isLoading: true,
       validationId: '',
       validationList: {}
@@ -616,6 +617,8 @@ export const QCList = withRouter(
         notificationContext.add({
           type: 'QC_RULE_UPDATING_ERROR'
         });
+      } finally {
+        tabsValidationsDispatch({ type: 'UPDATE_EDITING_ROWS_COUNT', payload: tabsValidationsState.editingRows - 1 });
       }
     };
 
@@ -655,7 +658,12 @@ export const QCList = withRouter(
 
       return (
         <div className={styles.validations}>
-          <div className={styles.searchInput}>
+          <div
+            className={styles.searchInput}
+            style={{
+              pointerEvents: tabsValidationsState.editingRows > 0 ? 'none' : 'auto',
+              opacity: tabsValidationsState.editingRows > 0 ? '0.5' : 1
+            }}>
             <Filters
               className="filter-lines"
               data={tabsValidationsState.validationList.validations}
