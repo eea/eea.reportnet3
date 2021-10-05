@@ -77,11 +77,9 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderCalendar = () => {
     return (
       <Calendar
-        dateFormat="DD/MM/YYYY HH:mm:ss"
         inline
         monthNavigator
         onChange={e => {
-          console.log('Calendar', e.value);
           setDate(e.value);
           setInputValue(dayjs(e.value).format('DD/MM/YYYY HH:mm:ss').toString());
         }}
@@ -99,8 +97,9 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     return <InputText onChange={e => setDate(new Date(e.target.value))} value={date} />;
   };
 
+  console.log(`dayjs(date).format('YYYY-MM-DD HH:mm:ss Z')`, dayjs(date).format('YYYY-MM-DD HH:mm:ss Z'));
+
   const renderInputMask = () => {
-    console.log(`Date.parse(inputValue)`, Date.parse(inputValue));
     return (
       <InputMask
         autoClear
@@ -109,7 +108,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
           setInputValue(e.target.value);
         }}
         onComplete={e => {
-          setDate(new Date(dayjs(e.value, 'DD/MM/YYYY HH:mm:ss').format('ddd/MMMDD/YYYY HH:mm:ssZZ')));
+          setDate(new Date(dayjs(e.value, 'DD/MM/YYYY HH:mm:ss').format('ddd/MMMDD/YYYY HH:mm:ssZ')));
         }}
         value={inputValue}
       />
@@ -119,7 +118,10 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     return (
       <Dropdown
         // onChange={e => setSelectedTimeZone(e.value)}
-        onChange={e => setSelectedOffset(e.value)}
+        onChange={e => {
+          setSelectedOffset(e.value);
+          // setDate(new Date(dayjs(date).utcOffset(e.value))); // Todo
+        }}
         optionLabel="label"
         optionValue="value"
         // options={getUtcOffsets()}
