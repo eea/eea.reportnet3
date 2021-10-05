@@ -1,8 +1,7 @@
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useRef, useState } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
-import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
 import styles from './TimezoneCalendar.module.scss';
@@ -13,41 +12,46 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
 import { InputText } from 'views/_components/InputText';
 
-import timezones from 'timezones-list';
-
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { uniqBy } from 'lodash';
 
 const offsetOptions = [
+  { value: -12, label: '-12:00' },
+  { value: -11, label: '-11:00' },
+  { value: -10, label: '-10:00' },
+  { value: -9, label: '-09:00' },
+  { value: -8, label: '-08:00' },
+  { value: -7, label: '-07:00' },
+  { value: -6, label: '-06:00' },
+  { value: -5, label: '-05:00' },
+  { value: -4, label: '-04:00' },
+  { value: -3, label: '-03:00' },
+  { value: -2, label: '-02:00' },
   { value: -1, label: '-01:00' },
   { value: 0, label: '+00:00' },
   { value: 1, label: '+01:00' },
-  { value: 2, label: '+02:00' }
+  { value: 2, label: '+02:00' },
+  { value: 3, label: '+03:00' },
+  { value: 4, label: '+04:00' },
+  { value: 5, label: '+05:00' },
+  { value: 6, label: '+06:00' },
+  { value: 7, label: '+07:00' },
+  { value: 8, label: '+08:00' },
+  { value: 9, label: '+09:00' },
+  { value: 10, label: '+10:00' },
+  { value: 11, label: '+11:00' },
+  { value: 12, label: '+12:00' }
 ];
 
 export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
-  dayjs.extend(timezone);
   dayjs.extend(customParseFormat);
 
   const calendarRef = useRef();
 
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
-  // const [selectedTimeZone, setSelectedTimeZone] = useState({ utcOffset: '+00:00', tzCode: 'Africa/Abidjan' });
-  const [selectedOffset, setSelectedOffset] = useState({ value: 2, label: '+02:00' });
-
-  console.log(`date`, date);
-
-  // const getUtcOffsets = () => {
-  //   let res = timezones.map(zone => ({ utcOffset: zone.utc, tzCode: zone.tzCode }));
-  //   return uniqBy(res, 'utcOffset');
-  // };
-
-  // useEffect(() => {
-  //   //todo timezone setter
-  // }, [selectedTimeZone]);
+  const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
 
   const renderButtons = () => {
     return (
@@ -71,20 +75,18 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
       </div>
     );
   };
-
-  console.log(`calendarRef.current`, calendarRef.current);
-
+  //31/12/2021 23:59:59
   const renderCalendar = () => {
     return (
       <Calendar
         inline
         monthNavigator
         onChange={e => {
-          setDate(e.value);
-          setInputValue(dayjs(e.value).format('DD/MM/YYYY HH:mm:ss').toString());
+          setDate(new Date(dayjs.utc(e.value).utcOffset(selectedOffset.value).format('ddd/MMMDD/YYYY HH:mm:ssZ')));
+          setInputValue(dayjs.utc(e.value).utcOffset(selectedOffset.value).format('DD/MM/YYYY HH:mm:ss').toString());
         }}
-        // showTime={true}
         ref={calendarRef}
+        // showTime
         showWeek
         value={date}
         yearNavigator
@@ -97,8 +99,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     return <InputText onChange={e => setDate(new Date(e.target.value))} value={date} />;
   };
 
-  console.log(`dayjs(date).format('YYYY-MM-DD HH:mm:ss Z')`, dayjs(date).format('YYYY-MM-DD HH:mm:ss Z'));
-
   const renderInputMask = () => {
     return (
       <InputMask
@@ -108,7 +108,14 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
           setInputValue(e.target.value);
         }}
         onComplete={e => {
-          setDate(new Date(dayjs(e.value, 'DD/MM/YYYY HH:mm:ss').format('ddd/MMMDD/YYYY HH:mm:ssZ')));
+          setDate(
+            new Date(
+              dayjs
+                .utc(e.value, 'DD/MM/YYYY HH:mm:ss')
+                .utcOffset(selectedOffset.value)
+                .format('ddd/MMMDD/YYYY HH:mm:ssZ')
+            )
+          );
         }}
         value={inputValue}
       />
@@ -117,17 +124,13 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderDropdown = () => {
     return (
       <Dropdown
-        // onChange={e => setSelectedTimeZone(e.value)}
         onChange={e => {
           setSelectedOffset(e.value);
-          // setDate(new Date(dayjs(date).utcOffset(e.value))); // Todo
+          setDate(new Date(dayjs.utc(date).utcOffset(selectedOffset.value).format('ddd/MMMDD/YYYY HH:mm:ssZ')));
         }}
         optionLabel="label"
         optionValue="value"
-        // options={getUtcOffsets()}
         options={offsetOptions}
-        placeholder="Select GMT offset"
-        // value={selectedTimeZone}
         value={selectedOffset}
       />
     );
@@ -138,7 +141,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
       {renderCalendar()}
       <div className={styles.inputMaskWrapper}>
         {renderInputMask()}
-        <span className={styles.label}>GMT</span>
+        <span className={styles.label}>UTC</span>
         {renderDropdown()}
       </div>
       {renderInput()}
