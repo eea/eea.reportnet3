@@ -1,5 +1,6 @@
 import { useContext, useState, useEffect } from 'react';
 
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
@@ -21,6 +22,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(timezone);
+  dayjs.extend(customParseFormat);
 
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
@@ -34,10 +36,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   useEffect(() => {
     //todo timezone setter
   }, [selectedTimeZone]);
-
-  useEffect(() => {
-    console.log(`use effect date  >>>  `, date);
-  }, [date]);
 
   const renderButtons = () => {
     return (
@@ -62,13 +60,14 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderCalendar = () => {
     return (
       <Calendar
-        baseZIndex={9999}
-        dateFormat="yy/mm/dd"
-        hourFormat="24"
+        dateFormat="DD/MM/YY hh:mm:ss"
         inline
         monthNavigator
         onChange={e => {
+          // console.log('Calendar', e.value);
           setDate(e.value);
+          // console.log(dayjs(e.value).format('DD/MM/YYYY hh:mm:ss').toString());
+          setInputValue(dayjs(e.value).format('DD/MM/YYYY hh:mm:ss').toString());
         }}
         // showTime={true}
         showWeek
@@ -84,19 +83,26 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   };
 
   const renderInputMask = () => {
-    console.log('inputValue', inputValue, `dayjs(new Date(inputValue))`, dayjs(new Date(inputValue)).format());
+    // console.log(`Date.parse(inputValue)`, Date.parse(inputValue));
     return (
       <InputMask
         autoClear
-        mask={`9999/99/99 99:99`}
-        onChange={e => setInputValue(e.target.value)}
-        onComplete={e => {
-          setDate(dayjs(inputValue).format());
-          setInputValue('');
+        mask={`99/99/9999 99:99:99`}
+        onChange={e => {
+          setInputValue(e.target.value);
+          // console.log('input mask ', e.target.value, ' input value', dayjs(inputValue), new Date(e.target.value));
         }}
-        // slotChar="yy/mm/dd hh:mm"
-        value={dayjs(date).format()}
-        // value={inputValue} // 19650917112
+        onComplete={e => {
+          // console.log(e.value);
+          // console.log(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss'));
+          // console.log(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss'));
+          // console.log(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss').format('DD/MM/YYYY hh:mm:ss'));
+          // console.log(new Date(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss').format('DD/MM/YYYY hh:mm:ss')));
+
+          setDate(new Date(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss').format('DD/MM/YYYY hh:mm:ss')));
+        }}
+        // slotChart="dd/mm/yyyy hh:mm:ss"
+        value={inputValue}
       />
     );
   };
@@ -121,7 +127,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
         <span className={styles.label}>GMT</span>
         {renderDropdown()}
       </div>
-      {/* {renderInput()} */}
+      {renderInput()}
       {renderButtons()}
     </div>
   );
