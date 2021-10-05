@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
@@ -26,19 +26,20 @@ const offsetOptions = [
 ];
 
 export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
-  const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(timezone);
   dayjs.extend(customParseFormat);
 
+  const resourcesContext = useContext(ResourcesContext);
+
   const calendarRef = useRef();
+
+  console.log(`calendarRef`, calendarRef);
 
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
   // const [selectedTimeZone, setSelectedTimeZone] = useState({ utcOffset: '+00:00', tzCode: 'Africa/Abidjan' });
   const [selectedOffset, setSelectedOffset] = useState({ value: 2, label: '+02:00' });
-
-  console.log(`date`, date);
 
   // const getUtcOffsets = () => {
   //   let res = timezones.map(zone => ({ utcOffset: zone.utc, tzCode: zone.tzCode }));
@@ -72,8 +73,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     );
   };
 
-  console.log(`calendarRef.current`, calendarRef.current);
-
   const renderCalendar = () => {
     return (
       <Calendar
@@ -81,7 +80,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
         inline
         monthNavigator
         onChange={e => {
-          console.log('Calendar', e.value);
           setDate(e.value);
           setInputValue(dayjs(e.value).format('DD/MM/YYYY HH:mm:ss').toString());
         }}
@@ -99,17 +97,22 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     return <InputText onChange={e => setDate(new Date(e.target.value))} value={date} />;
   };
 
+  const getFullYear = event =>
+    new Date(dayjs(event.value, 'DD/MM/YYYY HH:mm:ss').format('ddd/MMMDD/YYYY HH:mm:ssZZ')).getFullYear();
+
   const renderInputMask = () => {
-    console.log(`Date.parse(inputValue)`, Date.parse(inputValue));
     return (
       <InputMask
         autoClear
         mask={`99/99/9999 99:99:99`}
-        onChange={e => {
-          setInputValue(e.target.value);
-        }}
-        onComplete={e => {
-          setDate(new Date(dayjs(e.value, 'DD/MM/YYYY HH:mm:ss').format('ddd/MMMDD/YYYY HH:mm:ssZZ')));
+        onChange={e => setInputValue(e.target.value)}
+        onComplete={event => {
+          event.originalEvent.target.value = getFullYear(event);
+
+          setDate(new Date(dayjs(event.value, 'DD/MM/YYYY HH:mm:ss').format('ddd/MMMDD/YYYY HH:mm:ssZZ')));
+
+          calendarRef?.current?.onYearDropdownChange(event.originalEvent);
+          // calendarRef?.current?.onMonthDropdownChange(event.originalEvent);
         }}
         value={inputValue}
       />
