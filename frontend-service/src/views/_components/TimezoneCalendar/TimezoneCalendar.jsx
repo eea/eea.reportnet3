@@ -1,9 +1,8 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
 import timezone from 'dayjs/plugin/timezone';
-import timezones from 'timezones-list';
-import uniqBy from 'lodash/uniqBy';
 import utc from 'dayjs/plugin/utc';
 
 import styles from './TimezoneCalendar.module.scss';
@@ -14,13 +13,16 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
 import { InputText } from 'views/_components/InputText';
 
+import timezones from 'timezones-list';
+
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { uniqBy } from 'lodash';
 
 export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
+  const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(timezone);
-
-  const resourcesContext = useContext(ResourcesContext);
+  dayjs.extend(customParseFormat);
 
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
@@ -30,6 +32,11 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     let res = timezones.map(zone => ({ utcOffset: zone.utc, tzCode: zone.tzCode }));
     return uniqBy(res, 'utcOffset');
   };
+
+  useEffect(() => {
+    //todo timezone setter
+  }, [selectedTimeZone]);
+
   const renderButtons = () => {
     return (
       <div className={styles.buttonRight}>
@@ -53,15 +60,19 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderCalendar = () => {
     return (
       <Calendar
+        dateFormat="DD/MM/YY hh:mm:ss"
         inline
         monthNavigator
-        onChange={event => {
-          console.log('Calendar', event.value);
-          setDate(event.value);
-          setInputValue(dayjs(event.value).format('DD-MM-YYYYTHH:mm:ss'));
+        onChange={e => {
+          // console.log('Calendar', e.value);
+          setDate(e.value);
+          // console.log(dayjs(e.value).format('DD/MM/YYYY hh:mm:ss').toString());
+          setInputValue(dayjs(e.value).format('DD/MM/YYYY hh:mm:ss').toString());
         }}
+        // showTime={true}
         showWeek
         value={date}
+        yearNavigator
         yearRange="1900:2100"
       />
     );
@@ -70,18 +81,27 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderInput = () => {
     return <InputText onChange={e => setDate(new Date(e.target.value))} value={date} />;
   };
+
   const renderInputMask = () => {
-    console.log(`Date.parse(inputValue)`, Date.parse(inputValue));
+    // console.log(`Date.parse(inputValue)`, Date.parse(inputValue));
     return (
       <InputMask
         autoClear
-        mask={`99-99-9999 99:99:99`}
+        mask={`99/99/9999 99:99:99`}
         onChange={e => {
           setInputValue(e.target.value);
-          console.log('input mask ', e.target.value, ' input value', dayjs(inputValue));
+          // console.log('input mask ', e.target.value, ' input value', dayjs(inputValue), new Date(e.target.value));
         }}
-        onComplete={e => setDate(Date.parse(inputValue))}
-        slotChar="dd/mm/yyyy hh:mm:ss"
+        onComplete={e => {
+          // console.log(e.value);
+          // console.log(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss'));
+          // console.log(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss'));
+          // console.log(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss').format('DD/MM/YYYY hh:mm:ss'));
+          // console.log(new Date(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss').format('DD/MM/YYYY hh:mm:ss')));
+
+          setDate(new Date(dayjs(e.value, 'MM/DD/YYYY hh:mm:ss').format('DD/MM/YYYY hh:mm:ss')));
+        }}
+        // slotChart="dd/mm/yyyy hh:mm:ss"
         value={inputValue}
       />
     );
@@ -99,17 +119,15 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     );
   };
 
-  const renderTimezoneDropdown = () => {};
-
   return (
-    <div style={{ width: '500px' }}>
+    <div className={styles.container}>
       {renderCalendar()}
-      <div style={{ display: 'flex' }}>
+      <div className={styles.inputMaskWrapper}>
         {renderInputMask()}
-        GMT{renderDropdown()}
+        <span className={styles.label}>GMT</span>
+        {renderDropdown()}
       </div>
       {renderInput()}
-      {renderTimezoneDropdown()}
       {renderButtons()}
     </div>
   );
