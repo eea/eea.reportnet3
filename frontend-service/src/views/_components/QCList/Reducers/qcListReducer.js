@@ -49,6 +49,7 @@ export const qcListReducer = (state, { type, payload }) => {
       };
 
     case 'UPDATE_EDITING_ROWS_COUNT':
+      console.log({ payload });
       return { ...state, editingRows: payload };
 
     default: {

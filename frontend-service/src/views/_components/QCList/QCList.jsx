@@ -605,6 +605,7 @@ export const QCList = withRouter(
     const onUpdateValidationRule = async event => {
       try {
         console.log({ event });
+        tabsValidationsDispatch({ type: 'UPDATE_EDITING_ROWS_COUNT', payload: tabsValidationsState.editingRows - 1 });
         if (TextUtils.areEquals(event.data.entityType, 'TABLE')) {
           await ValidationService.updateTableRule(dataset.datasetId, getCandidateRule(event.data));
         } else if (TextUtils.areEquals(event.data.entityType, 'RECORD')) {
@@ -617,8 +618,6 @@ export const QCList = withRouter(
         notificationContext.add({
           type: 'QC_RULE_UPDATING_ERROR'
         });
-      } finally {
-        tabsValidationsDispatch({ type: 'UPDATE_EDITING_ROWS_COUNT', payload: tabsValidationsState.editingRows - 1 });
       }
     };
 

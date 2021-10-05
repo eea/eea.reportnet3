@@ -197,7 +197,6 @@ export const ValidationService = {
     };
 
     if (!validationRule.automatic) {
-      debugger;
       validation.integrityVO =
         isNil(validationRule.sqlSentence) || isEmpty(validationRule.sqlSentence)
           ? {
