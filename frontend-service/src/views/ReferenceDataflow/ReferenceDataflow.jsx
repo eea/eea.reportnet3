@@ -409,7 +409,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       {dataflowState.isDatasetsInfoDialogVisible && (
         <Dialog
           footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
-          header={`${resourcesContext.messages['datasetsInfo']} - ${dataflowState.name}`}
+          header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowState.id}`}
           onHide={() => manageDialogs('isDatasetsInfoDialogVisible', false)}
           visible={dataflowState.isDatasetsInfoDialogVisible}>
           <DatasetsInfo dataflowId={referenceDataflowId} dataflowType={dataflowState.dataflowType} />
