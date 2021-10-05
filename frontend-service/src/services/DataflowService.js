@@ -179,7 +179,7 @@ export const DataflowService = {
   },
 
   getDatasetsFinalFeedback: async dataflowId => {
-    const datasetsFinalFeedbackDTO = await DataflowRepository.getDatasetsFinalFeedback(dataflowId);
+    const datasetsFinalFeedbackDTO = await DataflowRepository.getDatasetsFinalFeedbackAndReleasedStatus(dataflowId);
     return datasetsFinalFeedbackDTO.data.map(dataset => {
       return {
         dataProviderName: dataset.dataSetName,
@@ -192,7 +192,7 @@ export const DataflowService = {
   },
 
   getDatasetsReleasedStatus: async dataflowId => {
-    const datasetsReleasedStatusDTO = await DataflowRepository.getDatasetsReleasedStatus(dataflowId);
+    const datasetsReleasedStatusDTO = await DataflowRepository.getDatasetsFinalFeedbackAndReleasedStatus(dataflowId);
     datasetsReleasedStatusDTO.data.sort((a, b) => {
       let datasetName_A = a.dataSetName;
       let datasetName_B = b.dataSetName;
