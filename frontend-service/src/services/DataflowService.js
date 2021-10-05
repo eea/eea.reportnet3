@@ -375,49 +375,86 @@ export const DataflowService = {
 
     const datasetsInfoDTO = [
       {
-        id: 1,
-        name: 'design dataset',
-        type: 'DESIGN',
-        dataProviderName: null,
-        dataProviderCode: null
+        id: 111,
+        dataSetName: 'nuevo dataset',
+        datasetTypeEnum: 'DESIGN',
+        dataProviderCode: null,
+        dataProviderName: null
       },
       {
-        id: 2,
-        name: 'reporting',
-        type: 'REPORTING',
-        dataProviderName: 'Spain',
-        dataProviderCode: 'SP'
+        id: 113,
+        dataSetName: 'nuevo',
+        datasetTypeEnum: 'DESIGN',
+        dataProviderCode: null,
+        dataProviderName: null
       },
       {
-        id: 3,
-        name: 'dataset test',
-        type: 'TEST',
-        dataProviderName: null,
-        dataProviderCode: null
+        id: 124,
+        dataSetName: 'Data Collection - nuevo dataset',
+        datasetTypeEnum: 'COLLECTION',
+        dataProviderCode: null,
+        dataProviderName: null
       },
       {
-        id: 4,
-        name: 'eu dataset',
-        type: 'EUDATASET',
-        dataProviderName: null,
-        dataProviderCode: null
+        id: 128,
+        dataSetName: 'Data Collection - nuevo',
+        datasetTypeEnum: 'COLLECTION',
+        dataProviderCode: null,
+        dataProviderName: null
       },
       {
-        id: 5,
-        name: 'data collection dataset',
-        type: 'COLLECTION',
-        dataProviderName: null,
-        dataProviderCode: null
+        id: 125,
+        dataSetName: 'EU Dataset - nuevo dataset',
+        datasetTypeEnum: 'EUDATASET',
+        dataProviderCode: null,
+        dataProviderName: null
       },
       {
-        id: 6,
-        name: 'reference dataset',
-        type: 'REFERENCE',
-        dataProviderName: null,
-        dataProviderCode: null
+        id: 129,
+        dataSetName: 'EU Dataset - nuevo',
+        datasetTypeEnum: 'EUDATASET',
+        dataProviderCode: null,
+        dataProviderName: null
+      },
+      {
+        id: 89,
+        dataSetName: 'Reference Dataset - nuevo',
+        datasetTypeEnum: 'REFERENCE',
+        dataProviderCode: null,
+        dataProviderName: null
+      },
+      {
+        id: 126,
+        dataSetName: 'Test Dataset - nuevo dataset',
+        datasetTypeEnum: 'TEST',
+        dataProviderCode: null,
+        dataProviderName: null
+      },
+      {
+        id: 130,
+        dataSetName: 'Test Dataset - nuevo',
+        datasetTypeEnum: 'TEST',
+        dataProviderCode: null,
+        dataProviderName: null
+      },
+      {
+        id: 127,
+        dataSetName: 'DATA_P_aux',
+        datasetTypeEnum: 'REPORTING',
+        dataProviderCode: 'FR',
+        dataProviderName: 'France'
+      },
+      {
+        id: 131,
+        dataSetName: 'DATA_P_aux',
+        datasetTypeEnum: 'REPORTING',
+        dataProviderCode: 'SP',
+        dataProviderName: 'Spain'
       }
     ];
 
-    return sortBy(datasetsInfoDTO, 'type');
+    const parsedDatasetsInfoDTO = DataflowUtils.parseDatasetsInfoDTO(datasetsInfoDTO);
+
+    return sortBy(parsedDatasetsInfoDTO, 'id');
   }
 };

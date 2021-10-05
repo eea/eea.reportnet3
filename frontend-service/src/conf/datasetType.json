@@ -1,8 +1,8 @@
 {
-  "DATACOLLECTION": "COLLECTION",
-  "DESIGN": "DESIGN",
-  "EUDATASET": "EUDATASET",
-  "REFERENCE": "REFERENCE",
-  "REPORTING": "REPORTING",
-  "TEST": "TEST"
+  "DATACOLLECTION": { "key": "COLLECTION", "value": "dataCollection" },
+  "DESIGN": { "key": "DESIGN", "value": "designDataset" },
+  "EUDATASET": { "key": "EUDATASET", "value": "euDataset" },
+  "REFERENCE": { "key": "REFERENCE", "value": "referenceDataset" },
+  "REPORTING": { "key": "REPORTING", "value": "reportingDataset" },
+  "TEST": { "key": "TEST", "value": "testDataset" }
 }

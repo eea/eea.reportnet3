@@ -3,8 +3,6 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
-import { config } from 'conf';
-
 import styles from './DatasetsInfo.module.scss';
 
 import { Column } from 'primereact/column';
@@ -43,8 +41,14 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
       setIsLoading(true);
       const datasets = await DataflowService.getDatasetsInfo(dataflowId);
 
+      datasets.forEach(dataset => {
+        dataset.providerData = !isNil(dataset.dataProviderName)
+          ? `${dataset.dataProviderName} (${dataset.dataProviderCode})`
+          : '';
+        dataset.type = resourcesContext.messages[dataset.type];
+      });
+
       setDatasetsInfo(datasets);
-      setFilteredData(datasets);
     } catch (error) {
       console.error('DatasetsInfo - onLoadDatasetsSummary.', error);
       notificationContext.add({ type: 'LOAD_DATASETS_SUMMARY_ERROR' });
@@ -75,7 +79,7 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
       properties: [
         { name: 'type' },
         {
-          name: 'dataProviderName',
+          name: 'providerData',
           label: TextByDataflowTypeUtils.getLabelByDataflowType(
             resourcesContext.messages,
             dataflowType,
@@ -87,36 +91,6 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
   ];
 
   const onLoadFilteredData = value => setFilteredData(value);
-
-  const renderDataProviderNameTemplate = rowData =>
-    !isEmpty(rowData.dataProviderName) && (
-      <div className={styles.checkedValueColumn}>{`${rowData.dataProviderName} (${rowData.dataProviderCode})`}</div>
-    );
-
-  const renderTypeTemplate = rowData => {
-    switch (rowData.type) {
-      case config.datasetType.DESIGN:
-        return resourcesContext.messages['design'];
-
-      case config.datasetType.TEST:
-        return resourcesContext.messages['testDataset'];
-
-      case config.datasetType.REPORTING:
-        return resourcesContext.messages['reportingDataset'];
-
-      case config.datasetType.DATACOLLECTION:
-        return resourcesContext.messages['dataCollection'];
-
-      case config.datasetType.EUDATASET:
-        return resourcesContext.messages['euDataset'];
-
-      case config.datasetType.REFERENCE:
-        return resourcesContext.messages['referenceDataset'];
-
-      default:
-        break;
-    }
-  };
 
   const renderFilters = () => (
     <Filters
@@ -146,15 +120,9 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
               totalRecords={datasetsInfo.length}
               value={filteredData}>
               <Column field="name" header={resourcesContext.messages['name']} sortable={true} />
+              <Column field="type" header={resourcesContext.messages['type']} sortable={true} />
               <Column
-                body={renderTypeTemplate}
-                field="type"
-                header={resourcesContext.messages['type']}
-                sortable={true}
-              />
-              <Column
-                body={renderDataProviderNameTemplate}
-                field="dataProviderName"
+                field="providerData"
                 header={TextByDataflowTypeUtils.getLabelByDataflowType(
                   resourcesContext.messages,
                   dataflowType,
