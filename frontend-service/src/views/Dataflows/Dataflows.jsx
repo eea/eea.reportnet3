@@ -219,27 +219,38 @@ const Dataflows = withRouter(({ history, match }) => {
     }
   };
 
+  const setStatusDataflowLabel = dataflows =>
+    dataflows.map(dataflow => {
+      dataflow.statusKey = dataflow.status;
+      if (dataflow.status === config.dataflowStatus.OPEN) {
+        dataflow.status = dataflow.isReleasable
+          ? resourcesContext.messages['open'].toUpperCase()
+          : resourcesContext.messages['closed'].toUpperCase();
+      } else {
+        dataflow.status = resourcesContext.messages['design'].toUpperCase();
+      }
+      return dataflow;
+    });
+
   const getDataflows = async () => {
     setLoading(true);
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
         const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        setStatusDataflowLabel(data);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reporting' } });
-      }
-
-      if (TextUtils.areEquals(tabId, 'reference')) {
+      } else if (TextUtils.areEquals(tabId, 'reference')) {
         const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        setStatusDataflowLabel(data);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reference' } });
-      }
-
-      if (TextUtils.areEquals(tabId, 'business')) {
+      } else if (TextUtils.areEquals(tabId, 'business')) {
         const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        setStatusDataflowLabel(data);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } });
-      }
-
-      if (TextUtils.areEquals(tabId, 'citizenScience')) {
+      } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
         const data = await CitizenScienceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        setStatusDataflowLabel(data);
         dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'citizenScience' } });
       }
     } catch (error) {

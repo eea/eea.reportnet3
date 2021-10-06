@@ -7,6 +7,8 @@ import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
 
+import { config } from 'conf';
+
 import styles from './DataflowsItem.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -99,14 +101,16 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
       </div>
 
       <div className={`${styles.status} dataflowList-status-help-step`}>
-        {!isCustodian && !isNil(itemContent.reportingDatasetsStatus) && itemContent.status === 'OPEN' && (
-          <p>
-            <span>{`${resourcesContext.messages['deliveryStatus']}: `}</span>
-            {itemContent.reportingDatasetsStatus === 'PENDING'
-              ? resourcesContext.messages['draft'].toUpperCase()
-              : itemContent.reportingDatasetsStatus.split('_').join(' ').toUpperCase()}
-          </p>
-        )}
+        {!isCustodian &&
+          !isNil(itemContent.reportingDatasetsStatus) &&
+          itemContent.statusKey === config.dataflowStatus.OPEN && (
+            <p>
+              <span>{`${resourcesContext.messages['deliveryStatus']}: `}</span>
+              {itemContent.reportingDatasetsStatus === 'PENDING'
+                ? resourcesContext.messages['draft'].toUpperCase()
+                : itemContent.reportingDatasetsStatus.split('_').join(' ').toUpperCase()}
+            </p>
+          )}
         <p>
           <span>{`${resourcesContext.messages['dataflowStatus']}: `}</span>
           {itemContent.status}

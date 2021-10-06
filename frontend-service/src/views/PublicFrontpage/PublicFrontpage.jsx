@@ -51,7 +51,13 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
     }
   }, [urlErrorType]);
 
-  const handleRedirect = target => history.push(target);
+  const handleRedirect = (e, target) => {
+    if (e.button === 0) {
+      return history.push(target);
+    } else if (e.button === 1) {
+      window.open(target, '_blank');
+    }
+  };
 
   return (
     <PublicLayout>
@@ -165,14 +171,14 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
               <div className={styles.showPublicData}>
                 <div
                   className={styles.showPublicDataButton}
-                  onClick={() => handleRedirect(getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}>
+                  onMouseDown={e => handleRedirect(e, getUrl(routes.PUBLIC_DATAFLOWS, {}, true))}>
                   <p>
                     <strong>View by obligation dataflow status and download reported data</strong>
                   </p>
                 </div>
                 <div
                   className={styles.showPublicDataButton}
-                  onClick={() => handleRedirect(getUrl(routes.PUBLIC_COUNTRIES, {}, true))}>
+                  onMouseDown={e => handleRedirect(e, getUrl(routes.PUBLIC_COUNTRIES, {}, true))}>
                   <p>
                     <strong>View by country dataflow status and download reported data</strong>
                   </p>
@@ -187,9 +193,9 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                     card={dataflow}
                     dataflowId={dataflow.id}
                     dueDate={dataflow.targetDate}
-                    externalCard={true}
                     frequency={dataflow.reportingFrequency}
                     key={dataflow.key}
+                    landingPageCard={true}
                     pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
                     subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
                     title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
@@ -203,9 +209,9 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                     card={dataflow}
                     dataflowId={dataflow.id}
                     dueDate={dataflow.targetDate}
-                    externalCard={true}
                     frequency={dataflow.reportingFrequency}
                     key={dataflow.key}
+                    landingPageCard={true}
                     pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
                     subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
                     title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
