@@ -14,7 +14,10 @@
   margin-top: 0.5rem;
 
   .label {
-    padding: 0 0.5rem;
+    padding-left: 0.5rem;
     align-self: center;
+  }
+  & span:nth-child(2n) {
+    padding-right: 0.5rem;
   }
 }

@@ -1265,6 +1265,8 @@
     "yes": "Yes",
     "expirationDateFilterLabel": "Delivery date range",
     "creationDateFilterLabel": "Creation date range",
-    "clear": "Clear"
+    "clear": "Clear",
+    "dateTimeWarningTooltip": "Datetime will be converted to UTC",
+    "utc": "UTC"
   }
 }

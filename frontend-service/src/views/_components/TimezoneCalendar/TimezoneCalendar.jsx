@@ -11,6 +11,7 @@ import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
 import { InputText } from 'views/_components/InputText';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -63,7 +64,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
           label={resourcesContext.messages['save']}
           onClick={() => onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value))}
         />
-        <Button
+        {/* <Button
           className="p-button p-component p-button-secondary p-button-animated-blink p-button-text-icon-left"
           icon="trash"
           label={resourcesContext.messages['clear']}
@@ -71,7 +72,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
             setDate('');
             setInputValue('');
           }}
-        />
+        /> */}
       </div>
     );
   };
@@ -132,7 +133,12 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
       {renderCalendar()}
       <div className={styles.inputMaskWrapper}>
         {renderInputMask()}
-        <span className={styles.label}>UTC</span>
+        <span className={styles.label}>{resourcesContext.messages['utc']}</span>
+        <TooltipButton
+          message={resourcesContext.messages['dateTimeWarningTooltip']}
+          tooltipClassName={styles.tooltip}
+          uniqueIdentifier={'dateTimeWarningTooltip'}
+        />
         {renderDropdown()}
       </div>
       {/* {renderInput()} */}
