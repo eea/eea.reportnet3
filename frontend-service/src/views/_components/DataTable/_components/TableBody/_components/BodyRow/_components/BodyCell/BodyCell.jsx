@@ -103,6 +103,14 @@ export class BodyCell extends Component {
     }
   }
 
+  calculateDisabledQuickEdit() {
+    return (
+      (this.props.rowData[this.props.quickEditRowInfo.property] === this.props.quickEditRowInfo.updatedRow ||
+        this.props.rowData[this.props.quickEditRowInfo.property] === this.props.quickEditRowInfo.deletedRow) &&
+      this.props.quickEditRowInfo.condition
+    );
+  }
+
   closeCell() {
     this.setState({
       editing: false
@@ -239,7 +247,8 @@ export class BodyCell extends Component {
           <div className={styles.actionTemplate}>
             <Button
               className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-              icon="clock"
+              disabled={this.props.quickEditRowInfo ? this.calculateDisabledQuickEdit() : false}
+              icon={this.props.quickEditRowInfo && this.calculateDisabledQuickEdit() ? 'spinnerAnimate' : 'clock'}
               onClick={this.props.onRowEditInit}
               tooltip={this.context.messages['quickEdit']}
               tooltipOptions={{ position: 'top' }}

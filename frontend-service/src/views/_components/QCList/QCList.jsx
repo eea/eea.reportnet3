@@ -51,6 +51,7 @@ export const QCList = withRouter(
       initialValidationsList: [],
       isDataUpdated: false,
       isDeleteDialogVisible: false,
+      isDeletingRule: false,
       editingRows: 0,
       isLoading: true,
       validationId: '',
@@ -483,7 +484,6 @@ export const QCList = withRouter(
     };
 
     const getCandidateRule = data => {
-      console.log(data);
       const getExpressionType = () => {
         let expressionType = '';
         if (isNil(data.sqlSentence)) {
@@ -506,7 +506,6 @@ export const QCList = withRouter(
           expressionType = 'sqlSentence';
         }
 
-        console.log({ expressionType });
         return expressionType;
       };
 
@@ -545,14 +544,11 @@ export const QCList = withRouter(
       <QCFieldEditor initialValue={props.rowData[field]} onSaveField={onRowEditorValueChange} qcs={props} />
     );
 
-    const levelErrorTemplate = (rowData, isDropdown = false) => {
-      // console.log(rowData, rowData.levelError, isDropdown);
-      return (
-        <div className={styles.levelErrorTemplateWrapper}>
-          <LevelError type={isDropdown ? rowData.value : rowData.levelError.toLowerCase()} />
-        </div>
-      );
-    };
+    const levelErrorTemplate = (rowData, isDropdown = false) => (
+      <div className={styles.levelErrorTemplateWrapper}>
+        <LevelError type={isDropdown ? rowData.value : rowData.levelError.toLowerCase()} />
+      </div>
+    );
 
     const renderColumns = validations => {
       const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
@@ -587,11 +583,8 @@ export const QCList = withRouter(
       isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
     const onRowEditorValueChange = (props, value) => {
-      console.log({ props, value });
-      let inmQCs = [...tabsValidationsState.validationList.validations];
+      const inmQCs = [...tabsValidationsState.validationList.validations];
       const qcIdx = inmQCs.findIndex(qc => qc.id === props.rowData.id);
-      console.log(qcIdx);
-      console.log(inmQCs[qcIdx][props.field], value);
       if (inmQCs[qcIdx][props.field] !== value) {
         inmQCs[qcIdx][props.field] = value;
         tabsValidationsDispatch({ type: 'UPDATE_FILTER_DATA_AND_VALIDATIONS', payload: inmQCs });
@@ -599,6 +592,7 @@ export const QCList = withRouter(
     };
 
     const onRowEditInit = event => {
+      validationContext.onOpenToQuickEdit(event.data.id);
       tabsValidationsDispatch({ type: 'SET_INITIAL_DATA' });
     };
 
@@ -606,8 +600,12 @@ export const QCList = withRouter(
 
     const onUpdateValidationRule = async event => {
       try {
-        console.log({ event });
-        tabsValidationsDispatch({ type: 'UPDATE_EDITING_ROWS_COUNT', payload: tabsValidationsState.editingRows - 1 });
+        tabsValidationsDispatch({
+          type: 'UPDATE_VALIDATION_RULE',
+          payload: { editingRowsCount: tabsValidationsState.editingRows - 1 }
+        });
+
+        // validationContext.onOpenToQuickEdit(event.data.id);
         if (TextUtils.areEquals(event.data.entityType, 'TABLE')) {
           await ValidationService.updateTableRule(dataset.datasetId, getCandidateRule(event.data));
         } else if (TextUtils.areEquals(event.data.entityType, 'RECORD')) {
@@ -615,6 +613,8 @@ export const QCList = withRouter(
         } else {
           await ValidationService.updateFieldRule(dataset.datasetId, getCandidateRule(event.data));
         }
+
+        onUpdateData();
       } catch (error) {
         console.error('FieldValidation - onUpdateValidationRule.', error);
         notificationContext.add({
@@ -689,6 +689,12 @@ export const QCList = withRouter(
               onRowEditSave={onUpdateValidationRule}
               paginator={true}
               paginatorRight={!isNil(tabsValidationsState.filteredData) && getPaginatorRecordsCount()}
+              quickEditRowInfo={{
+                updatedRow: validationContext.updatedRuleId,
+                deletedRow: tabsValidationsState.deletedRuleId,
+                property: 'id',
+                condition: validationContext.isFetchingData
+              }}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
               totalRecords={tabsValidationsState.validationList.validations.length}

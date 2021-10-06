@@ -81,6 +81,7 @@ export class DataTable extends Component {
     paginatorPosition: 'bottom',
     paginatorRight: null,
     paginatorTemplate: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink',
+    quickEditRowInfo: null,
     reorderableColumns: false,
     resizableColumns: false,
     responsive: false,
@@ -1303,6 +1304,7 @@ export class DataTable extends Component {
         onRowUnselect={this.props.onRowUnselect}
         onSelectionChange={this.props.onSelectionChange}
         paginator={this.props.paginator}
+        quickEditRowInfo={this.props.quickEditRowInfo}
         responsive={this.props.responsive}
         rowClassName={this.props.rowClassName}
         rowEditorValidator={this.props.rowEditorValidator}

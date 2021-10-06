@@ -171,7 +171,6 @@ const getCreationDTO = expressions => {
 };
 
 const getExpression = expression => {
-  console.log({ expression });
   const { operatorType, operatorValue, expressionValue } = expression;
   const {
     validations: { nonNumericOperators }
