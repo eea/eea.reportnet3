@@ -588,10 +588,12 @@ export const QCList = withRouter(
 
     const onRowEditorValueChange = (props, value) => {
       console.log({ props, value });
-      let inmQCs = [...props.value];
-      console.log(inmQCs[props.rowIndex][props.field], value);
-      if (inmQCs[props.rowIndex][props.field] !== value) {
-        inmQCs[props.rowIndex][props.field] = value;
+      let inmQCs = [...tabsValidationsState.validationList.validations];
+      const qcIdx = inmQCs.findIndex(qc => qc.id === props.rowData.id);
+      console.log(qcIdx);
+      console.log(inmQCs[qcIdx][props.field], value);
+      if (inmQCs[qcIdx][props.field] !== value) {
+        inmQCs[qcIdx][props.field] = value;
         tabsValidationsDispatch({ type: 'UPDATE_FILTER_DATA_AND_VALIDATIONS', payload: inmQCs });
       }
     };

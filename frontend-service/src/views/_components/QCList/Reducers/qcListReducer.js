@@ -19,9 +19,11 @@ export const qcListReducer = (state, { type, payload }) => {
       return { ...state, validationId: payload.value };
 
     case 'ON_LOAD_VALIDATION_LIST':
+      console.log('ON_LOAD');
       return { ...state, validationList: payload.validationsServiceList };
 
     case 'RESET_FILTERED_DATA':
+      console.log('RESET');
       return {
         ...state,
         filteredData: state.initialFilteredData,
@@ -42,6 +44,7 @@ export const qcListReducer = (state, { type, payload }) => {
       return { ...state, deletedRuleId: payload.deletedRuleId };
 
     case 'UPDATE_FILTER_DATA_AND_VALIDATIONS':
+      console.log('UPDATE', payload);
       return {
         ...state,
         filteredData: payload,
