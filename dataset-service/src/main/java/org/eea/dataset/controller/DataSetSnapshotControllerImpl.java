@@ -46,6 +46,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * The Class DataSetSnapshotControllerImpl.
@@ -86,7 +90,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/private/{idSnapshot}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("isAuthenticated()")
-  public SnapshotVO getById(@PathVariable("idSnapshot") Long idSnapshot) {
+  @ApiOperation(value = "get snapshot by id", hidden = true)
+  public SnapshotVO getById(@ApiParam(type = "Long", value = "snapshot Id",
+      example = "0") @PathVariable("idSnapshot") Long idSnapshot) {
     SnapshotVO snapshot = null;
     try {
       snapshot = datasetSnapshotService.getById(idSnapshot);
@@ -101,8 +107,10 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/private/schemaSnapshot/{idSnapshot}",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "get Schema by id snapshot", hidden = true)
   @PreAuthorize("isAuthenticated()")
-  public SnapshotVO getSchemaById(@PathVariable("idSnapshot") Long idSnapshot) {
+  public SnapshotVO getSchemaById(@ApiParam(type = "Long", value = "snapshot Id",
+      example = "0") @PathVariable("idSnapshot") Long idSnapshot) {
     SnapshotVO snapshot = null;
     try {
       snapshot = datasetSnapshotService.getSchemaById(idSnapshot);
@@ -124,8 +132,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "get snapshots by dataset id", hidden = true)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
-  public List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId) {
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get snapshots"),
+      @ApiResponse(code = 400, message = "Dataset id incorrect")})
+  public List<SnapshotVO> getSnapshotsByIdDataset(@ApiParam(type = "Long", value = "Dataset Id",
+      example = "0") @PathVariable("idDataset") Long datasetId) {
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -150,10 +162,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @HystrixCommand
   @PostMapping(value = "/dataset/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Create snapshot", hidden = true)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   public void createSnapshot(
-      @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
-      @LockCriteria(name = "released",
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("idDataset") Long datasetId,
+      @ApiParam(value = "create snapshot object") @LockCriteria(name = "released",
           path = "released") @RequestBody CreateSnapshotVO createSnapshot) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
@@ -173,8 +187,14 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
-  public void deleteSnapshot(@PathVariable("idDataset") Long datasetId,
-      @PathVariable("idSnapshot") Long idSnapshot) {
+  @ApiOperation(value = "Delete snapshot")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete snapshot"),
+      @ApiResponse(code = 400, message = "Dataset id incorrect or user request not found")})
+  public void deleteSnapshot(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("idDataset") Long datasetId,
+      @ApiParam(type = "Long", value = "snapshot Id",
+          example = "0") @PathVariable("idSnapshot") Long idSnapshot) {
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -201,9 +221,15 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiOperation(value = "Restore snapshot", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully restore snapshot"),
+      @ApiResponse(code = 400, message = "Dataset id incorrect"),
+      @ApiResponse(code = 423, message = "Locked")})
   public void restoreSnapshot(
-      @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
-      @PathVariable("idSnapshot") Long idSnapshot) {
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("idDataset") Long datasetId,
+      @ApiParam(type = "Long", value = "snapshot Id",
+          example = "0") @PathVariable("idSnapshot") Long idSnapshot) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -244,10 +270,17 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @PutMapping(value = "/private/{idSnapshot}/dataset/{idDataset}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Release snapshot", hidden = true)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER')")
-  public void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
-      @PathVariable("idSnapshot") Long idSnapshot,
-      @RequestParam("dateRelease") String dateRelease) {
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 400, message = "Dataset id incorrect or execution error")})
+  public void releaseSnapshot(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("idDataset") Long datasetId,
+      @ApiParam(type = "Long", value = "snapshot Id",
+          example = "0") @PathVariable("idSnapshot") Long idSnapshot,
+      @ApiParam(type = "String",
+          value = "Date release") @RequestParam("dateRelease") String dateRelease) {
 
     LOG.info("The user invoking DataSetSnaphotControllerImpl.releaseSnapshot is {}",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -278,9 +311,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/dataschema/{idDesignDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Get schema snapshot by dataset Id", hidden = true)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
-  public List<SnapshotVO> getSchemaSnapshotsByIdDataset(
-      @PathVariable("idDesignDataset") Long datasetId) {
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 400, message = "Dataset id incorrect")})
+  public List<SnapshotVO> getSchemaSnapshotsByIdDataset(@ApiParam(type = "Long",
+      value = "Dataset Id", example = "0") @PathVariable("idDesignDataset") Long datasetId) {
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -308,11 +344,15 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @PostMapping(value = "/dataschema/{idDatasetSchema}/dataset/{idDesignDataset}/create",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Create schema Snapshot", hidden = true)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
   public void createSchemaSnapshot(
-      @LockCriteria(name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
-      @PathVariable("idDatasetSchema") String idDatasetSchema,
-      @RequestParam("description") String description) {
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
+      @ApiParam(type = "String", value = "Dataset Schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("idDatasetSchema") String idDatasetSchema,
+      @ApiParam(type = "String", value = "Description",
+          example = "abc") @RequestParam("description") String description) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -332,10 +372,15 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Restore schema snapshot", hidden = true)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully restore schema snapshot"),
+      @ApiResponse(code = 400, message = "Dataset id incorrect")})
   public void restoreSchemaSnapshot(
-      @LockCriteria(name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
-      @PathVariable("idSnapshot") Long idSnapshot) {
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
+      @ApiParam(type = "Long", value = "snapshot Id",
+          example = "0") @PathVariable("idSnapshot") Long idSnapshot) {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -365,8 +410,16 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataschema/{idDesignDataset}/delete")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_EDITOR_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
-  public void deleteSchemaSnapshot(@PathVariable("idDesignDataset") Long datasetId,
-      @PathVariable("idSnapshot") Long idSnapshot) throws Exception {
+  @ApiOperation(value = "Delete schema snapshot", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 400, message = "Dataset id incorrect or user request not found"),
+      @ApiResponse(code = 423, message = "locked")})
+  public void deleteSchemaSnapshot(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("idDesignDataset") Long datasetId,
+      @ApiParam(type = "Long", value = "snapshot Id",
+          example = "0") @PathVariable("idSnapshot") Long idSnapshot)
+      throws Exception {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -408,9 +461,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER')")
   @GetMapping(value = "/receiptPDF/dataflow/{dataflowId}/dataProvider/{dataProviderId}",
       produces = MediaType.APPLICATION_PDF_VALUE)
+  @ApiOperation(value = "Create receipt PDF", hidden = true)
   public ResponseEntity<StreamingResponseBody> createReceiptPDF(HttpServletResponse response,
-      @PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataProviderId) {
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider Id",
+          example = "0") @PathVariable("dataProviderId") Long dataProviderId) {
     StreamingResponseBody stream =
         out -> datasetSnapshotService.createReceiptPDF(out, dataflowId, dataProviderId);
 
@@ -432,9 +488,14 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD')")
-
-  public List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
+  @ApiOperation(value = "Get historic releases")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 400, message = "Dataset not found")})
+  public List<ReleaseVO> historicReleases(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @RequestParam("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
     List<ReleaseVO> releases;
     // get dataset type
     try {
@@ -459,10 +520,13 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/historicReleasesRepresentative",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Get historic releases by representative", hidden = true)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER')")
   public List<ReleaseVO> historicReleasesByRepresentative(
-      @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("representativeId") Long representativeId) {
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Representative Id",
+          example = "0") @RequestParam("representativeId") Long representativeId) {
     List<ReleaseVO> releases = new ArrayList<>();
 
     List<ReportingDataset> datasets = reportingDatasetRepository.findByDataflowId(dataflowId);
@@ -483,7 +547,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @PutMapping("/private/eurelease/{idDataset}")
-  public void updateSnapshotEURelease(@PathVariable("idDataset") Long datasetId) {
+  @ApiOperation(value = "Update snapshot eu release", hidden = true)
+  public void updateSnapshotEURelease(@ApiParam(type = "Long", value = "Dataset Id",
+      example = "0") @PathVariable("idDataset") Long datasetId) {
     datasetSnapshotService.updateSnapshotEURelease(datasetId);
   }
 
@@ -500,12 +566,18 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER')")
+  @ApiOperation(value = "Create release snapshots", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create"),
+      @ApiResponse(code = 400, message = "Execution error"),
+      @ApiResponse(code = 412, message = "Dataflow not releasable")})
   public void createReleaseSnapshots(
-      @LockCriteria(name = "dataflowId") @PathVariable(value = "dataflowId",
-          required = true) Long dataflowId,
-      @LockCriteria(name = "dataProviderId") @PathVariable(value = "dataProviderId",
-          required = true) Long dataProviderId,
-      @RequestParam(name = "restrictFromPublic", required = true,
+      @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
+          name = "dataflowId") @PathVariable(value = "dataflowId", required = true) Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider Id", example = "0") @LockCriteria(
+          name = "dataProviderId") @PathVariable(value = "dataProviderId",
+              required = true) Long dataProviderId,
+      @ApiParam(type = "boolean", value = "Restric from public", example = "true") @RequestParam(
+          name = "restrictFromPublic", required = true,
           defaultValue = "false") boolean restrictFromPublic) {
 
     ThreadPropertiesManager.setVariable("user",
@@ -542,8 +614,14 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
    */
   @Override
   @PutMapping("/private/releaseLocksRelatedToReleaseDataset/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
-  public void releaseLocksFromReleaseDatasets(@PathVariable("dataflowId") Long dataflowId,
-      @PathVariable("dataProviderId") Long dataProviderId) {
+  @ApiOperation(value = "Release locks form release datasets", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully released"),
+      @ApiResponse(code = 500, message = "Error releasing locks")})
+  public void releaseLocksFromReleaseDatasets(
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider Id",
+          example = "0") @PathVariable("dataProviderId") Long dataProviderId) {
     try {
       datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
     } catch (EEAException e) {
