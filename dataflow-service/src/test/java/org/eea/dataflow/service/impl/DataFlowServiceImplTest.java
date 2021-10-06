@@ -1180,34 +1180,6 @@ public class DataFlowServiceImplTest {
   @Test
   public void getDataflowsCountAdminTest() throws EEAException {
 
-    DataflowCountVO dataflowCountVO = new DataflowCountVO();
-    dataflowCountVO.setType(TypeDataflowEnum.REPORTING);
-    dataflowCountVO.setAmount(1L);
-    List<DataflowCountVO> dataflowCountVOList = new ArrayList<>();
-    dataflowCountVOList.add(dataflowCountVO);
-
-    ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
-    resourceAccessVO.setId(0L);
-    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
-    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.doReturn(authorities).when(authentication).getAuthorities();
-    Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
-        .thenReturn(Arrays.asList(resourceAccessVO));
-
-
-    assertNotNull(dataflowServiceImpl.getDataflowsCount(Mockito.any()));
-  }
-
-  /**
-   * Gets the dataflows count test.
-   *
-   * @return the dataflows count test
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void getDataflowsCountTest() throws EEAException {
-
     IDataflowCount idc1 = new IDataflowCount() {
 
       @Override
@@ -1225,7 +1197,7 @@ public class DataFlowServiceImplTest {
 
       @Override
       public TypeDataflowEnum getType() {
-        return TypeDataflowEnum.REPORTING;
+        return TypeDataflowEnum.REFERENCE;
       }
 
       @Override
@@ -1235,6 +1207,47 @@ public class DataFlowServiceImplTest {
     };
 
     List<IDataflowCount> listObject = Arrays.asList(idc1, idc2);
+    DataflowCountVO dataflowCountVO = new DataflowCountVO();
+    dataflowCountVO.setType(TypeDataflowEnum.REPORTING);
+    dataflowCountVO.setAmount(1L);
+    List<DataflowCountVO> dataflowCountVOList = new ArrayList<>();
+    dataflowCountVOList.add(dataflowCountVO);
+
+    ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
+    resourceAccessVO.setId(0L);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
+        .thenReturn(Arrays.asList(resourceAccessVO));
+    Mockito.when(dataflowRepository.countDataflowByType()).thenReturn(listObject);
+
+
+    assertNotNull(dataflowServiceImpl.getDataflowsCount());
+  }
+
+  /**
+   * Gets the dataflows count test.
+   *
+   * @return the dataflows count test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getDataflowsCountTest() throws EEAException {
+
+    IDataflowCount idc1 = new IDataflowCount() {
+
+      @Override
+      public TypeDataflowEnum getType() {
+        return TypeDataflowEnum.REFERENCE;
+      }
+
+      @Override
+      public Long getAmount() {
+        return 15L;
+      }
+    };
 
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
@@ -1246,10 +1259,9 @@ public class DataFlowServiceImplTest {
     authorities.add(new SimpleGrantedAuthority("ROLE_CUSTODIAN"));
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
-    Mockito.when(dataflowRepository.countDataflowByTypeAndUser(Mockito.anyList()))
-        .thenReturn(listObject);
+    Mockito.when(dataflowRepository.countReferenceDataflowsDraft()).thenReturn(idc1);
 
-    assertNotNull(dataflowServiceImpl.getDataflowsCount(Mockito.any()));
+    assertNotNull(dataflowServiceImpl.getDataflowsCount());
   }
 
   @Test

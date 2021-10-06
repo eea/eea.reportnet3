@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.ApiOperation;
 
 /**
  * The type Issue controller.
@@ -27,6 +28,8 @@ public class IssueControllerImpl implements IssueController {
    */
   @Override
   @GetMapping(value = "/")
+  @ApiOperation(value = "Gets a list with all the obligation issues", response = IssueVO.class,
+      responseContainer = "List", hidden = true)
   public List<IssueVO> findAll() {
     return issueService.findAll();
   }

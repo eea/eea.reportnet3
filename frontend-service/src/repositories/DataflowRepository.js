@@ -3,6 +3,8 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const DataflowRepository = {
+  countByType: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.countByType) }),
+
   getAll: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getAll) }),
 
   getCloneableDataflows: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getCloneableDataflows) }),
@@ -20,11 +22,8 @@ export const DataflowRepository = {
 
   getDetails: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDetails, { dataflowId }) }),
 
-  getDatasetsFinalFeedback: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsFinalFeedback, { dataflowId }) }),
-
-  getDatasetsReleasedStatus: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsReleasedStatus, { dataflowId }) }),
+  getDatasetsFinalFeedbackAndReleasedStatus: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsFinalFeedbackAndReleasedStatus, { dataflowId }) }),
 
   getDatasetsValidationStatistics: async (dataflowId, datasetSchemaId) =>
     await HTTPRequester.get({

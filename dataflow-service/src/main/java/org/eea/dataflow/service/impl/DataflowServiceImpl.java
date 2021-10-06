@@ -259,7 +259,8 @@ public class DataflowServiceImpl implements DataflowService {
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
+    if (CollectionUtils.isNotEmpty(idsResources) || userAdmin
+        || dataflowType == TypeDataflowEnum.REFERENCE) {
       List<Dataflow> dataflows = new ArrayList<>();
       switch (dataflowType) {
         case REPORTING:
@@ -279,11 +280,12 @@ public class DataflowServiceImpl implements DataflowService {
                       .findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources);
           break;
         case REFERENCE:
-          dataflows = userAdmin
-              ? dataflowRepository
-                  .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
-              : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
-                  TypeStatusEnum.DESIGN, idsResources);
+          if (CollectionUtils.isNotEmpty(idsResources) || userAdmin)
+            dataflows = userAdmin
+                ? dataflowRepository
+                    .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
+                : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
+                    TypeStatusEnum.DESIGN, idsResources);
 
           dataflows.addAll(dataflowRepository
               .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT));
@@ -1481,26 +1483,58 @@ public class DataflowServiceImpl implements DataflowService {
   /**
    * Gets the dataflows count.
    *
-   * @param userId the user id
    * @return the dataflows count
    */
   @Override
-  public List<DataflowCountVO> getDataflowsCount(String userId) {
+  public List<DataflowCountVO> getDataflowsCount() {
+
+    boolean isAdmin = isAdmin();
 
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
 
-    List<IDataflowCount> dataflowCountList = isAdmin() ? dataflowRepository.countDataflowByType()
-        : dataflowRepository.countDataflowByTypeAndUser(idsResources);
+    List<IDataflowCount> dataflowCountList = new ArrayList<>();
+
+    if (CollectionUtils.isNotEmpty(idsResources) || isAdmin) {
+      dataflowCountList = isAdmin ? dataflowRepository.countDataflowByType()
+          : dataflowRepository.countDataflowByTypeAndUser(idsResources);
+    }
 
     List<DataflowCountVO> dataflowCountVOList = new ArrayList<>();
 
     for (IDataflowCount dataflow : dataflowCountList) {
       DataflowCountVO newDataflowCountVO = new DataflowCountVO();
+      if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin) {
+        continue;
+      }
       newDataflowCountVO.setType(dataflow.getType());
       newDataflowCountVO.setAmount(dataflow.getAmount());
       dataflowCountVOList.add(newDataflowCountVO);
+    }
+
+    if (!isAdmin) {
+      IDataflowCount draftReferenceDataflow = dataflowRepository.countReferenceDataflowsDraft();
+      IDataflowCount designReferenceDataflow = null;
+
+      if (CollectionUtils.isNotEmpty(idsResources))
+        designReferenceDataflow =
+            dataflowRepository.countReferenceDataflowsDesignByUser(idsResources);
+
+      long totalReferenceAmount = 0L;
+
+      if (designReferenceDataflow != null) {
+        totalReferenceAmount += designReferenceDataflow.getAmount();
+      }
+
+      if (draftReferenceDataflow != null) {
+        totalReferenceAmount += draftReferenceDataflow.getAmount();
+      }
+
+      DataflowCountVO totalReferenceCountVO = new DataflowCountVO();
+      totalReferenceCountVO.setType(TypeDataflowEnum.REFERENCE);
+      totalReferenceCountVO.setAmount(totalReferenceAmount);
+      dataflowCountVOList.add(totalReferenceCountVO);
     }
 
     return dataflowCountVOList;

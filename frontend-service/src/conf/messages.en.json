@@ -309,11 +309,9 @@
     "deleteReferenceDataflowDialogHeader": "Delete reference dataflow",
     "deleteReferenceDatasetDialogHeader": "Delete reference dataset",
     "deleteReferenceDatasetDialogMessage": "Are you sure you want to delete the reference dataset schema?",
-    "deleteReporterButtonTableHeader": "Delete reporter",
     "deleteReporterError": "Error deleting reporter",
     "deleteRepresentativeButtonTableHeader": "Delete representative",
     "deleteRepresentativeError": "Error deleting representative",
-    "deleteRequesterButtonTableHeader": "Delete requester",
     "deleteRequesterError": "Error deleting requester",
     "deleteRow": "Delete row",
     "deleteRuleError": "Error deleting rule",
@@ -1264,6 +1262,8 @@
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "The URL is not valid",
-    "yes": "Yes"
+    "yes": "Yes",
+    "expirationDateFilterLabel": "Delivery date range",
+    "creationDateFilterLabel": "Creation date range"
   }
 }

@@ -192,6 +192,26 @@ public interface DataflowRepository
   List<IDataflowCount> countDataflowByType();
 
   /**
+   * Count reference dataflows available to the user in DESIGN status.
+   *
+   * @param datasetIds the dataset ids
+   * @return the dataflow count
+   */
+  @Query(nativeQuery = true,
+      value = "select df.type as type , count(*) as amount from dataflow df where df.type='REFERENCE' and df.status='DESIGN' and df.id IN :ids group by type")
+  IDataflowCount countReferenceDataflowsDesignByUser(@Param("ids") List<Long> ids);
+
+
+  /**
+   * Count reference dataflows in DRAFT status.
+   *
+   * @return the dataflow count
+   */
+  @Query(nativeQuery = true,
+      value = "select df.type as type , count(*) as amount from dataflow df where df.type='REFERENCE' and df.status='DRAFT' group by type")
+  IDataflowCount countReferenceDataflowsDraft();
+
+  /**
    * Count dataflow by type based on the user access rights.
    *
    * @param datasetIds the dataset ids

@@ -75,7 +75,7 @@ public interface DataflowService {
    *
    * @return the dataflows count
    */
-  List<DataflowCountVO> getDataflowsCount(String userId) throws EEAException;
+  List<DataflowCountVO> getDataflowsCount() throws EEAException;
 
   /**
    * Gets the completed.

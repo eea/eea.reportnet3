@@ -3,7 +3,7 @@ package org.eea.collaboration.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import org.eea.collaboration.persistence.domain.MessageAttachment;
+import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.service.CollaborationService;
 import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAErrorMessage;
@@ -37,6 +37,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * The Class CollaborationControllerImpl.
@@ -70,8 +74,14 @@ public class CollaborationControllerImpl implements CollaborationController {
   @HystrixCommand
   @PostMapping("/createMessage/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
-  public MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody MessageVO messageVO) {
+  @ApiOperation(value = "Creates a new message assigned to a Dataflow", hidden = true,
+      response = MessageVO.class)
+  @ApiResponses(value = {@ApiResponse(code = 400, message = "Error creating message"),
+      @ApiResponse(code = 403, message = "Error creating message")})
+  public MessageVO createMessage(
+      @ApiParam(value = "Dataflow Id you're assigning the message to",
+          example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Message Object") @RequestBody MessageVO messageVO) {
     try {
       return collaborationService.createMessage(dataflowId, messageVO);
     } catch (EEAIllegalArgumentException e) {
@@ -96,9 +106,16 @@ public class CollaborationControllerImpl implements CollaborationController {
       @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
   @PostMapping("/createMessage/dataflow/{dataflowId}/attachment")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
-  public MessageVO createMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId,
-      @RequestPart("fileAttachment") MultipartFile fileAttachment) {
+  @ApiOperation(value = "Creates a new message attachment assigned to a Dataflow and a provider Id",
+      response = MessageVO.class, hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.FILE_FORMAT),
+      @ApiResponse(code = 403, message = "Error creating message attachment"),
+      @ApiResponse(code = 500, message = "Internal server error creating message attachment")})
+  public MessageVO createMessageAttachment(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
+      @ApiParam(
+          value = "The file which is going to be attached") @RequestPart("fileAttachment") MultipartFile fileAttachment) {
     try {
       if (providerId == null || dataflowId == null || fileAttachment == null
           || fileAttachment.getOriginalFilename() == null) {
@@ -112,7 +129,7 @@ public class CollaborationControllerImpl implements CollaborationController {
       String fileName = fileAttachment.getOriginalFilename().replace(",", "");
       String fileSize = String.valueOf(fileAttachment.getSize());
       return collaborationService.createMessageAttachment(dataflowId, providerId, is, fileName,
-          fileSize);
+          fileSize, fileAttachment.getContentType());
     } catch (EEAIllegalArgumentException e) {
       LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
@@ -136,8 +153,12 @@ public class CollaborationControllerImpl implements CollaborationController {
   @HystrixCommand
   @PutMapping("/updateMessageReadStatus/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
-  public void updateMessageReadStatus(@PathVariable("dataflowId") Long dataflowId,
-      @RequestBody List<MessageVO> messageVOs) {
+  @ApiOperation(value = "Updates the message read status", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 400, message = "Error updating the message"),
+      @ApiResponse(code = 500, message = "Error updating the message")})
+  public void updateMessageReadStatus(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Message Object to be updated") @RequestBody List<MessageVO> messageVOs) {
     try {
       collaborationService.updateMessageReadStatus(dataflowId, messageVOs);
     } catch (EEAIllegalArgumentException e) {
@@ -157,12 +178,16 @@ public class CollaborationControllerImpl implements CollaborationController {
    * @param messageId the message id
    */
   @Override
-  @HystrixCommand(commandProperties = {
-      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
+  @HystrixCommand
   @DeleteMapping("/deleteMessage/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
-  public void deleteMessage(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId, @RequestParam("messageId") Long messageId) {
+  @ApiOperation(value = "Deletes the message", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 400, message = "Error deleting the message"),
+      @ApiResponse(code = 404, message = "Error deleting the message")})
+  public void deleteMessage(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
+      @ApiParam(value = "Message Id", example = "0") @RequestParam("messageId") Long messageId) {
     try {
       if (providerId == null || dataflowId == null || messageId == null) {
         throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGING_BAD_REQUEST);
@@ -192,10 +217,15 @@ public class CollaborationControllerImpl implements CollaborationController {
   @HystrixCommand
   @GetMapping("/findMessages/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @ApiOperation(value = "Gets all the messages assigned to a Dataflow and a Provider",
+      hidden = true)
+  @ApiResponse(code = 403, message = "Error finding the messages.")
   public MessagePaginatedVO findMessages(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId,
-      @RequestParam(value = "read", required = false) Boolean read,
-      @RequestParam("page") int page) {
+      @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
+      @ApiParam(value = "Searching for read messages?", example = "true",
+          required = false) @RequestParam(value = "read", required = false) Boolean read,
+      @ApiParam(value = "Page number where the messaged are located",
+          example = "0") @RequestParam("page") int page) {
     try {
       MessagePaginatedVO messagePaginatedVO =
           collaborationService.findMessages(dataflowId, providerId, read, page);
@@ -233,15 +263,19 @@ public class CollaborationControllerImpl implements CollaborationController {
       @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
   @GetMapping("/findMessages/dataflow/{dataflowId}/getMessageAttachment")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
-  public ResponseEntity<byte[]> getMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId, @RequestParam("messageId") Long messageId) {
+  @ApiOperation(value = "Gets the attachment assigned to a message", hidden = true)
+  @ApiResponse(code = 404, message = "Error getting the message attachment")
+  public ResponseEntity<byte[]> getMessageAttachment(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
+      @ApiParam(value = "Message Id", example = "0") @RequestParam("messageId") Long messageId) {
 
 
     LOG.info("Downloading message attachment from the dataflowId {}", dataflowId);
     try {
-      MessageAttachment messageAttachment = collaborationService.getMessageAttachment(messageId);
-      byte[] file = messageAttachment.getContent();
-      String filename = messageAttachment.getFileName();
+      Message messageAttachment = collaborationService.getMessage(messageId);
+      String filename = messageAttachment.getContent();
+      byte[] file = collaborationService.getMessageAttachment(messageId, dataflowId, filename);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
@@ -268,12 +302,16 @@ public class CollaborationControllerImpl implements CollaborationController {
   @Override
   @HystrixCommand
   @GetMapping("/private/notifyNewMessages")
+  @ApiOperation(value = "Notifies about a new message", hidden = true)
   public void notifyNewMessages(@RequestParam("dataflowId") Long dataflowId,
-      @RequestParam("providerId") Long providerId,
-      @RequestParam("modifiedDatasetId") Long modifiedDatasetId,
-      @RequestParam("datasetStatus") DatasetStatusEnum datasetStatus,
-      @RequestParam("datasetName") String datasetName,
-      @RequestParam("eventType") String eventType) {
+      @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
+      @ApiParam(value = "Modified Dataset Id",
+          example = "0") @RequestParam("modifiedDatasetId") Long modifiedDatasetId,
+      @ApiParam(value = "The Dataset Status",
+          example = "RELEASED") @RequestParam("datasetStatus") DatasetStatusEnum datasetStatus,
+      @ApiParam(value = "Dataset name",
+          example = "Im A Dataset") @RequestParam("datasetName") String datasetName,
+      @ApiParam(value = "Event type") @RequestParam("eventType") String eventType) {
     collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, modifiedDatasetId,
         datasetStatus, datasetName, eventType);
   }
