@@ -1,11 +1,13 @@
 package org.eea.dataset.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.eea.dataset.service.ReferenceDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,5 +98,23 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
+  }
+
+  /**
+   * Find reference dataset summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @GetMapping("/private/referenceDatasetsSummary/dataflow/{id}")
+  public List<DatasetsSummaryVO> findReferenceDatasetSummaryList(
+      @PathVariable("id") Long dataflowId) {
+    List<DatasetsSummaryVO> referenceDatasetsSummaryList = new ArrayList<>();
+    if (null != dataflowId) {
+      referenceDatasetsSummaryList =
+          referenceDatasetService.findReferenceDatasetSummaryList(dataflowId);
+    }
+    return referenceDatasetsSummaryList;
   }
 }

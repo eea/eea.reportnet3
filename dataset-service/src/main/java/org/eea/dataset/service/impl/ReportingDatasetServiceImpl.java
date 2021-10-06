@@ -3,12 +3,14 @@ package org.eea.dataset.service.impl;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
 import org.eea.dataset.mapper.ReportingDatasetPublicMapper;
+import org.eea.dataset.mapper.ReportingDatasetSummaryMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
@@ -19,9 +21,12 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -63,6 +68,10 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
   /** The reference dataset repository. */
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;
+
+  /** The reporting dataset summary mapper. */
+  @Autowired
+  private ReportingDatasetSummaryMapper reportingDatasetSummaryMapper;
 
   /**
    * The Constant LOG_ERROR.
@@ -306,6 +315,30 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
     return emptyNames.toArray(result);
   }
 
+  /**
+   * Find reporting datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  public List<DatasetsSummaryVO> findReportingDatasetsSummaryList(Long dataflowId) {
+    List<DatasetsSummaryVO> reportingDatasetsSummaryList = new ArrayList<>();
+    List<ReportingDatasetVO> reportingDatasetsVO = getDataSetIdByDataflowId(dataflowId);
+    DataProviderVO dataProviderVO;
+    for (ReportingDatasetVO reportingDatasetVO : reportingDatasetsVO) {
+      DatasetsSummaryVO datasetSummaryVO =
+          reportingDatasetSummaryMapper.entityToClass(reportingDatasetVO);
+      datasetSummaryVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
+      dataProviderVO =
+          representativeControllerZuul.findDataProviderById(reportingDatasetVO.getDataProviderId());
+      datasetSummaryVO.setDataProviderCode(dataProviderVO.getCode());
+      datasetSummaryVO.setDataProviderName(representativeControllerZuul
+          .findDataProviderGroupById(dataProviderVO.getGroupId()).getName());
+      reportingDatasetsSummaryList.add(datasetSummaryVO);
+    }
 
+    return reportingDatasetsSummaryList;
+  }
 
 }

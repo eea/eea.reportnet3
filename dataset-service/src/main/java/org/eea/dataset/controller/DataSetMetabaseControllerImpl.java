@@ -3,6 +3,7 @@
  */
 package org.eea.dataset.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -14,6 +15,7 @@ import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
@@ -483,4 +485,40 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
           EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
     }
   }
+
+  /**
+   * Find design dataset summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @GetMapping(value = "/private/designDatasetsSummary/dataflow/{id}")
+  public List<DatasetsSummaryVO> findDesignDatasetSummaryList(@PathVariable("id") Long dataflowId) {
+    List<DatasetsSummaryVO> designsDatasetsSummaryList = new ArrayList<>();
+    if (null != dataflowId) {
+      designsDatasetsSummaryList = designDatasetService.getDesignDatasetSummaryList(dataflowId);
+    }
+    return designsDatasetsSummaryList;
+  }
+
+  /**
+   * Find reporting datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @GetMapping(value = "/private/reportingDatasetsSummary/dataflow/{id}")
+  public List<DatasetsSummaryVO> findReportingDatasetsSummaryList(
+      @PathVariable("id") Long dataflowId) {
+    List<DatasetsSummaryVO> reportingDatasetsSummaryList = new ArrayList<>();
+    if (null != dataflowId) {
+      reportingDatasetsSummaryList =
+          reportingDatasetService.findReportingDatasetsSummaryList(dataflowId);
+    }
+    return reportingDatasetsSummaryList;
+  }
+
+
 }

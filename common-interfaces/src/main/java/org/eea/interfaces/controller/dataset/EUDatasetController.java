@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -40,4 +41,15 @@ public interface EUDatasetController {
    */
   @PostMapping("/populateData/dataflow/{dataflowId}")
   void populateDataFromDataCollection(@PathVariable("dataflowId") Long idDataflow);
+
+
+  /**
+   * Find EU datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @GetMapping(value = "/private/euDatasetsSummary/dataflow/{id}")
+  List<DatasetsSummaryVO> findEUDatasetsSummaryList(@PathVariable("id") Long dataflowId);
+
 }

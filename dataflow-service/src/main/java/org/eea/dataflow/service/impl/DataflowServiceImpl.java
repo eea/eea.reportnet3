@@ -46,6 +46,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -180,7 +181,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private FMEUserRepository fmeUserRepository;
 
-
+  /** The dataflow private mapper. */
   @Autowired
   private DataflowPrivateMapper dataflowPrivateMapper;
 
@@ -1474,6 +1475,52 @@ public class DataflowServiceImpl implements DataflowService {
   private void removeWebLinksAndDocuments(DataFlowVO result) {
     result.setWeblinks(null);
     result.setDocuments(null);
+  }
+
+  /**
+   * Gets the dataset summary.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataset summary
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public List<DatasetsSummaryVO> getDatasetSummary(Long dataflowId) throws EEAException {
+    List<DatasetsSummaryVO> datasetsSummaryList = new ArrayList<>();
+    if (null != dataflowId) {
+      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      if (null != dataflow) {
+        List<DatasetsSummaryVO> datasetDesignsSummaryList =
+            datasetMetabaseControllerZuul.findDesignDatasetSummaryList(dataflowId);
+        datasetsSummaryList.addAll(datasetDesignsSummaryList);
+
+        List<DatasetsSummaryVO> referenceDatasetsSummaryList =
+            referenceDatasetControllerZuul.findReferenceDatasetSummaryList(dataflowId);
+        datasetsSummaryList.addAll(referenceDatasetsSummaryList);
+
+        List<DatasetsSummaryVO> dataCollectionsSummaryList =
+            dataCollectionControllerZuul.findDataCollectionsSummaryList(dataflowId);
+        datasetsSummaryList.addAll(dataCollectionsSummaryList);
+
+        List<DatasetsSummaryVO> euDatasetsSummaryList =
+            euDatasetControllerZuul.findEUDatasetsSummaryList(dataflowId);
+        datasetsSummaryList.addAll(euDatasetsSummaryList);
+
+        List<DatasetsSummaryVO> testDatasetsSummaryList =
+            testDataSetControllerZuul.findTestDatasetsSummaryList(dataflowId);
+        datasetsSummaryList.addAll(testDatasetsSummaryList);
+
+        List<DatasetsSummaryVO> reportingDatasetsSummaryList =
+            datasetMetabaseControllerZuul.findReportingDatasetsSummaryList(dataflowId);
+        datasetsSummaryList.addAll(reportingDatasetsSummaryList);
+      } else {
+        throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+      }
+    } else {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    return datasetsSummaryList;
   }
 
 }

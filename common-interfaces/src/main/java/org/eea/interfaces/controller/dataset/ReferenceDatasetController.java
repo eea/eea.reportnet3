@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataset;
 import java.util.List;
 import java.util.Set;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -72,5 +73,14 @@ public interface ReferenceDatasetController {
   @PutMapping("/{datasetId}")
   void updateReferenceDataset(@PathVariable Long datasetId,
       @RequestParam("updatable") Boolean updatable);
+
+  /**
+   * Find reference dataset summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @GetMapping("/private/referenceDatasetsSummary/dataflow/{id}")
+  List<DatasetsSummaryVO> findReferenceDatasetSummaryList(@PathVariable("id") Long dataflowId);
 
 }

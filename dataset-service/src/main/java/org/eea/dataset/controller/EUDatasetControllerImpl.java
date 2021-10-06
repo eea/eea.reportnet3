@@ -1,9 +1,11 @@
 package org.eea.dataset.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.service.EUDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.EUDatasetController;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -82,4 +84,21 @@ public class EUDatasetControllerImpl implements EUDatasetController {
       LOG_ERROR.error("Error populating the EU Dataset because: {}", e.getMessage());
     }
   }
+
+  /**
+   * Find EU datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @GetMapping(value = "/private/euDatasetsSummary/dataflow/{id}")
+  public List<DatasetsSummaryVO> findEUDatasetsSummaryList(@PathVariable("id") Long dataflowId) {
+    List<DatasetsSummaryVO> datasetsSummaryVOList = new ArrayList<>();
+    if (null != dataflowId) {
+      datasetsSummaryVOList = euDatasetService.findEUDatasetsSummaryList(dataflowId);
+    }
+    return datasetsSummaryVOList;
+  }
+
 }

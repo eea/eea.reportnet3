@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,7 @@ import org.eea.dataset.service.DataCollectionService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataset.DataCollectionController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
@@ -210,4 +212,22 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long idDataflow) {
     return dataCollectionService.getDataCollectionIdByDataflowId(idDataflow);
   }
+
+  /**
+   * Find data collections summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @GetMapping(value = "/private/dataCollectionsSummary/dataflow/{id}")
+  public List<DatasetsSummaryVO> findDataCollectionsSummaryList(
+      @PathVariable("id") Long dataflowId) {
+    List<DatasetsSummaryVO> dataCollectionsSummaryList = new ArrayList<>();
+    if (null != dataflowId) {
+      dataCollectionsSummaryList = dataCollectionService.findDataCollectionsSummaryList(dataflowId);
+    }
+    return dataCollectionsSummaryList;
+  }
+
 }

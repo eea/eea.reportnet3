@@ -1,6 +1,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -32,4 +33,13 @@ public interface TestDatasetController {
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<TestDatasetVO> findTestDatasetByDataflowId(@PathVariable("id") Long idDataflow);
 
+
+  /**
+   * Find test datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @GetMapping(value = "/private/testDatasetsSummary/dataflow/{id}")
+  List<DatasetsSummaryVO> findTestDatasetsSummaryList(@PathVariable("id") Long dataflowId);
 }

@@ -12,6 +12,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.mapper.DataProviderGroupMapper;
+import org.eea.dataflow.mapper.DataProviderGroupSummaryMapper;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.FMEUserMapper;
 import org.eea.dataflow.mapper.LeadReporterMapper;
@@ -34,6 +35,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
+import org.eea.interfaces.vo.dataflow.DataProviderGroupVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
@@ -128,6 +130,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The FME user mapper. */
   @Autowired
   private FMEUserMapper fmeUserMapper;
+
+  /** The data provider group summary mapper. */
+  @Autowired
+  private DataProviderGroupSummaryMapper dataProviderGroupSummaryMapper;
 
   /**
    * The delimiter.
@@ -850,4 +856,21 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return countryCode;
   }
 
+
+  /**
+   * Find data provider group by id.
+   *
+   * @param groupId the group id
+   * @return the data provider group VO
+   */
+  @Override
+  public DataProviderGroupVO findDataProviderGroupById(Long groupId) {
+    DataProviderGroupVO dataProviderGroupVO = null;
+    DataProviderGroup dataProviderGroup =
+        dataProviderGroupRepository.findById(groupId).orElse(null);
+    if (null != dataProviderGroup) {
+      dataProviderGroupVO = dataProviderGroupSummaryMapper.entityToClass(dataProviderGroup);
+    }
+    return dataProviderGroupVO;
+  }
 }

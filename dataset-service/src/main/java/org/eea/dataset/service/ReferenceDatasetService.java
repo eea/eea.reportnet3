@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 
@@ -50,4 +51,12 @@ public interface ReferenceDatasetService {
    * @throws EEAException the EEA exception
    */
   void updateUpdatable(Long datasetId, Boolean updatable) throws EEAException;
+
+  /**
+   * Find reference dataset summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  List<DatasetsSummaryVO> findReferenceDatasetSummaryList(Long dataflowId);
 }

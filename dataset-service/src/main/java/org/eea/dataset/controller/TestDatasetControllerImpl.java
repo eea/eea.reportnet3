@@ -1,8 +1,10 @@
 package org.eea.dataset.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.service.TestDatasetService;
 import org.eea.interfaces.controller.dataset.TestDatasetController;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -37,6 +39,23 @@ public class TestDatasetControllerImpl implements TestDatasetController {
 
     return testDatasetService.getTestDatasetByDataflowId(idDataflow);
   }
+
+  /**
+   * Find test datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @GetMapping(value = "/private/testDatasetsSummary/dataflow/{id}")
+  public List<DatasetsSummaryVO> findTestDatasetsSummaryList(@PathVariable("id") Long dataflowId) {
+    List<DatasetsSummaryVO> testDatasetsSummaryList = new ArrayList<>();
+    if (null != dataflowId) {
+      testDatasetsSummaryList = testDatasetService.findTestDatasetsSummaryList(dataflowId);
+    }
+    return testDatasetsSummaryList;
+  }
+
 
 
 }

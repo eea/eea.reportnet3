@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.TestDatasetVO;
 
 
@@ -17,5 +18,13 @@ public interface TestDatasetService {
    * @return the Test dataset by dataflow id
    */
   List<TestDatasetVO> getTestDatasetByDataflowId(Long idDataflow);
+
+  /**
+   * Find test datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  List<DatasetsSummaryVO> findTestDatasetsSummaryList(Long dataflowId);
 
 }
