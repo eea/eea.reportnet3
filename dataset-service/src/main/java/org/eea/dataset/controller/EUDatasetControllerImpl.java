@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * The Class EUDatasetControllerImpl.
@@ -55,7 +57,9 @@ public class EUDatasetControllerImpl implements EUDatasetController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<EUDatasetVO> findEUDatasetByDataflowId(@PathVariable("id") Long idDataflow) {
+  @ApiOperation(value = "Populate data from Datacollection", hidden = true)
+  public List<EUDatasetVO> findEUDatasetByDataflowId(@ApiParam(type = "Long", value = "Dataflow Id",
+      example = "0") @PathVariable("id") Long idDataflow) {
 
     return euDatasetService.getEUDatasetByDataflowId(idDataflow);
   }
@@ -70,8 +74,10 @@ public class EUDatasetControllerImpl implements EUDatasetController {
   @PostMapping("/populateData/dataflow/{dataflowId}")
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')  OR (checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN'))")
+  @ApiOperation(value = "Populate data from Datacollection")
   public void populateDataFromDataCollection(
-      @LockCriteria(name = "dataflowId") @PathVariable("dataflowId") Long dataflowId) {
+      @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
+          name = "dataflowId") @PathVariable("dataflowId") Long dataflowId) {
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
