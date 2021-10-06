@@ -1,18 +1,20 @@
 .buttonRight {
   display: flex;
   justify-content: flex-end;
-  // flex-grow: ;
   & button {
     margin: 1rem 0 0.5rem 0.5rem;
   }
 }
+
 .container {
   // min-width: 400px;
   // max-width: 500px;
 }
+
 .timeInput {
-  width: min-content !important;
+  width: 6rem !important;
 }
+
 .inputMaskWrapper {
   display: flex;
   margin-top: 0.5rem;
@@ -20,6 +22,7 @@
   .label {
     padding-left: 0.5rem;
     align-self: center;
+    width: max-content !important;
   }
 }
 
@@ -30,4 +33,6 @@
 
 .dropdown {
   margin-left: 0.5rem;
+  width: 5rem !important;
+  min-width: none !important;
 }
