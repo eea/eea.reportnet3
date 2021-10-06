@@ -1,4 +1,4 @@
-import { useContext, useRef, useState } from 'react';
+import { useContext, useState, useRef } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
@@ -61,7 +61,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
           disabled={!dayjs(new Date(date)).isValid()}
           icon="save"
           label={resourcesContext.messages['save']}
-          onClick={() => onSaveDate(date)}
+          onClick={() => onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value))}
         />
         <Button
           className="p-button p-component p-button-secondary p-button-animated-blink p-button-text-icon-left"
@@ -75,19 +75,18 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
       </div>
     );
   };
-  //31/12/2021 23:59:59
+
   const renderCalendar = () => {
     return (
       <Calendar
         inline
         monthNavigator
         onChange={e => {
-          setDate(new Date(dayjs.utc(e.value).utcOffset(selectedOffset.value).format('ddd/MMMDD/YYYY HH:mm:ssZ')));
-          setInputValue(dayjs.utc(e.value).utcOffset(selectedOffset.value).format('DD/MM/YYYY HH:mm:ss').toString());
+          setDate(e.value);
+          setInputValue(dayjs(e.value).format('DD/MM/YYYY HH:mm:ss').toString());
         }}
+        // showTime={true}
         ref={calendarRef}
-        // showTime
-        showWeek
         value={date}
         yearNavigator
         yearRange="1900:2100"
@@ -108,14 +107,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
           setInputValue(e.target.value);
         }}
         onComplete={e => {
-          setDate(
-            new Date(
-              dayjs
-                .utc(e.value, 'DD/MM/YYYY HH:mm:ss')
-                .utcOffset(selectedOffset.value)
-                .format('ddd/MMMDD/YYYY HH:mm:ssZ')
-            )
-          );
+          setDate(new Date(dayjs(e.value, 'DD/MM/YYYY HH:mm:ss').format('ddd/MMMDD/YYYY HH:mm:ss')));
         }}
         value={inputValue}
       />
@@ -126,7 +118,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
       <Dropdown
         onChange={e => {
           setSelectedOffset(e.value);
-          setDate(new Date(dayjs.utc(date).utcOffset(selectedOffset.value).format('ddd/MMMDD/YYYY HH:mm:ssZ')));
         }}
         optionLabel="label"
         optionValue="value"
@@ -144,7 +135,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
         <span className={styles.label}>UTC</span>
         {renderDropdown()}
       </div>
-      {renderInput()}
+      {/* {renderInput()} */}
       {renderButtons()}
     </div>
   );
