@@ -103,7 +103,7 @@ export class BodyCell extends Component {
     }
   }
 
-  calculateDisabledQuickEdit() {
+  calculateRowDisabledQuickEdit() {
     return (
       (this.props.rowData[this.props.quickEditRowInfo.property] === this.props.quickEditRowInfo.updatedRow ||
         this.props.rowData[this.props.quickEditRowInfo.property] === this.props.quickEditRowInfo.deletedRow) &&
@@ -247,8 +247,8 @@ export class BodyCell extends Component {
           <div className={styles.actionTemplate}>
             <Button
               className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-              disabled={this.props.quickEditRowInfo ? this.calculateDisabledQuickEdit() : false}
-              icon={this.props.quickEditRowInfo && this.calculateDisabledQuickEdit() ? 'spinnerAnimate' : 'clock'}
+              disabled={this.props.quickEditRowInfo ? this.props.quickEditRowInfo.condition : false}
+              icon={this.props.quickEditRowInfo && this.calculateRowDisabledQuickEdit() ? 'spinnerAnimate' : 'clock'}
               onClick={this.props.onRowEditInit}
               tooltip={this.context.messages['quickEdit']}
               tooltipOptions={{ position: 'top' }}

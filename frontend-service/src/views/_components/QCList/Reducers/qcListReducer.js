@@ -21,13 +21,20 @@ export const qcListReducer = (state, { type, payload }) => {
     case 'ON_LOAD_VALIDATION_LIST':
       return { ...state, validationList: payload.validationsServiceList };
 
+    case 'RESET_EDITING_ROWS':
+      return {
+        ...state,
+        editingRows: [],
+        filteredData: state.initialFilteredData,
+        validationList: { ...state.validationList, validations: state.initialValidationsList }
+      };
+
     case 'RESET_FILTERED_DATA':
       return {
         ...state,
         filteredData: state.initialFilteredData,
-        // initialFilteredData: [],
         validationList: { ...state.validationList, validations: state.initialValidationsList },
-        editingRows: state.editingRows - 1
+        editingRows: state.editingRows.filter(editingRow => editingRow.id !== payload.id)
       };
 
     case 'SET_INITIAL_DATA':
@@ -35,7 +42,7 @@ export const qcListReducer = (state, { type, payload }) => {
         ...state,
         initialFilteredData: state.filteredData,
         initialValidationsList: state.validationList.validations,
-        editingRows: state.editingRows + 1
+        editingRows: [...state.editingRows, payload]
       };
 
     case 'SET_DELETED_RULE_ID':
@@ -44,12 +51,13 @@ export const qcListReducer = (state, { type, payload }) => {
     case 'UPDATE_FILTER_DATA_AND_VALIDATIONS':
       return {
         ...state,
-        filteredData: payload,
-        validationList: { ...state.validationList, validations: payload }
+        filteredData: payload.qcs,
+        editingRows: payload.editRows,
+        validationList: { ...state.validationList, validations: payload.qcs }
       };
 
     case 'UPDATE_VALIDATION_RULE':
-      return { ...state, editingRows: payload.editingRowsCount };
+      return { ...state, editingRows: state.editingRows.filter(editingRow => editingRow.id !== payload.id) };
 
     default: {
       return state;
