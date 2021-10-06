@@ -1,13 +1,11 @@
 package org.eea.dataset.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.eea.dataset.service.ReferenceDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 
 /**
@@ -100,25 +96,5 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
     }
-  }
-
-  /**
-   * Find reference dataset summary list.
-   *
-   * @param dataflowId the dataflow id
-   * @return the list
-   */
-  @Override
-  @GetMapping("/private/referenceDatasetsSummary/dataflow/{id}")
-  @ApiOperation(value = "Get a list of summarized reference datasets",
-      response = DatasetsSummaryVO.class, responseContainer = "List", hidden = true)
-  public List<DatasetsSummaryVO> findReferenceDatasetSummaryList(
-      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
-    List<DatasetsSummaryVO> referenceDatasetsSummaryList = new ArrayList<>();
-    if (null != dataflowId) {
-      referenceDatasetsSummaryList =
-          referenceDatasetService.findReferenceDatasetSummaryList(dataflowId);
-    }
-    return referenceDatasetsSummaryList;
   }
 }

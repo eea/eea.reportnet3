@@ -1,7 +1,6 @@
 package org.eea.dataset.service;
 
 import java.util.List;
-import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 
@@ -71,13 +70,5 @@ public interface ReportingDatasetService {
    * @return the reportings by dataflow ids
    */
   List<ReportingDatasetVO> getReportingsByDataflowIds(List<Long> dataflowIds);
-
-  /**
-   * Find reporting datasets summary list.
-   *
-   * @param dataflowId the dataflow id
-   * @return the list
-   */
-  List<DatasetsSummaryVO> findReportingDatasetsSummaryList(Long dataflowId);
 
 }

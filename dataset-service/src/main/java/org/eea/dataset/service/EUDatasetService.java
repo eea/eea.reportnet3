@@ -2,7 +2,6 @@ package org.eea.dataset.service;
 
 import java.util.List;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 
 
@@ -35,13 +34,5 @@ public interface EUDatasetService {
    * @return the boolean if successful lock removed
    */
   Boolean removeLocksRelatedToPopulateEU(Long dataflowId);
-
-  /**
-   * Find EU datasets summary list.
-   *
-   * @param dataflowId the dataflow id
-   * @return the list
-   */
-  List<DatasetsSummaryVO> findEUDatasetsSummaryList(Long dataflowId);
 
 }

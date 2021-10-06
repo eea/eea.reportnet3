@@ -10,7 +10,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
-import org.eea.interfaces.vo.dataflow.DataProviderGroupVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
@@ -589,19 +588,16 @@ public class RepresentativeControllerImpl implements RepresentativeController {
         providerIdList);
   }
 
-  /**
-   * Find data provider group by id.
-   *
-   * @param groupId the group id
-   * @return the data provider group VO
+  /*
+   * @Override
+   * 
+   * @GetMapping("/private/dataProviderGroup/{groupId}")
+   * 
+   * @ApiOperation(value = "Get a dataProviderGroup information by a group id", response =
+   * DataProviderGroupVO.class, hidden = true) public DataProviderGroupVO
+   * findDataProviderGroupById(@ApiParam(value = "DataProviderGroup Id", example =
+   * "0") @PathVariable("groupId") Long groupId) { return
+   * representativeService.findDataProviderGroupById(groupId); }
    */
-  @Override
-  @GetMapping("/private/dataProviderGroup/{groupId}")
-  @ApiOperation(value = "Get a dataProviderGroup information by a group id",
-      response = DataProviderGroupVO.class, hidden = true)
-  public DataProviderGroupVO findDataProviderGroupById(@ApiParam(value = "DataProviderGroup Id",
-      example = "0") @PathVariable("groupId") Long groupId) {
-    return representativeService.findDataProviderGroupById(groupId);
-  }
 
 }

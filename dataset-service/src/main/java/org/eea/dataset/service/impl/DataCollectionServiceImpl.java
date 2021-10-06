@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.eea.dataset.mapper.DataCollectionMapper;
-import org.eea.dataset.mapper.DataCollectionSummaryMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -47,7 +46,6 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
@@ -251,9 +249,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;
 
-  /** The data collection summary mapper. */
-  @Autowired
-  private DataCollectionSummaryMapper dataCollectionSummaryMapper;
 
   /**
    * Gets the dataflow status.
@@ -1636,25 +1631,5 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             .allMatch(tableSchema -> tableSchema.getRecordSchema().getFieldSchema().stream()
                 .anyMatch(fieldSchema -> Boolean.TRUE.equals(fieldSchema.getPk()))));
   }
-
-  /**
-   * Find data collections summary list.
-   *
-   * @param dataflowId the dataflow id
-   * @return the list
-   */
-  @Override
-  public List<DatasetsSummaryVO> findDataCollectionsSummaryList(Long dataflowId) {
-    List<DatasetsSummaryVO> datasetsSummaryVOList = new ArrayList<>();
-    List<DataCollectionVO> dataCollectionsVO = getDataCollectionIdByDataflowId(dataflowId);
-    for (DataCollectionVO dataCollectionVO : dataCollectionsVO) {
-      DatasetsSummaryVO datasetSummaryVO =
-          dataCollectionSummaryMapper.entityToClass(dataCollectionVO);
-      datasetSummaryVO.setDatasetTypeEnum(DatasetTypeEnum.COLLECTION);
-      datasetsSummaryVOList.add(datasetSummaryVO);
-    }
-    return datasetsSummaryVOList;
-  }
-
 
 }

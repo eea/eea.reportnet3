@@ -821,7 +821,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("hasAnyRole('ADMIN')")
   @GetMapping("/{dataflowId}/datasetsSummary")
-  @ApiOperation(value = "get a summary of the information of all the dataset types of a dataflow",
+  @ApiOperation(value = "Get a summary of the information of all the dataset types of a dataflow",
       hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public List<DatasetsSummaryVO> getDatasetSummaryByDataflowId(

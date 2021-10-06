@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DesignDatasetMapper;
-import org.eea.dataset.mapper.DesignDatasetSummaryMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.mapper.WebFormMapper;
@@ -28,7 +27,6 @@ import org.eea.interfaces.controller.dataflow.ContributorController.ContributorC
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
-import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -130,10 +128,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   /** The lock service. */
   @Autowired
   private LockService lockService;
-
-  /** The design dataset summary mapper. */
-  @Autowired
-  private DesignDatasetSummaryMapper designDatasetSummaryMapper;
 
   /**
    * Gets the design data set id by dataflow id.
@@ -548,25 +542,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       }
     }
     return result;
-  }
-
-
-  /**
-   * Gets the design dataset summary list.
-   *
-   * @param dataflowId the dataflow id
-   * @return the design dataset summary list
-   */
-  @Override
-  public List<DatasetsSummaryVO> getDesignDatasetSummaryList(Long dataflowId) {
-    List<DatasetsSummaryVO> designDatasetsSummary = new ArrayList<>();
-    List<DesignDatasetVO> designDatasetsVO = getDesignDataSetIdByDataflowId(dataflowId);
-    for (DesignDatasetVO designDataset : designDatasetsVO) {
-      DatasetsSummaryVO datasetSummary = designDatasetSummaryMapper.entityToClass(designDataset);
-      datasetSummary.setDatasetTypeEnum(DatasetTypeEnum.DESIGN);
-      designDatasetsSummary.add(datasetSummary);
-    }
-    return designDatasetsSummary;
   }
 
 }

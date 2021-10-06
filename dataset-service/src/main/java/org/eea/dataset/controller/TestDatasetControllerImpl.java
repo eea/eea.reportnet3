@@ -1,10 +1,8 @@
 package org.eea.dataset.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.service.TestDatasetService;
 import org.eea.interfaces.controller.dataset.TestDatasetController;
-import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -13,8 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 
 /**
  * The Class TestDatasetControllerImpl.
@@ -41,26 +37,5 @@ public class TestDatasetControllerImpl implements TestDatasetController {
 
     return testDatasetService.getTestDatasetByDataflowId(idDataflow);
   }
-
-  /**
-   * Find test datasets summary list.
-   *
-   * @param dataflowId the dataflow id
-   * @return the list
-   */
-  @Override
-  @GetMapping(value = "/private/testDatasetsSummary/dataflow/{id}")
-  @ApiOperation(value = "Get a list of summarized test datasets",
-      response = DatasetsSummaryVO.class, responseContainer = "List", hidden = true)
-  public List<DatasetsSummaryVO> findTestDatasetsSummaryList(
-      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
-    List<DatasetsSummaryVO> testDatasetsSummaryList = new ArrayList<>();
-    if (null != dataflowId) {
-      testDatasetsSummaryList = testDatasetService.findTestDatasetsSummaryList(dataflowId);
-    }
-    return testDatasetsSummaryList;
-  }
-
-
 
 }

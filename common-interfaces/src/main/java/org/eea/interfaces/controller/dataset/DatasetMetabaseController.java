@@ -288,22 +288,13 @@ public interface DatasetMetabaseController {
       @RequestParam("dataflowIds") List<Long> dataflowIds);
 
   /**
-   * Find design dataset summary list.
+   * Gets the datasets summary list.
    *
    * @param dataflowId the dataflow id
-   * @return the list
+   * @return the datasets summary list
    */
-  @GetMapping(value = "/private/designDatasetsSummary/dataflow/{id}")
-  List<DatasetsSummaryVO> findDesignDatasetSummaryList(@PathVariable("id") Long dataflowId);
-
-  /**
-   * Find reporting datasets summary list.
-   *
-   * @param dataflowId the dataflow id
-   * @return the list
-   */
-  @GetMapping(value = "/private/reportingDatasetsSummary/dataflow/{id}")
-  List<DatasetsSummaryVO> findReportingDatasetsSummaryList(@PathVariable("id") Long dataflowId);
+  @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
+  List<DatasetsSummaryVO> getDatasetsSummaryList(@PathVariable("id") Long dataflowId);
 
 
 }

@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 
@@ -75,12 +74,5 @@ public interface DataCollectionService {
    */
   DataFlowVO getDataflowMetabase(Long dataflowId);
 
-  /**
-   * Find data collections summary list.
-   *
-   * @param dataflowId the dataflow id
-   * @return the list
-   */
-  List<DatasetsSummaryVO> findDataCollectionsSummaryList(Long dataflowId);
 
 }

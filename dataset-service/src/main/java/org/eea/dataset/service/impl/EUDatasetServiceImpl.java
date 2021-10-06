@@ -1,13 +1,11 @@
 package org.eea.dataset.service.impl;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.eea.dataset.mapper.EUDatasetMapper;
-import org.eea.dataset.mapper.EUDatasetSummaryMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
@@ -19,11 +17,9 @@ import org.eea.dataset.service.EUDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.service.LockService;
@@ -78,9 +74,6 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
-  /** The eu dataset summary mapper. */
-  @Autowired
-  private EUDatasetSummaryMapper euDatasetSummaryMapper;
 
   /**
    * Gets the EU dataset by dataflow id.
@@ -242,25 +235,5 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     }
     return partition;
   }
-
-  /**
-   * Find EU datasets summary list.
-   *
-   * @param dataflowId the dataflow id
-   * @return the list
-   */
-  @Override
-  public List<DatasetsSummaryVO> findEUDatasetsSummaryList(Long dataflowId) {
-    List<DatasetsSummaryVO> datasetsSummaryVOList = new ArrayList<>();
-    List<EUDatasetVO> euDatasetsVO = getEUDatasetByDataflowId(dataflowId);
-    for (EUDatasetVO euDatasetVO : euDatasetsVO) {
-      DatasetsSummaryVO datasetSummaryVO = euDatasetSummaryMapper.entityToClass(euDatasetVO);
-      datasetSummaryVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
-      datasetsSummaryVOList.add(datasetSummaryVO);
-    }
-    return datasetsSummaryVOList;
-  }
-
-
 
 }

@@ -3,7 +3,6 @@
  */
 package org.eea.dataset.controller;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -489,43 +488,19 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   }
 
   /**
-   * Find design dataset summary list.
+   * Gets the datasets summary list.
    *
    * @param dataflowId the dataflow id
-   * @return the list
+   * @return the datasets summary list
    */
-  @Override
-  @GetMapping(value = "/private/designDatasetsSummary/dataflow/{id}")
-  @ApiOperation(value = "Get a list of summarized design datasets",
-      response = DatasetsSummaryVO.class, responseContainer = "List", hidden = true)
-  public List<DatasetsSummaryVO> findDesignDatasetSummaryList(
+  @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
+  @ApiOperation(value = "Get a summary of the information of all the dataset types of a dataflow",
+      hidden = true)
+  public List<DatasetsSummaryVO> getDatasetsSummaryList(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
-    List<DatasetsSummaryVO> designsDatasetsSummaryList = new ArrayList<>();
-    if (null != dataflowId) {
-      designsDatasetsSummaryList = designDatasetService.getDesignDatasetSummaryList(dataflowId);
-    }
-    return designsDatasetsSummaryList;
+    return datasetMetabaseService.getDatasetsSummaryList(dataflowId);
   }
 
-  /**
-   * Find reporting datasets summary list.
-   *
-   * @param dataflowId the dataflow id
-   * @return the list
-   */
-  @Override
-  @GetMapping(value = "/private/reportingDatasetsSummary/dataflow/{id}")
-  @ApiOperation(value = "Get a list of summarized reporting datasets",
-      response = DatasetsSummaryVO.class, responseContainer = "List", hidden = true)
-  public List<DatasetsSummaryVO> findReportingDatasetsSummaryList(
-      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
-    List<DatasetsSummaryVO> reportingDatasetsSummaryList = new ArrayList<>();
-    if (null != dataflowId) {
-      reportingDatasetsSummaryList =
-          reportingDatasetService.findReportingDatasetsSummaryList(dataflowId);
-    }
-    return reportingDatasetsSummaryList;
-  }
 
 
 }

@@ -2,7 +2,6 @@ package org.eea.dataset.service;
 
 import java.util.List;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 
 
@@ -27,12 +26,4 @@ public interface DesignDatasetService {
    * @throws EEAException the EEA exception
    */
   void copyDesignDatasets(Long idDataflowOrigin, Long idDataflowDestination) throws EEAException;
-
-  /**
-   * Gets the design dataset summary list.
-   *
-   * @param dataflowId the dataflow id
-   * @return the design dataset summary list
-   */
-  List<DatasetsSummaryVO> getDesignDatasetSummaryList(Long dataflowId);
 }

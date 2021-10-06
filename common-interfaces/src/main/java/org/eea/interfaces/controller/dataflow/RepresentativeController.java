@@ -2,7 +2,6 @@ package org.eea.interfaces.controller.dataflow;
 
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
-import org.eea.interfaces.vo.dataflow.DataProviderGroupVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
@@ -262,7 +261,7 @@ public interface RepresentativeController {
    * @param groupId the group id
    * @return the data provider group VO
    */
-  @GetMapping("/private/dataProviderGroup/{groupId}")
-  DataProviderGroupVO findDataProviderGroupById(@PathVariable("groupId") Long groupId);
+  // @GetMapping("/private/dataProviderGroup/{groupId}")
+  // DataProviderGroupVO findDataProviderGroupById(@PathVariable("groupId") Long groupId);
 
 }

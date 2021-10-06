@@ -1495,29 +1495,7 @@ public class DataflowServiceImpl implements DataflowService {
     if (null != dataflowId) {
       Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
       if (null != dataflow) {
-        List<DatasetsSummaryVO> datasetDesignsSummaryList =
-            datasetMetabaseControllerZuul.findDesignDatasetSummaryList(dataflowId);
-        datasetsSummaryList.addAll(datasetDesignsSummaryList);
-
-        List<DatasetsSummaryVO> referenceDatasetsSummaryList =
-            referenceDatasetControllerZuul.findReferenceDatasetSummaryList(dataflowId);
-        datasetsSummaryList.addAll(referenceDatasetsSummaryList);
-
-        List<DatasetsSummaryVO> dataCollectionsSummaryList =
-            dataCollectionControllerZuul.findDataCollectionsSummaryList(dataflowId);
-        datasetsSummaryList.addAll(dataCollectionsSummaryList);
-
-        List<DatasetsSummaryVO> euDatasetsSummaryList =
-            euDatasetControllerZuul.findEUDatasetsSummaryList(dataflowId);
-        datasetsSummaryList.addAll(euDatasetsSummaryList);
-
-        List<DatasetsSummaryVO> testDatasetsSummaryList =
-            testDataSetControllerZuul.findTestDatasetsSummaryList(dataflowId);
-        datasetsSummaryList.addAll(testDatasetsSummaryList);
-
-        List<DatasetsSummaryVO> reportingDatasetsSummaryList =
-            datasetMetabaseControllerZuul.findReportingDatasetsSummaryList(dataflowId);
-        datasetsSummaryList.addAll(reportingDatasetsSummaryList);
+        datasetsSummaryList = datasetMetabaseControllerZuul.getDatasetsSummaryList(dataflowId);
       } else {
         throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
       }

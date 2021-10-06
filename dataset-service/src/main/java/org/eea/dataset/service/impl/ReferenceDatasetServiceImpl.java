@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import org.eea.dataset.mapper.ReferenceDatasetMapper;
 import org.eea.dataset.mapper.ReferenceDatasetPublicMapper;
-import org.eea.dataset.mapper.ReferenceDatasetSummaryMapper;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferencedSchema;
@@ -17,10 +16,8 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,10 +63,6 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
   /** The dataflow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
-
-  /** The reference dataset summary mapper. */
-  @Autowired
-  private ReferenceDatasetSummaryMapper referenceDatasetSummaryMapper;
 
 
   /**
@@ -138,25 +131,6 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
     }
     referenceDataset.setUpdatable(updatable);
     referenceDatasetRepository.save(referenceDataset);
-  }
-
-  /**
-   * Find reference dataset summary list.
-   *
-   * @param dataflowId the dataflow id
-   * @return the list
-   */
-  @Override
-  public List<DatasetsSummaryVO> findReferenceDatasetSummaryList(Long dataflowId) {
-    List<DatasetsSummaryVO> datasetsSummaryList = new ArrayList<>();
-    List<ReferenceDatasetVO> referenceDatasetsVO = getReferenceDatasetByDataflowId(dataflowId);
-    for (ReferenceDatasetVO referenceDatasetVO : referenceDatasetsVO) {
-      DatasetsSummaryVO datasetSummaryVO =
-          referenceDatasetSummaryMapper.entityToClass(referenceDatasetVO);
-      datasetSummaryVO.setDatasetTypeEnum(DatasetTypeEnum.REFERENCE);
-      datasetsSummaryList.add(datasetSummaryVO);
-    }
-    return datasetsSummaryList;
   }
 
 }
