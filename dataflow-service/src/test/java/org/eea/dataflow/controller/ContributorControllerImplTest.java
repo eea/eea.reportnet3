@@ -3,6 +3,7 @@ package org.eea.dataflow.controller;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import org.eea.dataflow.service.ContributorService;
+import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.contributor.ContributorVO;
@@ -38,6 +39,10 @@ public class ContributorControllerImplTest {
   /** The user management controller zull. */
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
+
+  /** The dataflow service. */
+  @Mock
+  private DataflowServiceImpl dataflowService;
 
   /** The contributor VO write. */
   private ContributorVO contributorVOWrite;

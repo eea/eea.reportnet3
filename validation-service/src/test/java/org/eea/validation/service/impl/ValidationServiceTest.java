@@ -55,6 +55,7 @@ import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
 import org.eea.validation.persistence.data.repository.ValidationRepository;
+import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.util.KieBaseManager;
@@ -163,6 +164,10 @@ public class ValidationServiceTest {
    */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The rules repository. */
+  @Mock
+  private RulesRepository rulesRepository;
 
   /**
    * The record validation repository.
@@ -333,7 +338,6 @@ public class ValidationServiceTest {
     tableValues.add(new TableValue());
     datasetValue.setTableValues(tableValues);
     datasetValue.setDatasetValidations(datasetValidations);
-    datasetValue.setIdDatasetSchema("1234");
     datasetValue.setId(123L);
 
     idList = new ArrayList<>();
@@ -1017,11 +1021,10 @@ public class ValidationServiceTest {
     dataSetMetabase.setDataSetName("file");
     dataSetMetabase.setId(1L);
 
-
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
 
-
+    when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(validationRepository.findGroupRecordsByFilter(Mockito.anyLong(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean())).thenReturn(errorList);
@@ -1048,7 +1051,7 @@ public class ValidationServiceTest {
       throw e;
     }
   }
-  
+
   @After
   public void afterTests() {
     File file = new File("./dataset-1-validations");

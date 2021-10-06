@@ -53,8 +53,11 @@ import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
 import org.eea.validation.persistence.data.repository.ValidationRepository;
+import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.persistence.schemas.rule.Rule;
+import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
 import org.eea.validation.util.RulesErrorUtils;
@@ -192,6 +195,10 @@ public class ValidationServiceImpl implements ValidationService {
   /** The validation repository. */
   @Autowired
   private ValidationRepository validationRepository;
+
+  /** The rules repository. */
+  @Autowired
+  private RulesRepository rulesRepository;
 
   /**
    * The kafka sender utils.
@@ -838,8 +845,11 @@ public class ValidationServiceImpl implements ValidationService {
     validations.setIdDatasetSchema(dataset.getIdDatasetSchema());
     validations.setIdDataset(datasetId);
 
-    validations.setErrors(validationRepository.findGroupRecordsByFilter(datasetId,
-        new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false));
+    List<GroupValidationVO> errors = validationRepository.findGroupRecordsByFilter(datasetId,
+        new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false);
+
+    getRuleMessage(dataset, errors);
+    validations.setErrors(errors);
 
     validations
         .setTotalRecords(Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId,
@@ -847,6 +857,39 @@ public class ValidationServiceImpl implements ValidationService {
 
     return validations;
   }
+
+  /**
+   * Gets the rule message.
+   *
+   * @param dataset the dataset
+   * @param errors the errors
+   * @return the rule message
+   */
+  private void getRuleMessage(DatasetValue dataset, List<GroupValidationVO> errors) {
+    RulesSchema rules =
+        rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getIdDatasetSchema()));
+    for (GroupValidationVO validation : errors) {
+      if (null != rules && null != rules.getRules()) {
+        for (Rule rule : rules.getRules()) {
+          if (validation.getIdRule().equals(rule.getRuleId().toString())) {
+            validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Replace place holders.
+   *
+   * @param message the message
+   * @return the string
+   */
+  private String replacePlaceHolders(String message) {
+    return message.replace("{%", "<").replace("%}", ">");
+  }
+
+
 
   /**
    * Fill validation error data.
