@@ -25,6 +25,7 @@ import { RecordUtils } from 'views/_functions/Utils';
 import { MapUtils } from 'views/_functions/Utils/MapUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 
 proj4.defs([
   ['EPSG:4258', '+proj=longlat +ellps=GRS80 +no_defs'],
@@ -634,57 +635,59 @@ const FieldEditor = ({
           />
         );
       case 'DATETIME':
-        return (
-          <Calendar
-            appendTo={document.body}
-            baseZIndex={9999}
-            inputId={calendarWithDatetimeId}
-            inputRef={refDatetimeCalendar}
-            locale={{
-              firstDayOfWeek: 0,
-              dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-              dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-              dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
-              monthNames: [
-                'January',
-                'February',
-                'March',
-                'April',
-                'May',
-                'June',
-                'July',
-                'August',
-                'September',
-                'October',
-                'November',
-                'December'
-              ],
-              monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-              today: 'Save',
-              clear: 'Clear',
-              weekHeader: 'Wk'
-            }}
-            monthNavigator={true}
-            onChange={e => setDateTime(!isNil(e.value) ? e.value : '')}
-            onFocus={e => {
-              calculateCalendarPanelPosition(e.currentTarget, cells.field);
-              const dateTimeValue = RecordUtils.getCellValue(cells, cells.field);
-              setDateTime(dateTimeValue === '' ? Date.now : new Date(dateTimeValue));
-              setIsCalendarVisible(true);
-            }}
-            onTodayButtonClick={e => {
-              e.stopPropagation();
-              saveCalendarDate(dateTime === '' ? '' : dayjs(dateTime).format('YYYY-MM-DD HH:mm:ss'), true);
-            }}
-            showButtonBar={true}
-            showSeconds={true}
-            showTime={true}
-            todayButtonClassName="p-button-primary"
-            value={!isNil(dateTime) ? dateTime : new Date(RecordUtils.getCellValue(cells, cells.field))}
-            yearNavigator={true}
-            yearRange="1900:2100"
-          />
-        );
+        return <TimezoneCalendar />;
+      // case 'DATETIME_':
+      //   return (
+      //     <Calendar
+      //       appendTo={document.body}
+      //       baseZIndex={9999}
+      //       inputId={calendarWithDatetimeId}
+      //       inputRef={refDatetimeCalendar}
+      //       locale={{
+      //         firstDayOfWeek: 0,
+      //         dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      //         dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      //         dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+      //         monthNames: [
+      //           'January',
+      //           'February',
+      //           'March',
+      //           'April',
+      //           'May',
+      //           'June',
+      //           'July',
+      //           'August',
+      //           'September',
+      //           'October',
+      //           'November',
+      //           'December'
+      //         ],
+      //         monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      //         today: 'Save',
+      //         clear: 'Clear',
+      //         weekHeader: 'Wk'
+      //       }}
+      //       monthNavigator={true}
+      //       onChange={e => setDateTime(!isNil(e.value) ? e.value : '')}
+      //       onFocus={e => {
+      //         calculateCalendarPanelPosition(e.currentTarget, cells.field);
+      //         const dateTimeValue = RecordUtils.getCellValue(cells, cells.field);
+      //         setDateTime(dateTimeValue === '' ? Date.now : new Date(dateTimeValue));
+      //         setIsCalendarVisible(true);
+      //       }}
+      //       onTodayButtonClick={e => {
+      //         e.stopPropagation();
+      //         saveCalendarDate(dateTime === '' ? '' : dayjs(dateTime).format('YYYY-MM-DD HH:mm:ss'), true);
+      //       }}
+      //       showButtonBar={true}
+      //       showSeconds={true}
+      //       showTime={true}
+      //       todayButtonClassName="p-button-primary"
+      //       value={!isNil(dateTime) ? dateTime : new Date(RecordUtils.getCellValue(cells, cells.field))}
+      //       yearNavigator={true}
+      //       yearRange="1900:2100"
+      //     />
+      //   );
 
       case 'EMAIL':
         return (

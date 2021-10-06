@@ -29,6 +29,7 @@ import { mapReducer } from './_functions/Reducers/mapReducer';
 import { MapUtils, RecordUtils } from 'views/_functions/Utils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { TimezoneCalendar } from 'views/_components/TimezoneCalendar/TimezoneCalendar';
 
 const DataFormFieldEditor = ({
   autoFocus,
@@ -452,23 +453,28 @@ const DataFormFieldEditor = ({
 
   const renderDatetimeCalendar = (field, fieldValue) => {
     return (
-      <Calendar
-        appendTo={document.body}
-        baseZIndex={9999}
-        dateFormat="yy-mm-dd"
+      // <Calendar
+      //   appendTo={document.body}
+      //   baseZIndex={9999}
+      //   dateFormat="yy-mm-dd"
+      //   disabled={(column.readOnly && reporting) || isSaving}
+      //   inputRef={refDatetimeCalendar}
+      //   monthNavigator={true}
+      //   onChange={e => onChangeForm(field, dayjs(e.target.value).format('YYYY-MM-DD HH:mm:ss'), isConditional)}
+      //   onFocus={e => {
+      //     calculateCalendarPanelPosition(e.currentTarget);
+      //   }}
+      //   readOnlyInput={true}
+      //   showSeconds={true}
+      //   showTime={true}
+      //   value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
+      //   yearNavigator={true}
+      //   yearRange="1900:2100"
+      // />
+      <TimezoneCalendar
         disabled={(column.readOnly && reporting) || isSaving}
-        inputRef={refDatetimeCalendar}
-        monthNavigator={true}
-        onChange={e => onChangeForm(field, dayjs(e.target.value).format('YYYY-MM-DD HH:mm:ss'), isConditional)}
-        onFocus={e => {
-          calculateCalendarPanelPosition(e.currentTarget);
-        }}
-        readOnlyInput={true}
-        showSeconds={true}
-        showTime={true}
-        value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
-        yearNavigator={true}
-        yearRange="1900:2100"
+        onChangeDate={e => onChangeForm(field, e.value, isConditional)}
+        value={fieldValue}
       />
     );
   };
