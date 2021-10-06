@@ -63,15 +63,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
           label={resourcesContext.messages['save']}
           onClick={() => onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value))}
         />
-        <Button
-          className="p-button p-component p-button-secondary p-button-animated-blink p-button-text-icon-left"
-          icon="trash"
-          label={resourcesContext.messages['clear']}
-          onClick={() => {
-            setDate('');
-            setInputValue('');
-          }}
-        />
       </div>
     );
   };
