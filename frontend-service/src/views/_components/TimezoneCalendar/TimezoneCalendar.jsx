@@ -14,6 +14,8 @@ import { InputText } from 'views/_components/InputText';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
+
 const offsetOptions = [
   { value: -12, label: '-12:00' },
   { value: -11, label: '-11:00' },
@@ -52,13 +54,14 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
+  const [hasError, setHasError] = useState(false);
 
   const renderButtons = () => {
     return (
       <div className={styles.buttonRight}>
         <Button
           className="p-button p-component p-button-primary p-button-animated-blink p-button-text-icon-left"
-          disabled={!dayjs(new Date(date)).isValid()}
+          disabled={!dayjs(new Date(date)).isValid() || hasError}
           icon="save"
           label={resourcesContext.messages['save']}
           onClick={() => onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value))}
@@ -74,10 +77,10 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
         monthNavigator
         onChange={e => {
           setDate(e.value);
-          setInputValue(dayjs(e.value).format('DD/MM/YYYY HH:mm:ss').toString());
+          setInputValue(dayjs(e.value).format('HH:mm:ss').toString());
         }}
-        // showTime={true}
         ref={calendarRef}
+        showTime={true}
         value={date}
         yearNavigator
         yearRange="1900:2100"
@@ -89,16 +92,26 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     return <InputText onChange={e => setDate(new Date(e.target.value))} value={date} />;
   };
 
+  const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
+
   const renderInputMask = () => {
     return (
       <InputMask
         autoClear
-        mask={`99/99/9999 99:99:99`}
+        className={hasError && styles.error}
+        mask={`99:99:99`}
         onChange={e => {
           setInputValue(e.target.value);
         }}
         onComplete={e => {
-          setDate(new Date(dayjs(e.value, 'DD/MM/YYYY HH:mm:ss').format('ddd/MMMDD/YYYY HH:mm:ss')));
+          if (checkIsCorrectTimeFormat(e.value)) {
+            setHasError(false);
+            const [hour, minute, second] = e.value.split(':');
+
+            setDate(new Date(dayjs(date).hour(hour).minute(minute).second(second).format('ddd/MMMDD/YYYY HH:mm:ss')));
+          } else {
+            setHasError(true);
+          }
         }}
         value={inputValue}
       />
@@ -126,7 +139,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
         <span className={styles.label}>UTC</span>
         {renderDropdown()}
       </div>
-      {/* {renderInput()} */}
+      {renderInput()}
       {renderButtons()}
     </div>
   );
