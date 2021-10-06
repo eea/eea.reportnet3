@@ -99,7 +99,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     return (
       <InputMask
         autoClear
-        className={hasError && styles.error}
+        className={`${styles.timeInput} ${hasError && styles.error}`}
         mask={`99:99:99`}
         onChange={e => {
           setInputValue(e.target.value);

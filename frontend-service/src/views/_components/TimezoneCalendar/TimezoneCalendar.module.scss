@@ -1,7 +1,7 @@
 .buttonRight {
   display: flex;
   justify-content: flex-end;
-
+  // flex-grow: ;
   & button {
     margin: 1rem 0 0.5rem 0.5rem;
   }
@@ -9,6 +9,9 @@
 .container {
   // min-width: 400px;
   // max-width: 500px;
+}
+.timeInput {
+  width: min-content !important;
 }
 .inputMaskWrapper {
   display: flex;
