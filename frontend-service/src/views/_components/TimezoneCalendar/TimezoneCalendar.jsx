@@ -1,4 +1,4 @@
-import { useContext, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
@@ -45,7 +45,7 @@ const offsetOptions = [
   { value: 12, label: '+12:00' }
 ];
 
-export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
+export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isEdit }) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
@@ -56,6 +56,21 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const [inputValue, setInputValue] = useState('');
   const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    if (!value) {
+      setInputValue(dayjs().format('HH:mm:ss').toString());
+      setDate(new Date());
+    } else {
+      if (isEdit) {
+        setInputValue(dayjs(value).format('HH:mm:ss').toString());
+        setDate(new Date(dayjs(value, 'YYYY-MM-DD HH:mm:ss')));
+      } else {
+        setInputValue(dayjs(value).format('HH:mm:ss').toString());
+        setDate(value);
+      }
+    }
+  }, []);
 
   const renderButtons = () => {
     return (
@@ -121,6 +136,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderDropdown = () => {
     return (
       <Dropdown
+        //TODO CHECK Z-INDEX
         className={styles.dropdown}
         onChange={e => {
           setSelectedOffset(e.value);

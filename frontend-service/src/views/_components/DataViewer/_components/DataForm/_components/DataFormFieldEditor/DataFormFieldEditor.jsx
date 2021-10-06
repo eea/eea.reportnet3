@@ -473,6 +473,7 @@ const DataFormFieldEditor = ({
       // />
       <TimezoneCalendar
         disabled={(column.readOnly && reporting) || isSaving}
+        isEdit
         onChangeDate={e => onChangeForm(field, e.value, isConditional)}
         value={fieldValue}
       />

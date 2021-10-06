@@ -635,7 +635,12 @@ const FieldEditor = ({
           />
         );
       case 'DATETIME':
-        return <TimezoneCalendar />;
+        return (
+          <TimezoneCalendar
+            onSaveDate={dateTimeProp => setDateTime(!isNil(dateTimeProp) ? dateTimeProp : '')}
+            value={!isNil(dateTime) ? dateTime : new Date(RecordUtils.getCellValue(cells, cells.field))}
+          />
+        );
       // case 'DATETIME_':
       //   return (
       //     <Calendar
