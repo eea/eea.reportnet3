@@ -271,7 +271,7 @@ const Dataflow = withRouter(({ history, match }) => {
       editBusinessBtn: (isAdmin || isLeadDesigner) && isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
-      manageRequestersBtn: isAdmin || isLeadDesigner,
+      manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
@@ -986,15 +986,12 @@ const Dataflow = withRouter(({ history, match }) => {
               columnHeader={resourcesContext.messages['requestersEmailColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
-              deleteColumnHeader={resourcesContext.messages['deleteRequesterButtonTableHeader']}
               deleteConfirmHeader={resourcesContext.messages['requestersRightsDialogConfirmDeleteHeader']}
               deleteConfirmMessage={resourcesContext.messages['requestersRightsDialogConfirmDeleteQuestion']}
               deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
               editConfirmHeader={resourcesContext.messages['editRequesterConfirmHeader']}
               getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
               isAdmin={isAdmin}
-              isBusinessDataflow={isBusinessDataflow}
-              isSteward={isSteward}
               isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
               placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
@@ -1019,7 +1016,6 @@ const Dataflow = withRouter(({ history, match }) => {
               columnHeader={resourcesContext.messages['reportersEmailColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
-              deleteColumnHeader={resourcesContext.messages['deleteReporterButtonTableHeader']}
               deleteConfirmHeader={resourcesContext.messages['reportersRightsDialogConfirmDeleteHeader']}
               deleteConfirmMessage={resourcesContext.messages['reportersRightsDialogConfirmDeleteQuestion']}
               deleteErrorNotificationKey={'DELETE_REPORTER_ERROR'}

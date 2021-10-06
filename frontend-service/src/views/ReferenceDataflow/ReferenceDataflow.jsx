@@ -384,7 +384,6 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
             columnHeader={resourcesContext.messages['requestersEmailColumn']}
             dataflowId={referenceDataflowId}
-            deleteColumnHeader={resourcesContext.messages['deleteRequesterButtonTableHeader']}
             deleteConfirmHeader={resourcesContext.messages['requestersRightsDialogConfirmDeleteHeader']}
             deleteConfirmMessage={resourcesContext.messages['requestersRightsDialogConfirmDeleteQuestion']}
             deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
