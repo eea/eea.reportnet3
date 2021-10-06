@@ -588,16 +588,4 @@ public class RepresentativeControllerImpl implements RepresentativeController {
         providerIdList);
   }
 
-  /*
-   * @Override
-   * 
-   * @GetMapping("/private/dataProviderGroup/{groupId}")
-   * 
-   * @ApiOperation(value = "Get a dataProviderGroup information by a group id", response =
-   * DataProviderGroupVO.class, hidden = true) public DataProviderGroupVO
-   * findDataProviderGroupById(@ApiParam(value = "DataProviderGroup Id", example =
-   * "0") @PathVariable("groupId") Long groupId) { return
-   * representativeService.findDataProviderGroupById(groupId); }
-   */
-
 }

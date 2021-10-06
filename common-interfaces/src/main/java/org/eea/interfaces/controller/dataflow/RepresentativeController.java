@@ -254,14 +254,4 @@ public interface RepresentativeController {
       @PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerIdList") List<Long> providerIdList);
 
-
-  /**
-   * Find data provider group by id.
-   *
-   * @param groupId the group id
-   * @return the data provider group VO
-   */
-  // @GetMapping("/private/dataProviderGroup/{groupId}")
-  // DataProviderGroupVO findDataProviderGroupById(@PathVariable("groupId") Long groupId);
-
 }
