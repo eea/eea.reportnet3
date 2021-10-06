@@ -41,6 +41,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /** The Class DataSetMetabaseControllerImpl. */
 @RestController
@@ -494,7 +496,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @GetMapping(value = "/private/designDatasetsSummary/dataflow/{id}")
-  public List<DatasetsSummaryVO> findDesignDatasetSummaryList(@PathVariable("id") Long dataflowId) {
+  @ApiOperation(value = "Get a list of summarized design datasets",
+      response = DatasetsSummaryVO.class, responseContainer = "List", hidden = true)
+  public List<DatasetsSummaryVO> findDesignDatasetSummaryList(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
     List<DatasetsSummaryVO> designsDatasetsSummaryList = new ArrayList<>();
     if (null != dataflowId) {
       designsDatasetsSummaryList = designDatasetService.getDesignDatasetSummaryList(dataflowId);
@@ -510,8 +515,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @GetMapping(value = "/private/reportingDatasetsSummary/dataflow/{id}")
+  @ApiOperation(value = "Get a list of summarized reporting datasets",
+      response = DatasetsSummaryVO.class, responseContainer = "List", hidden = true)
   public List<DatasetsSummaryVO> findReportingDatasetsSummaryList(
-      @PathVariable("id") Long dataflowId) {
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
     List<DatasetsSummaryVO> reportingDatasetsSummaryList = new ArrayList<>();
     if (null != dataflowId) {
       reportingDatasetsSummaryList =

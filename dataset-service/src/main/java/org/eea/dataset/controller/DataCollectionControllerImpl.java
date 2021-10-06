@@ -221,8 +221,10 @@ public class DataCollectionControllerImpl implements DataCollectionController {
    */
   @Override
   @GetMapping(value = "/private/dataCollectionsSummary/dataflow/{id}")
+  @ApiOperation(value = "Get a list of summarized datacollections",
+      response = DatasetsSummaryVO.class, responseContainer = "List", hidden = true)
   public List<DatasetsSummaryVO> findDataCollectionsSummaryList(
-      @PathVariable("id") Long dataflowId) {
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
     List<DatasetsSummaryVO> dataCollectionsSummaryList = new ArrayList<>();
     if (null != dataflowId) {
       dataCollectionsSummaryList = dataCollectionService.findDataCollectionsSummaryList(dataflowId);

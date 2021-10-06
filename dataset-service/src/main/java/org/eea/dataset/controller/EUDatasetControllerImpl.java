@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * The Class EUDatasetControllerImpl.
@@ -93,7 +95,10 @@ public class EUDatasetControllerImpl implements EUDatasetController {
    */
   @Override
   @GetMapping(value = "/private/euDatasetsSummary/dataflow/{id}")
-  public List<DatasetsSummaryVO> findEUDatasetsSummaryList(@PathVariable("id") Long dataflowId) {
+  @ApiOperation(value = "Get a list of summarized eu datasets", response = DatasetsSummaryVO.class,
+      responseContainer = "List", hidden = true)
+  public List<DatasetsSummaryVO> findEUDatasetsSummaryList(
+      @ApiParam(value = "Dataflow Id") @PathVariable("id") Long dataflowId) {
     List<DatasetsSummaryVO> datasetsSummaryVOList = new ArrayList<>();
     if (null != dataflowId) {
       datasetsSummaryVOList = euDatasetService.findEUDatasetsSummaryList(dataflowId);

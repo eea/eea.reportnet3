@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 
 /**
@@ -108,8 +110,10 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
    */
   @Override
   @GetMapping("/private/referenceDatasetsSummary/dataflow/{id}")
+  @ApiOperation(value = "Get a list of summarized reference datasets",
+      response = DatasetsSummaryVO.class, responseContainer = "List", hidden = true)
   public List<DatasetsSummaryVO> findReferenceDatasetSummaryList(
-      @PathVariable("id") Long dataflowId) {
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
     List<DatasetsSummaryVO> referenceDatasetsSummaryList = new ArrayList<>();
     if (null != dataflowId) {
       referenceDatasetsSummaryList =

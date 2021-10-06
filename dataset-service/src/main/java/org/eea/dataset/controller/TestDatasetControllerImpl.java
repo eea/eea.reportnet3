@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * The Class TestDatasetControllerImpl.
@@ -48,7 +50,10 @@ public class TestDatasetControllerImpl implements TestDatasetController {
    */
   @Override
   @GetMapping(value = "/private/testDatasetsSummary/dataflow/{id}")
-  public List<DatasetsSummaryVO> findTestDatasetsSummaryList(@PathVariable("id") Long dataflowId) {
+  @ApiOperation(value = "Get a list of summarized test datasets",
+      response = DatasetsSummaryVO.class, responseContainer = "List", hidden = true)
+  public List<DatasetsSummaryVO> findTestDatasetsSummaryList(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
     List<DatasetsSummaryVO> testDatasetsSummaryList = new ArrayList<>();
     if (null != dataflowId) {
       testDatasetsSummaryList = testDatasetService.findTestDatasetsSummaryList(dataflowId);
