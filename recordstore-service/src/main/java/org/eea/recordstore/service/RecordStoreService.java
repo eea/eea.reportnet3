@@ -16,16 +16,6 @@ public interface RecordStoreService {
 
 
   /**
-   * Reset dataset database.
-   *
-   * @throws RecordStoreAccessException the docker access exception
-   * @deprecated (pending to remove)
-   */
-  @Deprecated
-  void resetDatasetDatabase() throws RecordStoreAccessException;
-
-
-  /**
    * Creates the empty data set.
    *
    * @param datasetName the dataset name
