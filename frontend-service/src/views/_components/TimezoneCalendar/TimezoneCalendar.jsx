@@ -117,6 +117,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderDropdown = () => {
     return (
       <Dropdown
+        className={styles.dropdown}
         onChange={e => {
           setSelectedOffset(e.value);
         }}
@@ -136,7 +137,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
         <span className={styles.label}>{resourcesContext.messages['utc']}</span>
         <TooltipButton
           message={resourcesContext.messages['dateTimeWarningTooltip']}
-          tooltipClassName={styles.tooltip}
           uniqueIdentifier={'dateTimeWarningTooltip'}
         />
         {renderDropdown()}
