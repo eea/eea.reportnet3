@@ -43,6 +43,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 
 /**
  * The Class ValidationServiceController.
@@ -86,9 +89,14 @@ public class ValidationControllerImpl implements ValidationController {
   @PutMapping(value = "/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @LockMethod(removeWhenFinish = false)
+  @ApiOperation(value = "Validates dataset data for a given dataset id", hidden = true)
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
   public void validateDataSetData(
-      @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
-      @RequestParam(value = "released", required = false) boolean released) {
+      @LockCriteria(name = "datasetId") @ApiParam(
+          value = "Dataset id whose data is going to be validated",
+          example = "15") @PathVariable("id") Long datasetId,
+      @ApiParam(value = "Is the dataset released?", example = "true",
+          required = false) @RequestParam(value = "released", required = false) boolean released) {
 
     LOG.info(
         "The user invoking ValidationControllerImpl.validateDataSetData is {} and the datasetId {}",
@@ -129,18 +137,34 @@ public class ValidationControllerImpl implements ValidationController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASET_OBSERVER','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR checkAccessReferenceEntity('DATASET',#datasetId)")
   @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Gets all the failed validations for a given dataset", hidden = true)
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
   public FailedValidationsDatasetVO getFailedValidationsByIdDataset(
-      @PathVariable("id") Long datasetId,
-      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "headers", required = false) String headers,
-      @RequestParam(value = "asc", defaultValue = "true") boolean asc,
-      @RequestParam(value = "levelErrorsFilter",
-          required = false) List<ErrorTypeEnum> levelErrorsFilter,
-      @RequestParam(value = "typeEntitiesFilter",
-          required = false) List<EntityTypeEnum> typeEntitiesFilter,
-      @RequestParam(value = "tableFilter", required = false) String tableFilter,
-      @RequestParam(value = "fieldValueFilter", required = false) String fieldValueFilter) {
+      @ApiParam(value = "Dataset id used in the retrieval process",
+          example = "1") @PathVariable("id") Long datasetId,
+      @ApiParam(value = "Page number the filtering starts in.", example = "0", defaultValue = "0",
+          required = false) @RequestParam(value = "pageNum", defaultValue = "0",
+              required = false) Integer pageNum,
+      @ApiParam(value = "How many records are going to be shown per page.", example = "10",
+          defaultValue = "20", required = false) @RequestParam(value = "pageSize",
+              defaultValue = "20", required = false) Integer pageSize,
+      @ApiParam(value = "The headers used in the retrieval process") @RequestParam(
+          value = "headers", required = false) String headers,
+      @ApiParam(value = "Are the validations going to be ordered in ascending order?",
+          example = "false",
+          defaultValue = "true") @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+      @ApiParam(value = "The level of error the validations are going to be filtered with",
+          required = false) @RequestParam(value = "levelErrorsFilter",
+              required = false) List<ErrorTypeEnum> levelErrorsFilter,
+      @ApiParam(value = "The types of entities used in the retrieval process", example = "DATASET",
+          required = false) @RequestParam(value = "typeEntitiesFilter",
+              required = false) List<EntityTypeEnum> typeEntitiesFilter,
+      @ApiParam(value = "The table filter used in the retrieval process",
+          required = false) @RequestParam(value = "tableFilter",
+              required = false) String tableFilter,
+      @ApiParam(value = "The filtered field value used in the retrieval process",
+          required = false) @RequestParam(value = "fieldValueFilter",
+              required = false) String fieldValueFilter) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -184,18 +208,35 @@ public class ValidationControllerImpl implements ValidationController {
   @Override
   @GetMapping(value = "listGroupValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER')")
+  @ApiOperation(value = "Gets all the failed validations for a given dataset grouped by code",
+      hidden = true)
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
   public FailedValidationsDatasetVO getGroupFailedValidationsByIdDataset(
-      @PathVariable("id") Long datasetId,
-      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
-      @RequestParam(value = "headers", required = false) String headers,
-      @RequestParam(value = "asc", defaultValue = "true") boolean asc,
-      @RequestParam(value = "levelErrorsFilter",
-          required = false) List<ErrorTypeEnum> levelErrorsFilter,
-      @RequestParam(value = "typeEntitiesFilter",
-          required = false) List<EntityTypeEnum> typeEntitiesFilter,
-      @RequestParam(value = "tableFilter", required = false) String tableFilter,
-      @RequestParam(value = "fieldValueFilter", required = false) String fieldValueFilter) {
+      @ApiParam(value = "Dataset id used in the retrieval process",
+          example = "1") @PathVariable("id") Long datasetId,
+      @ApiParam(value = "Page number the filtering starts in.", example = "0", defaultValue = "0",
+          required = false) @RequestParam(value = "pageNum", defaultValue = "0",
+              required = false) Integer pageNum,
+      @ApiParam(value = "How many records are going to be shown per page.", example = "10",
+          defaultValue = "20", required = false) @RequestParam(value = "pageSize",
+              defaultValue = "20", required = false) Integer pageSize,
+      @ApiParam(value = "The headers used in the retrieval process") @RequestParam(
+          value = "headers", required = false) String headers,
+      @ApiParam(value = "Are the validations going to be ordered in ascending order?",
+          example = "false",
+          defaultValue = "true") @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+      @ApiParam(value = "The level of error the validations are going to be filtered with",
+          required = false) @RequestParam(value = "levelErrorsFilter",
+              required = false) List<ErrorTypeEnum> levelErrorsFilter,
+      @ApiParam(value = "The types of entities used in the retrieval process", example = "DATASET",
+          required = false) @RequestParam(value = "typeEntitiesFilter",
+              required = false) List<EntityTypeEnum> typeEntitiesFilter,
+      @ApiParam(value = "The table filter used in the retrieval process",
+          required = false) @RequestParam(value = "tableFilter",
+              required = false) String tableFilter,
+      @ApiParam(value = "The filtered field value used in the retrieval process",
+          required = false) @RequestParam(value = "fieldValueFilter",
+              required = false) String fieldValueFilter) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -232,7 +273,10 @@ public class ValidationControllerImpl implements ValidationController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @PostMapping(value = "/export/{datasetId}")
-  public void exportValidationDataCSV(@PathVariable("datasetId") Long datasetId) {
+  @ApiOperation(value = "Export all the validations for a given dataset grouped by code",
+      hidden = true)
+  public void exportValidationDataCSV(@ApiParam(value = "Dataset id used in the export process",
+      example = "1") @PathVariable("datasetId") Long datasetId) {
     LOG.info("Export dataset validation data from datasetId {}, with type .csv", datasetId);
     try {
       validationService.exportValidationFile(datasetId);
@@ -252,7 +296,16 @@ public class ValidationControllerImpl implements ValidationController {
   @Override
   @GetMapping(value = "/downloadFile/{datasetId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
-  public void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
+  @ApiOperation(
+      value = "Download the file created in the export validations for a given dataset grouped by code",
+      hidden = true)
+  @ApiResponse(code = 404,
+      message = "Could not download the validation export file for the given dataset id")
+  public void downloadFile(
+      @ApiParam(value = "Dataset id that was used in the export process",
+          example = "1") @PathVariable Long datasetId,
+      @ApiParam(value = "Filename for the file that was generated during the export process.",
+          example = "dataset-3-validations") @RequestParam String fileName,
       HttpServletResponse response) {
     try {
       LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
