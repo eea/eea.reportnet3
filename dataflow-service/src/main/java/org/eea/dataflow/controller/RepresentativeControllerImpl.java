@@ -75,7 +75,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @PostMapping("/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
-  @ApiOperation(value = "Create one Representative", response = Long.class)
+  @ApiOperation(value = "Create one Representative", response = Long.class, hidden = true)
   public Long createRepresentative(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(type = "Object",
@@ -101,7 +101,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Find all DataProviders  by their Group Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.REPRESENTATIVE_TYPE_INCORRECT)
   public List<DataProviderVO> findAllDataProviderByGroupId(
       @ApiParam(value = "Group id", example = "0") @PathVariable("groupId") Long groupId) {
@@ -122,7 +122,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @GetMapping(value = "/dataProvider/countryGroups", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Find all DataProvider types", produces = MediaType.APPLICATION_JSON_VALUE,
-      response = DataProviderVO.class, responseContainer = "List")
+      response = DataProviderVO.class, responseContainer = "List", hidden = true)
   public List<DataProviderCodeVO> findAllDataProviderCountryType() {
     return representativeService.getDataProviderGroupByType(TypeDataProviderEnum.COUNTRY);
   }
@@ -138,7 +138,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @PreAuthorize("hasAnyRole('ADMIN')")
   @ApiOperation(value = "Find all DataProvider business types",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<DataProviderCodeVO> findAllDataProviderCompanyType() {
     return representativeService.getDataProviderGroupByType(TypeDataProviderEnum.COMPANY);
   }
@@ -155,7 +155,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Find all DataProvider organization types",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<DataProviderCodeVO> findAllDataProviderOrganizationType() {
     return representativeService.getDataProviderGroupByType(TypeDataProviderEnum.ORGANIZATION);
   }
@@ -200,7 +200,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @PutMapping("/update")
   @PreAuthorize("isAuthenticated()")
-  public Long updateRepresentative(@RequestBody RepresentativeVO representativeVO) {
+  @ApiOperation(value = "Update a representative", produces = MediaType.APPLICATION_JSON_VALUE,
+      response = Long.class, hidden = true)
+  public Long updateRepresentative(@ApiParam(value = "Representative object",
+      type = "Object") @RequestBody RepresentativeVO representativeVO) {
 
     // Authorization
     if (!representativeService.authorizeByRepresentativeId(representativeVO.getId())) {
@@ -221,7 +224,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @DeleteMapping(value = "/{dataflowRepresentativeId}/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
-  @ApiOperation(value = "Delete Representative")
+  @ApiOperation(value = "Delete Representative", hidden = true)
   @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
   public void deleteRepresentative(
       @ApiParam(value = "Dataflow Representative id",
@@ -245,7 +248,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @GetMapping(value = "/dataProvider/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("isAuthenticated()")
-  @ApiOperation(value = "Find a DataProvider based on its Id")
+  @ApiOperation(value = "Find a DataProvider based on its Id", response = DataProviderVO.class,
+      hidden = true)
   @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
   public DataProviderVO findDataProviderById(
       @ApiParam(value = "Dataprovider id", example = "0") @PathVariable("id") Long dataProviderId) {
@@ -281,6 +285,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @GetMapping(value = "/dataProviderGroup/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Finds a DataProviderGroup based on a Dataflow Id",
+      response = DataProviderCodeVO.class, hidden = true)
+  @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
   public DataProviderCodeVO findDataProviderGroupByDataflowId(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
 
@@ -301,7 +308,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @GetMapping(value = "/export/{dataflowId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @ApiOperation(value = "Export file lead reporters")
+  @ApiOperation(value = "Exports the file containing the info of Lead reporters",
+      response = ResponseEntity.class, hidden = true)
+  @ApiResponse(code = 500, message = "Internal server error exporting the file")
   public ResponseEntity<byte[]> exportLeadReportersFile(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
@@ -327,8 +336,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping(value = "/exportTemplateReportersFile/{groupId}",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @ApiOperation(value = "Export template file countrys avaliable")
-  public ResponseEntity<byte[]> exportTemplateReportersFile(@PathVariable("groupId") Long groupId) {
+  @ApiOperation(value = "Exports the template file for lead reporters",
+      response = ResponseEntity.class, hidden = true)
+  @ApiResponse(code = 500, message = "Internal server error exporting the template file")
+  public ResponseEntity<byte[]> exportTemplateReportersFile(
+      @ApiParam(value = "Group Id", example = "0") @PathVariable("groupId") Long groupId) {
 
     try {
       byte[] file = representativeService.exportTemplateReportersFile(groupId);
@@ -355,11 +367,16 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
-  @ApiOperation(value = "Import file lead reporters ")
+  @ApiOperation(value = "Import file lead reporters", hidden = true)
   @PostMapping("/import/{dataflowId}/group/{groupId}")
+  @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.FILE_EXTENSION),
+      @ApiResponse(code = 400, message = EEAErrorMessage.CSV_FILE_ERROR),
+      @ApiResponse(code = 400, message = "Error importing file")})
   public ResponseEntity<byte[]> importFileCountryTemplate(
-      @PathVariable(value = "dataflowId") Long dataflowId,
-      @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file) {
+      @ApiParam(value = "Dataflow Id",
+          example = "0") @PathVariable(value = "dataflowId") Long dataflowId,
+      @ApiParam(value = "Group Id", example = "0") @PathVariable(value = "groupId") Long groupId,
+      @ApiParam(value = "File to be imported") @RequestParam("file") MultipartFile file) {
     // we check if the field is a csv
     final int location = file.getOriginalFilename().lastIndexOf('.');
     if (location == -1) {
@@ -392,11 +409,15 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @PostMapping("/private/updateRepresentativeVisibilityRestrictions")
+  @ApiOperation(value = "Update representative visibility", hidden = true)
   public void updateRepresentativeVisibilityRestrictions(
-      @RequestParam(value = "dataflowId", required = true) Long dataflowId,
-      @RequestParam(value = "dataProviderId", required = true) Long dataProviderId,
-      @RequestParam(value = "restrictFromPublic", required = true,
-          defaultValue = "false") boolean restrictFromPublic) {
+      @ApiParam(value = "Dataflow Id", example = "0",
+          required = true) @RequestParam(value = "dataflowId", required = true) Long dataflowId,
+      @ApiParam(value = "Dataprovider Id", required = true) @RequestParam(value = "dataProviderId",
+          required = true) Long dataProviderId,
+      @ApiParam(value = "Should the representative be restricted to public view?", required = true,
+          defaultValue = "false") @RequestParam(value = "restrictFromPublic", required = true,
+              defaultValue = "false") boolean restrictFromPublic) {
     representativeService.updateRepresentativeVisibilityRestrictions(dataflowId, dataProviderId,
         restrictFromPublic);
   }
@@ -414,7 +435,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @PostMapping("/{representativeId}/leadReporter/dataflow/{dataflowId}")
   @LockMethod
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
-  @ApiOperation(value = "Create one Lead reporter", response = Long.class)
+  @ApiOperation(value = "Create one Lead reporter", response = Long.class, hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.USER_NOTFOUND),
+      @ApiResponse(code = 400, message = EEAErrorMessage.NOT_EMAIL),
+      @ApiResponse(code = 400, message = "Error creating new lead reporter")})
   public Long createLeadReporter(
       @ApiParam(value = "Representative id", example = "0") @LockCriteria(
           name = "representativeId") @PathVariable("representativeId") Long representativeId,
@@ -451,6 +475,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @PutMapping("/leadReporter/update/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @ApiOperation(value = "Updates a Lead reporter", response = Long.class, hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 403, message = "LeadReporter not allowed"),
+      @ApiResponse(code = 400, message = "Invalid email"),
+      @ApiResponse(code = 404, message = "Representative not found")})
   public Long updateLeadReporter(@RequestBody LeadReporterVO leadReporterVO,
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
 
@@ -485,6 +513,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @DeleteMapping("/leadReporter/{leadReporterId}/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @ApiOperation(value = "Deletes a Lead reporter", hidden = true)
+  @ApiResponse(code = 400, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
   public void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId,
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
@@ -519,7 +549,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @PutMapping("/private/update")
   @PreAuthorize("isAuthenticated()")
-  public Long updateInternalRepresentative(@RequestBody RepresentativeVO representativeVO) {
+  @ApiOperation(value = "Updates the internal representative", response = Long.class, hidden = true)
+  public Long updateInternalRepresentative(@ApiParam(
+      value = "Representative VO object") @RequestBody RepresentativeVO representativeVO) {
 
     return representativeService.updateDataflowRepresentative(representativeVO);
   }
@@ -534,7 +566,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @GetMapping("/private/dataProviderByCode/{code}")
   @ApiOperation(value = "Find DataProviders based on a code", response = DataProviderVO.class,
       responseContainer = "List", hidden = true)
-  public List<DataProviderVO> findDataProvidersByCode(@PathVariable("code") String code) {
+  public List<DataProviderVO> findDataProvidersByCode(
+      @ApiParam(value = "Code", example = "EL") @PathVariable("code") String code) {
     return representativeService.findDataProvidersByCode(code);
   }
 
@@ -550,7 +583,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @ApiOperation(value = "Find Representatives based on a dataflowId and providerId List",
       response = RepresentativeControllerZuul.class, responseContainer = "List", hidden = true)
   public List<RepresentativeVO> findRepresentativesByDataFlowIdAndProviderIdList(
-      @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Dataflow Id", example = "1") @PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerIdList") List<Long> providerIdList) {
     return representativeService.findRepresentativesByDataflowIdAndDataproviderList(dataflowId,
         providerIdList);

@@ -1,4 +1,4 @@
-import { Fragment, useContext } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 
@@ -16,10 +16,14 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onToggleVisibleDeleteMessage }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
+
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const getMessageContent = () => {
     let content = message.content.replace(/(?:\r\n|\r|\n)/g, '<br/>');
@@ -57,6 +61,7 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
 
   const onFileDownload = async (dataflowId, messageId, dataProviderId) => {
     try {
+      setIsDownloading(true);
       const data = await FeedbackService.getMessageAttachment(dataflowId, messageId, dataProviderId);
       DownloadFile(data, message.messageAttachment.name);
     } catch (error) {
@@ -65,6 +70,8 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
         type: 'FEEDBACK_DOWNLOAD_MESSAGE_ATTACHMENT_ERROR',
         content: {}
       });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -84,7 +91,8 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
           {!message.automatic && (
             <Button
               className={`p-button-animated-right-blink p-button-secondary-transparent ${styles.downloadFileButton}`}
-              icon="export"
+              disabled={isDownloading}
+              icon={isDownloading ? 'spinnerAnimate' : 'export'}
               iconPos="right"
               onClick={() => onFileDownload(dataflowId, message.id, message.providerId)}
               style={{ color: message.direction ? 'var(--white)' : 'var(--c-black-400)' }}
@@ -105,6 +113,13 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
     return (
       <div className={`${styles.message} rep-feedback-message ${getStyles()}`} key={message.id}>
         <div className={styles.messageTextWrapper}>
+          <span className={styles.datetime}>
+            {dayjs(message.date).format(
+              `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
+                userContext.userProps.amPm24h ? '' : ' A'
+              }`
+            )}
+          </span>
           {TextUtils.areEquals(message.type, 'ATTACHMENT') ? (
             renderAttachment()
           ) : (
@@ -112,7 +127,6 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
               className={`${styles.messageText} ${message.direction ? styles.sender : styles.receiver}`}
               dangerouslySetInnerHTML={{ __html: getMessageContent() }}></span>
           )}
-          <span className={styles.datetime}>{dayjs(message.date).format('YYYY-MM-DD HH:mm')}</span>
         </div>
         {isCustodian && !message.automatic && (
           <FontAwesomeIcon

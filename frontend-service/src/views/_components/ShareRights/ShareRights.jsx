@@ -37,24 +37,24 @@ export const ShareRights = ({
   columnHeader,
   dataflowId,
   dataProviderId,
-  deleteColumnHeader,
   deleteConfirmHeader,
   deleteConfirmMessage,
   deleteErrorNotificationKey,
   editConfirmHeader,
   getErrorNotificationKey,
+  isAdmin = false,
   isUserRightManagementDialogVisible,
   placeholder,
   representativeId,
   roleOptions,
-  setIsAdminAssignedDataflow = () => {},
+  setRightPermissionsChange = () => {},
   setIsUserRightManagementDialogVisible,
   updateErrorNotificationKey,
   userType
 }) => {
   const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
   const methodTypes = { DELETE: 'delete', GET_ALL: 'getAll', UPDATE: 'update' };
-  const notDeletableRoles = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
+  const notDeletableRolesRequester = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
   const userTypes = { REPORTER: 'reporter', REQUESTER: 'requester' };
 
   const filterOptions = [
@@ -73,7 +73,6 @@ export const ShareRights = ({
     clonedUserRightList: [],
     dataUpdatedCount: 0,
     filteredData: [],
-    isAdmin: false,
     isDeleteDialogVisible: false,
     isDeletingUserRight: false,
     isEditingModal: false,
@@ -99,13 +98,6 @@ export const ShareRights = ({
       dropdownRef.current.focusInput.focus();
     }
   }, [dropdownRef.current, isUserRightManagementDialogVisible]);
-
-  useEffect(() => {
-    if (!isNil(userContext.contextRoles)) {
-      const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
-      shareRightsDispatch({ type: 'ON_ADMIN_CHANGE', payload: { isAdmin } });
-    }
-  }, [userContext]);
 
   useInputTextFocus(isUserRightManagementDialogVisible, inputRef);
 
@@ -137,7 +129,7 @@ export const ShareRights = ({
 
   const onDataChange = () => {
     shareRightsDispatch({ type: 'ON_DATA_CHANGE', payload: { isDataUpdated: true } });
-    setIsAdminAssignedDataflow(
+    setRightPermissionsChange(
       TextUtils.areEquals(userRight.account, userContext.email) ||
         TextUtils.areEquals(shareRightsState.userRightToDelete.account, userContext.email)
     );
@@ -312,7 +304,11 @@ export const ShareRights = ({
   };
 
   const renderButtonsColumnTemplate = userRight => {
-    return notDeletableRoles.includes(userRight?.role) && !shareRightsState.isAdmin ? null : (
+    if (userType === userTypes.REQUESTER && notDeletableRolesRequester.includes(userRight?.role) && !isAdmin) {
+      return null;
+    }
+
+    return (
       <ActionsColumn
         disabledButtons={isNil(actionsButtons.id) && loadingStatus.isActionButtonsLoading}
         isDeletingDocument={actionsButtons.isDeleting}
@@ -393,7 +389,7 @@ export const ShareRights = ({
         style={{ height: isEmpty(shareRightsState.userRightList) ? 0 : 'inherit' }}>
         {children}
       </div>
-      {TextUtils.areEquals(userType, 'reporter') && (
+      {userType === userTypes.REPORTER && (
         <span className={styles.shareRightsDisclaimer}>{resourcesContext.messages['shareRightsDisclaimer']}</span>
       )}
     </Fragment>
@@ -446,8 +442,7 @@ export const ShareRights = ({
               <Column body={renderRoleColumnTemplate} header={resourcesContext.messages['rolesColumn']} />
               <Column
                 body={renderButtonsColumnTemplate}
-                className={styles.emptyTableHeader}
-                header={deleteColumnHeader}
+                header={resourcesContext.messages['actions']}
                 style={{ width: '100px' }}
               />
             </DataTable>

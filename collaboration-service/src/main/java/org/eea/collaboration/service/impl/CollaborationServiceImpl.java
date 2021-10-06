@@ -10,11 +10,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.eea.collaboration.mapper.MessageMapper;
 import org.eea.collaboration.persistence.domain.Message;
-import org.eea.collaboration.persistence.domain.MessageAttachment;
-import org.eea.collaboration.persistence.repository.MessageAttachmentRepository;
 import org.eea.collaboration.persistence.repository.MessageRepository;
 import org.eea.collaboration.service.CollaborationService;
 import org.eea.collaboration.service.helper.CollaborationServiceHelper;
@@ -23,6 +22,7 @@ import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.vo.dataflow.MessageAttachmentVO;
 import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
@@ -33,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.GrantedAuthority;
@@ -69,13 +68,15 @@ public class CollaborationServiceImpl implements CollaborationService {
   @Autowired
   private MessageRepository messageRepository;
 
-  /** The message attachment repository. */
-  @Autowired
-  private MessageAttachmentRepository messageAttachmentRepository;
 
   /** The message mapper. */
   @Autowired
   private MessageMapper messageMapper;
+
+
+  /** The document controller zuul. */
+  @Autowired
+  private DocumentControllerZuul documentControllerZuul;
 
   /**
    * Creates the message.
@@ -114,6 +115,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setDirection(direction);
     message.setType(MessageTypeEnum.TEXT);
     message.setAutomatic(messageVO.isAutomatic());
+    message.setFileSize("0");
     message = messageRepository.save(message);
 
     String eventType = EventType.RECEIVED_MESSAGE.toString();
@@ -124,28 +126,33 @@ public class CollaborationServiceImpl implements CollaborationService {
     return messageMapper.entityToClass(message);
   }
 
+
   /**
    * Creates the message attachment.
    *
    * @param dataflowId the dataflow id
    * @param providerId the provider id
-   * @param fileAttachment the file attachment
+   * @param is the is
+   * @param fileName the file name
+   * @param fileSize the file size
+   * @param contentType the content type
    * @return the message VO
    * @throws EEAForbiddenException the EEA forbidden exception
    * @throws EEAIllegalArgumentException the EEA illegal argument exception
-   * @throws IOException
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   @Transactional
   public MessageVO createMessageAttachment(Long dataflowId, Long providerId, InputStream is,
-      String fileName, String fileSize)
+      String fileName, String fileSize, String contentType)
       throws EEAForbiddenException, EEAIllegalArgumentException, IOException {
 
     String userName = SecurityContextHolder.getContext().getAuthentication().getName();
     boolean direction = authorizeAndGetDirection(dataflowId, providerId);
+    MessageVO messageVO = new MessageVO();
 
-    Message message = new Message();
     try {
+      Message message = new Message();
       message.setContent(fileName);
       message.setDataflowId(dataflowId);
       message.setProviderId(providerId);
@@ -154,17 +161,21 @@ public class CollaborationServiceImpl implements CollaborationService {
       message.setUserName(userName);
       message.setDirection(direction);
       message.setType(MessageTypeEnum.ATTACHMENT);
+      message.setFileSize(fileSize);
       message = messageRepository.save(message);
-      byte[] fileContent;
 
-      fileContent = IOUtils.toByteArray(is);
+      String extension = FilenameUtils.getExtension(fileName);
 
-      MessageAttachment messageAttachment = new MessageAttachment();
-      messageAttachment.setFileName(fileName);
-      messageAttachment.setFileSize(fileSize);
-      messageAttachment.setContent(fileContent);
-      messageAttachment.setMessage(message);
-      messageAttachmentRepository.save(messageAttachment);
+      MessageAttachmentVO messageAttachmentVO = new MessageAttachmentVO();
+      messageAttachmentVO.setName(fileName);
+      messageAttachmentVO.setSize(fileSize);
+      messageAttachmentVO.setExtension(extension);
+
+      messageVO = messageMapper.entityToClass(message);
+      messageVO.setMessageAttachment(messageAttachmentVO);
+
+      documentControllerZuul.uploadCollaborationDocument(IOUtils.toByteArray(is), dataflowId,
+          fileName, contentType, message.getId());
 
       String eventType = EventType.RECEIVED_MESSAGE.toString();
       collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null,
@@ -174,16 +185,6 @@ public class CollaborationServiceImpl implements CollaborationService {
     } finally {
       is.close();
     }
-    int indexExtension = fileName.lastIndexOf(".");
-    String extension = fileName.substring(indexExtension + 1, fileName.length());
-
-    MessageAttachmentVO messageAttachmentVO = new MessageAttachmentVO();
-    messageAttachmentVO.setName(fileName);
-    messageAttachmentVO.setSize(fileSize);
-    messageAttachmentVO.setExtension(extension);
-
-    MessageVO messageVO = messageMapper.entityToClass(message);
-    messageVO.setMessageAttachment(messageAttachmentVO);
 
     return messageVO;
   }
@@ -246,17 +247,22 @@ public class CollaborationServiceImpl implements CollaborationService {
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public void deleteMessage(Long messageId) throws EEAException {
     try {
-      MessageAttachment messageAttachment = messageAttachmentRepository.findByMessageId(messageId);
-      if (messageAttachment != null) {
-        Long messageAttachmentId = messageAttachment.getId();
-        messageAttachmentRepository.deleteById(messageAttachmentId);
+      Message message = messageRepository.findById(messageId).orElseThrow(EEAException::new);
+      if (message != null) {
+        if (MessageTypeEnum.ATTACHMENT.equals(message.getType())) {
+          documentControllerZuul.deleteCollaborationDocument(message.getDataflowId(),
+              message.getContent(), messageId);
+        }
+        messageRepository.delete(message);
       }
-      messageRepository.deleteById(messageId);
-    } catch (EmptyResultDataAccessException e) {
+    } catch (Exception e) {
+      LOG_ERROR.error("Error deleting message {}", e.getMessage());
       throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGE_INCORRECT_ID);
     }
+    LOG.info("Message {} deleted", messageId);
   }
 
   /**
@@ -298,8 +304,22 @@ public class CollaborationServiceImpl implements CollaborationService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public MessageAttachment getMessageAttachment(Long messageId) throws EEAException {
-    return messageAttachmentRepository.findByMessageId(messageId);
+  public Message getMessage(Long messageId) throws EEAException {
+    return messageRepository.findById(messageId).orElseThrow(EEAException::new);
+  }
+
+
+  /**
+   * Gets the message attachment.
+   *
+   * @param messageId the message id
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @return the message attachment
+   */
+  @Override
+  public byte[] getMessageAttachment(Long messageId, Long dataflowId, String fileName) {
+    return documentControllerZuul.getCollaborationDocument(dataflowId, fileName, messageId);
   }
 
   /**

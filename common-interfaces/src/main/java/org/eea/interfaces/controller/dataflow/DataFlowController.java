@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.dataflow;
 import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
@@ -108,6 +109,14 @@ public interface DataFlowController {
    */
   @GetMapping(value = "/cloneableDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findCloneableDataflows();
+
+  /**
+   * Gets the dataflows count.
+   *
+   * @return the dataflows count
+   */
+  @GetMapping(value = "/countByType", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataflowCountVO> getDataflowsCount();
 
   /**
    * Adds the contributor.
