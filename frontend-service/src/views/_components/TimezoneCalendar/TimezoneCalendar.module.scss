@@ -15,11 +15,16 @@
   margin-top: 0.5rem;
 
   .label {
-    padding: 0 0.5rem;
+    padding-left: 0.5rem;
     align-self: center;
   }
 }
+
 .error {
   border-color: red !important;
   box-shadow: red !important;
+}
+
+.dropdown {
+  margin-left: 0.5rem;
 }

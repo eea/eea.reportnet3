@@ -1291,7 +1291,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           subtitle={designerState.dataflowName}
           title={`${resourcesContext.messages['datasetSchema']}: ${designerState.datasetSchemaName}`}
         />
-        <TimezoneCalendar />
+        {/* <TimezoneCalendar /> */}
         <h4 className={styles.descriptionLabel}>
           {resourcesContext.messages['newDatasetSchemaDescriptionPlaceHolder']}
         </h4>

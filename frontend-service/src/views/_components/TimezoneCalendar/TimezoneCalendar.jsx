@@ -11,6 +11,7 @@ import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
 import { InputText } from 'views/_components/InputText';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -80,7 +81,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
           setInputValue(dayjs(e.value).format('HH:mm:ss').toString());
         }}
         ref={calendarRef}
-        showTime={true}
+        // showTime={true}
         value={date}
         yearNavigator
         yearRange="1900:2100"
@@ -120,6 +121,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderDropdown = () => {
     return (
       <Dropdown
+        className={styles.dropdown}
         onChange={e => {
           setSelectedOffset(e.value);
         }}
@@ -136,10 +138,14 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
       {renderCalendar()}
       <div className={styles.inputMaskWrapper}>
         {renderInputMask()}
-        <span className={styles.label}>UTC</span>
+        <span className={styles.label}>{resourcesContext.messages['utc']}</span>
+        <TooltipButton
+          message={resourcesContext.messages['dateTimeWarningTooltip']}
+          uniqueIdentifier={'dateTimeWarningTooltip'}
+        />
         {renderDropdown()}
       </div>
-      {renderInput()}
+      {/* {renderInput()} */}
       {renderButtons()}
     </div>
   );
