@@ -292,5 +292,10 @@ public class DataSetMetabaseControllerImplTest {
         .getDataSetPublicByDataflowAndProviderId(Mockito.any(), Mockito.any());
   }
 
+  @Test
+  public void getDatasetsSummaryListTest() {
+    dataSetMetabaseControllerImpl.getDatasetsSummaryList(1L);
+    Mockito.verify(datasetMetabaseService, times(1)).getDatasetsSummaryList(1L);
+  }
 
 }
