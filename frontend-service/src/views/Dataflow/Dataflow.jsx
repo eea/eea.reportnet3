@@ -960,6 +960,10 @@ const Dataflow = withRouter(({ history, match }) => {
                 dataflowId={dataflowId}
                 dataflowType={dataflowState.dataflowType}
                 representativesImport={dataflowState.representativesImport}
+                selectedDataProviderGroup={{
+                  dataProviderGroupId: dataflowState.data.dataProviderGroupId,
+                  label: dataflowState.data.dataProviderGroupName
+                }}
                 setDataProviderSelected={setDataProviderSelected}
                 setFormHasRepresentatives={setFormHasRepresentatives}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
