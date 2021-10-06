@@ -1,33 +1,49 @@
-.buttonRight {
-  display: flex;
-  justify-content: flex-end;
-  // flex-grow: ;
-  & button {
-    margin: 1rem 0 0.5rem 0.5rem;
-  }
-}
 .container {
+  width: fit-content !important;
   // min-width: 400px;
-  // max-width: 500px;
-}
-.timeInput {
-  width: min-content !important;
-}
-.inputMaskWrapper {
+  max-width: 350px;
   display: flex;
-  margin-top: 0.5rem;
+  flex-direction: column;
+  margin: -0.5rem 0 0 -0.5rem;
 
-  .label {
-    padding-left: 0.5rem;
-    align-self: center;
+  .buttonRight {
+    margin-top: 0.5rem;
+    width: 100% !important;
   }
-}
 
-.error {
-  border-color: red !important;
-  box-shadow: red !important;
-}
+  .inputMaskWrapper {
+    display: flex;
+    margin-top: 0.5rem;
+    width: 100%;
 
-.dropdown {
-  margin-left: 0.5rem;
+    .timeInput {
+      width: min-content !important;
+    }
+
+    .error {
+      border-color: red !important;
+      box-shadow: red !important;
+      &:focus {
+        border-color: red !important;
+        box-shadow: red !important;
+      }
+    }
+
+    .utc {
+      justify-content: flex-end;
+      display: flex;
+      flex-grow: 2;
+
+      .label {
+        // padding-left: 5rem;
+        align-self: center;
+      }
+
+      .dropdown {
+        margin-left: 0.5rem;
+        width: 5px !important;
+        min-width: 90px !important;
+      }
+    }
+  }
 }

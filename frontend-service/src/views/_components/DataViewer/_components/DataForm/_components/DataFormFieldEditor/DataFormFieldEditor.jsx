@@ -472,6 +472,7 @@ const DataFormFieldEditor = ({
       //   yearRange="1900:2100"
       // />
       <TimezoneCalendar
+        className={styles.timezoneCalendar}
         disabled={(column.readOnly && reporting) || isSaving}
         onChangeDate={e => onChangeForm(field, e.value, isConditional)}
         value={fieldValue}
