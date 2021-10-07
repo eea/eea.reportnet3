@@ -147,6 +147,7 @@ export const QCList = withRouter(
               automaticType: validation.automaticType,
               id: validation.id,
               description: validation.description,
+              message: validation.message,
               name: validation.name
             };
           })
