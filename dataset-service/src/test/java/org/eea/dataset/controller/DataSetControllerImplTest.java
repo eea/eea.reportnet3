@@ -2,7 +2,6 @@ package org.eea.dataset.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -224,44 +223,6 @@ public class DataSetControllerImplTest {
 
     Mockito.verify(datasetService, times(1)).getTableValuesById(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Test get by id success.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetByIdSuccess() throws Exception {
-    when(datasetService.getById(Mockito.any())).thenReturn(new DataSetVO());
-    DataSetVO result = dataSetControllerImpl.getById(1L);
-    Mockito.verify(datasetService, times(1)).getById(Mockito.any());
-    assertEquals("failed assertion", new DataSetVO(), result);
-  }
-
-
-  /**
-   * Test get by id find exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetByIdFindException() throws Exception {
-    doThrow(new EEAException()).when(datasetService).getById(Mockito.any());
-    DataSetVO result = dataSetControllerImpl.getById(1L);
-    Mockito.verify(datasetService, times(1)).getById(Mockito.any());
-    assertNull("should be null", result);
-  }
-
-
-  /**
-   * Test get by id exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testGetByIdException() throws Exception {
-    dataSetControllerImpl.getById(null);
   }
 
   /**

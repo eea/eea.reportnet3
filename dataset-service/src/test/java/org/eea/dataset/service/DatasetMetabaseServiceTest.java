@@ -699,4 +699,23 @@ public class DatasetMetabaseServiceTest {
   }
 
 
+  @Test
+  public void getDatasetsSummaryListFromDatasetTypeTest() {
+
+    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(referenceDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(testDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(dataCollectionRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(euDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+
+    assertEquals(new ArrayList<>(), datasetMetabaseService.getDatasetsSummaryList(1L));
+
+  }
 }

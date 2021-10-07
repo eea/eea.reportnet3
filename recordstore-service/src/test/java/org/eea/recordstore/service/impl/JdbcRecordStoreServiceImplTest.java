@@ -175,11 +175,6 @@ public class JdbcRecordStoreServiceImplTest {
   @Rule
   public TemporaryFolder folder = new TemporaryFolder();
 
-  @Test(expected = UnsupportedOperationException.class)
-  public void resetDatasetDatabase() throws RecordStoreAccessException {
-    jdbcRecordStoreService.resetDatasetDatabase();
-  }
-
   @Test
   public void createEmptyDataSet() throws RecordStoreAccessException {
     jdbcRecordStoreService.createEmptyDataSet("", "");

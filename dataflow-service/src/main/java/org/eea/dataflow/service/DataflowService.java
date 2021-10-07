@@ -8,6 +8,7 @@ import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -75,7 +76,7 @@ public interface DataflowService {
    *
    * @return the dataflows count
    */
-  List<DataflowCountVO> getDataflowsCount(String userId) throws EEAException;
+  List<DataflowCountVO> getDataflowsCount() throws EEAException;
 
   /**
    * Gets the completed.
@@ -254,6 +255,16 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   DataflowPrivateVO getPrivateDataflowById(Long dataflowId) throws EEAException;
+
+
+  /**
+   * Gets the dataset summary.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataset summary
+   * @throws EEAException the EEA exception
+   */
+  List<DatasetsSummaryVO> getDatasetSummary(Long dataflowId) throws EEAException;
 
 
 
