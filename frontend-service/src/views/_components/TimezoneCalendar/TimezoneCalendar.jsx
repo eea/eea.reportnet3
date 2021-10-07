@@ -102,8 +102,11 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton,
         inline
         monthNavigator
         onChange={e => {
+          const time = dayjs(e.value).format('HH:mm:ss').toString();
+
+          checkError(time);
           setDate(e.value);
-          setInputValue(dayjs(e.value).format('HH:mm:ss').toString());
+          setInputValue(time);
         }}
         ref={calendarRef}
         // showTime={true}
@@ -114,9 +117,13 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton,
     );
   };
 
-  // const renderInput = () => {
-  //   return <InputText onChange={e => setDate(new Date(e.target.value))} value={date} />;
-  // };
+  const checkError = time => {
+    if (checkIsCorrectTimeFormat(time)) {
+      setHasError(false);
+    } else {
+      setHasError(true);
+    }
+  };
 
   const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
 
@@ -128,16 +135,14 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton,
         disabled={isDisabled}
         mask={`99:99:99`}
         onChange={e => {
+          checkError(e.value);
           setInputValue(e.target.value);
         }}
         onComplete={e => {
           if (checkIsCorrectTimeFormat(e.value)) {
-            setHasError(false);
             const [hour, minute, second] = e.value.split(':');
 
             setDate(new Date(dayjs(date).hour(hour).minute(minute).second(second).format('ddd/MMMDD/YYYY HH:mm:ss')));
-          } else {
-            setHasError(true);
           }
         }}
         value={inputValue}
@@ -147,7 +152,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton,
   const renderDropdown = () => {
     return (
       <Dropdown
-        //TODO CHECK Z-INDEX
         appendTo={document.body}
         className={styles.dropdown}
         disabled={isDisabled}
@@ -174,7 +178,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton,
           {renderDropdown()}
         </div>
       </div>
-      {/* {renderInput()} */}
       {renderButtons()}
     </div>
   );
