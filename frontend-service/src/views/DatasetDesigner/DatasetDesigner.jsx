@@ -33,7 +33,6 @@ import { Spinner } from 'views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
 import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
-import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 import { Toolbar } from 'views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
 import { Validations } from 'views/DatasetDesigner/_components/Validations';
@@ -1291,7 +1290,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           subtitle={designerState.dataflowName}
           title={`${resourcesContext.messages['datasetSchema']}: ${designerState.datasetSchemaName}`}
         />
-        {/* <TimezoneCalendar /> */}
         <h4 className={styles.descriptionLabel}>
           {resourcesContext.messages['newDatasetSchemaDescriptionPlaceHolder']}
         </h4>
