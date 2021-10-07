@@ -2,8 +2,7 @@ import cloneDeep from 'lodash/cloneDeep';
 export const qcListReducer = (state, { type, payload }) => {
   switch (type) {
     case 'FILTER_DATA':
-      console.log('FILTER_DATA');
-      return { ...state, filteredData: payload.data };
+      return { ...state, filteredData: payload.data, editingRows: payload.data.length === 0 ? [] : state.editingRows };
 
     case 'IS_DATA_UPDATED':
       return { ...state, isDataUpdated: payload.value };
@@ -24,16 +23,14 @@ export const qcListReducer = (state, { type, payload }) => {
       return { ...state, validationList: payload.validationsServiceList };
 
     case 'RESET_EDITING_ROWS':
-      console.log('RESET_EDITING_ROWS');
       return {
         ...state,
         editingRows: [],
         filteredData: cloneDeep(state.initialFilteredData),
-        validationList: { ...state.validationList, validations: state.initialValidationsList }
+        validationList: { ...state.validationList, validations: cloneDeep(state.initialValidationsList) }
       };
 
     case 'RESET_FILTERED_DATA':
-      console.log('RESET_FILTERED_DATA');
       return {
         ...state,
         filteredData: cloneDeep(state.initialFilteredData),
@@ -53,7 +50,6 @@ export const qcListReducer = (state, { type, payload }) => {
       return { ...state, deletedRuleId: payload.deletedRuleId };
 
     case 'UPDATE_FILTER_DATA_AND_VALIDATIONS':
-      console.log('UPDATE_FILTER_DATA_AND_VALIDATIONS');
       return {
         ...state,
         filteredData: cloneDeep(payload.qcs),

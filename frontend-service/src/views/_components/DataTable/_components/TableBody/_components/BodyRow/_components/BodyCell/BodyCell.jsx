@@ -246,7 +246,9 @@ export class BodyCell extends Component {
         content = (
           <div className={styles.actionTemplate}>
             <Button
-              className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+              className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
+                this.calculateRowDisabledQuickEdit() ? 'p-button-animated-blink' : ''
+              }`}
               disabled={this.props.quickEditRowInfo ? this.props.quickEditRowInfo.condition : false}
               icon={this.props.quickEditRowInfo && this.calculateRowDisabledQuickEdit() ? 'spinnerAnimate' : 'clock'}
               onClick={this.props.onRowEditInit}
