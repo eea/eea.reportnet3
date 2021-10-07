@@ -1,14 +1,30 @@
+.buttonRight {
+  display: flex;
+  justify-content: flex-end;
+  & button {
+    margin: 1rem 0 0.5rem 0.5rem;
+  }
+}
+
 .container {
   width: fit-content !important;
   // min-width: 400px;
-  max-width: 350px;
+  // max-width: 500px;
+}
+
+.timeInput {
+  width: 6rem !important;
+}
+
+.inputMaskWrapper {
   display: flex;
   flex-direction: column;
   margin: -0.5rem 0 0 -0.5rem;
 
-  .buttonRight {
-    margin-top: 0.5rem;
-    width: 100% !important;
+  .label {
+    padding-left: 0.5rem;
+    align-self: center;
+    width: max-content !important;
   }
 
   .inputMaskWrapper {
@@ -29,21 +45,25 @@
       }
     }
 
-    .utc {
-      justify-content: flex-end;
-      display: flex;
-      flex-grow: 2;
+    // .utc {
+    //   justify-content: flex-end;
+    //   display: flex;
+    //   flex-grow: 2;
 
-      .label {
-        // padding-left: 5rem;
-        align-self: center;
-      }
+    //   .label {
+    //     // padding-left: 5rem;
+    //     align-self: center;
+    //   }
 
-      .dropdown {
-        margin-left: 0.5rem;
-        width: 5px !important;
-        min-width: 90px !important;
-      }
-    }
+    // .dropdown {
+    //   margin-left: 0.5rem;
+    //   width: 5px !important;
+    //   min-width: 90px !important;
+    // }
+  }
+  .dropdown {
+    margin-left: 0.5rem;
+    width: 5rem !important;
+    min-width: none !important;
   }
 }

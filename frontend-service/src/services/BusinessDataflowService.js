@@ -1,5 +1,3 @@
-import { config } from 'conf';
-
 import { BusinessDataflowRepository } from 'repositories/BusinessDataflowRepository';
 
 import { BusinessDataflowUtils } from 'services/_utils/BusinessDataflowUtils';
@@ -16,9 +14,6 @@ export const BusinessDataflowService = {
         accessRoles,
         contextRoles
       );
-      if (businessDataflowDTO.status === config.dataflowStatus.OPEN) {
-        businessDataflowDTO.status = businessDataflowDTO.releasable ? 'OPEN' : 'CLOSED';
-      }
       return businessDataflowDTO;
     });
 

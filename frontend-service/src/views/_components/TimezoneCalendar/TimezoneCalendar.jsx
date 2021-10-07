@@ -1,5 +1,4 @@
-import { useContext, useState, useRef } from 'react';
-import PropTypes from 'prop-types';
+import { useContext, useEffect, useState, useRef } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
@@ -46,7 +45,7 @@ const offsetOptions = [
   { value: 12, label: '+12:00' }
 ];
 
-export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
+export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton, isDisabled }) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
@@ -54,11 +53,35 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const calendarRef = useRef();
 
   const [date, setDate] = useState('');
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState('00:00:00');
   const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
 
+  useEffect(() => {
+    if (!value) {
+      setInputValue(dayjs().format('HH:mm:ss').toString());
+      setDate(new Date());
+    } else {
+      if (hideSaveButton) {
+        setInputValue(dayjs(value).format('HH:mm:ss').toString());
+        setDate(new Date(dayjs(value, 'YYYY-MM-DD HH:mm:ss')));
+      } else {
+        setInputValue(dayjs(value).format('HH:mm:ss').toString());
+        setDate(value);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (hideSaveButton) {
+      onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value));
+    }
+  }, [date, selectedOffset.value]);
+
   const renderButtons = () => {
+    if (hideSaveButton) {
+      return;
+    }
     return (
       <div className={styles.buttonRight}>
         <Button
@@ -75,6 +98,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderCalendar = () => {
     return (
       <Calendar
+        disabled={isDisabled}
         inline
         monthNavigator
         onChange={e => {
@@ -100,7 +124,8 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
     return (
       <InputMask
         autoClear
-        className={`${styles.timeInput} ${hasError && styles.error}`}
+        className={`${styles.timeInput} ${hasError ? styles.error : ''}`}
+        disabled={isDisabled}
         mask={`99:99:99`}
         onChange={e => {
           setInputValue(e.target.value);
@@ -122,7 +147,9 @@ export const TimezoneCalendar = ({ onSaveDate = () => {} }) => {
   const renderDropdown = () => {
     return (
       <Dropdown
+        //TODO CHECK Z-INDEX
         className={styles.dropdown}
+        disabled={isDisabled}
         onChange={e => {
           setSelectedOffset(e.value);
         }}
