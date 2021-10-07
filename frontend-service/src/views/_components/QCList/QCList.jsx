@@ -340,9 +340,11 @@ export const QCList = withRouter(
     const editAndDeleteTemplate = row => {
       let rowType = 'field';
 
-      if (row.entityType === 'RECORD') rowType = 'row';
-
-      if (row.entityType === 'TABLE') rowType = 'dataset';
+      if (row.entityType === 'RECORD') {
+        rowType = 'row';
+      } else if (row.entityType === 'TABLE') {
+        rowType = 'dataset';
+      }
 
       const getDeleteBtnIcon = () => {
         if (row.id === tabsValidationsState.deletedRuleId && validationContext.isFetchingData) {
