@@ -1274,7 +1274,6 @@
     "reportingDataset": "Reporting Dataset",
     "testDataset": "Test Dataset",
     "designDataset": "Design Dataset",
-    "wrongWebLinkError": "The URL is not valid",    
     "deleteFieldBulkTitle": "Delete fields",
     "deleteFieldBulkConfirm": "Are you sure you want to delete these fields in design?",
     "bulkDeleteCheckTooltip": "Delete multiple fields",
