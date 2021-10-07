@@ -2,6 +2,7 @@ package org.eea.interfaces.controller.dataflow;
 
 import java.util.Date;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
@@ -264,4 +265,23 @@ public interface DataFlowController {
    */
   @GetMapping("/getPrivateDataflow/{dataflowId}")
   DataflowPrivateVO getPrivateDataflowById(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Export schema information.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @GetMapping("/exportSchemaInformation/{dataflowId}")
+  void exportSchemaInformation(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Download schema information.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @GetMapping("/downloadSchemaInformation/{dataflowId}")
+  void downloadSchemaInformation(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam String fileName, HttpServletResponse response);
 }
