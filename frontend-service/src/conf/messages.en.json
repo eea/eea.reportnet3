@@ -1265,6 +1265,14 @@
     "yes": "Yes",
     "expirationDateFilterLabel": "Delivery date range",
     "creationDateFilterLabel": "Creation date range",
-    "quickEdit": "Quick edit"
+    "quickEdit": "Quick edit",
+    "datasetsInfo": "Datasets info",
+    "loadDatasetsSummaryError": "Error loading datasets list",
+    "companyCC": "Company (CC)",
+    "countriesCC": "Country (CC)",
+    "organizationOC": "Organization (OC)",
+    "reportingDataset": "Reporting Dataset",
+    "testDataset": "Test Dataset",
+    "designDataset": "Design Dataset"
   }
 }
