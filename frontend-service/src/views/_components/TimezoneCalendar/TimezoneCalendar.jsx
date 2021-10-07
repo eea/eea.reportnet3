@@ -148,14 +148,13 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton,
     return (
       <Dropdown
         //TODO CHECK Z-INDEX
+        appendTo={document.body}
         className={styles.dropdown}
         disabled={isDisabled}
-        onChange={e => {
-          setSelectedOffset(e.value);
-        }}
+        onChange={e => setSelectedOffset(e.value)}
         optionLabel="label"
-        optionValue="value"
         options={offsetOptions}
+        optionValue="value"
         value={selectedOffset}
       />
     );

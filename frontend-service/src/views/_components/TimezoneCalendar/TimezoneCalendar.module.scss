@@ -1,11 +1,10 @@
 .container {
-  position: absolute;
-  width: fit-content !important;
-  min-width: 335px;
-  max-width: 400px;
+  // width: fit-content !important;
+  // min-width: 335px;
+  // max-width: 400px;
+  width: 335px;
   display: flex;
   flex-direction: column;
-  z-index: 9999 !important;
   background-color: var(--bg);
 
   .buttonRight {
@@ -16,7 +15,6 @@
   .inputMaskWrapper {
     display: flex;
     margin-top: 0.5rem;
-    width: 100%;
 
     .timeInput {
       width: 6rem !important;
@@ -46,9 +44,7 @@
       .dropdown {
         margin-left: 0.5rem;
         width: 5rem !important;
-        min-width: 11rem !important;
-        position: relative;
-        z-index: 1 !important;
+        min-width: 11rem;
       }
     }
   }
