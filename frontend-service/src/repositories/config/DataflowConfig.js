@@ -1,5 +1,6 @@
 export const DataflowConfig = {
   cloneSchemas: '/dataschema/copy?sourceDataflow={:sourceDataflowId}&targetDataflow={:targetDataflowId}',
+  countByType: '/dataflow/countByType',
   createUpdate: '/dataflow',
   createApiKey: '/user/createApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   createApiKeyCustodian: '/user/createApiKey?dataflowId={:dataflowId}',
@@ -13,8 +14,7 @@ export const DataflowConfig = {
   getApiKey: '/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   getApiKeyCustodian: '/user/getApiKey?dataflowId={:dataflowId}',
   getDetails: '/dataflow/{:dataflowId}/getmetabase',
-  getDatasetsFinalFeedback: '/datasetmetabase/dataflow/{:dataflowId}',
-  getDatasetsReleasedStatus: '/datasetmetabase/dataflow/{:dataflowId}',
+  getDatasetsFinalFeedbackAndReleasedStatus: '/datasetmetabase/dataflow/{:dataflowId}',
   getDatasetsValidationStatistics:
     '/datasetmetabase/globalStatistics/dataflow/{:dataflowId}/dataSchema/{:datasetSchemaId}',
   getPublicData: '/dataflow/getPublicDataflows',

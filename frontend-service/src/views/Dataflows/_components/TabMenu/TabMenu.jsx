@@ -1,9 +1,25 @@
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
+
+import isNil from 'lodash/isNil';
+
+import styles from './TabMenu.module.scss';
 
 import classNames from 'classnames';
 
-export const TabMenu = ({ activeIndex, className, id, model, onTabChange, style }) => {
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+export const TabMenu = ({
+  activeIndex,
+  className,
+  headerLabelChildrenCount = {},
+  headerLabelLoading = false,
+  id,
+  model,
+  onTabChange,
+  style
+}) => {
   const [activeIndexTab, setActiveIndexTab] = useState(activeIndex);
 
   const getActiveIndex = () => (onTabChange ? activeIndex : activeIndexTab);
@@ -40,7 +56,7 @@ export const TabMenu = ({ activeIndex, className, id, model, onTabChange, style 
         aria-disabled={item.disabled}
         aria-expanded={isActive}
         aria-selected={isActive}
-        className={`${menuItemClassName} ${item.className}`}
+        className={`${menuItemClassName} ${item.className || ''}`}
         key={item.id}
         role="tab"
         style={item.style}>
@@ -50,10 +66,41 @@ export const TabMenu = ({ activeIndex, className, id, model, onTabChange, style 
           onClick={event => itemClick(event, item, index)}
           role="presentation"
           target={item.target}>
-          {item.icon && <span className={classNames('p-menuitem-icon', item.icon)}></span>}
-          {item.label && <span className="p-menuitem-text">{item.label}</span>}
+          {renderMenuItemLabel(item, index)}
         </a>
       </li>
+    );
+  };
+
+  const renderMenuItemLabel = (item, index) => {
+    let label = item.label;
+    if (!isNil(headerLabelChildrenCount[item.id])) {
+      if (headerLabelLoading[item.id] && isSelected(index)) {
+        label = (
+          <Fragment>
+            {item.label} (
+            <span>
+              <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />
+            </span>
+            )
+          </Fragment>
+        );
+      } else {
+        label = (
+          <Fragment>
+            {item.label} ({headerLabelChildrenCount[item.id]})
+          </Fragment>
+        );
+      }
+    } else {
+      label = item.label;
+    }
+
+    return (
+      <div>
+        {!isNil(item.icon) ? <span className={classNames('p-menuitem-icon', item.icon)}></span> : null}
+        {!isNil(item.label) ? <span className="p-menuitem-text">{label}</span> : null}
+      </div>
     );
   };
 

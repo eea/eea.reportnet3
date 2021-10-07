@@ -6,8 +6,6 @@ import isNull from 'lodash/isNull';
 import orderBy from 'lodash/orderBy';
 import sortBy from 'lodash/sortBy';
 
-import { config } from 'conf';
-
 import { DataflowRepository } from 'repositories/DataflowRepository';
 
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
@@ -22,14 +20,16 @@ import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 export const DataflowService = {
+  countByType: async () => {
+    const dataflowsCountDTO = await DataflowRepository.countByType();
+    return DataflowUtils.parseDataflowCount(dataflowsCountDTO.data);
+  },
+
   getAll: async (accessRoles, contextRoles) => {
     const dataflowsDTO = await DataflowRepository.getAll();
 
     const dataflows = dataflowsDTO.data.map(dataflowDTO => {
       dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
-      if (dataflowDTO.status === config.dataflowStatus.OPEN) {
-        dataflowDTO.status = dataflowDTO.releasable ? 'OPEN' : 'CLOSED';
-      }
       return dataflowDTO;
     });
 
@@ -174,7 +174,7 @@ export const DataflowService = {
   },
 
   getDatasetsFinalFeedback: async dataflowId => {
-    const datasetsFinalFeedbackDTO = await DataflowRepository.getDatasetsFinalFeedback(dataflowId);
+    const datasetsFinalFeedbackDTO = await DataflowRepository.getDatasetsFinalFeedbackAndReleasedStatus(dataflowId);
     return datasetsFinalFeedbackDTO.data.map(dataset => {
       return {
         dataProviderName: dataset.dataSetName,
@@ -187,7 +187,7 @@ export const DataflowService = {
   },
 
   getDatasetsReleasedStatus: async dataflowId => {
-    const datasetsReleasedStatusDTO = await DataflowRepository.getDatasetsReleasedStatus(dataflowId);
+    const datasetsReleasedStatusDTO = await DataflowRepository.getDatasetsFinalFeedbackAndReleasedStatus(dataflowId);
     datasetsReleasedStatusDTO.data.sort((a, b) => {
       let datasetName_A = a.dataSetName;
       let datasetName_B = b.dataSetName;

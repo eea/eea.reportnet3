@@ -3,9 +3,11 @@ package org.eea.interfaces.controller.dataflow;
 import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -107,6 +109,14 @@ public interface DataFlowController {
    */
   @GetMapping(value = "/cloneableDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> findCloneableDataflows();
+
+  /**
+   * Gets the dataflows count.
+   *
+   * @return the dataflows count
+   */
+  @GetMapping(value = "/countByType", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataflowCountVO> getDataflowsCount();
 
   /**
    * Adds the contributor.
@@ -264,4 +274,14 @@ public interface DataFlowController {
    */
   @GetMapping("/getPrivateDataflow/{dataflowId}")
   DataflowPrivateVO getPrivateDataflowById(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Gets the dataset summary by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataset summary by dataflow id
+   */
+  @GetMapping("/{dataflowId}/datasetsSummary")
+  List<DatasetsSummaryVO> getDatasetSummaryByDataflowId(
+      @PathVariable("dataflowId") Long dataflowId);
 }

@@ -2,11 +2,17 @@ package org.eea.dataflow.controller;
 
 import java.util.List;
 import org.eea.dataflow.service.ContributorService;
+import org.eea.dataflow.service.impl.DataflowServiceImpl;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.contributor.ContributorVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
+import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,6 +74,10 @@ public class ContributorControllerImpl implements ContributorController {
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
+  /** The dataflow service. */
+  @Autowired
+  private DataflowServiceImpl dataflowService;
+
   /**
    * Delete requester.
    *
@@ -76,17 +87,18 @@ public class ContributorControllerImpl implements ContributorController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') || hasRole('ADMIN')")
   @DeleteMapping(value = "/requester/dataflow/{dataflowId}")
-  @ApiOperation(value = "Delete one requester in a Dataflow")
+  @ApiOperation(value = "Delete one requester in a Dataflow", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted requester"),
       @ApiResponse(code = 204, message = "Successfully deleted requester"),
       @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
       @ApiResponse(code = 404, message = "The email doesn't exist in Repornet"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
-  @ApiParam()
   public void deleteRequester(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(type = "Object",
           value = "Contributors Properties") @RequestBody ContributorVO contributorVO) {
+    // check permission not allowed for custodian in bdr dataflow
+    checkIsBussinesCustodian(dataflowId);
     // we can only remove role of editor, reporter or reporter partition type
     try {
       checkAccount(dataflowId, contributorVO.getAccount());
@@ -114,7 +126,7 @@ public class ContributorControllerImpl implements ContributorController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @DeleteMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}")
-  @ApiOperation(value = "Delete one Reporter in a Dataflow")
+  @ApiOperation(value = "Delete one Reporter in a Dataflow", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted reporter"),
       @ApiResponse(code = 204, message = "Successfully deleted reporter"),
       @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
@@ -157,7 +169,7 @@ public class ContributorControllerImpl implements ContributorController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find all Requesters in a Dataflow",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ContributorVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<ContributorVO> findRequestersByGroup(@ApiParam(type = "Long", value = "Dataflow Id",
       example = "0") @PathVariable("dataflowId") Long dataflowId) {
     // we can find requesters,
@@ -179,7 +191,7 @@ public class ContributorControllerImpl implements ContributorController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @ApiOperation(value = "Find all Reporters in a Dataflow",
       produces = MediaType.APPLICATION_JSON_VALUE, response = ContributorVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<ContributorVO> findReportersByGroup(
       @ApiParam(type = "Long", value = "Dataflow Id",
           example = "0") @PathVariable("dataflowId") Long dataflowId,
@@ -204,7 +216,7 @@ public class ContributorControllerImpl implements ContributorController {
   @PutMapping(value = "/requester/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Update one Requester in a Dataflow",
-      produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class)
+      produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update requester"),
       @ApiResponse(code = 204, message = "Successfully updated requester"),
       @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
@@ -215,6 +227,8 @@ public class ContributorControllerImpl implements ContributorController {
           example = "0") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(type = "Object",
           value = "Contributors Properties") @RequestBody ContributorVO contributorVO) {
+    // check permission not allowed for custodian in bdr dataflow
+    checkIsBussinesCustodian(dataflowId);
     // we can only update an editor, reporter or reporter partition role
     // mock
     String message = "";
@@ -238,6 +252,7 @@ public class ContributorControllerImpl implements ContributorController {
     return new ResponseEntity<>(message, status);
   }
 
+
   /**
    * Update reporter.
    *
@@ -253,7 +268,7 @@ public class ContributorControllerImpl implements ContributorController {
   @PutMapping(value = "/reporter/dataflow/{dataflowId}/provider/{dataProviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Update one Reporter in a Dataflow",
-      produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class)
+      produces = MediaType.APPLICATION_JSON_VALUE, response = ResponseEntity.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update reporter"),
       @ApiResponse(code = 204, message = "Successfully updated reporter"),
       @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
@@ -333,6 +348,33 @@ public class ContributorControllerImpl implements ContributorController {
           account, dataflowId);
       throw new EEAException(HttpStatus.NOT_FOUND.toString());
     }
+  }
+
+
+  /**
+   * Check is bussines custodian.
+   *
+   * @param dataflowId the dataflow id
+   */
+  private void checkIsBussinesCustodian(Long dataflowId) {
+    if (dataflowService.isDataflowType(TypeDataflowEnum.BUSINESS, EntityClassEnum.DATAFLOW,
+        dataflowId) && !isAdminOrSteward(dataflowId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.FORBIDDEN);
+    }
+  }
+
+  /**
+   * Checks if is admin or steward.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if is admin or steward
+   */
+  private boolean isAdminOrSteward(Long dataflowId) {
+    String roleSteward = ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId);
+    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
+    return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+        .anyMatch(role -> roleSteward.equals(role.getAuthority())
+            || roleAdmin.equals(role.getAuthority()));
   }
 
 }

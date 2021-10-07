@@ -20,6 +20,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 
 /**
@@ -43,9 +47,10 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
    */
   @Override
   @HystrixCommand
+  @ApiOperation(value = "Find reference dataset  by dataflow Id", hidden = true)
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<ReferenceDatasetVO> findReferenceDatasetByDataflowId(
-      @PathVariable("id") Long dataflowId) {
+  public List<ReferenceDatasetVO> findReferenceDatasetByDataflowId(@ApiParam(type = "Long",
+      value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
 
     return referenceDatasetService.getReferenceDatasetByDataflowId(dataflowId);
   }
@@ -61,8 +66,9 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   @HystrixCommand
   @GetMapping(value = "/private/referencePublic/dataflow/{id}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<ReferenceDatasetPublicVO> findReferenceDataSetPublicByDataflowId(
-      @PathVariable("id") Long dataflowId) {
+  @ApiOperation(value = "Find reference dataset public by dataflow Id", hidden = true)
+  public List<ReferenceDatasetPublicVO> findReferenceDataSetPublicByDataflowId(@ApiParam(
+      type = "Long", value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
     return referenceDatasetService.getReferenceDatasetPublicByDataflow(dataflowId);
   }
 
@@ -76,8 +82,10 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   @Override
   @HystrixCommand
   @GetMapping(value = "/referenced/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find referenced dataflows reference by dataflow Id", hidden = true)
   @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD', 'ADMIN') OR checkAccessReferenceEntity('DATAFLOW',#id)")
-  public Set<DataFlowVO> findDataflowsReferencedByDataflowId(@PathVariable("id") Long dataflowId) {
+  public Set<DataFlowVO> findDataflowsReferencedByDataflowId(@ApiParam(type = "Long",
+      value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
     return referenceDatasetService.getDataflowsReferenced(dataflowId);
   }
 
@@ -88,9 +96,14 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   @Override
   @HystrixCommand
   @PutMapping("/{datasetId}")
+  @ApiOperation(value = "update referenced dataset", hidden = true)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
-  public void updateReferenceDataset(@PathVariable Long datasetId,
-      @RequestParam("updatable") Boolean updatable) {
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update dataset"),
+      @ApiResponse(code = 404, message = "Dataset not found")})
+  public void updateReferenceDataset(
+      @ApiParam(type = "Long", value = "dataset Id", example = "0") @PathVariable Long datasetId,
+      @ApiParam(type = "Boolean", value = "updatable",
+          example = "0") @RequestParam("updatable") Boolean updatable) {
     try {
       referenceDatasetService.updateUpdatable(datasetId, updatable);
     } catch (EEAException e) {

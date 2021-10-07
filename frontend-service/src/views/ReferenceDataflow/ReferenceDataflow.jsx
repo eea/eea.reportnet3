@@ -53,7 +53,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     designDatasetSchemas: [],
     error: null,
     isAdmin: false,
-    isAdminAssignedDataflow: false,
+    isRightPermissionsChanged: false,
     isApiKeyDialogVisible: false,
     isCustodianUser: false,
     isCreatingReferenceDatasets: false,
@@ -144,10 +144,10 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_IS_CREATING_REFERENCE_DATASETS', payload: { isCreatingReferenceDatasets } });
   }
 
-  const setIsAdminAssignedDataflow = value => {
+  const setRightPermissionsChange = isRightPermissionsChanged => {
     dataflowDispatch({
-      type: 'SET_IS_ADMIN_ASSIGNED_DATAFLOW',
-      payload: { isAdminAssignedDataflow: value }
+      type: 'SET_IS_RIGHT_PERMISSIONS_CHANGED',
+      payload: { isRightPermissionsChanged }
     });
   };
 
@@ -159,11 +159,11 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const onCloseShareRightsDialog = () => {
     manageDialogs('isManageRequestersDialogVisible', false);
-    if (dataflowState.isAdminAssignedDataflow) {
+    if (dataflowState.isRightPermissionsChanged) {
       setIsLoading(true);
       onRefreshToken();
       onLoadReferenceDataflow();
-      setIsAdminAssignedDataflow(false);
+      setRightPermissionsChange(false);
     }
   };
 
@@ -384,7 +384,6 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
             columnHeader={resourcesContext.messages['requestersEmailColumn']}
             dataflowId={referenceDataflowId}
-            deleteColumnHeader={resourcesContext.messages['deleteRequesterButtonTableHeader']}
             deleteConfirmHeader={resourcesContext.messages['requestersRightsDialogConfirmDeleteHeader']}
             deleteConfirmMessage={resourcesContext.messages['requestersRightsDialogConfirmDeleteQuestion']}
             deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
@@ -393,8 +392,8 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
             placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}
             roleOptions={requesterRoleOptions}
-            setIsAdminAssignedDataflow={setIsAdminAssignedDataflow}
             setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
+            setRightPermissionsChange={setRightPermissionsChange}
             updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
             userType={'requester'}
           />

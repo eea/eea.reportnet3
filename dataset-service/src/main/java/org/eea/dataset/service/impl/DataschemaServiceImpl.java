@@ -2678,6 +2678,37 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   }
 
 
+  /**
+   * Export zip field schemas.
+   *
+   * @param datasetId the dataset id
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public byte[] exportZipFieldSchemas(Long datasetId) throws EEAException {
+
+    DesignDataset design = designDatasetRepository.findById(datasetId).orElse(null);
+
+    if (null == design) {
+      // Error. There aren't field schemas to export in the dataflow
+      LOG.error("No field schemas found to export in the dataset {}", datasetId);
+      throw new EEAException(
+          String.format("No field schemas to export in the dataset %s", datasetId));
+    }
+    DataSetSchema schema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(design.getDatasetSchema()));
+    List<byte[]> tablesSchema = new ArrayList<>();
+    List<String> tableSchemaNames = new ArrayList<>();
+    for (TableSchema table : schema.getTableSchemas()) {
+      tablesSchema.add(exportFieldsSchema(datasetId, design.getDatasetSchema(),
+          table.getIdTableSchema().toString()));
+      tableSchemaNames.add(table.getNameTableSchema());
+    }
+    return zipUtils.zipArrayListFieldSchemas(tablesSchema, datasetId, tableSchemaNames);
+  }
+
+
 
   /**
    * Read field lines.

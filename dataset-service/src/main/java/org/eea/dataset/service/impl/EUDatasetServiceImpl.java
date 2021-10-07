@@ -74,6 +74,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+
   /**
    * Gets the EU dataset by dataflow id.
    *
@@ -234,6 +235,5 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     }
     return partition;
   }
-
 
 }

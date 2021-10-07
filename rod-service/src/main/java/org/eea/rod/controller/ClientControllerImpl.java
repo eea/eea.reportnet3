@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.ApiOperation;
 
 /**
  * The type Client controller.
@@ -27,6 +28,8 @@ public class ClientControllerImpl implements ClientController {
    */
   @Override
   @GetMapping(value = "/")
+  @ApiOperation(value = "Gets a list with all the obligation clients", response = ClientVO.class,
+      responseContainer = "List", hidden = true)
   public List<ClientVO> findAll() {
     return clientService.findAll();
   }

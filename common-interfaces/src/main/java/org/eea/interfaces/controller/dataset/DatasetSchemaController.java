@@ -359,4 +359,16 @@ public interface DatasetSchemaController {
       @RequestParam("file") MultipartFile file,
       @RequestParam(value = "replace", required = false) Boolean replace);
 
+
+  /**
+   * Export field schemas from dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the response entity
+   */
+  @GetMapping(value = "/dataset/{datasetId}/exportFieldSchemas",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<byte[]> exportFieldSchemasFromDataset(
+      @PathVariable("datasetId") Long datasetId);
+
 }
