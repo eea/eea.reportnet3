@@ -45,7 +45,7 @@ const offsetOptions = [
   { value: 12, label: '+12:00' }
 ];
 
-export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isEdit }) => {
+export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton }) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
@@ -62,7 +62,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isEdit }) => {
       setInputValue(dayjs().format('HH:mm:ss').toString());
       setDate(new Date());
     } else {
-      if (isEdit) {
+      if (hideSaveButton) {
         setInputValue(dayjs(value).format('HH:mm:ss').toString());
         setDate(new Date(dayjs(value, 'YYYY-MM-DD HH:mm:ss')));
       } else {
@@ -72,7 +72,16 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isEdit }) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (hideSaveButton) {
+      onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value));
+    }
+  }, [date, selectedOffset.value]);
+
   const renderButtons = () => {
+    if (hideSaveButton) {
+      return;
+    }
     return (
       <div className={styles.buttonRight}>
         <Button
