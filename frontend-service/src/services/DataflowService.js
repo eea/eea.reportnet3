@@ -363,5 +363,11 @@ export const DataflowService = {
   getSchemasValidation: async dataflowId => await DataflowRepository.getSchemasValidation(dataflowId),
 
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
-    await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo)
+    await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo),
+
+  getDatasetsInfo: async dataflowId => {
+    const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
+    const parsedDatasetsInfoDTO = DataflowUtils.parseDatasetsInfoDTO(datasetsInfoDTO.data);
+    return sortBy(parsedDatasetsInfoDTO, 'id');
+  }
 };

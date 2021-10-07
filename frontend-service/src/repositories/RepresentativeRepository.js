@@ -18,9 +18,6 @@ export const RepresentativeRepository = {
   getDataProviders: async dataProviderGroupId =>
     await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getDataProviders, { dataProviderGroupId }) }),
 
-  getSelectedDataProviderGroup: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getSelectedDataProviderGroup, { dataflowId }) }),
-
   getRepresentatives: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getRepresentatives, { dataflowId: dataflowId }) }),
 

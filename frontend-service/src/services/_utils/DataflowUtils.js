@@ -97,8 +97,9 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {
     dataflow.users.forEach((user, usersIndex) => {
       user.roles.forEach((role, roleIndex) => {
-        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] =
-          UserRoleUtils.getUserRoleLabel(role);
+        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(
+          role
+        );
       });
     });
   });
@@ -165,6 +166,43 @@ const getTechnicalAcceptanceStatus = (datasetsStatus = []) => {
     return config.datasetStatus.TECHNICALLY_ACCEPTED.label;
 };
 
+const parseDatasetsInfoDTO = datasetsDTO => {
+  return datasetsDTO.map(datasetDTO => {
+    return {
+      dataProviderCode: datasetDTO.dataProviderCode,
+      dataProviderName: datasetDTO.dataProviderName,
+      id: datasetDTO.id,
+      name: datasetDTO.dataSetName,
+      type: getDatasetType(datasetDTO.datasetTypeEnum)
+    };
+  });
+};
+
+const getDatasetType = datasetType => {
+  switch (datasetType) {
+    case config.datasetType.DESIGN.key:
+      return config.datasetType.DESIGN.value;
+
+    case config.datasetType.TEST.key:
+      return config.datasetType.TEST.value;
+
+    case config.datasetType.REPORTING.key:
+      return config.datasetType.REPORTING.value;
+
+    case config.datasetType.DATACOLLECTION.key:
+      return config.datasetType.DATACOLLECTION.value;
+
+    case config.datasetType.EUDATASET.key:
+      return config.datasetType.EUDATASET.value;
+
+    case config.datasetType.REFERENCE.key:
+      return config.datasetType.REFERENCE.value;
+
+    default:
+      break;
+  }
+};
+
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
@@ -172,6 +210,7 @@ export const DataflowUtils = {
   parseDataflowDTO,
   parseDataflowListDTO,
   parseDataProvidersUserList,
+  parseDatasetsInfoDTO,
   parsePublicDataflowDTO,
   parsePublicDataflowListDTO,
   parseSortedDataflowListDTO,
