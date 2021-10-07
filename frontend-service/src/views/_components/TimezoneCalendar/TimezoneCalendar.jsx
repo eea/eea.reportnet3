@@ -53,7 +53,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isEdit }) => {
   const calendarRef = useRef();
 
   const [date, setDate] = useState('');
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState('00:00:00');
   const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
 
