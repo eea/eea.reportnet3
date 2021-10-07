@@ -17,7 +17,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
-import org.eea.dataflow.service.file.DataflowHelp;
+import org.eea.dataflow.service.file.DataflowHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
@@ -99,7 +99,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   private LockService lockService;
 
   @Autowired
-  private DataflowHelp dataflowHelp;
+  private DataflowHelper dataflowHelp;
 
   /**
    * Find by id.

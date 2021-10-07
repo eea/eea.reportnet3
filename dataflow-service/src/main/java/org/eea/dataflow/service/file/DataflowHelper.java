@@ -50,10 +50,10 @@ import org.springframework.web.server.ResponseStatusException;
  * The Class DataflowHelp.
  */
 @Component
-public class DataflowHelp implements DisposableBean {
+public class DataflowHelper implements DisposableBean {
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DataflowHelp.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DataflowHelper.class);
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
