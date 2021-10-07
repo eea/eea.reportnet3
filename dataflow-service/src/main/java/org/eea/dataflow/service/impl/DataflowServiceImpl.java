@@ -23,6 +23,7 @@ import org.eea.dataflow.persistence.domain.FMEUser;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.DataflowRepository.IDataflowCount;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
@@ -43,9 +44,11 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -180,7 +183,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private FMEUserRepository fmeUserRepository;
 
-
+  /** The dataflow private mapper. */
   @Autowired
   private DataflowPrivateMapper dataflowPrivateMapper;
 
@@ -257,7 +260,8 @@ public class DataflowServiceImpl implements DataflowService {
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (null != idsResources && !idsResources.isEmpty() || userAdmin) {
+    if (CollectionUtils.isNotEmpty(idsResources) || userAdmin
+        || dataflowType == TypeDataflowEnum.REFERENCE) {
       List<Dataflow> dataflows = new ArrayList<>();
       switch (dataflowType) {
         case REPORTING:
@@ -277,11 +281,12 @@ public class DataflowServiceImpl implements DataflowService {
                       .findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources);
           break;
         case REFERENCE:
-          dataflows = userAdmin
-              ? dataflowRepository
-                  .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
-              : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
-                  TypeStatusEnum.DESIGN, idsResources);
+          if (CollectionUtils.isNotEmpty(idsResources) || userAdmin)
+            dataflows = userAdmin
+                ? dataflowRepository
+                    .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
+                : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
+                    TypeStatusEnum.DESIGN, idsResources);
 
           dataflows.addAll(dataflowRepository
               .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT));
@@ -1476,4 +1481,87 @@ public class DataflowServiceImpl implements DataflowService {
     result.setDocuments(null);
   }
 
+  /**
+   * Gets the dataset summary.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataset summary
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public List<DatasetsSummaryVO> getDatasetSummary(Long dataflowId) throws EEAException {
+    List<DatasetsSummaryVO> datasetsSummaryList = new ArrayList<>();
+    if (null != dataflowId) {
+      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      if (null != dataflow) {
+        datasetsSummaryList = datasetMetabaseControllerZuul.getDatasetsSummaryList(dataflowId);
+      } else {
+        throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+      }
+    } else {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    return datasetsSummaryList;
+  }
+
+  /**
+   * Gets the dataflows count.
+   *
+   * @return the dataflows count
+   */
+  @Override
+  public List<DataflowCountVO> getDataflowsCount() {
+
+    boolean isAdmin = isAdmin();
+
+    List<Long> idsResources =
+        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+
+    List<IDataflowCount> dataflowCountList = new ArrayList<>();
+
+    if (CollectionUtils.isNotEmpty(idsResources) || isAdmin) {
+      dataflowCountList = isAdmin ? dataflowRepository.countDataflowByType()
+          : dataflowRepository.countDataflowByTypeAndUser(idsResources);
+    }
+
+    List<DataflowCountVO> dataflowCountVOList = new ArrayList<>();
+
+    for (IDataflowCount dataflow : dataflowCountList) {
+      DataflowCountVO newDataflowCountVO = new DataflowCountVO();
+      if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin) {
+        continue;
+      }
+      newDataflowCountVO.setType(dataflow.getType());
+      newDataflowCountVO.setAmount(dataflow.getAmount());
+      dataflowCountVOList.add(newDataflowCountVO);
+    }
+
+    if (!isAdmin) {
+      IDataflowCount draftReferenceDataflow = dataflowRepository.countReferenceDataflowsDraft();
+      IDataflowCount designReferenceDataflow = null;
+
+      if (CollectionUtils.isNotEmpty(idsResources))
+        designReferenceDataflow =
+            dataflowRepository.countReferenceDataflowsDesignByUser(idsResources);
+
+      long totalReferenceAmount = 0L;
+
+      if (designReferenceDataflow != null) {
+        totalReferenceAmount += designReferenceDataflow.getAmount();
+      }
+
+      if (draftReferenceDataflow != null) {
+        totalReferenceAmount += draftReferenceDataflow.getAmount();
+      }
+
+      DataflowCountVO totalReferenceCountVO = new DataflowCountVO();
+      totalReferenceCountVO.setType(TypeDataflowEnum.REFERENCE);
+      totalReferenceCountVO.setAmount(totalReferenceAmount);
+      dataflowCountVOList.add(totalReferenceCountVO);
+    }
+
+    return dataflowCountVOList;
+  }
 }

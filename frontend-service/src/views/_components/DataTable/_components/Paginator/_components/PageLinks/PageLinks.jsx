@@ -4,15 +4,17 @@ import classNames from 'classnames';
 
 export class PageLinks extends Component {
   static defaultProps = {
+    disabled: false,
     links: null,
     page: null,
     value: null
   };
 
   static propTypes = {
-    value: PropTypes.array,
+    disabled: PropTypes.bool,
+    onClick: PropTypes.func,
     page: PropTypes.number,
-    onClick: PropTypes.func
+    value: PropTypes.array
   };
 
   onPageLinkClick(event, pageLink) {
@@ -33,7 +35,13 @@ export class PageLinks extends Component {
       });
 
       return (
-        <button className={pageClassName} key={pageLink} onClick={e => this.onPageLinkClick(e, pageLink)} type="button">
+        <button
+          className={pageClassName}
+          disabled={this.props.disabled}
+          key={pageLink}
+          onClick={e => this.onPageLinkClick(e, pageLink)}
+          style={{ opacity: this.props.disabled ? '0.6' : '1', pointerEvents: this.props.disabled ? 'none' : 'auto' }}
+          type="button">
           {pageLink}
         </button>
       );

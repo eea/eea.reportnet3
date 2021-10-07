@@ -1832,5 +1832,26 @@ public class DatasetSchemaControllerImplTest {
   }
 
 
+  @Test
+  public void testExportFieldSchemasFromDataset() throws EEAException, IOException {
+
+    dataSchemaControllerImpl.exportFieldSchemasFromDataset(1L);
+    Mockito.verify(dataschemaService, times(1)).exportZipFieldSchemas(Mockito.anyLong());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testExportFieldSchemasFromDatasetException() throws EEAException, IOException {
+    try {
+      doThrow(new EEAException("error")).when(dataschemaService)
+          .exportZipFieldSchemas(Mockito.anyLong());
+
+      dataSchemaControllerImpl.exportFieldSchemasFromDataset(1L);
+
+    } catch (EEAException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw e;
+    }
+  }
 
 }

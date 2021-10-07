@@ -523,6 +523,7 @@ export class TableBody extends Component {
             onRowEditSave={this.props.onRowEditSave}
             onRowToggle={this.onRowToggle}
             onTouchEnd={this.onRowTouchEnd}
+            quickEditRowInfo={this.props.quickEditRowInfo}
             responsive={this.props.responsive}
             rowClassName={this.props.rowClassName}
             rowData={rowData}
