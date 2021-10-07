@@ -45,7 +45,7 @@ const offsetOptions = [
   { value: 12, label: '+12:00' }
 ];
 
-export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton }) => {
+export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton, isDisabled }) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
@@ -98,6 +98,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton 
   const renderCalendar = () => {
     return (
       <Calendar
+        disabled={isDisabled}
         inline
         monthNavigator
         onChange={e => {
@@ -124,6 +125,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton 
       <InputMask
         autoClear
         className={`${styles.timeInput} ${hasError ? styles.error : ''}`}
+        disabled={isDisabled}
         mask={`99:99:99`}
         onChange={e => {
           setInputValue(e.target.value);
@@ -147,6 +149,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton 
       <Dropdown
         //TODO CHECK Z-INDEX
         className={styles.dropdown}
+        disabled={isDisabled}
         onChange={e => {
           setSelectedOffset(e.value);
         }}
