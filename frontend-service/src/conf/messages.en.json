@@ -1264,6 +1264,7 @@
     "wrongWebLinkError": "The URL is not valid",
     "yes": "Yes",
     "expirationDateFilterLabel": "Delivery date range",
-    "creationDateFilterLabel": "Creation date range"
+    "creationDateFilterLabel": "Creation date range",
+    "quickEdit": "Quick edit"
   }
 }

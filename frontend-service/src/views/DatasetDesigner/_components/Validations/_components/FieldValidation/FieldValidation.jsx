@@ -270,7 +270,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
     try {
       setIsSubmitDisabled(true);
       const { candidateRule, expressionText } = creationFormState;
-      candidateRule.expressionText = expressionText;      
+      candidateRule.expressionText = expressionText;
       await ValidationService.createFieldRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
@@ -285,7 +285,8 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
     try {
       setIsSubmitDisabled(true);
       const { candidateRule, expressionText } = creationFormState;
-      candidateRule.expressionText = expressionText;      
+      candidateRule.expressionText = expressionText;
+
       await ValidationService.updateFieldRule(datasetId, candidateRule);
       if (!isNil(candidateRule) && candidateRule.automatic) {
         validationContext.onAutomaticRuleIsUpdated(true);
@@ -469,7 +470,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                 id={`${componentName}__update`}
                 label={resourcesContext.messages.update}
-                onClick={() => onUpdateValidationRule()}
+                onClick={onUpdateValidationRule}
                 type="button"
               />
             </span>
@@ -483,7 +484,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                 id={`${componentName}__create`}
                 label={resourcesContext.messages.create}
-                onClick={() => onCreateValidationRule()}
+                onClick={onCreateValidationRule}
                 type="button"
               />
             </span>
