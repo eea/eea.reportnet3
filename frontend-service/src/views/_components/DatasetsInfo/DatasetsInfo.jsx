@@ -114,31 +114,31 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
       return (
         <div className={styles.emptyFilteredData}>{resourcesContext.messages['noDatasetsWithSelectedParameters']}</div>
       );
-    } else {
-      return (
-        <DataTable
-          paginator={true}
-          paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
-          rows={10}
-          rowsPerPageOptions={[5, 10, 15]}
-          summary="datasetsInfo"
-          totalRecords={datasetsInfo.length}
-          value={filteredData}>
-          <Column field="name" header={resourcesContext.messages['name']} sortable={true} />
-          <Column field="type" header={resourcesContext.messages['type']} sortable={true} />
-          <Column
-            field="providerData"
-            header={TextByDataflowTypeUtils.getLabelByDataflowType(
-              resourcesContext.messages,
-              dataflowType,
-              'datasetsInfoDataProviderColumnHeader'
-            )}
-            sortable={true}
-          />
-          <Column field="id" header={resourcesContext.messages['datasetId']} sortable={true} />
-        </DataTable>
-      );
     }
+
+    return (
+      <DataTable
+        paginator={true}
+        paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
+        rows={10}
+        rowsPerPageOptions={[5, 10, 15]}
+        summary="datasetsInfo"
+        totalRecords={datasetsInfo.length}
+        value={filteredData}>
+        <Column field="name" header={resourcesContext.messages['name']} sortable={true} />
+        <Column field="type" header={resourcesContext.messages['type']} sortable={true} />
+        <Column
+          field="providerData"
+          header={TextByDataflowTypeUtils.getLabelByDataflowType(
+            resourcesContext.messages,
+            dataflowType,
+            'datasetsInfoDataProviderColumnHeader'
+          )}
+          sortable={true}
+        />
+        <Column field="id" header={resourcesContext.messages['datasetId']} sortable={true} />
+      </DataTable>
+    );
   };
 
   const renderFilters = () => (
