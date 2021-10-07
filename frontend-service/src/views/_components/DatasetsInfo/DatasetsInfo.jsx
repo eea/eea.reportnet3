@@ -92,6 +92,55 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
 
   const onLoadFilteredData = value => setFilteredData(value);
 
+  const renderDatasetsInfoContent = () => {
+    if (isLoading) {
+      return <Spinner />;
+    }
+
+    if (isEmpty(datasetsInfo)) {
+      return <div className={styles.noDatasets}>{resourcesContext.messages['noDatasets']}</div>;
+    }
+
+    return (
+      <Fragment>
+        {renderFilters()}
+        {renderDatasetsInfoTable()}
+      </Fragment>
+    );
+  };
+
+  const renderDatasetsInfoTable = () => {
+    if (isEmpty(filteredData)) {
+      return (
+        <div className={styles.emptyFilteredData}>{resourcesContext.messages['noDatasetsWithSelectedParameters']}</div>
+      );
+    } else {
+      return (
+        <DataTable
+          paginator={true}
+          paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
+          rows={10}
+          rowsPerPageOptions={[5, 10, 15]}
+          summary="datasetsInfo"
+          totalRecords={datasetsInfo.length}
+          value={filteredData}>
+          <Column field="name" header={resourcesContext.messages['name']} sortable={true} />
+          <Column field="type" header={resourcesContext.messages['type']} sortable={true} />
+          <Column
+            field="providerData"
+            header={TextByDataflowTypeUtils.getLabelByDataflowType(
+              resourcesContext.messages,
+              dataflowType,
+              'datasetsInfoDataProviderColumnHeader'
+            )}
+            sortable={true}
+          />
+          <Column field="id" header={resourcesContext.messages['datasetId']} sortable={true} />
+        </DataTable>
+      );
+    }
+  };
+
   const renderFilters = () => (
     <Filters
       data={datasetsInfo}
@@ -101,44 +150,5 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     />
   );
 
-  return (
-    <div className={styles.container}>
-      {isLoading ? (
-        <Spinner />
-      ) : isEmpty(datasetsInfo) ? (
-        <div className={styles.noDatasets}>{resourcesContext.messages['noDatasets']}</div>
-      ) : (
-        <div className={styles.datasets}>
-          {renderFilters()}
-          {!isEmpty(filteredData) ? (
-            <DataTable
-              paginator={true}
-              paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
-              rows={10}
-              rowsPerPageOptions={[5, 10, 15]}
-              summary="datasetsInfo"
-              totalRecords={datasetsInfo.length}
-              value={filteredData}>
-              <Column field="name" header={resourcesContext.messages['name']} sortable={true} />
-              <Column field="type" header={resourcesContext.messages['type']} sortable={true} />
-              <Column
-                field="providerData"
-                header={TextByDataflowTypeUtils.getLabelByDataflowType(
-                  resourcesContext.messages,
-                  dataflowType,
-                  'datasetsInfoDataProviderColumnHeader'
-                )}
-                sortable={true}
-              />
-              <Column field="id" header={resourcesContext.messages['datasetId']} sortable={true} />
-            </DataTable>
-          ) : (
-            <div className={styles.emptyFilteredData}>
-              {resourcesContext.messages['noDatasetsWithSelectedParameters']}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+  return <div className={styles.container}>{renderDatasetsInfoContent()}</div>;
 };
