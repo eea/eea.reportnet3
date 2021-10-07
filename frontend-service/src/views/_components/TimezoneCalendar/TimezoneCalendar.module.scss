@@ -1,8 +1,12 @@
 .container {
+  position: absolute;
   width: fit-content !important;
   min-width: 335px;
+  max-width: 400px;
   display: flex;
   flex-direction: column;
+  z-index: 9999 !important;
+  background-color: var(--bg);
 
   .buttonRight {
     margin-top: 0.5rem;
@@ -19,11 +23,14 @@
     }
 
     .error {
-      border-color: red !important;
-      box-shadow: red !important;
+      border: var(--inputtext-border-error);
+
       &:focus {
-        border-color: red !important;
-        box-shadow: red !important;
+        border: var(--inputtext-border-error);
+        box-shadow: var(--inputtext-box-shadow-focus-error);
+      }
+      &:hover {
+        border: var(--inputtext-border-error);
       }
     }
 
@@ -33,7 +40,6 @@
       flex-grow: 2;
 
       .label {
-        // padding-left: 5rem;
         align-self: center;
       }
 
@@ -41,6 +47,8 @@
         margin-left: 0.5rem;
         width: 5rem !important;
         min-width: 11rem !important;
+        position: relative;
+        z-index: 1 !important;
       }
     }
   }
