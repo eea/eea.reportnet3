@@ -366,89 +366,9 @@ export const DataflowService = {
     await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo),
 
   getDatasetsInfo: async dataflowId => {
-    // const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
+    const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
 
-    const datasetsInfoDTO = [
-      {
-        id: 111,
-        dataSetName: 'nuevo dataset',
-        datasetTypeEnum: 'DESIGN',
-        dataProviderCode: null,
-        dataProviderName: null
-      },
-      {
-        id: 113,
-        dataSetName: 'nuevo',
-        datasetTypeEnum: 'DESIGN',
-        dataProviderCode: null,
-        dataProviderName: null
-      },
-      {
-        id: 124,
-        dataSetName: 'Data Collection - nuevo dataset',
-        datasetTypeEnum: 'COLLECTION',
-        dataProviderCode: null,
-        dataProviderName: null
-      },
-      {
-        id: 128,
-        dataSetName: 'Data Collection - nuevo',
-        datasetTypeEnum: 'COLLECTION',
-        dataProviderCode: null,
-        dataProviderName: null
-      },
-      {
-        id: 125,
-        dataSetName: 'EU Dataset - nuevo dataset',
-        datasetTypeEnum: 'EUDATASET',
-        dataProviderCode: null,
-        dataProviderName: null
-      },
-      {
-        id: 129,
-        dataSetName: 'EU Dataset - nuevo',
-        datasetTypeEnum: 'EUDATASET',
-        dataProviderCode: null,
-        dataProviderName: null
-      },
-      {
-        id: 89,
-        dataSetName: 'Reference Dataset - nuevo',
-        datasetTypeEnum: 'REFERENCE',
-        dataProviderCode: null,
-        dataProviderName: null
-      },
-      {
-        id: 126,
-        dataSetName: 'Test Dataset - nuevo dataset',
-        datasetTypeEnum: 'TEST',
-        dataProviderCode: null,
-        dataProviderName: null
-      },
-      {
-        id: 130,
-        dataSetName: 'Test Dataset - nuevo',
-        datasetTypeEnum: 'TEST',
-        dataProviderCode: null,
-        dataProviderName: null
-      },
-      {
-        id: 127,
-        dataSetName: 'DATA_P_aux',
-        datasetTypeEnum: 'REPORTING',
-        dataProviderCode: 'FR',
-        dataProviderName: 'France'
-      },
-      {
-        id: 131,
-        dataSetName: 'DATA_P_aux',
-        datasetTypeEnum: 'REPORTING',
-        dataProviderCode: 'SP',
-        dataProviderName: 'Spain'
-      }
-    ];
-
-    const parsedDatasetsInfoDTO = DataflowUtils.parseDatasetsInfoDTO(datasetsInfoDTO);
+    const parsedDatasetsInfoDTO = DataflowUtils.parseDatasetsInfoDTO(datasetsInfoDTO.data);
 
     return sortBy(parsedDatasetsInfoDTO, 'id');
   }
