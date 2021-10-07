@@ -21,6 +21,7 @@ import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetCo
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
@@ -143,8 +144,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         .error("The QC Rule is disabled").build();
 
     try {
-      query = proccessQuery(datasetId, rule.getSqlSentence());
-      sqlError = validateRule(query, datasetId, rule, Boolean.TRUE);
+      DataSetMetabaseVO dataSetMetabaseVO =
+          datasetMetabaseController.findDatasetMetabaseById(datasetId);
+      query = proccessQuery(dataSetMetabaseVO, rule.getSqlSentence());
+      sqlError = validateRule(query, dataSetMetabaseVO, rule);
     } catch (StringIndexOutOfBoundsException | NumberFormatException e) {
       sqlError = "Syntax not allowed";
     }
@@ -182,9 +185,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       RuleVO ruleVO) {
     Rule rule = ruleMapper.classToEntity(ruleVO);
 
-    String query = proccessQuery(datasetId, ruleVO.getSqlSentence());
+    DataSetMetabaseVO dataSetMetabaseVO =
+        datasetMetabaseController.findDatasetMetabaseById(datasetId);
+    String query = proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
     boolean verifAndEnabled = true;
-    if (!StringUtils.isBlank(validateRule(query, datasetId, rule, Boolean.TRUE))) {
+    if (!StringUtils.isBlank(validateRule(query, dataSetMetabaseVO, rule))) {
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
       verifAndEnabled = false;
       rule.setEnabled(verifAndEnabled);
@@ -231,37 +236,39 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
   @Override
-  public TableValue retrieveTableData(String query, Long datasetId, Rule rule, Boolean ischeckDC)
-      throws EEAInvalidSQLException {
-    DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
+  public TableValue retrieveTableData(String query, DataSetMetabaseVO dataSetMetabaseVO, Rule rule,
+      Boolean ischeckDC) throws EEAInvalidSQLException {
+    DataSetSchemaVO schema =
+        datasetSchemaController.findDataSchemaByDatasetId(dataSetMetabaseVO.getId());
     String entityName = "";
     Long idTable = null;
 
-    String newQuery = proccessQuery(datasetId, query);
+    String newQuery = proccessQuery(dataSetMetabaseVO, query);
 
     switch (rule.getType()) {
       case FIELD:
         entityName = retriveFieldName(schema, rule.getReferenceId().toString());
-        idTable =
-            retriveIsTableFromFieldSchema(schema, rule.getReferenceId().toString(), datasetId);
+        idTable = retriveIsTableFromFieldSchema(schema, rule.getReferenceId().toString(),
+            dataSetMetabaseVO.getId());
         break;
       case TABLE:
         entityName = retriveTableName(schema, rule.getReferenceId().toString());
-        idTable = datasetRepository.getTableId(rule.getReferenceId().toString(), datasetId);
+        idTable = datasetRepository.getTableId(rule.getReferenceId().toString(),
+            dataSetMetabaseVO.getId());
         break;
       case RECORD:
-        idTable =
-            retriveIsTableFromRecordSchema(schema, rule.getReferenceId().toString(), datasetId);
+        idTable = retriveIsTableFromRecordSchema(schema, rule.getReferenceId().toString(),
+            dataSetMetabaseVO.getId());
         break;
       case DATASET:
         break;
     }
     LOG.info("Query from ruleCode {} to be executed: {}", rule.getShortCode(), newQuery);
     TableValue table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName,
-        datasetId, idTable);
+        dataSetMetabaseVO.getId(), idTable);
     if (Boolean.FALSE.equals(ischeckDC) && null != table && null != table.getRecords()
         && !table.getRecords().isEmpty() && !EntityTypeEnum.TABLE.equals(rule.getType())) {
-      retrieveValidations(table.getRecords(), datasetId);
+      retrieveValidations(table.getRecords(), dataSetMetabaseVO.getId());
     }
     return table;
   }
@@ -278,11 +285,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   public void validateSQLRules(Long datasetId, String datasetSchemaId, Boolean showNotification) {
     List<RuleVO> rulesSql =
         ruleMapper.entityListToClass(rulesRepository.findSqlRules(new ObjectId(datasetSchemaId)));
-    Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
+    DataSetMetabaseVO dataSetMetabaseVO =
+        datasetMetabaseController.findDatasetMetabaseById(datasetId);
     if (null != rulesSql && !rulesSql.isEmpty()) {
       rulesSql.stream().forEach(ruleVO -> {
         Rule rule = ruleMapper.classToEntity(ruleVO);
-        String sqlError = validateRule(ruleVO.getSqlSentence(), datasetId, rule, Boolean.TRUE);
+        String sqlError = validateRule(ruleVO.getSqlSentence(), dataSetMetabaseVO, rule);
         if (StringUtils.isBlank(sqlError)) {
           rule.setVerified(true);
         } else {
@@ -310,8 +318,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (rulesDisabled > 0 || rulesUnchecked > 0) {
       NotificationVO notificationVO = NotificationVO.builder()
           .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .datasetId(datasetId).dataflowId(dataflowId).invalidRules(rulesUnchecked)
-          .disabledRules(rulesDisabled).build();
+          .datasetId(datasetId).dataflowId(dataSetMetabaseVO.getDataflowId())
+          .invalidRules(rulesUnchecked).disabledRules(rulesDisabled).build();
       LOG.info("SQL rules contains errors");
       if (showNotification == null || showNotification) {
         releaseNotification(EventType.VALIDATE_RULES_ERROR_EVENT, notificationVO);
@@ -320,7 +328,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
       NotificationVO notificationVO = NotificationVO.builder()
           .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .datasetId(datasetId).dataflowId(dataflowId).build();
+          .datasetId(datasetId).dataflowId(dataSetMetabaseVO.getDataflowId()).build();
       LOG.info("SQL rules contains 0 errors");
       if (showNotification == null || showNotification) {
         releaseNotification(EventType.VALIDATE_RULES_COMPLETED_EVENT, notificationVO);
@@ -351,14 +359,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param ischeckDC the ischeck DC
    * @return the boolean
    */
-  private String validateRule(String query, Long datasetId, Rule rule, Boolean ischeckDC) {
+  private String validateRule(String query, DataSetMetabaseVO dataSetMetabaseVO, Rule rule) {
     String isSQLCorrect = "";
     // validate query
     if (!StringUtils.isBlank(query)) {
       // validate query sintax
       if (checkQuerySyntax(query)) {
         List<String> ids = getListOfDatasetsOnQuery(query);
-        checkDatasetFromSameDataflow(datasetId, ids);
+        checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
         if (!ids.isEmpty()) {
           checkDatasetFromReferenceDataflow(ids);
         }
@@ -366,7 +374,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         // dataflows
         if (ids.isEmpty()) {
           try {
-            checkQueryTestExecution(query.replace(";", ""), datasetId, rule);
+            checkQueryTestExecution(query.replace(";", ""), dataSetMetabaseVO, rule);
           } catch (EEAInvalidSQLException e) {
             LOG_ERROR.error("SQL is not correct: {}",
                 ((SQLGrammarException) e.getCause()).getSQLException().getMessage(), e);
@@ -415,10 +423,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param rule the rule
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
-  private void checkQueryTestExecution(String query, Long datasetId, Rule rule)
+  private void checkQueryTestExecution(String query, DataSetMetabaseVO dataSetMetabaseVO, Rule rule)
       throws EEAInvalidSQLException {
-    String newQuery = proccessQuery(datasetId, query);
-    datasetRepository.validateQuery("explain " + newQuery, datasetId);
+    String newQuery = proccessQuery(dataSetMetabaseVO, query);
+    datasetRepository.validateQuery("explain " + newQuery, dataSetMetabaseVO.getId());
   }
 
   /**
@@ -630,13 +638,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param query the query
    * @return the string
    */
-  private String proccessQuery(Long datasetId, String query) {
+  private String proccessQuery(DataSetMetabaseVO dataSetMetabaseVO, String query) {
 
     if (query.contains(DATASET)) {
       Map<String, Long> datasetSchemasMap = getMapOfDatasetsOnQuery(query);
-      DatasetTypeEnum datasetType = datasetMetabaseController.getType(datasetId);
-      Long dataflowId =
-          datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
+      DatasetTypeEnum datasetType = dataSetMetabaseVO.getDatasetTypeEnum();
+      Long dataflowId = dataSetMetabaseVO.getDataflowId();
 
       Map<Long, Long> datasetIdOldNew = new HashMap<>();
       switch (datasetType) {
@@ -647,8 +654,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           query = modifyQueryForEU(query, datasetSchemasMap, dataflowId, datasetIdOldNew);
           break;
         case REPORTING:
-          query = modifyQueryForReportingDataset(datasetId, query, datasetSchemasMap, dataflowId,
-              datasetIdOldNew);
+          query = modifyQueryForReportingDataset(dataSetMetabaseVO.getDataProviderId(), query,
+              datasetSchemasMap, dataflowId, datasetIdOldNew);
           break;
         case TEST:
           query = modifyQueryForTestDataset(query, datasetSchemasMap, dataflowId, datasetIdOldNew);
@@ -760,17 +767,15 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param datasetIdOldNew the dataset id old new
    * @return the string
    */
-  private String modifyQueryForReportingDataset(Long datasetId, String query,
+  private String modifyQueryForReportingDataset(Long dataProviderId, String query,
       Map<String, Long> datasetSchemasMap, Long dataflowId, Map<Long, Long> datasetIdOldNew) {
     List<ReportingDatasetVO> reportingDatasetList =
         datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
     List<RepresentativeVO> dataprovidersVOList =
         representativeController.findRepresentativesByIdDataFlow(dataflowId);
-    Long providerId =
-        datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataProviderId();
     List<Long> dataprovidersIdList = new ArrayList<>();
     dataprovidersVOList.forEach(dataprovider -> {
-      if (dataprovider.getDataProviderId().equals(providerId)) {
+      if (dataprovider.getDataProviderId().equals(dataProviderId)) {
         dataprovidersIdList.add(dataprovider.getDataProviderId());
       }
     });
@@ -778,17 +783,17 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     for (ReportingDatasetVO dataset : reportingDatasetList) {
       datasetIdList.add(dataset.getDatasetSchema());
     }
-    Map<String, Long> reportingDatasetSchamasMap = new HashMap<>();
+    Map<String, Long> reportingDatasetSchemasMap = new HashMap<>();
     for (ReportingDatasetVO reportingDataset : reportingDatasetList) {
       if (dataprovidersIdList.contains(reportingDataset.getDataProviderId())) {
-        reportingDatasetSchamasMap.put(reportingDataset.getDatasetSchema(),
+        reportingDatasetSchemasMap.put(reportingDataset.getDatasetSchema(),
             reportingDataset.getId());
       }
     }
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
       if (datasetIdList.contains(auxDatasetMap.getKey())) {
         String key = auxDatasetMap.getKey();
-        Long datasetDatacollection = reportingDatasetSchamasMap.get(key);
+        Long datasetDatacollection = reportingDatasetSchemasMap.get(key);
         datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
       }
     }
@@ -830,7 +835,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
   /**
    * Gets a list with the id of the query datasets
-   * 
+   *
    * @param query the query
    * @return Gets a list with the id of the query datasets
    */
@@ -854,10 +859,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param ids the ids
    * @return the list
    */
-  private List<String> checkDatasetFromSameDataflow(Long datasetId, List<String> ids) {
+  private List<String> checkDatasetFromSameDataflow(DataSetMetabaseVO dataSetMetabaseVO,
+      List<String> ids) {
 
     List<String> idsFound = new ArrayList<>();
-    Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
+    Long dataflowId = dataSetMetabaseVO.getDataflowId();
     for (String id : ids) {
       Long idDataFlowFromDatasetOnQuery =
           datasetMetabaseController.findDatasetMetabaseById(Long.parseLong(id)).getDataflowId();

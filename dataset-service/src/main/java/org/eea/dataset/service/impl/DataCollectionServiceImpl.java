@@ -1412,39 +1412,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     for (Map.Entry<Long, List<String>> entry : datasetIdsEmails.entrySet()) {
 
-      // Create Dataset-%s-DATA_STEWARD
-      groups.add(
-          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_STEWARD));
-
-      // Create Dataset-%s-DATA_CUSTODIAN
-      groups.add(
-          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_CUSTODIAN));
-
-      // Create Dataset-%s-DATA_OBSERVER
-      groups.add(
-          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_OBSERVER));
-
       // Create Dataset-%s-LEAD_REPORTER
       groups.add(
           createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.LEAD_REPORTER));
-
-      // Assign Dataset-%s-DATA_STEWARD
-      for (UserRepresentationVO steward : stewards) {
-        assignments.add(createAssignments(entry.getKey(), steward.getEmail(),
-            ResourceGroupEnum.DATASET_STEWARD));
-      }
-
-      // Assign Dataset-%s-DATA_CUSTODIAN
-      for (UserRepresentationVO custodian : custodians) {
-        assignments.add(createAssignments(entry.getKey(), custodian.getEmail(),
-            ResourceGroupEnum.DATASET_CUSTODIAN));
-      }
-
-      // Assign Dataset-%s-DATA_OBSERVER
-      for (UserRepresentationVO observer : observers) {
-        assignments.add(createAssignments(entry.getKey(), observer.getEmail(),
-            ResourceGroupEnum.DATASET_OBSERVER));
-      }
 
       if (null != entry.getValue()) {
         for (String email : entry.getValue()) {

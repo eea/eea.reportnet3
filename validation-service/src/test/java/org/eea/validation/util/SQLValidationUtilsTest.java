@@ -129,7 +129,7 @@ public class SQLValidationUtilsTest {
         .thenReturn(new ObjectId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.anyLong(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(table);
 
     sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, null);
@@ -169,7 +169,7 @@ public class SQLValidationUtilsTest {
         .thenReturn(new ObjectId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.anyLong(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(table);
 
     sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
@@ -203,7 +203,7 @@ public class SQLValidationUtilsTest {
     tableSchemas.add(tableS);
     schema.setTableSchemas(tableSchemas);
 
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
@@ -240,7 +240,7 @@ public class SQLValidationUtilsTest {
     tableSchemas.add(tableS);
     schema.setTableSchemas(tableSchemas);
 
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
@@ -285,7 +285,7 @@ public class SQLValidationUtilsTest {
     tableSchemas.add(tableS);
     schema.setTableSchemas(tableSchemas);
 
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
@@ -332,7 +332,7 @@ public class SQLValidationUtilsTest {
     tableSchemas.add(tableS);
     schema.setTableSchemas(tableSchemas);
 
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
@@ -391,7 +391,7 @@ public class SQLValidationUtilsTest {
 
 
     Mockito.when(datasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
@@ -450,7 +450,7 @@ public class SQLValidationUtilsTest {
 
 
     Mockito.when(datasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);

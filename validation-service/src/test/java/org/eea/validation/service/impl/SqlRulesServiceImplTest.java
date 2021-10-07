@@ -502,15 +502,17 @@ public class SqlRulesServiceImplTest {
     rule.setSqlSentence("SELECT * from dataset_1.table_value;");
     rule.setType(EntityTypeEnum.TABLE);
     rule.setReferenceId(new ObjectId());
-
-
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
     when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.anyLong())).thenReturn(schema);
     when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
 
     when(datasetRepository.queryRSExecution(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(tableValue);
 
-    sqlRulesServiceImpl.retrieveTableData("", 1L, rule, Boolean.FALSE);
+    sqlRulesServiceImpl.retrieveTableData("", dataset, rule, Boolean.FALSE);
 
     Mockito.verify(datasetRepository, times(1)).queryRSExecution(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
@@ -569,7 +571,11 @@ public class SqlRulesServiceImplTest {
         .thenReturn(fieldsValidations);
     when(datasetRepository.queryRecordValidationExecution(Mockito.anyString()))
         .thenReturn(recordsValidation);
-    sqlRulesServiceImpl.retrieveTableData("", 1L, rule, Boolean.FALSE);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    sqlRulesServiceImpl.retrieveTableData("", dataset, rule, Boolean.FALSE);
 
     Mockito.verify(datasetRepository, times(1)).queryRSExecution(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());

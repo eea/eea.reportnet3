@@ -39,7 +39,7 @@ public interface ValidationService {
    * @throws EEAException the EEA exception
    */
   void validateFields(@DatasetId Long datasetId, KieBase kieBase, Pageable pageable,
-      boolean onlyEmptyFields) throws EEAException;
+      boolean onlyEmptyFields, Long dataProviderId, String datasetSchema) throws EEAException;
 
 
   /**
@@ -229,7 +229,7 @@ public interface ValidationService {
    * @return the integer
    */
   Integer countEmptyFieldsDataset(@DatasetId Long datasetId);
-  
+
   /**
    * Exports validation data file.
    *

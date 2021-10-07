@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -142,9 +143,13 @@ public class SQLValidationUtils {
   public static void executeValidationSQLRule(Long datasetId, String ruleId,
       String dataProviderCode) {
     Rule rule = sqlRulesService.getRule(datasetId, ruleId);
-    TableValue tableToEvaluate = getTableToEvaluate(datasetId, rule, dataProviderCode);
-    if (null != tableToEvaluate && null != tableToEvaluate.getId()) {
-      String schemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    DataSetMetabaseVO dataSetMetabaseVO =
+        datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    TableValue tableToEvaluate =
+        getTableToEvaluate(datasetId, rule, dataProviderCode, dataSetMetabaseVO);
+    if (null != tableToEvaluate && null != tableToEvaluate.getId()
+        && CollectionUtils.isNotEmpty(tableToEvaluate.getRecords())) {
+      String schemaId = dataSetMetabaseVO.getDatasetSchema();
       Optional<DataSetSchema> dataSetSchema = schemasRepository.findById(new ObjectId(schemaId));
       Optional<TableValue> tableValue = tableRepository.findById(tableToEvaluate.getId());
       String tableName = getTableName(dataSetSchema, tableValue);
@@ -177,7 +182,8 @@ public class SQLValidationUtils {
    * @param dataProviderCode the data provider code
    * @return the table to evaluate
    */
-  private static TableValue getTableToEvaluate(Long datasetId, Rule rule, String dataProviderCode) {
+  private static TableValue getTableToEvaluate(Long datasetId, Rule rule, String dataProviderCode,
+      DataSetMetabaseVO dataSetMetabaseVO) {
     TableValue table = null;
     String query = rule.getSqlSentence();
     try {
@@ -187,7 +193,8 @@ public class SQLValidationUtils {
         preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", dataProviderCode);
         preparedquery = preparedquery.replace("{%R3_ORGANIZATION_CODE%}", dataProviderCode);
       }
-      table = sqlRulesService.retrieveTableData(preparedquery, datasetId, rule, Boolean.FALSE);
+      table =
+          sqlRulesService.retrieveTableData(preparedquery, dataSetMetabaseVO, rule, Boolean.FALSE);
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
     }
@@ -375,22 +382,14 @@ public class SQLValidationUtils {
     Validation validationDataset = createValidation(rule, tableName, null,
         prepareSQLErrorMessage(dataset, rule, dataSetSchema, null));
     validationDataset.setTableName(datasetMetabase.getDataSetName());
-    if (dataset.getDatasetValidations().isEmpty()) {
-      DatasetValidation datasetValidation = new DatasetValidation();
-      datasetValidation.setDatasetValue(dataset);
-      datasetValidation.setValidation(validationDataset);
-      List<DatasetValidation> datasetValidations = new ArrayList<>();
-      datasetValidations.add(datasetValidation);
-      dataset.setDatasetValidations(datasetValidations);
-    } else {
-      List<DatasetValidation> datasetValidations = dataset.getDatasetValidations();
-      DatasetValidation datasetValidation = new DatasetValidation();
-      datasetValidation.setDatasetValue(dataset);
-      datasetValidation.setValidation(createValidation(rule, tableName, null,
-          prepareSQLErrorMessage(dataset, rule, dataSetSchema, null)));
-      datasetValidations.add(datasetValidation);
-      dataset.setDatasetValidations(datasetValidations);
-    }
+    DatasetValidation datasetValidation = new DatasetValidation();
+    datasetValidation.setDatasetValue(dataset);
+    datasetValidation.setValidation(validationDataset);
+    List<DatasetValidation> datasetValidations =
+        dataset.getDatasetValidations() != null ? dataset.getDatasetValidations()
+            : new ArrayList<>();
+    datasetValidations.add(datasetValidation);
+    dataset.setDatasetValidations(datasetValidations);
     saveDataset(dataset);
   }
 
