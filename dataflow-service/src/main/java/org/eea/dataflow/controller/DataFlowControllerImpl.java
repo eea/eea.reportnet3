@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -809,4 +810,29 @@ public class DataFlowControllerImpl implements DataFlowController {
     }
     return false;
   }
+
+  /**
+   * Gets the dataset summary by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataset summary by dataflow id
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @GetMapping("/{dataflowId}/datasetsSummary")
+  @ApiOperation(value = "Get a summary of the information of all the dataset types of a dataflow",
+      hidden = true)
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
+  public List<DatasetsSummaryVO> getDatasetSummaryByDataflowId(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+    List<DatasetsSummaryVO> datasetsSummary = null;
+    try {
+      datasetsSummary = dataflowService.getDatasetSummary(dataflowId);
+    } catch (EEAException e) {
+      LOG_ERROR.info("Error in dataflow with id {} " + dataflowId);
+    }
+    return datasetsSummary;
+  }
+
 }
