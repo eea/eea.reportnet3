@@ -121,6 +121,7 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
    *
    * @param datasetId the dataset id
    * @param updatable the updatable
+   * @throws EEAException the EEA exception
    */
   public void updateUpdatable(Long datasetId, Boolean updatable) throws EEAException {
 

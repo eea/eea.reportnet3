@@ -1,5 +1,3 @@
-import { config } from 'conf';
-
 import { CitizenScienceDataflowRepository } from 'repositories/CitizenScienceDataflowRepository';
 
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
@@ -11,9 +9,6 @@ export const CitizenScienceDataflowService = {
 
     const dataflows = dataflowsDTO.data.map(dataflowDTO => {
       dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
-      if (dataflowDTO.status === config.dataflowStatus.OPEN) {
-        dataflowDTO.status = dataflowDTO.releasable ? 'OPEN' : 'CLOSED';
-      }
       return dataflowDTO;
     });
 

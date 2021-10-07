@@ -8,16 +8,20 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
+import { config } from 'conf';
+
 import styles from './QCList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-
 import { Button } from 'views/_components/Button';
+import { Checkbox } from 'views/_components/Checkbox';
+import { Dropdown } from 'views/_components/Dropdown';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
 import { LevelError } from 'views/_components/LevelError';
+import { QCFieldEditor } from './_components/QCFieldEditor';
 import { Spinner } from 'views/_components/Spinner';
 
 import { ValidationService } from 'services/ValidationService';
@@ -43,8 +47,12 @@ export const QCList = withRouter(
       deletedRuleId: null,
       filtered: false,
       filteredData: [],
+      initialFilteredData: [],
+      initialValidationsList: [],
       isDataUpdated: false,
       isDeleteDialogVisible: false,
+      isDeletingRule: false,
+      editingRows: [],
       isLoading: true,
       validationId: '',
       validationList: {}
@@ -140,6 +148,16 @@ export const QCList = withRouter(
           });
         }
 
+        //If there are quickedit rows preserve their values on update
+        if (tabsValidationsState.editingRows.length > 0) {
+          validationsServiceList.validations.forEach((validation, i) => {
+            const editingRow = tabsValidationsState.editingRows.find(row => row.id === validation.id);
+            if (editingRow) {
+              validationsServiceList.validations[i] = editingRow;
+            }
+          });
+        }
+
         tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_LIST', payload: { validationsServiceList } });
         validationContext.onSetRulesDescription(
           validationsServiceList?.validations?.map(validation => {
@@ -147,6 +165,7 @@ export const QCList = withRouter(
               automaticType: validation.automaticType,
               id: validation.id,
               description: validation.description,
+              message: validation.message,
               name: validation.name
             };
           })
@@ -322,9 +341,11 @@ export const QCList = withRouter(
     const editAndDeleteTemplate = row => {
       let rowType = 'field';
 
-      if (row.entityType === 'RECORD') rowType = 'row';
-
-      if (row.entityType === 'TABLE') rowType = 'dataset';
+      if (row.entityType === 'RECORD') {
+        rowType = 'row';
+      } else if (row.entityType === 'TABLE') {
+        rowType = 'dataset';
+      }
 
       const getDeleteBtnIcon = () => {
         if (row.id === tabsValidationsState.deletedRuleId && validationContext.isFetchingData) {
@@ -334,13 +355,10 @@ export const QCList = withRouter(
       };
 
       return (
-        <div className={styles.actionTemplate}>
+        <Fragment>
           <Button
             className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-            disabled={
-              (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
-              validationContext.isFetchingData
-            }
+            disabled={validationContext.isFetchingData}
             icon={getEditBtnIcon(row.id)}
             onClick={() => validationContext.onOpenToEdit(row, rowType)}
             tooltip={resourcesContext.messages['edit']}
@@ -349,10 +367,7 @@ export const QCList = withRouter(
           />
           <Button
             className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-            disabled={
-              (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
-              validationContext.isFetchingData
-            }
+            disabled={validationContext.isFetchingData}
             icon="clone"
             onClick={() => validationContext.onOpenToCopy(row, rowType)}
             tooltip={resourcesContext.messages['duplicate']}
@@ -363,12 +378,12 @@ export const QCList = withRouter(
             className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
             disabled={validationContext.isFetchingData}
             icon={getDeleteBtnIcon()}
-            onClick={() => onShowDeleteDialog()}
+            onClick={onShowDeleteDialog}
             tooltip={resourcesContext.messages['delete']}
             tooltipOptions={{ position: 'top' }}
             type="button"
           />
-        </div>
+        </Fragment>
       );
     };
 
@@ -380,20 +395,15 @@ export const QCList = withRouter(
       if (row.entityType === 'TABLE') rowType = 'dataset';
 
       return (
-        <div className={styles.actionTemplate}>
-          <Button
-            className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-            disabled={
-              (row.id === validationContext.updatedRuleId || row.id === tabsValidationsState.deletedRuleId) &&
-              validationContext.isFetchingData
-            }
-            icon={getEditBtnIcon(row.id)}
-            onClick={() => validationContext.onOpenToEdit(row, rowType)}
-            tooltip={resourcesContext.messages['edit']}
-            tooltipOptions={{ position: 'top' }}
-            type="button"
-          />
-        </div>
+        <Button
+          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+          disabled={validationContext.isFetchingData}
+          icon={getEditBtnIcon(row.id)}
+          onClick={() => validationContext.onOpenToEdit(row, rowType)}
+          tooltip={resourcesContext.messages['edit']}
+          tooltipOptions={{ position: 'top' }}
+          type="button"
+        />
       );
     };
 
@@ -440,14 +450,107 @@ export const QCList = withRouter(
         className={styles.validationCol}
         header={resourcesContext.messages['actions']}
         key="actions"
+        rowEditor={true}
         sortable={false}
         style={{ width: '100px' }}
       />
     );
 
-    const levelErrorTemplate = rowData => (
+    const getEditor = field => {
+      switch (field) {
+        case 'enabled':
+          return row => checkboxEditor(row, 'enabled');
+        case 'name':
+        case 'description':
+        case 'message':
+        case 'shortCode':
+          return row => textEditor(row, field);
+        case 'levelError':
+          return row => dropdownEditor(row, 'levelError');
+        default:
+          break;
+      }
+    };
+
+    const checkboxEditor = (props, field) => {
+      return (
+        <div className={styles.checkboxEditorWrapper}>
+          <Checkbox
+            checked={props.rowData[field]}
+            className={styles.checkboxEditor}
+            id={props.rowData[field]?.toString()}
+            inputId={props.rowData[field]?.toString()}
+            onChange={e => onRowEditorValueChange(props, e.checked)}
+            role="checkbox"
+          />
+        </div>
+      );
+    };
+
+    const getCandidateRule = data => {
+      const getExpressionType = () => {
+        let expressionType = '';
+        if (isNil(data.sqlSentence)) {
+          if (data.expressionsIf && data.expressionsIf.length > 0) {
+            expressionType = 'ifThenClause';
+          }
+
+          if (data.entityType === 'TABLE') {
+            expressionType = 'fieldRelations';
+          }
+
+          if (data.entityType === 'RECORD' && data.expressions.length > 0) {
+            expressionType = 'fieldComparison';
+          }
+
+          if (data.entityType === 'FIELD' && data.expressions.length > 0) {
+            expressionType = 'fieldTab';
+          }
+        } else {
+          expressionType = 'sqlSentence';
+        }
+
+        return expressionType;
+      };
+
+      const rule = {
+        ...data,
+        active: data.enabled,
+        errorMessage: data.message,
+        errorLevel: { value: data.levelError },
+        ruleId: data.id,
+        field: { code: data.referenceId },
+        table: { code: data.referenceId },
+        recordSchemaId: data.referenceId,
+        expressionType: getExpressionType()
+      };
+      return rule;
+    };
+
+    const dropdownEditor = (props, field) => {
+      return (
+        <Dropdown
+          appendTo={document.body}
+          filterPlaceholder={resourcesContext.messages['errorTypePlaceholder']}
+          id="errorType"
+          itemTemplate={rowData => levelErrorTemplate(rowData, true)}
+          onChange={e => onRowEditorValueChange(props, e.target.value.value)}
+          optionLabel="label"
+          optionValue="value"
+          options={config.validations.errorLevels}
+          placeholder={resourcesContext.messages['errorTypePlaceholder']}
+          value={{ label: props.rowData[field], value: props.rowData[field] }}
+        />
+      );
+    };
+
+    const textEditor = (props, field) => (
+      <QCFieldEditor initialValue={props.rowData[field]} onSaveField={onRowEditorValueChange} qcs={props} />
+    );
+
+    const levelErrorTemplate = (rowData, isDropdown = false) => (
       <div className={styles.levelErrorTemplateWrapper}>
-        <LevelError type={rowData.levelError.toLowerCase()} />
+        <LevelError type={isDropdown ? rowData.value : rowData.levelError.toLowerCase()} />
       </div>
     );
 
@@ -457,12 +560,13 @@ export const QCList = withRouter(
         if (field === 'automatic') template = automaticTemplate;
         if (field === 'enabled') template = enabledTemplate;
         if (field === 'isCorrect') template = correctTemplate;
-        if (field === 'levelError') template = levelErrorTemplate;
+        if (field === 'levelError') template = rowData => levelErrorTemplate(rowData, false);
         if (field === 'expressionText') template = expressionsTemplate;
         return (
           <Column
             body={template}
             columnResizeMode="expand"
+            editor={getEditor(field)}
             field={field}
             header={getHeader(field)}
             key={field}
@@ -481,6 +585,56 @@ export const QCList = withRouter(
 
     const checkIsEmptyValidations = () =>
       isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
+
+    const onPageChange = () => {
+      tabsValidationsDispatch({ type: 'RESET_EDITING_ROWS' });
+    };
+
+    const onRowEditorValueChange = (props, value) => {
+      const inmQCs = [...tabsValidationsState.validationList.validations];
+      const inmEditingRows = [...tabsValidationsState.editingRows];
+      const qcIdx = inmQCs.findIndex(qc => qc.id === props.rowData.id);
+      const editIdx = inmEditingRows.findIndex(qc => qc.id === props.rowData.id);
+      if (inmQCs[qcIdx][props.field] !== value && editIdx !== -1) {
+        inmQCs[qcIdx][props.field] = value;
+        inmEditingRows[editIdx][props.field] = value;
+
+        tabsValidationsDispatch({
+          type: 'UPDATE_FILTER_DATA_AND_VALIDATIONS',
+          payload: { qcs: inmQCs, editRows: inmEditingRows }
+        });
+      }
+    };
+
+    const onRowEditInit = event => {
+      validationContext.onOpenToQuickEdit(event.data.id);
+      tabsValidationsDispatch({ type: 'SET_INITIAL_DATA', payload: event.data });
+    };
+
+    const onRowEditCancel = event => tabsValidationsDispatch({ type: 'RESET_FILTERED_DATA', payload: event.data });
+
+    const onUpdateValidationRule = async event => {
+      try {
+        tabsValidationsDispatch({
+          type: 'UPDATE_VALIDATION_RULE',
+          payload: event.data
+        });
+
+        if (TextUtils.areEquals(event.data.entityType, 'TABLE')) {
+          await ValidationService.updateTableRule(dataset.datasetId, getCandidateRule(event.data));
+        } else if (TextUtils.areEquals(event.data.entityType, 'RECORD')) {
+          await ValidationService.updateRowRule(dataset.datasetId, getCandidateRule(event.data));
+        } else {
+          await ValidationService.updateFieldRule(dataset.datasetId, getCandidateRule(event.data));
+        }
+        onUpdateData();
+      } catch (error) {
+        console.error('FieldValidation - onUpdateValidationRule.', error);
+        notificationContext.add({
+          type: 'QC_RULE_UPDATING_ERROR'
+        });
+      }
+    };
 
     const filterOptions = [
       {
@@ -518,7 +672,12 @@ export const QCList = withRouter(
 
       return (
         <div className={styles.validations}>
-          <div className={styles.searchInput}>
+          <div
+            className={styles.searchInput}
+            style={{
+              pointerEvents: tabsValidationsState.editingRows.length > 0 ? 'none' : 'auto',
+              opacity: tabsValidationsState.editingRows.length > 0 ? '0.5' : 1
+            }}>
             <Filters
               className="filter-lines"
               data={tabsValidationsState.validationList.validations}
@@ -529,16 +688,28 @@ export const QCList = withRouter(
               searchBy={['shortCode', 'name', 'description', 'message']}
             />
           </div>
-
           {!isEmpty(tabsValidationsState.filteredData) ? (
             <DataTable
               autoLayout={true}
               className={styles.paginatorValidationViewer}
+              editMode="row"
+              getPageChange={onPageChange}
               hasDefaultCurrentPage={true}
               loading={false}
               onRowClick={event => validationId(event.data.id)}
+              onRowEditCancel={onRowEditCancel}
+              onRowEditInit={onRowEditInit}
+              onRowEditSave={onUpdateValidationRule}
+              // paginator={tabsValidationsState.editingRows.length === 0}
               paginator={true}
+              paginatorDisabled={tabsValidationsState.editingRows.length > 0}
               paginatorRight={!isNil(tabsValidationsState.filteredData) && getPaginatorRecordsCount()}
+              quickEditRowInfo={{
+                updatedRow: validationContext.updatedRuleId,
+                deletedRow: tabsValidationsState.deletedRuleId,
+                property: 'id',
+                condition: validationContext.isFetchingData || tabsValidationsState.filtered
+              }}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
               totalRecords={tabsValidationsState.validationList.validations.length}

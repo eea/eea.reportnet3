@@ -68,6 +68,12 @@ const validationReducer = (state, { type, payload }) => {
         updatedRuleId: payload.updatedRuleId
       };
 
+    case 'ON_OPEN_TO_QUICK_EDIT':
+      return {
+        ...state,
+        updatedRuleId: payload.updatedRuleId
+      };
+
     case 'ON_OPENER_RESET':
       return { ...state, opener: null, reOpenOpener: false };
 
@@ -143,6 +149,13 @@ export const ValidationProvider = ({ children }) => {
           dispatch({
             type: 'ON_OPEN_TO_EDIT',
             payload: { ruleToEdit: { ...rule }, referenceId: rule.referenceId, level, updatedRuleId: rule.id }
+          });
+        },
+
+        onOpenToQuickEdit: ruleId => {
+          dispatch({
+            type: 'ON_OPEN_TO_QUICK_EDIT',
+            payload: { updatedRuleId: ruleId }
           });
         },
 

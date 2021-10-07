@@ -429,7 +429,7 @@ export const Filters = ({
     );
   };
 
-  const renderDropdown = property => (
+  const renderDropdown = (property, label = '') => (
     <span className={`${styles.input}`} key={property}>
       {renderOrderFilter(property)}
       <Dropdown
@@ -440,7 +440,7 @@ export const Filters = ({
         id={`${property}_dropdown`}
         inputClassName={`p-float-label ${styles.label}`}
         inputId={property}
-        label={resourcesContext.messages[property]}
+        label={isEmpty(label) ? resourcesContext.messages[property] : label}
         onChange={event => onFilterData(property, event.value)}
         onMouseDown={event => {
           event.preventDefault();
@@ -562,7 +562,7 @@ export const Filters = ({
             renderMultiselectSelectFilter(property.name, property.showInput, property.label)
           );
         case 'dropdown':
-          return filterOption.properties.map(property => renderDropdown(property.name));
+          return filterOption.properties.map(property => renderDropdown(property.name, property.label));
         case 'checkbox':
           return filterOption.properties.map((property, i) => renderCheckboxFilter(property.name, property.label, i));
         case 'date':
