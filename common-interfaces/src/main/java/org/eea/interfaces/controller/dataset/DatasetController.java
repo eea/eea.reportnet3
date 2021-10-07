@@ -72,45 +72,6 @@ public interface DatasetController {
   void updateDataset(@RequestBody DataSetVO dataset);
 
   /**
-   * Load table data.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param file the file
-   * @param idTableSchema the id table schema
-   * @param replace the replace
-   * @param integrationId the integration id
-   */
-  @Deprecated
-  @PostMapping("{id}/loadTableData/{idTableSchema}")
-  void loadTableData(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId,
-      @RequestParam("file") MultipartFile file, @PathVariable("idTableSchema") String idTableSchema,
-      @RequestParam(value = "replace", required = false) boolean replace,
-      @RequestParam(value = "integrationId", required = false) Long integrationId);
-
-  /**
-   * Load dataset data.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param file the file
-   * @param replace the replace
-   * @param integrationId the integration id
-   */
-  @Deprecated
-  @PostMapping("{id}/loadDatasetData")
-  void loadDatasetData(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId,
-      @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace,
-      @RequestParam(value = "integrationId", required = false) Long integrationId);
-
-  /**
    * Gets the position from any object id.
    *
    * @param id the id
@@ -121,16 +82,6 @@ public interface DatasetController {
   @GetMapping("findPositionFromAnyObject/{id}")
   ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") String id,
       @RequestParam("datasetId") Long idDataset, @RequestParam("type") EntityTypeEnum type);
-
-  /**
-   * Gets the by id.
-   *
-   * @param datasetId the dataset id
-   * @return the by id
-   */
-  @Deprecated
-  @GetMapping("{id}")
-  DataSetVO getById(@PathVariable("id") Long datasetId);
 
   /**
    * Gets the data flow id by id.

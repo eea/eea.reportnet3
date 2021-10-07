@@ -1,7 +1,6 @@
 package org.eea.recordstore.service.impl;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
@@ -9,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -116,42 +114,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private KafkaSender kafkaSender;
 
-  /**
-   * Reset dataset database.
-   *
-   * @throws RecordStoreAccessException the docker access exception
-   */
-  @Override
-  public void resetDatasetDatabase() throws RecordStoreAccessException {
-    // TODO REMOVE THIS PART, THIS IS ONLY FOR TESTING PURPOSES
-    final Container oldContainer = dockerInterfaceService.getContainer("crunchy-postgres");
-    if (null != oldContainer) {
-      dockerInterfaceService.stopAndRemoveContainer(oldContainer);
-    }
-    // TODO END REMOVE
-
-    final Container container = dockerInterfaceService.createContainer(containerName,
-        "crunchydata/crunchy-postgres-gis:centos7-11.2-2.3.1", "5432:5432");
-
-    dockerInterfaceService.startContainer(container, 10l, TimeUnit.SECONDS);
-    // create init file in container
-
-    final File fileInitSql =
-        new File(getClass().getClassLoader().getResource("init.sql").getFile());
-
-    dockerInterfaceService.copyFileFromHostToContainer(containerName, fileInitSql.getPath(),
-        "/pgwal");
-
-    try {
-      dockerInterfaceService.executeCommandInsideContainer(container, "/bin/bash", "-c", "psql -h "
-          + ipPostgreDb + " -U " + userPostgreDb + " -p 5432 -d datasets -f /pgwal/init.sql ");
-    } catch (final InterruptedException e) {
-      LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
-      Thread.currentThread().interrupt();
-      throw new RecordStoreAccessException(
-          String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
-    }
-  }
 
   /**
    * Creates the empty data set.

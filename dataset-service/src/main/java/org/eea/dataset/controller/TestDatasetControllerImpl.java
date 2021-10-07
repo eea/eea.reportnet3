@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * The Class TestDatasetControllerImpl.
@@ -33,10 +35,10 @@ public class TestDatasetControllerImpl implements TestDatasetController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<TestDatasetVO> findTestDatasetByDataflowId(@PathVariable("id") Long idDataflow) {
-
+  @ApiOperation(value = "Find test dataset by dataflow Id", hidden = true)
+  public List<TestDatasetVO> findTestDatasetByDataflowId(@ApiParam(type = "Long",
+      value = "Dataflow Id", example = "0") @PathVariable("id") Long idDataflow) {
     return testDatasetService.getTestDatasetByDataflowId(idDataflow);
   }
-
 
 }

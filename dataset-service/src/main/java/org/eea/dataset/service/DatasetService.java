@@ -83,19 +83,6 @@ public interface DatasetService {
       EntityTypeEnum type) throws EEAException;
 
   /**
-   * Gets the dataset by id.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the by id
-   *
-   * @throws EEAException the EEA exception
-   * @deprecated this deprecated
-   */
-  @Deprecated
-  DataSetVO getById(@DatasetId Long datasetId) throws EEAException;
-
-  /**
    * Update dataset.
    *
    * @param datasetId the dataset id
