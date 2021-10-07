@@ -255,6 +255,7 @@ export class BodyRow extends Component {
           onRowEditInit={this.onRowEditInit}
           onRowEditSave={this.onRowEditSave}
           onRowToggle={this.props.onRowToggle}
+          quickEditRowInfo={this.props.quickEditRowInfo}
           responsive={this.props.responsive}
           rowData={this.props.rowData}
           rowIndex={this.props.rowIndex}

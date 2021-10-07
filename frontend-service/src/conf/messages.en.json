@@ -1265,6 +1265,7 @@
     "yes": "Yes",
     "expirationDateFilterLabel": "Delivery date range",
     "creationDateFilterLabel": "Creation date range",
+    "quickEdit": "Quick edit",
     "datasetsInfo": "Datasets info",
     "loadDatasetsSummaryError": "Error loading datasets list",
     "companyCC": "Company (CC)",

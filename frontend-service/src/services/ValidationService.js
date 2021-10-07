@@ -157,7 +157,7 @@ export const ValidationService = {
       shortCode: validationRule.shortCode,
       sqlSentence: validationRule.sqlSentence,
       thenCondition: [validationRule.errorMessage, validationRule.errorLevel.value],
-      type: validationRule.ruleType,
+      type: 'RECORD',
       whenCondition: null
     };
     if (!validationRule.automatic) {
