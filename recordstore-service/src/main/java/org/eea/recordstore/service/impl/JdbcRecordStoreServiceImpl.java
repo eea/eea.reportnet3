@@ -709,16 +709,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   /**
-   * Reset dataset database.
-   *
-   * @throws RecordStoreAccessException the record store access exception
-   */
-  @Override
-  public void resetDatasetDatabase() throws RecordStoreAccessException {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
-  }
-
-  /**
    * Restore snapshot.
    *
    * @param datasetId the dataset id

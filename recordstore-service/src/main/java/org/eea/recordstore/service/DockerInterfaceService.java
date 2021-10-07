@@ -1,7 +1,6 @@
 package org.eea.recordstore.service;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.github.dockerjava.api.model.Container;
 
@@ -38,12 +37,6 @@ public interface DockerInterfaceService {
   byte[] executeCommandInsideContainer(Container container, String... command)
       throws InterruptedException;
 
-  /**
-   * Gets connection.
-   *
-   * @return the connection
-   */
-  List<String> getConnection();
 
   /**
    * Stop and remove container.
