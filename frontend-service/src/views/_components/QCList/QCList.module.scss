@@ -17,6 +17,13 @@
   font-weight: bold;
 }
 
+.checkboxEditorWrapper {
+  display: flex;
+  justify-content: center;
+  .checkboxEditor {
+    width: 20px !important;
+  }
+}
 .emptyFilteredData {
   height: 75%;
 }
@@ -113,10 +120,6 @@
   }
 }
 
-.actionTemplate {
-  display: flex;
-  justify-content: center;
-}
 .editRowButton {
   border: 1px solid var(--c-custom-gray) !important;
   @include shadow-0em;
