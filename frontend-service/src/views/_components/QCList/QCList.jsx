@@ -592,8 +592,12 @@ export const QCList = withRouter(
       const inmEditingRows = [...tabsValidationsState.editingRows];
       const qcIdx = inmQCs.findIndex(qc => qc.id === props.rowData.id);
       const editIdx = inmEditingRows.findIndex(qc => qc.id === props.rowData.id);
-      if (inmQCs[qcIdx][props.field] !== value) {
+      console.log(editIdx);
+      if (inmQCs[qcIdx][props.field] !== value && editIdx !== -1) {
         inmQCs[qcIdx][props.field] = value;
+        console.log(inmEditingRows[editIdx][props.field]);
+        console.log(value);
+        console.log(inmEditingRows[editIdx][props.field]);
         inmEditingRows[editIdx][props.field] = value;
 
         tabsValidationsDispatch({
@@ -604,6 +608,7 @@ export const QCList = withRouter(
     };
 
     const onRowEditInit = event => {
+      console.log('ON ROW EDIT INIT');
       validationContext.onOpenToQuickEdit(event.data.id);
       tabsValidationsDispatch({ type: 'SET_INITIAL_DATA', payload: event.data });
     };
