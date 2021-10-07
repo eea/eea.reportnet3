@@ -157,8 +157,8 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton,
         disabled={isDisabled}
         onChange={e => setSelectedOffset(e.value)}
         optionLabel="label"
-        options={offsetOptions}
         optionValue="value"
+        options={offsetOptions}
         value={selectedOffset}
       />
     );
