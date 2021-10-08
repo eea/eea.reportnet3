@@ -7,38 +7,10 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getTime();
 const getEndOfDay = date => new Date(dayjs(date).endOf('day').format()).getTime();
 
-const checkDates = (between, data, filteredKeys, allData, state) => {
+const checkDates = (data, filteredKeys = [], state) => {
   for (let index = 0; index < filteredKeys.length; index++) {
     const key = filteredKeys[index];
     const betweenDates = state.filterBy[key];
-
-    if (!isEmpty(state.filterBy[key])) {
-      // if (!allData[filteredKeys[index]].toLowerCase().includes(state.filterBy[filteredKeys[index]].toLowerCase())) {
-      //   return false;
-      // }
-
-      const btwDates = [getStartOfDay(betweenDates[0]), getEndOfDay(betweenDates[1])];
-      const test = new Date(data[key]).getTime() >= btwDates[0] && new Date(data[key]).getTime() <= btwDates[1];
-      if (!test) {
-        return false;
-      }
-    }
-  }
-
-  // if (!isEmpty(betweenDates)) {
-  //   const btwDates = [getStartOfDay(betweenDates[0]), getEndOfDay(betweenDates[1])];
-  //   return new Date(data).getTime() >= btwDates[0] && new Date(data).getTime() <= btwDates[1];
-  // }
-  return true;
-};
-
-const onCheckDates = (data, filteredKeys = [], state) => {
-  console.log(`filteredKeys`, filteredKeys);
-
-  for (let index = 0; index < filteredKeys.length; index++) {
-    const key = filteredKeys[index];
-    const betweenDates = state.filterBy[key];
-    console.log(`betweenDates`, betweenDates);
 
     if (!isEmpty(state.filterBy[key])) {
       const btwDates = [getStartOfDay(betweenDates[0]), getEndOfDay(betweenDates[1])];
@@ -121,10 +93,9 @@ const onApplyFilters = ({
       (checkbox.includes(filter) && !isNil(dataItem[filter]))
     ) {
       const isApplySelected = onApplySelected(dataItem, filter, state, value);
-      const isDateChecked = onCheckDates(dataItem, dateKeys, state);
+      const isDateChecked = checkDates(dataItem, dateKeys, state);
       const isCheckFilters = onCheckFilters(
         dataItem,
-        date,
         filteredKeys,
         searchedKeys,
         selectedKeys,
@@ -148,14 +119,12 @@ const onApplyFilters = ({
             checkSearched(state, dataItem, searchedKeys) &&
             checkSelected(state, dataItem, selectedKeys, actualFilterBy) &&
             checkSelected(state, dataItem, checkedKeys, actualFilterBy) &&
-            checkDates(state.filterBy[date], dataItem[date], filteredKeys, data, state) &&
-            onCheckDates(dataItem, dateKeys, state)
+            checkDates(dataItem, dateKeys, state)
         : checkFilters(filteredKeys, dataItem, state) &&
             checkSearched(state, dataItem, searchedKeys) &&
             checkSelected(state, dataItem, selectedKeys, actualFilterBy) &&
             checkSelected(state, dataItem, checkedKeys, actualFilterBy) &&
-            checkDates(state.filterBy[date], dataItem[date], filteredKeys, data, state) &&
-            onCheckDates(dataItem, dateKeys, state);
+            checkDates(dataItem, dateKeys, state);
     }
 
     return (
@@ -165,8 +134,7 @@ const onApplyFilters = ({
       checkSearched(state, dataItem, searchedKeys) &&
       checkSelected(state, dataItem, selectedKeys, actualFilterBy) &&
       checkSelected(state, dataItem, checkedKeys, actualFilterBy) &&
-      checkDates(state.filterBy[date], dataItem[date], filteredKeys, data, state) &&
-      onCheckDates(dataItem, dateKeys, state)
+      checkDates(dataItem, dateKeys, state)
     );
   });
 
@@ -213,15 +181,13 @@ const onApplySelected = (data, filter, state, value) => {
   return true;
 };
 
-const onCheckFilters = (data, date, filteredKeys, searchedKeys, selectedKeys, checkedKeys, state, actualFilterBy) => {
-  const isCheckedDates = checkDates(state.filterBy[date], data[date], filteredKeys, data, state);
+const onCheckFilters = (data, filteredKeys, searchedKeys, selectedKeys, checkedKeys, state, actualFilterBy) => {
   const isCheckedFilters = checkFilters(filteredKeys, data, state);
   const isCheckedSearchedKeys = checkSearched(state, data, searchedKeys);
   const isCheckedSelectedKeys = checkSelected(state, data, selectedKeys, actualFilterBy);
   const isCheckedCheckedKeys = checkSelected(state, data, checkedKeys, actualFilterBy);
-  // onCheckDates(data, filteredKeys, state);
 
-  return isCheckedDates && isCheckedFilters && isCheckedSearchedKeys && isCheckedSelectedKeys && isCheckedCheckedKeys;
+  return isCheckedFilters && isCheckedSearchedKeys && isCheckedSelectedKeys && isCheckedCheckedKeys;
 };
 
 const onClearLabelState = (input = [], multiselect = [], date = [], dropdown = [], checkbox = []) => {
