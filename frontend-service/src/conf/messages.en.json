@@ -1287,6 +1287,7 @@
     "downloadSchemasInfo": "Download schema/s info",
     "downloadSchemasInfoTooltip": "Download all schema/s info in an XLSX file",
     "downloadSchemasInfoFileError": "Failed downloading schemas info file",
-    "generateSchemasInfoFileError": "Failed generating schemas info file"
+    "generateSchemasInfoFileError": "Failed generating schemas info file",
+    "automaticallyDownloadSchemasInfoFile": "Schemas info file generated successfully"
   }
 }

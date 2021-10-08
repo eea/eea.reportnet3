@@ -1001,6 +1001,9 @@
           "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD"
         },
         {
+          "key": "AUTOMATICALLY_DOWNLOAD_SCHEMAS_INFO_FILE"
+        },
+        {
           "key": "AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE"
         },
         {

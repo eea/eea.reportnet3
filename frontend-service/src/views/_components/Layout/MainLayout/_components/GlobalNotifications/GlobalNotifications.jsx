@@ -43,7 +43,7 @@ const GlobalNotifications = () => {
         notification.content.dataflowId,
         notification.content.fileName
       );
-      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE' });
+      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_SCHEMAS_INFO_FILE' });
 
       if (data.size !== 0) {
         DownloadFile(data, notification.content.fileName);
