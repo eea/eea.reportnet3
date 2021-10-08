@@ -228,7 +228,7 @@ export const Filters = ({
 
     const checkedKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkbox);
 
-    const dateKeys = FiltersUtils.getFilteredDateKeys(filterState, filter, date);
+    const dateKeys = FiltersUtils.getFilterKeys(filterState, filter, date);
 
     const filteredData = ApplyFilterUtils.onApplyFilters({
       actualFilterBy,
