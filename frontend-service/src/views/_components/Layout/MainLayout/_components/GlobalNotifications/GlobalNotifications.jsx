@@ -2,6 +2,7 @@ import { useContext, useEffect } from 'react';
 
 import { DownloadFile } from 'views/_components/DownloadFile';
 
+import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 import { ValidationService } from 'services/ValidationService';
 
@@ -23,6 +24,10 @@ const GlobalNotifications = () => {
       downloadQCRulesFile();
     }
 
+    if (hasHiddenDownloadAllSchemasInfoNotification()) {
+      downloadAllSchemasInfoFile();
+    }
+
     if (findHiddenExportFMENotification()) downloadExportFMEFile();
 
     findHiddenExportDatasetNotification();
@@ -33,6 +38,9 @@ const GlobalNotifications = () => {
 
   const hasHiddenDownloadValidationsNotification = () =>
     notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_VALIDATIONS_COMPLETED_EVENT');
+
+  const hasHiddenDownloadAllSchemasInfoNotification = () =>
+    notificationContext.hidden.find(notification => notification.key === 'EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT');
 
   const findHiddenExportFMENotification = () => {
     return notificationContext.hidden.find(
@@ -164,6 +172,29 @@ const GlobalNotifications = () => {
     } catch (error) {
       console.error('GlobalNotifications - downloadValidationsFile.', error);
       notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' });
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
+  };
+
+  const downloadAllSchemasInfoFile = async () => {
+    const [notification] = notificationContext.hidden.filter(
+      notification => notification.key === 'EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT'
+    );
+
+    try {
+      const { data } = await DataflowService.downloadAllSchemasInfo(
+        notification.content.dataflowId,
+        notification.content.fileName
+      );
+      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE' });
+
+      if (data.size !== 0) {
+        DownloadFile(data, notification.content.fileName);
+      }
+    } catch (error) {
+      console.error('GlobalNotifications - downloadValidationsFile.', error);
+      notificationContext.add({ type: 'DOWNLOAD_SCHEMAS_INFO_FILE_ERROR' });
     } finally {
       notificationContext.clearHiddenNotifications();
     }

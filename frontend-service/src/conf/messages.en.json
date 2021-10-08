@@ -1278,6 +1278,7 @@
     "tablesAndFields": "Tables & Fields",
     "extensions": "Extension/s",
     "downloadSchemasInfo": "Download schema/s info",
-    "downloadSchemasInfoTooltip": "Download all schema/s info in an XLSX file"
+    "downloadSchemasInfoTooltip": "Download all schema/s info in an XLSX file",
+    "downloadSchemasInfoFileError": "Failed downloading QC rules file"
   }
 }
