@@ -1,13 +1,10 @@
 .container {
-  // width: fit-content !important;
-  // min-width: 335px;
-  // max-width: 400px;
   width: 335px;
   display: flex;
   flex-direction: column;
-  background-color: var(--bg);
+  // background-color: var(--bg);
 
-  .buttonRight {
+  .buttonWrapper {
     margin-top: 0.5rem;
     width: 100% !important;
   }
