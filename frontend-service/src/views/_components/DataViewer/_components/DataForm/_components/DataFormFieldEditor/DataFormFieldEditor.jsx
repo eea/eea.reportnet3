@@ -26,8 +26,9 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { mapReducer } from './_functions/Reducers/mapReducer';
 
-import { MapUtils, RecordUtils } from 'views/_functions/Utils';
+import { useOnClickOutside } from 'views/_functions/Hooks/useOnClickOutside';
 
+import { MapUtils, RecordUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { TimezoneCalendar } from 'views/_components/TimezoneCalendar/TimezoneCalendar';
 
@@ -67,9 +68,11 @@ const DataFormFieldEditor = ({
   const refCalendar = useRef(null);
   const refDatetimeCalendar = useRef(null);
   const textAreaRef = useRef(null);
+  const timezoneRef = useRef(null);
 
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
+  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
   const [columnWithLinks, setColumnWithLinks] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [map, dispatchMap] = useReducer(mapReducer, {
@@ -87,6 +90,8 @@ const DataFormFieldEditor = ({
     newPointCRS: { label: 'WGS84 - 4326', value: 'EPSG:4326' },
     showCoordinateError: false
   });
+
+  useOnClickOutside(timezoneRef, () => setIsTimezoneCalendarVisible(false));
 
   const { areEquals } = TextUtils;
 
@@ -474,13 +479,20 @@ const DataFormFieldEditor = ({
       //   yearNavigator={true}
       //   yearRange="1900:2100"
       // />
-      <TimezoneCalendar
-        isDisabled={(column.readOnly && reporting) || isSaving}
-        // onChangeDate={e => onChangeForm(field, e.value, isConditional)}
-        isInModal
-        onSaveDate={dateTime => onSaveDate(dateTime)}
-        value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
-      />
+      <Fragment>
+        <InputText onFocus={() => setIsTimezoneCalendarVisible(true)} value={fieldValue} />
+
+        {isTimezoneCalendarVisible && (
+          <TimezoneCalendar
+            ref={timezoneRef}
+            isDisabled={(column.readOnly && reporting) || isSaving}
+            // onChangeDate={e => onChangeForm(field, e.value, isConditional)}
+            isInModal
+            onSaveDate={dateTime => onSaveDate(dateTime)}
+            value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
+          />
+        )}
+      </Fragment>
     );
   };
 

@@ -45,7 +45,7 @@ const offsetOptions = [
   { value: 12, label: '+12:00' }
 ];
 
-export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDisabled }) => {
+export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDisabled, ref }) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
@@ -155,7 +155,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   };
 
   return (
-    <div className={styles.container}>
+    <div ref={ref} className={styles.container}>
       {renderCalendar()}
       {renderInput()}
       <div className={styles.inputMaskWrapper}>
