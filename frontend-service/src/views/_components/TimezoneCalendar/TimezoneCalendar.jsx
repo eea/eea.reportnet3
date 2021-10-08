@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
@@ -45,26 +45,28 @@ const offsetOptions = [
   { value: 12, label: '+12:00' }
 ];
 
+const getCurrentZoneOffset = () => new Date().getTimezoneOffset() / 60;
+
 export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDisabled }) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
-
-  const calendarRef = useRef();
 
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('00:00:00');
   const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
 
+  const currentZoneOffset = getCurrentZoneOffset();
+
   useEffect(() => {
-    setInputValue(dayjs(value).format('HH:mm:ss').toString());
+    setInputValue(dayjs(value).utc().format('HH:mm:ss').toString()); // Added utc() to display correct time in the input
     setDate(value);
   }, []);
 
   useEffect(() => {
     if (isInModal && dayjs(date).isValid()) {
-      onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value));
+      onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value + currentZoneOffset));
     }
   }, [date, selectedOffset.value]);
 
@@ -79,7 +81,9 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
           disabled={!dayjs(new Date(date)).isValid() || hasError}
           icon="save"
           label={resourcesContext.messages['save']}
-          onClick={() => onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value))}
+          onClick={() => {
+            onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value + currentZoneOffset));
+          }}
         />
       </div>
     );
@@ -92,10 +96,10 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
         inline
         monthNavigator
         onChange={e => {
-          checkError(dayjs(e.value).format('HH:mm:ss').toString());
+          checkError(dayjs(e.value).format('HH:mm:ss').toString()); // TODO CHECK
           setDate(e.value);
+          // setInputValue(dayjs(e.value).format('HH:mm:ss').toString()); // TODO CHECK IF IT IS NECESSARY
         }}
-        ref={calendarRef}
         value={date}
         yearNavigator
         yearRange="1900:2100"
@@ -132,7 +136,16 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
           if (checkIsCorrectTimeFormat(e.value)) {
             const [hour, minute, second] = e.value.split(':');
 
-            setDate(new Date(dayjs(date).hour(hour).minute(minute).second(second).format('ddd/MMMDD/YYYY HH:mm:ss')));
+            setDate(
+              new Date(
+                dayjs(date)
+                  // .hour(parseInt(hour) - currentZoneOffset) // TODO SET CORRECT TIME IN DATE
+                  .hour(hour)
+                  .minute(minute)
+                  .second(second)
+                  .format('ddd/MMMDD/YYYY HH:mm:ss')
+              )
+            );
           }
         }}
         value={inputValue}
