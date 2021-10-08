@@ -453,7 +453,7 @@ const DataFormFieldEditor = ({
 
   const renderDatetimeCalendar = (field, fieldValue) => {
     const onSaveDate = dateTime => {
-      onChangeForm(field, dayjs(dateTime).format(), isConditional);
+      onChangeForm(field, dayjs.utc(dateTime).format(), isConditional);
     };
     return (
       // <Calendar
