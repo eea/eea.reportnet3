@@ -13,19 +13,16 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
-import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -70,18 +67,11 @@ public class FileCommonUtils {
   @Autowired
   private TableRepository tableRepository;
 
-  @Autowired
-  private ValidationRepository validationRepository;
-
   /**
    * The design dataset repository.
    */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
-
-  /** The validation controller. */
-  @Autowired
-  private ValidationControllerZuul validationController;
 
   /** The dataflow controller zuul. */
   @Autowired
@@ -90,12 +80,6 @@ public class FileCommonUtils {
   /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
-
-  /**
-   * The schemas repository.
-   */
-  @Autowired
-  private SchemasRepository schemasRepository;
 
   /**
    * The Constant LOG.
