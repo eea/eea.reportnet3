@@ -4,7 +4,6 @@ package org.eea.dataset.service.file;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +13,7 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -28,7 +28,6 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -70,6 +69,9 @@ public class FileCommonUtils {
   /** The table repository. */
   @Autowired
   private TableRepository tableRepository;
+
+  @Autowired
+  private ValidationRepository validationRepository;
 
   /**
    * The design dataset repository.
@@ -455,9 +457,7 @@ public class FileCommonUtils {
    */
   public FailedValidationsDatasetVO getErrors(Long datasetId, String idTableSchema,
       DataSetSchemaVO datasetSchema) {
-    return validationController.getFailedValidationsByIdDataset(datasetId, 0, 1000000, null, true,
-        null, Arrays.asList(EntityTypeEnum.FIELD, EntityTypeEnum.RECORD),
-        getTableName(idTableSchema, datasetSchema), null);
+    return datasetService.getTotalFailedValidationsByIdDataset(datasetId, idTableSchema);
   }
 
   /**
