@@ -21,9 +21,6 @@ export const RepresentativeService = {
     return response;
   },
 
-  getSelectedDataProviderGroup: async dataflowId =>
-    await RepresentativeRepository.getSelectedDataProviderGroup(dataflowId),
-
   getRepresentatives: async dataflowId => {
     const representativesDTO = await RepresentativeRepository.getRepresentatives(dataflowId);
 

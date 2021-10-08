@@ -6,8 +6,6 @@ import isNull from 'lodash/isNull';
 import orderBy from 'lodash/orderBy';
 import sortBy from 'lodash/sortBy';
 
-import { config } from 'conf';
-
 import { DataflowRepository } from 'repositories/DataflowRepository';
 
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
@@ -32,9 +30,6 @@ export const DataflowService = {
 
     const dataflows = dataflowsDTO.data.map(dataflowDTO => {
       dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
-      if (dataflowDTO.status === config.dataflowStatus.OPEN) {
-        dataflowDTO.status = dataflowDTO.releasable ? 'OPEN' : 'CLOSED';
-      }
       return dataflowDTO;
     });
 
@@ -370,5 +365,11 @@ export const DataflowService = {
   getSchemasValidation: async dataflowId => await DataflowRepository.getSchemasValidation(dataflowId),
 
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
-    await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo)
+    await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo),
+
+  getDatasetsInfo: async dataflowId => {
+    const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
+    const parsedDatasetsInfoDTO = DataflowUtils.parseDatasetsInfoDTO(datasetsInfoDTO.data);
+    return sortBy(parsedDatasetsInfoDTO, 'id');
+  }
 };

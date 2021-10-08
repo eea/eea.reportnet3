@@ -52,21 +52,22 @@ export const ShowValidationsList = memo(
       fieldSchemaName: [],
       levelError: []
     });
+    const [fieldValueFilter, setFieldValueFilter] = useState([]);
     const [filtered, setFiltered] = useState(false);
     const [firstRow, setFirstRow] = useState(0);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
     const [isFilteredTypeEntities, setIsFilteredTypeEntities] = useState(false);
-    const [isLoadingTable, setIsLoadingTable] = useState(false);
     const [isLoadingModal, setIsLoadingModal] = useState(true);
-    const [fieldValueFilter, setFieldValueFilter] = useState([]);
+    const [isLoadingTable, setIsLoadingTable] = useState(false);
+    const [isRulesDescriptionLoaded, setIsRulesDescriptionLoaded] = useState(false);
     const [levelErrorsFilter, setLevelErrorsFilter] = useState([]);
     const [levelErrorsTypesFilter, setLevelErrorsTypesFilter] = useState([]);
     const [numberRows, setNumberRows] = useState(10);
-    const [tablesFilter, setTablesFilter] = useState([]);
     const [originsTypesFilter, setOriginsTypesFilter] = useState([]);
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState(0);
+    const [tablesFilter, setTablesFilter] = useState([]);
     const [typeEntitiesFilter, setTypeEntitiesFilter] = useState([]);
     const [typeEntitiesTypesFilter, setTypeEntitiesTypesFilter] = useState([]);
     const [validationsAllTypesFilters, setValidationsAllTypesFilters] = useState([]);
@@ -185,26 +186,28 @@ export const ShowValidationsList = memo(
     }, [validationContext.rulesDescription]);
 
     useEffect(() => {
-      if (visible) {
-        onLoadFilters();
-        fetchData(
-          '',
-          sortOrder,
-          firstRow,
-          numberRows,
-          fieldValueFilter,
-          levelErrorsFilter,
-          typeEntitiesFilter,
-          tablesFilter
-        );
-      } else {
-        if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow.toString() !== '0') {
-          resetFilters();
-          setFirstRow(0);
-          fetchData('', sortOrder, 0, numberRows, [], [], [], []);
+      if (isRulesDescriptionLoaded) {
+        if (visible) {
+          onLoadFilters();
+          fetchData(
+            '',
+            sortOrder,
+            firstRow,
+            numberRows,
+            fieldValueFilter,
+            levelErrorsFilter,
+            typeEntitiesFilter,
+            tablesFilter
+          );
+        } else {
+          if (isFilteredLevelErrors || isFilteredTypeEntities || isFilteredOrigins || firstRow.toString() !== '0') {
+            resetFilters();
+            setFirstRow(0);
+            fetchData('', sortOrder, 0, numberRows, [], [], [], []);
+          }
         }
       }
-    }, [visible]);
+    }, [visible, isRulesDescriptionLoaded]);
 
     const addTableSchemaId = tableErrors => {
       tableErrors.forEach(tableError => {
@@ -437,6 +440,7 @@ export const ShowValidationsList = memo(
           };
         })
       );
+      setIsRulesDescriptionLoaded(true);
     };
 
     const onSort = event => {

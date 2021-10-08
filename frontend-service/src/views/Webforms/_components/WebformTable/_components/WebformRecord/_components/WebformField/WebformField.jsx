@@ -455,7 +455,7 @@ export const WebformField = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
-            characterCounterStyles={{ top: '-50%', marginBottom: 0 }}
+            characterCounterStyles={{ marginBottom: 0 }}
             hasMaxCharCounter
             id={field.fieldId}
             keyfilter={RecordUtils.getFilter(type)}
