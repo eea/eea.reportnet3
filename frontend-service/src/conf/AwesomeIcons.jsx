@@ -98,7 +98,8 @@ import {
   faClock,
   faMeteor,
   faSearch,
-  faTimesCircle
+  faTimesCircle,
+  faEdit
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -354,6 +355,8 @@ export const AwesomeIcons = icon => {
       return faQuestion;
     case 'questionCircle':
       return farQuestionCircle;
+    case 'quickEdit':
+      return faEdit;
     case 'rar':
       return faFileArchive;
     case 'released':

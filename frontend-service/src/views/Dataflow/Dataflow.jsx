@@ -26,6 +26,7 @@ import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
+import { DatasetsInfo } from 'views/_components/DatasetsInfo';
 import { MainLayout } from 'views/_components/Layout';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
@@ -95,6 +96,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isExportEUDatasetLoading: false,
     isExporting: false,
     isFetchingData: false,
+    isDatasetsInfoDialogVisible: false,
     isImportLeadReportersVisible: false,
     isManageReportersDialogVisible: false,
     isManageRequestersDialogVisible: false,
@@ -254,6 +256,7 @@ const Dataflow = withRouter(({ history, match }) => {
     if (isEmpty(dataflowState.data)) {
       return {
         apiKeyBtn: false,
+        datasetsInfoBtn: false,
         editBtn: false,
         editBusinessBtn: false,
         exportBtn: false,
@@ -267,6 +270,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
+      datasetsInfoBtn: isAdmin,
       editBtn: isDesign && isLeadDesigner && !isAdmin && !isBusinessDataflow,
       editBusinessBtn: (isAdmin || isLeadDesigner) && isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
@@ -488,12 +492,12 @@ const Dataflow = withRouter(({ history, match }) => {
     </Fragment>
   );
 
-  const renderDataflowUsersListFooter = (
+  const renderDialogFooterCloseBtn = modalType => (
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs('isUserListVisible', false)}
+      onClick={() => manageDialogs(modalType, false)}
     />
   );
 
@@ -956,6 +960,10 @@ const Dataflow = withRouter(({ history, match }) => {
                 dataflowId={dataflowId}
                 dataflowType={dataflowState.dataflowType}
                 representativesImport={dataflowState.representativesImport}
+                selectedDataProviderGroup={{
+                  dataProviderGroupId: dataflowState.data.dataProviderGroupId,
+                  label: dataflowState.data.dataProviderGroupName
+                }}
                 setDataProviderSelected={setDataProviderSelected}
                 setFormHasRepresentatives={setFormHasRepresentatives}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
@@ -1133,7 +1141,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isUserListVisible && (
           <Dialog
-            footer={renderDataflowUsersListFooter}
+            footer={renderDialogFooterCloseBtn('isUserListVisible')}
             header={
               ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
@@ -1214,6 +1222,16 @@ const Dataflow = withRouter(({ history, match }) => {
             manageDialogs={manageDialogs}
             match={match}
           />
+        )}
+
+        {dataflowState.isDatasetsInfoDialogVisible && (
+          <Dialog
+            footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
+            header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowState.id}`}
+            onHide={() => manageDialogs('isDatasetsInfoDialogVisible', false)}
+            visible={dataflowState.isDatasetsInfoDialogVisible}>
+            <DatasetsInfo dataflowId={dataflowId} dataflowType={dataflowState.dataflowType} />
+          </Dialog>
         )}
       </div>
     </div>

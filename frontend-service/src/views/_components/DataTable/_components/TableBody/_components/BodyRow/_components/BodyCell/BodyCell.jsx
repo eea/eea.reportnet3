@@ -1,11 +1,19 @@
-import { Component, Fragment } from 'react';
+import { Component } from 'react';
 import classNames from 'classnames';
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
+
+import styles from './BodyCell.module.scss';
+
+import { Button } from 'views/_components/Button';
 import { RowRadioButton } from './_components/RowRadioButton';
 import { RowCheckbox } from 'views/_components/DataTable/_components/RowCheckbox';
 
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
 export class BodyCell extends Component {
+  static contextType = ResourcesContext;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -93,6 +101,18 @@ export class BodyCell extends Component {
 
       document.addEventListener('click', this.documentEditListener);
     }
+  }
+
+  calculateRowDisabledQuickEdit() {
+    return (
+      (this.props.rowData[this.props.quickEditRowInfo.property] === this.props.quickEditRowInfo.updatedRow ||
+        this.props.rowData[this.props.quickEditRowInfo.property] === this.props.quickEditRowInfo.deletedRow) &&
+      this.props.quickEditRowInfo.condition
+    );
+  }
+
+  checkEditorInvalid() {
+    return this.props.quickEditRowInfo.requiredFields.some(field => this.props.rowData[field] === '');
   }
 
   closeCell() {
@@ -207,20 +227,42 @@ export class BodyCell extends Component {
     } else if (this.props.rowEditor) {
       if (this.state.editing) {
         content = (
-          <Fragment>
-            <button className="p-row-editor-save p-link" onClick={this.props.onRowEditSave}>
-              <span className="p-row-editor-save-icon pi pi-fw pi-check p-clickable"></span>
-            </button>
-            <button className="p-row-editor-cancel p-link" onClick={this.props.onRowEditCancel}>
-              <span className="p-row-editor-cancel-icon pi pi-fw pi-times p-clickable"></span>
-            </button>
-          </Fragment>
+          <div className={styles.actionTemplate}>
+            <Button
+              className={`${`p-button-rounded p-button-primary-transparent ${styles.editSaveRowButton}`} p-button-animated-blink`}
+              disabled={this.checkEditorInvalid()}
+              icon="check"
+              onClick={this.props.onRowEditSave}
+              tooltip={this.context.messages['save']}
+              tooltipOptions={{ position: 'top' }}
+              type="button"
+            />
+            <Button
+              className={`${`p-button-rounded p-button-secondary-transparent ${styles.editCancelRowButton}`} p-button-animated-blink`}
+              icon="cancel"
+              onClick={this.props.onRowEditCancel}
+              tooltip={this.context.messages['cancel']}
+              tooltipOptions={{ position: 'top' }}
+              type="button"
+            />
+          </div>
         );
       } else {
         content = (
-          <button className="p-row-editor-init p-link" onClick={this.props.onRowEditInit}>
-            <span className="p-row-editor-init-icon pi pi-fw pi-pencil p-clickable"></span>
-          </button>
+          <div className={styles.actionTemplate}>
+            <Button
+              className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
+                !this.calculateRowDisabledQuickEdit() ? 'p-button-animated-blink' : ''
+              }`}
+              disabled={this.props.quickEditRowInfo ? this.props.quickEditRowInfo.condition : false}
+              icon={this.props.quickEditRowInfo && this.calculateRowDisabledQuickEdit() ? 'spinnerAnimate' : 'clock'}
+              onClick={this.props.onRowEditInit}
+              tooltip={this.context.messages['quickEdit']}
+              tooltipOptions={{ position: 'top' }}
+              type="button"
+            />
+            {this.props.body(this.props.rowData, this.props)}
+          </div>
         );
       }
     } else {
