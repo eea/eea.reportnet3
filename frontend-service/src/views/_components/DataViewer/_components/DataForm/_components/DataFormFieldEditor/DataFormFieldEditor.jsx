@@ -476,7 +476,7 @@ const DataFormFieldEditor = ({
         // onChangeDate={e => onChangeForm(field, e.value, isConditional)}
         isInModal
         onSaveDate={dateTime => onChangeForm(field, dateTime.format(), isConditional)}
-        value={fieldValue !== '' ? fieldValue : Date.now().toString()}
+        value={fieldValue !== '' ? fieldValue : new Date().toISOString().split('T')[0]}
       />
     );
   };

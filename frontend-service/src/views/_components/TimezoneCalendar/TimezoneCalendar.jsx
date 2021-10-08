@@ -65,17 +65,20 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
     setDate(new Date(day));
     let timezone = '';
     let timeZoneChar = '-';
-    if (hourWithTimezone.includes('+')) {
-      timeZoneChar = '+';
-    }
-
-    const splittedTimezone = splitTimezoneByChar(hourWithTimezone, timeZoneChar);
-    if (!isNil(splittedTimezone)) {
-      timezone = `${timeZoneChar}${splittedTimezone}`;
-    } else {
+    if (isNil(hourWithTimezone)) {
       timezone = '+00:00';
-    }
+    } else {
+      if (hourWithTimezone.includes('+')) {
+        timeZoneChar = '+';
+      }
 
+      const splittedTimezone = splitTimezoneByChar(hourWithTimezone, timeZoneChar);
+      if (!isNil(splittedTimezone)) {
+        timezone = `${timeZoneChar}${splittedTimezone}`;
+      } else {
+        timezone = '+00:00';
+      }
+    }
     console.log(
       timezone,
       offsetOptions.find(offset => offset.label === timezone)
@@ -86,6 +89,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   useEffect(() => {
     const utcDate = parseDate(date);
     if (isInModal && dayjs(utcDate).isValid()) {
+      console.log(dayjs.utc(utcDate).utcOffset(selectedOffset.value));
       onSaveDate(dayjs.utc(utcDate).utcOffset(selectedOffset.value));
     }
   }, [date, selectedOffset.value]);
