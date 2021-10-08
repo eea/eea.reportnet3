@@ -325,6 +325,9 @@
           "key": "GENERATE_QC_RULES_FILE_ERROR"
         },
         {
+          "key": "GENERATE_SCHEMAS_INFO_FILE_ERROR"
+        },
+        {
           "key": "CREATE_DATA_COLLECTION_ERROR"
         },
         {

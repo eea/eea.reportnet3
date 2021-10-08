@@ -1279,6 +1279,7 @@
     "extensions": "Extension/s",
     "downloadSchemasInfo": "Download schema/s info",
     "downloadSchemasInfoTooltip": "Download all schema/s info in an XLSX file",
-    "downloadSchemasInfoFileError": "Failed downloading QC rules file"
+    "downloadSchemasInfoFileError": "Failed downloading schemas info file",
+    "generateSchemasInfoFileError": "Failed generating schemas info file"
   }
 }
