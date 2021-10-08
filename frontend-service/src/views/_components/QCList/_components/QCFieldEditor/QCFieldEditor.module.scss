@@ -1,0 +1,6 @@
+.required {
+  border-color: var(--errors) !important;
+  box-shadow: inset 0px 0px 0px 1px var(--errors) !important;
+  outline: none !important;
+  overflow: hidden;
+}
