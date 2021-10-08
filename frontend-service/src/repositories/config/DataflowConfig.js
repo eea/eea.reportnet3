@@ -7,7 +7,7 @@ export const DataflowConfig = {
   createEmptyDatasetSchema:
     '/dataschema/createEmptyDatasetSchema?dataflowId={:dataflowId}&datasetSchemaName={:datasetSchemaName}',
   delete: '/dataflow/{:dataflowId}',
-  downloadAllSchemasInfo: '/dataflow/downloadSchemaInformation/{:dataflowId}/filename={:fileName}',
+  downloadAllSchemasInfo: '/dataflow/downloadSchemaInformation/{:dataflowId}?fileName={:fileName}',
   exportSchemas: '/dataschema/export?dataflowId={:dataflowId}',
   getAll: '/dataflow/getDataflows',
   getCloneableDataflows: '/dataflow/cloneableDataflows',
