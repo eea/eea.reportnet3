@@ -545,7 +545,13 @@ export const QCList = withRouter(
     };
 
     const textEditor = (props, field) => (
-      <QCFieldEditor initialValue={props.rowData[field]} onSaveField={onRowEditorValueChange} qcs={props} />
+      <QCFieldEditor
+        initialValue={props.rowData[field]}
+        keyfilter={['message', 'shortCode'].includes(field) ? 'noDoubleQuote' : ''}
+        onSaveField={onRowEditorValueChange}
+        qcs={props}
+        required={['name', 'message', 'shortCode'].includes(field)}
+      />
     );
 
     const levelErrorTemplate = (rowData, isDropdown = false) => (
@@ -708,7 +714,8 @@ export const QCList = withRouter(
                 updatedRow: validationContext.updatedRuleId,
                 deletedRow: tabsValidationsState.deletedRuleId,
                 property: 'id',
-                condition: validationContext.isFetchingData || tabsValidationsState.filtered
+                condition: validationContext.isFetchingData || tabsValidationsState.filtered,
+                requiredFields: ['name', 'message', 'shortCode']
               }}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
