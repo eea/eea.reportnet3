@@ -3660,6 +3660,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the total failed validations by id dataset.
    *
    * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
    * @return the total failed validations by id dataset
    */
   @Override
@@ -3681,6 +3682,7 @@ public class DatasetServiceImpl implements DatasetService {
    * Gets the field and record errors.
    *
    * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
    * @return the field and record errors
    */
   private List<ErrorsValidationVO> getFieldAndRecordErrors(Long datasetId, String idTableSchema) {
