@@ -70,8 +70,6 @@ export const Filters = ({
     searched: false
   });
 
-  // console.log(`filterState.filterBy`, filterState.filterBy);
-
   useEffect(() => {
     if (isNil(sendData)) getInitialState();
   }, [data]);
@@ -112,8 +110,6 @@ export const Filters = ({
   }, [filterState.clearedFilters]);
 
   const { input, multiselect, date, dropdown, checkbox } = FiltersUtils.getOptionsNames(options);
-
-  // console.log(`date`, date);
 
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[date]) && onAnimateLabel([date], false));
 

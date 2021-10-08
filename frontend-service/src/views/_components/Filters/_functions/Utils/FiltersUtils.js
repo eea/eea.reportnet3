@@ -165,6 +165,7 @@ const onFilterBooleanOptions = option => (typeof option !== 'boolean' ? !isNil(o
 export const FiltersUtils = {
   getCheckboxFilterInitialState,
   getCheckboxState,
+  getFilteredDateKeys,
   getFilteredSelectedOptions,
   getFilterInitialState,
   getFilterKeys,
@@ -172,6 +173,5 @@ export const FiltersUtils = {
   getOptionsNames,
   getOptionsTypes,
   getSelectedKeys,
-  getValidationsOptionTypes,
-  getFilteredDateKeys
+  getValidationsOptionTypes
 };
