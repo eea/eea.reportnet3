@@ -45,7 +45,7 @@ const offsetOptions = [
   { value: 12, label: '+12:00' }
 ];
 
-export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton, isDisabled }) => {
+export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDisabled }) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
@@ -58,28 +58,18 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, hideSaveButton,
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    if (!value) {
-      setInputValue(dayjs().format('HH:mm:ss').toString());
-      setDate(new Date());
-    } else {
-      if (hideSaveButton) {
-        setInputValue(dayjs(value).format('HH:mm:ss').toString());
-        setDate(new Date(dayjs(value, 'YYYY-MM-DD HH:mm:ss')));
-      } else {
-        setInputValue(dayjs(value).format('HH:mm:ss').toString());
-        setDate(value);
-      }
-    }
+    setInputValue(dayjs(value).format('HH:mm:ss').toString());
+    setDate(value);
   }, []);
 
   useEffect(() => {
-    if (hideSaveButton) {
+    if (isInModal && dayjs(date).isValid()) {
       onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value));
     }
   }, [date, selectedOffset.value]);
 
   const renderButtons = () => {
-    if (hideSaveButton) {
+    if (isInModal) {
       return;
     }
     return (

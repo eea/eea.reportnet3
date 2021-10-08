@@ -452,6 +452,9 @@ const DataFormFieldEditor = ({
   };
 
   const renderDatetimeCalendar = (field, fieldValue) => {
+    const onSaveDate = dateTime => {
+      onChangeForm(field, dayjs(dateTime).format(), isConditional);
+    };
     return (
       // <Calendar
       //   appendTo={document.body}
@@ -472,10 +475,11 @@ const DataFormFieldEditor = ({
       //   yearRange="1900:2100"
       // />
       <TimezoneCalendar
-        hideSaveButton
         isDisabled={(column.readOnly && reporting) || isSaving}
-        onChangeDate={e => onChangeForm(field, e.value, isConditional)}
-        value={fieldValue}
+        // onChangeDate={e => onChangeForm(field, e.value, isConditional)}
+        isInModal
+        onSaveDate={dateTime => onSaveDate(dateTime)}
+        value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
       />
     );
   };
