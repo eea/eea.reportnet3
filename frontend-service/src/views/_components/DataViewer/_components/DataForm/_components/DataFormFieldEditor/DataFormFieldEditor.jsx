@@ -452,9 +452,6 @@ const DataFormFieldEditor = ({
   };
 
   const renderDatetimeCalendar = (field, fieldValue) => {
-    const onSaveDate = dateTime => {
-      onChangeForm(field, dayjs.utc(dateTime).format(), isConditional);
-    };
     return (
       // <Calendar
       //   appendTo={document.body}
@@ -478,8 +475,8 @@ const DataFormFieldEditor = ({
         isDisabled={(column.readOnly && reporting) || isSaving}
         // onChangeDate={e => onChangeForm(field, e.value, isConditional)}
         isInModal
-        onSaveDate={dateTime => onSaveDate(dateTime)}
-        value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
+        onSaveDate={dateTime => onChangeForm(field, dateTime.format(), isConditional)}
+        value={fieldValue !== '' ? fieldValue : Date.now().toString()}
       />
     );
   };

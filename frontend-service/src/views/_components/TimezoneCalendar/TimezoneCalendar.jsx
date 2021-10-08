@@ -58,8 +58,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
 
-  const currentZoneOffset = getCurrentZoneOffset();
-
   useEffect(() => {
     console.log({ value });
     setInputValue(dayjs(value).utc().format('HH:mm:ss').toString());
