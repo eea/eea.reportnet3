@@ -61,11 +61,10 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
     }
   }, [notificationContext.hidden]);
 
-  const onDownloadAllSchemasInfo = async datasetSchemaId => {
+  const onDownloadAllSchemasInfo = async dataflowId => {
     try {
       setIsDownloading(true);
-
-      await DataflowService.generateAllSchemasInfoFile(datasetSchemaId);
+      await DataflowService.generateAllSchemasInfoFile(dataflowId);
     } catch (error) {
       console.error('DatasetSchema - onDownloadAllSchemasInfo .', error);
       notificationContext.add({ type: 'DOWNLOAD_ALL_TABS_INFO_FAILED' }); // TODO CHECK NOTIFICATION NAMING
