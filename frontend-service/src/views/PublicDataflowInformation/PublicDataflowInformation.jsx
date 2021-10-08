@@ -248,11 +248,8 @@ export const PublicDataflowInformation = withRouter(
 
     const onDownloadAllSchemasInfo = async () => {
       try {
-        setIsDownloading(true); // TODO CONFIRM THIS LOADING
-
-        const { data } = await DataflowService.downloadAllSchemasInfo(dataflowId);
-
-        if (!isNil(data)) DownloadFile(data, `${dataflowData.name}.xlsx`);
+        setIsDownloading(true);
+        await DataflowService.generateAllSchemasInfoFile(dataflowId);
       } catch (error) {
         console.error('DatasetSchema - onDownloadAllSchemasInfo .', error);
         notificationContext.add({ type: 'DOWNLOAD_ALL_TABS_INFO_FAILED' }); // TODO CHECK NOTIFICATION NAMING
