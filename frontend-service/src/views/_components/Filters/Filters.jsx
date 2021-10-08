@@ -70,6 +70,8 @@ export const Filters = ({
     searched: false
   });
 
+  // console.log(`filterState.filterBy`, filterState.filterBy);
+
   useEffect(() => {
     if (isNil(sendData)) getInitialState();
   }, [data]);
@@ -110,6 +112,8 @@ export const Filters = ({
   }, [filterState.clearedFilters]);
 
   const { input, multiselect, date, dropdown, checkbox } = FiltersUtils.getOptionsNames(options);
+
+  // console.log(`date`, date);
 
   useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[date]) && onAnimateLabel([date], false));
 
@@ -228,17 +232,20 @@ export const Filters = ({
 
     const checkedKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkbox);
 
+    const dateKeys = FiltersUtils.getFilteredDateKeys(filterState, filter, date);
+
     const filteredData = ApplyFilterUtils.onApplyFilters({
       actualFilterBy,
       checkbox,
       checkedKeys,
       data,
       date,
+      dateKeys,
       filter,
       filteredKeys: inputKeys,
+      multiselect,
       searchedKeys,
       selectedKeys,
-      multiselect,
       state: filterState,
       value
     });
