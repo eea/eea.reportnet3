@@ -62,7 +62,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
     console.log({ value });
     setInputValue(dayjs(value).utc().format('HH:mm:ss').toString());
     const [day, hourWithTimezone] = value.split('T');
-    setDate(new Date(day));
     let timezone = '';
     let timeZoneChar = '-';
     if (isNil(hourWithTimezone)) {
@@ -79,11 +78,15 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
         timezone = '+00:00';
       }
     }
-    console.log(
-      timezone,
-      offsetOptions.find(offset => offset.label === timezone)
-    );
-    setSelectedOffset(offsetOptions.find(offset => offset.label === timezone));
+
+    const filteredTimezone = offsetOptions.find(offset => offset.label === timezone);
+
+    console.log(dayjs.utc(value));
+    console.log(dayjs.utc(parseDate(value)).utcOffset(filteredTimezone.value));
+
+    setDate(new Date(day));
+
+    setSelectedOffset(filteredTimezone);
   }, []);
 
   useEffect(() => {
