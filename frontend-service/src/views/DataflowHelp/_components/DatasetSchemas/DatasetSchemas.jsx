@@ -52,11 +52,9 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
 
   const onDownloadAllSchemasInfo = async datasetSchemaId => {
     try {
-      setIsDownloading(true); // TODO MAKE USE OF isDownloading in Button?
+      setIsDownloading(true);
 
-      const { data } = await DataflowService.downloadAllSchemasInfo(datasetSchemaId);
-
-      if (!isNil(data)) DownloadFile(data, `${dataflowName}.xlsx`);
+      await DataflowService.generateAllSchemasInfoFile(datasetSchemaId);
     } catch (error) {
       console.error('DatasetSchema - onDownloadAllSchemasInfo .', error);
       notificationContext.add({ type: 'DOWNLOAD_ALL_TABS_INFO_FAILED' }); // TODO CHECK NOTIFICATION NAMING
