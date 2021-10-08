@@ -2,7 +2,6 @@ package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
@@ -895,44 +894,6 @@ public class DatasetServiceTest {
         listFields, errorfilter, null, null, null));
   }
 
-  /**
-   * Test get by id.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetById() throws Exception {
-    DataSetVO datasetVOtemp = new DataSetVO();
-    datasetVOtemp.setId(1L);
-    datasetVOtemp.setTableVO(new ArrayList<>());
-    when(dataSetMapper.entityToClass(Mockito.any())).thenReturn(datasetVOtemp);
-    assertEquals("not equals", datasetVOtemp, datasetService.getById(1L));
-  }
-
-  /**
-   * Test get by id success.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetByIdSuccess() throws Exception {
-    when(tableRepository.findAllTables()).thenReturn(tableValues);
-    when(dataSetMapper.entityToClass(Mockito.any())).thenReturn(dataSetVO);
-    DataSetVO result = datasetService.getById(1L);
-    assertEquals("not equals", dataSetVO, result);
-  }
-
-  /**
-   * Test get data flow id by id success.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetDataFlowIdByIdSuccess() throws Exception {
-    when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
-    Long result = datasetService.getDataFlowIdById(1L);
-    assertNotNull("it shouldn't be null", result);
-  }
 
   /**
    * Test update null exception.

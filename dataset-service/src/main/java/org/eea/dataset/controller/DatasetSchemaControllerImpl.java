@@ -62,6 +62,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.netty.util.internal.StringUtil;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * The Class DatasetSchemaControllerImpl.
@@ -133,9 +137,17 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @PostMapping(value = "/createEmptyDatasetSchema")
-  @PreAuthorize("(secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')) OR (secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE'))")
-  public void createEmptyDatasetSchema(@RequestParam("dataflowId") final Long dataflowId,
-      @RequestParam("datasetSchemaName") String datasetSchemaName) {
+  @PreAuthorize("(secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_EDITOR_WRITE'))")
+  @ApiOperation(value = "Create empty Dataset Schema", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create"),
+      @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_NAME_DUPLICATED),
+      @ApiResponse(code = 403, message = "invalid dataflow status"),
+      @ApiResponse(code = 500, message = "Error creating dataset")})
+  public void createEmptyDatasetSchema(
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam("dataflowId") final Long dataflowId,
+      @ApiParam(type = "String", value = "Dataset schema name",
+          example = "abc") @RequestParam("datasetSchemaName") String datasetSchemaName) {
 
     String nameTrimmed = datasetSchemaName.trim();
     boolean isSchema = true;
@@ -181,7 +193,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id) {
+  @ApiOperation(value = "Find dataschema by Id", hidden = true)
+  public DataSetSchemaVO findDataSchemaById(@ApiParam(type = "String", value = "dataset schema Id",
+      example = "5cf0e9b3b793310e9ceca190") @PathVariable("id") String id) {
     return dataschemaService.getDataSchemaById(id);
   }
 
@@ -196,7 +210,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @GetMapping(value = "/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_LEAD_REPORTER','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
-  public DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId) {
+  @ApiOperation(value = "Find dataschema by Dataset Id")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 500, message = "Error getting the data")})
+  public DataSetSchemaVO findDataSchemaByDatasetId(@ApiParam(type = "Long", value = "Dataset Id",
+      example = "0") @PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDataSchemaByDatasetId(true, datasetId);
     } catch (EEAException e) {
@@ -213,7 +231,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @GetMapping("/getDataSchema/{datasetId}")
-  public String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId) {
+  @ApiOperation(value = "Find dataset schema Id", hidden = true)
+  public String getDatasetSchemaId(@ApiParam(type = "Long", value = "Dataset Id",
+      example = "0") @PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDatasetSchemaId(datasetId);
     } catch (EEAException e) {
@@ -232,8 +252,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @GetMapping(value = "{datasetId}/noRules", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_REPORTER_READ','DATASCHEMA_LEAD_REPORTER','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR')")
-  public DataSetSchemaVO findDataSchemaWithNoRulesByDatasetId(
-      @PathVariable("datasetId") Long datasetId) {
+  @ApiOperation(value = "Find data schmea with no rules by dataset Id", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 500, message = "Error getting the data")})
+  public DataSetSchemaVO findDataSchemaWithNoRulesByDatasetId(@ApiParam(type = "Long",
+      value = "Dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDataSchemaByDatasetId(false, datasetId);
     } catch (EEAException e) {
@@ -250,8 +273,18 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @DeleteMapping(value = "/dataset/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
-  public void deleteDatasetSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "forceDelete", required = false) Boolean forceDelete) {
+  @ApiOperation(value = "Delete Dataset Schema", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete"),
+      @ApiResponse(code = 400, message = "dataset incorrect or execution error"),
+      @ApiResponse(code = 404, message = EEAErrorMessage.DATASET_NOTFOUND),
+      @ApiResponse(code = 401, message = EEAErrorMessage.PK_REFERENCED),
+      @ApiResponse(code = 403, message = EEAErrorMessage.NOT_ENOUGH_PERMISSION),
+      @ApiResponse(code = 500, message = "Error deleting")})
+  public void deleteDatasetSchema(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Boolean", value = "force delete", example = "true") @RequestParam(
+          value = "forceDelete", required = false) Boolean forceDelete) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -319,8 +352,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PostMapping(value = "/{datasetId}/tableSchema", produces = MediaType.APPLICATION_JSON_VALUE)
-  public TableSchemaVO createTableSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody TableSchemaVO tableSchemaVO) {
+  @ApiOperation(value = "Create Table Schema", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create table"),
+      @ApiResponse(code = 400, message = "dataset incorrect id"),
+      @ApiResponse(code = 403, message = "invalid dataflow status")})
+  public TableSchemaVO createTableSchema(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "table schmea object") @RequestBody TableSchemaVO tableSchemaVO) {
 
     String nameTrimmed = tableSchemaVO.getNameTableSchema().trim();
     boolean isSchema = false;
@@ -358,9 +397,15 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PutMapping("/{datasetId}/tableSchema")
-  public void updateTableSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody TableSchemaVO tableSchemaVO) {
-
+  @ApiOperation(value = "Update table schema", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update table"),
+      @ApiResponse(code = 400,
+          message = "dataset incorrect id,table not found or error updating table schema"),
+      @ApiResponse(code = 403, message = "invalid dataflow status")})
+  public void updateTableSchema(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "table schema object") @RequestBody TableSchemaVO tableSchemaVO) {
     boolean isSchema = false;
     if (null != tableSchemaVO.getNameTableSchema()) {
       String nameTrimmed = tableSchemaVO.getNameTableSchema().trim();
@@ -412,8 +457,15 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @DeleteMapping("/{datasetId}/tableSchema/{tableSchemaId}")
-  public void deleteTableSchema(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("tableSchemaId") String tableSchemaId) {
+  @ApiOperation(value = "Delete table schema", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete table"),
+      @ApiResponse(code = 500, message = EEAErrorMessage.EXECUTION_ERROR),
+      @ApiResponse(code = 403, message = "invalid dataflow status")})
+  public void deleteTableSchema(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "table Schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("tableSchemaId") String tableSchemaId) {
 
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
@@ -454,8 +506,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PutMapping("/{datasetId}/tableSchema/order")
-  public void orderTableSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody OrderVO orderVO) {
+  @ApiOperation(value = "Order table schema", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully order table"),
+      @ApiResponse(code = 404, message = "schema not found"),
+      @ApiResponse(code = 403, message = "invalid dataflow status")})
+  public void orderTableSchema(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "Order object") @RequestBody OrderVO orderVO) {
 
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
@@ -486,8 +544,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PostMapping("/{datasetId}/fieldSchema")
-  public String createFieldSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody final FieldSchemaVO fieldSchemaVO) {
+  @ApiOperation(value = "Create field schema", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create field"),
+      @ApiResponse(code = 400, message = "field name null or invalid object id"),
+      @ApiResponse(code = 403, message = "invalid dataflow status")})
+  public String createFieldSchema(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "Field schema object") @RequestBody final FieldSchemaVO fieldSchemaVO) {
 
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
@@ -551,8 +615,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PutMapping("/{datasetId}/fieldSchema")
-  public void updateFieldSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody FieldSchemaVO fieldSchemaVO) {
+  @ApiOperation(value = "Update field schema", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update field"),
+      @ApiResponse(code = 400, message = "pk already exist or pk referenced"),
+      @ApiResponse(code = 403, message = "invalid dataflow status")})
+  public void updateFieldSchema(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "Field schema object") @RequestBody FieldSchemaVO fieldSchemaVO) {
 
     if (null != fieldSchemaVO.getName()) {
       String nameTrimmed = fieldSchemaVO.getName().trim();
@@ -621,9 +691,15 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @DeleteMapping("/{datasetId}/fieldSchema/{fieldSchemaId}")
-  public void deleteFieldSchema(
-      @PathVariable("datasetId") @LockCriteria(name = "datasetId") Long datasetId,
-      @PathVariable("fieldSchemaId") @LockCriteria(name = "fieldSchemaId") String fieldSchemaId) {
+  @ApiOperation(value = "delete field schema", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete field"),
+      @ApiResponse(code = 400, message = "invalid object id or pk referenced"),
+      @ApiResponse(code = 403, message = "invalid dataflow status")})
+  public void deleteFieldSchema(@ApiParam(type = "Long", value = "Dataset Id",
+      example = "0") @PathVariable("datasetId") @LockCriteria(name = "datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "Dataset Id",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("fieldSchemaId") @LockCriteria(
+              name = "fieldSchemaId") String fieldSchemaId) {
 
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
@@ -682,8 +758,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PutMapping("/{datasetId}/fieldSchema/order")
-  public void orderFieldSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody OrderVO orderVO) {
+  @ApiOperation(value = "Order field schema", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully order field"),
+      @ApiResponse(code = 400, message = "schema not found"),
+      @ApiResponse(code = 403, message = "invalid dataflow status")})
+  public void orderFieldSchema(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "order objcet") @RequestBody OrderVO orderVO) {
 
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
         .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
@@ -713,8 +795,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PutMapping("/{datasetId}/datasetSchema")
-  public void updateDatasetSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestBody(required = true) DataSetSchemaVO datasetSchemaVO) {
+  @ApiOperation(value = "Update dataset schema", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update dataset schema"),
+      @ApiResponse(code = 400, message = "schema not found")})
+  public void updateDatasetSchema(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "dataset schema object") @RequestBody(
+          required = true) DataSetSchemaVO datasetSchemaVO) {
 
     try {
       String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
@@ -755,7 +843,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @GetMapping(value = "{schemaId}/validate", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("isAuthenticated()")
-  public Boolean validateSchema(@PathVariable("schemaId") String datasetSchemaId) {
+  @ApiOperation(value = "validate schema", hidden = true)
+  public Boolean validateSchema(@ApiParam(type = "String", value = "Dataset Schema Id",
+      example = "5cf0e9b3b793310e9ceca190") @PathVariable("schemaId") String datasetSchemaId) {
     return dataschemaService.validateSchema(datasetSchemaId, null);
   }
 
@@ -770,7 +860,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @GetMapping(value = "/validate/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR hasAnyRole('ADMIN')")
-  public Boolean validateSchemas(@PathVariable("dataflowId") Long dataflowId) {
+  @ApiOperation(value = "validate schemas", hidden = true)
+  public Boolean validateSchemas(@ApiParam(type = "Long", value = "Dataflow Id",
+      example = "0") @PathVariable("dataflowId") Long dataflowId) {
     // Recover the designs datasets of the dataflowId given. And then, for each design dataset
     // executes a validation.
     // At the first wrong design dataset, it stops and returns false. Otherwise it returns true
@@ -797,8 +889,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @GetMapping(value = "/getSchemas/dataflow/{idDataflow}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#idDataflow,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#idDataflow))")
-  public List<DataSetSchemaVO> findDataSchemasByIdDataflow(
-      @PathVariable("idDataflow") Long idDataflow) {
+  @ApiOperation(value = "Find dataschemas by dataflow Id", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 400, message = "schema not found")})
+  public List<DataSetSchemaVO> findDataSchemasByIdDataflow(@ApiParam(type = "Long",
+      value = "Dataflow Id", example = "0") @PathVariable("idDataflow") Long idDataflow) {
 
     List<DataSetSchemaVO> schemas = new ArrayList<>();
 
@@ -826,9 +921,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_STEWARD')")
   @GetMapping(value = "{schemaId}/getUniqueConstraints/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find unique constraints", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 400, message = EEAErrorMessage.IDDATASETSCHEMA_INCORRECT)})
   public List<UniqueConstraintVO> getUniqueConstraints(
-      @PathVariable("schemaId") String datasetSchemaId,
-      @PathVariable("dataflowId") Long dataflowId) {
+      @ApiParam(type = "String", value = "Dataset schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("schemaId") String datasetSchemaId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @PathVariable("dataflowId") Long dataflowId) {
     if (datasetSchemaId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
@@ -846,7 +946,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @GetMapping(value = "/private/getUniqueConstraint/{uniqueId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public UniqueConstraintVO getUniqueConstraint(@PathVariable("uniqueId") String uniqueId) {
+  @ApiOperation(value = "Get unique constraint", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 400, message = "bad request")})
+  public UniqueConstraintVO getUniqueConstraint(@ApiParam(type = "String", value = "Unique Id",
+      example = "5cf0e9b3b793310e9ceca190") @PathVariable("uniqueId") String uniqueId) {
     try {
       return dataschemaService.getUniqueConstraint(uniqueId);
     } catch (EEAException e) {
@@ -862,7 +966,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#uniqueConstraint.dataflowId,'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
   @PostMapping(value = "/createUniqueConstraint")
-  public void createUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
+  @ApiOperation(value = "Create unique constaint", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create unique"),
+      @ApiResponse(code = 400,
+          message = "Data schema id or table schema id is incorrect, unreported fieldschemas or data")})
+  public void createUniqueConstraint(@ApiParam(
+      value = "Unique constraint object") @RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint != null) {
       if (uniqueConstraint.getDatasetSchemaId() == null) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -890,8 +999,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
   @DeleteMapping(value = "/deleteUniqueConstraint/{uniqueConstraintId}/dataflow/{dataflowId}")
-  public void deleteUniqueConstraint(@PathVariable("uniqueConstraintId") String uniqueConstraintId,
-      @PathVariable("dataflowId") Long dataflowId) {
+  @ApiOperation(value = "Delete unique constraint", hidden = true)
+  @ApiResponses(
+      value = {@ApiResponse(code = 200, message = "Successfully delete unique constraint"),
+          @ApiResponse(code = 400, message = "bad request")})
+  public void deleteUniqueConstraint(@ApiParam(type = "String", value = "Unique Id",
+      example = "5cf0e9b3b793310e9ceca190") @PathVariable("uniqueConstraintId") String uniqueConstraintId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
       dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
     } catch (EEAException e) {
@@ -907,7 +1022,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#uniqueConstraint.dataflowId,'DATAFLOW_EDITOR_WRITE', 'DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
   @PutMapping(value = "/updateUniqueConstraint", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void updateUniqueConstraint(@RequestBody UniqueConstraintVO uniqueConstraint) {
+  @ApiOperation(value = "Update unique constraint", hidden = true)
+  public void updateUniqueConstraint(@ApiParam(
+      value = "Unique constraint object") @RequestBody UniqueConstraintVO uniqueConstraint) {
     if (uniqueConstraint == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
     }
@@ -945,10 +1062,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowIdDestination,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @LockMethod(removeWhenFinish = false)
+  @ApiOperation(value = "Copy designs from dataflow", hidden = true)
   @PostMapping(value = "/copy", produces = MediaType.APPLICATION_JSON_VALUE)
-  public void copyDesignsFromDataflow(@RequestParam("sourceDataflow") final Long dataflowIdOrigin,
-      @RequestParam("targetDataflow") @LockCriteria(
-          name = "dataflowIdDestination") final Long dataflowIdDestination) {
+  public void copyDesignsFromDataflow(
+      @ApiParam(type = "Long", value = "Dataflow Id Origin",
+          example = "0") @RequestParam("sourceDataflow") final Long dataflowIdOrigin,
+      @ApiParam(type = "Long", value = "Dataflow Id destination",
+          example = "0") @RequestParam("targetDataflow") @LockCriteria(
+              name = "dataflowIdDestination") final Long dataflowIdDestination) {
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
@@ -972,9 +1093,17 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
   @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId,
-      @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId) {
+  @ApiOperation(value = "Gets the simple Schema")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 500, message = "Error getting data"),
+      @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)})
+  public SimpleDatasetSchemaVO getSimpleSchema(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -998,9 +1127,17 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
   @GetMapping(value = "/getTableSchemasIds/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<TableSchemaIdNameVO> getTableSchemasIds(@PathVariable("datasetId") Long datasetId,
-      @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId) {
+  @ApiOperation(value = "Get list of table Schema ids")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 500, message = "Error getting data"),
+      @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)})
+  public List<TableSchemaIdNameVO> getTableSchemasIds(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -1025,7 +1162,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public ResponseEntity<byte[]> exportSchemas(@RequestParam("dataflowId") final Long dataflowId) {
+  @ApiOperation(value = "Export schemas", hidden = true)
+  public ResponseEntity<byte[]> exportSchemas(@ApiParam(type = "Long", value = "Dataflow Id",
+      example = "0") @RequestParam("dataflowId") final Long dataflowId) {
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
@@ -1054,9 +1193,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PostMapping(value = "/import")
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
+  @ApiOperation(value = "Import schemas", hidden = true)
   public void importSchemas(
-      @LockCriteria(name = "dataflowId") @RequestParam(value = "dataflowId") Long dataflowId,
-      @RequestParam("file") MultipartFile file) {
+      @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
+          name = "dataflowId") @RequestParam(value = "dataflowId") Long dataflowId,
+      @ApiParam(value = "File") @RequestParam("file") MultipartFile file) {
 
     if (!TypeStatusEnum.DESIGN
         .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
@@ -1089,10 +1230,17 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @GetMapping(value = "/{datasetSchemaId}/exportFieldSchemas",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  public ResponseEntity<byte[]> exportFieldSchemas(
-      @PathVariable("datasetSchemaId") String datasetSchemaId,
-      @RequestParam(value = "datasetId") final Long datasetId,
-      @RequestParam(value = "tableSchemaId", required = false) final String tableSchemaId) {
+  @ApiOperation(value = "Export field schemas")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully export data"),
+      @ApiResponse(code = 500, message = "Error exporting data")})
+  public ResponseEntity<byte[]> exportFieldSchemas(@ApiParam(type = "String",
+      value = "Dataset Schema Id",
+      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId,
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @RequestParam(value = "datasetId") final Long datasetId,
+      @ApiParam(type = "String", value = "Table schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+              required = false) final String tableSchemaId) {
 
     try {
       String fileName = "fieldschemas_export_dataset_" + datasetId + ".csv";
@@ -1120,11 +1268,19 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PostMapping(value = "/{datasetSchemaId}/importFieldSchemas")
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
-  public void importFieldSchemas(@PathVariable("datasetSchemaId") String datasetSchemaId,
-      @RequestParam(value = "datasetId") Long datasetId,
-      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-      @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) Boolean replace) {
+  @ApiOperation(value = "Import field schemas")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully import data"),
+      @ApiResponse(code = 400, message = "Error importing file")})
+  public void importFieldSchemas(@ApiParam(type = "String", value = "Dataset schema Id",
+      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId,
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @RequestParam(value = "datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "Table schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+              required = false) String tableSchemaId,
+      @ApiParam(value = "File") @RequestParam("file") MultipartFile file,
+      @ApiParam(type = "Boolean", value = "Replace",
+          example = "true") @RequestParam(value = "replace", required = false) Boolean replace) {
 
     try {
       // Set the user name on the thread

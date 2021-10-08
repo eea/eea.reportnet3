@@ -4,6 +4,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -285,5 +286,15 @@ public interface DatasetMetabaseController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReportingDatasetVO> findReportingDataSetByDataflowIds(
       @RequestParam("dataflowIds") List<Long> dataflowIds);
+
+  /**
+   * Gets the datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the datasets summary list
+   */
+  @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
+  List<DatasetsSummaryVO> getDatasetsSummaryList(@PathVariable("id") Long dataflowId);
+
 
 }

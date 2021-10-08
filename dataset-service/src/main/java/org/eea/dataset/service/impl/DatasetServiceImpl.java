@@ -36,7 +36,6 @@ import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.RecordValidationMapper;
-import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValidation;
@@ -523,31 +522,6 @@ public class DatasetServiceImpl implements DatasetService {
     return result;
   }
 
-  /**
-   * Gets the by id.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the by id
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  @Deprecated
-  public DataSetVO getById(Long datasetId) throws EEAException {
-    DatasetValue datasetValue = new DatasetValue();
-    List<TableValue> allTableValues = tableRepository.findAllTables();
-    datasetValue.setTableValues(allTableValues);
-    datasetValue.setId(datasetId);
-    datasetValue.setIdDatasetSchema(datasetRepository.findIdDatasetSchemaById(datasetId));
-    for (TableValue tableValue : allTableValues) {
-      tableValue
-          .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
-    }
-    LOG.info("Get dataset by id: {}", datasetId);
-    return dataSetMapper.entityToClass(datasetValue);
-  }
 
   /**
    * Update dataset.
@@ -2123,26 +2097,6 @@ public class DatasetServiceImpl implements DatasetService {
     return result;
   }
 
-  /**
-   * Retrieve record value.
-   *
-   * @param idTableSchema the id table schema
-   * @param idFieldSchema the id field schema
-   *
-   * @return the list
-   */
-  @Deprecated
-  private List<RecordValue> retrieveRecordValue(String idTableSchema, String idFieldSchema) {
-    Optional.ofNullable(idFieldSchema).ifPresent(field -> SortFieldsHelper.setSortingField(field));
-    List<RecordValue> records = null;
-    try {
-      records = recordRepository.findByTableValueIdTableSchema(idTableSchema);
-    } finally {
-      SortFieldsHelper.cleanSortingField();
-    }
-
-    return records;
-  }
 
   /**
    * Sanitize records.

@@ -54,8 +54,13 @@ export const PublicDataflows = withRouter(({ history }) => {
     }
   };
 
-  const onOpenDataflow = dataflowId => {
-    return history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true));
+  const onOpenDataflow = (dataflowId, newTab) => {
+    const url = getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true);
+    if (!newTab) {
+      return history.push(url);
+    } else {
+      window.open(url, '_blank');
+    }
   };
 
   return (
@@ -70,12 +75,13 @@ export const PublicDataflows = withRouter(({ history }) => {
                   <PublicCard
                     animation
                     card={dataflow}
+                    dataflowId={dataflow.id}
                     dueDate={dataflow.expirationDate}
-                    externalCard={false}
                     key={dataflow.id}
+                    landingPageCard={false}
                     obligation={dataflow.obligation}
-                    onCardClick={() => onOpenDataflow(dataflow.id)}
-                    status={dataflow.status}
+                    onCardClick={onOpenDataflow}
+                    status={resourcesContext.messages[dataflow.status]}
                     subtitle={{ text: dataflow.description, url: '' }}
                     title={{ text: dataflow.name, url: '' }}
                   />

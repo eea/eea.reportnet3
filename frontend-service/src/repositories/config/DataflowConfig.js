@@ -17,6 +17,7 @@ export const DataflowConfig = {
   getApiKeyCustodian: '/user/getApiKey?dataflowId={:dataflowId}',
   getDetails: '/dataflow/{:dataflowId}/getmetabase',
   getDatasetsFinalFeedbackAndReleasedStatus: '/datasetmetabase/dataflow/{:dataflowId}',
+  getDatasetsInfo: '/dataflow/{:dataflowId}/datasetsSummary',
   getDatasetsValidationStatistics:
     '/datasetmetabase/globalStatistics/dataflow/{:dataflowId}/dataSchema/{:datasetSchemaId}',
   getPublicData: '/dataflow/getPublicDataflows',

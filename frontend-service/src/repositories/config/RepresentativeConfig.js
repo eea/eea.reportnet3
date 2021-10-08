@@ -11,7 +11,6 @@ export const RepresentativeConfig = {
   getGroupCountries: '/representative/dataProvider/countryGroups',
   getGroupOrganizations: '/representative/dataProvider/organizationGroups',
   getRepresentatives: '/representative/dataflow/{:dataflowId}',
-  getSelectedDataProviderGroup: '/representative/dataProviderGroup/dataflow/{:dataflowId}',
   importFile: '/representative/import/{:dataflowId}/group/{:dataProviderGroupId}',
   updateDataProviderId: '/representative/update',
   updateLeadReporter: '/representative/leadReporter/update/dataflow/{:dataflowId}'

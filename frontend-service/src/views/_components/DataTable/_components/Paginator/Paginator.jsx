@@ -16,6 +16,7 @@ export class Paginator extends Component {
     alwaysShow: true,
     className: null,
     currentPageReportTemplate: '({currentPage} of {totalPages})',
+    disabled: false,
     first: 0,
     leftContent: null,
     onPageChange: null,
@@ -32,6 +33,7 @@ export class Paginator extends Component {
     alwaysShow: PropTypes.bool,
     className: PropTypes.string,
     currentPageReportTemplate: PropTypes.any,
+    disabled: PropTypes.bool,
     first: PropTypes.number,
     leftContent: PropTypes.any,
     onPageChange: PropTypes.func,
@@ -166,20 +168,42 @@ export class Paginator extends Component {
 
     switch (key) {
       case 'FirstPageLink':
-        element = <FirstPageLink disabled={this.isFirstPage()} key={key} onClick={this.changePageToFirst} />;
+        element = (
+          <FirstPageLink
+            disabled={this.isFirstPage() || this.props.disabled}
+            key={key}
+            onClick={this.changePageToFirst}
+          />
+        );
         break;
       case 'PrevPageLink':
-        element = <PrevPageLink disabled={this.isFirstPage()} key={key} onClick={this.changePageToPrev} />;
+        element = (
+          <PrevPageLink
+            disabled={this.isFirstPage() || this.props.disabled}
+            key={key}
+            onClick={this.changePageToPrev}
+          />
+        );
         break;
       case 'NextPageLink':
-        element = <NextPageLink disabled={this.isLastPage()} key={key} onClick={this.changePageToNext} />;
+        element = (
+          <NextPageLink disabled={this.isLastPage() || this.props.disabled} key={key} onClick={this.changePageToNext} />
+        );
         break;
       case 'LastPageLink':
-        element = <LastPageLink disabled={this.isLastPage()} key={key} onClick={this.changePageToLast} />;
+        element = (
+          <LastPageLink disabled={this.isLastPage() || this.props.disabled} key={key} onClick={this.changePageToLast} />
+        );
         break;
       case 'PageLinks':
         element = (
-          <PageLinks key={key} onClick={this.onPageLinkClick} page={this.getPage()} value={this.updatePageLinks()} />
+          <PageLinks
+            disabled={this.props.disabled}
+            key={key}
+            onClick={this.onPageLinkClick}
+            page={this.getPage()}
+            value={this.updatePageLinks()}
+          />
         );
         break;
       case 'CurrentPageReport':
@@ -246,6 +270,7 @@ export class Paginator extends Component {
         <div className={className} style={this.props.style}>
           <div className="p-paginator-left-content-rowsPerPage">
             <RowsPerPageDropdown
+              disabled={this.props.disabled}
               key="RowsPerPageDropdown"
               label={this.context.messages['rowsPerPage']}
               onChange={this.onRowsChange}
