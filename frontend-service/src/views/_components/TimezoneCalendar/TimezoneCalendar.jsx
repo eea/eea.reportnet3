@@ -16,6 +16,7 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
+import { isNil } from 'lodash';
 
 const offsetOptions = [
   { value: -12, label: '-12:00' },
@@ -60,15 +61,45 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   const currentZoneOffset = getCurrentZoneOffset();
 
   useEffect(() => {
-    setInputValue(dayjs(value).utc().format('HH:mm:ss').toString()); // Added utc() to display correct time in the input
-    setDate(value);
+    console.log({ value });
+    setInputValue(dayjs(value).utc().format('HH:mm:ss').toString());
+    const [day, hourWithTimezone] = value.split('T');
+    setDate(new Date(day));
+    let timezone = '';
+    let timeZoneChar = '-';
+    if (hourWithTimezone.includes('+')) {
+      timeZoneChar = '+';
+    }
+
+    const splittedTimezone = splitTimezoneByChar(hourWithTimezone, timeZoneChar);
+    if (!isNil(splittedTimezone)) {
+      timezone = `${timeZoneChar}${splittedTimezone}`;
+    } else {
+      timezone = '+00:00';
+    }
+
+    console.log(
+      timezone,
+      offsetOptions.find(offset => offset.label === timezone)
+    );
+    setSelectedOffset(offsetOptions.find(offset => offset.label === timezone));
   }, []);
 
   useEffect(() => {
-    if (isInModal && dayjs(date).isValid()) {
-      onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value + currentZoneOffset));
+    const utcDate = parseDate(date);
+    if (isInModal && dayjs(utcDate).isValid()) {
+      onSaveDate(dayjs.utc(utcDate).utcOffset(selectedOffset.value));
     }
   }, [date, selectedOffset.value]);
+
+  const splitTimezoneByChar = (str, char) => str.split(char)[1];
+
+  const parseDate = dateToParse => {
+    const newDate = new Date(dateToParse);
+    const [hour, minute, second] = inputValue.split(':');
+    const utcDate = Date.UTC(newDate.getFullYear(), newDate.getMonth(), newDate.getDate(), hour, minute, second);
+    return utcDate;
+  };
 
   const renderButtons = () => {
     if (isInModal) {
@@ -81,22 +112,23 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
           disabled={!dayjs(new Date(date)).isValid() || hasError}
           icon="save"
           label={resourcesContext.messages['save']}
-          onClick={() => {
-            onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value + currentZoneOffset));
-          }}
+          onClick={() => onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value))}
         />
       </div>
     );
   };
 
   const renderCalendar = () => {
+    console.log({ date });
     return (
       <Calendar
+        dateFormat="yyyy-mm-dd"
         disabled={isDisabled}
         inline
         monthNavigator
         onChange={e => {
-          checkError(dayjs(e.value).format('HH:mm:ss').toString()); // TODO CHECK
+          console.log(e.value);
+          checkError(dayjs(e.value).format('HH:mm:ss').toString());
           setDate(e.value);
           // setInputValue(dayjs(e.value).format('HH:mm:ss').toString()); // TODO CHECK IF IT IS NECESSARY
         }}
@@ -134,18 +166,8 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
         }}
         onComplete={e => {
           if (checkIsCorrectTimeFormat(e.value)) {
-            const [hour, minute, second] = e.value.split(':');
-
-            setDate(
-              new Date(
-                dayjs(date)
-                  // .hour(parseInt(hour) - currentZoneOffset) // TODO SET CORRECT TIME IN DATE
-                  .hour(hour)
-                  .minute(minute)
-                  .second(second)
-                  .format('ddd/MMMDD/YYYY HH:mm:ss')
-              )
-            );
+            setInputValue(e.value);
+            // setDate(new Date(dayjs(date).hour(hour).minute(minute).second(second).format('ddd/MMMDD/YYYY HH:mm:ss')));
           }
         }}
         value={inputValue}

@@ -638,11 +638,12 @@ const FieldEditor = ({
         return (
           <TimezoneCalendar
             onSaveDate={dateTimeProp => {
+              console.log(dayjs(dateTimeProp).utc().format());
               setDateTime(!isNil(dateTimeProp) ? dateTimeProp : '');
-              saveCalendarDate(dateTimeProp === '' ? '' : dayjs(dateTimeProp).utc().format(), true);
+              saveCalendarDate(dateTimeProp === '' ? '' : dateTimeProp.format(), true);              
               document.body.click();
             }}
-            value={!isNil(dateTime) ? dateTime : new Date(RecordUtils.getCellValue(cells, cells.field))}
+            value={!isNil(dateTime) ? dateTime : RecordUtils.getCellValue(cells, cells.field)}
           />
         );
       // case 'DATETIME_':
