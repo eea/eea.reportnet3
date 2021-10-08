@@ -30,6 +30,9 @@ export const DataflowRepository = {
   generateAllSchemasInfoFile: async dataflowId =>
     await HTTPRequester.post({ url: getUrl(DataflowConfig.generateAllSchemasInfoFile, { dataflowId }) }),
 
+  generatePublicAllSchemasInfoFile: async dataflowId =>
+    await HTTPRequester.post({ url: getUrl(DataflowConfig.generatePublicAllSchemasInfoFile, { dataflowId }) }),
+
   getDetails: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDetails, { dataflowId }) }),
 
   getDatasetsFinalFeedbackAndReleasedStatus: async dataflowId =>

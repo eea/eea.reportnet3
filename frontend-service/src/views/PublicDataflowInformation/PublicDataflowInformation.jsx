@@ -249,7 +249,7 @@ export const PublicDataflowInformation = withRouter(
     const onDownloadAllSchemasInfo = async () => {
       try {
         setIsDownloading(true);
-        await DataflowService.generateAllSchemasInfoFile(dataflowId);
+        await DataflowService.generatePublicAllSchemasInfoFile(dataflowId);
       } catch (error) {
         console.error('DatasetSchema - onDownloadAllSchemasInfo .', error);
         notificationContext.add({ type: 'GENERATE_SCHEMAS_INFO_FILE_ERROR' });

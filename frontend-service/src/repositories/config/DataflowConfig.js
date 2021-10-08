@@ -13,6 +13,7 @@ export const DataflowConfig = {
   getCloneableDataflows: '/dataflow/cloneableDataflows',
   getAllDataflowsUserList: '/dataflow/getUserRolesAllDataflows',
   generateAllSchemasInfoFile: '/dataflow/exportSchemaInformation/{:dataflowId}',
+  generatePublicAllSchemasInfoFile: '/dataflow/exportSchemaInformation/{:dataflowId}', // TODO ADD CORRECT ENDPOINT
   getApiKey: '/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   getApiKeyCustodian: '/user/getApiKey?dataflowId={:dataflowId}',
   getDetails: '/dataflow/{:dataflowId}/getmetabase',
