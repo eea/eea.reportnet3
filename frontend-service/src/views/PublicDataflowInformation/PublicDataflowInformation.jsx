@@ -484,7 +484,7 @@ export const PublicDataflowInformation = withRouter(
           <Toolbar className={styles.actionsToolbar}>
             <div className={'p-toolbar-group-left'}>
               <Button
-                className={`p-button-rounded p-button-primary ${!isDownloading ? 'p-button-animated-blink' : ''}`}
+                className={`p-button-rounded p-button-secondary ${!isDownloading ? 'p-button-animated-blink' : ''}`}
                 disabled={isDownloading}
                 icon={isDownloading ? 'spinnerAnimate' : 'export'}
                 label={resourcesContext.messages['downloadSchemasInfo']}
