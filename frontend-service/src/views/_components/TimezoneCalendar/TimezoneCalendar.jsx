@@ -46,7 +46,7 @@ const offsetOptions = [
   { value: 12, label: '+12:00' }
 ];
 
-const getCurrentZoneOffset = () => new Date().getTimezoneOffset() / 60;
+// const getCurrentZoneOffset = () => new Date().getTimezoneOffset() / 60;
 
 export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDisabled }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -62,42 +62,47 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
     console.log({ value });
     setInputValue(dayjs(value).utc().format('HH:mm:ss').toString());
     const [day, hourWithTimezone] = value.split('T');
-    let timezone = '';
-    let timeZoneChar = '-';
-    if (isNil(hourWithTimezone)) {
-      timezone = '+00:00';
-    } else {
-      if (hourWithTimezone.includes('+')) {
-        timeZoneChar = '+';
-      }
+    // let timezone = '';
+    // let timeZoneChar = '-';
+    // if (isNil(hourWithTimezone)) {
+    //   timezone = '+00:00';
+    // } else {
+    //   if (hourWithTimezone.includes('+')) {
+    //     timeZoneChar = '+';
+    //   }
 
-      const splittedTimezone = splitTimezoneByChar(hourWithTimezone, timeZoneChar);
-      if (!isNil(splittedTimezone)) {
-        timezone = `${timeZoneChar}${splittedTimezone}`;
-      } else {
-        timezone = '+00:00';
-      }
-    }
+    //   const splittedTimezone = splitTimezoneByChar(hourWithTimezone, timeZoneChar);
+    //   if (!isNil(splittedTimezone)) {
+    //     timezone = `${timeZoneChar}${splittedTimezone}`;
+    //   } else {
+    //     timezone = '+00:00';
+    //   }
+    // }
 
-    const filteredTimezone = offsetOptions.find(offset => offset.label === timezone);
+    // const filteredTimezone = offsetOptions.find(offset => offset.label === timezone);
 
-    console.log(dayjs.utc(value));
-    console.log(dayjs.utc(parseDate(value)).utcOffset(filteredTimezone.value));
+    // console.log(dayjs.utc(value));
+    // console.log(dayjs.utc(parseDate(value)).utcOffset(filteredTimezone.value));
 
     setDate(new Date(day));
 
-    setSelectedOffset(filteredTimezone);
+    // setSelectedOffset(filteredTimezone);
   }, []);
 
   useEffect(() => {
-    const utcDate = parseDate(date);
-    if (isInModal && dayjs(utcDate).isValid()) {
-      console.log(dayjs.utc(utcDate).utcOffset(selectedOffset.value));
-      onSaveDate(dayjs.utc(utcDate).utcOffset(selectedOffset.value));
+    // const utcDate = parseDate(date);
+    if (isInModal && dayjs(date).isValid()) {
+      // console.log(dayjs.utc(utcDate).utcOffset(selectedOffset.value));
+      onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value));
     }
+    // const utcDate = parseDate(date);
+    // if (isInModal && dayjs(utcDate).isValid()) {
+    //   console.log(dayjs.utc(utcDate).utcOffset(selectedOffset.value));
+    //   onSaveDate(dayjs.utc(utcDate).utcOffset(selectedOffset.value));
+    // }
   }, [date, selectedOffset.value]);
 
-  const splitTimezoneByChar = (str, char) => str.split(char)[1];
+  // const splitTimezoneByChar = (str, char) => str.split(char)[1];
 
   const parseDate = dateToParse => {
     const newDate = new Date(dateToParse);

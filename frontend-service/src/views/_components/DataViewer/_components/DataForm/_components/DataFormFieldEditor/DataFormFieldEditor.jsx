@@ -476,7 +476,7 @@ const DataFormFieldEditor = ({
         isDisabled={(column.readOnly && reporting) || isSaving}
         // onChangeDate={e => onChangeForm(field, e.value, isConditional)}
         isInModal
-        onSaveDate={dateTime => onChangeForm(field, dateTime.format(), isConditional)}
+        onSaveDate={dateTime => onChangeForm(field, dateTime.format('YYYY-MM-DDTHH:mm:ss[Z]'), isConditional)}
         value={
           fieldValue !== ''
             ? dayjs(fieldValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
