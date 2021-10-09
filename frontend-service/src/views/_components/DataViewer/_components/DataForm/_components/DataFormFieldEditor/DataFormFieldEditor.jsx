@@ -452,6 +452,7 @@ const DataFormFieldEditor = ({
   };
 
   const renderDatetimeCalendar = (field, fieldValue) => {
+    console.log({ fieldValue });
     return (
       // <Calendar
       //   appendTo={document.body}
@@ -476,7 +477,11 @@ const DataFormFieldEditor = ({
         // onChangeDate={e => onChangeForm(field, e.value, isConditional)}
         isInModal
         onSaveDate={dateTime => onChangeForm(field, dateTime.format(), isConditional)}
-        value={fieldValue !== '' ? fieldValue : new Date().toISOString().split('T')[0]}
+        value={
+          fieldValue !== ''
+            ? dayjs(fieldValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
+            : new Date().toISOString().split('T')[0]
+        }
       />
     );
   };

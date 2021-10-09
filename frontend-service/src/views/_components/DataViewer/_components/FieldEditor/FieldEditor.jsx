@@ -640,7 +640,7 @@ const FieldEditor = ({
             onSaveDate={dateTimeProp => {
               console.log(dayjs(dateTimeProp).utc().format(), dateTimeProp, dateTimeProp.format());
               setDateTime(!isNil(dateTimeProp) ? dateTimeProp : '');
-              saveCalendarDate(dateTimeProp === '' ? '' : dateTimeProp.format(), true);
+              saveCalendarDate(dateTimeProp === '' ? '' : dateTimeProp.format('YYYY-MM-DDTHH:mm:ss[Z]'), true);
               document.body.click();
             }}
             value={!isNil(dateTime) ? dateTime : RecordUtils.getCellValue(cells, cells.field)}
