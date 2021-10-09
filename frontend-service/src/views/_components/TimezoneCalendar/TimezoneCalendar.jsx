@@ -16,7 +16,6 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
-import { isNil } from 'lodash';
 
 const offsetOptions = [
   { value: -12, label: '-12:00' },
@@ -46,8 +45,6 @@ const offsetOptions = [
   { value: 12, label: '+12:00' }
 ];
 
-// const getCurrentZoneOffset = () => new Date().getTimezoneOffset() / 60;
-
 export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDisabled }) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
@@ -61,48 +58,16 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   useEffect(() => {
     console.log({ value });
     setInputValue(dayjs(value).utc().format('HH:mm:ss').toString());
-    const [day, hourWithTimezone] = value.split('T');
-    // let timezone = '';
-    // let timeZoneChar = '-';
-    // if (isNil(hourWithTimezone)) {
-    //   timezone = '+00:00';
-    // } else {
-    //   if (hourWithTimezone.includes('+')) {
-    //     timeZoneChar = '+';
-    //   }
-
-    //   const splittedTimezone = splitTimezoneByChar(hourWithTimezone, timeZoneChar);
-    //   if (!isNil(splittedTimezone)) {
-    //     timezone = `${timeZoneChar}${splittedTimezone}`;
-    //   } else {
-    //     timezone = '+00:00';
-    //   }
-    // }
-
-    // const filteredTimezone = offsetOptions.find(offset => offset.label === timezone);
-
-    // console.log(dayjs.utc(value));
-    // console.log(dayjs.utc(parseDate(value)).utcOffset(filteredTimezone.value));
+    const [day] = value.split('T');
 
     setDate(new Date(day));
-
-    // setSelectedOffset(filteredTimezone);
   }, []);
 
   useEffect(() => {
-    // const utcDate = parseDate(date);
     if (isInModal && dayjs(date).isValid()) {
-      // console.log(dayjs.utc(utcDate).utcOffset(selectedOffset.value));
       onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value));
     }
-    // const utcDate = parseDate(date);
-    // if (isInModal && dayjs(utcDate).isValid()) {
-    //   console.log(dayjs.utc(utcDate).utcOffset(selectedOffset.value));
-    //   onSaveDate(dayjs.utc(utcDate).utcOffset(selectedOffset.value));
-    // }
   }, [date, selectedOffset.value]);
-
-  // const splitTimezoneByChar = (str, char) => str.split(char)[1];
 
   const parseDate = dateToParse => {
     const newDate = new Date(dateToParse);
@@ -140,7 +105,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
           console.log(e.value);
           checkError(dayjs(e.value).format('HH:mm:ss').toString());
           setDate(e.value);
-          // setInputValue(dayjs(e.value).format('HH:mm:ss').toString()); // TODO CHECK IF IT IS NECESSARY
         }}
         value={date}
         yearNavigator
@@ -177,7 +141,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
         onComplete={e => {
           if (checkIsCorrectTimeFormat(e.value)) {
             setInputValue(e.value);
-            // setDate(new Date(dayjs(date).hour(hour).minute(minute).second(second).format('ddd/MMMDD/YYYY HH:mm:ss')));
           }
         }}
         value={inputValue}
