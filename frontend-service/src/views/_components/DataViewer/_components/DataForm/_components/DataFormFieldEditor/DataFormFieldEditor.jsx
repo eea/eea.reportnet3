@@ -457,9 +457,7 @@ const DataFormFieldEditor = ({
   };
 
   const renderDatetimeCalendar = (field, fieldValue) => {
-    const onSaveDate = dateTime => {
-      onChangeForm(field, dayjs.utc(dateTime).format(), isConditional);
-    };
+    console.log({ fieldValue });
     return (
       // <Calendar
       //   appendTo={document.body}
@@ -479,20 +477,21 @@ const DataFormFieldEditor = ({
       //   yearNavigator={true}
       //   yearRange="1900:2100"
       // />
-      <Fragment>
-        <InputText onFocus={() => setIsTimezoneCalendarVisible(true)} value={fieldValue} />
 
-        {isTimezoneCalendarVisible && (
-          <TimezoneCalendar
-            ref={timezoneRef}
-            isDisabled={(column.readOnly && reporting) || isSaving}
-            // onChangeDate={e => onChangeForm(field, e.value, isConditional)}
-            isInModal
-            onSaveDate={dateTime => onSaveDate(dateTime)}
-            value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
-          />
-        )}
-      </Fragment>
+      isTimezoneCalendarVisible ? (
+        <TimezoneCalendar
+          isDisabled={(column.readOnly && reporting) || isSaving}
+          isInModal
+          onSaveDate={dateTime => onChangeForm(field, dateTime.format('YYYY-MM-DDTHH:mm:ss[Z]'), isConditional)}
+          value={
+            fieldValue !== ''
+              ? dayjs(fieldValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
+              : new Date().toISOString().split('T')[0]
+          }
+        />
+      ) : (
+        <InputText onFocus={() => setIsTimezoneCalendarVisible(true)} value={fieldValue} />
+      )
     );
   };
 

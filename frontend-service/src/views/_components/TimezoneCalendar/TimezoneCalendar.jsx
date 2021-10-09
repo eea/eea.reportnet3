@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
@@ -50,23 +50,30 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
 
-  const calendarRef = useRef();
-
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('00:00:00');
   const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    setInputValue(dayjs(value).format('HH:mm:ss').toString());
-    setDate(value);
+    setInputValue(dayjs(value).utc().format('HH:mm:ss').toString());
+    const [day] = value.split('T');
+
+    setDate(new Date(day));
   }, []);
 
   useEffect(() => {
     if (isInModal && dayjs(date).isValid()) {
-      onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value));
+      onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value));
     }
   }, [date, selectedOffset.value]);
+
+  const parseDate = dateToParse => {
+    const newDate = new Date(dateToParse);
+    const [hour, minute, second] = inputValue.split(':');
+    const utcDate = Date.UTC(newDate.getFullYear(), newDate.getMonth(), newDate.getDate(), hour, minute, second);
+    return utcDate;
+  };
 
   const renderButtons = () => {
     if (isInModal) {
@@ -79,7 +86,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
           disabled={!dayjs(new Date(date)).isValid() || hasError}
           icon="save"
           label={resourcesContext.messages['save']}
-          onClick={() => onSaveDate(dayjs.utc(date).utcOffset(selectedOffset.value))}
+          onClick={() => onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value))}
         />
       </div>
     );
@@ -88,6 +95,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   const renderCalendar = () => {
     return (
       <Calendar
+        dateFormat="yyyy-mm-dd"
         disabled={isDisabled}
         inline
         monthNavigator
@@ -95,7 +103,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
           checkError(dayjs(e.value).format('HH:mm:ss').toString());
           setDate(e.value);
         }}
-        ref={calendarRef}
         value={date}
         yearNavigator
         yearRange="1900:2100"
@@ -130,9 +137,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
         }}
         onComplete={e => {
           if (checkIsCorrectTimeFormat(e.value)) {
-            const [hour, minute, second] = e.value.split(':');
-
-            setDate(new Date(dayjs(date).hour(hour).minute(minute).second(second).format('ddd/MMMDD/YYYY HH:mm:ss')));
+            setInputValue(e.value);
           }
         }}
         value={inputValue}
@@ -155,9 +160,9 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   };
 
   return (
-    <div ref={ref} className={styles.container}>
+    <div className={styles.container} ref={ref}>
       {renderCalendar()}
-      {renderInput()}
+      {/* {renderInput()} */}
       <div className={styles.inputMaskWrapper}>
         {renderInputMask()}
         <div className={styles.utc}>
