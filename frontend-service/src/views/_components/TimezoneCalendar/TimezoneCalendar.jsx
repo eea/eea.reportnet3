@@ -10,7 +10,7 @@ import { Button } from 'views/_components/Button';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
-import { InputText } from 'views/_components/InputText';
+// import { InputText } from 'views/_components/InputText';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -57,6 +57,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
 
   useEffect(() => {
     setInputValue(dayjs(value).utc().format('HH:mm:ss').toString());
+
     const [day] = value.split('T');
 
     setDate(new Date(day));
@@ -118,9 +119,9 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
     }
   };
 
-  const renderInput = () => {
-    return <InputText onChange={e => setDate(new Date(e.target.value))} value={date} />;
-  };
+  // const renderInput = () => {
+  //   return <InputText onChange={e => setDate(new Date(e.target.value))} value={date} />;
+  // };
 
   const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
 

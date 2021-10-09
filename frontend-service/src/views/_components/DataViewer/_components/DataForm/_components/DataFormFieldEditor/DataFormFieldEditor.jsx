@@ -441,20 +441,20 @@ const DataFormFieldEditor = ({
     );
   };
 
-  const calculateCalendarPanelPosition = element => {
-    const {
-      current: { panel }
-    } = refDatetimeCalendar;
+  // const calculateCalendarPanelPosition = element => {
+  //   const {
+  //     current: { panel }
+  //   } = refDatetimeCalendar;
 
-    panel.style.display = 'block';
+  //   panel.style.display = 'block';
 
-    const inputRect = element.getBoundingClientRect();
-    const panelRect = panel.getBoundingClientRect();
-    const top = `${inputRect.top - panelRect.height / 2}px`;
+  //   const inputRect = element.getBoundingClientRect();
+  //   const panelRect = panel.getBoundingClientRect();
+  //   const top = `${inputRect.top - panelRect.height / 2}px`;
 
-    panel.style.top = top;
-    panel.style.position = 'fixed';
-  };
+  //   panel.style.top = top;
+  //   panel.style.position = 'fixed';
+  // };
 
   const renderDatetimeCalendar = (field, fieldValue) => {
     console.log({ fieldValue });
