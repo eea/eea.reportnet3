@@ -1,12 +1,13 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
-import dayjs from 'dayjs';
 import cloneDeep from 'lodash/cloneDeep';
+import dayjs from 'dayjs';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import proj4 from 'proj4';
+import utc from 'dayjs/plugin/utc';
 
 import styles from './DataFormFieldEditor.module.scss';
 
@@ -18,6 +19,7 @@ import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { Map } from 'views/_components/Map';
 import { MultiSelect } from 'views/_components/MultiSelect';
+import { TimezoneCalendar } from 'views/_components/TimezoneCalendar/TimezoneCalendar';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -30,7 +32,6 @@ import { useOnClickOutside } from 'views/_functions/Hooks/useOnClickOutside';
 
 import { MapUtils, RecordUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
-import { TimezoneCalendar } from 'views/_components/TimezoneCalendar/TimezoneCalendar';
 
 const DataFormFieldEditor = ({
   autoFocus,
@@ -69,6 +70,8 @@ const DataFormFieldEditor = ({
   const refDatetimeCalendar = useRef(null);
   const textAreaRef = useRef(null);
   const timezoneRef = useRef(null);
+
+  dayjs.extend(utc);
 
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
