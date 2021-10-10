@@ -67,7 +67,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
     if (isInModal && dayjs(date).isValid()) {
       onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value));
     }
-  }, [date, selectedOffset.value]);
+  }, [date, selectedOffset.value, inputValue]);
 
   const parseDate = dateToParse => {
     const newDate = new Date(dateToParse);
