@@ -84,7 +84,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
       <div className={styles.buttonWrapper}>
         <Button
           className="p-button p-component p-button-primary p-button-animated-blink p-button-text-icon-left"
-          disabled={!dayjs(new Date(date)).isValid() || hasError}
+          disabled={!dayjs(parseDate(date)).isValid() || hasError}
           icon="save"
           label={resourcesContext.messages['save']}
           onClick={() => onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value))}
