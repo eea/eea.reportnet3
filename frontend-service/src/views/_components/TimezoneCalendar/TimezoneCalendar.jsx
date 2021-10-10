@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useState } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
@@ -55,7 +55,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setInputValue(dayjs(value).utc().format('HH:mm:ss').toString());
 
     const [day] = value.split('T');
