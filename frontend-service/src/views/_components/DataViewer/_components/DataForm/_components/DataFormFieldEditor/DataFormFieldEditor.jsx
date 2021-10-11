@@ -445,9 +445,8 @@ const DataFormFieldEditor = ({
   };
 
   const renderDatetimeCalendar = (field, fieldValue) => {
-    console.log({ fieldValue });
     return isTimezoneCalendarVisible ? (
-      <Fragment>
+      <div className={styles.timezoneWrapper}>
         <Button
           className={'p-button-rounded p-button-secondary-transparent'}
           icon="cancel"
@@ -463,7 +462,7 @@ const DataFormFieldEditor = ({
               : new Date().toISOString().split('T')[0]
           }
         />
-      </Fragment>
+      </div>
     ) : (
       <InputText onFocus={() => setIsTimezoneCalendarVisible(true)} value={fieldValue} />
     );

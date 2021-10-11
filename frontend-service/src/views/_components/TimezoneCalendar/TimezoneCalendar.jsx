@@ -10,7 +10,6 @@ import { Button } from 'views/_components/Button';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
-// import { InputText } from 'views/_components/InputText';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -51,7 +50,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   dayjs.extend(customParseFormat);
 
   const [date, setDate] = useState('');
-  const [inputValue, setInputValue] = useState('00:00:00');
+  const [inputValue, setInputValue] = useState('');
   const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
 
@@ -119,10 +118,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
     }
   };
 
-  // const renderInput = () => {
-  //   return <InputText onChange={e => setDate(new Date(e.target.value))} value={date} />;
-  // };
-
   const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
 
   const renderInputMask = () => {
@@ -163,7 +158,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   return (
     <div className={styles.container} ref={ref}>
       {renderCalendar()}
-      {/* {renderInput()} */}
       <div className={styles.inputMaskWrapper}>
         {renderInputMask()}
         <div className={styles.utc}>

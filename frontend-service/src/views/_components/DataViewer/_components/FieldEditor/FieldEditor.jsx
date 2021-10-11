@@ -15,6 +15,7 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { MultiSelect } from 'views/_components/MultiSelect';
+import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -25,7 +26,6 @@ import { RecordUtils } from 'views/_functions/Utils';
 import { MapUtils } from 'views/_functions/Utils/MapUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
-import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 
 proj4.defs([
   ['EPSG:4258', '+proj=longlat +ellps=GRS80 +no_defs'],
