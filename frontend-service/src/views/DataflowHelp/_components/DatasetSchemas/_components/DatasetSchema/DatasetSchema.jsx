@@ -26,7 +26,7 @@ import { ValidationService } from 'services/ValidationService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { RecordUtils } from 'views/_functions/Utils';
+import { DateUtils } from 'views/_functions/Utils';
 
 const DatasetSchema = ({
   dataflowName,
@@ -477,13 +477,7 @@ const DatasetSchema = ({
 
       if (!isNil(data)) {
         const date = new Date();
-
-        const formattedDate = `${RecordUtils.formatDate(date, isNil(date))} ${[
-          date.getHours(),
-          date.getMinutes(),
-          date.getSeconds()
-        ].join('.')}`;
-
+        const formattedDate = DateUtils.formatDate(date, isNil(date), true);
         DownloadFile(data, `table-definition-${datasetSchemaId}-${formattedDate}.zip`);
       }
     } catch (error) {

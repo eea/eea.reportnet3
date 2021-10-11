@@ -1,4 +1,5 @@
 export { CurrentPage } from './CurrentPage';
+export { DateUtils } from './DateUtils';
 export { ErrorUtils } from './ErrorUtils';
 export { ExtensionUtils } from './ExtensionUtils';
 export { FileUtils } from './FileUtils';
