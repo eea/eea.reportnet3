@@ -51,7 +51,7 @@ public interface DatasetMetabaseController {
    * @param idDatasetSchema the id dataset schema
    * @param idDataflow the id dataflow
    */
-  @PostMapping(value = "/create")
+  @PostMapping(value = "/private/create")
   void createEmptyDataSet(
       @RequestParam(value = "datasetType", required = true) DatasetTypeEnum datasetType,
       @RequestParam(value = "datasetName", required = true) String datasetName,
@@ -73,7 +73,7 @@ public interface DatasetMetabaseController {
    * @param idDataflow the id dataflow
    * @return the list
    */
-  @GetMapping(value = "/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DesignDatasetVO> findDesignDataSetIdByDataflowId(@PathVariable("id") Long idDataflow);
 
   /**
@@ -123,7 +123,8 @@ public interface DatasetMetabaseController {
    * @param schemaId the schema id
    * @return the reportings id by schema id
    */
-  @GetMapping(value = "/findReportings/{schemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/findReportings/{schemaId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReportingDatasetVO> getReportingsIdBySchemaId(@PathVariable("schemaId") String schemaId);
 
   /**

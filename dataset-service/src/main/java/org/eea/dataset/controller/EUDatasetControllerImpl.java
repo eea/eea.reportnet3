@@ -56,7 +56,7 @@ public class EUDatasetControllerImpl implements EUDatasetController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Populate data from Datacollection", hidden = true)
   public List<EUDatasetVO> findEUDatasetByDataflowId(@ApiParam(type = "Long", value = "Dataflow Id",
       example = "0") @PathVariable("id") Long idDataflow) {

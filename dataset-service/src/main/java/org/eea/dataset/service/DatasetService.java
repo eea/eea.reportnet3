@@ -17,7 +17,6 @@ import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -68,19 +67,6 @@ public interface DatasetService {
       String fields, ErrorTypeEnum[] levelError, String[] idRules, String fieldSchema,
       String fieldValue) throws EEAException;
 
-  /**
-   * Gets the position from any object id.
-   *
-   * @param id the id
-   * @param idDataset the id dataset
-   * @param type the type
-   *
-   * @return the position from any object id
-   *
-   * @throws EEAException the EEA exception
-   */
-  ValidationLinkVO getPositionFromAnyObjectId(String id, @DatasetId Long idDataset,
-      EntityTypeEnum type) throws EEAException;
 
   /**
    * Update dataset.
