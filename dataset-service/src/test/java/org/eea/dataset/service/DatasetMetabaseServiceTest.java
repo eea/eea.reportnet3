@@ -711,6 +711,7 @@ public class DatasetMetabaseServiceTest {
     reportingDataset.setId(1L);
     reportingDataset.setDataSetName("REPORTING DATASET");
     reportingDataset.setDataProviderId(1L);
+    reportingDataset.setDatasetSchema("ID");
     List<ReportingDataset> reportingDatasets = new ArrayList<>();
     reportingDatasets.add(reportingDataset);
     DataProviderVO dataProviderVO = new DataProviderVO();
@@ -719,6 +720,10 @@ public class DatasetMetabaseServiceTest {
     dataProviderVO.setLabel("LABEL");
     dataProviderVO.setCode("CODE");
     dataProviderVO.setGroup("GROUP");
+    DesignDataset designDatasetOptional = new DesignDataset();
+    designDatasetOptional.setId(1L);
+    designDatasetOptional.setDataSetName("PRUEBA");
+    designDatasetOptional.setDatasetSchema("ID");
     List<DatasetsSummaryVO> datasetsSummarysVOExpected = new ArrayList<>();
     for (DesignDataset design : designDatasets) {
       DatasetsSummaryVO datasetSummary = new DatasetsSummaryVO();
@@ -732,7 +737,8 @@ public class DatasetMetabaseServiceTest {
       datasetSummary.setId(1L);
       datasetSummary.setDataProviderCode(dataProviderVO.getCode());
       datasetSummary.setDataProviderName(dataProviderVO.getLabel());
-      datasetSummary.setDataSetName(reporting.getDataSetName());
+      datasetSummary.setDataSetName(
+          reporting.getDataSetName() + " - " + designDatasetOptional.getDataSetName());
       datasetSummary.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
       datasetsSummarysVOExpected.add(datasetSummary);
     }
@@ -750,6 +756,9 @@ public class DatasetMetabaseServiceTest {
         .thenReturn(reportingDatasets);
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
         .thenReturn(dataProviderVO);
+    Mockito
+        .when(designDatasetRepository.findFirstByDatasetSchema(reportingDataset.getDatasetSchema()))
+        .thenReturn(Optional.of(designDatasetOptional));
     assertEquals(datasetsSummarysVOExpected, datasetMetabaseService.getDatasetsSummaryList(1L));
   }
 

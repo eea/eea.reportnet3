@@ -161,7 +161,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;
 
-
   /**
    * The Constant LOG.
    */
@@ -1062,9 +1061,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
           representativeControllerZuul.findDataProviderById(reportingDataset.getDataProviderId());
       datasetsSummary.setDataProviderCode(dataProvider.getCode());
       datasetsSummary.setDataProviderName(dataProvider.getLabel());
+      Optional<DesignDataset> designDataset =
+          designDatasetRepository.findFirstByDatasetSchema(reportingDataset.getDatasetSchema());
+      datasetsSummary.setDataSetName(
+          reportingDataset.getDataSetName() + " - " + designDataset.get().getDataSetName());
       datasetsSummaryList.add(datasetsSummary);
     }
-
     return datasetsSummaryList;
   }
 

@@ -571,6 +571,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    * @param dataflowId the dataflow id
    * @return the datasets summary list
    */
+  @Override
   @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
   @ApiOperation(value = "Get a summary of the information of all the dataset types of a dataflow",
       hidden = true)
