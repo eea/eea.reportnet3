@@ -227,7 +227,6 @@ export class BodyCell extends Component {
       content = <i className={reorderIcon}></i>;
     } else if (this.props.rowEditor) {
       if (this.state.editing) {
-        console.log(this.props.rowIndex);
         content = (
           <div className={styles.actionTemplate}>
             <span data-for={`quickEditSaveTooltip${this.props.rowIndex}`} data-tip>
