@@ -725,11 +725,9 @@ public class DatasetMetabaseServiceTest {
     dataProviderVO.setLabel("LABEL");
     dataProviderVO.setCode("CODE");
     dataProviderVO.setGroup("GROUP");
-
     DataSetSchemaVO datasetSchemaVO = new DataSetSchemaVO();
     datasetSchemaVO.setIdDataSetSchema("ID");
     datasetSchemaVO.setNameDatasetSchema("PRUEBA");
-
     List<DatasetsSummaryVO> datasetsSummarysVOExpected = new ArrayList<>();
     for (DesignDataset design : designDatasets) {
       DatasetsSummaryVO datasetSummary = new DatasetsSummaryVO();
