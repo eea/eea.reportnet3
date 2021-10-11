@@ -48,7 +48,7 @@
           "key": "DOWNLOAD_ALL_TABS_INFO_FAILED"
         },
         {
-          "key": "DOWNLOAD_TABLE_DEFINITIONS_FAILED"
+          "key": "DOWNLOAD_TABLE_DEFINITIONS_ERROR"
         },
         {
           "key": "EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT",

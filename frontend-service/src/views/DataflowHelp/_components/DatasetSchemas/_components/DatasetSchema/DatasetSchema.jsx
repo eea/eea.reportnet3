@@ -473,7 +473,7 @@ const DatasetSchema = ({
   const onDownloadTableDefinitions = async datasetSchemaId => {
     try {
       setIsDownloadingTableDefinition(true);
-      const { data } = await DatasetService.downloadTableDefinitions(datasetSchemaId);
+      const { data } = await DatasetService.downloadTableDefinitions();
 
       if (!isNil(data)) {
         DownloadFile(
@@ -483,7 +483,7 @@ const DatasetSchema = ({
       }
     } catch (error) {
       console.error('DatasetSchema - onDownloadTableDefinitions.', error);
-      notificationContext.add({ type: 'DOWNLOAD_TABLE_DEFINITIONS_FAILED' }); // TODO CHECK NOTIFICATION NAMING
+      notificationContext.add({ type: 'DOWNLOAD_TABLE_DEFINITIONS_ERROR' }); // TODO CHECK NOTIFICATION NAMING
     } finally {
       setIsDownloadingTableDefinition(false);
     }
