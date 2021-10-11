@@ -162,6 +162,8 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
         appendTo={document.body}
         className={styles.dropdown}
         disabled={isDisabled}
+        filter
+        filterBy="label"
         onChange={e => setSelectedOffset(e.value)}
         optionLabel="label"
         optionValue="value"
