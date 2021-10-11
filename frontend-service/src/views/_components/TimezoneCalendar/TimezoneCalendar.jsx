@@ -17,6 +17,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 
 const offsetOptions = [
+  { value: 0, label: '+00:00' },
   { value: -12, label: '-12:00' },
   { value: -11, label: '-11:00' },
   { value: -10, label: '-10:00' },
@@ -31,7 +32,6 @@ const offsetOptions = [
   { value: -3, label: '-03:00' },
   { value: -2, label: '-02:00' },
   { value: -1, label: '-01:00' },
-  { value: 0, label: '+00:00' },
   { value: 1, label: '+01:00' },
   { value: 2, label: '+02:00' },
   { value: 3, label: '+03:00' },
