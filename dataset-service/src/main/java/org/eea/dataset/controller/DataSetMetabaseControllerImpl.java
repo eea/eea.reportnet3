@@ -95,7 +95,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/findReportings/{schemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/findReportings/{schemaId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get reporting list id", hidden = true)
   public List<ReportingDatasetVO> getReportingsIdBySchemaId(
       @ApiParam(type = "String", value = "Schema Id",
@@ -128,7 +129,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/create")
+  @PostMapping(value = "/private/create")
   @ApiOperation(value = "create empty dataset", hidden = true)
   public void createEmptyDataSet(
       @ApiParam(value = "dataset type", example = "REPORTING") @RequestParam(value = "datasetType",
@@ -214,7 +215,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @ApiOperation(value = "Get design dataset id list", hidden = true)
-  @GetMapping(value = "/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DesignDatasetVO> findDesignDataSetIdByDataflowId(
       @ApiParam(type = "Long", value = "dataflow Id", example = "0") Long idDataflow) {
 
