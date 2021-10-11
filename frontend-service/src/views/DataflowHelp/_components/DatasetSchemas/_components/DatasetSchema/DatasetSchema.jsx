@@ -471,7 +471,7 @@ const DatasetSchema = ({
   const onDownloadTableDefinitions = async datasetSchemaId => {
     try {
       setIsDownloadingTableDefinition(true);
-      const { data } = await DatasetService.downloadTableDefinitions();
+      const { data } = await DatasetService.downloadTableDefinitions(datasetSchemaId);
 
       if (!isNil(data)) {
         DownloadFile(
