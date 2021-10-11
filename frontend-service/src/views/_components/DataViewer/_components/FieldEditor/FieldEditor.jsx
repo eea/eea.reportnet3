@@ -638,7 +638,6 @@ const FieldEditor = ({
         return (
           <TimezoneCalendar
             onSaveDate={dateTimeProp => {
-              console.log(dayjs(dateTimeProp).utc().format(), dateTimeProp, dateTimeProp.format());
               setDateTime(!isNil(dateTimeProp) ? dateTimeProp : '');
               saveCalendarDate(dateTimeProp === '' ? '' : dateTimeProp.format('YYYY-MM-DDTHH:mm:ss[Z]'), true);
               document.body.click();

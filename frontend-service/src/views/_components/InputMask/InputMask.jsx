@@ -1,11 +1,8 @@
 import React, { Component } from 'react';
-// import { DomHandler, classNames } from '../utils/Utils';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-// import classNames from 'classnames';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 import { InputText } from 'views/_components/InputText';
-// import { tip } from '../tooltip/Tooltip';
 import { Tooltip } from 'views/_components/Tooltip';
 
 export class InputMask extends Component {

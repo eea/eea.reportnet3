@@ -19,7 +19,7 @@ import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { Map } from 'views/_components/Map';
 import { MultiSelect } from 'views/_components/MultiSelect';
-import { TimezoneCalendar } from 'views/_components/TimezoneCalendar/TimezoneCalendar';
+import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 
 import { DatasetService } from 'services/DatasetService';
 
