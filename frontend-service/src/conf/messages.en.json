@@ -1274,7 +1274,6 @@
     "reportingDataset": "Reporting dataset",
     "testDataset": "Test dataset",
     "designDataset": "Design dataset",
-    "clear": "Clear",
     "dateTimeWarningTooltip": "Datetime will be converted to UTC",
     "utc": "UTC"
   }
