@@ -444,64 +444,28 @@ const DataFormFieldEditor = ({
     );
   };
 
-  // const calculateCalendarPanelPosition = element => {
-  //   const {
-  //     current: { panel }
-  //   } = refDatetimeCalendar;
-
-  //   panel.style.display = 'block';
-
-  //   const inputRect = element.getBoundingClientRect();
-  //   const panelRect = panel.getBoundingClientRect();
-  //   const top = `${inputRect.top - panelRect.height / 2}px`;
-
-  //   panel.style.top = top;
-  //   panel.style.position = 'fixed';
-  // };
-
   const renderDatetimeCalendar = (field, fieldValue) => {
     console.log({ fieldValue });
-    return (
-      // <Calendar
-      //   appendTo={document.body}
-      //   baseZIndex={9999}
-      //   dateFormat="yy-mm-dd"
-      //   disabled={(column.readOnly && reporting) || isSaving}
-      //   inputRef={refDatetimeCalendar}
-      //   monthNavigator={true}
-      //   onChange={e => onChangeForm(field, dayjs(e.target.value).format('YYYY-MM-DD HH:mm:ss'), isConditional)}
-      //   onFocus={e => {
-      //     calculateCalendarPanelPosition(e.currentTarget);
-      //   }}
-      //   readOnlyInput={true}
-      //   showSeconds={true}
-      //   showTime={true}
-      //   value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
-      //   yearNavigator={true}
-      //   yearRange="1900:2100"
-      // />
-
-      isTimezoneCalendarVisible ? (
-        <Fragment>
-          <Button
-            className={'p-button-rounded p-button-secondary-transparent'}
-            icon="cancel"
-            onClick={() => setIsTimezoneCalendarVisible(false)}
-          />
-          <TimezoneCalendar
-            isDisabled={(column.readOnly && reporting) || isSaving}
-            isInModal
-            onSaveDate={dateTime => onChangeForm(field, dateTime.format('YYYY-MM-DDTHH:mm:ss[Z]'), isConditional)}
-            value={
-              fieldValue !== ''
-                ? dayjs(fieldValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
-                : new Date().toISOString().split('T')[0]
-            }
-          />
-        </Fragment>
-      ) : (
-        <InputText onFocus={() => setIsTimezoneCalendarVisible(true)} value={fieldValue} />
-      )
+    return isTimezoneCalendarVisible ? (
+      <Fragment>
+        <Button
+          className={'p-button-rounded p-button-secondary-transparent'}
+          icon="cancel"
+          onClick={() => setIsTimezoneCalendarVisible(false)}
+        />
+        <TimezoneCalendar
+          isDisabled={(column.readOnly && reporting) || isSaving}
+          isInModal
+          onSaveDate={dateTime => onChangeForm(field, dateTime.format('YYYY-MM-DDTHH:mm:ss[Z]'), isConditional)}
+          value={
+            fieldValue !== ''
+              ? dayjs(fieldValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
+              : new Date().toISOString().split('T')[0]
+          }
+        />
+      </Fragment>
+    ) : (
+      <InputText onFocus={() => setIsTimezoneCalendarVisible(true)} value={fieldValue} />
     );
   };
 
