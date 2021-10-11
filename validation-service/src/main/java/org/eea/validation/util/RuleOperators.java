@@ -4273,7 +4273,8 @@ public class RuleOperators {
    */
   public static boolean fieldDaytimeEquals(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getDayOfMonth() == number.longValue();
     } catch (Exception e) {
       return true;
@@ -4290,7 +4291,8 @@ public class RuleOperators {
    */
   public static boolean fieldDaytimeDistinct(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getDayOfMonth() != number.longValue();
     } catch (Exception e) {
       return true;
@@ -4307,7 +4309,8 @@ public class RuleOperators {
    */
   public static boolean fieldDaytimeGreaterThan(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getDayOfMonth() > number.longValue();
     } catch (Exception e) {
       return true;
@@ -4324,7 +4327,8 @@ public class RuleOperators {
    */
   public static boolean fieldDaytimeLessThan(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getDayOfMonth() < number.longValue();
     } catch (Exception e) {
       return true;
@@ -4341,7 +4345,8 @@ public class RuleOperators {
    */
   public static boolean fieldDaytimeGreaterThanOrEqualsThan(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getDayOfMonth() >= number.longValue();
     } catch (Exception e) {
       return true;
@@ -4358,7 +4363,8 @@ public class RuleOperators {
    */
   public static boolean fieldDaytimeLessThanOrEqualsThan(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getDayOfMonth() <= number.longValue();
     } catch (Exception e) {
       return true;
@@ -4375,7 +4381,8 @@ public class RuleOperators {
    */
   public static boolean fieldMonthtimeEquals(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getMonthValue() == number.longValue();
     } catch (Exception e) {
       return true;
@@ -4392,7 +4399,8 @@ public class RuleOperators {
    */
   public static boolean fieldMonthtimeDistinct(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getMonthValue() != number.longValue();
     } catch (Exception e) {
       return true;
@@ -4409,7 +4417,8 @@ public class RuleOperators {
    */
   public static boolean fieldMonthtimeGreaterThan(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getMonthValue() > number.longValue();
     } catch (Exception e) {
       return true;
@@ -4426,7 +4435,8 @@ public class RuleOperators {
    */
   public static boolean fieldMonthtimeLessThan(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getMonthValue() < number.longValue();
     } catch (Exception e) {
       return true;
@@ -4443,7 +4453,8 @@ public class RuleOperators {
    */
   public static boolean fieldMonthtimeGreaterThanOrEqualsThan(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getMonthValue() >= number.longValue();
     } catch (Exception e) {
       return true;
@@ -4460,7 +4471,8 @@ public class RuleOperators {
    */
   public static boolean fieldMonthtimeLessThanOrEqualsThan(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getMonthValue() <= number.longValue();
     } catch (Exception e) {
       return true;
@@ -4477,7 +4489,8 @@ public class RuleOperators {
    */
   public static boolean fieldYeartimeEquals(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getYear() == number.longValue();
     } catch (Exception e) {
       return true;
@@ -4494,7 +4507,8 @@ public class RuleOperators {
    */
   public static boolean fieldYeartimeDistinct(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getYear() != number.longValue();
     } catch (Exception e) {
       return true;
@@ -4511,7 +4525,8 @@ public class RuleOperators {
    */
   public static boolean fieldYeartimeGreaterThan(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getYear() > number.longValue();
     } catch (Exception e) {
       return true;
@@ -4528,7 +4543,8 @@ public class RuleOperators {
    */
   public static boolean fieldYeartimeLessThan(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getYear() < number.longValue();
     } catch (Exception e) {
       return true;
@@ -4545,7 +4561,8 @@ public class RuleOperators {
    */
   public static boolean fieldYeartimeGreaterThanOrEqualsThan(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getYear() >= number.longValue();
     } catch (Exception e) {
       return true;
@@ -4562,7 +4579,8 @@ public class RuleOperators {
    */
   public static boolean fieldYeartimeLessThanOrEqualsThan(String value, Number number) {
     try {
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.getYear() <= number.longValue();
     } catch (Exception e) {
       return true;
@@ -4580,7 +4598,8 @@ public class RuleOperators {
   public static boolean fieldDatetimeEquals(String value, String date) {
     try {
       LocalDateTime ruleDate = LocalDateTime.parse(date, DATETIME_FORMAT);
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.equals(ruleDate);
     } catch (Exception e) {
       return true;
@@ -4598,7 +4617,8 @@ public class RuleOperators {
   public static boolean fieldDatetimeDistinct(String value, String date) {
     try {
       LocalDateTime ruleDate = LocalDateTime.parse(date, DATETIME_FORMAT);
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return !fieldDate.equals(ruleDate);
     } catch (Exception e) {
       return true;
@@ -4617,7 +4637,8 @@ public class RuleOperators {
   public static boolean fieldDatetimeGreaterThan(String value, String date) {
     try {
       LocalDateTime ruleDate = LocalDateTime.parse(date, DATETIME_FORMAT);
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.isAfter(ruleDate);
     } catch (Exception e) {
       return true;
@@ -4635,7 +4656,8 @@ public class RuleOperators {
   public static boolean fieldDatetimeLessThan(String value, String date) {
     try {
       LocalDateTime ruleDate = LocalDateTime.parse(date, DATETIME_FORMAT);
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.isBefore(ruleDate);
     } catch (Exception e) {
       return true;
@@ -4653,7 +4675,8 @@ public class RuleOperators {
   public static boolean fieldDatetimeGreaterThanOrEqualsThan(String value, String date) {
     try {
       LocalDateTime ruleDate = LocalDateTime.parse(date, DATETIME_FORMAT);
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.isAfter(ruleDate) || fieldDate.equals(ruleDate);
     } catch (Exception e) {
       return true;
@@ -4671,7 +4694,8 @@ public class RuleOperators {
   public static boolean fieldDatetimeLessThanOrEqualsThan(String value, String date) {
     try {
       LocalDateTime ruleDate = LocalDateTime.parse(date, DATETIME_FORMAT);
-      LocalDateTime fieldDate = LocalDateTime.parse(value.replaceAll("Z$", ""), DATETIME_FORMAT);
+      LocalDateTime fieldDate =
+          LocalDateTime.parse(value.replaceAll("[zZ]$", "").replace('T', ' '), DATETIME_FORMAT);
       return fieldDate.isBefore(ruleDate) || fieldDate.equals(ruleDate);
     } catch (Exception e) {
       return true;
