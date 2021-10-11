@@ -21,7 +21,6 @@ export const DataflowRepository = {
     }),
 
   downloadAllSchemasInfo: async (dataflowId, fileName) => {
-    console.log('fileName :>> ', fileName);
     return await HTTPRequester.download({
       url: getUrl(DataflowConfig.downloadAllSchemasInfo, { dataflowId, fileName })
     });

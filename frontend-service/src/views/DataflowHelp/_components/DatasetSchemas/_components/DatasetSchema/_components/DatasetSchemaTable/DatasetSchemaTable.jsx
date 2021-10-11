@@ -86,7 +86,6 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
   };
 
   const getMultiselectFilter = field => {
-    // console.log(columnOptions);
     if (
       !isNil(columnOptions[type]['filterType']) &&
       !isNil(columnOptions[type]['filterType']['multiselect']) &&
@@ -140,7 +139,6 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
   };
 
   const renderColumns = colFields => {
-    console.log({ colFields });
     return colFields.map(colField => (
       <Column
         body={getTemplate(colField)}
@@ -282,7 +280,7 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
       </div>
     );
   };
-  console.log({ fields });
+
   return !isNil(fields) && !isEmpty(fields) ? (
     <DataTable
       getPageChange={onPaginate}

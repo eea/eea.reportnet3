@@ -28,7 +28,6 @@ import { ValidationService } from 'services/ValidationService';
 const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
-  console.log({ datasetsSchemas });
   const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
   const [isDownloading, setIsDownloading] = useState(false);
   const [extensionsOperationsList, setExtensionsOperationsList] = useState();

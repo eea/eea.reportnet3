@@ -372,7 +372,6 @@ const DatasetSchema = ({
   };
 
   const parseDesignDataset = (design, extensionsOperationsList, uniqueList, qcList) => {
-    console.log({ design });
     const parsedDataset = {};
     parsedDataset.datasetId = design.datasetId;
     parsedDataset.datasetSchemaId = design.datasetSchemaId;
@@ -457,7 +456,6 @@ const DatasetSchema = ({
   const parsedDesignDataset = parseDesignDataset(designDataset, extensionsOperationsList, uniqueList, qcList);
 
   const onDownloadQCRules = async datasetId => {
-    console.log({ datasetId });
     setIsDownloadingQCs(true);
     notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
 
@@ -483,13 +481,12 @@ const DatasetSchema = ({
       }
     } catch (error) {
       console.error('DatasetSchema - onDownloadTableDefinitions.', error);
-      notificationContext.add({ type: 'DOWNLOAD_TABLE_DEFINITIONS_ERROR' }); // TODO CHECK NOTIFICATION NAMING
+      notificationContext.add({ type: 'DOWNLOAD_TABLE_DEFINITIONS_ERROR' });
     } finally {
       setIsDownloadingTableDefinition(false);
     }
   };
 
-  console.log({ parsedDesignDataset });
   return (
     <div>
       <div className={styles.datasetSchemaPropertiesWrapper}>
