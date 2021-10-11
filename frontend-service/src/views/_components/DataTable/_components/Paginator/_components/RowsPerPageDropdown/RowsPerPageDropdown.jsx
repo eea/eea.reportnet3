@@ -6,6 +6,7 @@ import { Dropdown } from 'views/_components/Dropdown';
 
 export class RowsPerPageDropdown extends Component {
   static defaultProps = {
+    disabled: false,
     label: '',
     onChange: null,
     options: null,
@@ -13,6 +14,7 @@ export class RowsPerPageDropdown extends Component {
   };
 
   static propTypes = {
+    disabled: PropTypes.bool,
     label: PropTypes.string,
     onChange: PropTypes.func,
     options: PropTypes.array,
@@ -30,6 +32,7 @@ export class RowsPerPageDropdown extends Component {
           <Dropdown
             appendTo={document.body}
             ariaLabel={'rowsPerPage'}
+            disabled={this.props.disabled}
             name={uniqueId('rowsPerPage')}
             onChange={this.props.onChange}
             options={options}

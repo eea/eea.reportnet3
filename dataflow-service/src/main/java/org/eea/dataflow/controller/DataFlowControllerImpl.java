@@ -1,5 +1,9 @@
 package org.eea.dataflow.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -7,9 +11,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
+import org.eea.dataflow.service.file.DataflowHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
@@ -18,6 +26,7 @@ import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -38,6 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -72,6 +82,9 @@ public class DataFlowControllerImpl implements DataFlowController {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DataFlowControllerImpl.class);
+
   /** The dataflow service. */
   @Autowired
   @Lazy
@@ -84,6 +97,9 @@ public class DataFlowControllerImpl implements DataFlowController {
   /** The lock service. */
   @Autowired
   private LockService lockService;
+
+  @Autowired
+  private DataflowHelper dataflowHelp;
 
   /**
    * Find by id.
@@ -808,5 +824,85 @@ public class DataFlowControllerImpl implements DataFlowController {
       }
     }
     return false;
+  }
+
+  /**
+   * Gets the dataset summary by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataset summary by dataflow id
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @GetMapping("/{dataflowId}/datasetsSummary")
+  @ApiOperation(value = "Get a summary of the information of all the dataset types of a dataflow",
+      hidden = true)
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
+  public List<DatasetsSummaryVO> getDatasetSummaryByDataflowId(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+    List<DatasetsSummaryVO> datasetsSummary = null;
+    try {
+      datasetsSummary = dataflowService.getDatasetSummary(dataflowId);
+    } catch (EEAException e) {
+      LOG_ERROR.info("Error in dataflow with id {} " + dataflowId);
+    }
+    return datasetsSummary;
+  }
+
+  /**
+   * Export schema information.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @PostMapping("/exportSchemaInformation/{dataflowId}")
+  public void exportSchemaInformation(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+    LOG.info("Export schema information from dataflowId {}", dataflowId);
+    try {
+      dataflowHelp.exportSchemaInformation(dataflowId);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error(
+          "Error downloading file generated from export from the dataflowId {}. Message: {}",
+          dataflowId, e.getMessage());
+    }
+  }
+
+  /**
+   * Download schema information.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @Override
+  @GetMapping("/downloadSchemaInformation/{dataflowId}")
+  public void downloadSchemaInformation(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @RequestParam String fileName, HttpServletResponse response) {
+    try {
+      LOG.info(
+          "Downloading file generated when exporting Schema Information. DataflowId {}. Filename {}",
+          dataflowId, fileName);
+      File file = dataflowHelp.downloadSchemaInformation(dataflowId, fileName);
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
+      OutputStream out = response.getOutputStream();
+      FileInputStream in = new FileInputStream(file);
+      // copy from in to out
+      IOUtils.copyLarge(in, out);
+      out.close();
+      in.close();
+      // delete the file after downloading it
+      FileUtils.forceDelete(file);
+    } catch (IOException | ResponseStatusException e) {
+      LOG_ERROR.error(
+          "Downloading file generated when exporting Schema Information. DataflowId {}. Filename {}. Error message: {}",
+          dataflowId, fileName, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
+          "Trying to download a file generated during the export Schema Information process but the file is not found, dataflowId: %s filename: %s message: %s",
+          dataflowId, fileName, e.getMessage()), e);
+    }
   }
 }

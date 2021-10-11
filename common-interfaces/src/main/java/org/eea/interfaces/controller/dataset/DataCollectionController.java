@@ -66,5 +66,4 @@ public interface DataCollectionController {
    */
   @PutMapping("/update/{dataflowId}")
   void updateDataCollection(@PathVariable("dataflowId") Long dataflowId);
-
 }

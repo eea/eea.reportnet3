@@ -14,6 +14,7 @@ import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
@@ -563,4 +564,21 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
           EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
     }
   }
+
+  /**
+   * Gets the datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the datasets summary list
+   */
+  @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
+  @ApiOperation(value = "Get a summary of the information of all the dataset types of a dataflow",
+      hidden = true)
+  public List<DatasetsSummaryVO> getDatasetsSummaryList(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
+    return datasetMetabaseService.getDatasetsSummaryList(dataflowId);
+  }
+
+
+
 }

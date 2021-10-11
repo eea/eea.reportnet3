@@ -217,4 +217,5 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long idDataflow) {
     return dataCollectionService.getDataCollectionIdByDataflowId(idDataflow);
   }
+
 }

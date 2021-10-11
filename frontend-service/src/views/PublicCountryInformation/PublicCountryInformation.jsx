@@ -191,7 +191,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
             ? config.datasetStatus.DELIVERED.label
             : DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status)),
           restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false,
-          status: dataflow.status
+          status: resourcesContext.messages[dataflow.status]
         };
       });
     setDataflows(publicDataflows);
@@ -224,8 +224,8 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       .map(field => {
         let template = null;
         if (field === 'isReleased') template = renderIsReleasedBodyColumn;
-        if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
         if (field === 'name') template = renderDataflowNameBodyColumn;
+        if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
         if (field === 'obligation') template = renderObligationBodyColumn;
         if (field === 'publicFilesNames') template = renderDownloadFileBodyColumn;
         if (field === 'referencePublicFilesNames') template = renderDownloadReferenceFileBodyColumn;
@@ -341,23 +341,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
 
   const renderDataflowNameBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
-      <span className={styles.cellWrapper}>
-        {rowData.name}{' '}
-        <FontAwesomeIcon
-          aria-hidden={false}
-          className={`p-breadcrumb-home ${styles.link}`}
-          data-for="navigateTooltip"
-          data-tip
-          icon={AwesomeIcons('externalUrl')}
-          onClick={e => {
-            e.preventDefault();
-            history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: rowData.id }, true));
-          }}
-        />
-        <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
-          <span>{resourcesContext.messages['navigateToDataflow']}</span>
-        </ReactTooltip>
-      </span>
+      {rowData.obligation?.obligationId
+        ? renderRedirectText(rowData.name, getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: rowData.id }, true))
+        : rowData.name}
     </div>
   );
 

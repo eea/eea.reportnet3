@@ -36,6 +36,7 @@ const RepresentativesList = ({
   dataflowType,
   representativesImport = false,
   setDataProviderSelected,
+  selectedDataProviderGroup,
   setFormHasRepresentatives,
   setHasRepresentativesWithoutDatasets,
   setRepresentativeImport
@@ -130,14 +131,8 @@ const RepresentativesList = ({
     }
   };
 
-  const getDataProviderGroup = async () => {
-    try {
-      const response = await RepresentativeService.getSelectedDataProviderGroup(dataflowId);
-      formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: response.data });
-    } catch (error) {
-      console.error('RepresentativesList - getDataProviderGroup.', error);
-    }
-  };
+  const getDataProviderGroup = async () =>
+    formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: selectedDataProviderGroup });
 
   const getInitialData = async () => {
     switch (dataflowType) {
