@@ -35,7 +35,6 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
@@ -57,7 +56,6 @@ import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -183,11 +181,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
   /** The Constant STATUS_CHANGED: {@value}. */
   private static final String STATUS_CHANGED = "Feedback status changed, Message: ";
-
-  /** The dataset schema service. */
-  @Autowired
-  @Lazy
-  private DatasetSchemaService datasetSchemaService;
 
   /**
    * Gets the data set id by dataflow id.
@@ -1068,10 +1061,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
           representativeControllerZuul.findDataProviderById(reportingDataset.getDataProviderId());
       datasetsSummary.setDataProviderCode(dataProvider.getCode());
       datasetsSummary.setDataProviderName(dataProvider.getLabel());
-      DataSetSchemaVO datasetSchemaVO =
-          datasetSchemaService.getDataSchemaById(reportingDataset.getDatasetSchema());
+      Optional<DesignDataset> designDataset =
+          designDatasetRepository.findFirstByDatasetSchema(reportingDataset.getDatasetSchema());
       datasetsSummary.setDataSetName(
-          reportingDataset.getDataSetName() + " - " + datasetSchemaVO.getNameDatasetSchema());
+          reportingDataset.getDataSetName() + " - " + designDataset.get().getDataSetName());
       datasetsSummaryList.add(datasetsSummary);
     }
     return datasetsSummaryList;
