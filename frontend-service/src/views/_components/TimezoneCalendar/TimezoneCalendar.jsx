@@ -55,7 +55,12 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   const [hasError, setHasError] = useState(false);
 
   useLayoutEffect(() => {
-    setInputValue(dayjs(value).utc().format('HH:mm:ss').toString());
+    if (RegularExpressions['timezoneISO8601'].test(value)) {
+      setInputValue(dayjs(value).utc().format('HH:mm:ss').toString());
+    } else {
+      setInputValue(dayjs(new Date()).utc().format('HH:mm:ss').toString());
+    }
+
     const [day] = value.split('T');
     setDate(new Date(day));
   }, []);
