@@ -14,7 +14,12 @@ export const QCFieldEditor = ({ initialValue, keyfilter = '', onSaveField, qcs, 
       className={required && fieldValue === '' ? styles.required : ''}
       keyfilter={keyfilter}
       onBlur={() => onSaveField(qcs, fieldValue)}
-      onChange={e => onChange(e.target.value)}
+      onChange={e => {
+        if (e.target.value === '' && required) {
+          onSaveField(qcs, '');
+        }
+        onChange(e.target.value);
+      }}
       type="text"
       value={fieldValue}
     />
