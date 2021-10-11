@@ -553,6 +553,14 @@ public class DataFlowControllerImpl implements DataFlowController {
   public void deleteDataFlow(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
 
+    DataFlowVO dataflowData = null;
+    try {
+      dataflowData = dataflowService.getMetabaseById(dataflowId);
+    } catch (EEAException e) {
+      LOG.error(String.format(
+          "Couldn't retrieve the dataflow information with the provided dataflowId %s",
+          dataflowId));
+    }
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
     Map<String, Object> importDatasetData = new HashMap<>();
@@ -571,6 +579,10 @@ public class DataFlowControllerImpl implements DataFlowController {
     } else if (cloneLockVO != null) {
       throw new ResponseStatusException(HttpStatus.LOCKED,
           "Dataflow is locked because clone is in progress.");
+    } else if (!dataflowService.isAdmin() && dataflowData != null
+        && dataflowData.getType() == TypeDataflowEnum.BUSINESS) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "Can't delete a Business Dataflow without being an admin user.");
     } else {
       dataflowService.deleteDataFlow(dataflowId);
     }
