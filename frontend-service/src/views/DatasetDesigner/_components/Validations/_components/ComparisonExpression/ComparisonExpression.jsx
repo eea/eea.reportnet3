@@ -5,6 +5,9 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
 
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
 import styles from './ComparisonExpression.module.scss';
 
 import { config } from 'conf/';
@@ -16,6 +19,7 @@ import { Checkbox } from 'views/_components/Checkbox';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'views/_components/InputText';
+import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -36,6 +40,7 @@ const ComparisonExpression = ({
   rawTableFields,
   showRequiredFields
 }) => {
+  dayjs.extend(utc);
   const componentName = 'fieldComparison';
   const { expressionId } = expressionValues;
   const {
@@ -57,6 +62,7 @@ const ComparisonExpression = ({
   const [valueKeyFilter, setValueKeyFilter] = useState();
   const [valueTypeSelectorOptions, setValueTypeSelectorOptions] = useState([]);
   const [valueFieldPlaceholder, setValueFieldPlaceholder] = useState(resourcesContext.messages.selectField);
+  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
 
   useEffect(() => {
     if (inputStringMatchRef.current && isActiveStringMatchInput) {
@@ -370,12 +376,38 @@ const ComparisonExpression = ({
     panel.style.position = 'fixed';
   };
 
+  const renderDatetimeCalendar = () => {
+    return isTimezoneCalendarVisible ? (
+      <div className={styles.timezoneWrapper}>
+        <Button
+          className={'p-button-rounded p-button-secondary-transparent'}
+          icon="cancel"
+          onClick={() => setIsTimezoneCalendarVisible(false)}
+        />
+        <TimezoneCalendar
+          isInModal
+          onSaveDate={dateTime => onUpdateExpressionField('field2', dateTime)}
+          value={dayjs(expressionValues.expressionValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
+        />
+      </div>
+    ) : (
+      <InputText
+        onFocus={() => setIsTimezoneCalendarVisible(true)}
+        value={dayjs(expressionValues.expressionValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
+      />
+    );
+  };
+
   const buildValueInput = () => {
     const { operatorType, operatorValue, field2 } = expressionValues;
 
     if (operatorType === 'date' || operatorType === 'dateTime') {
       const showSeconds = operatorType === 'dateTime';
       const showTime = operatorType === 'dateTime';
+
+      if (operatorType === 'dateTime') {
+        return renderDatetimeCalendar();
+      }
       return (
         <Calendar
           appendTo={document.body}
