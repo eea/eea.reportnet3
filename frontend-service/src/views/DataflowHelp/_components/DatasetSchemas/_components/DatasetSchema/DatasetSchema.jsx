@@ -477,7 +477,7 @@ const DatasetSchema = ({
 
       if (!isNil(data)) {
         const date = new Date();
-        const formattedDate = DateUtils.formatDate(date, isNil(date), true);
+        const formattedDate = DateUtils.formatFullDate(date, isNil(date), true);
         DownloadFile(data, `table-definition-${datasetSchemaId}-${formattedDate}.zip`);
       }
     } catch (error) {
