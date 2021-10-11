@@ -1,4 +1,4 @@
-import { useContext, useEffect, useLayoutEffect, useState } from 'react';
+import { useContext, useEffect, useLayoutEffect, useState, useRef } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
@@ -15,6 +15,8 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
+
+import usePortal from 'react-useportal';
 
 const offsetOptions = [
   { value: 0, label: '+00:00' },
@@ -62,11 +64,14 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
 
+  const [openPortal, closePortal, isOpen, Portal] = usePortal();
+
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
 
+  const refDatetimeCalendar = useRef(null);
   useLayoutEffect(() => {
     if (RegularExpressions['UTC_ISO8601'].test(value)) {
       setInputValue(dayjs(value).utc().format('HH:mm:ss').toString());
@@ -174,20 +179,22 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   };
 
   return (
-    <div className={styles.container}>
-      {renderCalendar()}
-      <div className={styles.inputMaskWrapper}>
-        {renderInputMask()}
-        <div className={styles.utc}>
-          <span className={styles.label}>{resourcesContext.messages['utc']}</span>
-          <TooltipButton
-            message={resourcesContext.messages['dateTimeWarningTooltip']}
-            uniqueIdentifier={'dateTimeWarningTooltip'}
-          />
-          {renderDropdown()}
+    <Portal>
+      <div className={`${styles.container} p-shadow`}>
+        {renderCalendar()}
+        <div className={styles.inputMaskWrapper}>
+          {renderInputMask()}
+          <div className={styles.utc}>
+            <span className={styles.label}>{resourcesContext.messages['utc']}</span>
+            <TooltipButton
+              message={resourcesContext.messages['dateTimeWarningTooltip']}
+              uniqueIdentifier={'dateTimeWarningTooltip'}
+            />
+            {renderDropdown()}
+          </div>
         </div>
+        {renderButtons()}
       </div>
-      {renderButtons()}
-    </div>
+    </Portal>
   );
 };

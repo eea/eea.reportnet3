@@ -2,7 +2,11 @@
   width: 334px;
   display: flex;
   flex-direction: column;
-
+  position: absolute;
+  z-index: 6000;
+  top: 400px;
+  left: 1156px;
+  background-color: white;
   .buttonWrapper {
     margin-top: 0.5rem;
     width: 100% !important;
