@@ -36,6 +36,7 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
+import { DateUtils } from 'views/_functions/Utils';
 import { FileUtils } from 'views/_functions/Utils/FileUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -249,7 +250,13 @@ export const PublicDataflowInformation = withRouter(
     const onDownloadAllSchemasInfo = async () => {
       try {
         setIsDownloading(true);
-        await DataflowService.generatePublicAllSchemasInfoFile(dataflowId);
+        const { data } = await DataflowService.downloadPublicAllSchemasInfoFile(dataflowId);
+
+        if (!isNil(data.size !== 0)) {
+          const date = new Date();
+          const formattedDate = DateUtils.formatFullDate(date, isNil(date));
+          DownloadFile(data, `dataflow-${dataflowId}-Schema_Information_${formattedDate}.xlsx`);
+        }
       } catch (error) {
         console.error('PublicDataflowInformation - onDownloadAllSchemasInfo .', error);
         notificationContext.add({ type: 'GENERATE_SCHEMAS_INFO_FILE_ERROR' });

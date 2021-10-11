@@ -8,12 +8,12 @@ export const DataflowConfig = {
     '/dataschema/createEmptyDatasetSchema?dataflowId={:dataflowId}&datasetSchemaName={:datasetSchemaName}',
   delete: '/dataflow/{:dataflowId}',
   downloadAllSchemasInfo: '/dataflow/downloadSchemaInformation/{:dataflowId}?fileName={:fileName}',
+  downloadPublicAllSchemasInfoFile: '/dataflow/exportSchemaInformation/{:dataflowId}', // TODO ADD CORRECT ENDPOINT
   exportSchemas: '/dataschema/export?dataflowId={:dataflowId}',
   getAll: '/dataflow/getDataflows',
   getCloneableDataflows: '/dataflow/cloneableDataflows',
   getAllDataflowsUserList: '/dataflow/getUserRolesAllDataflows',
   generateAllSchemasInfoFile: '/dataflow/exportSchemaInformation/{:dataflowId}',
-  generatePublicAllSchemasInfoFile: '/dataflow/exportSchemaInformation/{:dataflowId}', // TODO ADD CORRECT ENDPOINT
   getApiKey: '/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   getApiKeyCustodian: '/user/getApiKey?dataflowId={:dataflowId}',
   getDetails: '/dataflow/{:dataflowId}/getmetabase',
