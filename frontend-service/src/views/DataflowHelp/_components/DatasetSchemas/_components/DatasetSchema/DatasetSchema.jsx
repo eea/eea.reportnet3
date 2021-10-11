@@ -26,6 +26,8 @@ import { ValidationService } from 'services/ValidationService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { RecordUtils } from 'views/_functions/Utils';
+
 const DatasetSchema = ({
   dataflowName,
   designDataset,
@@ -474,10 +476,15 @@ const DatasetSchema = ({
       const { data } = await DatasetService.downloadTableDefinitions(datasetSchemaId);
 
       if (!isNil(data)) {
-        DownloadFile(
-          data,
-          `table_definition_${datasetSchemaId}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip` //TODO CHANGE FILE NAME
-        );
+        const date = new Date();
+
+        const formattedDate = `${RecordUtils.formatDate(date, isNil(date))} ${[
+          date.getHours(),
+          date.getMinutes(),
+          date.getSeconds()
+        ].join('.')}`;
+
+        DownloadFile(data, `table-definition-${datasetSchemaId}-${formattedDate}.zip`);
       }
     } catch (error) {
       console.error('DatasetSchema - onDownloadTableDefinitions.', error);
