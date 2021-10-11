@@ -4,6 +4,9 @@ import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
 import styles from './ValidationExpression.module.scss';
 
 import { config } from 'conf/';
@@ -18,6 +21,7 @@ import { InputText } from 'views/_components/InputText';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 
 const ValidationExpression = ({
   dataflowType,
@@ -31,6 +35,7 @@ const ValidationExpression = ({
   position,
   showRequiredFields
 }) => {
+  dayjs.extend(utc);
   const { expressionId } = expressionValues;
   const {
     validations: { operatorTypes: operatorTypesConf, operatorByType }
@@ -45,6 +50,7 @@ const ValidationExpression = ({
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
   const [valueKeyFilter, setValueKeyFilter] = useState();
+  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
 
   useEffect(() => {
     if (inputStringMatchRef.current && isActiveStringMatchInput) {
@@ -195,6 +201,28 @@ const ValidationExpression = ({
     panel.style.position = 'fixed';
   };
 
+  const renderDatetimeCalendar = () => {
+    return isTimezoneCalendarVisible ? (
+      <div className={styles.timezoneWrapper}>
+        <Button
+          className={'p-button-rounded p-button-secondary-transparent'}
+          icon="cancel"
+          onClick={() => setIsTimezoneCalendarVisible(false)}
+        />
+        <TimezoneCalendar
+          isInModal
+          onSaveDate={dateTime => onUpdateExpressionField('expressionValue', dateTime)}
+          value={dayjs(expressionValues.expressionValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
+        />
+      </div>
+    ) : (
+      <InputText
+        onFocus={() => setIsTimezoneCalendarVisible(true)}
+        value={dayjs(expressionValues.expressionValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
+      />
+    );
+  };
+
   const buildValueInput = () => {
     const { operatorType, operatorValue } = expressionValues;
 
@@ -203,8 +231,13 @@ const ValidationExpression = ({
     }
 
     if (operatorType === 'date' || operatorType === 'dateTime') {
-      const showSeconds = operatorType === 'dateTime';
-      const showTime = operatorType === 'dateTime';
+      // const showSeconds = operatorType === 'dateTime';
+      // const showTime = operatorType === 'dateTime';
+
+      if (operatorType === 'dateTime') {
+        return renderDatetimeCalendar();
+      }
+
       return (
         <Calendar
           appendTo={document.body}
@@ -218,8 +251,8 @@ const ValidationExpression = ({
           }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
-          showSeconds={showSeconds}
-          showTime={showTime}
+          // showSeconds={showSeconds}
+          // showTime={showTime}
           value={expressionValues.expressionValue}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>
