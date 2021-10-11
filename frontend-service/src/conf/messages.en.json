@@ -1281,12 +1281,15 @@
     "dateTimeWarningTooltip": "Datetime will be converted to UTC",
     "utc": "UTC",
     "downloadAllTabsInfoFailed": "Error downloading tabs info file",
-    "downloadTableDefinitionsFailed": "Error downloading table definitions file",
+    "downloadTableDefinitionsError": "Error downloading table definitions file",
     "singleMultipleSelectItems": "Single/Multiple select items",
     "exportTablesSchema": "Export tables definitions",
     "tablesAndFields": "Tables & Fields",
     "extensions": "Extension/s",
     "downloadSchemasInfo": "Download schema/s info",
-    "downloadSchemasInfoTooltip": "Download all schema/s info in an XLSX file"
+    "downloadSchemasInfoTooltip": "Download all schema/s info in an XLSX file",
+    "downloadSchemasInfoFileError": "Failed downloading schemas info file",
+    "generateSchemasInfoFileError": "Failed generating schemas info file",
+    "automaticallyDownloadSchemasInfoFile": "Schemas info file generated successfully"
   }
 }

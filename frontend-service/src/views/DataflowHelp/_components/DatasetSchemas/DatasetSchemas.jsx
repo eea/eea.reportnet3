@@ -10,7 +10,6 @@ import styles from './DatasetSchemas.module.css';
 
 import { Button } from 'views/_components/Button';
 import { DatasetSchema } from './_components/DatasetSchema';
-import { DownloadFile } from 'views/_components/DownloadFile';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
@@ -29,7 +28,6 @@ import { ValidationService } from 'services/ValidationService';
 const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
-  console.log({ datasetsSchemas });
   const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
   const [isDownloading, setIsDownloading] = useState(false);
   const [extensionsOperationsList, setExtensionsOperationsList] = useState();
@@ -50,16 +48,26 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
     }
   }, [extensionsOperationsList, uniqueList, qcList]);
 
-  const onDownloadAllSchemasInfo = async datasetSchemaId => {
+  useEffect(() => {
+    if (
+      notificationContext.hidden.some(
+        notification =>
+          notification.key === 'EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT' ||
+          notification.key === 'EXPORT_SCHEMA_INFORMATION_FAILED_EVENT'
+      )
+    ) {
+      setIsDownloading(false);
+    }
+  }, [notificationContext.hidden]);
+
+  const onDownloadAllSchemasInfo = async dataflowId => {
     try {
-      setIsDownloading(true); // TODO MAKE USE OF isDownloading in Button?
-
-      const { data } = await DataflowService.downloadAllSchemasInfo(datasetSchemaId);
-
-      if (!isNil(data)) DownloadFile(data, `${dataflowName}.xlsx`);
+      setIsDownloading(true);
+      await DataflowService.generateAllSchemasInfoFile(dataflowId);
     } catch (error) {
       console.error('DatasetSchema - onDownloadAllSchemasInfo .', error);
-      notificationContext.add({ type: 'DOWNLOAD_ALL_TABS_INFO_FAILED' }); // TODO CHECK NOTIFICATION NAMING
+      notificationContext.add({ type: 'GENERATE_SCHEMAS_INFO_FILE_ERROR' });
+      setIsDownloading(false);
     }
   };
 

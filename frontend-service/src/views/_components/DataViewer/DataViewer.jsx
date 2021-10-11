@@ -88,10 +88,9 @@ const DataViewer = withRouter(
     const levelErrorAllTypes = ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'];
 
     const userContext = useContext(UserContext);
+
     const [addAnotherOne, setAddAnotherOne] = useState(false);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
-    const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
-    const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -100,16 +99,18 @@ const DataViewer = withRouter(
     const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
     const [importTableDialogVisible, setImportTableDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
+    const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
     const [isDataUpdated, setIsDataUpdated] = useState(false);
+    const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [prevFilterValue, setPrevFilterValue] = useState('');
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isPasting, setIsPasting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorAllTypes);
+    const [prevFilterValue, setPrevFilterValue] = useState('');
     const [valueFilter, setValueFilter] = useState();
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
