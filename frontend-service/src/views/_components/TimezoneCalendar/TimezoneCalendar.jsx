@@ -72,6 +72,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   const [hasError, setHasError] = useState(false);
 
   const refDatetimeCalendar = useRef(null);
+
   useLayoutEffect(() => {
     if (RegularExpressions['UTC_ISO8601'].test(value)) {
       setInputValue(dayjs(value).utc().format('HH:mm:ss').toString());
@@ -164,7 +165,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   const renderDropdown = () => {
     return (
       <Dropdown
-        appendTo={document.body}
+        // appendTo={document.body}
         className={styles.dropdown}
         disabled={isDisabled}
         filter
@@ -180,20 +181,22 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
 
   return (
     <Portal>
-      <div className={`${styles.container} p-shadow`}>
+      <div className={`${styles.container} p-datepicker.p-component.p-input-overlay.p-shadow`}>
         {renderCalendar()}
-        <div className={styles.inputMaskWrapper}>
-          {renderInputMask()}
-          <div className={styles.utc}>
-            <span className={styles.label}>{resourcesContext.messages['utc']}</span>
-            <TooltipButton
-              message={resourcesContext.messages['dateTimeWarningTooltip']}
-              uniqueIdentifier={'dateTimeWarningTooltip'}
-            />
-            {renderDropdown()}
+        <div className={styles.footer}>
+          <div className={styles.inputMaskWrapper}>
+            {renderInputMask()}
+            <div className={styles.utc}>
+              <span className={styles.label}>{resourcesContext.messages['utc']}</span>
+              <TooltipButton
+                message={resourcesContext.messages['dateTimeWarningTooltip']}
+                uniqueIdentifier={'dateTimeWarningTooltip'}
+              />
+              {renderDropdown()}
+            </div>
           </div>
+          {renderButtons()}
         </div>
-        {renderButtons()}
       </div>
     </Portal>
   );

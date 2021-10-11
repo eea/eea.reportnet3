@@ -6,10 +6,22 @@
   z-index: 6000;
   top: 400px;
   left: 1156px;
-  background-color: white;
+  box-shadow: var(--calendar-box-shadow);
+
   .buttonWrapper {
     margin-top: 0.5rem;
-    width: 100% !important;
+    // width: 100% !important;
+    button {
+      width: 100%;
+    }
+  }
+
+  .footer {
+    background-color: var(--bg);
+
+    padding: 0 0.5rem 0.5rem 0.5rem;
+    border: 1px solid var(--gray-50);
+    border-radius: 3px;
   }
 
   .inputMaskWrapper {
@@ -33,18 +45,22 @@
     }
 
     .utc {
+      padding-left: 0.5rem;
       justify-content: flex-end;
       display: flex;
-      flex-grow: 2;
+      // flex-grow: 2;
 
       .label {
         align-self: center;
+        color: var(--main-font-color);
       }
 
       .dropdown {
         margin-left: 0.5rem;
-        width: 5rem !important;
-        min-width: 11rem;
+        // right: 0;
+        // width: 5rem !important;
+        min-width: 8rem;
+        justify-self: flex-end;
       }
     }
   }
