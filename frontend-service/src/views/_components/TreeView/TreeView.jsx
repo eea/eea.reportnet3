@@ -234,10 +234,6 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
 
   const getLabel = str => resourcesContext.messages[str] || str;
 
-  if (property && !isNil(property.button)) {
-    console.log({ property });
-  }
-
   return (
     !isNil(property) && (
       <div
