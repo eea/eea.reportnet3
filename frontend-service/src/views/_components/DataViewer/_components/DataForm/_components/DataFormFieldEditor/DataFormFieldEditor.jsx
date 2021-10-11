@@ -28,8 +28,6 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { mapReducer } from './_functions/Reducers/mapReducer';
 
-import { useOnClickOutside } from 'views/_functions/Hooks/useOnClickOutside';
-
 import { MapUtils, RecordUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -69,15 +67,14 @@ const DataFormFieldEditor = ({
   const refCalendar = useRef(null);
   const refDatetimeCalendar = useRef(null);
   const textAreaRef = useRef(null);
-  const timezoneRef = useRef(null);
 
   dayjs.extend(utc);
 
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
-  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
   const [columnWithLinks, setColumnWithLinks] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
   const [map, dispatchMap] = useReducer(mapReducer, {
     currentCRS:
       fieldValue !== '' && type === 'POINT'
@@ -93,8 +90,6 @@ const DataFormFieldEditor = ({
     newPointCRS: { label: 'WGS84 - 4326', value: 'EPSG:4326' },
     showCoordinateError: false
   });
-
-  useOnClickOutside(timezoneRef, () => setIsTimezoneCalendarVisible(false));
 
   const { areEquals } = TextUtils;
 
