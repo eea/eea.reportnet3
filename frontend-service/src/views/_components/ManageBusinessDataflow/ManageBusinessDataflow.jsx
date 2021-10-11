@@ -257,7 +257,7 @@ export const ManageBusinessDataflow = ({
               uniqueIdentifier="pinDataflow"></TooltipButton>
           </div>
         )}
-        {isEditing && isDesign && (
+        {isEditing && isDesign && isAdmin && (
           <Button
             className="p-button-danger p-button-animated-blink"
             icon="trash"

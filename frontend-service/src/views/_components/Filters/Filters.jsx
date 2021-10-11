@@ -228,17 +228,20 @@ export const Filters = ({
 
     const checkedKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkbox);
 
+    const dateKeys = FiltersUtils.getFilteredDateKeys(filterState, filter, date);
+
     const filteredData = ApplyFilterUtils.onApplyFilters({
       actualFilterBy,
       checkbox,
       checkedKeys,
       data,
       date,
+      dateKeys,
       filter,
       filteredKeys: inputKeys,
+      multiselect,
       searchedKeys,
       selectedKeys,
-      multiselect,
       state: filterState,
       value
     });
