@@ -443,24 +443,18 @@ const DataFormFieldEditor = ({
     return (
       <div>
         {isTimezoneCalendarVisible ? (
-          <>
-            <Button
-              className={'p-button-rounded p-button-secondary-transparent'}
-              icon="cancel"
-              onClick={() => setIsTimezoneCalendarVisible(false)}
-            />
-            <TimezoneCalendar
-              isDisabled={(column.readOnly && reporting) || isSaving}
-              isInModal
-              onSaveDate={dateTime => onChangeForm(field, dateTime.format('YYYY-MM-DDTHH:mm:ss[Z]'), isConditional)}
-              parentRef={refDatetimeCalendar}
-              value={
-                fieldValue !== ''
-                  ? dayjs(fieldValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
-                  : new Date().toISOString().split('T')[0]
-              }
-            />
-          </>
+          <TimezoneCalendar
+            isDisabled={(column.readOnly && reporting) || isSaving}
+            isInModal
+            onClickOutside={() => setIsTimezoneCalendarVisible(false)}
+            onSaveDate={dateTime => onChangeForm(field, dateTime.format('YYYY-MM-DDTHH:mm:ss[Z]'), isConditional)}
+            parentRef={refDatetimeCalendar}
+            value={
+              fieldValue !== ''
+                ? dayjs(fieldValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
+                : new Date().toISOString().split('T')[0]
+            }
+          />
         ) : (
           <InputText
             onFocus={e => {

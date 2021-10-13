@@ -379,13 +379,9 @@ const ComparisonExpression = ({
   const renderDatetimeCalendar = () => {
     return isTimezoneCalendarVisible ? (
       <div className={styles.timezoneWrapper}>
-        <Button
-          className={'p-button-rounded p-button-secondary-transparent'}
-          icon="cancel"
-          onClick={() => setIsTimezoneCalendarVisible(false)}
-        />
         <TimezoneCalendar
           isInModal
+          onClickOutside={() => setIsTimezoneCalendarVisible(false)}
           onSaveDate={dateTime => onUpdateExpressionField('field2', dateTime)}
           value={dayjs(expressionValues.expressionValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
         />

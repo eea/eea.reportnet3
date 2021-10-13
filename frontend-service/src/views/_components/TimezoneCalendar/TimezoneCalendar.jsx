@@ -18,7 +18,6 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 
 const offsetOptions = [
-  { value: 0, label: '+00:00' },
   { value: -12, label: '-12:00' },
   { value: -11, label: '-11:00' },
   { value: -10, label: '-10:00' },
@@ -33,6 +32,7 @@ const offsetOptions = [
   { value: -3, label: '-03:00' },
   { value: -2, label: '-02:00' },
   { value: -1, label: '-01:00' },
+  { value: 0, label: '+00:00' },
   { value: 1, label: '+01:00' },
   { value: 2, label: '+02:00' },
   { value: 3, label: '+03:00' },
@@ -58,12 +58,18 @@ const offsetOptions = [
   { value: 14, label: '+14:00' }
 ];
 
-export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDisabled }) => {
+export const TimezoneCalendar = ({
+  onSaveDate = () => {},
+  onClickOutside = () => {},
+  value,
+  isInModal,
+  isDisabled
+}) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
 
-  const [openPortal, closePortal, isOpen, Portal] = usePortal();
+  const { Portal } = usePortal();
 
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
@@ -72,6 +78,20 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   const [position, setPosition] = useState();
 
   const refPosition = useRef(null);
+  const calendarRef = useRef(null);
+
+  const handleClickOutside = event => {
+    if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+      onClickOutside();
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('click', handleClickOutside, true);
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true);
+    };
+  });
 
   useLayoutEffect(() => {
     if (RegularExpressions['UTC_ISO8601'].test(value)) {
@@ -100,12 +120,10 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
 
   const calculatePosition = () => {
     const positionRect = refPosition?.current?.getBoundingClientRect();
-
     const bodyRect = document.body.getBoundingClientRect();
     const topOffset = positionRect.top - bodyRect.top - 200;
 
-    const leftOffset = positionRect.left;
-    setPosition({ left: leftOffset, top: topOffset });
+    setPosition({ left: positionRect.left, top: topOffset });
   };
 
   const renderButtons = () => {
@@ -195,6 +213,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
       <Portal>
         <div
           className={`${styles.container} p-datepicker.p-component.p-input-overlay.p-shadow`}
+          ref={calendarRef}
           style={{ left: `${position?.left}px`, top: `${position?.top + 40}px` }}>
           {renderCalendar()}
           <div className={styles.footer}>

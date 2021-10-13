@@ -201,16 +201,13 @@ const ValidationExpression = ({
     panel.style.position = 'fixed';
   };
 
+
   const renderDatetimeCalendar = () => {
     return isTimezoneCalendarVisible ? (
-      <div className={styles.timezoneWrapper}>
-        <Button
-          className={'p-button-rounded p-button-secondary-transparent'}
-          icon="cancel"
-          onClick={() => setIsTimezoneCalendarVisible(false)}
-        />
+      <div>
         <TimezoneCalendar
           isInModal
+          onClickOutside={() => setIsTimezoneCalendarVisible(false)}
           onSaveDate={dateTime => onUpdateExpressionField('expressionValue', dateTime)}
           value={dayjs(expressionValues.expressionValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
         />
