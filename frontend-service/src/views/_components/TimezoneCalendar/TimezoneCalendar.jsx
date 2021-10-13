@@ -101,8 +101,11 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   const calculatePosition = () => {
     const positionRect = refPosition?.current?.getBoundingClientRect();
 
-    console.log(`positionRect`, positionRect);
-    setPosition({ left: positionRect?.left, top: positionRect?.top });
+    const bodyRect = document.body.getBoundingClientRect();
+    const topOffset = positionRect.top - bodyRect.top - 200;
+
+    const leftOffset = positionRect.left;
+    setPosition({ left: leftOffset, top: topOffset });
   };
 
   const renderButtons = () => {
