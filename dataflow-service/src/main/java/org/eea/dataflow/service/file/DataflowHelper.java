@@ -221,296 +221,298 @@ public class DataflowHelper {
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
     // Create workbook
-    Workbook workbook = new XSSFWorkbook();
+    try (Workbook workbook = new XSSFWorkbook()) {
 
-    // Create sheets
-    Sheet sheetTF = workbook.createSheet("Tables & Fields");
-    Sheet sheetQC = workbook.createSheet("QC rules");
-    Sheet sheetUN = workbook.createSheet("Uniques");
-    Sheet sheetEI = workbook.createSheet("Externa integrations");
+      // Create sheets
+      Sheet sheetTF = workbook.createSheet("Tables & Fields");
+      Sheet sheetQC = workbook.createSheet("QC rules");
+      Sheet sheetUN = workbook.createSheet("Uniques");
+      Sheet sheetEI = workbook.createSheet("Externa integrations");
 
-    // Set columns and rows
-    int nColumnTF = 0;
-    int nRowTF = 0;
-    int nColumnQC = 0;
-    int nRowQC = 0;
-    int nColumnUN = 0;
-    int nRowUN = 0;
-    int nColumnEI = 0;
-    int nRowEI = 0;
+      // Set columns and rows
+      int nColumnTF = 0;
+      int nRowTF = 0;
+      int nColumnQC = 0;
+      int nRowQC = 0;
+      int nColumnUN = 0;
+      int nRowUN = 0;
+      int nColumnEI = 0;
+      int nRowEI = 0;
 
-    for (DesignDatasetVO designDatasetVO : listDesignDatasetVO) {
-      // Tables & Fields
-      Row rowheadTF;
-      rowheadTF = sheetTF.createRow(nRowTF);
-      rowheadTF.createCell(nColumnTF).setCellValue(designDatasetVO.getDataSetName());
-      nRowTF += 2;
-
-      // Tables
-      rowheadTF = sheetTF.createRow(nRowTF);
-      rowheadTF.createCell(nColumnTF).setCellValue("Tables");
-      nRowTF++;
-      rowheadTF = sheetTF.createRow(nRowTF);
-      rowheadTF.createCell(nColumnTF).setCellValue("Name");
-      nColumnTF++;
-      rowheadTF.createCell(nColumnTF).setCellValue("Description");
-      nColumnTF++;
-      rowheadTF.createCell(nColumnTF).setCellValue("Read only");
-      nColumnTF++;
-      rowheadTF.createCell(nColumnTF).setCellValue("Prefilled");
-      nColumnTF++;
-      rowheadTF.createCell(nColumnTF).setCellValue("Fixed number of records");
-      nColumnTF++;
-      rowheadTF.createCell(nColumnTF).setCellValue("Mandatory table");
-      nColumnTF = 0;
-      nRowTF++;
-
-      // Fill tables info
-      DataSetSchemaVO datasetSchemaVO =
-          datasetSchemaControllerZuul.findPublicDataSchemaByDatasetId(designDatasetVO.getId());
-
-      for (TableSchemaVO tableSchemaVO : datasetSchemaVO.getTableSchemas()) {
+      for (DesignDatasetVO designDatasetVO : listDesignDatasetVO) {
+        // Tables & Fields
+        Row rowheadTF;
         rowheadTF = sheetTF.createRow(nRowTF);
-        rowheadTF.createCell(nColumnTF).setCellValue(tableSchemaVO.getNameTableSchema());
-        nColumnTF++;
-        rowheadTF.createCell(nColumnTF).setCellValue(tableSchemaVO.getDescription());
-        nColumnTF++;
-        rowheadTF.createCell(nColumnTF).setCellValue(booleanToYesOrNo(tableSchemaVO.getReadOnly()));
-        nColumnTF++;
-        rowheadTF.createCell(nColumnTF)
-            .setCellValue(booleanToYesOrNo(tableSchemaVO.getToPrefill()));
-        nColumnTF++;
-        rowheadTF.createCell(nColumnTF)
-            .setCellValue(booleanToYesOrNo(tableSchemaVO.getFixedNumber()));
-        nColumnTF++;
-        String datasetSchemaId =
-            datasetSchemaControllerZuul.getDatasetSchemaId(designDatasetVO.getId());
-        RulesSchemaVO rulesSchemaVO =
-            rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId);
-        String mandatoryTable = "No";
-        for (RuleVO ruleVO : rulesSchemaVO.getRules()) {
-          if (AutomaticRuleTypeEnum.MANDATORY_TABLE.equals(ruleVO.getAutomaticType())
-              && tableSchemaVO.getIdTableSchema().equals(ruleVO.getReferenceId())) {
-            mandatoryTable = "Yes";
-            break;
-          }
-        }
-        rowheadTF.createCell(nColumnTF).setCellValue(mandatoryTable);
-        nColumnTF = 0;
-        nRowTF++;
-      }
+        rowheadTF.createCell(nColumnTF).setCellValue(designDatasetVO.getDataSetName());
+        nRowTF += 2;
 
-      // Fields tables
-      for (TableSchemaVO tableSchemaVO : datasetSchemaVO.getTableSchemas()) {
+        // Tables
+        rowheadTF = sheetTF.createRow(nRowTF);
+        rowheadTF.createCell(nColumnTF).setCellValue("Tables");
         nRowTF++;
         rowheadTF = sheetTF.createRow(nRowTF);
-        rowheadTF.createCell(nColumnTF)
-            .setCellValue("Fields table " + tableSchemaVO.getNameTableSchema());
-        nRowTF++;
-        rowheadTF = sheetTF.createRow(nRowTF);
-        rowheadTF.createCell(nColumnTF).setCellValue("Primary Key");
-        nColumnTF++;
-        rowheadTF.createCell(nColumnTF).setCellValue("Required");
-        nColumnTF++;
-        rowheadTF.createCell(nColumnTF).setCellValue("Read only");
-        nColumnTF++;
         rowheadTF.createCell(nColumnTF).setCellValue("Name");
         nColumnTF++;
         rowheadTF.createCell(nColumnTF).setCellValue("Description");
         nColumnTF++;
-        rowheadTF.createCell(nColumnTF).setCellValue("Type");
+        rowheadTF.createCell(nColumnTF).setCellValue("Read only");
         nColumnTF++;
-        rowheadTF.createCell(nColumnTF).setCellValue("Single/multiple select items");
+        rowheadTF.createCell(nColumnTF).setCellValue("Prefilled");
         nColumnTF++;
-        rowheadTF.createCell(nColumnTF).setCellValue("Format");
+        rowheadTF.createCell(nColumnTF).setCellValue("Fixed number of records");
+        nColumnTF++;
+        rowheadTF.createCell(nColumnTF).setCellValue("Mandatory table");
         nColumnTF = 0;
         nRowTF++;
-        List<FieldSchemaVO> listFieldSchemaVO = tableSchemaVO.getRecordSchema().getFieldSchema();
-        for (FieldSchemaVO fieldSchemaVO : listFieldSchemaVO) {
+
+        // Fill tables info
+        DataSetSchemaVO datasetSchemaVO =
+            datasetSchemaControllerZuul.findPublicDataSchemaByDatasetId(designDatasetVO.getId());
+
+        for (TableSchemaVO tableSchemaVO : datasetSchemaVO.getTableSchemas()) {
           rowheadTF = sheetTF.createRow(nRowTF);
-          rowheadTF.createCell(nColumnTF).setCellValue(booleanToYesOrNo(fieldSchemaVO.getPk()));
+          rowheadTF.createCell(nColumnTF).setCellValue(tableSchemaVO.getNameTableSchema());
+          nColumnTF++;
+          rowheadTF.createCell(nColumnTF).setCellValue(tableSchemaVO.getDescription());
           nColumnTF++;
           rowheadTF.createCell(nColumnTF)
-              .setCellValue(booleanToYesOrNo(fieldSchemaVO.getRequired()));
+              .setCellValue(booleanToYesOrNo(tableSchemaVO.getReadOnly()));
           nColumnTF++;
           rowheadTF.createCell(nColumnTF)
-              .setCellValue(booleanToYesOrNo(fieldSchemaVO.getReadOnly()));
+              .setCellValue(booleanToYesOrNo(tableSchemaVO.getToPrefill()));
           nColumnTF++;
-          rowheadTF.createCell(nColumnTF).setCellValue(fieldSchemaVO.getName());
+          rowheadTF.createCell(nColumnTF)
+              .setCellValue(booleanToYesOrNo(tableSchemaVO.getFixedNumber()));
           nColumnTF++;
-          rowheadTF.createCell(nColumnTF).setCellValue(fieldSchemaVO.getDescription());
-          nColumnTF++;
-          rowheadTF.createCell(nColumnTF).setCellValue(fieldSchemaVO.getType().getValue());
-          nColumnTF++;
-          String codeListItems = "";
-          if (fieldSchemaVO.getCodelistItems() != null) {
-            codeListItems = String.join(",", fieldSchemaVO.getCodelistItems());
-          }
-          rowheadTF.createCell(nColumnTF).setCellValue(codeListItems);
-          nColumnTF++;
-          String format = "";
-          if (DataType.ATTACHMENT.equals(fieldSchemaVO.getType())) {
-            String validExtensions = "";
-            if (fieldSchemaVO.getCodelistItems() != null) {
-              validExtensions = String.join(",", fieldSchemaVO.getValidExtensions());
+          String datasetSchemaId =
+              datasetSchemaControllerZuul.getDatasetSchemaId(designDatasetVO.getId());
+          RulesSchemaVO rulesSchemaVO =
+              rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId);
+          String mandatoryTable = "No";
+          for (RuleVO ruleVO : rulesSchemaVO.getRules()) {
+            if (AutomaticRuleTypeEnum.MANDATORY_TABLE.equals(ruleVO.getAutomaticType())
+                && tableSchemaVO.getIdTableSchema().equals(ruleVO.getReferenceId())) {
+              mandatoryTable = "Yes";
+              break;
             }
-            format = "Valid extension: " + validExtensions + " - Max file size: "
-                + fieldSchemaVO.getMaxSize() + " MB";
-          } else {
-            format = fieldFormat.get(fieldSchemaVO.getType());
           }
-          rowheadTF.createCell(nColumnTF).setCellValue(format);
+          rowheadTF.createCell(nColumnTF).setCellValue(mandatoryTable);
           nColumnTF = 0;
           nRowTF++;
         }
-      }
-      nRowTF += 2;
 
-      // QC rules
-      String datasetSchemaId =
-          datasetSchemaControllerZuul.getDatasetSchemaId(designDatasetVO.getId());
-      RulesSchemaVO rulesSchemaVO = rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId);
+        // Fields tables
+        for (TableSchemaVO tableSchemaVO : datasetSchemaVO.getTableSchemas()) {
+          nRowTF++;
+          rowheadTF = sheetTF.createRow(nRowTF);
+          rowheadTF.createCell(nColumnTF)
+              .setCellValue("Fields table " + tableSchemaVO.getNameTableSchema());
+          nRowTF++;
+          rowheadTF = sheetTF.createRow(nRowTF);
+          rowheadTF.createCell(nColumnTF).setCellValue("Primary Key");
+          nColumnTF++;
+          rowheadTF.createCell(nColumnTF).setCellValue("Required");
+          nColumnTF++;
+          rowheadTF.createCell(nColumnTF).setCellValue("Read only");
+          nColumnTF++;
+          rowheadTF.createCell(nColumnTF).setCellValue("Name");
+          nColumnTF++;
+          rowheadTF.createCell(nColumnTF).setCellValue("Description");
+          nColumnTF++;
+          rowheadTF.createCell(nColumnTF).setCellValue("Type");
+          nColumnTF++;
+          rowheadTF.createCell(nColumnTF).setCellValue("Single/multiple select items");
+          nColumnTF++;
+          rowheadTF.createCell(nColumnTF).setCellValue("Format");
+          nColumnTF = 0;
+          nRowTF++;
+          List<FieldSchemaVO> listFieldSchemaVO = tableSchemaVO.getRecordSchema().getFieldSchema();
+          for (FieldSchemaVO fieldSchemaVO : listFieldSchemaVO) {
+            rowheadTF = sheetTF.createRow(nRowTF);
+            rowheadTF.createCell(nColumnTF).setCellValue(booleanToYesOrNo(fieldSchemaVO.getPk()));
+            nColumnTF++;
+            rowheadTF.createCell(nColumnTF)
+                .setCellValue(booleanToYesOrNo(fieldSchemaVO.getRequired()));
+            nColumnTF++;
+            rowheadTF.createCell(nColumnTF)
+                .setCellValue(booleanToYesOrNo(fieldSchemaVO.getReadOnly()));
+            nColumnTF++;
+            rowheadTF.createCell(nColumnTF).setCellValue(fieldSchemaVO.getName());
+            nColumnTF++;
+            rowheadTF.createCell(nColumnTF).setCellValue(fieldSchemaVO.getDescription());
+            nColumnTF++;
+            rowheadTF.createCell(nColumnTF).setCellValue(fieldSchemaVO.getType().getValue());
+            nColumnTF++;
+            String codeListItems = "";
+            if (fieldSchemaVO.getCodelistItems() != null) {
+              codeListItems = String.join(",", fieldSchemaVO.getCodelistItems());
+            }
+            rowheadTF.createCell(nColumnTF).setCellValue(codeListItems);
+            nColumnTF++;
+            String format = "";
+            if (DataType.ATTACHMENT.equals(fieldSchemaVO.getType())) {
+              String validExtensions = "";
+              if (fieldSchemaVO.getCodelistItems() != null) {
+                validExtensions = String.join(",", fieldSchemaVO.getValidExtensions());
+              }
+              format = "Valid extension: " + validExtensions + " - Max file size: "
+                  + fieldSchemaVO.getMaxSize() + " MB";
+            } else {
+              format = fieldFormat.get(fieldSchemaVO.getType());
+            }
+            rowheadTF.createCell(nColumnTF).setCellValue(format);
+            nColumnTF = 0;
+            nRowTF++;
+          }
+        }
+        nRowTF += 2;
 
-      Row rowheadQC = sheetQC.createRow(nRowQC);
-      rowheadQC.createCell(nColumnQC).setCellValue(designDatasetVO.getDataSetName());
-      nRowQC += 2;
+        // QC rules
+        String datasetSchemaId =
+            datasetSchemaControllerZuul.getDatasetSchemaId(designDatasetVO.getId());
+        RulesSchemaVO rulesSchemaVO =
+            rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId);
 
-      // Table QC rules
-      rowheadQC = sheetQC.createRow(nRowQC);
-      rowheadQC.createCell(nColumnQC).setCellValue("Table");
-      nColumnQC++;
-      rowheadQC.createCell(nColumnQC).setCellValue("Field");
-      nColumnQC++;
-      rowheadQC.createCell(nColumnQC).setCellValue("Shortcode");
-      nColumnQC++;
-      rowheadQC.createCell(nColumnQC).setCellValue("Name");
-      nColumnQC++;
-      rowheadQC.createCell(nColumnQC).setCellValue("Description");
-      nColumnQC++;
-      rowheadQC.createCell(nColumnQC).setCellValue("Expression");
-      nColumnQC++;
-      rowheadQC.createCell(nColumnQC).setCellValue("Type of QC");
-      nColumnQC++;
-      rowheadQC.createCell(nColumnQC).setCellValue("Level error");
-      nColumnQC++;
-      rowheadQC.createCell(nColumnQC).setCellValue("Message");
-      nColumnQC++;
-      rowheadQC.createCell(nColumnQC).setCellValue("Automatic");
-      nColumnQC++;
-      rowheadQC.createCell(nColumnQC).setCellValue("Enabled");
-      nColumnQC = 0;
-      nRowQC++;
+        Row rowheadQC = sheetQC.createRow(nRowQC);
+        rowheadQC.createCell(nColumnQC).setCellValue(designDatasetVO.getDataSetName());
+        nRowQC += 2;
 
-      // Fill QC rules table info
-      for (RuleVO ruleVO : rulesSchemaVO.getRules()) {
+        // Table QC rules
         rowheadQC = sheetQC.createRow(nRowQC);
-        rowheadQC.createCell(nColumnQC)
-            .setCellValue(tableNames.containsKey(ruleVO.getReferenceId())
-                ? tableNames.get(ruleVO.getReferenceId())
-                : "");
+        rowheadQC.createCell(nColumnQC).setCellValue("Table");
         nColumnQC++;
-        rowheadQC.createCell(nColumnQC)
-            .setCellValue(fieldNames.containsKey(ruleVO.getReferenceId())
-                ? fieldNames.get(ruleVO.getReferenceId())
-                : "");
+        rowheadQC.createCell(nColumnQC).setCellValue("Field");
         nColumnQC++;
-        rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getShortCode());
+        rowheadQC.createCell(nColumnQC).setCellValue("Shortcode");
         nColumnQC++;
-        rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getRuleName());
+        rowheadQC.createCell(nColumnQC).setCellValue("Name");
         nColumnQC++;
-        rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getDescription());
+        rowheadQC.createCell(nColumnQC).setCellValue("Description");
         nColumnQC++;
-        rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getExpressionText());
+        rowheadQC.createCell(nColumnQC).setCellValue("Expression");
         nColumnQC++;
-        rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getType().getValue());
+        rowheadQC.createCell(nColumnQC).setCellValue("Type of QC");
         nColumnQC++;
-        rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getThenCondition().get(1));
+        rowheadQC.createCell(nColumnQC).setCellValue("Level error");
         nColumnQC++;
-        rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getThenCondition().get(0));
+        rowheadQC.createCell(nColumnQC).setCellValue("Message");
         nColumnQC++;
-        rowheadQC.createCell(nColumnQC).setCellValue(booleanToYesOrNo(ruleVO.isAutomatic()));
+        rowheadQC.createCell(nColumnQC).setCellValue("Automatic");
         nColumnQC++;
-        rowheadQC.createCell(nColumnQC).setCellValue(booleanToYesOrNo(ruleVO.isEnabled()));
+        rowheadQC.createCell(nColumnQC).setCellValue("Enabled");
         nColumnQC = 0;
         nRowQC++;
-      }
-      nRowQC += 2;
 
-      // Sheet Uniques
-      Row rowheadUN = sheetUN.createRow(nRowUN);
-      rowheadUN.createCell(nColumnUN).setCellValue(designDatasetVO.getDataSetName());
-      nRowUN += 2;
-
-      // Table Uniques
-      rowheadUN = sheetUN.createRow(nRowUN);
-      rowheadUN.createCell(nColumnUN).setCellValue("Table");
-      nColumnUN++;
-      rowheadUN.createCell(nColumnUN).setCellValue("Field");
-      nColumnUN = 0;
-      nRowUN++;
-
-      // Fill uniques tables info
-      List<UniqueConstraintVO> listConstraintVO = datasetSchemaControllerZuul
-          .getPublicUniqueConstraints(datasetSchemaVO.getIdDataSetSchema(), dataflow.getId());
-      for (UniqueConstraintVO uniqueConstraintVO : listConstraintVO) {
-        for (String fieldSchemaId : uniqueConstraintVO.getFieldSchemaIds()) {
-          rowheadUN = sheetUN.createRow(nRowUN);
-          rowheadUN.createCell(nColumnUN)
-              .setCellValue(tableNames.containsKey(uniqueConstraintVO.getTableSchemaId())
-                  ? tableNames.get(uniqueConstraintVO.getTableSchemaId())
+        // Fill QC rules table info
+        for (RuleVO ruleVO : rulesSchemaVO.getRules()) {
+          rowheadQC = sheetQC.createRow(nRowQC);
+          rowheadQC.createCell(nColumnQC)
+              .setCellValue(tableNames.containsKey(ruleVO.getReferenceId())
+                  ? tableNames.get(ruleVO.getReferenceId())
                   : "");
-          nColumnUN++;
-          rowheadUN.createCell(nColumnUN).setCellValue(
-              fieldNames.containsKey(fieldSchemaId) ? fieldNames.get(fieldSchemaId) : "");
-          nColumnUN = 0;
-          nRowUN++;
+          nColumnQC++;
+          rowheadQC.createCell(nColumnQC)
+              .setCellValue(fieldNames.containsKey(ruleVO.getReferenceId())
+                  ? fieldNames.get(ruleVO.getReferenceId())
+                  : "");
+          nColumnQC++;
+          rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getShortCode());
+          nColumnQC++;
+          rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getRuleName());
+          nColumnQC++;
+          rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getDescription());
+          nColumnQC++;
+          rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getExpressionText());
+          nColumnQC++;
+          rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getType().getValue());
+          nColumnQC++;
+          rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getThenCondition().get(1));
+          nColumnQC++;
+          rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getThenCondition().get(0));
+          nColumnQC++;
+          rowheadQC.createCell(nColumnQC).setCellValue(booleanToYesOrNo(ruleVO.isAutomatic()));
+          nColumnQC++;
+          rowheadQC.createCell(nColumnQC).setCellValue(booleanToYesOrNo(ruleVO.isEnabled()));
+          nColumnQC = 0;
+          nRowQC++;
         }
-      }
-      nRowUN += 2;
+        nRowQC += 2;
 
-      // External Integrations
-      Row rowheadEI = sheetEI.createRow(nRowEI);
-      rowheadEI.createCell(nColumnEI).setCellValue(designDatasetVO.getDataSetName());
-      nRowEI += 2;
+        // Sheet Uniques
+        Row rowheadUN = sheetUN.createRow(nRowUN);
+        rowheadUN.createCell(nColumnUN).setCellValue(designDatasetVO.getDataSetName());
+        nRowUN += 2;
 
-      // Table external integrations
-      rowheadEI = sheetEI.createRow(nRowEI);
-      rowheadEI.createCell(nColumnEI).setCellValue("Dataset");
-      nColumnEI++;
-      rowheadEI.createCell(nColumnEI).setCellValue("Operation");
-      nColumnEI++;
-      rowheadEI.createCell(nColumnEI).setCellValue("Extension/s");
-      nColumnEI++;
-      rowheadEI.createCell(nColumnEI).setCellValue("Id");
-      nColumnEI = 0;
-      nRowEI++;
+        // Table Uniques
+        rowheadUN = sheetUN.createRow(nRowUN);
+        rowheadUN.createCell(nColumnUN).setCellValue("Table");
+        nColumnUN++;
+        rowheadUN.createCell(nColumnUN).setCellValue("Field");
+        nColumnUN = 0;
+        nRowUN++;
 
-      // Fill external integrations tables info
-      IntegrationVO integrationVO = new IntegrationVO();
-      LinkedHashMap<String, String> internalParameters = new LinkedHashMap();
-      internalParameters.put("dataflowId", dataflowId.toString());
-      internalParameters.put("datasetSchemaId", datasetSchemaId);
-      integrationVO.setInternalParameters(internalParameters);
-      List<IntegrationVO> listIntegrationVO =
-          integrationControllerZuul.findPublicExtensionsAndOperations(integrationVO);
-      for (IntegrationVO integration : listIntegrationVO) {
-        rowheadEI = sheetEI.createRow(nRowEI);
+        // Fill uniques tables info
+        List<UniqueConstraintVO> listConstraintVO = datasetSchemaControllerZuul
+            .getPublicUniqueConstraints(datasetSchemaVO.getIdDataSetSchema(), dataflow.getId());
+        for (UniqueConstraintVO uniqueConstraintVO : listConstraintVO) {
+          for (String fieldSchemaId : uniqueConstraintVO.getFieldSchemaIds()) {
+            rowheadUN = sheetUN.createRow(nRowUN);
+            rowheadUN.createCell(nColumnUN)
+                .setCellValue(tableNames.containsKey(uniqueConstraintVO.getTableSchemaId())
+                    ? tableNames.get(uniqueConstraintVO.getTableSchemaId())
+                    : "");
+            nColumnUN++;
+            rowheadUN.createCell(nColumnUN).setCellValue(
+                fieldNames.containsKey(fieldSchemaId) ? fieldNames.get(fieldSchemaId) : "");
+            nColumnUN = 0;
+            nRowUN++;
+          }
+        }
+        nRowUN += 2;
+
+        // External Integrations
+        Row rowheadEI = sheetEI.createRow(nRowEI);
         rowheadEI.createCell(nColumnEI).setCellValue(designDatasetVO.getDataSetName());
+        nRowEI += 2;
+
+        // Table external integrations
+        rowheadEI = sheetEI.createRow(nRowEI);
+        rowheadEI.createCell(nColumnEI).setCellValue("Dataset");
         nColumnEI++;
-        rowheadEI.createCell(nColumnEI).setCellValue(integration.getOperation().getValue());
+        rowheadEI.createCell(nColumnEI).setCellValue("Operation");
         nColumnEI++;
-        rowheadEI.createCell(nColumnEI)
-            .setCellValue(integration.getInternalParameters().get("fileExtension"));
+        rowheadEI.createCell(nColumnEI).setCellValue("Extension/s");
         nColumnEI++;
-        rowheadEI.createCell(nColumnEI).setCellValue(integration.getId());
+        rowheadEI.createCell(nColumnEI).setCellValue("Id");
         nColumnEI = 0;
         nRowEI++;
-      }
-      nRowEI += 2;
-    }
 
-    workbook.write(byteArrayOutputStream);
-    workbook.close();
+        // Fill external integrations tables info
+        IntegrationVO integrationVO = new IntegrationVO();
+        LinkedHashMap<String, String> internalParameters = new LinkedHashMap();
+        internalParameters.put("dataflowId", dataflowId.toString());
+        internalParameters.put("datasetSchemaId", datasetSchemaId);
+        integrationVO.setInternalParameters(internalParameters);
+        List<IntegrationVO> listIntegrationVO =
+            integrationControllerZuul.findPublicExtensionsAndOperations(integrationVO);
+        for (IntegrationVO integration : listIntegrationVO) {
+          rowheadEI = sheetEI.createRow(nRowEI);
+          rowheadEI.createCell(nColumnEI).setCellValue(designDatasetVO.getDataSetName());
+          nColumnEI++;
+          rowheadEI.createCell(nColumnEI).setCellValue(integration.getOperation().getValue());
+          nColumnEI++;
+          rowheadEI.createCell(nColumnEI)
+              .setCellValue(integration.getInternalParameters().get("fileExtension"));
+          nColumnEI++;
+          rowheadEI.createCell(nColumnEI).setCellValue(integration.getId());
+          nColumnEI = 0;
+          nRowEI++;
+        }
+        nRowEI += 2;
+      }
+
+      workbook.write(byteArrayOutputStream);
+    }
 
     return byteArrayOutputStream.toByteArray();
   }
