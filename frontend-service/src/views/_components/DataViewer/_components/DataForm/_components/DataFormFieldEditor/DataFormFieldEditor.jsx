@@ -441,7 +441,7 @@ const DataFormFieldEditor = ({
 
   const renderDatetimeCalendar = (field, fieldValue) => {
     return (
-      <div className={styles.timezoneWrapper}>
+      <div>
         {isTimezoneCalendarVisible ? (
           <>
             <Button
