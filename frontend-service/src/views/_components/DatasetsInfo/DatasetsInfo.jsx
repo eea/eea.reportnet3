@@ -3,6 +3,8 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
+
 import styles from './DatasetsInfo.module.scss';
 
 import { Column } from 'primereact/column';
@@ -90,6 +92,11 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     }
   ];
 
+  const filterReferenceDataflowOptions = [
+    { type: 'input', properties: [{ name: 'name' }] },
+    { type: 'multiselect', properties: [{ name: 'type' }] }
+  ];
+
   const onLoadFilteredData = value => setFilteredData(value);
 
   const renderDatasetsInfoContent = () => {
@@ -146,7 +153,7 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
       data={datasetsInfo}
       getFilteredData={onLoadFilteredData}
       getFilteredSearched={getFilteredState}
-      options={filterOptions}
+      options={dataflowType === config.dataflowType.REFERENCE.value ? filterReferenceDataflowOptions : filterOptions}
     />
   );
 
