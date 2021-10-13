@@ -206,6 +206,31 @@ public class IntegrationControllerImpl implements IntegrationController {
   }
 
   /**
+   * Find public extensions and operations.
+   *
+   * @param integrationVO the integration VO
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/listPublicExtensionsOperations",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Integrations and Operations by Integration Criteria",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class,
+      responseContainer = "List", hidden = true)
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  public List<IntegrationVO> findPublicExtensionsAndOperations(@ApiParam(type = "Object",
+      value = "IntegrationVO Object") @RequestBody IntegrationVO integrationVO) {
+    try {
+      return integrationService.getOnlyExtensionsAndOperations(
+          integrationService.getAllIntegrationsByCriteria(integrationVO));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error finding integrations: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  /**
    * Execute integration process.
    *
    * @param integrationToolTypeEnum the integration tool type enum
