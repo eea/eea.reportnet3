@@ -301,19 +301,19 @@ export class BodyCell extends Component {
     }
 
     if (this.props.editMode !== 'row') {
-      /* eslint-disable */
       editorKeyHelper = this.props.editor && (
+        /* eslint-disable jsx-a11y/anchor-is-valid */
         <a
-          tabIndex="0"
+          className="p-cell-editor-key-helper p-hidden-accessible"
+          onFocus={this.onEditorFocus}
           ref={el => {
             this.keyHelper = el;
           }}
-          className="p-cell-editor-key-helper p-hidden-accessible"
-          onFocus={this.onEditorFocus}>
+          tabIndex="0">
           <span></span>
         </a>
+        /* eslint-enable jsx-a11y/anchor-is-valid */
       );
-      /* eslint-enable */
     }
 
     return (
