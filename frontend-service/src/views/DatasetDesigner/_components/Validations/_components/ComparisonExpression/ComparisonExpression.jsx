@@ -384,13 +384,13 @@ const ComparisonExpression = ({
           isInModal
           onClickOutside={() => setIsTimezoneCalendarVisible(false)}
           onSaveDate={dateTime => onUpdateExpressionField('field2', dateTime)}
-          value={dayjs(expressionValues.expressionValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
+          value={dayjs(expressionValues.field2).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
         />
       </div>
     ) : (
       <InputText
         onFocus={() => setIsTimezoneCalendarVisible(true)}
-        value={dayjs(expressionValues.expressionValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
+        value={dayjs(expressionValues.field2).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
       />
     );
   };
