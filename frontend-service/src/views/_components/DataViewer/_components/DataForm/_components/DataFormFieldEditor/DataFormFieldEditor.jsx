@@ -129,8 +129,8 @@ const DataFormFieldEditor = ({
         textAreaRef.current.element.focus();
       } else if (refCalendar.current) {
         refCalendar.current.inputElement.focus();
-      } else if (refDatetimeCalendar.current) {
-        refDatetimeCalendar.current.inputElement.focus();
+        // } else if (refDatetimeCalendar.current) {
+        //   refDatetimeCalendar.current.inputElement.focus();
       } else if (dropdownRef.current) {
         dropdownRef.current.focusInput.focus();
       } else if (multiDropdownRef.current) {
@@ -147,7 +147,7 @@ const DataFormFieldEditor = ({
     pointRef.current,
     dropdownRef.current,
     refCalendar.current,
-    refDatetimeCalendar.current,
+    // refDatetimeCalendar.current,
     textAreaRef.current,
     inputRef.current,
     isVisible,
@@ -440,26 +440,37 @@ const DataFormFieldEditor = ({
   };
 
   const renderDatetimeCalendar = (field, fieldValue) => {
-    return isTimezoneCalendarVisible ? (
+    return (
       <div className={styles.timezoneWrapper}>
-        <Button
-          className={'p-button-rounded p-button-secondary-transparent'}
-          icon="cancel"
-          onClick={() => setIsTimezoneCalendarVisible(false)}
-        />
-        <TimezoneCalendar
-          isDisabled={(column.readOnly && reporting) || isSaving}
-          isInModal
-          onSaveDate={dateTime => onChangeForm(field, dateTime.format('YYYY-MM-DDTHH:mm:ss[Z]'), isConditional)}
-          value={
-            fieldValue !== ''
-              ? dayjs(fieldValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
-              : new Date().toISOString().split('T')[0]
-          }
-        />
+        {isTimezoneCalendarVisible ? (
+          <>
+            <Button
+              className={'p-button-rounded p-button-secondary-transparent'}
+              icon="cancel"
+              onClick={() => setIsTimezoneCalendarVisible(false)}
+            />
+            <TimezoneCalendar
+              isDisabled={(column.readOnly && reporting) || isSaving}
+              isInModal
+              onSaveDate={dateTime => onChangeForm(field, dateTime.format('YYYY-MM-DDTHH:mm:ss[Z]'), isConditional)}
+              parentRef={refDatetimeCalendar}
+              value={
+                fieldValue !== ''
+                  ? dayjs(fieldValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
+                  : new Date().toISOString().split('T')[0]
+              }
+            />
+          </>
+        ) : (
+          <InputText
+            onFocus={e => {
+              setIsTimezoneCalendarVisible(true);
+            }}
+            ref={refDatetimeCalendar}
+            value={fieldValue}
+          />
+        )}
       </div>
-    ) : (
-      <InputText onFocus={() => setIsTimezoneCalendarVisible(true)} value={fieldValue} />
     );
   };
 

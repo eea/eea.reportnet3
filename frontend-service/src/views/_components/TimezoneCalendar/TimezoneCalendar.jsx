@@ -2,6 +2,7 @@ import { useContext, useEffect, useLayoutEffect, useState, useRef } from 'react'
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
+import usePortal from 'react-useportal';
 import utc from 'dayjs/plugin/utc';
 
 import styles from './TimezoneCalendar.module.scss';
@@ -15,8 +16,6 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
-
-import usePortal from 'react-useportal';
 
 const offsetOptions = [
   { value: 0, label: '+00:00' },
@@ -70,8 +69,9 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   const [inputValue, setInputValue] = useState('');
   const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
+  const [position, setPosition] = useState();
 
-  const refDatetimeCalendar = useRef(null);
+  const refPosition = useRef(null);
 
   useLayoutEffect(() => {
     if (RegularExpressions['UTC_ISO8601'].test(value)) {
@@ -82,6 +82,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
 
     const [day] = value.split('T');
     setDate(new Date(day));
+    calculatePosition();
   }, []);
 
   useEffect(() => {
@@ -95,6 +96,13 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
     const [hour, minute, second] = inputValue.split(':');
     const utcDate = Date.UTC(newDate.getFullYear(), newDate.getMonth(), newDate.getDate(), hour, minute, second);
     return utcDate;
+  };
+
+  const calculatePosition = () => {
+    const positionRect = refPosition?.current?.getBoundingClientRect();
+
+    console.log(`positionRect`, positionRect);
+    setPosition({ left: positionRect?.left, top: positionRect?.top });
   };
 
   const renderButtons = () => {
@@ -165,7 +173,6 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   const renderDropdown = () => {
     return (
       <Dropdown
-        // appendTo={document.body}
         className={styles.dropdown}
         disabled={isDisabled}
         filter
@@ -180,24 +187,29 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
   };
 
   return (
-    <Portal>
-      <div className={`${styles.container} p-datepicker.p-component.p-input-overlay.p-shadow`}>
-        {renderCalendar()}
-        <div className={styles.footer}>
-          <div className={styles.inputMaskWrapper}>
-            {renderInputMask()}
-            <div className={styles.utc}>
-              <span className={styles.label}>{resourcesContext.messages['utc']}</span>
-              <TooltipButton
-                message={resourcesContext.messages['dateTimeWarningTooltip']}
-                uniqueIdentifier={'dateTimeWarningTooltip'}
-              />
-              {renderDropdown()}
+    <>
+      <div ref={refPosition} />
+      <Portal>
+        <div
+          className={`${styles.container} p-datepicker.p-component.p-input-overlay.p-shadow`}
+          style={{ left: `${position?.left}px`, top: `${position?.top + 40}px` }}>
+          {renderCalendar()}
+          <div className={styles.footer}>
+            <div className={styles.inputMaskWrapper}>
+              {renderInputMask()}
+              <div className={styles.utc}>
+                <span className={styles.label}>{resourcesContext.messages['utc']}</span>
+                <TooltipButton
+                  message={resourcesContext.messages['dateTimeWarningTooltip']}
+                  uniqueIdentifier={'dateTimeWarningTooltip'}
+                />
+                {renderDropdown()}
+              </div>
             </div>
+            {renderButtons()}
           </div>
-          {renderButtons()}
         </div>
-      </div>
-    </Portal>
+      </Portal>
+    </>
   );
 };
