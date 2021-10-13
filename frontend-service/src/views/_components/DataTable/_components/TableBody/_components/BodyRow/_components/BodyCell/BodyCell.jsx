@@ -6,6 +6,7 @@ import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 import styles from './BodyCell.module.scss';
 
 import { Button } from 'views/_components/Button';
+import ReactTooltip from 'react-tooltip';
 import { RowRadioButton } from './_components/RowRadioButton';
 import { RowCheckbox } from 'views/_components/DataTable/_components/RowCheckbox';
 
@@ -109,6 +110,10 @@ export class BodyCell extends Component {
         this.props.rowData[this.props.quickEditRowInfo.property] === this.props.quickEditRowInfo.deletedRow) &&
       this.props.quickEditRowInfo.condition
     );
+  }
+
+  checkEditorInvalid() {
+    return this.props.quickEditRowInfo.requiredFields.some(field => this.props.rowData[field] === '');
   }
 
   closeCell() {
@@ -224,22 +229,44 @@ export class BodyCell extends Component {
       if (this.state.editing) {
         content = (
           <div className={styles.actionTemplate}>
-            <Button
-              className={`${`p-button-rounded p-button-primary-transparent ${styles.editSaveRowButton}`} p-button-animated-blink`}
-              icon="check"
-              onClick={this.props.onRowEditSave}
-              tooltip={this.context.messages['save']}
-              tooltipOptions={{ position: 'top' }}
-              type="button"
-            />
-            <Button
-              className={`${`p-button-rounded p-button-secondary-transparent ${styles.editCancelRowButton}`} p-button-animated-blink`}
-              icon="cancel"
-              onClick={this.props.onRowEditCancel}
-              tooltip={this.context.messages['cancel']}
-              tooltipOptions={{ position: 'top' }}
-              type="button"
-            />
+            <span data-for={`quickEditSaveTooltip${this.props.rowIndex}`} data-tip>
+              <Button
+                className={`${`p-button-rounded p-button-primary-transparent ${styles.editSaveRowButton}`} ${
+                  !this.checkEditorInvalid() ? 'p-button-animated-blink' : ''
+                }`}
+                disabled={this.checkEditorInvalid()}
+                icon="check"
+                onClick={this.props.onRowEditSave}
+              />
+            </span>
+            <span data-for={`quickEditCancelTooltip${this.props.rowIndex}`} data-tip>
+              <Button
+                className={`${`p-button-rounded p-button-secondary-transparent ${styles.editCancelRowButton}`} p-button-animated-blink`}
+                icon="cancel"
+                onClick={this.props.onRowEditCancel}
+              />
+            </span>
+
+            <ReactTooltip
+              border={true}
+              className={styles.tooltip}
+              effect="solid"
+              id={`quickEditSaveTooltip${this.props.rowIndex}`}
+              place="top">
+              <span>
+                {!this.checkEditorInvalid()
+                  ? this.context.messages['save']
+                  : this.context.messages['fcSubmitButtonDisabled']}
+              </span>
+            </ReactTooltip>
+            <ReactTooltip
+              border={true}
+              className={styles.tooltip}
+              effect="solid"
+              id={`quickEditCancelTooltip${this.props.rowIndex}`}
+              place="top">
+              <span> {this.context.messages['cancel']} </span>
+            </ReactTooltip>
           </div>
         );
       } else {
@@ -247,7 +274,7 @@ export class BodyCell extends Component {
           <div className={styles.actionTemplate}>
             <Button
               className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
-                this.calculateRowDisabledQuickEdit() ? 'p-button-animated-blink' : ''
+                !this.calculateRowDisabledQuickEdit() ? 'p-button-animated-blink' : ''
               }`}
               disabled={this.props.quickEditRowInfo ? this.props.quickEditRowInfo.condition : false}
               icon={this.props.quickEditRowInfo && this.calculateRowDisabledQuickEdit() ? 'spinnerAnimate' : 'clock'}
@@ -274,19 +301,19 @@ export class BodyCell extends Component {
     }
 
     if (this.props.editMode !== 'row') {
-      /* eslint-disable */
       editorKeyHelper = this.props.editor && (
+        /* eslint-disable jsx-a11y/anchor-is-valid */
         <a
-          tabIndex="0"
+          className="p-cell-editor-key-helper p-hidden-accessible"
+          onFocus={this.onEditorFocus}
           ref={el => {
             this.keyHelper = el;
           }}
-          className="p-cell-editor-key-helper p-hidden-accessible"
-          onFocus={this.onEditorFocus}>
+          tabIndex="0">
           <span></span>
         </a>
+        /* eslint-enable jsx-a11y/anchor-is-valid */
       );
-      /* eslint-enable */
     }
 
     return (

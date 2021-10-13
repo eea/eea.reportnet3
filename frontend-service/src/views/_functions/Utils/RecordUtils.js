@@ -181,6 +181,7 @@ const getFilter = type => {
     case 'NUMBER_INTEGER':
       return 'int';
     case 'NUMBER_DECIMAL':
+      return 'num';
     case 'POINT':
       return 'coordinates';
     case 'DATE':
