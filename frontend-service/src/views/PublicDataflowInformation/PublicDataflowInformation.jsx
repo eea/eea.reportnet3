@@ -252,7 +252,7 @@ export const PublicDataflowInformation = withRouter(
         setIsDownloading(true);
         const { data } = await DataflowService.downloadPublicAllSchemasInfoFile(dataflowId);
 
-        if (!isNil(data.size)) {
+        if (!isNil(data)) {
           const date = new Date();
           const formattedDate = DateUtils.formatFullDate(date, isNil(date));
           DownloadFile(data, `dataflow-${dataflowId}-Schema_Information_${formattedDate}.xlsx`);
