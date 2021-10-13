@@ -209,7 +209,7 @@ export const TimezoneCalendar = ({
 
   return (
     <Fragment>
-      <div ref={refPosition} />
+      <div className={styles.hiddenDiv} ref={refPosition} />
       <Portal>
         <div
           className={`${styles.container} p-datepicker.p-component.p-input-overlay.p-shadow`}

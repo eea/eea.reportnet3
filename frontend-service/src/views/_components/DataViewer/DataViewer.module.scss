@@ -25,10 +25,6 @@
   @include for-desktop-up {
     max-width: 60%;
   }
-
-  @include for-big-desktop-up {
-    max-width: 60%;
-  }
 }
 .fieldDisabled {
   cursor: default;

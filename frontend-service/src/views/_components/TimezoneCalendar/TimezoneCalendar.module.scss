@@ -4,8 +4,6 @@
   flex-direction: column;
   position: absolute;
   z-index: 6000;
-  // top: 400px;
-  // left: 1156px;
   box-shadow: var(--calendar-box-shadow);
 
   .buttonWrapper {
@@ -57,11 +55,12 @@
 
       .dropdown {
         margin-left: 0.5rem;
-        // right: 0;
-        // width: 5rem !important;
         min-width: 8rem;
         justify-self: flex-end;
       }
     }
   }
+}
+.hiddenDiv {
+  min-height: 33px;
 }
