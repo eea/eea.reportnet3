@@ -116,10 +116,8 @@ export const Filters = ({
         }
 
         if (!isEmpty(filterState.filterBy[dateProperty])) {
-          console.log(`in`);
           onAnimateLabel(dateProperty, true);
         } else {
-          console.log(`out`);
           onAnimateLabel(dateProperty, false);
         }
       });
