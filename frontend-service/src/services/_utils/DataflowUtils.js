@@ -178,7 +178,7 @@ const parseDatasetsInfoDTO = datasetsDTO => {
   });
 };
 
-const getDatasetType = datasetType => config.datasetType.find(type => type.key === datasetType).value;
+const getDatasetType = datasetType => config.datasetType.find(type => type.key === datasetType)?.value;
 
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
