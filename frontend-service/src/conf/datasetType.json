@@ -1,8 +1,8 @@
-{
-  "DATACOLLECTION": { "key": "COLLECTION", "value": "dataCollection" },
-  "DESIGN": { "key": "DESIGN", "value": "designDataset" },
-  "EUDATASET": { "key": "EUDATASET", "value": "euDataset" },
-  "REFERENCE": { "key": "REFERENCE", "value": "referenceDataset" },
-  "REPORTING": { "key": "REPORTING", "value": "reportingDataset" },
-  "TEST": { "key": "TEST", "value": "testDataset" }
-}
+[
+  { "key": "COLLECTION", "value": "dataCollection" },
+  { "key": "DESIGN", "value": "designDataset" },
+  { "key": "EUDATASET", "value": "euDataset" },
+  { "key": "REFERENCE", "value": "referenceDataset" },
+  { "key": "REPORTING", "value": "reportingDataset" },
+  { "key": "TEST", "value": "testDataset" }
+]
