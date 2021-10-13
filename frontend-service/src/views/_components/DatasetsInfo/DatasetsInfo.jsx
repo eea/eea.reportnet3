@@ -134,15 +134,17 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
         value={filteredData}>
         <Column field="name" header={resourcesContext.messages['name']} sortable={true} />
         <Column field="type" header={resourcesContext.messages['type']} sortable={true} />
-        <Column
-          field="providerData"
-          header={TextByDataflowTypeUtils.getLabelByDataflowType(
-            resourcesContext.messages,
-            dataflowType,
-            'datasetsInfoDataProviderColumnHeader'
-          )}
-          sortable={true}
-        />
+        {!(dataflowType === config.dataflowType.REFERENCE.value) && (
+          <Column
+            field="providerData"
+            header={TextByDataflowTypeUtils.getLabelByDataflowType(
+              resourcesContext.messages,
+              dataflowType,
+              'datasetsInfoDataProviderColumnHeader'
+            )}
+            sortable={true}
+          />
+        )}
         <Column field="id" header={resourcesContext.messages['datasetId']} sortable={true} />
       </DataTable>
     );
