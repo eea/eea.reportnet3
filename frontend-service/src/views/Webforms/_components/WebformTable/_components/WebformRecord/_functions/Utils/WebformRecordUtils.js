@@ -19,17 +19,6 @@ const formatDate = (date, isInvalidDate) => {
   return [year, month, day].join('-');
 };
 
-const getInputType = {
-  DATE: 'date',
-  NUMBER_DECIMAL: 'any',
-  NUMBER_INTEGER: 'init',
-  POINT: 'coordinates',
-  TEXT: 'text',
-  EMAIL: 'email',
-  PHONE: 'phone',
-  RICH_TEXT: 'any'
-};
-
 const getMultiselectValues = (multiselectItemsOptions, value) => {
   if (!isUndefined(value) && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
     const splittedValue = !Array.isArray(value) ? TextUtils.splitByChar(value, ';') : value;
@@ -120,7 +109,6 @@ const parseListOfSinglePams = (records = []) => {
 
 export const WebformRecordUtils = {
   formatDate,
-  getInputType,
   getMultiselectValues,
   parseListOfSinglePams,
   parseMultiselect,

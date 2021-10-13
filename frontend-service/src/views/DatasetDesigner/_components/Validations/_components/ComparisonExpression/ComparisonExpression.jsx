@@ -21,6 +21,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { RecordUtils } from 'views/_functions/Utils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 const ComparisonExpression = ({
@@ -470,7 +471,7 @@ const ComparisonExpression = ({
             disabled={isDisabled}
             format={false}
             id={uniqueId(componentName)}
-            keyfilter="num"
+            keyfilter={RecordUtils.getFilter(fieldType)}
             onBlur={e => checkField('number', e.target.value)}
             onChange={e => onUpdateExpressionField('field2', e.target.value)}
             placeholder={resourcesContext.messages.value}
