@@ -10,6 +10,7 @@ const formatFullDate = (date, isInvalidDate) => {
 
   if (month.length < 2) month = '0' + month;
   if (day.length < 2) day = '0' + day;
+  if (minutes < 10) minutes = '0' + minutes;
   if (seconds < 10) seconds = '0' + seconds;
 
   return [year, month, day].join('-') + [hours, minutes, seconds].join('.');
