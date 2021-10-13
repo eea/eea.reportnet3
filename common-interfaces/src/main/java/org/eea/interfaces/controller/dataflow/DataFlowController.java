@@ -291,7 +291,7 @@ public interface DataFlowController {
    *
    * @param dataflowId the dataflow id
    */
-  @GetMapping("/exportSchemaInformation/{dataflowId}")
+  @PostMapping("/exportSchemaInformation/{dataflowId}")
   void exportSchemaInformation(@PathVariable("dataflowId") Long dataflowId);
 
   /**
@@ -304,4 +304,14 @@ public interface DataFlowController {
   @GetMapping("/downloadSchemaInformation/{dataflowId}")
   void downloadSchemaInformation(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam String fileName, HttpServletResponse response);
+
+  /**
+   * Download public schema information.
+   *
+   * @param dataflowId the dataflow id
+   * @return the response entity
+   */
+  @GetMapping("/downloadPublicSchemaInformation/{dataflowId}")
+  ResponseEntity<byte[]> downloadPublicSchemaInformation(
+      @PathVariable("dataflowId") Long dataflowId);
 }
