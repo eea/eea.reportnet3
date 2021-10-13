@@ -167,8 +167,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
           });
           Promise.all(datasetSchemas).then(completed => {
             completed.forEach(datasetSchema => {
-              datasetSchema.datasetId = data.designDatasets.find(
-                designDataset => designDataset.datasetSchemaId === datasetSchema.datasetSchemaId
+              datasetSchema.datasetId = data.datasets.find(
+                dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
               ).datasetId;
             });
             setDatasetsSchemas(completed);
