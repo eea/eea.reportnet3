@@ -47,6 +47,7 @@ export const QCList = withRouter(
       deletedRuleId: null,
       filtered: false,
       filteredData: [],
+      hasEmptyFields: false,
       initialFilteredData: [],
       initialValidationsList: [],
       isDataUpdated: false,
@@ -545,7 +546,13 @@ export const QCList = withRouter(
     };
 
     const textEditor = (props, field) => (
-      <QCFieldEditor initialValue={props.rowData[field]} onSaveField={onRowEditorValueChange} qcs={props} />
+      <QCFieldEditor
+        initialValue={props.rowData[field]}
+        keyfilter={['message', 'shortCode'].includes(field) ? 'noDoubleQuote' : ''}
+        onSaveField={onRowEditorValueChange}
+        qcs={props}
+        required={['name', 'message', 'shortCode'].includes(field)}
+      />
     );
 
     const levelErrorTemplate = (rowData, isDropdown = false) => (
@@ -590,14 +597,14 @@ export const QCList = withRouter(
       tabsValidationsDispatch({ type: 'RESET_EDITING_ROWS' });
     };
 
-    const onRowEditorValueChange = (props, value) => {
+    const onRowEditorValueChange = (props, value, isText = false) => {
       const inmQCs = [...tabsValidationsState.validationList.validations];
       const inmEditingRows = [...tabsValidationsState.editingRows];
       const qcIdx = inmQCs.findIndex(qc => qc.id === props.rowData.id);
       const editIdx = inmEditingRows.findIndex(qc => qc.id === props.rowData.id);
       if (inmQCs[qcIdx][props.field] !== value && editIdx !== -1) {
-        inmQCs[qcIdx][props.field] = value;
-        inmEditingRows[editIdx][props.field] = value;
+        inmQCs[qcIdx][props.field] = isText ? value.trim() : value;
+        inmEditingRows[editIdx][props.field] = isText ? value.trim() : value;
 
         tabsValidationsDispatch({
           type: 'UPDATE_FILTER_DATA_AND_VALIDATIONS',
@@ -708,7 +715,11 @@ export const QCList = withRouter(
                 updatedRow: validationContext.updatedRuleId,
                 deletedRow: tabsValidationsState.deletedRuleId,
                 property: 'id',
-                condition: validationContext.isFetchingData || tabsValidationsState.filtered
+                condition:
+                  validationContext.isFetchingData ||
+                  tabsValidationsState.filtered ||
+                  tabsValidationsState.hasEmptyFields,
+                requiredFields: ['name', 'message', 'shortCode']
               }}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}

@@ -56,7 +56,7 @@ public interface DataCollectionController {
    * @param idDataflow the id dataflow
    * @return the list
    */
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataCollectionVO> findDataCollectionIdByDataflowId(@PathVariable("id") Long idDataflow);
 
   /**

@@ -262,40 +262,6 @@ public class DataSetControllerImpl implements DatasetController {
     }
   }
 
-
-  /**
-   * Gets the position from any object id.
-   *
-   * @param id the id
-   * @param idDataset the id dataset
-   * @param type the type
-   * @return the position from any object id
-   */
-  @Override
-  @HystrixCommand
-  @GetMapping("findPositionFromAnyObject/{id}")
-  @ApiOperation(value = "get position from any object", hidden = true)
-  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
-      @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID),
-      @ApiResponse(code = 500, message = "Error getting data")})
-  public ValidationLinkVO getPositionFromAnyObjectId(
-      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @PathVariable("id") String id,
-      @RequestParam("datasetId") Long idDataset,
-      @ApiParam(value = "Entity Type") @RequestParam("type") EntityTypeEnum type) {
-
-    if (id == null || idDataset == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-
-    try {
-      return datasetService.getPositionFromAnyObjectId(id, idDataset, type);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
-  }
-
   /**
    * Gets the data flow id by id.
    *
@@ -304,7 +270,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @GetMapping("{id}/dataflow")
+  @GetMapping("/private/{id}/dataflow")
   @ApiOperation(value = "get Dataflow id by id", hidden = true)
   public Long getDataFlowIdById(
       @ApiParam(type = "Long", value = "Dataset Id", example = "0") Long datasetId) {
@@ -636,7 +602,7 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @PostMapping("/{id}/insertIdSchema")
+  @PostMapping("/private/{id}/insertIdSchema")
   @ApiOperation(value = "insert dataschema id", hidden = true)
   public void insertIdDataSchema(
       @ApiParam(type = "Long", value = "Dataset Id",

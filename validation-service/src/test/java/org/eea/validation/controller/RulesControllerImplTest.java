@@ -2,7 +2,6 @@ package org.eea.validation.controller;
 
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -174,46 +173,6 @@ public class RulesControllerImplTest {
     Mockito.verify(rulesService, times(1)).getRulesSchemaByDatasetId(Mockito.any());
   }
 
-  /**
-   * Find active rule schema by dataset id blank test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void findActiveRuleSchemaByDatasetIdBlankTest() throws EEAException {
-    try {
-      rulesControllerImpl.findActiveRuleSchemaByDatasetId("");
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
-    }
-  }
-
-  /**
-   * Find active rule schema by dataset id null test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void findActiveRuleSchemaByDatasetIdNullTest() throws EEAException {
-    try {
-      rulesControllerImpl.findActiveRuleSchemaByDatasetId(null);
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
-    }
-  }
-
-  /**
-   * Find active rule schema by dataset id success test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void findActiveRuleSchemaByDatasetIdSuccessTest() throws EEAException {
-    rulesControllerImpl.findActiveRuleSchemaByDatasetId("5e44110d6a9e3a270ce13fac");
-    Mockito.verify(rulesService, times(1)).getActiveRulesSchemaByDatasetId(Mockito.any());
-  }
 
 
   /**
@@ -379,35 +338,6 @@ public class RulesControllerImplTest {
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
-    }
-  }
-
-  /**
-   * Insert rule in position test.
-   */
-  @Test
-  public void insertRuleInPositionTest() {
-    when(rulesService.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        0)).thenReturn(true);
-    rulesControllerImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", 0,
-        "5e44110d6a9e3a270ce13fac");
-    Mockito.verify(rulesService, times(1)).insertRuleInPosition("5e44110d6a9e3a270ce13fac",
-        "5e44110d6a9e3a270ce13fac", 0);
-  }
-
-  /**
-   * Insert rule in position not work test.
-   */
-  @Test
-  public void insertRuleInPositionNotWorkTest() {
-    when(rulesService.insertRuleInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
-        .thenReturn(false);
-    try {
-      rulesControllerImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", 0,
-          "5e44110d6a9e3a270ce13fac");
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-      Assert.assertEquals(EEAErrorMessage.ERROR_ORDERING_RULE, e.getReason());
     }
   }
 

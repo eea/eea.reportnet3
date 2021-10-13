@@ -122,6 +122,15 @@ export const useLeftSideBar = (
             : 'dataflowUsersList'
       };
 
+      const datasetsInfoBtn = {
+        className: 'dataflow-help-datasets-info-step',
+        icon: 'listClipboard',
+        isVisible: buttonsVisibility.datasetsInfoBtn,
+        label: 'datasetsInfo',
+        onClick: () => manageDialogs('isDatasetsInfoDialogVisible', true),
+        title: 'datasetsInfo'
+      };
+
       //DON'T SORT ALPHABETICALLY
       const allButtons = [
         propertiesBtn,
@@ -133,7 +142,8 @@ export const useLeftSideBar = (
         apiKeyBtn,
         manageRequestersBtn,
         manageReportersBtn,
-        userListBtn
+        userListBtn,
+        datasetsInfoBtn
       ];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));

@@ -693,17 +693,17 @@ public class DataflowServiceImpl implements DataflowService {
 
     List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
     setReportings(dataflowPublicList, providerId);
-    List<Long> dataflowIds = new ArrayList<>();
-    dataflowPublicList.stream().forEach(dataflow -> {
-      dataflow.setReferenceDatasets(
-          referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflow.getId()));
-      dataflowIds.add(dataflow.getId());
-    });
 
     // sort and paging
     sortPublicDataflows(dataflowPublicList, header, asc);
     dataflowPublicPaginated.setPublicDataflows(getPage(dataflowPublicList, page, pageSize));
     dataflowPublicPaginated.setTotalRecords(Long.valueOf(dataflowPublicList.size()));
+
+    dataflowPublicPaginated.getPublicDataflows().stream().forEach(dataflow -> {
+      dataflow.setReferenceDatasets(
+          referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflow.getId()));
+    });
+
     return dataflowPublicPaginated;
   }
 
@@ -920,12 +920,17 @@ public class DataflowServiceImpl implements DataflowService {
       List<DataProviderVO> providerId) {
     dataflowPublicList.stream().forEach(dataflow -> {
       findObligationPublicDataflow(dataflow);
-      for (DataProviderVO dataProviderVO : providerId) {
-        List<ReportingDatasetPublicVO> reportings =
-            datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowIdAndProviderId(
-                dataflow.getId(), dataProviderVO.getId());
-        if (!reportings.isEmpty()) {
-          dataflow.setReportingDatasets(reportings);
+      dataflow.setReportingDatasets(new ArrayList<>());
+      List<ReportingDatasetPublicVO> reportings =
+          datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflow.getId());
+      if (!reportings.isEmpty()) {
+        for (DataProviderVO dataProviderVO : providerId) {
+          List<ReportingDatasetPublicVO> reportingsProvider =
+              reportings.stream().filter(r -> r.getDataProviderId().equals(dataProviderVO.getId()))
+                  .collect(Collectors.toList());
+          if (CollectionUtils.isNotEmpty(reportingsProvider)) {
+            dataflow.getReportingDatasets().addAll(reportingsProvider);
+          }
         }
       }
     });

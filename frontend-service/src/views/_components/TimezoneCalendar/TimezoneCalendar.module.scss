@@ -1,0 +1,47 @@
+.container {
+  width: 334px;
+  display: flex;
+  flex-direction: column;
+
+  .buttonWrapper {
+    margin-top: 0.5rem;
+    width: 100% !important;
+  }
+
+  .inputMaskWrapper {
+    display: flex;
+    margin-top: 0.5rem;
+
+    .timeInput {
+      width: 6rem !important;
+    }
+
+    .error {
+      border: var(--inputtext-border-error);
+
+      &:focus {
+        border: var(--inputtext-border-error);
+        box-shadow: var(--inputtext-box-shadow-focus-error);
+      }
+      &:hover {
+        border: var(--inputtext-border-error);
+      }
+    }
+
+    .utc {
+      justify-content: flex-end;
+      display: flex;
+      flex-grow: 2;
+
+      .label {
+        align-self: center;
+      }
+
+      .dropdown {
+        margin-left: 0.5rem;
+        width: 5rem !important;
+        min-width: 11rem;
+      }
+    }
+  }
+}

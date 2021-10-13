@@ -34,7 +34,7 @@ public class TestDatasetControllerImpl implements TestDatasetController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find test dataset by dataflow Id", hidden = true)
   public List<TestDatasetVO> findTestDatasetByDataflowId(@ApiParam(type = "Long",
       value = "Dataflow Id", example = "0") @PathVariable("id") Long idDataflow) {

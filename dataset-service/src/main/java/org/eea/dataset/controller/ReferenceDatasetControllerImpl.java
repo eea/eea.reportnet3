@@ -48,7 +48,7 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   @Override
   @HystrixCommand
   @ApiOperation(value = "Find reference dataset  by dataflow Id", hidden = true)
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<ReferenceDatasetVO> findReferenceDatasetByDataflowId(@ApiParam(type = "Long",
       value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
 

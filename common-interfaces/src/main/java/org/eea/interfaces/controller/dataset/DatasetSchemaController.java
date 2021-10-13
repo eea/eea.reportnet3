@@ -49,7 +49,7 @@ public interface DatasetSchemaController {
    * @param id the id
    * @return the data set schema VO
    */
-  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id);
 
   /**
@@ -76,7 +76,8 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @return the dataset schema id
    */
-  @GetMapping(value = "/getDataSchema/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/getDataSchema/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId);
 
   /**

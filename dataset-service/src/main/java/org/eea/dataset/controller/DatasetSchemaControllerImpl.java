@@ -192,7 +192,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find dataschema by Id", hidden = true)
   public DataSetSchemaVO findDataSchemaById(@ApiParam(type = "String", value = "dataset schema Id",
       example = "5cf0e9b3b793310e9ceca190") @PathVariable("id") String id) {
@@ -251,7 +251,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the dataset schema id
    */
   @Override
-  @GetMapping("/getDataSchema/{datasetId}")
+  @GetMapping("/private/getDataSchema/{datasetId}")
   @ApiOperation(value = "Find dataset schema Id", hidden = true)
   public String getDatasetSchemaId(@ApiParam(type = "Long", value = "Dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {
