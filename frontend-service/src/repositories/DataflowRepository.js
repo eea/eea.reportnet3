@@ -20,11 +20,10 @@ export const DataflowRepository = {
       data: { name, description, obligation: { obligationId }, releasable: true, type }
     }),
 
-  downloadAllSchemasInfo: async (dataflowId, fileName) => {
-    return await HTTPRequester.download({
+  downloadAllSchemasInfo: async (dataflowId, fileName) =>
+    await HTTPRequester.download({
       url: getUrl(DataflowConfig.downloadAllSchemasInfo, { dataflowId, fileName })
-    });
-  },
+    }),
 
   generateAllSchemasInfoFile: async dataflowId =>
     await HTTPRequester.post({ url: getUrl(DataflowConfig.generateAllSchemasInfoFile, { dataflowId }) }),
