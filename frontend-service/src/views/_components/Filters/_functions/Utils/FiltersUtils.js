@@ -75,10 +75,6 @@ const getFilterKeys = (state, filter, inputOptions = []) => {
   return Object.keys(state.filterBy).filter(key => key !== filter && inputOptions.includes(key));
 };
 
-const getFilteredDateKeys = (state, filter, dateOptions = []) => {
-  return Object.keys(state.filterBy).filter(key => key !== filter && dateOptions.includes(key));
-};
-
 const getLabelInitialState = (input, multiselect, date, dropdown, checkbox = [], filteredBy) => {
   const labelByGroup = input.concat(multiselect, date, dropdown, checkbox);
   return labelByGroup.reduce((obj, key) => Object.assign(obj, { [key]: !isEmpty(filteredBy[key]) }), {});
@@ -165,7 +161,6 @@ const onFilterBooleanOptions = option => (typeof option !== 'boolean' ? !isNil(o
 export const FiltersUtils = {
   getCheckboxFilterInitialState,
   getCheckboxState,
-  getFilteredDateKeys,
   getFilteredSelectedOptions,
   getFilterInitialState,
   getFilterKeys,
