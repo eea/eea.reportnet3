@@ -51,7 +51,8 @@
         background-color: #c2c8cf;
       }
     }
-    &.DRAFT {
+    &.OPEN,
+    &.CLOSED {
       background-color: var(--c-lilac-300);
       &:hover {
         background-color: #6565a8;
