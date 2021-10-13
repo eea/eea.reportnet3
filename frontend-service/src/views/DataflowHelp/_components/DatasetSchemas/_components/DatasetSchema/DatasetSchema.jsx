@@ -149,24 +149,44 @@ const DatasetSchema = ({
       filterType: {
         multiselect: {
           entityType: [
-            { label: 'FIELD', value: 'FIELD' },
-            { label: 'RECORD', value: 'RECORD' },
-            { label: 'TABLE', value: 'TABLE' },
-            { label: 'DATASET', value: 'DATASET' }
+            { label: resourcesContext.messages['field']?.toUpperCase(), value: 'FIELD' },
+            { label: resourcesContext.messages['record']?.toUpperCase(), value: 'RECORD' },
+            { label: resourcesContext.messages['table']?.toUpperCase(), value: 'TABLE' },
+            { label: resourcesContext.messages['dataset']?.toUpperCase(), value: 'DATASET' }
           ],
           automatic: [
-            { label: 'Automatic', value: true },
-            { label: 'Manual', value: false }
+            { label: resourcesContext.messages['ruleAutomatic'], value: true },
+            { label: resourcesContext.messages['manual'], value: false }
           ],
           enabled: [
-            { label: 'Enabled', value: true },
-            { label: 'Disabled', value: false }
+            { label: resourcesContext.messages['qcEnabled'], value: true },
+            { label: resourcesContext.messages['disabled'], value: false }
           ],
           levelError: [
-            { label: 'Info', value: 'INFO', class: styles.levelError, subclass: styles.info },
-            { label: 'Warning', value: 'WARNING', class: styles.levelError, subclass: styles.warning },
-            { label: 'Error', value: 'ERROR', class: styles.levelError, subclass: styles.error },
-            { label: 'Blocker', value: 'BLOCKER', class: styles.levelError, subclass: styles.blocker }
+            {
+              label: resourcesContext.messages['info'],
+              value: 'INFO',
+              class: styles.levelError,
+              subclass: styles.info
+            },
+            {
+              label: resourcesContext.messages['warning'],
+              value: 'WARNING',
+              class: styles.levelError,
+              subclass: styles.warning
+            },
+            {
+              label: resourcesContext.messages['error'],
+              value: 'ERROR',
+              class: styles.levelError,
+              subclass: styles.error
+            },
+            {
+              label: resourcesContext.messages['blocker'],
+              value: 'BLOCKER',
+              class: styles.levelError,
+              subclass: styles.blocker
+            }
           ]
         }
       },
@@ -448,6 +468,7 @@ const DatasetSchema = ({
 
       parsedDataset.tables = tables;
     }
+
     parsedDataset.uniques = uniqueList;
     parsedDataset.qc = qcList;
     parsedDataset.extensionsOperations = extensionsOperationsList;

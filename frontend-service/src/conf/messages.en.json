@@ -1290,6 +1290,13 @@
     "downloadSchemasInfoTooltip": "Download all schema/s info in an XLSX file",
     "downloadSchemasInfoFileError": "Failed downloading schemas info file",
     "generateSchemasInfoFileError": "Failed generating schemas info file",
-    "automaticallyDownloadSchemasInfoFile": "Schemas info file generated successfully"
+    "automaticallyDownloadSchemasInfoFile": "Schemas info file generated successfully",
+    "manual": "Manual",
+    "disabled": "Disabled",
+    "codelistSelectedItems": "Multiple/single selected items",
+    "linkedLabel": "Linked label",
+    "linkedConditional": "Linked conditional",
+    "masterConditional": "Master conditional",
+    "supportsMultipleValues": "Supports multiple values?"
   }
 }

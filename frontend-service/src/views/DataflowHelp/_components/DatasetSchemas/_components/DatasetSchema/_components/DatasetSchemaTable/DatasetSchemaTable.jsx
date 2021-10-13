@@ -86,11 +86,7 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
   };
 
   const getMultiselectFilter = field => {
-    if (
-      !isNil(columnOptions[type]['filterType']) &&
-      !isNil(columnOptions[type]['filterType']['multiselect']) &&
-      !isNil(columnOptions[type]['filterType']['multiselect'][field])
-    ) {
+    if (columnOptions[type]?.filterType?.multiselect[field]) {
       const id = uniqueId();
       return (
         <MultiSelect
@@ -214,31 +210,46 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
           {rowData.type === 'LINK' && (
             <Fragment>
               <div>
-                <span className={styles.propertyValueTableName}>{`Linked label: `}</span>
+                <span className={styles.propertyValueTableName}>{`${resourcesContext.messages['linkedLabel']}: `}</span>
                 <span>{`${rowData.referencedField?.linkedTableLabel ?? '-'}`}</span>
               </div>
               <div>
-                <span className={styles.propertyValueTableName}>{`Linked conditional: `}</span>
+                <span
+                  className={
+                    styles.propertyValueTableName
+                  }>{`${resourcesContext.messages['linkedConditional']}: `}</span>
                 <span>{`${rowData.referencedField?.linkedTableConditional ?? '-'}`}</span>
               </div>
               <div>
-                <span className={styles.propertyValueTableName}>{`Master conditional: `}</span>
+                <span
+                  className={
+                    styles.propertyValueTableName
+                  }>{`${resourcesContext.messages['masterConditional']}: `}</span>
                 <span>{`${rowData.referencedField?.masterTableConditional ?? '-'}`}</span>
               </div>
             </Fragment>
           )}
           <div>
-            <span className={styles.propertyValueTableName}>{`Supports multiple values?`}</span>
+            <span className={styles.propertyValueTableName}>{resourcesContext.messages['supportsMultipleValues']}</span>
             <FontAwesomeIcon
-              aria-label={rowData.referencedField?.pkHasMultipleValues ? 'True' : 'False'}
+              aria-label={
+                rowData.referencedField?.pkHasMultipleValues
+                  ? resourcesContext.messages['yes']
+                  : resourcesContext.messages['no']
+              }
               icon={AwesomeIcons(rowData.referencedField?.pkHasMultipleValues ? 'check' : 'cross')}
               style={{ float: 'center' }}
             />
           </div>
           <div>
-            <span className={styles.propertyValueTableName}>{`All PK values must be used on link?`}</span>
+            <span
+              className={styles.propertyValueTableName}>{`${resourcesContext.messages['pkValuesMustBeUsed']}?`}</span>
             <FontAwesomeIcon
-              aria-label={rowData.referencedField?.pkMustBeUsed ? 'True' : 'False'}
+              aria-label={
+                rowData.referencedField?.pkMustBeUsed
+                  ? resourcesContext.messages['yes']
+                  : resourcesContext.messages['no']
+              }
               icon={AwesomeIcons(rowData.referencedField?.pkMustBeUsed ? 'check' : 'cross')}
               style={{ float: 'center' }}
             />
@@ -253,7 +264,7 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
   const codelistTemplate = rowData => (
     <Chips
       disabled={true}
-      name="Multiple/single selected items"
+      name={resourcesContext.messages['codelistSelectedItems']}
       pasteSeparator=";"
       value={rowData.codelistItems}></Chips>
   );
