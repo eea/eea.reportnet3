@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -25,8 +26,6 @@ import { ValidationService } from 'services/ValidationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-
-import { DateUtils } from 'views/_functions/Utils';
 
 const DatasetSchema = ({
   dataflowName,
@@ -497,9 +496,7 @@ const DatasetSchema = ({
       const { data } = await DatasetService.downloadTableDefinitions(datasetSchemaId);
 
       if (!isNil(data)) {
-        const date = new Date();
-        const formattedDate = DateUtils.formatFullDate(date, isNil(date), true);
-        DownloadFile(data, `table-definition-${datasetSchemaId}-${formattedDate}.zip`);
+        DownloadFile(data, `table-definition-${datasetSchemaId}-${dayjs().format('YYYY-MM-DD HH.mm.ss')}.zip`);
       }
     } catch (error) {
       console.error('DatasetSchema - onDownloadTableDefinitions.', error);

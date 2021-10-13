@@ -5,6 +5,7 @@ import ReactTooltip from 'react-tooltip';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
@@ -36,7 +37,6 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
-import { DateUtils } from 'views/_functions/Utils';
 import { FileUtils } from 'views/_functions/Utils/FileUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -253,9 +253,7 @@ export const PublicDataflowInformation = withRouter(
         const { data } = await DataflowService.downloadPublicAllSchemasInfoFile(dataflowId);
 
         if (!isNil(data)) {
-          const date = new Date();
-          const formattedDate = DateUtils.formatFullDate(date, isNil(date));
-          DownloadFile(data, `dataflow-${dataflowId}-Schema_Information_${formattedDate}.xlsx`);
+          DownloadFile(data, `dataflow-${dataflowId}-Schema_Information_${dayjs().format('YYYY-MM-DD HH.mm.ss')}.xlsx`);
         }
       } catch (error) {
         console.error('PublicDataflowInformation - onDownloadAllSchemasInfo .', error);
