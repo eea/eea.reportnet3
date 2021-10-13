@@ -330,7 +330,6 @@ public class FileTreatmentHelper implements DisposableBean {
 
         // Queue import tasks for stored files
         if (!files.isEmpty()) {
-          wipeData(datasetId, null, replace);
           queueImportProcess(datasetId, null, schema, files, originalFileName, integrationVO,
               replace, delimiter, multipartFileMimeType);
         } else {
@@ -350,7 +349,6 @@ public class FileTreatmentHelper implements DisposableBean {
         }
 
         // Queue import task for the stored file
-        wipeData(datasetId, tableSchemaId, replace);
         queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName, integrationVO,
             replace, delimiter, multipartFileMimeType);
       }
@@ -513,14 +511,21 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param files the files
    * @param originalFileName the original file name
    * @param replace the replace
+   * @throws InterruptedException
    */
   private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema datasetSchema,
-      List<File> files, String originalFileName, boolean replace, String delimiter) {
+      List<File> files, String originalFileName, boolean replace, String delimiter)
+      throws InterruptedException {
     LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
+
+    // delete precious data if necessary
+    wipeData(datasetId, tableSchemaId, replace);
+
+    // Wait a second before continue to avoid duplicated insertions
+    Thread.sleep(1000);
 
     String error = null;
     boolean guessTableName = null == tableSchemaId;
-
     for (File file : files) {
       String fileName = file.getName();
 
