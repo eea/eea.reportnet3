@@ -1,3 +1,5 @@
+@import '_styles/mixins';
+
 .actionTemplate {
   display: flex;
 }
@@ -10,8 +12,23 @@
   display: inline-block;
   vertical-align: middle;
 }
+
 .addEditRecordDialog {
-  width: 35vw !important;
+  @include for-phone-landscape-up {
+    max-width: 90%;
+  }
+
+  @include for-tablet-landscape-up {
+    max-width: 80%;
+  }
+
+  @include for-desktop-up {
+    max-width: 60%;
+  }
+
+  @include for-big-desktop-up {
+    max-width: 60%;
+  }
 }
 .fieldDisabled {
   cursor: default;

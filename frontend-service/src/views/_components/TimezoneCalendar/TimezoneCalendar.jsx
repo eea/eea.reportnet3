@@ -1,4 +1,4 @@
-import { useContext, useEffect, useLayoutEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useLayoutEffect, useState, useRef, Fragment } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
@@ -208,7 +208,7 @@ export const TimezoneCalendar = ({
   };
 
   return (
-    <>
+    <Fragment>
       <div ref={refPosition} />
       <Portal>
         <div
@@ -232,6 +232,6 @@ export const TimezoneCalendar = ({
           </div>
         </div>
       </Portal>
-    </>
+    </Fragment>
   );
 };
