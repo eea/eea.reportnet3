@@ -1,5 +1,7 @@
 import { useContext, useEffect } from 'react';
 
+import isNil from 'lodash/isNil';
+
 import { DownloadFile } from 'views/_components/DownloadFile';
 
 import { DataflowService } from 'services/DataflowService';
@@ -16,27 +18,22 @@ const GlobalNotifications = () => {
   const notificationContext = useContext(NotificationContext);
 
   useEffect(() => {
-    if (hasHiddenDownloadAllSchemasInfoNotification()) {
-      downloadAllSchemasInfoFile();
-    }
-
-    if (hasHiddenDownloadQCRulesNotification()) {
-      downloadQCRulesFile();
-    }
-
-    if (hasHiddenDownloadValidationsNotification()) {
-      downloadValidationsFile();
-    }
-
-    if (findHiddenExportFMENotification()) downloadExportFMEFile();
-
-    findHiddenExportDatasetNotification();
+    downloadAllSchemasInfoFile();
+    downloadQCRulesFile();
+    downloadValidationsFile();
+    downloadExportFMEFile();
+    downloadExportDatasetFile();
+    getErrorExportDatasetNotification();
   }, [notificationContext.hidden]);
 
+  const findHiddenNotification = key => notificationContext.hidden.find(notification => notification.key === key);
+
   const downloadAllSchemasInfoFile = async () => {
-    const [notification] = notificationContext.hidden.filter(
-      notification => notification.key === 'EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT'
-    );
+    const notification = findHiddenNotification('EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT');
+
+    if (isNil(notification)) {
+      return;
+    }
 
     try {
       const { data } = await DataflowService.downloadAllSchemasInfo(
@@ -49,41 +46,74 @@ const GlobalNotifications = () => {
         DownloadFile(data, notification.content.fileName);
       }
     } catch (error) {
-      console.error('GlobalNotifications - downloadValidationsFile.', error);
+      console.error('GlobalNotifications - downloadAllSchemasInfoFile.', error);
       notificationContext.add({ type: 'DOWNLOAD_SCHEMAS_INFO_FILE_ERROR' });
     } finally {
       notificationContext.clearHiddenNotifications();
     }
   };
 
-  const downloadExportDatasetFile = async notification => {
-    try {
-      notificationContext.add({ type: 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD' });
+  const downloadQCRulesFile = async () => {
+    const notification = findHiddenNotification('EXPORT_QC_COMPLETED_EVENT');
 
-      const { data } = await DatasetService.downloadExportDatasetFile(
+    if (isNil(notification)) {
+      return;
+    }
+
+    try {
+      const { data } = await ValidationService.downloadQCRulesFile(
         notification.content.datasetId,
-        notification.content.datasetName
+        notification.content.fileName
       );
+      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE' });
 
       if (data.size !== 0) {
-        DownloadFile(data, notification.content.datasetName);
+        DownloadFile(data, notification.content.fileName);
       }
     } catch (error) {
-      console.error('GlobalNotifications - downloadExportDatasetFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' });
+      console.error('GlobalNotifications - downloadQCRulesFile.', error);
+      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' });
     } finally {
       notificationContext.clearHiddenNotifications();
     }
   };
 
-  const downloadExportFMEFile = async () => {
-    try {
-      const [notification] = notificationContext.hidden.filter(
-        notification =>
-          notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' ||
-          notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
-      );
+  const downloadValidationsFile = async () => {
+    const notification = findHiddenNotification('DOWNLOAD_VALIDATIONS_COMPLETED_EVENT');
 
+    if (isNil(notification)) {
+      return;
+    }
+
+    try {
+      const { data } = await ValidationService.downloadShowValidationsFile(
+        notification.content.datasetId,
+        notification.content.nameFile
+      );
+      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE' });
+
+      if (data.size !== 0) {
+        DownloadFile(data, notification.content.nameFile);
+      }
+    } catch (error) {
+      console.error('GlobalNotifications - downloadValidationsFile.', error);
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_FILE_ERROR' });
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
+  };
+  const downloadExportFMEFile = async () => {
+    const notification = notificationContext.hidden.find(
+      notification =>
+        notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' ||
+        notification.key === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
+    );
+
+    if (isNil(notification)) {
+      return;
+    }
+
+    try {
       const getFileName = () => {
         const extension = notification.content.fileName.split('.').pop();
         return `${notification.content.datasetName}.${extension}`;
@@ -120,87 +150,39 @@ const GlobalNotifications = () => {
     }
   };
 
-  const downloadQCRulesFile = async () => {
-    const [notification] = notificationContext.hidden.filter(
-      notification => notification.key === 'EXPORT_QC_COMPLETED_EVENT'
-    );
+  const downloadExportDatasetFile = async () => {
+    const notification = findHiddenNotification('EXPORT_DATASET_COMPLETED_EVENT');
+
+    if (isNil(notification)) {
+      return;
+    }
 
     try {
-      const { data } = await ValidationService.downloadQCRulesFile(
+      notificationContext.add({ type: 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD' });
+
+      const { data } = await DatasetService.downloadExportDatasetFile(
         notification.content.datasetId,
-        notification.content.fileName
+        notification.content.datasetName
       );
-      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE' });
 
       if (data.size !== 0) {
-        DownloadFile(data, notification.content.fileName);
+        DownloadFile(data, notification.content.datasetName);
       }
     } catch (error) {
-      console.error('GlobalNotifications - downloadValidationsFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' });
+      console.error('GlobalNotifications - downloadExportDatasetFile.', error);
+      notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' });
     } finally {
       notificationContext.clearHiddenNotifications();
     }
   };
 
-  const downloadValidationsFile = async () => {
-    const [notification] = notificationContext.hidden.filter(
-      notification => notification.key === 'DOWNLOAD_VALIDATIONS_COMPLETED_EVENT'
-    );
+  const getErrorExportDatasetNotification = () => {
+    const notification = findHiddenNotification('EXPORT_DATASET_FAILED_EVENT');
 
-    try {
-      const { data } = await ValidationService.downloadShowValidationsFile(
-        notification.content.datasetId,
-        notification.content.nameFile
-      );
-      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE' });
-
-      if (data.size !== 0) {
-        DownloadFile(data, notification.content.nameFile);
-      }
-    } catch (error) {
-      console.error('GlobalNotifications - downloadValidationsFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_FILE_ERROR' });
-    } finally {
-      notificationContext.clearHiddenNotifications();
-    }
-  };
-
-  const hasHiddenDownloadAllSchemasInfoNotification = () =>
-    notificationContext.hidden.find(notification => notification.key === 'EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT');
-
-  const hasHiddenDownloadQCRulesNotification = () =>
-    notificationContext.hidden.find(notification => notification.key === 'EXPORT_QC_COMPLETED_EVENT');
-
-  const hasHiddenDownloadValidationsNotification = () =>
-    notificationContext.hidden.find(notification => notification.key === 'DOWNLOAD_VALIDATIONS_COMPLETED_EVENT');
-
-  const findHiddenExportDatasetNotification = () => {
-    const successNotification = notificationContext.hidden.find(
-      notification => notification.key === 'EXPORT_DATASET_COMPLETED_EVENT'
-    );
-
-    if (successNotification) {
-      downloadExportDatasetFile(successNotification);
+    if (isNil(notification)) {
+      return;
     }
 
-    const errorNotification = notificationContext.hidden.find(
-      notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT'
-    );
-
-    if (errorNotification) {
-      getErrorNotification(errorNotification);
-    }
-  };
-
-  const findHiddenExportFMENotification = () => {
-    return notificationContext.hidden.find(
-      notification =>
-        notification.key === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' || 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
-    );
-  };
-
-  const getErrorNotification = notification => {
     const dataflowId = notification.content.dataflowId;
     const datasetId = notification.content.datasetId;
     const datasetName = notification.content.datasetName;
