@@ -114,7 +114,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "find dataset metabase", hidden = true)
   public DataSetMetabaseVO findDatasetMetabaseById(@ApiParam(type = "Long", value = "dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {
