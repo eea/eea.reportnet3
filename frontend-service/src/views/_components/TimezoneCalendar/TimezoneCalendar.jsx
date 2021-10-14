@@ -2,7 +2,6 @@ import { useContext, useEffect, useLayoutEffect, useState, useRef, Fragment } fr
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
-import usePortal from 'react-useportal';
 import utc from 'dayjs/plugin/utc';
 
 import styles from './TimezoneCalendar.module.scss';
@@ -11,6 +10,7 @@ import { Button } from 'views/_components/Button';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
+import { Portal } from 'views/_components/Portal';
 import { TooltipButton } from 'views/_components/TooltipButton';
 import uniqueId from 'lodash/uniqueId';
 
@@ -69,8 +69,6 @@ export const TimezoneCalendar = ({
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
-
-  const { Portal } = usePortal();
 
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
