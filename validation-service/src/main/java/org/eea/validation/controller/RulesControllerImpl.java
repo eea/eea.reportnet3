@@ -104,11 +104,15 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/{datasetSchemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{datasetSchemaId}/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER')")
   @ApiOperation(value = "Retrieves a rules schema based on a given dataset id", hidden = true)
   public RulesSchemaVO findRuleSchemaByDatasetId(@ApiParam(
       value = "Dataset schema id used in the search",
-      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId) {
+      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId,
+      @ApiParam(value = "Dataflow Id",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataflowId") Long dataflowId) {
     return rulesService.getRulesSchemaByDatasetId(datasetSchemaId);
   }
 

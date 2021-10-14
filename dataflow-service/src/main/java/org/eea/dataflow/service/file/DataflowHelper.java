@@ -203,7 +203,8 @@ public class DataflowHelper implements DisposableBean {
     for (DesignDatasetVO designDatasetVO : listDesignDatasetVO) {
       String datasetSchemaId =
           datasetSchemaControllerZuul.getDatasetSchemaId(designDatasetVO.getId());
-      RulesSchemaVO rulesSchemaVO = rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId);
+      RulesSchemaVO rulesSchemaVO =
+          rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId, dataflowId);
       listRulesSchemaVO.add(rulesSchemaVO);
       DataSetMetabaseVO datasetMetabaseVO =
           datasetMetabaseControllerZuul.findDatasetMetabaseById(designDatasetVO.getId());
@@ -269,7 +270,7 @@ public class DataflowHelper implements DisposableBean {
         String datasetSchemaId =
             datasetSchemaControllerZuul.getDatasetSchemaId(designDatasetVO.getId());
         RulesSchemaVO rulesSchemaVO =
-            rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId);
+            rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId, dataflowId);
         String mandatoryTable = "No";
         for (RuleVO ruleVO : rulesSchemaVO.getRules()) {
           if (AutomaticRuleTypeEnum.MANDATORY_TABLE.equals(ruleVO.getAutomaticType())
