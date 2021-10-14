@@ -48,7 +48,7 @@ const printExpression = (expression, tabs) => {
         case 'dateTime':
           return getExpressionString({
             ...expressionParameters,
-            expressionEnd: getDateFormattedField(expression.field2, 'YYYY-MM-DD HH:mm:ss')
+            expressionEnd: getDateFormattedField(expression.field2, 'YYYY-MM-DDTHH:mm:ss[Z]')
           });
         case 'yearDateTime':
           return getPrefixedExpression({ ...expressionParameters, prefix: 'Year' });

@@ -106,12 +106,13 @@ export const TimezoneCalendar = ({
   }, []);
 
   useEffect(() => {
-    if (isInModal && dayjs(date).isValid() && checkError(inputValue)) {
+    if (isInModal && dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)) {
       onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value));
     }
   }, [date, selectedOffset.value, inputValue]);
 
   const parseDate = dateToParse => {
+    console.log(dateToParse);
     const newDate = new Date(dateToParse);
     const [hour, minute, second] = inputValue.split(':');
     const utcDate = Date.UTC(newDate.getFullYear(), newDate.getMonth(), newDate.getDate(), hour, minute, second);
@@ -162,6 +163,8 @@ export const TimezoneCalendar = ({
   };
 
   const checkError = time => {
+    console.log({ time });
+    console.log(RegularExpressions['time24'].test(time));
     if (checkIsCorrectTimeFormat(time)) {
       setHasError(false);
     } else {

@@ -383,14 +383,17 @@ const ComparisonExpression = ({
         <TimezoneCalendar
           isInModal
           onClickOutside={() => setIsTimezoneCalendarVisible(false)}
-          onSaveDate={dateTime => onUpdateExpressionField('field2', dateTime)}
-          value={dayjs(expressionValues.field2).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
+          onSaveDate={dateTime => {
+            console.log(dateTime);
+            onUpdateExpressionField('field2', dateTime);
+          }}
+          value={dayjs(expressionValues.field2).format('YYYY-MM-DDTHH:mm:ss[Z]')}
         />
       </div>
     ) : (
       <InputText
         onFocus={() => setIsTimezoneCalendarVisible(true)}
-        value={dayjs(expressionValues.field2).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
+        value={dayjs(expressionValues.field2).format('YYYY-MM-DDTHH:mm:ss[Z]')}
       />
     );
   };
@@ -399,8 +402,8 @@ const ComparisonExpression = ({
     const { operatorType, operatorValue, field2 } = expressionValues;
 
     if (operatorType === 'date' || operatorType === 'dateTime') {
-      const showSeconds = operatorType === 'dateTime';
-      const showTime = operatorType === 'dateTime';
+      // const showSeconds = operatorType === 'dateTime';
+      // const showTime = operatorType === 'dateTime';
 
       if (operatorType === 'dateTime') {
         return renderDatetimeCalendar();
@@ -419,8 +422,8 @@ const ComparisonExpression = ({
           }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
-          showSeconds={showSeconds}
-          showTime={showTime}
+          // showSeconds={showSeconds}
+          // showTime={showTime}
           value={field2}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>

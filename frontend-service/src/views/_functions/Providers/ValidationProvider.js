@@ -146,6 +146,7 @@ export const ValidationProvider = ({ children }) => {
         },
 
         onOpenToEdit: (rule, level) => {
+          console.log(rule);
           dispatch({
             type: 'ON_OPEN_TO_EDIT',
             payload: { ruleToEdit: { ...rule }, referenceId: rule.referenceId, level, updatedRuleId: rule.id }

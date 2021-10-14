@@ -201,21 +201,25 @@ const ValidationExpression = ({
     panel.style.position = 'fixed';
   };
 
-
   const renderDatetimeCalendar = () => {
+    console.log(expressionValues.expressionValue);
     return isTimezoneCalendarVisible ? (
       <div>
         <TimezoneCalendar
           isInModal
           onClickOutside={() => setIsTimezoneCalendarVisible(false)}
-          onSaveDate={dateTime => onUpdateExpressionField('expressionValue', dateTime)}
-          value={dayjs(expressionValues.expressionValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
+          onSaveDate={dateTime => {
+            console.log(dateTime);
+            console.log(dayjs(dateTime).format('YYYY-MM-DDTHH:mm:ss[Z]'));
+            onUpdateExpressionField('expressionValue', dateTime);
+          }}
+          value={dayjs(expressionValues.expressionValue).format('YYYY-MM-DDTHH:mm:ss[Z]')}
         />
       </div>
     ) : (
       <InputText
         onFocus={() => setIsTimezoneCalendarVisible(true)}
-        value={dayjs(expressionValues.expressionValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')}
+        value={dayjs(expressionValues.expressionValue).format('YYYY-MM-DDTHH:mm:ss[Z]')}
       />
     );
   };
