@@ -80,7 +80,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR')  OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
+  // @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR')
+  // OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND
+  // checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
+  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Find reporting dataset id by dataflow id", hidden = true)
   public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(@ApiParam(type = "Long",
       value = "dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
