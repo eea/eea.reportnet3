@@ -287,7 +287,7 @@ public class DataflowHelper {
           String datasetSchemaId =
               datasetSchemaControllerZuul.getDatasetSchemaId(designDatasetVO.getId());
           RulesSchemaVO rulesSchemaVO =
-              rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId);
+              rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId, dataflowId);
           String mandatoryTable = "No";
           for (RuleVO ruleVO : rulesSchemaVO.getRules()) {
             if (AutomaticRuleTypeEnum.MANDATORY_TABLE.equals(ruleVO.getAutomaticType())
@@ -371,7 +371,7 @@ public class DataflowHelper {
         String datasetSchemaId =
             datasetSchemaControllerZuul.getDatasetSchemaId(designDatasetVO.getId());
         RulesSchemaVO rulesSchemaVO =
-            rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId);
+            rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId, dataflowId);
 
         Row rowheadQC = sheetQC.createRow(nRowQC);
         rowheadQC.createCell(nColumnQC).setCellValue(designDatasetVO.getDataSetName());

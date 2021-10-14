@@ -1135,4 +1135,22 @@ public class DataSetControllerImplTest {
 
   }
 
+  @Test
+  public void checkAnySchemaAvailableInPublicTest() {
+    dataSetControllerImpl.checkAnySchemaAvailableInPublic(1L);
+    Mockito.verify(datasetService, times(1)).checkAnySchemaAvailableInPublic(1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getFieldValuesReferencedExceptionTest() throws EEAException {
+    try {
+      doThrow(EEAException.class).when(datasetService).getFieldValuesReferenced(Mockito.any(),
+          Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+      dataSetControllerImpl.getFieldValuesReferenced(1L, "", "", "", "", null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
 }

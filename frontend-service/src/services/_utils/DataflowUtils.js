@@ -178,30 +178,7 @@ const parseDatasetsInfoDTO = datasetsDTO => {
   });
 };
 
-const getDatasetType = datasetType => {
-  switch (datasetType) {
-    case config.datasetType.DESIGN.key:
-      return config.datasetType.DESIGN.value;
-
-    case config.datasetType.TEST.key:
-      return config.datasetType.TEST.value;
-
-    case config.datasetType.REPORTING.key:
-      return config.datasetType.REPORTING.value;
-
-    case config.datasetType.DATACOLLECTION.key:
-      return config.datasetType.DATACOLLECTION.value;
-
-    case config.datasetType.EUDATASET.key:
-      return config.datasetType.EUDATASET.value;
-
-    case config.datasetType.REFERENCE.key:
-      return config.datasetType.REFERENCE.value;
-
-    default:
-      break;
-  }
-};
+const getDatasetType = datasetType => config.datasetType.find(type => type.key === datasetType)?.value;
 
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
