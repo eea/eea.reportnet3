@@ -140,7 +140,7 @@ public class RulesControllerImplTest {
   @Test
   public void findRuleSchemaByDatasetIdBlankTest() throws EEAException {
     try {
-      rulesControllerImpl.findRuleSchemaByDatasetId("");
+      rulesControllerImpl.findRuleSchemaByDatasetId("", 0L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
@@ -155,7 +155,7 @@ public class RulesControllerImplTest {
   @Test
   public void findRuleSchemaByDatasetIdNullTest() throws EEAException {
     try {
-      rulesControllerImpl.findRuleSchemaByDatasetId(null);
+      rulesControllerImpl.findRuleSchemaByDatasetId(null, 0L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.IDDATASETSCHEMA_INCORRECT, e.getReason());
@@ -169,7 +169,7 @@ public class RulesControllerImplTest {
    */
   @Test
   public void findRuleSchemaByDatasetIdSuccessTest() throws EEAException {
-    rulesControllerImpl.findRuleSchemaByDatasetId("5e44110d6a9e3a270ce13fac");
+    rulesControllerImpl.findRuleSchemaByDatasetId("5e44110d6a9e3a270ce13fac", 0L);
     Mockito.verify(rulesService, times(1)).getRulesSchemaByDatasetId(Mockito.any());
   }
 

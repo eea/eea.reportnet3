@@ -51,8 +51,10 @@ public interface RulesController {
    * @param datasetSchemaId the dataset schema id
    * @return the rules schema VO
    */
-  @GetMapping(value = "/{datasetSchemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  RulesSchemaVO findRuleSchemaByDatasetId(@PathVariable("datasetSchemaId") String datasetSchemaId);
+  @GetMapping(value = "/{datasetSchemaId}/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  RulesSchemaVO findRuleSchemaByDatasetId(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Delete rules schema.
