@@ -1,10 +1,9 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 
+import dayjs from 'dayjs';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-
-import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
 import styles from './ValidationExpression.module.scss';
@@ -47,10 +46,10 @@ const ValidationExpression = ({
 
   const [clickedFields, setClickedFields] = useState([]);
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
+  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
   const [valueKeyFilter, setValueKeyFilter] = useState();
-  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
 
   useEffect(() => {
     if (inputStringMatchRef.current && isActiveStringMatchInput) {
@@ -231,9 +230,6 @@ const ValidationExpression = ({
     }
 
     if (operatorType === 'date' || operatorType === 'dateTime') {
-      // const showSeconds = operatorType === 'dateTime';
-      // const showTime = operatorType === 'dateTime';
-
       if (operatorType === 'dateTime') {
         return renderDatetimeCalendar();
       }
@@ -251,8 +247,6 @@ const ValidationExpression = ({
           }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
-          // showSeconds={showSeconds}
-          // showTime={showTime}
           value={expressionValues.expressionValue}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>

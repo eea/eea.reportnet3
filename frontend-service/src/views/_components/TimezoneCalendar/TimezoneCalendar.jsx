@@ -1,7 +1,8 @@
-import { useContext, useEffect, useLayoutEffect, useState, useRef, Fragment } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
+import uniqueId from 'lodash/uniqueId';
 import utc from 'dayjs/plugin/utc';
 
 import styles from './TimezoneCalendar.module.scss';
@@ -12,7 +13,6 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
 import { Portal } from 'views/_components/Portal';
 import { TooltipButton } from 'views/_components/TooltipButton';
-import uniqueId from 'lodash/uniqueId';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -60,11 +60,11 @@ const offsetOptions = [
 ];
 
 export const TimezoneCalendar = ({
-  onSaveDate = () => {},
-  onClickOutside = () => {},
-  value,
+  isDisabled,
   isInModal,
-  isDisabled
+  onClickOutside = () => {},
+  onSaveDate = () => {},
+  value
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);

@@ -1,10 +1,9 @@
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isObject from 'lodash/isObject';
 import uniqueId from 'lodash/uniqueId';
-
-import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 import { Validation } from 'entities/Validation';
 

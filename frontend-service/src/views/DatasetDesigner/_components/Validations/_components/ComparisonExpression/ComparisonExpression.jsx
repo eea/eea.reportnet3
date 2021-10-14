@@ -1,11 +1,10 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
+import dayjs from 'dayjs';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
-
-import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 
 import styles from './ComparisonExpression.module.scss';
@@ -56,14 +55,14 @@ const ComparisonExpression = ({
   const [disabledFields, setDisabledFields] = useState({});
   const [fieldType, setFieldType] = useState(null);
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
+  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
   const [secondFieldOptions, setSecondFieldOptions] = useState([]);
   const [tableFields, setTableFields] = useState([]);
+  const [valueFieldPlaceholder, setValueFieldPlaceholder] = useState(resourcesContext.messages.selectField);
   const [valueKeyFilter, setValueKeyFilter] = useState();
   const [valueTypeSelectorOptions, setValueTypeSelectorOptions] = useState([]);
-  const [valueFieldPlaceholder, setValueFieldPlaceholder] = useState(resourcesContext.messages.selectField);
-  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
 
   useEffect(() => {
     if (inputStringMatchRef.current && isActiveStringMatchInput) {
@@ -401,9 +400,6 @@ const ComparisonExpression = ({
     const { operatorType, operatorValue, field2 } = expressionValues;
 
     if (operatorType === 'date' || operatorType === 'dateTime') {
-      // const showSeconds = operatorType === 'dateTime';
-      // const showTime = operatorType === 'dateTime';
-
       if (operatorType === 'dateTime') {
         return renderDatetimeCalendar();
       }
@@ -421,8 +417,6 @@ const ComparisonExpression = ({
           }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
-          // showSeconds={showSeconds}
-          // showTime={showTime}
           value={field2}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>
