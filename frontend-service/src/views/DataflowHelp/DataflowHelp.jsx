@@ -159,14 +159,15 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       setIsLoading(false);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {
-          const allDatasets = [...data.referenceDatasets, ...data.datasets];
-          const uniqueDatasetSchemas = allDatasets.filter((dataset, pos, arr) => {
-            return arr.map(dataset => dataset.datasetSchemaId).indexOf(dataset.datasetSchemaId) === pos;
-          });
-          const datasetSchemas = uniqueDatasetSchemas.map(async datasetSchema => {
+          const datasetSchemas = data.datasets.map(async datasetSchema => {
             return await onLoadDatasetSchema(datasetSchema.datasetId);
           });
           Promise.all(datasetSchemas).then(completed => {
+            completed.forEach(datasetSchema => {
+              datasetSchema.datasetId = data.datasets.find(
+                dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
+              ).datasetId;
+            });
             setDatasetsSchemas(completed);
           });
         } else {
@@ -178,6 +179,11 @@ export const DataflowHelp = withRouter(({ history, match }) => {
             return await onLoadDatasetSchema(designDataset.datasetId);
           });
           Promise.all(datasetSchemas).then(completed => {
+            completed.forEach(datasetSchema => {
+              datasetSchema.datasetId = data.designDatasets.find(
+                designDataset => designDataset.datasetSchemaId === datasetSchema.datasetSchemaId
+              ).datasetId;
+            });
             setDatasetsSchemas(completed);
           });
         } else {
@@ -276,6 +282,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
             rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas ? config.icons['spinnerAnimate'] : null}>
             <DatasetSchemas
               dataflowId={dataflowId}
+              dataflowName={dataflowName}
               datasetsSchemas={datasetsSchemas}
               isCustodian={isCustodian}
               onLoadDatasetsSchemas={onLoadDatasetsSchemas}
