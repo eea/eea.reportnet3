@@ -201,6 +201,39 @@ const DatasetSchema = ({
     }
   };
 
+  const renderAccordion = () => {
+    if (!isNil(parsedDesignDataset.tables)) {
+      return (
+        <Accordion
+          activeIndex={expandAll ? parsedDesignDataset?.tables?.map((_, i) => i) : 0}
+          key={uniqueId('tables')}
+          multiple={true}>
+          {!isNil(parsedDesignDataset) &&
+            !isNil(parsedDesignDataset.tables) &&
+            parsedDesignDataset.tables.map(table => {
+              const { description, readOnly, prefilled, fixedNumber, mandatory } = table.properties;
+              return (
+                <AccordionTab header={table.tableSchemaName} key={uniqueId(table.tableSchemaName)}>
+                  {renderProperty(resourcesContext.messages['description'], description)}
+                  {renderIconProperty(resourcesContext.messages['readOnly'], readOnly)}
+                  {renderIconProperty(resourcesContext.messages['prefilled'], prefilled)}
+                  {renderIconProperty(resourcesContext.messages['fixedNumber'], fixedNumber)}
+                  {renderIconProperty(resourcesContext.messages['notEmpty'], mandatory)}
+                  <DatasetSchemaTable
+                    columnOptions={columnOptions}
+                    fields={!isNil(table) ? table.fields : []}
+                    type="fields"
+                  />
+                </AccordionTab>
+              );
+            })}
+        </Accordion>
+      );
+    } else {
+      return <span className={styles.noTables}>{resourcesContext.messages['noCreatedTables']}</span>;
+    }
+  };
+
   const renderExternalIntegrations = () => (
     <TabPanel
       header={resourcesContext.messages['externalIntegrations']}
@@ -267,30 +300,7 @@ const DatasetSchema = ({
           />
         </div>
       </Toolbar>
-      <Accordion
-        activeIndex={expandAll ? parsedDesignDataset?.tables?.map((_, i) => i) : 0}
-        key={uniqueId('tables')}
-        multiple={true}>
-        {!isNil(parsedDesignDataset) &&
-          !isNil(parsedDesignDataset.tables) &&
-          parsedDesignDataset.tables.map(table => {
-            const { description, readOnly, prefilled, fixedNumber, mandatory } = table.properties;
-            return (
-              <AccordionTab header={table.tableSchemaName} key={uniqueId(table.tableSchemaName)}>
-                {renderProperty(resourcesContext.messages['description'], description)}
-                {renderIconProperty(resourcesContext.messages['readOnly'], readOnly)}
-                {renderIconProperty(resourcesContext.messages['prefilled'], prefilled)}
-                {renderIconProperty(resourcesContext.messages['fixedNumber'], fixedNumber)}
-                {renderIconProperty(resourcesContext.messages['notEmpty'], mandatory)}
-                <DatasetSchemaTable
-                  columnOptions={columnOptions}
-                  fields={!isNil(table) ? table.fields : []}
-                  type="fields"
-                />
-              </AccordionTab>
-            );
-          })}
-      </Accordion>
+      {renderAccordion()}
     </TabPanel>
   );
 

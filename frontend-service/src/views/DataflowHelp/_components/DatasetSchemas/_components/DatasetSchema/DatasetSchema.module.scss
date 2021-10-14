@@ -37,6 +37,14 @@
 .externalIntegrationsTab {
   transform: rotate(-90deg);
 }
+
+.noTables {
+  margin: 1rem 0;
+  display: block;
+  font-weight: bold;
+  font-style: italic;
+}
+
 .tabs {
   color: var(--tabview-color) !important;
 }
