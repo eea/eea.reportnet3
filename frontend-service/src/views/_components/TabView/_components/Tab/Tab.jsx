@@ -375,13 +375,7 @@ const Tab = ({
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
           {rightIcon && !editingHeader && (
-            <span
-              className={classNames(
-                'p-tabview-right-icon ',
-                rightIcon,
-                rightIconClass
-                // selected && !hasErrors ? styles.highlight : ''
-              )}></span>
+            <span className={classNames('p-tabview-right-icon ', rightIcon, rightIconClass)}></span>
           )}
           {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead ? (
             <div
