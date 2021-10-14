@@ -74,6 +74,18 @@ const DatasetSchema = ({
       filtered: true,
       filterType: {
         multiselect: {
+          pk: [
+            { label: resourcesContext.messages['pk'], value: true },
+            { label: resourcesContext.messages['notPK'], value: false }
+          ],
+          required: [
+            { label: resourcesContext.messages['required'], value: true },
+            { label: resourcesContext.messages['notRequired'], value: false }
+          ],
+          readOnly: [
+            { label: resourcesContext.messages['readOnly'], value: true },
+            { label: resourcesContext.messages['notReadOnly'], value: false }
+          ],
           type: [
             { label: 'Number Integer', value: 'NUMBER_INTEGER' },
             { label: 'Number Decimal', value: 'NUMBER_DECIMAL' },
