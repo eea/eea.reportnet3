@@ -11,6 +11,7 @@ import { Button } from 'views/_components/Button';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
+import { InputText } from 'views/_components/InputText';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -171,6 +172,16 @@ export const TimezoneCalendar = ({
 
   const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
 
+  const renderUtcInput = () => {
+    return (
+      <InputText
+        value={dayjs(parseDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value)))
+          .utc()
+          .format('ddd, DD MMM YYYY HH:mm:ss')}
+      />
+    );
+  };
+
   const renderInputMask = () => {
     return (
       <InputMask
@@ -228,6 +239,7 @@ export const TimezoneCalendar = ({
                 {renderDropdown()}
               </div>
             </div>
+            {renderUtcInput()}
             {renderButtons()}
           </div>
         </div>
