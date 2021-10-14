@@ -264,57 +264,55 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
 
   const getQCList = allQCs => {
     if (!isEmpty(allQCs)) {
-      return allQCs
-        .map(allQCs =>
-          allQCs.validations.map(qc => {
-            const datasetSchema = datasetsSchemas.filter(
-              datasetSchema => datasetSchema.datasetSchemaId === allQCs.datasetSchemaId
-            );
+      return allQCs.validations
+        .map(qc => {
+          const datasetSchema = datasetsSchemas.filter(
+            datasetSchema => datasetSchema.datasetSchemaId === allQCs.datasetSchemaId
+          );
 
-            const additionalInfo = getAdditionalValidationInfo(
-              qc.referenceId,
-              qc.entityType,
-              qc.relations,
-              datasetsSchemas,
-              allQCs.datasetSchemaId
+          const additionalInfo = getAdditionalValidationInfo(
+            qc.referenceId,
+            qc.entityType,
+            qc.relations,
+            datasetsSchemas,
+            allQCs.datasetSchemaId
+          );
+          qc.tableName = additionalInfo.tableName || '';
+          qc.fieldName = additionalInfo.fieldName || '';
+          qc.expression = getExpressionString(qc, datasetSchema[0].tables);
+          qc.datasetSchemaId = allQCs.datasetSchemaId;
+          if (!isCustodian) {
+            return pick(
+              qc,
+              'tableName',
+              'fieldName',
+              'shortCode',
+              'name',
+              'description',
+              'expression',
+              'entityType',
+              'levelError',
+              'message',
+              'datasetSchemaId'
             );
-            qc.tableName = additionalInfo.tableName || '';
-            qc.fieldName = additionalInfo.fieldName || '';
-            qc.expression = getExpressionString(qc, datasetSchema[0].tables);
-            qc.datasetSchemaId = allQCs.datasetSchemaId;
-            if (!isCustodian) {
-              return pick(
-                qc,
-                'tableName',
-                'fieldName',
-                'shortCode',
-                'name',
-                'description',
-                'expression',
-                'entityType',
-                'levelError',
-                'message',
-                'datasetSchemaId'
-              );
-            } else {
-              return pick(
-                qc,
-                'tableName',
-                'fieldName',
-                'shortCode',
-                'name',
-                'description',
-                'expression',
-                'entityType',
-                'levelError',
-                'message',
-                'automatic',
-                'enabled',
-                'datasetSchemaId'
-              );
-            }
-          })
-        )
+          } else {
+            return pick(
+              qc,
+              'tableName',
+              'fieldName',
+              'shortCode',
+              'name',
+              'description',
+              'expression',
+              'entityType',
+              'levelError',
+              'message',
+              'automatic',
+              'enabled',
+              'datasetSchemaId'
+            );
+          }
+        })
         .flat();
     } else {
       return [];
@@ -328,9 +326,9 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
         return await ValidationService.getAll(datasetSchema.datasetSchemaId, !isCustodian);
       });
       Promise.all(datasetValidations).then(allQCs => {
-        allQCs = allQCs.filter(qc => !isUndefined(qc));
+        allQCs = allQCs.find(qc => !isUndefined(qc));
         if (!isCustodian) {
-          allQCs.forEach(qc => (qc = qc.validations.filter(validation => validation.enabled !== false)));
+          allQCs.validations.filter(validation => validation.enabled !== false);
         }
         setQCList(getQCList(allQCs));
       });
