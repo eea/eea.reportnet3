@@ -38,7 +38,14 @@ import { getExpressionString } from 'views/DatasetDesigner/_components/Validatio
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const QCList = withRouter(
-  ({ dataset, datasetSchemaAllTables, datasetSchemaId, reporting = false, setHasValidations = () => {} }) => {
+  ({
+    dataflowId,
+    dataset,
+    datasetSchemaAllTables,
+    datasetSchemaId,
+    reporting = false,
+    setHasValidations = () => {}
+  }) => {
     const notificationContext = useContext(NotificationContext);
     const resourcesContext = useContext(ResourcesContext);
     const validationContext = useContext(ValidationContext);
@@ -135,7 +142,7 @@ export const QCList = withRouter(
 
       validationContext.onFetchingData(isFetchingData, updatedRuleId);
       try {
-        const validationsServiceList = await ValidationService.getAll(datasetSchemaId, reporting);
+        const validationsServiceList = await ValidationService.getAll(dataflowId, datasetSchemaId, reporting);
         if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
           validationsServiceList.validations.forEach(validation => {
             const additionalInfo = getAdditionalValidationInfo(

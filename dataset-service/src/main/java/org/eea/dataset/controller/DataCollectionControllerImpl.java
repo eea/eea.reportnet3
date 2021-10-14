@@ -209,7 +209,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find a Data Collection by Dataflow id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataCollectionVO.class,
       responseContainer = "List", hidden = true)

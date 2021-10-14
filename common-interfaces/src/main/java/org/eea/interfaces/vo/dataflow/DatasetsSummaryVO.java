@@ -2,15 +2,13 @@ package org.eea.interfaces.vo.dataflow;
 
 import java.io.Serializable;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.ToString;
 
 /**
  * The Class DatasetsSummaryVO
  */
-@Getter
-@Setter
+@Data
 @ToString
 public class DatasetsSummaryVO implements Serializable {
 
