@@ -202,17 +202,12 @@ const ValidationExpression = ({
   };
 
   const renderDatetimeCalendar = () => {
-    console.log(expressionValues.expressionValue);
     return isTimezoneCalendarVisible ? (
       <div>
         <TimezoneCalendar
           isInModal
           onClickOutside={() => setIsTimezoneCalendarVisible(false)}
-          onSaveDate={dateTime => {
-            console.log(dateTime);
-            console.log(dayjs(dateTime).format('YYYY-MM-DDTHH:mm:ss[Z]'));
-            onUpdateExpressionField('expressionValue', dateTime);
-          }}
+          onSaveDate={dateTime => onUpdateExpressionField('expressionValue', dateTime)}
           value={dayjs(expressionValues.expressionValue).format('YYYY-MM-DDTHH:mm:ss[Z]')}
         />
       </div>

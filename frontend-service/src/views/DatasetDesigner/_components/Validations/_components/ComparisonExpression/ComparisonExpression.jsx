@@ -384,7 +384,6 @@ const ComparisonExpression = ({
           isInModal
           onClickOutside={() => setIsTimezoneCalendarVisible(false)}
           onSaveDate={dateTime => {
-            console.log(dateTime);
             onUpdateExpressionField('field2', dateTime);
           }}
           value={dayjs(expressionValues.field2).format('YYYY-MM-DDTHH:mm:ss[Z]')}

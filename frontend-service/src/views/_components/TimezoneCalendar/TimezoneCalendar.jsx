@@ -112,7 +112,6 @@ export const TimezoneCalendar = ({
   }, [date, selectedOffset.value, inputValue]);
 
   const parseDate = dateToParse => {
-    console.log(dateToParse);
     const newDate = new Date(dateToParse);
     const [hour, minute, second] = inputValue.split(':');
     const utcDate = Date.UTC(newDate.getFullYear(), newDate.getMonth(), newDate.getDate(), hour, minute, second);
@@ -163,8 +162,6 @@ export const TimezoneCalendar = ({
   };
 
   const checkError = time => {
-    console.log({ time });
-    console.log(RegularExpressions['time24'].test(time));
     if (checkIsCorrectTimeFormat(time)) {
       setHasError(false);
     } else {

@@ -73,7 +73,7 @@ const getComparisonExpression = expression => {
     if (operatorType === 'dateTime' && valueTypeSelector === 'value') {
       return {
         operator: getOperatorEquivalence(valueTypeSelector, operatorType, operatorValue),
-        params: [field1, dayjs(transField2, 'YYYY-MM-DDTHH:mm:ss[Z]')]
+        params: [field1, dayjs(transField2).format('YYYY-MM-DDTHH:mm:ss[Z]')]
       };
     }
 
@@ -210,8 +210,6 @@ const getExpression = expression => {
     }
 
     if (operatorType === 'dateTime') {
-      console.log(expressionValue);
-      console.log(dayjs(expressionValue).format('YYYY-MM-DDTHH:mm:ss[Z]'));
       return {
         operator: operatorEquivalence,
         params: ['VALUE', dayjs(expressionValue).format('YYYY-MM-DDTHH:mm:ss[Z]')]
@@ -346,7 +344,6 @@ const getRowExpressionFromDTO = (expression, allExpressions, parentUnion) => {
       (newExpression.operatorType === 'date' || newExpression.operatorType === 'dateTime') &&
       newExpression.valueTypeSelector === 'value'
     ) {
-      console.log(expression.params[1].params[0]);
       newExpression.field2 =
         newExpression.operatorType === 'date'
           ? new Date(expression.params[1].params[0])
@@ -360,7 +357,6 @@ const getRowExpressionFromDTO = (expression, allExpressions, parentUnion) => {
       (newExpression.operatorType === 'date' || newExpression.operatorType === 'dateTime') &&
       newExpression.valueTypeSelector === 'value'
     ) {
-      console.log(expression.params[1], dayjs(expression.params[1], 'YYYY-MM-DDTHH:mm:ss[Z]'));
       newExpression.field2 =
         newExpression.operatorType === 'date'
           ? new Date(expression.params[1])
