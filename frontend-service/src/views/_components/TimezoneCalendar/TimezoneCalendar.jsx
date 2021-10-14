@@ -172,9 +172,14 @@ export const TimezoneCalendar = ({
 
   const renderLabel = () => {
     return (
-      <span className={styles.labelDate}>
-        {dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value).format('YYYY-MM-DDTHH:mm:ss[Z]').toString()}
-      </span>
+      <Fragment>
+        <span className={styles.labelText}>Result:</span>
+        <span className={styles.labelDate}>
+          {dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)
+            ? dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value).format('YYYY-MM-DDTHH:mm:ss[Z]').toString()
+            : '-'}
+        </span>
+      </Fragment>
     );
   };
 

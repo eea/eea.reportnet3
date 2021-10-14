@@ -13,9 +13,12 @@
     }
   }
 
-  .labelDate {
+  .labelDate,
+  .labelText {
     margin-left: 0.2rem;
     font-size: smaller;
+  }
+  .labelDate {
     font-weight: 600;
   }
 
