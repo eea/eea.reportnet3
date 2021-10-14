@@ -137,7 +137,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
 
   const onLoadDatasetSchema = async datasetId => {
     try {
-      const datasetSchema = await DatasetService.getSchema(datasetId);
+      const datasetSchema = await DatasetService.getSchema(dataflowId, datasetId);
 
       if (!isEmpty(datasetSchema)) {
         if (isCustodian) {

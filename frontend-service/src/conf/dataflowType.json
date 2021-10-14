@@ -46,11 +46,7 @@
   },
   "REFERENCE": {
     "key": "reference",
-    "value": "REFERENCE",
-    "labels": {
-      "datasetsInfoDataProviderColumnHeader": "countriesCC",
-      "datasetsInfoDataProviderNameFilterLabel": "countries"
-    }
+    "value": "REFERENCE"
   },
   "REPORTING": {
     "key": "reporting",

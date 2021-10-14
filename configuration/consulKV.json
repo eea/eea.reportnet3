@@ -1464,10 +1464,6 @@
     "value": "MTAwMA=="
   },
   {
-    "key": "config/dataflow/dataflow.task.parallelism",
-    "value": "JHtTTkFQU0hPVF9UQVNLX1BBUkFMTEVMSVNNOjR9"
-  },
-  {
     "key": "config/dataflow/exportDataflowSchemaInformationPath",
     "value": "JHtEQVRBRkxPV19FWFBPUlRfU0NIRU1BX0lORk9STUFUSU9OX1BBVEg6QzpcZXhwb3J0RGF0YWZsb3dTY2hlbWFJbmZvcm1hdGlvblx9"
   }

@@ -243,7 +243,7 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
     try {
       setIsLoading(true);
       const datasetValidations = datasetsSchemas.map(async datasetSchema => {
-        return await ValidationService.getAll(datasetSchema.datasetSchemaId, !isCustodian);
+        return await ValidationService.getAll(dataflowId, datasetSchema.datasetSchemaId, !isCustodian);
       });
       Promise.all(datasetValidations).then(allValidations => {
         allValidations = allValidations.filter(allValidation => !isUndefined(allValidation));

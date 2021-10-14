@@ -96,8 +96,8 @@ export const ValidationService = {
   downloadShowValidationsFile: async (datasetId, fileName) =>
     await ValidationRepository.downloadShowValidationsFile(datasetId, fileName),
 
-  getAll: async (datasetSchemaId, reporting = false) => {
-    const validationsListDTO = await ValidationRepository.getAll(datasetSchemaId);
+  getAll: async (dataflowId, datasetSchemaId, reporting = false) => {
+    const validationsListDTO = await ValidationRepository.getAll(dataflowId, datasetSchemaId);
     if (isUndefined(validationsListDTO.data) || isEmpty(validationsListDTO.data.rules)) {
       return;
     }

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -99,7 +101,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   private LockService lockService;
 
   @Autowired
-  private DataflowHelper dataflowHelp;
+  private DataflowHelper dataflowHelper;
 
   /**
    * Find by id.
@@ -553,6 +555,14 @@ public class DataFlowControllerImpl implements DataFlowController {
   public void deleteDataFlow(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
 
+    DataFlowVO dataflowData = null;
+    try {
+      dataflowData = dataflowService.getMetabaseById(dataflowId);
+    } catch (EEAException e) {
+      LOG.error(String.format(
+          "Couldn't retrieve the dataflow information with the provided dataflowId %s",
+          dataflowId));
+    }
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
     Map<String, Object> importDatasetData = new HashMap<>();
@@ -571,6 +581,10 @@ public class DataFlowControllerImpl implements DataFlowController {
     } else if (cloneLockVO != null) {
       throw new ResponseStatusException(HttpStatus.LOCKED,
           "Dataflow is locked because clone is in progress.");
+    } else if (!dataflowService.isAdmin() && dataflowData != null
+        && dataflowData.getType() == TypeDataflowEnum.BUSINESS) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "Can't delete a Business Dataflow without being an admin user.");
     } else {
       dataflowService.deleteDataFlow(dataflowId);
     }
@@ -857,11 +871,12 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @PostMapping("/exportSchemaInformation/{dataflowId}")
+  @ApiOperation(value = "Export a file with all Schema Information", hidden = true)
   public void exportSchemaInformation(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     LOG.info("Export schema information from dataflowId {}", dataflowId);
     try {
-      dataflowHelp.exportSchemaInformation(dataflowId);
+      dataflowHelper.exportSchemaInformation(dataflowId);
     } catch (IOException | EEAException e) {
       LOG_ERROR.error(
           "Error downloading file generated from export from the dataflowId {}. Message: {}",
@@ -878,6 +893,8 @@ public class DataFlowControllerImpl implements DataFlowController {
    */
   @Override
   @GetMapping("/downloadSchemaInformation/{dataflowId}")
+  @ApiOperation(value = "Download a file with all Schema Information from a dataflow",
+      hidden = true)
   public void downloadSchemaInformation(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
       @RequestParam String fileName, HttpServletResponse response) {
@@ -885,7 +902,7 @@ public class DataFlowControllerImpl implements DataFlowController {
       LOG.info(
           "Downloading file generated when exporting Schema Information. DataflowId {}. Filename {}",
           dataflowId, fileName);
-      File file = dataflowHelp.downloadSchemaInformation(dataflowId, fileName);
+      File file = dataflowHelper.downloadSchemaInformation(dataflowId, fileName);
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
       OutputStream out = response.getOutputStream();
@@ -904,5 +921,46 @@ public class DataFlowControllerImpl implements DataFlowController {
           "Trying to download a file generated during the export Schema Information process but the file is not found, dataflowId: %s filename: %s message: %s",
           dataflowId, fileName, e.getMessage()), e);
     }
+  }
+
+  /**
+   * Download public schema information.
+   *
+   * @param dataflowId the dataflow id
+   * @return the response entity
+   */
+  @Override
+  @GetMapping("/downloadPublicSchemaInformation/{dataflowId}")
+  @ApiOperation(value = "Download a file with all Schema Information from a public dataflow",
+      hidden = true)
+  public ResponseEntity<byte[]> downloadPublicSchemaInformation(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+
+    try {
+      dataflowService.getPublicDataflowById(dataflowId);
+      LOG.info("Downloading file Schema Information from DataflowId {}.", dataflowId);
+
+      String composedFileName = "dataflow-" + dataflowId + "-Schema_Information";
+      String fileNameWithExtension = composedFileName + "_"
+          + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss")) + "."
+          + FileTypeEnum.XLSX.getValue();
+
+      byte[] file = dataflowHelper.downloadPublicSchemaInformation(dataflowId);
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
+          "attachment; filename=" + fileNameWithExtension);
+      return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
+
+    } catch (EEAException e) {
+      LOG_ERROR.error("DataflowId {} is not public. Error message: {}", dataflowId, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    } catch (ResponseStatusException | IOException e) {
+      LOG_ERROR.error(
+          "Error downloading file schema information from the dataflowId {}, with message: {}",
+          dataflowId, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+    }
+
+
   }
 }

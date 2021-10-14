@@ -1,7 +1,7 @@
 import DomHandler from './DomHandler';
 
 export default class KeyFilter {
-  /* eslint-disable */
+  /* eslint-disable no-useless-escape */
   static DEFAULT_MASKS = {
     alpha: /[a-z_]/i,
     alphanum: /[a-z0-9_]/i,
@@ -23,7 +23,7 @@ export default class KeyFilter {
     schemaTableFields: /[a-zA-Z0-9_\s\-]/,
     url: /^\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/
   };
-  /* eslint-enable */
+  /* eslint-enable no-useless-escape */
 
   static KEYS = {
     TAB: 9,
