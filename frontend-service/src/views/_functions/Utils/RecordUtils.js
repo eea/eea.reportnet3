@@ -175,7 +175,7 @@ const getFieldTypeValue = fieldType => {
     const filteredTypes = config.fieldType.filter(field => TextUtils.areEquals(field.fieldType, fieldType))[0];
     return filteredTypes;
   } else {
-    return {};
+    return null;
   }
 };
 
