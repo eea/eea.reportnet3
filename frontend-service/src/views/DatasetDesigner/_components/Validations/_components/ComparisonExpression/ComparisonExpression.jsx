@@ -400,9 +400,6 @@ const ComparisonExpression = ({
     const { operatorType, operatorValue, field2 } = expressionValues;
 
     if (operatorType === 'date' || operatorType === 'dateTime') {
-      // const showSeconds = operatorType === 'dateTime';
-      // const showTime = operatorType === 'dateTime';
-
       if (operatorType === 'dateTime') {
         return renderDatetimeCalendar();
       }
@@ -420,8 +417,6 @@ const ComparisonExpression = ({
           }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
-          // showSeconds={showSeconds}
-          // showTime={showTime}
           value={field2}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>

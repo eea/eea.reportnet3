@@ -46,10 +46,10 @@ const ValidationExpression = ({
 
   const [clickedFields, setClickedFields] = useState([]);
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
+  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
   const [valueKeyFilter, setValueKeyFilter] = useState();
-  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
 
   useEffect(() => {
     if (inputStringMatchRef.current && isActiveStringMatchInput) {

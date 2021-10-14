@@ -65,7 +65,6 @@ const DataFormFieldEditor = ({
   const multiDropdownRef = useRef(null);
   const pointRef = useRef(null);
   const refCalendar = useRef(null);
-  // const refDatetimeCalendar = useRef(null);
   const textAreaRef = useRef(null);
 
   dayjs.extend(utc);
