@@ -171,12 +171,11 @@ const getCodelistValue = (codelistItemsOptions, value) => {
 };
 
 const getFieldTypeValue = fieldType => {
-  if (!isUndefined(fieldType)) {
-    const filteredTypes = config.fieldType.filter(field => TextUtils.areEquals(field.fieldType, fieldType))[0];
-    return filteredTypes;
-  } else {
-    return null;
+  if (isUndefined(fieldType)) {
+     return null;
   }
+  
+  return config.fieldType.filter(field => TextUtils.areEquals(field.fieldType, fieldType))[0];
 };
 
 const getFilter = type => {
