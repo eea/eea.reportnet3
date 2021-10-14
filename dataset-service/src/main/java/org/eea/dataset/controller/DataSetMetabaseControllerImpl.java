@@ -80,7 +80,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER')  OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
   @ApiOperation(value = "Find reporting dataset id by dataflow id", hidden = true)
   public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(@ApiParam(type = "Long",
       value = "dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
@@ -237,7 +237,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @HystrixCommand
   @GetMapping(value = "/{datasetId}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get statistics by dataset", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_OBSERVER','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE')")
   public StatisticsVO getStatisticsById(@ApiParam(type = "Long", value = "dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {
 
