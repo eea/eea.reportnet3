@@ -10,7 +10,6 @@ import { Button } from 'views/_components/Button';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
-import { InputText } from 'views/_components/InputText';
 import { Portal } from 'views/_components/Portal';
 import { TooltipButton } from 'views/_components/TooltipButton';
 import uniqueId from 'lodash/uniqueId';
@@ -173,11 +172,11 @@ export const TimezoneCalendar = ({
 
   const renderUtcInput = () => {
     return (
-      <InputText
-        value={dayjs(parseDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value)))
+      <label className={styles.labelDate}>
+        {dayjs(parseDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value)))
           .utc()
-          .format('ddd, DD MMM YYYY HH:mm:ss')}
-      />
+          .format('YYYY-MM-DDTHH:mm:ss[Z]')}
+      </label>
     );
   };
 
