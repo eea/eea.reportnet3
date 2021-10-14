@@ -2,7 +2,6 @@ import { useContext, useEffect, useLayoutEffect, useState, useRef, Fragment } fr
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
-import usePortal from 'react-useportal';
 import utc from 'dayjs/plugin/utc';
 
 import styles from './TimezoneCalendar.module.scss';
@@ -12,7 +11,9 @@ import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
 import { InputText } from 'views/_components/InputText';
+import { Portal } from 'views/_components/Portal';
 import { TooltipButton } from 'views/_components/TooltipButton';
+import uniqueId from 'lodash/uniqueId';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -69,8 +70,6 @@ export const TimezoneCalendar = ({
   const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
-
-  const { Portal } = usePortal();
 
   const [date, setDate] = useState('');
   const [inputValue, setInputValue] = useState('');
@@ -234,7 +233,8 @@ export const TimezoneCalendar = ({
                 <span className={styles.label}>{resourcesContext.messages['utc']}</span>
                 <TooltipButton
                   message={resourcesContext.messages['dateTimeWarningTooltip']}
-                  uniqueIdentifier={'dateTimeWarningTooltip'}
+                  uniqueIdentifier={uniqueId('dateTimeWarningTooltip_')}
+                  usedInPortal={true}
                 />
                 {renderDropdown()}
               </div>
