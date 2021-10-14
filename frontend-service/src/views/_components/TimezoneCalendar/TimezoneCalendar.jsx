@@ -106,7 +106,7 @@ export const TimezoneCalendar = ({
   }, []);
 
   useEffect(() => {
-    if (isInModal && dayjs(date).isValid()) {
+    if (isInModal && dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)) {
       onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value));
     }
   }, [date, selectedOffset.value, inputValue]);

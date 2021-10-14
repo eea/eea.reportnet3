@@ -4,9 +4,13 @@ import isNil from 'lodash/isNil';
 import isObject from 'lodash/isObject';
 import uniqueId from 'lodash/uniqueId';
 
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
 import { Validation } from 'entities/Validation';
 
 import { config } from 'conf';
+
+dayjs.extend(customParseFormat);
 
 const getOperatorEquivalence = (valueTypeSelector, operatorType, operatorValue = null) => {
   const {
@@ -243,7 +247,10 @@ const getExpressionFromDTO = (expression, allExpressions, parentUnion) => {
   }
 
   if (newExpression.operatorType === 'date' || newExpression.operatorType === 'dateTime') {
-    newExpression.expressionValue = new Date(expression.params[1]);
+    newExpression.expressionValue =
+      newExpression.operatorType === 'date'
+        ? new Date(expression.params[1])
+        : dayjs(expression.params[1], 'YYYY-MM-DDTHH:mm:ss[Z]');
   }
 
   allExpressions.push(newExpression);
@@ -337,7 +344,10 @@ const getRowExpressionFromDTO = (expression, allExpressions, parentUnion) => {
       (newExpression.operatorType === 'date' || newExpression.operatorType === 'dateTime') &&
       newExpression.valueTypeSelector === 'value'
     ) {
-      newExpression.field2 = new Date(expression.params[1].params[0]);
+      newExpression.field2 =
+        newExpression.operatorType === 'date'
+          ? new Date(expression.params[1].params[0])
+          : dayjs(expression.params[1].params[0], 'YYYY-MM-DDTHH:mm:ss[Z]');
     } else {
       newExpression.field2 = expression.params[1].params[0];
     }
@@ -347,7 +357,10 @@ const getRowExpressionFromDTO = (expression, allExpressions, parentUnion) => {
       (newExpression.operatorType === 'date' || newExpression.operatorType === 'dateTime') &&
       newExpression.valueTypeSelector === 'value'
     ) {
-      newExpression.field2 = new Date(expression.params[1]);
+      newExpression.field2 =
+        newExpression.operatorType === 'date'
+          ? new Date(expression.params[1])
+          : dayjs(expression.params[1], 'YYYY-MM-DDTHH:mm:ss[Z]');
     } else {
       newExpression.field2 = expression.params[1];
     }

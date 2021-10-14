@@ -3,7 +3,9 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 const getDateFormattedExpression = ({ expression, field, format }) => {
-  return `( ${field} ${expression.operatorValue} ${dayjs(expression.expressionValue).format(format)} )`;
+  return `( ${field} ${expression.operatorValue} ${
+    expression.expressionValue !== '' ? dayjs(expression.expressionValue).format(format) : ''
+  } )`;
 };
 const getPrefixedFieldExpression = ({ expression, field, prefix }) => {
   return `( ${prefix}( ${field} ) ${expression.operatorValue} ${expression.expressionValue} )`;
@@ -26,7 +28,7 @@ const printExpression = (expression, field) => {
         case 'day':
           return getPrefixedFieldExpression({ expression, field, prefix: 'Day' });
         case 'dateTime':
-          return getDateFormattedExpression({ expression, field, format: 'YYYY-MM-DD HH:mm:ss' });
+          return getDateFormattedExpression({ expression, field, format: 'YYYY-MM-DDTHH:mm:ss[Z]' });
         case 'yearDateTime':
           return getPrefixedFieldExpression({ expression, field, prefix: 'Year' });
         case 'monthDateTime':
