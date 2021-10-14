@@ -1,8 +1,10 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 
+import dayjs from 'dayjs';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import utc from 'dayjs/plugin/utc';
 
 import styles from './ValidationExpression.module.scss';
 
@@ -18,6 +20,7 @@ import { InputText } from 'views/_components/InputText';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 
 const ValidationExpression = ({
   dataflowType,
@@ -31,6 +34,7 @@ const ValidationExpression = ({
   position,
   showRequiredFields
 }) => {
+  dayjs.extend(utc);
   const { expressionId } = expressionValues;
   const {
     validations: { operatorTypes: operatorTypesConf, operatorByType }
@@ -42,6 +46,7 @@ const ValidationExpression = ({
 
   const [clickedFields, setClickedFields] = useState([]);
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
+  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
   const [valueKeyFilter, setValueKeyFilter] = useState();
@@ -195,6 +200,28 @@ const ValidationExpression = ({
     panel.style.position = 'fixed';
   };
 
+  const renderDatetimeCalendar = () => {
+    return isTimezoneCalendarVisible ? (
+      <div>
+        <TimezoneCalendar
+          isInModal
+          onClickOutside={() => setIsTimezoneCalendarVisible(false)}
+          onSaveDate={dateTime => onUpdateExpressionField('expressionValue', dateTime)}
+          value={dayjs(expressionValues.expressionValue).format('YYYY-MM-DDTHH:mm:ss[Z]')}
+        />
+      </div>
+    ) : (
+      <InputText
+        onFocus={() => setIsTimezoneCalendarVisible(true)}
+        value={
+          expressionValues.expressionValue !== ''
+            ? dayjs(expressionValues.expressionValue).format('YYYY-MM-DDTHH:mm:ss[Z]')
+            : ''
+        }
+      />
+    );
+  };
+
   const buildValueInput = () => {
     const { operatorType, operatorValue } = expressionValues;
 
@@ -203,8 +230,10 @@ const ValidationExpression = ({
     }
 
     if (operatorType === 'date' || operatorType === 'dateTime') {
-      const showSeconds = operatorType === 'dateTime';
-      const showTime = operatorType === 'dateTime';
+      if (operatorType === 'dateTime') {
+        return renderDatetimeCalendar();
+      }
+
       return (
         <Calendar
           appendTo={document.body}
@@ -218,8 +247,6 @@ const ValidationExpression = ({
           }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
-          showSeconds={showSeconds}
-          showTime={showTime}
           value={expressionValues.expressionValue}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>

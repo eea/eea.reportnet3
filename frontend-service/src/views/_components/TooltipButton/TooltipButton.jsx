@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 
 import styles from './TooltipButton.module.scss';
 import ReactTooltip from 'react-tooltip';
@@ -11,8 +11,13 @@ export const TooltipButton = ({
   tabIndex = '-1',
   tooltipClassName = '',
   uniqueIdentifier = 1,
+  usedInPortal = false,
   maxWidth = false
 }) => {
+  useEffect(() => {
+    if (usedInPortal) ReactTooltip.rebuild();
+  });
+
   return (
     <Fragment>
       <span data-for={`infoCircleButton_${uniqueIdentifier}`} data-tip>

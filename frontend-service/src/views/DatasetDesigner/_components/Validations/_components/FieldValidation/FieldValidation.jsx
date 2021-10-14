@@ -286,7 +286,6 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
       setIsSubmitDisabled(true);
       const { candidateRule, expressionText } = creationFormState;
       candidateRule.expressionText = expressionText;
-
       await ValidationService.updateFieldRule(datasetId, candidateRule);
       if (!isNil(candidateRule) && candidateRule.automatic) {
         validationContext.onAutomaticRuleIsUpdated(true);

@@ -1,9 +1,11 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
+import dayjs from 'dayjs';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
+import utc from 'dayjs/plugin/utc';
 
 import styles from './ComparisonExpression.module.scss';
 
@@ -16,6 +18,7 @@ import { Checkbox } from 'views/_components/Checkbox';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'views/_components/InputText';
+import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -37,6 +40,7 @@ const ComparisonExpression = ({
   rawTableFields,
   showRequiredFields
 }) => {
+  dayjs.extend(utc);
   const componentName = 'fieldComparison';
   const { expressionId } = expressionValues;
   const {
@@ -51,13 +55,14 @@ const ComparisonExpression = ({
   const [disabledFields, setDisabledFields] = useState({});
   const [fieldType, setFieldType] = useState(null);
   const [isActiveStringMatchInput, setIsActiveStringMatchInput] = useState(false);
+  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
   const [operatorTypes, setOperatorTypes] = useState([]);
   const [operatorValues, setOperatorValues] = useState([]);
   const [secondFieldOptions, setSecondFieldOptions] = useState([]);
   const [tableFields, setTableFields] = useState([]);
+  const [valueFieldPlaceholder, setValueFieldPlaceholder] = useState(resourcesContext.messages.selectField);
   const [valueKeyFilter, setValueKeyFilter] = useState();
   const [valueTypeSelectorOptions, setValueTypeSelectorOptions] = useState([]);
-  const [valueFieldPlaceholder, setValueFieldPlaceholder] = useState(resourcesContext.messages.selectField);
 
   useEffect(() => {
     if (inputStringMatchRef.current && isActiveStringMatchInput) {
@@ -371,12 +376,33 @@ const ComparisonExpression = ({
     panel.style.position = 'fixed';
   };
 
+  const renderDatetimeCalendar = () => {
+    return isTimezoneCalendarVisible ? (
+      <div className={styles.timezoneWrapper}>
+        <TimezoneCalendar
+          isInModal
+          onClickOutside={() => setIsTimezoneCalendarVisible(false)}
+          onSaveDate={dateTime => {
+            onUpdateExpressionField('field2', dateTime);
+          }}
+          value={dayjs(expressionValues.field2).format('YYYY-MM-DDTHH:mm:ss[Z]')}
+        />
+      </div>
+    ) : (
+      <InputText
+        onFocus={() => setIsTimezoneCalendarVisible(true)}
+        value={expressionValues.field2 !== '' ? dayjs(expressionValues.field2).format('YYYY-MM-DDTHH:mm:ss[Z]') : ''}
+      />
+    );
+  };
+
   const buildValueInput = () => {
     const { operatorType, operatorValue, field2 } = expressionValues;
 
     if (operatorType === 'date' || operatorType === 'dateTime') {
-      const showSeconds = operatorType === 'dateTime';
-      const showTime = operatorType === 'dateTime';
+      if (operatorType === 'dateTime') {
+        return renderDatetimeCalendar();
+      }
       return (
         <Calendar
           appendTo={document.body}
@@ -391,8 +417,6 @@ const ComparisonExpression = ({
           }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
-          showSeconds={showSeconds}
-          showTime={showTime}
           value={field2}
           yearNavigator={true}
           yearRange="1900:2500"></Calendar>
