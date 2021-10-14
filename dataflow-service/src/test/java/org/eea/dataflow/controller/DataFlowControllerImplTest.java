@@ -918,4 +918,11 @@ public class DataFlowControllerImplTest {
     Mockito.when(dataflowService.getDatasetSummary(Mockito.any())).thenReturn(datasetsSummary);
     assertEquals(new ArrayList<>(), dataFlowControllerImpl.getDatasetSummaryByDataflowId(1L));
   }
+
+  @Test
+  public void getDatasetSummaryByDataflowIdErrorTest() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).getDatasetSummary(Mockito.anyLong());
+    dataFlowControllerImpl.getDatasetSummaryByDataflowId(1L);
+    Mockito.verify(dataflowService, times(1)).getDatasetSummary(Mockito.anyLong());
+  }
 }

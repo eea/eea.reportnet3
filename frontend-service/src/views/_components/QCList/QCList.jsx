@@ -38,7 +38,14 @@ import { getExpressionString } from 'views/DatasetDesigner/_components/Validatio
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const QCList = withRouter(
-  ({ dataset, datasetSchemaAllTables, datasetSchemaId, reporting = false, setHasValidations = () => {} }) => {
+  ({
+    dataflowId,
+    dataset,
+    datasetSchemaAllTables,
+    datasetSchemaId,
+    reporting = false,
+    setHasValidations = () => {}
+  }) => {
     const notificationContext = useContext(NotificationContext);
     const resourcesContext = useContext(ResourcesContext);
     const validationContext = useContext(ValidationContext);
@@ -135,7 +142,7 @@ export const QCList = withRouter(
 
       validationContext.onFetchingData(isFetchingData, updatedRuleId);
       try {
-        const validationsServiceList = await ValidationService.getAll(datasetSchemaId, reporting);
+        const validationsServiceList = await ValidationService.getAll(dataflowId, datasetSchemaId, reporting);
         if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
           validationsServiceList.validations.forEach(validation => {
             const additionalInfo = getAdditionalValidationInfo(
@@ -593,10 +600,6 @@ export const QCList = withRouter(
     const checkIsEmptyValidations = () =>
       isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
-    const onPageChange = () => {
-      tabsValidationsDispatch({ type: 'RESET_EDITING_ROWS' });
-    };
-
     const onRowEditorValueChange = (props, value, isText = false) => {
       const inmQCs = [...tabsValidationsState.validationList.validations];
       const inmEditingRows = [...tabsValidationsState.editingRows];
@@ -700,7 +703,6 @@ export const QCList = withRouter(
               autoLayout={true}
               className={styles.paginatorValidationViewer}
               editMode="row"
-              getPageChange={onPageChange}
               hasDefaultCurrentPage={true}
               loading={false}
               onRowClick={event => validationId(event.data.id)}

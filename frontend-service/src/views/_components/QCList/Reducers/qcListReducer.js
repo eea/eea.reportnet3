@@ -22,14 +22,6 @@ export const qcListReducer = (state, { type, payload }) => {
     case 'ON_LOAD_VALIDATION_LIST':
       return { ...state, validationList: payload.validationsServiceList };
 
-    case 'RESET_EDITING_ROWS':
-      return {
-        ...state,
-        editingRows: [],
-        filteredData: cloneDeep(state.initialFilteredData),
-        validationList: { ...state.validationList, validations: cloneDeep(state.initialValidationsList) }
-      };
-
     case 'RESET_FILTERED_DATA':
       return {
         ...state,

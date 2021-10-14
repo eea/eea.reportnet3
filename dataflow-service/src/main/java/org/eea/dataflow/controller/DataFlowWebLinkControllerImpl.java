@@ -62,7 +62,7 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "{idLink}")
+  @GetMapping(value = "/private/{idLink}")
   @ApiOperation(value = "Find a Weblink", response = WeblinkVO.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),

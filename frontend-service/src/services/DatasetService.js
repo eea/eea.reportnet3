@@ -268,9 +268,9 @@ export const DatasetService = {
   updateTableOrder: async (datasetId, position, tableSchemaId) =>
     await DatasetRepository.updateTableOrder(datasetId, position, tableSchemaId),
 
-  getSchema: async datasetId => {
+  getSchema: async (dataflowId, datasetId) => {
     const datasetSchemaDTO = await DatasetRepository.getSchema(datasetId);
-    const rulesDTO = await ValidationRepository.getAll(datasetSchemaDTO.data.idDataSetSchema);
+    const rulesDTO = await ValidationRepository.getAll(dataflowId, datasetSchemaDTO.data.idDataSetSchema);
 
     const dataset = new Dataset({
       availableInPublic: datasetSchemaDTO.data.availableInPublic,

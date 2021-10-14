@@ -343,39 +343,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
 
   /**
-   * Find data provider group by dataflow id.
-   *
-   * @param dataflowId the dataflow id
-   * @return the data provider code VO
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public DataProviderCodeVO findDataProviderGroupByDataflowId(Long dataflowId) throws EEAException {
-    Dataflow dataflowFound = dataflowRepository.findById(dataflowId).orElse(null);
-    DataProviderGroup dataProviderGroup;
-
-    if (dataflowFound != null) {
-      try {
-        dataProviderGroup = dataProviderGroupRepository
-            .findById(dataflowFound.getDataProviderGroupId()).orElse(new DataProviderGroup());
-      } catch (Exception e) {
-        LOG.error("Cannot find Data provider group for Dataflow with provided Id: {}", dataflowId);
-        throw new EEAException(
-            "Data provider group associated with the provided Dataflow id is null. "
-                + e.getMessage());
-      }
-    }
-
-    else {
-      LOG.error(
-          "Cannot find Dataflow with dataflowId: {} when trying to find its Data provider group.",
-          dataflowId);
-      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
-    }
-    return dataProviderGroupMapper.entityToClass(dataProviderGroup);
-  }
-
-  /**
    * Export file.
    *
    * @param dataflowId the dataflow id

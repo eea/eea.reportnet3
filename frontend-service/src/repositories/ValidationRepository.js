@@ -28,8 +28,8 @@ export const ValidationRepository = {
   generateShowValidationsFile: async datasetId =>
     await HTTPRequester.post({ url: getUrl(ValidationConfig.generateShowValidationsFile, { datasetId }) }),
 
-  getAll: async datasetSchemaId =>
-    await HTTPRequester.get({ url: getUrl(ValidationConfig.getAll, { datasetSchemaId }) }),
+  getAll: async (dataflowId, datasetSchemaId) =>
+    await HTTPRequester.get({ url: getUrl(ValidationConfig.getAll, { dataflowId, datasetSchemaId }) }),
 
   update: async (datasetId, validationRule) => {
     let url = getUrl(ValidationConfig.update, { datasetId });

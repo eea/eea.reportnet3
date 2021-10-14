@@ -29,9 +29,7 @@ import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -271,57 +269,6 @@ public class DataSetControllerImplTest {
     dataSetControllerImpl.updateDataset(null);
   }
 
-
-  /**
-   * Test get position from any object id.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetPositionFromAnyObjectId() throws Exception {
-
-    when(datasetService.getPositionFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(new ValidationLinkVO());
-    dataSetControllerImpl.getPositionFromAnyObjectId("1L", 1L, EntityTypeEnum.TABLE);
-    Mockito.verify(datasetService, times(1)).getPositionFromAnyObjectId(Mockito.any(),
-        Mockito.any(), Mockito.any());
-  }
-
-
-  /**
-   * Test get position from any object id exception.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testGetPositionFromAnyObjectIdException() throws Exception {
-    dataSetControllerImpl.getPositionFromAnyObjectId(null, null, null);
-  }
-
-
-  /**
-   * Test get position from any object id exception 2.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testGetPositionFromAnyObjectIdException2() throws Exception {
-
-    doThrow(new EEAException(EEAErrorMessage.FILE_FORMAT)).when(datasetService)
-        .getPositionFromAnyObjectId(Mockito.any(), Mockito.any(), Mockito.any());
-    dataSetControllerImpl.getPositionFromAnyObjectId("1L", 1L, EntityTypeEnum.TABLE);
-  }
-
-
-  /**
-   * Test get position from any object id exception 3.
-   *
-   * @throws Exception the exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void testGetPositionFromAnyObjectIdException3() throws Exception {
-    dataSetControllerImpl.getPositionFromAnyObjectId("1L", null, null);
-  }
 
   /**
    * Testupdate records null entry.

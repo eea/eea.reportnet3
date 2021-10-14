@@ -99,7 +99,6 @@ import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -552,65 +551,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Cacheable(value = "dataFlowId", key = "#datasetId")
   public Long getDataFlowIdById(Long datasetId) {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
-  }
-
-  /**
-   * Gets the position from any object id.
-   *
-   * @param id the id
-   * @param idDataset the id dataset
-   * @param type the type
-   *
-   * @return the position from any object id
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public ValidationLinkVO getPositionFromAnyObjectId(final String id, final Long idDataset,
-      final EntityTypeEnum type) throws EEAException {
-
-    ValidationLinkVO validationLink = new ValidationLinkVO();
-    RecordValue record = new RecordValue();
-    List<RecordValue> records = new ArrayList<>();
-
-    // TABLE
-    if (EntityTypeEnum.TABLE == type) {
-      TableValue table = tableRepository.findByIdAndDatasetId_Id(Long.parseLong(id), idDataset);
-      records = recordRepository.findByTableValueNoOrder(table.getIdTableSchema(), null);
-      if (records != null && !records.isEmpty()) {
-        record = records.get(0);
-      }
-    }
-
-    // RECORD
-    if (EntityTypeEnum.RECORD == type) {
-      record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
-      records =
-          recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema(), null);
-    }
-
-    // FIELD
-    if (EntityTypeEnum.FIELD == type) {
-      FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
-      if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null) {
-        record = field.getRecord();
-        records = recordRepository
-            .findByTableValueNoOrder(record.getTableValue().getIdTableSchema(), null);
-      }
-    }
-
-    if (records != null && !records.isEmpty()) {
-      int recordPosition = records.indexOf(record);
-      validationLink.setIdTableSchema(record.getTableValue().getIdTableSchema());
-      validationLink.setPosition(Long.valueOf(recordPosition));
-      validationLink.setIdRecord(record.getId());
-    }
-
-    LOG.info(
-        "Validation error with idObject {} clicked in dataset {}. The position is {} from table schema {}",
-        id, idDataset, validationLink.getPosition(), validationLink.getIdTableSchema());
-    return validationLink;
   }
 
   /**
