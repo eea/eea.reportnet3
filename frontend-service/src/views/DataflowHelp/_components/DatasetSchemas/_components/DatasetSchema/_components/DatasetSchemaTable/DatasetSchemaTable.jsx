@@ -43,20 +43,19 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
   };
 
   const filterReferencedFieldAndCodelist = columns => {
-    let filteredColumns = columns;
     if (type === 'fields') {
       const hasReferencedFields = fields.some(
         field => !isNil(field.referencedField) && !isEmpty(field.referencedField)
       );
       const hasCodelists = fields.some(field => !isNil(field.codelistItems) && !isEmpty(field.codelistItems));
       if (!hasReferencedFields) {
-        filteredColumns = filteredColumns.filter(column => column !== 'referencedField');
+        columns = columns.filter(column => column !== 'referencedField');
       }
       if (!hasCodelists) {
-        filteredColumns = filteredColumns.filter(column => column !== 'codelistItems');
+        columns = columns.filter(column => column !== 'codelistItems');
       }
     }
-    return filteredColumns;
+    return columns;
   };
 
   const getFieldTypeValue = value => {
