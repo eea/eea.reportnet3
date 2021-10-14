@@ -12,6 +12,7 @@ import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
 import { TooltipButton } from 'views/_components/TooltipButton';
+import uniqueId from 'lodash/uniqueId';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -223,7 +224,8 @@ export const TimezoneCalendar = ({
                 <span className={styles.label}>{resourcesContext.messages['utc']}</span>
                 <TooltipButton
                   message={resourcesContext.messages['dateTimeWarningTooltip']}
-                  uniqueIdentifier={'dateTimeWarningTooltip'}
+                  uniqueIdentifier={uniqueId('dateTimeWarningTooltip_')}
+                  usedInPortal={true}
                 />
                 {renderDropdown()}
               </div>
