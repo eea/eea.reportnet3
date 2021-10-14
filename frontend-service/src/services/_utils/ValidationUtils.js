@@ -73,7 +73,7 @@ const getComparisonExpression = expression => {
     if (operatorType === 'dateTime' && valueTypeSelector === 'value') {
       return {
         operator: getOperatorEquivalence(valueTypeSelector, operatorType, operatorValue),
-        params: [field1, dayjs(transField2).format('YYYY-MM-DDTHH:mm:ss[Z]')]
+        params: [field1, dayjs(transField2).format('YYYY-MM-DD HH:mm:ss')]
       };
     }
 
@@ -212,7 +212,7 @@ const getExpression = expression => {
     if (operatorType === 'dateTime') {
       return {
         operator: operatorEquivalence,
-        params: ['VALUE', dayjs(expressionValue).format('YYYY-MM-DDTHH:mm:ss[Z]')]
+        params: ['VALUE', dayjs(expressionValue).format('YYYY-MM-DD HH:mm:ss')]
       };
     }
 
