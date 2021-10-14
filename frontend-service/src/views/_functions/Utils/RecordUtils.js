@@ -170,27 +170,27 @@ const getCodelistValue = (codelistItemsOptions, value) => {
 
 const getFieldTypeValue = fieldType => {
   const fieldTypes = [
-    { fieldType: 'Number_Integer', value: 'Number - Integer' },
-    { fieldType: 'Number_Decimal', value: 'Number - Decimal' },
-    { fieldType: 'Date', value: 'Date' },
-    { fieldType: 'Datetime', value: 'Datetime' },
-    { fieldType: 'Text', value: 'Text' },
-    // { fieldType: 'Rich_Text', value: 'Rich text' },
-    { fieldType: 'Textarea', value: 'Multiline text' },
-    { fieldType: 'Email', value: 'Email' },
-    { fieldType: 'URL', value: 'URL' },
-    { fieldType: 'Phone', value: 'Phone number' },
-    { fieldType: 'Point', value: 'Point' },
-    { fieldType: 'MultiPoint', value: 'Multiple points' },
-    { fieldType: 'Linestring', value: 'Line' },
-    { fieldType: 'MultiLineString', value: 'Multiple lines' },
-    { fieldType: 'Polygon', value: 'Polygon' },
+    { fieldType: 'Number_Integer', value: 'Number - Integer', fieldTypeIcon: 'number-integer' },
+    { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
+    { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
+    { fieldType: 'Datetime', value: 'Datetime', fieldTypeIcon: 'clock' },
+    { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
+    // { fieldType: 'Rich_Text', value: 'Rich text', fieldTypeIcon: 'align-right' },
+    { fieldType: 'Textarea', value: 'Multiline text', fieldTypeIcon: 'align-right' },
+    { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
+    { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
+    { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
+    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
+    { fieldType: 'MultiPoint', value: 'Multiple points', fieldTypeIcon: 'multiPoint' },
+    { fieldType: 'Linestring', value: 'Line', fieldTypeIcon: 'line' },
+    { fieldType: 'MultiLineString', value: 'Multiple lines', fieldTypeIcon: 'multiLineString' },
+    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
     { fieldType: 'MultiPolygon', value: 'Multiple polygons', fieldTypeIcon: 'multiPolygon' },
-    { fieldType: 'Codelist', value: 'Single select' },
-    { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
-    { fieldType: 'Link', value: 'Link' },
-    { fieldType: 'External_link', value: 'External link' },
-    { fieldType: 'Attachment', value: 'Attachment' }
+    { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
+    { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
+    { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
+    { fieldType: 'External_link', value: 'External link', fieldTypeIcon: 'externalLink' },
+    { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
   ];
 
   if (!isUndefined(fieldType)) {
