@@ -170,12 +170,10 @@ export const TimezoneCalendar = ({
 
   const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
 
-  const renderUtcInput = () => {
+  const renderLabel = () => {
     return (
       <label className={styles.labelDate}>
-        {dayjs(parseDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value)))
-          .utc()
-          .format('YYYY-MM-DDTHH:mm:ss[Z]')}
+        {dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value).format('YYYY-MM-DDTHH:mm:ss[Z]').toString()}
       </label>
     );
   };
@@ -238,7 +236,7 @@ export const TimezoneCalendar = ({
                 {renderDropdown()}
               </div>
             </div>
-            {renderUtcInput()}
+            {renderLabel()}
             {renderButtons()}
           </div>
         </div>
