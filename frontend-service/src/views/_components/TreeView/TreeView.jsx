@@ -234,31 +234,43 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
 
   const getLabel = str => resourcesContext.messages[str] || str;
 
-  return (
-    !isNil(property) && (
-      <div
-        style={{
-          paddingTop: '12px',
-          paddingLeft: '3px',
-          marginLeft: '10px'
-        }}>
-        {typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean' ? (
-          <Fragment>
-            <span className={styles.propertyTitle}>
-              {!Number.isInteger(Number(propertyName)) ? `${getLabel(propertyName)}: ` : ''}
+  const renderTreeView = () => {
+    if (!isNil(property)) {
+      return (
+        <div
+          style={{
+            paddingTop: '12px',
+            paddingLeft: '3px',
+            marginLeft: '10px'
+          }}>
+          {renderTreeViewExpandableItem()}
+        </div>
+      );
+    }
+  };
+
+  const renderTreeViewExpandableItem = () => {
+    if (typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean') {
+      return (
+        <Fragment>
+          <span className={styles.propertyTitle}>
+            {!Number.isInteger(Number(propertyName)) ? `${getLabel(propertyName)}: ` : ''}
+          </span>
+          {property !== '' ? (
+            <span
+              className={`${styles.propertyValue} ${className} ${
+                propertyName === 'tableSchemaName' ? styles.propertyValueTableName : ''
+              }`}>
+              {property.toString()}
             </span>
-            {property !== '' ? (
-              <span
-                className={`${styles.propertyValue} ${className} ${
-                  propertyName === 'tableSchemaName' ? styles.propertyValueTableName : ''
-                }`}>
-                {property.toString()}
-              </span>
-            ) : (
-              '-'
-            )}
-          </Fragment>
-        ) : isNil(property.button) ? (
+          ) : (
+            '-'
+          )}
+        </Fragment>
+      );
+    } else {
+      if (isNil(property.button)) {
+        return (
           <TreeViewExpandableItem
             buttons={
               !isNil(property.button)
@@ -301,10 +313,14 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
                 ))
               : null}
           </TreeViewExpandableItem>
-        ) : null}
-      </div>
-    )
-  );
+        );
+      } else {
+        return null;
+      }
+    }
+  };
+
+  return renderTreeView();
 };
 
 const codelistTemplate = rowData => (
