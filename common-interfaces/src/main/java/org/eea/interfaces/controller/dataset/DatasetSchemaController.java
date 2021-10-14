@@ -49,7 +49,7 @@ public interface DatasetSchemaController {
    * @param id the id
    * @return the data set schema VO
    */
-  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id);
 
   /**
@@ -62,12 +62,22 @@ public interface DatasetSchemaController {
   DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId);
 
   /**
+   * Find public data schema by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the data set schema VO
+   */
+  @GetMapping(value = "/publicDatasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetSchemaVO findPublicDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId);
+
+  /**
    * Gets the dataset schema id.
    *
    * @param datasetId the dataset id
    * @return the dataset schema id
    */
-  @GetMapping(value = "/getDataSchema/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/getDataSchema/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId);
 
   /**
@@ -224,6 +234,19 @@ public interface DatasetSchemaController {
   @GetMapping(value = "{schemaId}/getUniqueConstraints/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<UniqueConstraintVO> getUniqueConstraints(@PathVariable("schemaId") String datasetSchemaId,
+      @PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Gets the public unique constraints.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
+   * @return the public unique constraints
+   */
+  @GetMapping(value = "{schemaId}/getPublicUniqueConstraints/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<UniqueConstraintVO> getPublicUniqueConstraints(
+      @PathVariable("schemaId") String datasetSchemaId,
       @PathVariable("dataflowId") Long dataflowId);
 
 

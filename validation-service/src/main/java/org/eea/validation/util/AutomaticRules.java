@@ -126,7 +126,7 @@ public class AutomaticRules {
   public static Rule createDateTimeAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
     return composeRule(referenceId, typeEntityEnum, nameRule, "isDateTime(value)",
-        "The value is not a valid datetime (YYYY-MM-DD HH:MM:SS)", ErrorTypeEnum.ERROR.getValue(),
+        "The value is not a valid datetime YYYY-MM-DDTHH:mm:ss[Z]", ErrorTypeEnum.ERROR.getValue(),
         shortCode, automaticType, description);
   }
 

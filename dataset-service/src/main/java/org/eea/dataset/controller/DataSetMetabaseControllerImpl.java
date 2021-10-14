@@ -79,11 +79,12 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER')")
   @ApiOperation(value = "Find reporting dataset id by dataflow id", hidden = true)
-  public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(
-      @ApiParam(type = "Long", value = "dataflow Id", example = "0") Long idDataflow) {
-    return reportingDatasetService.getDataSetIdByDataflowId(idDataflow);
+  public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(@ApiParam(type = "Long",
+      value = "dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+    return reportingDatasetService.getDataSetIdByDataflowId(dataflowId);
   }
 
 
@@ -95,7 +96,8 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/findReportings/{schemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/findReportings/{schemaId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get reporting list id", hidden = true)
   public List<ReportingDatasetVO> getReportingsIdBySchemaId(
       @ApiParam(type = "String", value = "Schema Id",
@@ -106,16 +108,17 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   /**
    * Find dataset name.
    *
-   * @param idDataset the id dataset
+   * @param datasetId the id dataset
    * @return the list
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "find dataset metabase", hidden = true)
   public DataSetMetabaseVO findDatasetMetabaseById(@ApiParam(type = "Long", value = "dataset Id",
-      example = "0") @PathVariable("id") Long idDataset) {
-    return datasetMetabaseService.findDatasetMetabase(idDataset);
+      example = "0") @PathVariable("datasetId") Long datasetId) {
+    return datasetMetabaseService.findDatasetMetabase(datasetId);
   }
 
   /**
@@ -128,7 +131,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/create")
+  @PostMapping(value = "/private/create")
   @ApiOperation(value = "create empty dataset", hidden = true)
   public void createEmptyDataSet(
       @ApiParam(value = "dataset type", example = "REPORTING") @RequestParam(value = "datasetType",
@@ -214,7 +217,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @ApiOperation(value = "Get design dataset id list", hidden = true)
-  @GetMapping(value = "/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DesignDatasetVO> findDesignDataSetIdByDataflowId(
       @ApiParam(type = "Long", value = "dataflow Id", example = "0") Long idDataflow) {
 
@@ -232,10 +235,11 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/{id}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Get design dataset id list", hidden = true)
+  @GetMapping(value = "/{datasetId}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "get statistics by dataset", hidden = true)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR')")
   public StatisticsVO getStatisticsById(@ApiParam(type = "Long", value = "dataset Id",
-      example = "0") @PathVariable("id") Long datasetId) {
+      example = "0") @PathVariable("datasetId") Long datasetId) {
 
     StatisticsVO statistics = null;
     try {
@@ -570,6 +574,7 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    * @param dataflowId the dataflow id
    * @return the datasets summary list
    */
+  @Override
   @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
   @ApiOperation(value = "Get a summary of the information of all the dataset types of a dataflow",
       hidden = true)

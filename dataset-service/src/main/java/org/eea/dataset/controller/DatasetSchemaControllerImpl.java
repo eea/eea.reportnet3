@@ -192,7 +192,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find dataschema by Id", hidden = true)
   public DataSetSchemaVO findDataSchemaById(@ApiParam(type = "String", value = "dataset schema Id",
       example = "5cf0e9b3b793310e9ceca190") @PathVariable("id") String id) {
@@ -223,6 +223,27 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   /**
+   * Find public data schema by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the data set schema VO
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/publicDatasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find public dataschema by Dataset Id", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 500, message = "Error getting the data")})
+  public DataSetSchemaVO findPublicDataSchemaByDatasetId(@ApiParam(type = "Long",
+      value = "Dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
+    try {
+      return dataschemaService.getDataSchemaByDatasetId(true, datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+  /**
    * Gets the dataset schema id.
    *
    * @param datasetId the dataset id
@@ -230,7 +251,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the dataset schema id
    */
   @Override
-  @GetMapping("/getDataSchema/{datasetId}")
+  @GetMapping("/private/getDataSchema/{datasetId}")
   @ApiOperation(value = "Find dataset schema Id", hidden = true)
   public String getDatasetSchemaId(@ApiParam(type = "Long", value = "Dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {
@@ -925,6 +946,31 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 400, message = EEAErrorMessage.IDDATASETSCHEMA_INCORRECT)})
   public List<UniqueConstraintVO> getUniqueConstraints(
+      @ApiParam(type = "String", value = "Dataset schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("schemaId") String datasetSchemaId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @PathVariable("dataflowId") Long dataflowId) {
+    if (datasetSchemaId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    }
+    return dataschemaService.getUniqueConstraints(datasetSchemaId);
+  }
+
+  /**
+   * Gets the public unique constraints.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
+   * @return the public unique constraints
+   */
+  @Override
+  @GetMapping(value = "{schemaId}/getPublicUniqueConstraints/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find unique constraints", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 400, message = EEAErrorMessage.IDDATASETSCHEMA_INCORRECT)})
+  public List<UniqueConstraintVO> getPublicUniqueConstraints(
       @ApiParam(type = "String", value = "Dataset schema Id",
           example = "5cf0e9b3b793310e9ceca190") @PathVariable("schemaId") String datasetSchemaId,
       @ApiParam(type = "Long", value = "Dataflow Id",

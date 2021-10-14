@@ -8,9 +8,7 @@ import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.core.io.InputStreamResource;
@@ -72,24 +70,12 @@ public interface DatasetController {
   void updateDataset(@RequestBody DataSetVO dataset);
 
   /**
-   * Gets the position from any object id.
-   *
-   * @param id the id
-   * @param idDataset the id dataset
-   * @param type the type
-   * @return the position from any object id
-   */
-  @GetMapping("findPositionFromAnyObject/{id}")
-  ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") String id,
-      @RequestParam("datasetId") Long idDataset, @RequestParam("type") EntityTypeEnum type);
-
-  /**
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
    * @return the data flow id by id
    */
-  @GetMapping("{id}/dataflow")
+  @GetMapping("/private/{id}/dataflow")
   Long getDataFlowIdById(@PathVariable("id") Long datasetId);
 
   /**
@@ -183,7 +169,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param idDatasetSchema the id dataset schema
    */
-  @PostMapping("/{id}/insertIdSchema")
+  @PostMapping("/private/{id}/insertIdSchema")
   void insertIdDataSchema(@PathVariable("id") Long datasetId,
       @RequestParam("idDatasetSchema") String idDatasetSchema);
 
