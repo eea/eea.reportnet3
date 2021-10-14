@@ -416,6 +416,7 @@ export const DatasetService = {
     table.records = records;
     return table;
   },
+
   downloadTableDefinitions: async datasetSchemaId => await DatasetRepository.downloadTableDefinitions(datasetSchemaId),
 
   updateField: async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue, updateInCascade) => {
