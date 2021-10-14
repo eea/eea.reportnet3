@@ -264,7 +264,7 @@
     "dateFormat": "Date format",
     "dateFormatSubtitle": "Select the desired date format to visualize",
     "dateFormatWarning": "Note: Only affects visually and not how data is entered",
-    "datetimeFieldFormatRestriction": "YYYY-MM-DD HH:mm:ss",
+    "datetimeFieldFormatRestriction": "YYYY-MM-DDTHH:mm:ssZ",
     "deadline": "Deadline",
     "decimalFieldFormatRestriction": "Maximum of 40 characters",
     "delete": "Delete",
@@ -1298,6 +1298,9 @@
     "linkedConditional": "Linked conditional",
     "masterConditional": "Master conditional",
     "supportsMultipleValues": "Supports multiple values?",
-    "noCreatedTables": "There are no created tables"
+    "noCreatedTables": "There are no created tables",
+    "notPK": "Not PK",
+    "notRequired": "Not required",
+    "notReadOnly": "Not read only"
   }
 }
