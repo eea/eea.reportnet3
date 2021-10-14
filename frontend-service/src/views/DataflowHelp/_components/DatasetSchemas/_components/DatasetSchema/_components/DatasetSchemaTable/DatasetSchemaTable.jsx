@@ -14,6 +14,7 @@ import { DataTable } from 'views/_components/DataTable';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MultiSelect } from 'views/_components/MultiSelect';
 
+import { RecordUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -56,32 +57,6 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
       }
     }
     return columns;
-  };
-
-  const getFieldTypeValue = value => {
-    const fieldTypes = [
-      { fieldType: 'Number_Integer', value: 'Number - Integer', fieldTypeIcon: 'number-integer' },
-      { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
-      { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
-      { fieldType: 'Datetime', value: 'Datetime', fieldTypeIcon: 'clock' },
-      { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
-      { fieldType: 'Textarea', value: 'Multiline text', fieldTypeIcon: 'align-right' },
-      { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
-      { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
-      { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
-      { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
-      { fieldType: 'MultiPoint', value: 'Multiple points', fieldTypeIcon: 'multiPoint' },
-      { fieldType: 'Linestring', value: 'Line', fieldTypeIcon: 'line' },
-      { fieldType: 'MultiLineString', value: 'Multiple lines', fieldTypeIcon: 'multiLineString' },
-      { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
-      { fieldType: 'MultiPolygon', value: 'Multiple polygons', fieldTypeIcon: 'multiPolygon' },
-      { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
-      { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
-      { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
-      { fieldType: 'External_link', value: 'External link', fieldTypeIcon: 'externalLink' },
-      { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
-    ];
-    return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
   };
 
   const getMultiselectFilter = field => {
@@ -281,9 +256,9 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
   const typeTemplate = rowData => {
     return (
       <div style={{ display: 'flex', alignItems: 'baseline' }}>
-        <span style={{ margin: '.5em .25em 0 0.5em' }}>{getFieldTypeValue(rowData.type).value}</span>
+        <span style={{ margin: '.5em .25em 0 0.5em' }}>{RecordUtils.getFieldTypeValue(rowData.type).value}</span>
         <FontAwesomeIcon
-          icon={AwesomeIcons(getFieldTypeValue(rowData.type).fieldTypeIcon)}
+          icon={AwesomeIcons(RecordUtils.getFieldTypeValue(rowData.type).fieldTypeIcon)}
           role="presentation"
           style={{ marginLeft: 'auto' }}
         />
