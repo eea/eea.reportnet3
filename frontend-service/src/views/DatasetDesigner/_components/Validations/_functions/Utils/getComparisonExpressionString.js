@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import { getSelectedFieldById } from './getSelectedFieldById';
 
 const getDateFormattedField = (field, format) => {
-  return dayjs(field).format(format);
+  return field !== '' ? dayjs(field).format(format) : '';
 };
 const getPrefixedExpression = ({ expression, tabs, prefix, expressionEnd }) => {
   return `( ${prefix}( ${getSelectedFieldById(expression.field1, tabs).label} ) ${

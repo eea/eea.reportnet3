@@ -214,7 +214,11 @@ const ValidationExpression = ({
     ) : (
       <InputText
         onFocus={() => setIsTimezoneCalendarVisible(true)}
-        value={dayjs(expressionValues.expressionValue).format('YYYY-MM-DDTHH:mm:ss[Z]')}
+        value={
+          expressionValues.expressionValue !== ''
+            ? dayjs(expressionValues.expressionValue).format('YYYY-MM-DDTHH:mm:ss[Z]')
+            : ''
+        }
       />
     );
   };

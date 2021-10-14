@@ -392,7 +392,7 @@ const ComparisonExpression = ({
     ) : (
       <InputText
         onFocus={() => setIsTimezoneCalendarVisible(true)}
-        value={dayjs(expressionValues.field2).format('YYYY-MM-DDTHH:mm:ss[Z]')}
+        value={expressionValues.field2 !== '' ? dayjs(expressionValues.field2).format('YYYY-MM-DDTHH:mm:ss[Z]') : ''}
       />
     );
   };
