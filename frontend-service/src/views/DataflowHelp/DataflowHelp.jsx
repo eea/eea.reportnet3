@@ -159,11 +159,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       setIsLoading(false);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {
-          const allDatasets = [...data.referenceDatasets, ...data.datasets];
-          const uniqueDatasetSchemas = allDatasets.filter((dataset, pos, arr) => {
-            return arr.map(dataset => dataset.datasetSchemaId).indexOf(dataset.datasetSchemaId) === pos;
-          });
-          const datasetSchemas = uniqueDatasetSchemas.map(async datasetSchema => {
+          const datasetSchemas = data.datasets.map(async datasetSchema => {
             return await onLoadDatasetSchema(datasetSchema.datasetId);
           });
           Promise.all(datasetSchemas).then(completed => {
