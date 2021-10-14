@@ -66,7 +66,7 @@ public interface DatasetMetabaseController {
    * @param datasetId the id dataset
    * @return the string
    */
-  @GetMapping(value = "/private/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("datasetId") Long datasetId);
 
   /**
@@ -297,14 +297,5 @@ public interface DatasetMetabaseController {
    */
   @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
   List<DatasetsSummaryVO> getDatasetsSummaryList(@PathVariable("id") Long dataflowId);
-
-  /**
-   * Gets the dataset metabase by id.
-   *
-   * @param datasetId the dataset id
-   * @return the dataset metabase by id
-   */
-  @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetMetabaseVO getDatasetMetabaseById(@PathVariable("datasetId") Long datasetId);
 
 }

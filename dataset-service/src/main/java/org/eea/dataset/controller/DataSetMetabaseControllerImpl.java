@@ -113,25 +113,10 @@ public class DataSetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/private/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "find dataset metabase private", hidden = true)
   public DataSetMetabaseVO findDatasetMetabaseById(@ApiParam(type = "Long", value = "dataset Id",
-      example = "0") @PathVariable("datasetId") Long datasetId) {
-    return datasetMetabaseService.findDatasetMetabase(datasetId);
-  }
-
-  /**
-   * Gets the dataset metabase by id.
-   *
-   * @param datasetId the dataset id
-   * @return the dataset metabase by id
-   */
-  @Override
-  @HystrixCommand
-  @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASET_STEWARD','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
-  @ApiOperation(value = "find dataset metabase", hidden = true)
-  public DataSetMetabaseVO getDatasetMetabaseById(@ApiParam(type = "Long", value = "dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {
     return datasetMetabaseService.findDatasetMetabase(datasetId);
   }
