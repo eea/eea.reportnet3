@@ -268,9 +268,9 @@ export const DatasetService = {
   updateTableOrder: async (datasetId, position, tableSchemaId) =>
     await DatasetRepository.updateTableOrder(datasetId, position, tableSchemaId),
 
-  getSchema: async datasetId => {
+  getSchema: async (dataflowId, datasetId) => {
     const datasetSchemaDTO = await DatasetRepository.getSchema(datasetId);
-    const rulesDTO = await ValidationRepository.getAll(datasetSchemaDTO.data.idDataSetSchema);
+    const rulesDTO = await ValidationRepository.getAll(dataflowId, datasetSchemaDTO.data.idDataSetSchema);
 
     const dataset = new Dataset({
       availableInPublic: datasetSchemaDTO.data.availableInPublic,
@@ -416,6 +416,8 @@ export const DatasetService = {
     table.records = records;
     return table;
   },
+
+  downloadTableDefinitions: async datasetSchemaId => await DatasetRepository.downloadTableDefinitions(datasetSchemaId),
 
   updateField: async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue, updateInCascade) => {
     const datasetTableField = new DatasetTableField({});

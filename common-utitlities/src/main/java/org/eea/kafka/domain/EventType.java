@@ -429,8 +429,15 @@ public enum EventType {
 
   /** The no pk reference dataflow error event. */
   NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "no_pk_reference_dataflow_error_event", true);
+      "no_pk_reference_dataflow_error_event", true),
 
+  /** The export schema information completed event. */
+  EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_schema_information_completed_event", true),
+
+  /** The export schema information failed event. */
+  EXPORT_SCHEMA_INFORMATION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_schema_information_failed_event", true);
 
   /** The topic. */
   private String topic;
