@@ -19,7 +19,8 @@ body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a {
   background-color: var(--tabview-bg);
   border: var(--tabview-border);
   float: none;
-  display: inline-block;
+  display: flex;
+  align-items: center;
   color: var(--tabview-color);
   padding: 0.571rem 1.3rem;
   font-weight: 700;

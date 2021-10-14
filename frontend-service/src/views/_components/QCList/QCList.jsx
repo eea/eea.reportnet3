@@ -600,10 +600,6 @@ export const QCList = withRouter(
     const checkIsEmptyValidations = () =>
       isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
-    const onPageChange = () => {
-      tabsValidationsDispatch({ type: 'RESET_EDITING_ROWS' });
-    };
-
     const onRowEditorValueChange = (props, value, isText = false) => {
       const inmQCs = [...tabsValidationsState.validationList.validations];
       const inmEditingRows = [...tabsValidationsState.editingRows];
@@ -707,7 +703,6 @@ export const QCList = withRouter(
               autoLayout={true}
               className={styles.paginatorValidationViewer}
               editMode="row"
-              getPageChange={onPageChange}
               hasDefaultCurrentPage={true}
               loading={false}
               onRowClick={event => validationId(event.data.id)}

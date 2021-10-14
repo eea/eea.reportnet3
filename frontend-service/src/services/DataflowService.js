@@ -52,6 +52,14 @@ export const DataflowService = {
   cloneSchemas: async (sourceDataflowId, targetDataflowId) =>
     await DataflowRepository.cloneSchemas(sourceDataflowId, targetDataflowId),
 
+  downloadAllSchemasInfo: async (dataflowId, fileName) =>
+    await DataflowRepository.downloadAllSchemasInfo(dataflowId, fileName),
+
+  generateAllSchemasInfoFile: async dataflowId => await DataflowRepository.generateAllSchemasInfoFile(dataflowId),
+
+  downloadPublicAllSchemasInfoFile: async dataflowId =>
+    await DataflowRepository.downloadPublicAllSchemasInfoFile(dataflowId),
+
   getDatasetsValidationStatistics: async (dataflowId, datasetSchemaId) => {
     const datasetsDashboardsDataDTO = await DataflowRepository.getDatasetsValidationStatistics(
       dataflowId,
