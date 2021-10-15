@@ -150,7 +150,7 @@ export const TimezoneCalendar = ({
         inline
         monthNavigator
         onChange={e => {
-          checkError(dayjs(e.value).format('HH:mm:ss').toString());
+          checkError(inputValue);
           setDate(e.value);
         }}
         value={date}
