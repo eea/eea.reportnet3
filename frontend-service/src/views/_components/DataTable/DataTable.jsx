@@ -77,10 +77,12 @@ export class DataTable extends Component {
     onVirtualScroll: null,
     pageLinkSize: 5,
     paginator: false,
+    paginatorDisabled: false,
     paginatorLeft: null,
     paginatorPosition: 'bottom',
     paginatorRight: null,
     paginatorTemplate: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink',
+    quickEditRowInfo: null,
     reorderableColumns: false,
     resizableColumns: false,
     responsive: false,
@@ -168,6 +170,7 @@ export class DataTable extends Component {
     onVirtualScroll: PropTypes.func,
     pageLinkSize: PropTypes.number,
     paginator: PropTypes.bool,
+    paginatorDisabled: PropTypes.bool,
     paginatorLeft: PropTypes.any,
     paginatorPosition: PropTypes.string,
     paginatorRight: PropTypes.any,
@@ -496,6 +499,7 @@ export class DataTable extends Component {
         alwaysShow={this.props.alwaysShowPaginator}
         className={className}
         currentPageReportTemplate={this.props.currentPageReportTemplate}
+        disabled={this.props.paginatorDisabled}
         first={this.getFirst()}
         leftContent={this.props.paginatorLeft}
         onPageChange={this.onPageChange}
@@ -515,6 +519,7 @@ export class DataTable extends Component {
                       <InputText
                         data-for="pageInputTooltip"
                         data-tip
+                        disabled={this.props.paginatorDisabled}
                         id="currentPageInput"
                         keyfilter="pint"
                         onChange={this.onChangeCurrentPage}
@@ -1303,6 +1308,7 @@ export class DataTable extends Component {
         onRowUnselect={this.props.onRowUnselect}
         onSelectionChange={this.props.onSelectionChange}
         paginator={this.props.paginator}
+        quickEditRowInfo={this.props.quickEditRowInfo}
         responsive={this.props.responsive}
         rowClassName={this.props.rowClassName}
         rowEditorValidator={this.props.rowEditorValidator}

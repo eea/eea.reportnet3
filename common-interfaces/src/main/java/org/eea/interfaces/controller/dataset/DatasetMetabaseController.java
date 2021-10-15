@@ -4,6 +4,7 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -40,8 +41,9 @@ public interface DatasetMetabaseController {
    * @param idDataflow the id dataflow
    * @return the list
    */
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(@PathVariable("id") Long idDataflow);
+  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(
+      @PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Creates the empty data set.
@@ -51,7 +53,7 @@ public interface DatasetMetabaseController {
    * @param idDatasetSchema the id dataset schema
    * @param idDataflow the id dataflow
    */
-  @PostMapping(value = "/create")
+  @PostMapping(value = "/private/create")
   void createEmptyDataSet(
       @RequestParam(value = "datasetType", required = true) DatasetTypeEnum datasetType,
       @RequestParam(value = "datasetName", required = true) String datasetName,
@@ -61,11 +63,11 @@ public interface DatasetMetabaseController {
   /**
    * Find dataset name.
    *
-   * @param idDataset the id dataset
+   * @param datasetId the id dataset
    * @return the string
    */
-  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("id") Long idDataset);
+  @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Find design data set id by dataflow id.
@@ -73,7 +75,7 @@ public interface DatasetMetabaseController {
    * @param idDataflow the id dataflow
    * @return the list
    */
-  @GetMapping(value = "/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DesignDatasetVO> findDesignDataSetIdByDataflowId(@PathVariable("id") Long idDataflow);
 
   /**
@@ -101,8 +103,8 @@ public interface DatasetMetabaseController {
    * @return the statistics by id
    */
 
-  @GetMapping(value = "/{id}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
-  StatisticsVO getStatisticsById(@PathVariable("id") Long datasetId);
+  @GetMapping(value = "/{datasetId}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
+  StatisticsVO getStatisticsById(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Gets the global statistics by dataschema id.
@@ -123,7 +125,8 @@ public interface DatasetMetabaseController {
    * @param schemaId the schema id
    * @return the reportings id by schema id
    */
-  @GetMapping(value = "/findReportings/{schemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/findReportings/{schemaId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReportingDatasetVO> getReportingsIdBySchemaId(@PathVariable("schemaId") String schemaId);
 
   /**
@@ -285,5 +288,15 @@ public interface DatasetMetabaseController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReportingDatasetVO> findReportingDataSetByDataflowIds(
       @RequestParam("dataflowIds") List<Long> dataflowIds);
+
+  /**
+   * Gets the datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the datasets summary list
+   */
+  @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
+  List<DatasetsSummaryVO> getDatasetsSummaryList(@PathVariable("id") Long dataflowId);
+
 
 }

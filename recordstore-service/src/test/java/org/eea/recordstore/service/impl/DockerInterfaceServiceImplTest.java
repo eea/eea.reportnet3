@@ -2,7 +2,6 @@ package org.eea.recordstore.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
@@ -188,34 +187,6 @@ public class DockerInterfaceServiceImplTest {
         dockerInterfaceServiceImpl.executeCommandInsideContainer(new Container(), "test"));
   }
 
-
-  /**
-   * Test get connection.
-   *
-   * @throws RecordStoreAccessException the docker access exception
-   * @throws InterruptedException the interrupted exception
-   */
-  @Test
-  public void testGetConnection() throws RecordStoreAccessException, InterruptedException {
-    List<String> resultExpected = new ArrayList<>();
-    commonWhens();
-    when(execStartResultCallback.awaitCompletion()).thenReturn(execStartResultCallback);
-    assertEquals(FAILED, resultExpected, dockerInterfaceServiceImpl.getConnection());;
-  }
-
-  /**
-   * Test get connection exception.
-   *
-   * @throws RecordStoreAccessException the docker access exception
-   * @throws InterruptedException the interrupted exception
-   */
-  @Test
-  public void testGetConnectionException() throws RecordStoreAccessException, InterruptedException {
-    List<String> resultExpected = new ArrayList<>();
-    commonWhens();
-    doThrow(new InterruptedException()).when(execStartResultCallback).awaitCompletion();
-    assertEquals(FAILED, resultExpected, dockerInterfaceServiceImpl.getConnection());
-  }
 
   /**
    * Common whens.

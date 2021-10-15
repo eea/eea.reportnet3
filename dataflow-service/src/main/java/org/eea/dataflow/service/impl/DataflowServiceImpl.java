@@ -48,6 +48,7 @@ import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -182,7 +183,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private FMEUserRepository fmeUserRepository;
 
-
+  /** The dataflow private mapper. */
   @Autowired
   private DataflowPrivateMapper dataflowPrivateMapper;
 
@@ -692,17 +693,17 @@ public class DataflowServiceImpl implements DataflowService {
 
     List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
     setReportings(dataflowPublicList, providerId);
-    List<Long> dataflowIds = new ArrayList<>();
-    dataflowPublicList.stream().forEach(dataflow -> {
-      dataflow.setReferenceDatasets(
-          referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflow.getId()));
-      dataflowIds.add(dataflow.getId());
-    });
 
     // sort and paging
     sortPublicDataflows(dataflowPublicList, header, asc);
     dataflowPublicPaginated.setPublicDataflows(getPage(dataflowPublicList, page, pageSize));
     dataflowPublicPaginated.setTotalRecords(Long.valueOf(dataflowPublicList.size()));
+
+    dataflowPublicPaginated.getPublicDataflows().stream().forEach(dataflow -> {
+      dataflow.setReferenceDatasets(
+          referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflow.getId()));
+    });
+
     return dataflowPublicPaginated;
   }
 
@@ -919,12 +920,17 @@ public class DataflowServiceImpl implements DataflowService {
       List<DataProviderVO> providerId) {
     dataflowPublicList.stream().forEach(dataflow -> {
       findObligationPublicDataflow(dataflow);
-      for (DataProviderVO dataProviderVO : providerId) {
-        List<ReportingDatasetPublicVO> reportings =
-            datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowIdAndProviderId(
-                dataflow.getId(), dataProviderVO.getId());
-        if (!reportings.isEmpty()) {
-          dataflow.setReportingDatasets(reportings);
+      dataflow.setReportingDatasets(new ArrayList<>());
+      List<ReportingDatasetPublicVO> reportings =
+          datasetMetabaseControllerZuul.findReportingDataSetPublicByDataflowId(dataflow.getId());
+      if (!reportings.isEmpty()) {
+        for (DataProviderVO dataProviderVO : providerId) {
+          List<ReportingDatasetPublicVO> reportingsProvider =
+              reportings.stream().filter(r -> r.getDataProviderId().equals(dataProviderVO.getId()))
+                  .collect(Collectors.toList());
+          if (CollectionUtils.isNotEmpty(reportingsProvider)) {
+            dataflow.getReportingDatasets().addAll(reportingsProvider);
+          }
         }
       }
     });
@@ -1481,6 +1487,30 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
+   * Gets the dataset summary.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataset summary
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public List<DatasetsSummaryVO> getDatasetSummary(Long dataflowId) throws EEAException {
+    List<DatasetsSummaryVO> datasetsSummaryList = new ArrayList<>();
+    if (null != dataflowId) {
+      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      if (null != dataflow) {
+        datasetsSummaryList = datasetMetabaseControllerZuul.getDatasetsSummaryList(dataflowId);
+      } else {
+        throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+      }
+    } else {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    return datasetsSummaryList;
+  }
+
+  /**
    * Gets the dataflows count.
    *
    * @return the dataflows count
@@ -1539,5 +1569,4 @@ public class DataflowServiceImpl implements DataflowService {
 
     return dataflowCountVOList;
   }
-
 }

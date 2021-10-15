@@ -20,8 +20,6 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-import { DataflowsListUtils } from './_functions/Utils/DataflowsListUtils';
-
 const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoading, visibleTab }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -38,7 +36,7 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
 
   useLayoutEffect(() => {
     const parsedDataflows = orderBy(
-      DataflowsListUtils.parseDataToFilter(content[visibleTab], userContext.userProps.pinnedDataflows),
+      parseDataToFilter(content[visibleTab], userContext.userProps.pinnedDataflows),
       ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
       ['asc', 'asc', 'asc', 'asc', 'asc']
     );
@@ -57,6 +55,24 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
   }, [filteredData]);
+
+  const parseDataToFilter = (data, pinnedDataflows) => {
+    return data?.map(dataflow => ({
+      id: dataflow.id,
+      creationDate: dataflow.creationDate,
+      description: dataflow.description,
+      expirationDate: dataflow.expirationDate,
+      legalInstrument: dataflow.obligation?.legalInstrument?.alias,
+      name: dataflow.name,
+      obligationTitle: dataflow.obligation?.title,
+      obligationId: dataflow.obligation?.obligationId?.toString(),
+      pinned: pinnedDataflows.some(pinnedDataflow => pinnedDataflow === dataflow.id.toString()) ? 'pinned' : 'unpinned',
+      reportingDatasetsStatus: dataflow.reportingDatasetsStatus,
+      status: dataflow.status,
+      statusKey: dataflow.statusKey,
+      userRole: dataflow.userRole
+    }));
+  };
 
   const onLoadFilteredData = data => setFilteredData(data);
 

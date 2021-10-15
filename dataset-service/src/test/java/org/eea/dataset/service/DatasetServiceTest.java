@@ -2,7 +2,6 @@ package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
@@ -895,44 +894,6 @@ public class DatasetServiceTest {
         listFields, errorfilter, null, null, null));
   }
 
-  /**
-   * Test get by id.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetById() throws Exception {
-    DataSetVO datasetVOtemp = new DataSetVO();
-    datasetVOtemp.setId(1L);
-    datasetVOtemp.setTableVO(new ArrayList<>());
-    when(dataSetMapper.entityToClass(Mockito.any())).thenReturn(datasetVOtemp);
-    assertEquals("not equals", datasetVOtemp, datasetService.getById(1L));
-  }
-
-  /**
-   * Test get by id success.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetByIdSuccess() throws Exception {
-    when(tableRepository.findAllTables()).thenReturn(tableValues);
-    when(dataSetMapper.entityToClass(Mockito.any())).thenReturn(dataSetVO);
-    DataSetVO result = datasetService.getById(1L);
-    assertEquals("not equals", dataSetVO, result);
-  }
-
-  /**
-   * Test get data flow id by id success.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetDataFlowIdByIdSuccess() throws Exception {
-    when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
-    Long result = datasetService.getDataFlowIdById(1L);
-    assertNotNull("it shouldn't be null", result);
-  }
 
   /**
    * Test update null exception.
@@ -956,79 +917,6 @@ public class DatasetServiceTest {
     when(datasetRepository.saveAndFlush(Mockito.any())).thenReturn(new DatasetValue());
     datasetService.updateDataset(1L, new DataSetVO());
     Mockito.verify(datasetRepository, times(1)).saveAndFlush(Mockito.any());
-  }
-
-  /**
-   * Test get table from any object id.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetTableFromAnyObjectId() throws Exception {
-
-    when(recordRepository.findByIdAndTableValue_DatasetId_Id(Mockito.any(), Mockito.any()))
-        .thenReturn(recordValue);
-
-    datasetService.getPositionFromAnyObjectId("1L", 1L, EntityTypeEnum.RECORD);
-    Mockito.verify(recordRepository, times(1)).findByIdAndTableValue_DatasetId_Id(Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
-   * Test get table from any object id 2.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetTableFromAnyObjectId2() throws Exception {
-
-    when(tableRepository.findByIdAndDatasetId_Id(Mockito.any(), Mockito.any()))
-        .thenReturn(tableValue);
-
-    datasetService.getPositionFromAnyObjectId("1", 1L, EntityTypeEnum.TABLE);
-    Mockito.verify(tableRepository, times(1)).findByIdAndDatasetId_Id(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Test get table from any object id table.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetTableFromAnyObjectIdTable() throws Exception {
-    TableValue table = new TableValue();
-    List<RecordValue> records = new ArrayList<>();
-    records.add(recordValue);
-    table.setRecords(records);
-    when(tableRepository.findByIdAndDatasetId_Id(Mockito.any(), Mockito.any())).thenReturn(table);
-    Mockito.when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any()))
-        .thenReturn(recordValues);
-    DataSetSchema schema = new DataSetSchema();
-    TableSchema tableSchema = new TableSchema();
-    tableSchema.setIdTableSchema(new ObjectId());
-    List<TableSchema> tableSchemas = new ArrayList<>();
-    tableSchemas.add(tableSchema);
-    schema.setTableSchemas(tableSchemas);
-
-    datasetService.getPositionFromAnyObjectId("1", 1L, EntityTypeEnum.TABLE);
-    Mockito.verify(tableRepository, times(1)).findByIdAndDatasetId_Id(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Test get table from any object id 3.
-   *
-   * @throws Exception the exception
-   */
-  @Test
-  public void testGetTableFromAnyObjectId3() throws Exception {
-    fieldValue.setRecord(recordValue);
-    when(fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(Mockito.any(), Mockito.any()))
-        .thenReturn(fieldValue);
-    Mockito.when(recordRepository.findByTableValueNoOrder(Mockito.any(), Mockito.any()))
-        .thenReturn(recordValues);
-    datasetService.getPositionFromAnyObjectId("1L", 1L, EntityTypeEnum.FIELD);
-    Mockito.verify(fieldRepository, times(1))
-        .findByIdAndRecord_TableValue_DatasetId_Id(Mockito.any(), Mockito.any());
   }
 
   /**

@@ -12,6 +12,7 @@ import { config } from 'conf';
 import { ApiKeyDialog } from 'views/_components/ApiKeyDialog';
 import { BigButtonListReference } from './_components/BigButtonListReference';
 import { Button } from 'views/_components/Button';
+import { DatasetsInfo } from 'views/_components/DatasetsInfo';
 import { MainLayout } from 'views/_components/Layout';
 import { ReferencingDataflows } from './_components/ReferencingDataflows';
 import { routes } from 'conf/routes';
@@ -49,6 +50,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   const dataflowInitialState = {
     data: {},
+    dataflowType: '',
     description: '',
     designDatasetSchemas: [],
     error: null,
@@ -59,6 +61,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     isCreatingReferenceDatasets: false,
     isCustodian: false,
     isEditDialogVisible: false,
+    isDatasetsInfoDialogVisible: false,
     isLoading: false,
     isManageRequestersDialogVisible: false,
     isPropertiesDialogVisible: false,
@@ -74,6 +77,22 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
+
+  const isAdmin = userContext.accessRole?.some(role => role === config.permissions.roles.ADMIN.key);
+
+  const isCustodianUser = userContext.accessRole?.some(role => role === config.permissions.roles.CUSTODIAN.key);
+
+  const isCustodian = userContext.hasContextAccessPermission(
+    config.permissions.prefixes.DATAFLOW,
+    referenceDataflowId,
+    [config.permissions.roles.CUSTODIAN.key]
+  );
+
+  const isSteward = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, referenceDataflowId, [
+    config.permissions.roles.STEWARD.key
+  ]);
+
+  const isLeadDesigner = isSteward || isCustodian;
 
   const setUpdatedDatasetSchema = updatedData =>
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
@@ -188,15 +207,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   };
 
   const onLoadPermissions = () => {
-    const isAdmin = userContext.accessRole.some(role => role === config.permissions.roles.ADMIN.key);
-    const isCustodianUser = userContext.accessRole.some(role => role === config.permissions.roles.CUSTODIAN.key);
-    const isCustodian = userContext.hasContextAccessPermission(
-      config.permissions.prefixes.DATAFLOW,
-      referenceDataflowId,
-      [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key]
-    );
-
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, isCustodian, isCustodianUser } });
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, isCustodian: isLeadDesigner, isCustodianUser } });
   };
 
   const onLoadReferenceDataflow = async () => {
@@ -209,6 +220,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         type: 'LOADING_SUCCESS',
         payload: {
           data: referenceDataflow,
+          dataflowType: referenceDataflow.type,
           description: referenceDataflow.description,
           name: referenceDataflow.name,
           status: referenceDataflow.status
@@ -243,21 +255,12 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const referencingDataflowsDialogFooter = (
+  const renderDialogFooterCloseBtn = modalType => (
     <Button
       className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
+      icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
-    />
-  );
-
-  const propertiesDataflowsDialogFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
-      label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs('isPropertiesDialogVisible', false)}
+      onClick={() => manageDialogs(modalType, false)}
     />
   );
 
@@ -285,11 +288,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
   function getLeftSidebarButtonsVisibility() {
     return {
-      apiKeyBtn: dataflowState.isCustodian,
-      editBtn: dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian,
-      manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
+      apiKeyBtn: isLeadDesigner,
+      datasetsInfoBtn: isAdmin,
+      editBtn: dataflowState.status === config.dataflowStatus.DESIGN && isLeadDesigner,
+      manageRequestersBtn: isAdmin || isLeadDesigner,
       propertiesBtn: true,
-      reportingDataflows: dataflowState.status === config.dataflowStatus.OPEN
+      reportingDataflowsBtn:
+        dataflowState.status === config.dataflowStatus.OPEN && (isLeadDesigner || dataflowState.isCustodianUser)
     };
   }
 
@@ -325,7 +330,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
       {dataflowState.isPropertiesDialogVisible && (
         <Dialog
-          footer={propertiesDataflowsDialogFooter}
+          footer={renderDialogFooterCloseBtn('isPropertiesDialogVisible')}
           header={resourcesContext.messages['properties']}
           onHide={() => manageDialogs('isPropertiesDialogVisible', false)}
           visible={dataflowState.isPropertiesDialogVisible}>
@@ -365,7 +370,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
 
       {dataflowState.isReferencingDataflowsDialogVisible && (
         <Dialog
-          footer={referencingDataflowsDialogFooter}
+          footer={renderDialogFooterCloseBtn('isReferencingDataflowsDialogVisible')}
           header={resourcesContext.messages['referencingDataflowsDialogHeader']}
           onHide={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
           visible={dataflowState.isReferencingDataflowsDialogVisible}>
@@ -397,6 +402,16 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
             updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
             userType={'requester'}
           />
+        </Dialog>
+      )}
+
+      {dataflowState.isDatasetsInfoDialogVisible && (
+        <Dialog
+          footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
+          header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowState.data.id}`}
+          onHide={() => manageDialogs('isDatasetsInfoDialogVisible', false)}
+          visible={dataflowState.isDatasetsInfoDialogVisible}>
+          <DatasetsInfo dataflowId={referenceDataflowId} dataflowType={dataflowState.dataflowType} />
         </Dialog>
       )}
     </div>

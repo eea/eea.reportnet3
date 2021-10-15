@@ -276,28 +276,6 @@ public class RepresentativeControllerImpl implements RepresentativeController {
 
 
   /**
-   * Find data provider group by dataflow id.
-   *
-   * @param dataflowId the dataflow id
-   * @return the data provider code VO
-   */
-  @Override
-  @GetMapping(value = "/dataProviderGroup/dataflow/{dataflowId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Finds a DataProviderGroup based on a Dataflow Id",
-      response = DataProviderCodeVO.class, hidden = true)
-  @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
-  public DataProviderCodeVO findDataProviderGroupByDataflowId(
-      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
-
-    try {
-      return representativeService.findDataProviderGroupByDataflowId(dataflowId);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
-    }
-  }
-
-  /**
    * Export file of lead reporters.
    *
    * @param dataflowId the dataflow id

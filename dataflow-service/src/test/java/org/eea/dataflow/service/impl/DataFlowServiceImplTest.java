@@ -1368,4 +1368,34 @@ public class DataFlowServiceImplTest {
         EntityClassEnum.DATASET, 1L));
   }
 
+  @Test(expected = EEAException.class)
+  public void getDatasetSummaryDataflowIncorrectIdExceptionTest() throws EEAException {
+    try {
+      dataflowServiceImpl.getDatasetSummary(null);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, ex.getMessage());
+      throw ex;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void getDatasetSummaryDataflowNotFoundExceptionTest() throws EEAException {
+    Mockito.when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.ofNullable(null));
+    try {
+      dataflowServiceImpl.getDatasetSummary(1L);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, ex.getMessage());
+      throw ex;
+    }
+  }
+
+  @Test
+  public void getDatasetSummaryTest() throws EEAException {
+    Mockito.when(dataflowRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(new Dataflow()));
+    Mockito.when(datasetMetabaseController.getDatasetsSummaryList(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    assertEquals(new ArrayList<>(), dataflowServiceImpl.getDatasetSummary(1L));
+  }
+
 }

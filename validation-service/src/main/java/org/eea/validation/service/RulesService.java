@@ -119,15 +119,6 @@ public interface RulesService {
    */
   boolean existsRuleRequired(String datasetSchemaId, String referenceId);
 
-  /**
-   * Insert rule in position.
-   *
-   * @param datasetSchemaId the dataset schema id
-   * @param ruleId the rule id
-   * @param position the position
-   * @return true, if successful
-   */
-  boolean insertRuleInPosition(String datasetSchemaId, String ruleId, int position);
 
   /**
    * Delete rule by reference field schema PK id.

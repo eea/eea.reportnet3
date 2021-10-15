@@ -67,21 +67,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   private static final Logger LOG = LoggerFactory.getLogger(RecordStoreControllerImpl.class);
 
   /**
-   * Reste data set data base.
-   */
-  @Override
-  @HystrixCommand
-  @PostMapping(value = "/reset")
-  public void resteDataSetDataBase() {
-    try {
-      recordStoreService.resetDatasetDatabase();
-    } catch (final RecordStoreAccessException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-    }
-  }
-
-
-  /**
    * Creates the empty dataset.
    *
    * @param datasetName the dataset name
