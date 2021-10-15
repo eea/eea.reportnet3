@@ -347,8 +347,8 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
       <div className={`dataflowHelp-datasetSchema-help-step ${styles.index}`}>
         <h3>{resourcesContext.messages['datasetSchemas']}</h3>
         {datasetsSchemas.map(designDataset => (
-          <div key={designDataset.datasetSchemaName}>
-            <a href={`#${designDataset.datasetSchemaId}`}>{designDataset.datasetSchemaName}</a>
+          <div id="datasetSchemaIndex" key={designDataset.datasetSchemaName}>
+            <a href={`#${designDataset.datasetSchemaId}`}>{`• ${designDataset.datasetSchemaName}`}</a>
           </div>
         ))}
       </div>
@@ -413,8 +413,14 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
   return (
     <Fragment>
       {renderToolbar()}
-      {renderAnchors()}
-      {isLoading ? <Spinner className={styles.positioning} /> : renderDatasetSchemas()}
+      {isLoading ? (
+        <Spinner className={styles.positioning} />
+      ) : (
+        <div>
+          {renderAnchors()}
+          {renderDatasetSchemas()}
+        </div>
+      )}
     </Fragment>
   );
 };
