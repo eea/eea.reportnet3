@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -18,6 +17,7 @@ import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -302,10 +302,10 @@ public class ExcelWriterStrategy implements WriterStrategy {
   private Map<String, String> mapErrors(FailedValidationsDatasetVO failedValidationsByIdDataset) {
     Map<String, String> errorsMap = new HashMap<>();
     for (Object error : failedValidationsByIdDataset.getErrors()) {
-      LinkedHashMap<?, ?> castedError = (LinkedHashMap<?, ?>) error;
-      String newError = (String) castedError.get("levelError");
-      String message = (String) castedError.get("message");
-      String id = castedError.get("idObject").toString();
+      ErrorsValidationVO castedError = (ErrorsValidationVO) error;
+      String newError = castedError.getLevelError();
+      String message = castedError.getMessage();
+      String id = castedError.getIdObject();
       String value = errorsMap.putIfAbsent(id, newError + ": " + message);
       if (value != null) {
         insertIntoOrderedPosition(errorsMap, value, id, newError, message);
