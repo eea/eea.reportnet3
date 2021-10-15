@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import pick from 'lodash/pick';
 
@@ -264,55 +263,57 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
 
   const getQCList = allQCs => {
     if (!isEmpty(allQCs)) {
-      return allQCs.validations
-        .map(qc => {
-          const datasetSchema = datasetsSchemas.filter(
-            datasetSchema => datasetSchema.datasetSchemaId === allQCs.datasetSchemaId
-          );
+      return allQCs
+        .map(allQCs =>
+          allQCs.validations.map(qc => {
+            const datasetSchema = datasetsSchemas.filter(
+              datasetSchema => datasetSchema.datasetSchemaId === allQCs.datasetSchemaId
+            );
 
-          const additionalInfo = getAdditionalValidationInfo(
-            qc.referenceId,
-            qc.entityType,
-            qc.relations,
-            datasetsSchemas,
-            allQCs.datasetSchemaId
-          );
-          qc.tableName = additionalInfo.tableName || '';
-          qc.fieldName = additionalInfo.fieldName || '';
-          qc.expression = getExpressionString(qc, datasetSchema[0].tables);
-          qc.datasetSchemaId = allQCs.datasetSchemaId;
-          if (!isCustodian) {
-            return pick(
-              qc,
-              'tableName',
-              'fieldName',
-              'shortCode',
-              'name',
-              'description',
-              'expression',
-              'entityType',
-              'levelError',
-              'message',
-              'datasetSchemaId'
+            const additionalInfo = getAdditionalValidationInfo(
+              qc.referenceId,
+              qc.entityType,
+              qc.relations,
+              datasetsSchemas,
+              allQCs.datasetSchemaId
             );
-          } else {
-            return pick(
-              qc,
-              'tableName',
-              'fieldName',
-              'shortCode',
-              'name',
-              'description',
-              'expression',
-              'entityType',
-              'levelError',
-              'message',
-              'automatic',
-              'enabled',
-              'datasetSchemaId'
-            );
-          }
-        })
+            qc.tableName = additionalInfo.tableName || '';
+            qc.fieldName = additionalInfo.fieldName || '';
+            qc.expression = getExpressionString(qc, datasetSchema[0].tables);
+            qc.datasetSchemaId = allQCs.datasetSchemaId;
+            if (!isCustodian) {
+              return pick(
+                qc,
+                'tableName',
+                'fieldName',
+                'shortCode',
+                'name',
+                'description',
+                'expression',
+                'entityType',
+                'levelError',
+                'message',
+                'datasetSchemaId'
+              );
+            } else {
+              return pick(
+                qc,
+                'tableName',
+                'fieldName',
+                'shortCode',
+                'name',
+                'description',
+                'expression',
+                'entityType',
+                'levelError',
+                'message',
+                'automatic',
+                'enabled',
+                'datasetSchemaId'
+              );
+            }
+          })
+        )
         .flat();
     } else {
       return [];
@@ -326,9 +327,9 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
         return await ValidationService.getAll(dataflowId, datasetSchema.datasetSchemaId, !isCustodian);
       });
       Promise.all(datasetValidations).then(allQCs => {
-        allQCs = allQCs.find(qc => !isUndefined(qc));
+        allQCs = allQCs.filter(qc => !isUndefined(qc));
         if (!isCustodian) {
-          allQCs.validations.filter(validation => validation.enabled !== false);
+          allQCs.forEach(qc => (qc = qc.validations.filter(validation => validation.enabled !== false)));
         }
         setQCList(getQCList(allQCs));
       });
@@ -341,12 +342,24 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
     }
   };
 
+  const renderAnchors = () => {
+    return !isNil(datasetsSchemas) && datasetsSchemas.length > 0 ? (
+      <div className={`dataflowHelp-datasetSchema-help-step ${styles.index}`}>
+        <h3>{resourcesContext.messages['datasetSchemas']}</h3>
+        {datasetsSchemas.map(designDataset => (
+          <div id="datasetSchemaIndex" key={designDataset.datasetSchemaName}>
+            <a href={`#${designDataset.datasetSchemaId}`}>{`• ${designDataset.datasetSchemaName}`}</a>
+          </div>
+        ))}
+      </div>
+    ) : null;
+  };
+
   const renderDatasetSchemas = () => {
-    return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
+    return !isNil(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       <div className="dataflowHelp-datasetSchema-help-step">
         {datasetsSchemas.map((designDataset, i) => (
           <DatasetSchema
-            dataflowName={dataflowName}
             designDataset={designDataset}
             extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
             index={i}
@@ -400,7 +413,14 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
   return (
     <Fragment>
       {renderToolbar()}
-      {isLoading ? <Spinner className={styles.positioning} /> : renderDatasetSchemas()}
+      {isLoading ? (
+        <Spinner className={styles.positioning} />
+      ) : (
+        <div>
+          {renderAnchors()}
+          {renderDatasetSchemas()}
+        </div>
+      )}
     </Fragment>
   );
 };
