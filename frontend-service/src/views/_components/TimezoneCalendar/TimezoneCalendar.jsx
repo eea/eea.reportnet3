@@ -108,7 +108,7 @@ export const TimezoneCalendar = ({
   const calculatePosition = () => {
     const positionRect = refPosition?.current?.getBoundingClientRect();
     const bodyRect = document.body.getBoundingClientRect();
-    const topOffset = positionRect.top - bodyRect.top - 200;
+    const topOffset = positionRect.top - bodyRect.top - 160;
 
     setPosition({ left: positionRect.left, top: topOffset });
   };
@@ -228,7 +228,7 @@ export const TimezoneCalendar = ({
         <div
           className={`${styles.container} p-datepicker.p-component.p-input-overlay.p-shadow`}
           ref={calendarRef}
-          style={{ left: `${position?.left}px`, top: `${position?.top + 40}px` }}>
+          style={{ left: `${position?.left}px`, top: `${position?.top}px` }}>
           {renderCalendar()}
           <div className={styles.footer}>
             <div className={styles.inputMaskWrapper}>
