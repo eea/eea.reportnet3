@@ -66,31 +66,19 @@ export const TimezoneCalendar = ({
   onSaveDate = () => {},
   value
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
 
+  const resourcesContext = useContext(ResourcesContext);
+
   const [date, setDate] = useState('');
-  const [inputValue, setInputValue] = useState('');
-  const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
+  const [inputValue, setInputValue] = useState('');
   const [position, setPosition] = useState();
+  const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
 
-  const refPosition = useRef(null);
   const calendarRef = useRef(null);
-
-  const handleClickOutside = event => {
-    if (calendarRef.current && !calendarRef.current.contains(event.target)) {
-      onClickOutside();
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('click', handleClickOutside, true);
-    return () => {
-      document.removeEventListener('click', handleClickOutside, true);
-    };
-  });
+  const refPosition = useRef(null);
 
   useLayoutEffect(() => {
     if (RegularExpressions['UTC_ISO8601'].test(value)) {
@@ -105,10 +93,35 @@ export const TimezoneCalendar = ({
   }, []);
 
   useEffect(() => {
+    document.addEventListener('click', handleClickOutside, true);
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true);
+    };
+  });
+
+  useEffect(() => {
     if (isInModal && dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)) {
       onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value));
     }
   }, [date, selectedOffset.value, inputValue]);
+
+  const calculatePosition = () => {
+    const positionRect = refPosition?.current?.getBoundingClientRect();
+    const bodyRect = document.body.getBoundingClientRect();
+    const topOffset = positionRect.top - bodyRect.top - 160;
+
+    setPosition({ left: positionRect.left, top: topOffset });
+  };
+
+  const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
+
+  const checkError = time => {
+    if (checkIsCorrectTimeFormat(time)) {
+      setHasError(false);
+    } else {
+      setHasError(true);
+    }
+  };
 
   const parseDate = dateToParse => {
     const newDate = new Date(dateToParse);
@@ -117,12 +130,10 @@ export const TimezoneCalendar = ({
     return utcDate;
   };
 
-  const calculatePosition = () => {
-    const positionRect = refPosition?.current?.getBoundingClientRect();
-    const bodyRect = document.body.getBoundingClientRect();
-    const topOffset = positionRect.top - bodyRect.top - 200;
-
-    setPosition({ left: positionRect.left, top: topOffset });
+  const handleClickOutside = event => {
+    if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+      onClickOutside();
+    }
   };
 
   const renderButtons = () => {
@@ -133,7 +144,7 @@ export const TimezoneCalendar = ({
       <div className={styles.buttonWrapper}>
         <Button
           className="p-button p-component p-button-primary p-button-animated-blink p-button-text-icon-left"
-          disabled={!dayjs(parseDate(date)).isValid() || hasError || !checkIsCorrectTimeFormat(inputValue)}
+          disabled={!dayjs(parseDate(date)).isValid() || hasError}
           icon="save"
           label={resourcesContext.messages['save']}
           onClick={() => onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value))}
@@ -160,26 +171,19 @@ export const TimezoneCalendar = ({
     );
   };
 
-  const checkError = time => {
-    if (checkIsCorrectTimeFormat(time)) {
-      setHasError(false);
-    } else {
-      setHasError(true);
-    }
-  };
-
-  const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
-
-  const renderLabel = () => {
+  const renderDropdown = () => {
     return (
-      <Fragment>
-        <span className={styles.labelText}>{resourcesContext.messages['outcome']}:</span>
-        <span className={styles.labelDate}>
-          {dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)
-            ? dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value).format('YYYY-MM-DD HH:mm[Z]').toString()
-            : '-'}
-        </span>
-      </Fragment>
+      <Dropdown
+        className={styles.dropdown}
+        disabled={isDisabled}
+        filter
+        filterBy="label"
+        onChange={e => setSelectedOffset(e.value)}
+        optionLabel="label"
+        optionValue="value"
+        options={offsetOptions}
+        value={selectedOffset}
+      />
     );
   };
 
@@ -203,19 +207,17 @@ export const TimezoneCalendar = ({
       />
     );
   };
-  const renderDropdown = () => {
+
+  const renderLabel = () => {
     return (
-      <Dropdown
-        className={styles.dropdown}
-        disabled={isDisabled}
-        filter
-        filterBy="label"
-        onChange={e => setSelectedOffset(e.value)}
-        optionLabel="label"
-        optionValue="value"
-        options={offsetOptions}
-        value={selectedOffset}
-      />
+      <Fragment>
+        <span className={styles.labelText}>{resourcesContext.messages['outcome']}:</span>
+        <span className={styles.labelDate}>
+          {dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)
+            ? dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value).format('YYYY-MM-DD HH:mm[Z]').toString()
+            : '-'}
+        </span>
+      </Fragment>
     );
   };
 
@@ -224,9 +226,9 @@ export const TimezoneCalendar = ({
       <div className={styles.hiddenDiv} ref={refPosition} />
       <Portal>
         <div
-          className={`${styles.container} p-datepicker.p-component.p-input-overlay.p-shadow`}
+          className={`${styles.container} .p-datepicker .p-component .p-input-overlay .p-shadow`}
           ref={calendarRef}
-          style={{ left: `${position?.left}px`, top: `${position?.top + 40}px` }}>
+          style={{ left: `${position?.left}px`, top: `${position?.top}px` }}>
           {renderCalendar()}
           <div className={styles.footer}>
             <div className={styles.inputMaskWrapper}>
