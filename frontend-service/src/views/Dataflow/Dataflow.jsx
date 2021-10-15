@@ -26,6 +26,7 @@ import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
+import { DatasetsInfo } from 'views/_components/DatasetsInfo';
 import { MainLayout } from 'views/_components/Layout';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
@@ -83,7 +84,7 @@ const Dataflow = withRouter(({ history, match }) => {
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
-    isAdminAssignedDataflow: false,
+    isRightPermissionsChanged: false,
     isApiKeyDialogVisible: false,
     isBusinessDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
@@ -95,6 +96,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isExportEUDatasetLoading: false,
     isExporting: false,
     isFetchingData: false,
+    isDatasetsInfoDialogVisible: false,
     isImportLeadReportersVisible: false,
     isManageReportersDialogVisible: false,
     isManageRequestersDialogVisible: false,
@@ -144,9 +146,17 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const uniqRepresentatives = uniq(map(dataflowState.data.representatives, 'dataProviderId'));
 
-  const isLeadDesigner = dataflowState.userRoles.some(
-    userRole => userRole === config.permissions.roles.CUSTODIAN.key || userRole === config.permissions.roles.STEWARD.key
-  );
+  const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+
+  const isSteward = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowState.id, [
+    config.permissions.roles.STEWARD.key
+  ]);
+
+  const isCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowState.id, [
+    config.permissions.roles.CUSTODIAN.key
+  ]);
+
+  const isLeadDesigner = isSteward || isCustodian;
 
   const isObserver = dataflowState.userRoles.some(userRole => userRole === config.permissions.roles.OBSERVER.key);
 
@@ -246,6 +256,7 @@ const Dataflow = withRouter(({ history, match }) => {
     if (isEmpty(dataflowState.data)) {
       return {
         apiKeyBtn: false,
+        datasetsInfoBtn: false,
         editBtn: false,
         editBusinessBtn: false,
         exportBtn: false,
@@ -259,20 +270,17 @@ const Dataflow = withRouter(({ history, match }) => {
 
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
-      editBtn: isDesign && isLeadDesigner && !dataflowState.isAdmin && !isBusinessDataflow,
-      editBusinessBtn: (dataflowState.isAdmin || dataflowState.isCustodian) && isBusinessDataflow,
+      datasetsInfoBtn: isAdmin && isNil(dataProviderId),
+      editBtn: isDesign && isLeadDesigner && !isAdmin && !isBusinessDataflow,
+      editBusinessBtn: (isAdmin || isLeadDesigner) && isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
-      manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
+      manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
-        isLeadReporterOfCountry ||
-        isNationalCoordinatorOfCountry ||
-        isReporterOfCountry ||
-        dataflowState.isCustodian ||
-        dataflowState.isObserver
+        isLeadReporterOfCountry || isNationalCoordinatorOfCountry || isReporterOfCountry || isLeadDesigner || isObserver
     };
   };
 
@@ -315,10 +323,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const handleRedirect = target => history.push(target);
 
-  const setIsAdminAssignedDataflow = value => {
+  const setRightPermissionsChange = isRightPermissionsChanged => {
     dataflowDispatch({
-      type: 'SET_IS_ADMIN_ASSIGNED_DATAFLOW',
-      payload: { isAdminAssignedDataflow: value }
+      type: 'SET_IS_RIGHT_PERMISSIONS_CHANGED',
+      payload: { isRightPermissionsChanged }
     });
   };
 
@@ -326,29 +334,34 @@ const Dataflow = withRouter(({ history, match }) => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
   };
 
-  const shareRightsFooterDialogFooter = userType => (
-    <div className={styles.buttonsRolesFooter}>
-      <Button
-        className={`p-button-secondary p-button-animated-blink p-button-left-aligned`}
-        icon="plus"
-        label={resourcesContext.messages['add']}
-        onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
-      />
-      <Button
-        className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
-        icon="cancel"
-        label={resourcesContext.messages['close']}
-        onClick={() => {
-          manageDialogs(`isManage${userType}DialogVisible`, false);
-          if (dataflowState.isAdminAssignedDataflow) {
-            onLoadReportingDataflow();
-            setIsPageLoading(true);
-            onRefreshToken();
-          }
-        }}
-      />
-    </div>
-  );
+  const shareRightsFooterDialogFooter = userType => {
+    const isAddButtonHidden = isBusinessDataflow && !isAdmin && !isSteward;
+    return (
+      <div className={isAddButtonHidden ? null : styles.buttonsRolesFooter}>
+        {isAddButtonHidden ? null : (
+          <Button
+            className={`p-button-secondary p-button-animated-blink p-button-left-aligned`}
+            icon="plus"
+            label={resourcesContext.messages['add']}
+            onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
+          />
+        )}
+        <Button
+          className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
+          icon="cancel"
+          label={resourcesContext.messages['close']}
+          onClick={() => {
+            manageDialogs(`isManage${userType}DialogVisible`, false);
+            if (dataflowState.isRightPermissionsChanged) {
+              onLoadReportingDataflow();
+              setIsPageLoading(true);
+              onRefreshToken();
+            }
+          }}
+        />
+      </div>
+    );
+  };
 
   const setDataProviderSelected = value => dataflowDispatch({ type: 'SET_DATA_PROVIDER_SELECTED', payload: value });
 
@@ -479,12 +492,12 @@ const Dataflow = withRouter(({ history, match }) => {
     </Fragment>
   );
 
-  const renderDataflowUsersListFooter = (
+  const renderDialogFooterCloseBtn = modalType => (
     <Button
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs('isUserListVisible', false)}
+      onClick={() => manageDialogs(modalType, false)}
     />
   );
 
@@ -508,12 +521,6 @@ const Dataflow = withRouter(({ history, match }) => {
       `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
     );
 
-    const isNationalCoordinator = userContext.hasContextAccessPermission(
-      config.permissions.prefixes.NATIONAL_COORDINATOR,
-      null,
-      [config.permissions.roles.NATIONAL_COORDINATOR.key]
-    );
-
     const entity =
       isNil(representativeId) || representativeId !== 0
         ? `${config.permissions.prefixes.DATAFLOW}${dataflowId}`
@@ -521,20 +528,16 @@ const Dataflow = withRouter(({ history, match }) => {
 
     const userRoles = userContext.getUserRole(entity);
 
-    const isCustodian = userRoles.some(
-      userRole =>
-        userRole === config.permissions.roles.CUSTODIAN.key || userRole === config.permissions.roles.STEWARD.key
-    );
-
-    const isObserver = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
-      config.permissions.roles.OBSERVER.key
-    ]);
-
-    const isAdmin = userContext.accessRole.some(role => role === config.permissions.roles.ADMIN.key);
-
     dataflowDispatch({
       type: 'LOAD_PERMISSIONS',
-      payload: { hasWritePermissions, isCustodian, isNationalCoordinator, isObserver, isAdmin, userRoles }
+      payload: {
+        hasWritePermissions,
+        isCustodian: isLeadDesigner,
+        isNationalCoordinator,
+        isObserver,
+        isAdmin,
+        userRoles
+      }
     });
   };
 
@@ -957,6 +960,10 @@ const Dataflow = withRouter(({ history, match }) => {
                 dataflowId={dataflowId}
                 dataflowType={dataflowState.dataflowType}
                 representativesImport={dataflowState.representativesImport}
+                selectedDataProviderGroup={{
+                  dataProviderGroupId: dataflowState.data.dataProviderGroupId,
+                  label: dataflowState.data.dataProviderGroupName
+                }}
                 setDataProviderSelected={setDataProviderSelected}
                 setFormHasRepresentatives={setFormHasRepresentatives}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
@@ -974,7 +981,7 @@ const Dataflow = withRouter(({ history, match }) => {
             header={resourcesContext.messages['manageRequestersRights']}
             onHide={() => {
               manageDialogs('isManageRequestersDialogVisible', false);
-              if (dataflowState.isAdminAssignedDataflow) {
+              if (dataflowState.isRightPermissionsChanged) {
                 onLoadReportingDataflow();
                 setIsPageLoading(true);
                 onRefreshToken();
@@ -987,18 +994,18 @@ const Dataflow = withRouter(({ history, match }) => {
               columnHeader={resourcesContext.messages['requestersEmailColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
-              deleteColumnHeader={resourcesContext.messages['deleteRequesterButtonTableHeader']}
               deleteConfirmHeader={resourcesContext.messages['requestersRightsDialogConfirmDeleteHeader']}
               deleteConfirmMessage={resourcesContext.messages['requestersRightsDialogConfirmDeleteQuestion']}
               deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
               editConfirmHeader={resourcesContext.messages['editRequesterConfirmHeader']}
               getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
+              isAdmin={isAdmin}
               isUserRightManagementDialogVisible={dataflowState.isUserRightManagementDialogVisible}
               placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
-              setIsAdminAssignedDataflow={setIsAdminAssignedDataflow}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
+              setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
               userType={'requester'}
             />
@@ -1017,7 +1024,6 @@ const Dataflow = withRouter(({ history, match }) => {
               columnHeader={resourcesContext.messages['reportersEmailColumn']}
               dataProviderId={dataProviderId}
               dataflowId={dataflowId}
-              deleteColumnHeader={resourcesContext.messages['deleteReporterButtonTableHeader']}
               deleteConfirmHeader={resourcesContext.messages['reportersRightsDialogConfirmDeleteHeader']}
               deleteConfirmMessage={resourcesContext.messages['reportersRightsDialogConfirmDeleteQuestion']}
               deleteErrorNotificationKey={'DELETE_REPORTER_ERROR'}
@@ -1027,8 +1033,8 @@ const Dataflow = withRouter(({ history, match }) => {
               placeholder={resourcesContext.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={reporterRoleOptions}
-              setIsAdminAssignedDataflow={setIsAdminAssignedDataflow}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
+              setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}
               userType="reporter"
             />
@@ -1135,10 +1141,9 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isUserListVisible && (
           <Dialog
-            footer={renderDataflowUsersListFooter}
+            footer={renderDialogFooterCloseBtn('isUserListVisible')}
             header={
-              ((isNil(dataProviderId) && dataflowState.isCustodian) ||
-                (isNil(representativeId) && dataflowState.isObserver)) &&
+              ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
                 ? TextByDataflowTypeUtils.getLabelByDataflowType(
                     resourcesContext.messages,
@@ -1152,7 +1157,7 @@ const Dataflow = withRouter(({ history, match }) => {
             <UserList
               dataflowId={dataflowId}
               dataflowType={dataflowState.dataflowType}
-              representativeId={dataflowState.isObserver ? representativeId : dataProviderId}
+              representativeId={isObserver ? representativeId : dataProviderId}
             />
           </Dialog>
         )}
@@ -1217,6 +1222,16 @@ const Dataflow = withRouter(({ history, match }) => {
             manageDialogs={manageDialogs}
             match={match}
           />
+        )}
+
+        {dataflowState.isDatasetsInfoDialogVisible && (
+          <Dialog
+            footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
+            header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowState.id}`}
+            onHide={() => manageDialogs('isDatasetsInfoDialogVisible', false)}
+            visible={dataflowState.isDatasetsInfoDialogVisible}>
+            <DatasetsInfo dataflowId={dataflowId} dataflowType={dataflowState.dataflowType} />
+          </Dialog>
         )}
       </div>
     </div>

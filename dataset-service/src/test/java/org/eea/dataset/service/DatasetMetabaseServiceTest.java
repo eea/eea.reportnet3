@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutionException;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
@@ -43,6 +44,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -690,7 +692,6 @@ public class DatasetMetabaseServiceTest {
 
   @Test
   public void updateDatasetStatusTest() throws EEAException {
-
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DataSetMetabase()));
     datasetMetabaseService.updateDatasetStatus(new DatasetStatusMessageVO());
@@ -698,5 +699,74 @@ public class DatasetMetabaseServiceTest {
         Mockito.any());
   }
 
+
+  @Test
+  public void getDatasetsSummaryListFromDatasetTypeTest() {
+    DesignDataset designDataset = new DesignDataset();
+    designDataset.setId(1L);
+    designDataset.setDataSetName("DESIGN DATASET");
+    List<DesignDataset> designDatasets = new ArrayList<>();
+    designDatasets.add(designDataset);
+    ReportingDataset reportingDataset = new ReportingDataset();
+    reportingDataset.setId(1L);
+    reportingDataset.setDataSetName("REPORTING DATASET");
+    reportingDataset.setDataProviderId(1L);
+    reportingDataset.setDatasetSchema("ID");
+    List<ReportingDataset> reportingDatasets = new ArrayList<>();
+    reportingDatasets.add(reportingDataset);
+    DataProviderVO dataProviderVO = new DataProviderVO();
+    dataProviderVO.setId(1L);
+    dataProviderVO.setGroupId(1L);
+    dataProviderVO.setLabel("LABEL");
+    dataProviderVO.setCode("CODE");
+    dataProviderVO.setGroup("GROUP");
+    DesignDataset designDatasetOptional = new DesignDataset();
+    designDatasetOptional.setId(1L);
+    designDatasetOptional.setDataSetName("PRUEBA");
+    designDatasetOptional.setDatasetSchema("ID");
+    List<DatasetsSummaryVO> datasetsSummarysVOExpected = new ArrayList<>();
+    for (DesignDataset design : designDatasets) {
+      DatasetsSummaryVO datasetSummary = new DatasetsSummaryVO();
+      datasetSummary.setId(1L);
+      datasetSummary.setDataSetName(design.getDataSetName());
+      datasetSummary.setDatasetTypeEnum(DatasetTypeEnum.DESIGN);
+      datasetsSummarysVOExpected.add(datasetSummary);
+    }
+    for (ReportingDataset reporting : reportingDatasets) {
+      DatasetsSummaryVO datasetSummary = new DatasetsSummaryVO();
+      datasetSummary.setId(1L);
+      datasetSummary.setDataProviderCode(dataProviderVO.getCode());
+      datasetSummary.setDataProviderName(dataProviderVO.getLabel());
+      datasetSummary.setDataSetName(
+          reporting.getDataSetName() + " - " + designDatasetOptional.getDataSetName());
+      datasetSummary.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
+      datasetsSummarysVOExpected.add(datasetSummary);
+    }
+    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(designDatasets);
+    Mockito.when(referenceDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(testDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(dataCollectionRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(euDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong()))
+        .thenReturn(reportingDatasets);
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(dataProviderVO);
+    Mockito
+        .when(designDatasetRepository.findFirstByDatasetSchema(reportingDataset.getDatasetSchema()))
+        .thenReturn(Optional.of(designDatasetOptional));
+    assertEquals(datasetsSummarysVOExpected, datasetMetabaseService.getDatasetsSummaryList(1L));
+  }
+
+  @Test
+  public void getDatasetIdsByDataflowIdAndDataProviderIdTest() {
+    datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(1L, 1L);
+    Mockito.verify(dataSetMetabaseRepository, times(1))
+        .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong());
+  }
 
 }

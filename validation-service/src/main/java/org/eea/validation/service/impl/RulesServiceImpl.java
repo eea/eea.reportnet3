@@ -845,33 +845,6 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
-  /**
-   * Insert rule in position.
-   *
-   * @param datasetSchemaId the dataset schema id
-   * @param ruleId the rule id
-   * @param position the position
-   * @return true, if successful
-   */
-  @Override
-  public boolean insertRuleInPosition(String datasetSchemaId, String ruleId, int position) {
-    Rule rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
-    if (null != rule) {
-      if (rulesRepository.deleteRuleById(new ObjectId(datasetSchemaId), new ObjectId(ruleId))) {
-        if (rulesRepository.insertRuleInPosition(new ObjectId(datasetSchemaId), rule, position)) {
-          LOG.info("Rule {} reordered in datasetSchemaId {}", ruleId, datasetSchemaId);
-          return true;
-        }
-        LOG_ERROR.error("Error inserting Rule {} in datasetSchemaId {} in position {}", ruleId,
-            datasetSchemaId, position);
-        return false;
-      }
-      LOG_ERROR.error("Error deleting Rule {} in datasetSchemaId {}", ruleId, datasetSchemaId);
-      return false;
-    }
-    LOG_ERROR.error("Rule {} not found", ruleId);
-    return false;
-  }
 
   /**
    * Update allowed rule properties.
