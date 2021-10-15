@@ -1854,4 +1854,81 @@ public class DatasetSchemaControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void getTableSchemasIdsExceptionTest() {
+    try {
+      dataSchemaControllerImpl.getTableSchemasIds(null, 1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getTableSchemasIdsInternalServerErrorException() throws EEAException {
+    try {
+      doThrow(new EEAException("error")).when(dataschemaService).getTableSchemasIds(1L);
+      dataSchemaControllerImpl.getTableSchemasIds(1L, 1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void getTableSchemasIdsTest() throws EEAException {
+    dataSchemaControllerImpl.getTableSchemasIds(1L, 1L, 1L);
+    Mockito.verify(dataschemaService, times(1)).getTableSchemasIds(Mockito.anyLong());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void findPublicDataSchemaByDatasetIdExceptionTest() throws EEAException {
+    try {
+      doThrow(new EEAException("error")).when(dataschemaService).getDataSchemaByDatasetId(true, 1L);
+      dataSchemaControllerImpl.findDataSchemaByDatasetIdPrivate(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void findPublicDataSchemaByDatasetIdTest() throws EEAException {
+    dataSchemaControllerImpl.findDataSchemaByDatasetIdPrivate(1L);
+    Mockito.verify(dataschemaService, times(1)).getDataSchemaByDatasetId(true, 1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getPublicUniqueConstraintsExceptionTest() {
+    try {
+      dataSchemaControllerImpl.getPublicUniqueConstraints(null, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void getPublicUniqueConstraintsTest() {
+    dataSchemaControllerImpl.getPublicUniqueConstraints("schema", 1L);
+    Mockito.verify(dataschemaService, times(1)).getUniqueConstraints("schema");
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void findDataSchemasByIdDataflowExceptionTest() throws EEAException {
+    List<DesignDatasetVO> designs = new ArrayList<>();
+    DesignDatasetVO design = new DesignDatasetVO();
+    design.setId(1L);
+    designs.add(design);
+    try {
+      doThrow(new EEAException("error")).when(dataschemaService).getDataSchemaByDatasetId(false,
+          1L);
+      Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(1L)).thenReturn(designs);
+      dataSchemaControllerImpl.findDataSchemasByIdDataflow(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
 }

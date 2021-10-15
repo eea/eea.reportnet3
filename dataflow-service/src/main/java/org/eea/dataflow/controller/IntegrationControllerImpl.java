@@ -205,21 +205,22 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
+
   /**
-   * Find public extensions and operations.
+   * Find extensions and operations private.
    *
    * @param integrationVO the integration VO
    * @return the list
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/listPublicExtensionsOperations",
+  @PutMapping(value = "/private/listPublicExtensionsOperations",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Integrations and Operations by Integration Criteria",
       produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class,
       responseContainer = "List", hidden = true)
   @ApiResponse(code = 500, message = "Internal Server Error")
-  public List<IntegrationVO> findPublicExtensionsAndOperations(@ApiParam(type = "Object",
+  public List<IntegrationVO> findExtensionsAndOperationsPrivate(@ApiParam(type = "Object",
       value = "IntegrationVO Object") @RequestBody IntegrationVO integrationVO) {
     try {
       return integrationService.getOnlyExtensionsAndOperations(

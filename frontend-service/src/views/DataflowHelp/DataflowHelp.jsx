@@ -4,6 +4,7 @@ import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
+import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
 import { DataflowHelpReporterHelpConfig } from 'conf/help/dataflowHelp/reporter';
@@ -159,15 +160,17 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       setIsLoading(false);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {
-          const allDatasets = [...data.referenceDatasets, ...data.datasets];
-          const uniqueDatasetSchemas = allDatasets.filter((dataset, pos, arr) => {
-            return arr.map(dataset => dataset.datasetSchemaId).indexOf(dataset.datasetSchemaId) === pos;
-          });
-          const datasetSchemas = uniqueDatasetSchemas.map(async datasetSchema => {
+          const datasetSchemas = data.datasets.map(async datasetSchema => {
             return await onLoadDatasetSchema(datasetSchema.datasetId);
           });
           Promise.all(datasetSchemas).then(completed => {
-            setDatasetsSchemas(completed);
+            completed.forEach(datasetSchema => {
+              datasetSchema.datasetId = data.datasets.find(
+                dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
+              ).datasetId;
+            });
+
+            setDatasetsSchemas(uniqBy(completed, 'datasetSchemaId'));
           });
         } else {
           setIsLoadingSchemas(false);
@@ -178,7 +181,12 @@ export const DataflowHelp = withRouter(({ history, match }) => {
             return await onLoadDatasetSchema(designDataset.datasetId);
           });
           Promise.all(datasetSchemas).then(completed => {
-            setDatasetsSchemas(completed);
+            completed.forEach(datasetSchema => {
+              datasetSchema.datasetId = data.designDatasets.find(
+                designDataset => designDataset.datasetSchemaId === datasetSchema.datasetSchemaId
+              ).datasetId;
+            });
+            setDatasetsSchemas(uniqBy(completed, 'datasetSchemaId'));
           });
         } else {
           setIsLoadingSchemas(false);
@@ -276,6 +284,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
             rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas ? config.icons['spinnerAnimate'] : null}>
             <DatasetSchemas
               dataflowId={dataflowId}
+              dataflowName={dataflowName}
               datasetsSchemas={datasetsSchemas}
               isCustodian={isCustodian}
               onLoadDatasetsSchemas={onLoadDatasetsSchemas}

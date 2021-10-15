@@ -208,7 +208,7 @@ public class DataflowHelper {
     Map<String, String> fieldNames = new HashMap<>();
     for (DesignDatasetVO designDatasetVO : listDesignDatasetVO) {
       DataSetSchemaVO datasetSchemaVO =
-          datasetSchemaControllerZuul.findPublicDataSchemaByDatasetId(designDatasetVO.getId());
+          datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(designDatasetVO.getId());
       for (TableSchemaVO table : datasetSchemaVO.getTableSchemas()) {
         tableNames.put(table.getIdTableSchema(), table.getNameTableSchema());
         for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
@@ -267,7 +267,7 @@ public class DataflowHelper {
 
         // Fill tables info
         DataSetSchemaVO datasetSchemaVO =
-            datasetSchemaControllerZuul.findPublicDataSchemaByDatasetId(designDatasetVO.getId());
+            datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(designDatasetVO.getId());
 
         for (TableSchemaVO tableSchemaVO : datasetSchemaVO.getTableSchemas()) {
           rowheadTF = sheetTF.createRow(nRowTF);
@@ -287,7 +287,7 @@ public class DataflowHelper {
           String datasetSchemaId =
               datasetSchemaControllerZuul.getDatasetSchemaId(designDatasetVO.getId());
           RulesSchemaVO rulesSchemaVO =
-              rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId, dataflowId);
+              rulesControllerZuul.findRuleSchemaByDatasetIdPrivate(datasetSchemaId, dataflowId);
           String mandatoryTable = "No";
           for (RuleVO ruleVO : rulesSchemaVO.getRules()) {
             if (AutomaticRuleTypeEnum.MANDATORY_TABLE.equals(ruleVO.getAutomaticType())
@@ -371,7 +371,7 @@ public class DataflowHelper {
         String datasetSchemaId =
             datasetSchemaControllerZuul.getDatasetSchemaId(designDatasetVO.getId());
         RulesSchemaVO rulesSchemaVO =
-            rulesControllerZuul.findRuleSchemaByDatasetId(datasetSchemaId, dataflowId);
+            rulesControllerZuul.findRuleSchemaByDatasetIdPrivate(datasetSchemaId, dataflowId);
 
         Row rowheadQC = sheetQC.createRow(nRowQC);
         rowheadQC.createCell(nColumnQC).setCellValue(designDatasetVO.getDataSetName());
@@ -494,7 +494,7 @@ public class DataflowHelper {
         internalParameters.put("datasetSchemaId", datasetSchemaId);
         integrationVO.setInternalParameters(internalParameters);
         List<IntegrationVO> listIntegrationVO =
-            integrationControllerZuul.findPublicExtensionsAndOperations(integrationVO);
+            integrationControllerZuul.findExtensionsAndOperationsPrivate(integrationVO);
         for (IntegrationVO integration : listIntegrationVO) {
           rowheadEI = sheetEI.createRow(nRowEI);
           rowheadEI.createCell(nColumnEI).setCellValue(designDatasetVO.getDataSetName());

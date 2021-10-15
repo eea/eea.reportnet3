@@ -1063,8 +1063,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       datasetsSummary.setDataProviderName(dataProvider.getLabel());
       Optional<DesignDataset> designDataset =
           designDatasetRepository.findFirstByDatasetSchema(reportingDataset.getDatasetSchema());
-      datasetsSummary.setDataSetName(
-          reportingDataset.getDataSetName() + " - " + designDataset.get().getDataSetName());
+      if (designDataset.isPresent()) {
+        datasetsSummary.setDataSetName(
+            reportingDataset.getDataSetName() + " - " + designDataset.get().getDataSetName());
+      }
       datasetsSummaryList.add(datasetsSummary);
     }
     return datasetsSummaryList;

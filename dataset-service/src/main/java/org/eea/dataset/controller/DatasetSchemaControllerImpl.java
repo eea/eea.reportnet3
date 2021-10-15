@@ -223,18 +223,19 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   /**
-   * Find public data schema by dataset id.
+   * Find data schema by dataset id private.
    *
    * @param datasetId the dataset id
    * @return the data set schema VO
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/publicDatasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/publicDatasetId/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find public dataschema by Dataset Id", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting the data")})
-  public DataSetSchemaVO findPublicDataSchemaByDatasetId(@ApiParam(type = "Long",
+  public DataSetSchemaVO findDataSchemaByDatasetIdPrivate(@ApiParam(type = "Long",
       value = "Dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
     try {
       return dataschemaService.getDataSchemaByDatasetId(true, datasetId);

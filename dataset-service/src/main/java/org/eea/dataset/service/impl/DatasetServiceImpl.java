@@ -43,6 +43,7 @@ import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.domain.Validation;
 import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
@@ -51,6 +52,7 @@ import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository.IDError;
 import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
 import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.data.util.SortField;
@@ -94,6 +96,8 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -301,6 +305,10 @@ public class DatasetServiceImpl implements DatasetService {
   /** The record store controller. */
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
+
+  /** The validation repository. */
+  @Autowired
+  private ValidationRepository validationRepository;
 
   /** The import path. */
   @Value("${importPath}")
@@ -3542,4 +3550,77 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+  /**
+   * Gets the total failed validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the total failed validations by id dataset
+   */
+  @Override
+  public FailedValidationsDatasetVO getTotalFailedValidationsByIdDataset(Long datasetId,
+      String idTableSchema) {
+    DataSetMetabase dataset =
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+    FailedValidationsDatasetVO validation = new FailedValidationsDatasetVO();
+    validation.setErrors(new ArrayList<>());
+    validation.setIdDatasetSchema(dataset.getDatasetSchema());
+    validation.setIdDataset(datasetId);
+    Long countValidations = validationRepository.count();
+    validation.setErrors(getFieldAndRecordErrors(datasetId, idTableSchema));
+    validation.setTotalFilteredRecords(countValidations);
+    return validation;
+  }
+
+  /**
+   * Gets the field and record errors.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the field and record errors
+   */
+  private List<ErrorsValidationVO> getFieldAndRecordErrors(Long datasetId, String idTableSchema) {
+    List<ErrorsValidationVO> errors = new ArrayList<>();
+
+    for (FieldValidation fieldValidation : fieldValidationRepository
+        .findFieldValidationsByIdDatasetAndIdTableSchema(datasetId, idTableSchema)) {
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      error.setIdObject(fieldValidation.getFieldValue().getId());
+      error.setIdTableSchema(
+          fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema());
+      error.setNameFieldSchema(fieldValidation.getValidation().getFieldName());
+      refillErrorValidation(fieldValidation.getValidation(), error);
+      errors.add(error);
+    }
+
+    for (RecordValidation recordValidation : recordValidationRepository
+        .findRecordValidationsByIdDatasetAndIdTableSchema(datasetId, idTableSchema)) {
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      if (recordValidation.getRecordValue() != null) {
+        error.setIdObject(recordValidation.getRecordValue().getId());
+        error
+            .setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
+      }
+      refillErrorValidation(recordValidation.getValidation(), error);
+      errors.add(error);
+    }
+    LOG.info("Found all errors for field and records for dataset: {}", datasetId);
+    return errors;
+  }
+
+  /**
+   * Refill error validation.
+   *
+   * @param validation the validation
+   * @param error the error
+   */
+  private void refillErrorValidation(Validation validation, ErrorsValidationVO error) {
+    error.setIdValidation(validation.getId());
+    error.setLevelError(validation.getLevelError().name());
+    error.setMessage(validation.getMessage());
+    error.setNameTableSchema(validation.getTableName());
+    error.setTypeEntity(validation.getTypeEntity().name());
+    error.setValidationDate(validation.getValidationDate());
+    error.setShortCode(validation.getShortCode());
+  }
 }

@@ -1,7 +1,8 @@
-import { useContext, useEffect, useLayoutEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import dayjs from 'dayjs';
+import uniqueId from 'lodash/uniqueId';
 import utc from 'dayjs/plugin/utc';
 
 import styles from './TimezoneCalendar.module.scss';
@@ -10,6 +11,7 @@ import { Button } from 'views/_components/Button';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
+import { Portal } from 'views/_components/Portal';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -57,15 +59,26 @@ const offsetOptions = [
   { value: 14, label: '+14:00' }
 ];
 
-export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDisabled }) => {
-  const resourcesContext = useContext(ResourcesContext);
+export const TimezoneCalendar = ({
+  isDisabled,
+  isInModal,
+  onClickOutside = () => {},
+  onSaveDate = () => {},
+  value
+}) => {
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
 
+  const resourcesContext = useContext(ResourcesContext);
+
   const [date, setDate] = useState('');
-  const [inputValue, setInputValue] = useState('');
-  const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [position, setPosition] = useState();
+  const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
+
+  const calendarRef = useRef(null);
+  const refPosition = useRef(null);
 
   useLayoutEffect(() => {
     if (RegularExpressions['UTC_ISO8601'].test(value)) {
@@ -76,19 +89,51 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
 
     const [day] = value.split('T');
     setDate(new Date(day));
+    calculatePosition();
   }, []);
 
   useEffect(() => {
-    if (isInModal && dayjs(date).isValid()) {
+    document.addEventListener('click', handleClickOutside, true);
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true);
+    };
+  });
+
+  useEffect(() => {
+    if (isInModal && dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)) {
       onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value));
     }
   }, [date, selectedOffset.value, inputValue]);
+
+  const calculatePosition = () => {
+    const positionRect = refPosition?.current?.getBoundingClientRect();
+    const bodyRect = document.body.getBoundingClientRect();
+    const topOffset = positionRect.top - bodyRect.top - 160;
+
+    setPosition({ left: positionRect.left, top: topOffset });
+  };
+
+  const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
+
+  const checkError = time => {
+    if (checkIsCorrectTimeFormat(time)) {
+      setHasError(false);
+    } else {
+      setHasError(true);
+    }
+  };
 
   const parseDate = dateToParse => {
     const newDate = new Date(dateToParse);
     const [hour, minute, second] = inputValue.split(':');
     const utcDate = Date.UTC(newDate.getFullYear(), newDate.getMonth(), newDate.getDate(), hour, minute, second);
     return utcDate;
+  };
+
+  const handleClickOutside = event => {
+    if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+      onClickOutside();
+    }
   };
 
   const renderButtons = () => {
@@ -116,7 +161,7 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
         inline
         monthNavigator
         onChange={e => {
-          checkError(dayjs(e.value).format('HH:mm:ss').toString());
+          checkError(inputValue);
           setDate(e.value);
         }}
         value={date}
@@ -126,15 +171,21 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
     );
   };
 
-  const checkError = time => {
-    if (checkIsCorrectTimeFormat(time)) {
-      setHasError(false);
-    } else {
-      setHasError(true);
-    }
+  const renderDropdown = () => {
+    return (
+      <Dropdown
+        className={styles.dropdown}
+        disabled={isDisabled}
+        filter
+        filterBy="label"
+        onChange={e => setSelectedOffset(e.value)}
+        optionLabel="label"
+        optionValue="value"
+        options={offsetOptions}
+        value={selectedOffset}
+      />
+    );
   };
-
-  const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
 
   const renderInputMask = () => {
     return (
@@ -156,36 +207,47 @@ export const TimezoneCalendar = ({ onSaveDate = () => {}, value, isInModal, isDi
       />
     );
   };
-  const renderDropdown = () => {
+
+  const renderLabel = () => {
     return (
-      <Dropdown
-        appendTo={document.body}
-        className={styles.dropdown}
-        disabled={isDisabled}
-        onChange={e => setSelectedOffset(e.value)}
-        optionLabel="label"
-        optionValue="value"
-        options={offsetOptions}
-        value={selectedOffset}
-      />
+      <Fragment>
+        <span className={styles.labelText}>{resourcesContext.messages['outcome']}:</span>
+        <span className={styles.labelDate}>
+          {dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)
+            ? dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value).format('YYYY-MM-DDTHH:mm:ss[Z]').toString()
+            : '-'}
+        </span>
+      </Fragment>
     );
   };
 
   return (
-    <div className={styles.container}>
-      {renderCalendar()}
-      <div className={styles.inputMaskWrapper}>
-        {renderInputMask()}
-        <div className={styles.utc}>
-          <span className={styles.label}>{resourcesContext.messages['utc']}</span>
-          <TooltipButton
-            message={resourcesContext.messages['dateTimeWarningTooltip']}
-            uniqueIdentifier={'dateTimeWarningTooltip'}
-          />
-          {renderDropdown()}
+    <Fragment>
+      <div className={styles.hiddenDiv} ref={refPosition} />
+      <Portal>
+        <div
+          className={`${styles.container} .p-datepicker .p-component .p-input-overlay .p-shadow`}
+          ref={calendarRef}
+          style={{ left: `${position?.left}px`, top: `${position?.top}px` }}>
+          {renderCalendar()}
+          <div className={styles.footer}>
+            <div className={styles.inputMaskWrapper}>
+              {renderInputMask()}
+              <div className={styles.utc}>
+                <span className={styles.label}>{resourcesContext.messages['utc']}</span>
+                <TooltipButton
+                  message={resourcesContext.messages['dateTimeWarningTooltip']}
+                  uniqueIdentifier={uniqueId('dateTimeWarningTooltip_')}
+                  usedInPortal={true}
+                />
+                {renderDropdown()}
+              </div>
+            </div>
+            {renderLabel()}
+            {renderButtons()}
+          </div>
         </div>
-      </div>
-      {renderButtons()}
-    </div>
+      </Portal>
+    </Fragment>
   );
 };
