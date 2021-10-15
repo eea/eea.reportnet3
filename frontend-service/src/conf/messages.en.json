@@ -1303,6 +1303,7 @@
     "notRequired": "Not required",
     "notReadOnly": "Not read only",
     "outcome": "Outcome",
-    "goTop": "Go top"
+    "goTop": "Go top",
+    "sqlSentenceDatetimeNote": "Note: Datetime field values must follow <strong><u>'YYYY-MM-DD HH:mm:ss'</u></strong> format."
   }
 }
