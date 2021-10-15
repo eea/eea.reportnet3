@@ -483,19 +483,21 @@ export const PublicDataflowInformation = withRouter(
       return (
         <Fragment>
           <Title icon="clone" iconSize="4rem" subtitle={dataflowData.description} title={dataflowData.name} />
-          <Toolbar className={styles.actionsToolbar}>
-            <div className={'p-toolbar-group-left'}>
-              <Button
-                className={`p-button-rounded p-button-secondary ${!isDownloading ? 'p-button-animated-blink' : ''}`}
-                disabled={isDownloading}
-                icon={isDownloading ? 'spinnerAnimate' : 'export'}
-                label={resourcesContext.messages['downloadSchemasInfo']}
-                onClick={() => onDownloadAllSchemasInfo()}
-                tooltip={resourcesContext.messages['downloadSchemasInfoTooltip']}
-                tooltipOptions={{ position: 'right' }}
-              />
-            </div>
-          </Toolbar>
+          {!TextUtils.areEquals(dataflowData.type, config.dataflowType.BUSINESS.value) && (
+            <Toolbar className={styles.actionsToolbar}>
+              <div className={'p-toolbar-group-left'}>
+                <Button
+                  className={`p-button-rounded p-button-secondary ${!isDownloading ? 'p-button-animated-blink' : ''}`}
+                  disabled={isDownloading}
+                  icon={isDownloading ? 'spinnerAnimate' : 'export'}
+                  label={resourcesContext.messages['downloadSchemasInfo']}
+                  onClick={() => onDownloadAllSchemasInfo()}
+                  tooltip={resourcesContext.messages['downloadSchemasInfoTooltip']}
+                  tooltipOptions={{ position: 'right' }}
+                />
+              </div>
+            </Toolbar>
+          )}
 
           {!isEmpty(representatives) && (
             <div className={styles.dataTableWrapper}>
