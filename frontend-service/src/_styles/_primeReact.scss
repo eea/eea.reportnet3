@@ -649,6 +649,11 @@ body .p-datepicker .p-monthpicker .p-monthpicker-month.p-highlight {
   color: #ffffff;
   background-color: #004494;
 }
+body .p-datepicker-month,
+body .p-datepicker-year {
+  background-color: var(--bg);
+  color: var(--main-font-color);
+}
 body .p-datepicker.p-datepicker-timeonly {
   padding: 0;
 }
