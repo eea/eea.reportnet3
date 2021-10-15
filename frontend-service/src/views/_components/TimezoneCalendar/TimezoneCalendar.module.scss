@@ -13,6 +13,15 @@
     }
   }
 
+  .labelDate,
+  .labelText {
+    margin-left: 0.2rem;
+    font-size: smaller;
+  }
+  .labelDate {
+    font-weight: 600;
+  }
+
   .footer {
     background-color: var(--bg);
 
@@ -24,6 +33,7 @@
   .inputMaskWrapper {
     display: flex;
     margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
     justify-content: space-between;
 
     .timeInput {

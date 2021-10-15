@@ -133,7 +133,7 @@ export const TimezoneCalendar = ({
       <div className={styles.buttonWrapper}>
         <Button
           className="p-button p-component p-button-primary p-button-animated-blink p-button-text-icon-left"
-          disabled={!dayjs(parseDate(date)).isValid() || hasError}
+          disabled={!dayjs(parseDate(date)).isValid() || hasError || !checkIsCorrectTimeFormat(inputValue)}
           icon="save"
           label={resourcesContext.messages['save']}
           onClick={() => onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value))}
@@ -150,7 +150,7 @@ export const TimezoneCalendar = ({
         inline
         monthNavigator
         onChange={e => {
-          checkError(dayjs(e.value).format('HH:mm:ss').toString());
+          checkError(inputValue);
           setDate(e.value);
         }}
         value={date}
@@ -169,6 +169,19 @@ export const TimezoneCalendar = ({
   };
 
   const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
+
+  const renderLabel = () => {
+    return (
+      <Fragment>
+        <span className={styles.labelText}>{resourcesContext.messages['outcome']}:</span>
+        <span className={styles.labelDate}>
+          {dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)
+            ? dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value).format('YYYY-MM-DD HH:mm[Z]').toString()
+            : '-'}
+        </span>
+      </Fragment>
+    );
+  };
 
   const renderInputMask = () => {
     return (
@@ -228,6 +241,7 @@ export const TimezoneCalendar = ({
                 {renderDropdown()}
               </div>
             </div>
+            {renderLabel()}
             {renderButtons()}
           </div>
         </div>
