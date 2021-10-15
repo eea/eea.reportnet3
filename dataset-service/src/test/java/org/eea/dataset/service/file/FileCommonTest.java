@@ -426,9 +426,9 @@ public class FileCommonTest {
    */
   @Test
   public void getErrorsTest() {
-    Mockito.when(validationController.getFailedValidationsByIdDataset(Mockito.anyLong(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(null);
+    Mockito
+        .when(datasetService.getTotalFailedValidationsByIdDataset(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(null);
     assertNull("fail", fileCommon.getErrors(1L, ID, datasetVO));
   }
 
