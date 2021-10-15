@@ -530,10 +530,7 @@ const DatasetSchema = ({
   return (
     <div id={designDataset.datasetSchemaId}>
       <div className={styles.datasetSchemaPropertiesWrapper}>
-        <h3
-          className={
-            styles.header
-          }>{`${resourcesContext.messages['createDatasetSchemaName']}: ${designDataset.datasetSchemaName}`}</h3>
+        <h3 className={styles.header}>{`${designDataset.datasetSchemaName}`}</h3>
         {renderProperties()}
       </div>
       <TabView activeIndex={0} hasQueryString={false} name="DatasetSchemas">

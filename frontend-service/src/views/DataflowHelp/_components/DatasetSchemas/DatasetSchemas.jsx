@@ -344,9 +344,12 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
 
   const renderAnchors = () => {
     return !isNil(datasetsSchemas) && datasetsSchemas.length > 0 ? (
-      <div className="dataflowHelp-datasetSchema-help-step">
+      <div className={`dataflowHelp-datasetSchema-help-step ${styles.index}`}>
+        <h3>{resourcesContext.messages['datasetSchemas']}</h3>
         {datasetsSchemas.map(designDataset => (
-          <a href={`#${designDataset.datasetSchemaId}`}>{designDataset.datasetSchemaName}</a>
+          <div key={designDataset.datasetSchemaName}>
+            <a href={`#${designDataset.datasetSchemaId}`}>{designDataset.datasetSchemaName}</a>
+          </div>
         ))}
       </div>
     ) : null;
