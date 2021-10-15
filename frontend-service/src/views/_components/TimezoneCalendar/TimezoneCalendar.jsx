@@ -226,7 +226,7 @@ export const TimezoneCalendar = ({
       <div className={styles.hiddenDiv} ref={refPosition} />
       <Portal>
         <div
-          className={`${styles.container} p-datepicker.p-component.p-input-overlay.p-shadow`}
+          className={`${styles.container} .p-datepicker .p-component .p-input-overlay .p-shadow`}
           ref={calendarRef}
           style={{ left: `${position?.left}px`, top: `${position?.top}px` }}>
           {renderCalendar()}
