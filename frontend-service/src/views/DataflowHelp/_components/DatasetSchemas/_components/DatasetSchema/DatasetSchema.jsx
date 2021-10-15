@@ -28,7 +28,6 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 const DatasetSchema = ({
-  dataflowName,
   designDataset,
   extensionsOperationsList = [],
   onGetReferencedFieldName,
@@ -120,7 +119,7 @@ const DatasetSchema = ({
       }
     },
     externalIntegrations: {
-      columns: ['operation', 'extension', 'id'],
+      columns: ['operation', 'fileExtension', 'id'],
       filtered: true,
       groupable: true,
       narrow: true,
@@ -529,12 +528,18 @@ const DatasetSchema = ({
   };
 
   return (
-    <div>
+    <div id={designDataset.datasetSchemaId}>
       <div className={styles.datasetSchemaPropertiesWrapper}>
-        <h3
-          className={
-            styles.header
-          }>{`${resourcesContext.messages['createDatasetSchemaName']}: ${designDataset.datasetSchemaName}`}</h3>
+        <h3 className={styles.header}>
+          {designDataset.datasetSchemaName}
+          <a data-for="linkGoTop" data-tip href="#datasetSchemaIndex">
+            <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowUp')} role="presentation" />
+          </a>
+          <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="linkGoTop" place="top">
+            {resourcesContext.messages['goTop']}
+          </ReactTooltip>
+        </h3>
+
         {renderProperties()}
       </div>
       <TabView activeIndex={0} hasQueryString={false} name="DatasetSchemas">
