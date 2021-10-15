@@ -66,31 +66,19 @@ export const TimezoneCalendar = ({
   onSaveDate = () => {},
   value
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
 
+  const resourcesContext = useContext(ResourcesContext);
+
   const [date, setDate] = useState('');
-  const [inputValue, setInputValue] = useState('');
-  const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
   const [hasError, setHasError] = useState(false);
+  const [inputValue, setInputValue] = useState('');
   const [position, setPosition] = useState();
+  const [selectedOffset, setSelectedOffset] = useState({ value: 0, label: '+00:00' });
 
-  const refPosition = useRef(null);
   const calendarRef = useRef(null);
-
-  const handleClickOutside = event => {
-    if (calendarRef.current && !calendarRef.current.contains(event.target)) {
-      onClickOutside();
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('click', handleClickOutside, true);
-    return () => {
-      document.removeEventListener('click', handleClickOutside, true);
-    };
-  });
+  const refPosition = useRef(null);
 
   useLayoutEffect(() => {
     if (RegularExpressions['UTC_ISO8601'].test(value)) {
@@ -105,10 +93,35 @@ export const TimezoneCalendar = ({
   }, []);
 
   useEffect(() => {
+    document.addEventListener('click', handleClickOutside, true);
+    return () => {
+      document.removeEventListener('click', handleClickOutside, true);
+    };
+  });
+
+  useEffect(() => {
     if (isInModal && dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)) {
       onSaveDate(dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value));
     }
   }, [date, selectedOffset.value, inputValue]);
+
+  const calculatePosition = () => {
+    const positionRect = refPosition?.current?.getBoundingClientRect();
+    const bodyRect = document.body.getBoundingClientRect();
+    const topOffset = positionRect.top - bodyRect.top - 200;
+
+    setPosition({ left: positionRect.left, top: topOffset });
+  };
+
+  const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
+
+  const checkError = time => {
+    if (checkIsCorrectTimeFormat(time)) {
+      setHasError(false);
+    } else {
+      setHasError(true);
+    }
+  };
 
   const parseDate = dateToParse => {
     const newDate = new Date(dateToParse);
@@ -117,12 +130,10 @@ export const TimezoneCalendar = ({
     return utcDate;
   };
 
-  const calculatePosition = () => {
-    const positionRect = refPosition?.current?.getBoundingClientRect();
-    const bodyRect = document.body.getBoundingClientRect();
-    const topOffset = positionRect.top - bodyRect.top - 200;
-
-    setPosition({ left: positionRect.left, top: topOffset });
+  const handleClickOutside = event => {
+    if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+      onClickOutside();
+    }
   };
 
   const renderButtons = () => {
@@ -160,26 +171,19 @@ export const TimezoneCalendar = ({
     );
   };
 
-  const checkError = time => {
-    if (checkIsCorrectTimeFormat(time)) {
-      setHasError(false);
-    } else {
-      setHasError(true);
-    }
-  };
-
-  const checkIsCorrectTimeFormat = time => RegularExpressions['time24'].test(time);
-
-  const renderLabel = () => {
+  const renderDropdown = () => {
     return (
-      <Fragment>
-        <span className={styles.labelText}>{resourcesContext.messages['outcome']}:</span>
-        <span className={styles.labelDate}>
-          {dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)
-            ? dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value).format('YYYY-MM-DD HH:mm[Z]').toString()
-            : '-'}
-        </span>
-      </Fragment>
+      <Dropdown
+        className={styles.dropdown}
+        disabled={isDisabled}
+        filter
+        filterBy="label"
+        onChange={e => setSelectedOffset(e.value)}
+        optionLabel="label"
+        optionValue="value"
+        options={offsetOptions}
+        value={selectedOffset}
+      />
     );
   };
 
@@ -203,19 +207,17 @@ export const TimezoneCalendar = ({
       />
     );
   };
-  const renderDropdown = () => {
+
+  const renderLabel = () => {
     return (
-      <Dropdown
-        className={styles.dropdown}
-        disabled={isDisabled}
-        filter
-        filterBy="label"
-        onChange={e => setSelectedOffset(e.value)}
-        optionLabel="label"
-        optionValue="value"
-        options={offsetOptions}
-        value={selectedOffset}
-      />
+      <Fragment>
+        <span className={styles.labelText}>{resourcesContext.messages['outcome']}:</span>
+        <span className={styles.labelDate}>
+          {dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)
+            ? dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value).format('YYYY-MM-DD HH:mm[Z]').toString()
+            : '-'}
+        </span>
+      </Fragment>
     );
   };
 
