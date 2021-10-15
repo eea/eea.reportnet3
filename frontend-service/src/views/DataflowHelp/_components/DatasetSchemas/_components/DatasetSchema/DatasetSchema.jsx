@@ -528,7 +528,7 @@ const DatasetSchema = ({
   };
 
   return (
-    <div>
+    <div id={designDataset.datasetSchemaId}>
       <div className={styles.datasetSchemaPropertiesWrapper}>
         <h3
           className={

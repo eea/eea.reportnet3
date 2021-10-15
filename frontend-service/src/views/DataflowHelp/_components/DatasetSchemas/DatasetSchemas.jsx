@@ -342,6 +342,16 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
     }
   };
 
+  const renderAnchors = () => {
+    return !isNil(datasetsSchemas) && datasetsSchemas.length > 0 ? (
+      <div className="dataflowHelp-datasetSchema-help-step">
+        {datasetsSchemas.map(designDataset => (
+          <a href={`#${designDataset.datasetSchemaId}`}>{designDataset.datasetSchemaName}</a>
+        ))}
+      </div>
+    ) : null;
+  };
+
   const renderDatasetSchemas = () => {
     return !isNil(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       <div className="dataflowHelp-datasetSchema-help-step">
@@ -400,6 +410,7 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
   return (
     <Fragment>
       {renderToolbar()}
+      {renderAnchors()}
       {isLoading ? <Spinner className={styles.positioning} /> : renderDatasetSchemas()}
     </Fragment>
   );
