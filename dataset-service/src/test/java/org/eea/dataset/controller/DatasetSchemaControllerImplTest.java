@@ -1885,7 +1885,7 @@ public class DatasetSchemaControllerImplTest {
   public void findPublicDataSchemaByDatasetIdExceptionTest() throws EEAException {
     try {
       doThrow(new EEAException("error")).when(dataschemaService).getDataSchemaByDatasetId(true, 1L);
-      dataSchemaControllerImpl.findPublicDataSchemaByDatasetId(1L);
+      dataSchemaControllerImpl.findDataSchemaByDatasetIdPrivate(1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
@@ -1894,7 +1894,7 @@ public class DatasetSchemaControllerImplTest {
 
   @Test
   public void findPublicDataSchemaByDatasetIdTest() throws EEAException {
-    dataSchemaControllerImpl.findPublicDataSchemaByDatasetId(1L);
+    dataSchemaControllerImpl.findDataSchemaByDatasetIdPrivate(1L);
     Mockito.verify(dataschemaService, times(1)).getDataSchemaByDatasetId(true, 1L);
   }
 
