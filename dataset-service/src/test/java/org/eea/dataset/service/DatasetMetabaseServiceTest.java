@@ -762,4 +762,11 @@ public class DatasetMetabaseServiceTest {
     assertEquals(datasetsSummarysVOExpected, datasetMetabaseService.getDatasetsSummaryList(1L));
   }
 
+  @Test
+  public void getDatasetIdsByDataflowIdAndDataProviderIdTest() {
+    datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(1L, 1L);
+    Mockito.verify(dataSetMetabaseRepository, times(1))
+        .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong());
+  }
+
 }

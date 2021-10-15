@@ -14,6 +14,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -593,5 +594,15 @@ public interface DatasetService {
    * @throws SQLException the SQL exception
    */
   void storeRecords(Long datasetId, List<RecordValue> recordList) throws IOException, SQLException;
+
+  /**
+   * Gets the total failed validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the total failed validations by id dataset
+   */
+  FailedValidationsDatasetVO getTotalFailedValidationsByIdDataset(Long datasetId,
+      String idTableSchema);
 
 }

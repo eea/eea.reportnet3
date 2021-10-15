@@ -298,5 +298,4 @@ public interface DatasetMetabaseController {
   @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
   List<DatasetsSummaryVO> getDatasetsSummaryList(@PathVariable("id") Long dataflowId);
 
-
 }
