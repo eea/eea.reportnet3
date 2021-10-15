@@ -214,7 +214,7 @@ export const TimezoneCalendar = ({
         <span className={styles.labelText}>{resourcesContext.messages['outcome']}:</span>
         <span className={styles.labelDate}>
           {dayjs(date).isValid() && checkIsCorrectTimeFormat(inputValue)
-            ? dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value).format('YYYY-MM-DD HH:mm[Z]').toString()
+            ? dayjs.utc(parseDate(date)).utcOffset(selectedOffset.value).format('YYYY-MM-DDTHH:mm:ss[Z]').toString()
             : '-'}
         </span>
       </Fragment>
