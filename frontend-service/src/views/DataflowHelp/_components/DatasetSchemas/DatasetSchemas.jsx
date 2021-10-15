@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import pick from 'lodash/pick';
 
@@ -344,11 +343,10 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
   };
 
   const renderDatasetSchemas = () => {
-    return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
+    return !isNil(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       <div className="dataflowHelp-datasetSchema-help-step">
         {datasetsSchemas.map((designDataset, i) => (
           <DatasetSchema
-            dataflowName={dataflowName}
             designDataset={designDataset}
             extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
             index={i}

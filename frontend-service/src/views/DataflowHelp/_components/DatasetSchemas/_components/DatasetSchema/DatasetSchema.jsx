@@ -28,7 +28,6 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 const DatasetSchema = ({
-  dataflowName,
   designDataset,
   extensionsOperationsList = [],
   onGetReferencedFieldName,
@@ -120,7 +119,7 @@ const DatasetSchema = ({
       }
     },
     externalIntegrations: {
-      columns: ['operation', 'extension', 'id'],
+      columns: ['operation', 'fileExtension', 'id'],
       filtered: true,
       groupable: true,
       narrow: true,
