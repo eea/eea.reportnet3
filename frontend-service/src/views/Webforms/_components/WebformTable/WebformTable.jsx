@@ -35,7 +35,7 @@ export const WebformTable = ({
   onUpdatePamsValue,
   onUpdateSinglesList,
   pamsRecords,
-  selectedTable = { fieldSchemaId: null, pamsId: null, recordId: null, tableName: null },
+  selectedTable = { fieldSchemaId: null, pamsId: undefined, recordId: null, tableName: null },
   setIsLoading = () => {},
   webform,
   webformType
