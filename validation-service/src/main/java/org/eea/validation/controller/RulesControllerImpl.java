@@ -96,10 +96,12 @@ public class RulesControllerImpl implements RulesController {
         datasetSchemaId);
   }
 
+
   /**
    * Find rule schema by dataset id.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
    * @return the rules schema VO
    */
   @Override
@@ -109,6 +111,26 @@ public class RulesControllerImpl implements RulesController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
   @ApiOperation(value = "Retrieves a rules schema based on a given dataset id", hidden = true)
   public RulesSchemaVO findRuleSchemaByDatasetId(@ApiParam(
+      value = "Dataset schema id used in the search",
+      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId,
+      @ApiParam(value = "Dataflow Id",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataflowId") Long dataflowId) {
+    return rulesService.getRulesSchemaByDatasetId(datasetSchemaId);
+  }
+
+  /**
+   * Find rule schema by dataset id private.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
+   * @return the rules schema VO
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/{datasetSchemaId}/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Retrieves a rules schema based on a given dataset id", hidden = true)
+  public RulesSchemaVO findRuleSchemaByDatasetIdPrivate(@ApiParam(
       value = "Dataset schema id used in the search",
       example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId,
       @ApiParam(value = "Dataflow Id",

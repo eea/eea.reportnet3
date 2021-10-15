@@ -45,15 +45,30 @@ public interface RulesController {
   void createEmptyRulesSchema(@RequestParam("idDataSetSchema") String datasetSchemaId,
       @RequestParam("idRulesSchema") String rulesSchemaId);
 
+
   /**
    * Find rule schema by dataset id.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
    * @return the rules schema VO
    */
   @GetMapping(value = "/{datasetSchemaId}/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   RulesSchemaVO findRuleSchemaByDatasetId(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Find rule schema by dataset id private.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
+   * @return the rules schema VO
+   */
+  @GetMapping(value = "/private/{datasetSchemaId}/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  RulesSchemaVO findRuleSchemaByDatasetIdPrivate(
+      @PathVariable("datasetSchemaId") String datasetSchemaId,
       @PathVariable("dataflowId") Long dataflowId);
 
   /**

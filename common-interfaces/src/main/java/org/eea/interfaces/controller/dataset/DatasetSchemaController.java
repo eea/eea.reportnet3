@@ -62,13 +62,14 @@ public interface DatasetSchemaController {
   DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId);
 
   /**
-   * Find public data schema by dataset id.
+   * Find data schema by dataset id private.
    *
    * @param datasetId the dataset id
    * @return the data set schema VO
    */
-  @GetMapping(value = "/publicDatasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  DataSetSchemaVO findPublicDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId);
+  @GetMapping(value = "/private/publicDatasetId/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetSchemaVO findDataSchemaByDatasetIdPrivate(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Gets the dataset schema id.

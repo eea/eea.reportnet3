@@ -75,15 +75,16 @@ public interface IntegrationController {
   @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
   List<IntegrationVO> findExtensionsAndOperations(IntegrationVO integrationVO);
 
+
   /**
-   * Find public extensions and operations.
+   * Find extensions and operations private.
    *
    * @param integrationVO the integration VO
    * @return the list
    */
-  @PutMapping(value = "/listPublicExtensionsOperations",
+  @PutMapping(value = "/private/listPublicExtensionsOperations",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  List<IntegrationVO> findPublicExtensionsAndOperations(IntegrationVO integrationVO);
+  List<IntegrationVO> findExtensionsAndOperationsPrivate(IntegrationVO integrationVO);
 
   /**
    * Execute integration process.
