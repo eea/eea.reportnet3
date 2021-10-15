@@ -26,15 +26,6 @@ public interface RecordStoreController {
 
   }
 
-  /**
-   * Reste data set data base. DO NOT USE IN PRODUCTION. TO BE REMOVED. ONLY FOR TEST PURPOSES
-   *
-   * @deprecated (reset db)
-   */
-  @Deprecated
-  @PostMapping(value = "/reset")
-  void resteDataSetDataBase();
-
 
   /**
    * Creates the empty dataset.

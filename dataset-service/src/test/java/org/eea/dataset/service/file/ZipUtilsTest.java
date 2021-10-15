@@ -146,5 +146,13 @@ public class ZipUtilsTest {
         multipartFile.getOriginalFilename()));
   }
 
+  @Test
+  public void zipArrayListFieldSchemasTest() {
+    List<String> tableNames = new ArrayList<>();
+    tableNames.add("t1");
+    List<byte[]> listBytes = new ArrayList<>();
+    listBytes.add("test".getBytes());
+    zipUtils.zipArrayListFieldSchemas(listBytes, 1L, tableNames);
+  }
 
 }

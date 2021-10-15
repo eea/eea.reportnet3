@@ -59,7 +59,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @HystrixCommand
   @GetMapping(value = "/document/{documentId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find a Document based on its Id",
-      produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class)
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND),
       @ApiResponse(code = 404, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)})
   public DocumentVO getDocumentInfoById(
@@ -85,7 +85,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Override
   @HystrixCommand
   @PutMapping(value = "/update")
-  @ApiOperation(value = "Update a Document")
+  @ApiOperation(value = "Update a Document", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)
   public void updateDocument(
       @ApiParam(type = "Object", value = "Document") @RequestBody DocumentVO document) {
@@ -108,10 +108,10 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Override
   @HystrixCommand
   @PostMapping
-  @ApiOperation(value = "Insert a Document")
+  @ApiOperation(value = "Insert a Document", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)
   public Long insertDocument(
-      @ApiParam(type = "Object", value = "Document") @RequestBody DocumentVO document) {
+      @ApiParam(type = "Object", value = "Document object") @RequestBody DocumentVO document) {
     LOG.info("inserting document in controller");
     try {
       return dataflowService.insertDocument(document);
@@ -129,7 +129,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{documentId}")
-  @ApiOperation(value = "Delete a Document based on its Id")
+  @ApiOperation(value = "Delete a Document based on its Id", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)
   public void deleteDocument(
       @ApiParam(value = "Document id", example = "0") @PathVariable("documentId") Long documentId) {
@@ -150,7 +150,10 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   @Override
   @HystrixCommand
   @GetMapping(value = "/private/{dataflowId}")
-  public List<DocumentVO> getAllDocumentsByDataflowId(@PathVariable("dataflowId") Long dataflowId) {
+  @ApiOperation(value = "Get all documents for a specific dataflow Id", hidden = true)
+  @ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)
+  public List<DocumentVO> getAllDocumentsByDataflowId(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     List<DocumentVO> documents = new ArrayList<>();
     try {
       documents = dataflowService.getAllDocumentsByDataflowId(dataflowId);

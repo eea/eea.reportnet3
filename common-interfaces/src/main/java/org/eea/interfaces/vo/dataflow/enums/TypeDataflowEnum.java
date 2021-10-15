@@ -11,7 +11,6 @@ public enum TypeDataflowEnum {
   /** The reporting. */
   REPORTING("REPORTING"),
 
-
   /** The reference. */
   REFERENCE("REFERENCE"),
 

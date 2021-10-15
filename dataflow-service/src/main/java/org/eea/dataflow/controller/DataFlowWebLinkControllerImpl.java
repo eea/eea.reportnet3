@@ -62,8 +62,8 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "{idLink}")
-  @ApiOperation(value = "Find a Weblink", response = WeblinkVO.class)
+  @GetMapping(value = "/private/{idLink}")
+  @ApiOperation(value = "Find a Weblink", response = WeblinkVO.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
@@ -213,7 +213,8 @@ public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController 
       produces = MediaType.APPLICATION_JSON_VALUE, response = WeblinkVO.class,
       responseContainer = "List")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
-  public List<WeblinkVO> getAllWeblinksByDataflow(@PathVariable("dataflowId") Long dataflowId) {
+  public List<WeblinkVO> getAllWeblinksByDataflow(
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     List<WeblinkVO> weblinks = new ArrayList<>();
     try {
       weblinks = dataflowWebLinkService.getAllWeblinksByDataflowId(dataflowId);

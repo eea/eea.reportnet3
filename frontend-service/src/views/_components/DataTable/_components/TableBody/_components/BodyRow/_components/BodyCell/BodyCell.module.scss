@@ -1,0 +1,21 @@
+.actionTemplate {
+  display: flex;
+  justify-content: center;
+
+  .editRowButton {
+    border: 1px solid var(--c-custom-gray) !important;
+    margin-left: 3px !important;
+  }
+  .editSaveRowButton {
+    border: 1px solid var(--c-custom-gray) !important;
+    margin-left: 3px;
+  }
+  .editCancelRowButton {
+    border: 1px solid var(--c-custom-gray) !important;
+    margin-left: 3px;
+  }
+  .tooltip {
+    border-radius: 3px;
+    padding: 1rem;
+  }
+}

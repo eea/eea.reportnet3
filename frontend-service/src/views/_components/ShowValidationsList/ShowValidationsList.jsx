@@ -29,6 +29,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ShowValidationsList = memo(
   ({
+    dataflowId,
     datasetId,
     datasetSchemaId,
     isWebformView,
@@ -428,7 +429,7 @@ export const ShowValidationsList = memo(
     };
 
     const onLoadRulesDescription = async () => {
-      const validationsServiceList = await ValidationService.getAll(datasetSchemaId, reporting);
+      const validationsServiceList = await ValidationService.getAll(dataflowId, datasetSchemaId, reporting);
       validationContext.onSetRulesDescription(
         validationsServiceList?.validations?.map(validation => {
           return {

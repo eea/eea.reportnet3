@@ -76,6 +76,16 @@ public interface IntegrationController {
   List<IntegrationVO> findExtensionsAndOperations(IntegrationVO integrationVO);
 
   /**
+   * Find public extensions and operations.
+   *
+   * @param integrationVO the integration VO
+   * @return the list
+   */
+  @PutMapping(value = "/listPublicExtensionsOperations",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<IntegrationVO> findPublicExtensionsAndOperations(IntegrationVO integrationVO);
+
+  /**
    * Execute integration process.
    *
    * @param integrationToolTypeEnum the integration tool type enum
