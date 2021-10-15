@@ -347,7 +347,7 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
       <div className={`dataflowHelp-datasetSchema-help-step ${styles.index}`}>
         <h3>{resourcesContext.messages['datasetSchemas']}</h3>
         {datasetsSchemas.map(designDataset => (
-          <div id="datasetSchemaIndex" key={designDataset.datasetSchemaName}>
+          <div key={designDataset.datasetSchemaName}>
             <a href={`#${designDataset.datasetSchemaId}`}>{`• ${designDataset.datasetSchemaName}`}</a>
           </div>
         ))}
@@ -379,7 +379,7 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
   const renderToolbar = () => {
     return (
       isCustodian && (
-        <Toolbar className={styles.datasetSchemasToolbar}>
+        <Toolbar className={styles.datasetSchemasToolbar} id="datasetSchemaIndex">
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${
