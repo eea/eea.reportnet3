@@ -1,12 +1,13 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
-import dayjs from 'dayjs';
 import cloneDeep from 'lodash/cloneDeep';
+import dayjs from 'dayjs';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import proj4 from 'proj4';
+import utc from 'dayjs/plugin/utc';
 
 import styles from './DataFormFieldEditor.module.scss';
 
@@ -18,6 +19,7 @@ import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { Map } from 'views/_components/Map';
 import { MultiSelect } from 'views/_components/MultiSelect';
+import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -27,7 +29,6 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { mapReducer } from './_functions/Reducers/mapReducer';
 
 import { MapUtils, RecordUtils } from 'views/_functions/Utils';
-
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const DataFormFieldEditor = ({
@@ -64,13 +65,15 @@ const DataFormFieldEditor = ({
   const multiDropdownRef = useRef(null);
   const pointRef = useRef(null);
   const refCalendar = useRef(null);
-  const refDatetimeCalendar = useRef(null);
   const textAreaRef = useRef(null);
+
+  dayjs.extend(utc);
 
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
   const [columnWithLinks, setColumnWithLinks] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isTimezoneCalendarVisible, setIsTimezoneCalendarVisible] = useState(false);
   const [map, dispatchMap] = useReducer(mapReducer, {
     currentCRS:
       fieldValue !== '' && type === 'POINT'
@@ -125,8 +128,6 @@ const DataFormFieldEditor = ({
         textAreaRef.current.element.focus();
       } else if (refCalendar.current) {
         refCalendar.current.inputElement.focus();
-      } else if (refDatetimeCalendar.current) {
-        refDatetimeCalendar.current.inputElement.focus();
       } else if (dropdownRef.current) {
         dropdownRef.current.focusInput.focus();
       } else if (multiDropdownRef.current) {
@@ -143,7 +144,6 @@ const DataFormFieldEditor = ({
     pointRef.current,
     dropdownRef.current,
     refCalendar.current,
-    refDatetimeCalendar.current,
     textAreaRef.current,
     inputRef.current,
     isVisible,
@@ -435,41 +435,30 @@ const DataFormFieldEditor = ({
     );
   };
 
-  const calculateCalendarPanelPosition = element => {
-    const {
-      current: { panel }
-    } = refDatetimeCalendar;
-
-    panel.style.display = 'block';
-
-    const inputRect = element.getBoundingClientRect();
-    const panelRect = panel.getBoundingClientRect();
-    const top = `${inputRect.top - panelRect.height / 2}px`;
-
-    panel.style.top = top;
-    panel.style.position = 'fixed';
-  };
-
   const renderDatetimeCalendar = (field, fieldValue) => {
     return (
-      <Calendar
-        appendTo={document.body}
-        baseZIndex={9999}
-        dateFormat="yy-mm-dd"
-        disabled={(column.readOnly && reporting) || isSaving}
-        inputRef={refDatetimeCalendar}
-        monthNavigator={true}
-        onChange={e => onChangeForm(field, dayjs(e.target.value).format('YYYY-MM-DD HH:mm:ss'), isConditional)}
-        onFocus={e => {
-          calculateCalendarPanelPosition(e.currentTarget);
-        }}
-        readOnlyInput={true}
-        showSeconds={true}
-        showTime={true}
-        value={fieldValue !== '' ? new Date(fieldValue) : Date.now()}
-        yearNavigator={true}
-        yearRange="1900:2100"
-      />
+      <div>
+        {isTimezoneCalendarVisible ? (
+          <TimezoneCalendar
+            isDisabled={(column.readOnly && reporting) || isSaving}
+            isInModal
+            onClickOutside={() => setIsTimezoneCalendarVisible(false)}
+            onSaveDate={dateTime => onChangeForm(field, dateTime.format('YYYY-MM-DDTHH:mm:ss[Z]'), isConditional)}
+            value={
+              fieldValue !== ''
+                ? dayjs(fieldValue).utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
+                : new Date().toISOString().split('T')[0]
+            }
+          />
+        ) : (
+          <InputText
+            onFocus={e => {
+              setIsTimezoneCalendarVisible(true);
+            }}
+            value={fieldValue}
+          />
+        )}
+      </div>
     );
   };
 

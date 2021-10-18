@@ -76,9 +76,9 @@
       .containerLink {
         color: var(--white);
         background-image: url('/views/_assets/images/logos/logo-blanco.png');
-        .deliveryDate {
+        .dataflowDates {
           color: var(--white);
-          text-align: right;
+          margin-left: auto;
         }
       }
     }
@@ -152,12 +152,12 @@
     opacity: 0.6;
   }
 
-  .deliveryDate {
+  .dataflowDates {
     grid-column: 3/3;
     grid-row: 1/2;
     color: var(--gray-110);
     font-size: 1rem;
-    text-align: right;
+    margin-left: auto;
     margin-right: 3rem;
     span {
       font-weight: normal;
@@ -306,7 +306,7 @@
     .icon {
       display: none;
     }
-    .deliveryDate {
+    .dataflowDates {
       grid-column: 2/2;
       font-size: 0.9rem;
     }
@@ -350,7 +350,7 @@
     .role {
       grid-row: 1/2;
     }
-    .deliveryDate {
+    .dataflowDates {
       grid-column: 1/1;
       grid-row: 2/3;
       text-align: left;

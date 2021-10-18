@@ -726,7 +726,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     try {
       setIsLoading(true);
       const getDatasetSchemaId = async () => {
-        const dataset = await DatasetService.getSchema(datasetId);
+        const dataset = await DatasetService.getSchema(dataflowId, datasetId);
         const tableSchemaList = [];
         dataset.tables.forEach(table => tableSchemaList.push({ name: table.tableSchemaName, id: table.tableSchemaId }));
 
@@ -1230,6 +1230,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           style={{ width: '90%' }}
           visible={designerState.validationListDialogVisible}>
           <QCList
+            dataflowId={dataflowId}
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
@@ -1692,6 +1693,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             style={{ width: '90%' }}
             visible={designerState.isValidationViewerVisible}>
             <ShowValidationsList
+              dataflowId={dataflowId}
               datasetId={datasetId}
               datasetName={designerState.datasetSchemaName}
               datasetSchemaId={designerState.datasetSchemaId}

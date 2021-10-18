@@ -133,7 +133,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const getDataSchema = async () => {
     try {
-      const datasetSchema = await DatasetService.getSchema(datasetId);
+      const datasetSchema = await DatasetService.getSchema(dataflowId, datasetId);
       euDatasetDispatch({
         type: 'GET_DATA_SCHEMA',
         payload: {
@@ -288,7 +288,7 @@ export const EUDataset = withRouter(({ history, match }) => {
   const renderTabsSchema = () => (
     <TabsSchema
       dataflowType={dataflowType}
-      datasetSchemaId={euDatasetState.metaData.dataset.datasetSchemaId}
+      datasetSchemaId={euDatasetState.metaData.dataset?.datasetSchemaId}
       hasCountryCode={true}
       hasWritePermissions={false}
       isExportable={false}

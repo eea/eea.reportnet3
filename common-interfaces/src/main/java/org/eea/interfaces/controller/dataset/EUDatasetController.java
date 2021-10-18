@@ -30,7 +30,7 @@ public interface EUDatasetController {
    * @param idDataflow the id dataflow
    * @return the list
    */
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<EUDatasetVO> findEUDatasetByDataflowId(@PathVariable("id") Long idDataflow);
 
   /**
@@ -40,4 +40,5 @@ public interface EUDatasetController {
    */
   @PostMapping("/populateData/dataflow/{dataflowId}")
   void populateDataFromDataCollection(@PathVariable("dataflowId") Long idDataflow);
+
 }

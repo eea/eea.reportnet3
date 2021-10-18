@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
@@ -292,5 +293,37 @@ public class DataSetMetabaseControllerImplTest {
         .getDataSetPublicByDataflowAndProviderId(Mockito.any(), Mockito.any());
   }
 
+  @Test
+  public void getDatasetsSummaryListTest() {
+    dataSetMetabaseControllerImpl.getDatasetsSummaryList(1L);
+    Mockito.verify(datasetMetabaseService, times(1)).getDatasetsSummaryList(1L);
+  }
+
+  @Test
+  public void findReportingDataSetByDataflowIdsTest() {
+    List<Long> dataflowIds = new ArrayList<>();
+    dataflowIds.add(1L);
+    dataSetMetabaseControllerImpl.findReportingDataSetByDataflowIds(dataflowIds);
+    Mockito.verify(reportingDatasetService, times(1)).getReportingsByDataflowIds(dataflowIds);
+  }
+
+  @Test
+  public void getUserProviderIdsByDataflowIdTest() {
+    dataSetMetabaseControllerImpl.getUserProviderIdsByDataflowId(1L);
+    Mockito.verify(datasetMetabaseService, times(1)).getUserProviderIdsByDataflowId(1L);
+  }
+
+  @Test
+  public void getDatasetIdsByDataflowIdAndDataProviderIdTest() {
+    dataSetMetabaseControllerImpl.getDatasetIdsByDataflowIdAndDataProviderId(1L, 1L);
+    Mockito.verify(datasetMetabaseService, times(1)).getDatasetIdsByDataflowIdAndDataProviderId(1L,
+        1L);
+  }
+
+  @Test
+  public void getTypeTest() {
+    dataSetMetabaseControllerImpl.getType(1L);
+    Mockito.verify(datasetMetabaseService, times(1)).getDatasetType(1L);
+  }
 
 }
