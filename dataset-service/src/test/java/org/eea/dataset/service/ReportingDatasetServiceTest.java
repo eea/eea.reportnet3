@@ -215,4 +215,18 @@ public class ReportingDatasetServiceTest {
     assertNotNull("is null",
         reportingDatasetService.getDataSetPublicByDataflowAndProviderId(0L, 0L));
   }
+
+  @Test
+  public void getReportingsByDataflowIdsTest() {
+    List<Long> dataflowIds = new ArrayList<>();
+    dataflowIds.add(1L);
+    List<ReportingDatasetVO> reportingDatasetsVO = new ArrayList<>();
+    ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
+    reportingDatasetVO.setId(1L);
+    reportingDatasetsVO.add(reportingDatasetVO);
+    when(reportingDatasetMapper.entityListToClass(Mockito.any())).thenReturn(reportingDatasetsVO);
+    assertEquals(reportingDatasetsVO,
+        reportingDatasetService.getReportingsByDataflowIds(dataflowIds));
+  }
+
 }

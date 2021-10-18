@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import pick from 'lodash/pick';
 
@@ -20,19 +19,19 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 
+import { DataflowService } from 'services/DataflowService';
 import { IntegrationService } from 'services/IntegrationService';
 import { UniqueConstraintService } from 'services/UniqueConstraintService';
 import { ValidationService } from 'services/ValidationService';
 
-const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
+const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
-
-  const [expandAll, setExpandAll] = useState(true);
   const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
+  const [isDownloading, setIsDownloading] = useState(false);
   const [extensionsOperationsList, setExtensionsOperationsList] = useState();
   const [uniqueList, setUniqueList] = useState();
-  const [validationList, setValidationList] = useState();
+  const [qcList, setQCList] = useState();
 
   useEffect(() => {
     if (!isEmpty(datasetsSchemas)) {
@@ -43,10 +42,33 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   }, [datasetsSchemas]);
 
   useEffect(() => {
-    if (!isUndefined(extensionsOperationsList) && !isUndefined(uniqueList) && !isUndefined(validationList)) {
+    if (!isUndefined(extensionsOperationsList) && !isUndefined(uniqueList) && !isUndefined(qcList)) {
       setIsLoading(false);
     }
-  }, [extensionsOperationsList, uniqueList, validationList]);
+  }, [extensionsOperationsList, uniqueList, qcList]);
+
+  useEffect(() => {
+    if (
+      notificationContext.hidden.some(
+        notification =>
+          notification.key === 'EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT' ||
+          notification.key === 'EXPORT_SCHEMA_INFORMATION_FAILED_EVENT'
+      )
+    ) {
+      setIsDownloading(false);
+    }
+  }, [notificationContext.hidden]);
+
+  const onDownloadAllSchemasInfo = async dataflowId => {
+    try {
+      setIsDownloading(true);
+      await DataflowService.generateAllSchemasInfoFile(dataflowId);
+    } catch (error) {
+      console.error('DatasetSchema - onDownloadAllSchemasInfo .', error);
+      notificationContext.add({ type: 'GENERATE_SCHEMAS_INFO_FILE_ERROR' });
+      setIsDownloading(false);
+    }
+  };
 
   const onGetReferencedFieldName = (referenceField, isExternalLink) => {
     const fieldObj = {};
@@ -239,76 +261,77 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
     }
   };
 
+  const getQCList = allQCs => {
+    if (!isEmpty(allQCs)) {
+      return allQCs
+        .map(allQCs =>
+          allQCs.validations.map(qc => {
+            const datasetSchema = datasetsSchemas.filter(
+              datasetSchema => datasetSchema.datasetSchemaId === allQCs.datasetSchemaId
+            );
+
+            const additionalInfo = getAdditionalValidationInfo(
+              qc.referenceId,
+              qc.entityType,
+              qc.relations,
+              datasetsSchemas,
+              allQCs.datasetSchemaId
+            );
+            qc.tableName = additionalInfo.tableName || '';
+            qc.fieldName = additionalInfo.fieldName || '';
+            qc.expression = getExpressionString(qc, datasetSchema[0].tables);
+            qc.datasetSchemaId = allQCs.datasetSchemaId;
+            if (!isCustodian) {
+              return pick(
+                qc,
+                'tableName',
+                'fieldName',
+                'shortCode',
+                'name',
+                'description',
+                'expression',
+                'entityType',
+                'levelError',
+                'message',
+                'datasetSchemaId'
+              );
+            } else {
+              return pick(
+                qc,
+                'tableName',
+                'fieldName',
+                'shortCode',
+                'name',
+                'description',
+                'expression',
+                'entityType',
+                'levelError',
+                'message',
+                'automatic',
+                'enabled',
+                'datasetSchemaId'
+              );
+            }
+          })
+        )
+        .flat();
+    } else {
+      return [];
+    }
+  };
+
   const getValidationList = async datasetsSchemas => {
     try {
       setIsLoading(true);
       const datasetValidations = datasetsSchemas.map(async datasetSchema => {
-        return await ValidationService.getAll(datasetSchema.datasetSchemaId, !isCustodian);
+        return await ValidationService.getAll(dataflowId, datasetSchema.datasetSchemaId, !isCustodian);
       });
-      Promise.all(datasetValidations).then(allValidations => {
-        allValidations = allValidations.filter(allValidation => !isUndefined(allValidation));
+      Promise.all(datasetValidations).then(allQCs => {
+        allQCs = allQCs.filter(qc => !isUndefined(qc));
         if (!isCustodian) {
-          allValidations.forEach(
-            allValidation =>
-              (allValidation = allValidation.validations.filter(validation => validation.enabled !== false))
-          );
+          allQCs.forEach(qc => (qc = qc.validations.filter(validation => validation.enabled !== false)));
         }
-        setValidationList(
-          !isUndefined(allValidations[0])
-            ? allValidations
-                .map(allValidation =>
-                  allValidation.validations.map(validation => {
-                    const datasetSchema = datasetsSchemas.filter(
-                      datasetSchema => datasetSchema.datasetSchemaId === allValidation.datasetSchemaId
-                    );
-
-                    const additionalInfo = getAdditionalValidationInfo(
-                      validation.referenceId,
-                      validation.entityType,
-                      validation.relations,
-                      datasetsSchemas,
-                      allValidation.datasetSchemaId
-                    );
-                    validation.tableName = additionalInfo.tableName || '';
-                    validation.fieldName = additionalInfo.fieldName || '';
-                    validation.expression = getExpressionString(validation, datasetSchema[0].tables);
-                    validation.datasetSchemaId = allValidation.datasetSchemaId;
-                    if (!isCustodian) {
-                      return pick(
-                        validation,
-                        'tableName',
-                        'fieldName',
-                        'shortCode',
-                        'name',
-                        'description',
-                        'expression',
-                        'entityType',
-                        'levelError',
-                        'message',
-                        'datasetSchemaId'
-                      );
-                    } else {
-                      return pick(
-                        validation,
-                        'tableName',
-                        'fieldName',
-                        'shortCode',
-                        'name',
-                        'description',
-                        'expression',
-                        'entityType',
-                        'levelError',
-                        'message',
-                        'automatic',
-                        'enabled',
-                        'datasetSchemaId'
-                      );
-                    }
-                  })
-                )
-                .flat()
-            : []
-        );
+        setQCList(getQCList(allQCs));
       });
     } catch (error) {
       console.error('DatasetSchemas - getValidationList.', error);
@@ -319,20 +342,32 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
     }
   };
 
+  const renderAnchors = () => {
+    return !isNil(datasetsSchemas) && datasetsSchemas.length > 0 ? (
+      <div className={`dataflowHelp-datasetSchema-help-step ${styles.index}`}>
+        <h3>{resourcesContext.messages['datasetSchemas']}</h3>
+        {datasetsSchemas.map(designDataset => (
+          <div key={designDataset.datasetSchemaName}>
+            <a href={`#${designDataset.datasetSchemaId}`}>{`• ${designDataset.datasetSchemaName}`}</a>
+          </div>
+        ))}
+      </div>
+    ) : null;
+  };
+
   const renderDatasetSchemas = () => {
-    return !isUndefined(datasetsSchemas) && !isNull(datasetsSchemas) && datasetsSchemas.length > 0 ? (
+    return !isNil(datasetsSchemas) && datasetsSchemas.length > 0 ? (
       <div className="dataflowHelp-datasetSchema-help-step">
         {datasetsSchemas.map((designDataset, i) => (
           <DatasetSchema
             designDataset={designDataset}
-            expandAll={expandAll}
             extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
             index={i}
             isCustodian={isCustodian}
             key={designDataset.datasetSchemaId}
             onGetReferencedFieldName={onGetReferencedFieldName}
+            qcList={filterData(designDataset, qcList)}
             uniqueList={filterData(designDataset, uniqueList)}
-            validationList={filterData(designDataset, validationList)}
           />
         ))}
       </div>
@@ -344,13 +379,18 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   const renderToolbar = () => {
     return (
       isCustodian && (
-        <Toolbar className={styles.datasetSchemasToolbar}>
+        <Toolbar className={styles.datasetSchemasToolbar} id="datasetSchemaIndex">
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
-              icon={expandAll ? 'angleRight' : 'angleDown'}
-              label={expandAll ? resourcesContext.messages['collapseAll'] : resourcesContext.messages['expandAll']}
-              onClick={() => setExpandAll(!expandAll)}
+              className={`p-button-rounded p-button-secondary-transparent ${
+                !isDownloading ? 'p-button-animated-blink' : ''
+              }`}
+              disabled={isDownloading}
+              icon={isDownloading ? 'spinnerAnimate' : 'export'}
+              label={resourcesContext.messages['downloadSchemasInfo']}
+              onClick={() => onDownloadAllSchemasInfo(dataflowId)}
+              tooltip={resourcesContext.messages['downloadSchemasInfoTooltip']}
+              tooltipOptions={{ position: 'top' }}
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
@@ -373,7 +413,14 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, isCustodian, onLoadDatase
   return (
     <Fragment>
       {renderToolbar()}
-      {isLoading ? <Spinner className={styles.positioning} /> : renderDatasetSchemas()}
+      {isLoading ? (
+        <Spinner className={styles.positioning} />
+      ) : (
+        <div>
+          {renderAnchors()}
+          {renderDatasetSchemas()}
+        </div>
+      )}
     </Fragment>
   );
 };

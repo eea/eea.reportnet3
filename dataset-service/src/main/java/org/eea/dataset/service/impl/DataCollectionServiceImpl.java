@@ -677,7 +677,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       if (!referenceDataflow) {
         for (DesignDatasetVO design : designs) {
           RulesSchemaVO rulesSchemaVO =
-              rulesControllerZuul.findRuleSchemaByDatasetId(design.getDatasetSchema());
+              rulesControllerZuul.findRuleSchemaByDatasetId(design.getDatasetSchema(), dataflowId);
           List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
           if (isCreation) {
 

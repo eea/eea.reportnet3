@@ -32,7 +32,7 @@ public interface DataFlowWebLinkController {
    * @param idLink the id link
    * @return the link
    */
-  @GetMapping(value = "{idLink}")
+  @GetMapping(value = "/private/{idLink}")
   WeblinkVO getLink(@PathVariable("idLink") Long idLink);
 
   /**

@@ -96,37 +96,46 @@ public class RulesControllerImpl implements RulesController {
         datasetSchemaId);
   }
 
+
   /**
    * Find rule schema by dataset id.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
    * @return the rules schema VO
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/{datasetSchemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/{datasetSchemaId}/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
   @ApiOperation(value = "Retrieves a rules schema based on a given dataset id", hidden = true)
   public RulesSchemaVO findRuleSchemaByDatasetId(@ApiParam(
       value = "Dataset schema id used in the search",
-      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId) {
+      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId,
+      @ApiParam(value = "Dataflow Id",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataflowId") Long dataflowId) {
     return rulesService.getRulesSchemaByDatasetId(datasetSchemaId);
   }
 
   /**
-   * Find active rule schema by dataset id.
+   * Find rule schema by dataset id private.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
    * @return the rules schema VO
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/{datasetSchemaId}/actives", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Retrieves an active rules schema based on a given dataset id",
-      hidden = true)
-  public RulesSchemaVO findActiveRuleSchemaByDatasetId(@ApiParam(
+  @GetMapping(value = "/private/{datasetSchemaId}/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Retrieves a rules schema based on a given dataset id", hidden = true)
+  public RulesSchemaVO findRuleSchemaByDatasetIdPrivate(@ApiParam(
       value = "Dataset schema id used in the search",
-      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId) {
-    return rulesService.getActiveRulesSchemaByDatasetId(datasetSchemaId);
+      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId,
+      @ApiParam(value = "Dataflow Id",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataflowId") Long dataflowId) {
+    return rulesService.getRulesSchemaByDatasetId(datasetSchemaId);
   }
 
   /**
@@ -346,32 +355,6 @@ public class RulesControllerImpl implements RulesController {
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating automatic rule: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-    }
-  }
-
-  /**
-   * Insert rule in position.
-   *
-   * @param ruleId the rule id
-   * @param position the position
-   * @param datasetSchemaId the dataset schema id
-   */
-  @Override
-  @HystrixCommand
-  @PutMapping("/updatePositionRule")
-  @ApiOperation(value = "Inserts a rule in a specific position with the given rule id.",
-      hidden = true)
-  @ApiResponse(code = 400, message = "Error inserting the rule in the specified position.")
-  public void insertRuleInPosition(
-      @ApiParam(value = "Rule id used in the insert process",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("ruleId") String ruleId,
-      @ApiParam(value = "Position used in the insert process",
-          example = "15") @RequestParam("position") int position,
-      @ApiParam(value = "Dataset schema id used in the insert process",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId) {
-    if (!rulesService.insertRuleInPosition(datasetSchemaId, ruleId, position)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.ERROR_ORDERING_RULE);
     }
   }
 

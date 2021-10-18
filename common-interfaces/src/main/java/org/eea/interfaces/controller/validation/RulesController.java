@@ -45,24 +45,31 @@ public interface RulesController {
   void createEmptyRulesSchema(@RequestParam("idDataSetSchema") String datasetSchemaId,
       @RequestParam("idRulesSchema") String rulesSchemaId);
 
+
   /**
    * Find rule schema by dataset id.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
    * @return the rules schema VO
    */
-  @GetMapping(value = "/{datasetSchemaId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  RulesSchemaVO findRuleSchemaByDatasetId(@PathVariable("datasetSchemaId") String datasetSchemaId);
+  @GetMapping(value = "/{datasetSchemaId}/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  RulesSchemaVO findRuleSchemaByDatasetId(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("dataflowId") Long dataflowId);
 
   /**
-   * Find active rule schema by dataset id.
+   * Find rule schema by dataset id private.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
    * @return the rules schema VO
    */
-  @GetMapping(value = "/{datasetSchemaId}/actives", produces = MediaType.APPLICATION_JSON_VALUE)
-  RulesSchemaVO findActiveRuleSchemaByDatasetId(
-      @PathVariable("datasetSchemaId") String datasetSchemaId);
+  @GetMapping(value = "/private/{datasetSchemaId}/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  RulesSchemaVO findRuleSchemaByDatasetIdPrivate(
+      @PathVariable("datasetSchemaId") String datasetSchemaId,
+      @PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Delete rules schema.
@@ -160,18 +167,6 @@ public interface RulesController {
    */
   @PutMapping("/updateRule")
   void updateRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO);
-
-  /**
-   * Insert rule in position.
-   *
-   * @param ruleId the rule id
-   * @param position the position
-   * @param datasetSchemaId the dataset schema id
-   */
-  @PutMapping("/updatePositionRule")
-  void insertRuleInPosition(@RequestParam("ruleId") String ruleId,
-      @RequestParam("position") int position,
-      @RequestParam("datasetSchemaId") String datasetSchemaId);
 
   /**
    * Update automatic rule.

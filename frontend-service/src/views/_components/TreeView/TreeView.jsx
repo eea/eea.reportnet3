@@ -1,7 +1,6 @@
 import { Fragment, useContext, useReducer, useRef } from 'react';
 
 import capitalize from 'lodash/capitalize';
-import isNull from 'lodash/isNull';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniqueId from 'lodash/uniqueId';
@@ -73,7 +72,7 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
 
   const groupFields = fields => {
     parseData(fields);
-    if (!isUndefined(fields) && !isNull(fields) && fields.length > 0) {
+    if (!isNil(fields) && fields.length > 0) {
       return (
         <DataTable
           ref={dataTableRef}
@@ -236,33 +235,57 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
 
   const getLabel = str => resourcesContext.messages[str] || str;
 
-  return (
-    !isUndefined(property) &&
-    !isNull(property) && (
-      <div
-        style={{
-          paddingTop: '12px',
-          paddingLeft: '3px',
-          marginLeft: '10px'
-        }}>
-        {typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean' ? (
-          <Fragment>
-            <span className={styles.propertyTitle}>
-              {!Number.isInteger(Number(propertyName)) ? `${getLabel(propertyName)}: ` : ''}
+  const renderTreeView = () => {
+    if (!isNil(property)) {
+      return (
+        <div
+          style={{
+            paddingTop: '12px',
+            paddingLeft: '3px',
+            marginLeft: '10px'
+          }}>
+          {renderTreeViewExpandableItem()}
+        </div>
+      );
+    }
+  };
+
+  const renderTreeViewExpandableItem = () => {
+    if (typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean') {
+      return (
+        <Fragment>
+          <span className={styles.propertyTitle}>
+            {!Number.isInteger(Number(propertyName)) ? `${getLabel(propertyName)}: ` : ''}
+          </span>
+          {property !== '' ? (
+            <span
+              className={`${styles.propertyValue} ${className} ${
+                propertyName === 'tableSchemaName' ? styles.propertyValueTableName : ''
+              }`}>
+              {property.toString()}
             </span>
-            {property !== '' ? (
-              <span
-                className={`${styles.propertyValue} ${className} ${
-                  propertyName === 'tableSchemaName' ? styles.propertyValueTableName : ''
-                }`}>
-                {property.toString()}
-              </span>
-            ) : (
-              '-'
-            )}
-          </Fragment>
-        ) : (
+          ) : (
+            '-'
+          )}
+        </Fragment>
+      );
+    } else {
+      if (isNil(property.button)) {
+        return (
           <TreeViewExpandableItem
+            buttons={
+              !isNil(property.button)
+                ? [
+                    {
+                      className: `p-button-secondary-transparent`,
+                      icon: property.button.icon,
+                      label: property.button.label,
+                      tooltip: property.button.tooltip,
+                      onClick: property.button.onClick
+                    }
+                  ]
+                : undefined
+            }
             expanded={expandAll}
             items={!Number.isInteger(Number(propertyName)) ? [{ label: getLabel(propertyName) }] : []}>
             {!isUndefined(columnOptions[propertyName]) &&
@@ -291,10 +314,14 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
                 ))
               : null}
           </TreeViewExpandableItem>
-        )}
-      </div>
-    )
-  );
+        );
+      } else {
+        return null;
+      }
+    }
+  };
+
+  return renderTreeView();
 };
 
 const codelistTemplate = rowData => (
@@ -318,9 +345,9 @@ const itemTemplate = (rowData, key) => {
 const typeTemplate = rowData => {
   return (
     <div style={{ display: 'flex', alignItems: 'baseline' }}>
-      <span style={{ margin: '.5em .25em 0 0.5em' }}>{RecordUtils.getFieldType(rowData.type).value}</span>
+      <span style={{ margin: '.5em .25em 0 0.5em' }}>{RecordUtils.getFieldTypeValue(rowData.type).value}</span>
       <FontAwesomeIcon
-        icon={AwesomeIcons(RecordUtils.getFieldType(rowData.type).fieldTypeIcon)}
+        icon={AwesomeIcons(RecordUtils.getFieldTypeValue(rowData.type).fieldTypeIcon)}
         role="presentation"
         style={{ marginLeft: 'auto', color: 'var(--treeview-table-icon-color)' }}
       />

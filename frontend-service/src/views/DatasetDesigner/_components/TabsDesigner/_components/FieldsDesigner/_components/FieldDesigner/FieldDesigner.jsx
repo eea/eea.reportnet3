@@ -90,10 +90,10 @@ export const FieldDesigner = ({
     fieldPkMustBeUsed: fieldMustBeUsed || false,
     fieldPKReferencedValue: fieldPKReferenced || false,
     fieldPKValue: fieldPK,
-    fieldPreviousTypeValue: RecordUtils.getFieldType(fieldType) || '',
+    fieldPreviousTypeValue: RecordUtils.getFieldTypeValue(fieldType) || '',
     fieldReadOnlyValue: fieldReadOnly,
     fieldRequiredValue: fieldRequired,
-    fieldTypeValue: RecordUtils.getFieldType(fieldType),
+    fieldTypeValue: RecordUtils.getFieldTypeValue(fieldType),
     fieldValue: fieldName,
     initialDescriptionValue: undefined,
     initialFieldValue: undefined,
@@ -1228,7 +1228,7 @@ export const FieldDesigner = ({
           event.stopPropagation();
         }}
         optionLabel="value"
-        options={config.fieldTypes}
+        options={config.fieldType}
         placeholder={resourcesContext.messages['newFieldTypePlaceHolder']}
         ref={fieldTypeRef}
         required={true}
@@ -1237,7 +1237,7 @@ export const FieldDesigner = ({
         value={
           fieldDesignerState.fieldTypeValue !== ''
             ? fieldDesignerState.fieldTypeValue
-            : RecordUtils.getFieldType(fieldType)
+            : RecordUtils.getFieldTypeValue(fieldType)
         }
       />
     </Fragment>

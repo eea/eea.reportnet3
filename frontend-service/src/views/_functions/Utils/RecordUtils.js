@@ -166,14 +166,16 @@ const getCodelistItemsWithEmptyOption = (column, noneText) => {
 
 const getCodelistValue = (codelistItemsOptions, value) => {
   if (!isUndefined(value)) {
-    return codelistItemsOptions.filter(item => item.value === value)[0];
+    return codelistItemsOptions.find(item => item.value === value);
   }
 };
 
-const getFieldType = fieldType => {
-  if (isNil(fieldType)) return {};
+const getFieldTypeValue = fieldType => {
+  if (isUndefined(fieldType)) {
+    return null;
+  }
 
-  return config.fieldTypes.find(field => TextUtils.areEquals(field.fieldType, fieldType));
+  return config.fieldType.find(field => TextUtils.areEquals(field.fieldType, fieldType));
 };
 
 const getFilter = type => {
@@ -302,7 +304,7 @@ export const RecordUtils = {
   getCodelistItemsInSingleColumn,
   getCodelistItemsWithEmptyOption,
   getCodelistValue,
-  getFieldType,
+  getFieldTypeValue,
   getFilter,
   getInitialRecordValues,
   getLinkValue,
