@@ -1086,7 +1086,7 @@ export const FieldDesigner = ({
                       fieldsSelected.push({
                         checked: true,
                         fieldId: fields[i].fieldId,
-                        fieldType: RecordUtils.getFieldType(fields[i].type),
+                        fieldType: RecordUtils.getFieldTypeValue(fields[i].type)?.value,
                         fieldName: fields[i].name,
                         fieldIndex: i
                       });

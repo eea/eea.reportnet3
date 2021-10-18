@@ -115,7 +115,7 @@ export const FieldsDesigner = ({
         inmMarkedForDeletion.forEach(markedField => {
           const field = fields.find(field => field.fieldId === markedField.fieldId);
           if (!isNil(field)) {
-            markedField.fieldType = RecordUtils.getFieldType(field.type);
+            markedField.fieldType = RecordUtils.getFieldTypeValue(field.type)?.value;
             markedField.fieldName = field.name;
           }
         });
