@@ -5,6 +5,8 @@ import isNull from 'lodash/isNull';
 import isString from 'lodash/isString';
 import isUndefined from 'lodash/isUndefined';
 
+import { config } from 'conf';
+
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const allAttachments = colsSchema => {
@@ -169,36 +171,11 @@ const getCodelistValue = (codelistItemsOptions, value) => {
 };
 
 const getFieldTypeValue = fieldType => {
-  const fieldTypes = [
-    { fieldType: 'Number_Integer', value: 'Number - Integer' },
-    { fieldType: 'Number_Decimal', value: 'Number - Decimal' },
-    { fieldType: 'Date', value: 'Date' },
-    { fieldType: 'Datetime', value: 'Datetime' },
-    { fieldType: 'Text', value: 'Text' },
-    // { fieldType: 'Rich_Text', value: 'Rich text' },
-    { fieldType: 'Textarea', value: 'Multiline text' },
-    { fieldType: 'Email', value: 'Email' },
-    { fieldType: 'URL', value: 'URL' },
-    { fieldType: 'Phone', value: 'Phone number' },
-    { fieldType: 'Point', value: 'Point' },
-    { fieldType: 'MultiPoint', value: 'Multiple points' },
-    { fieldType: 'Linestring', value: 'Line' },
-    { fieldType: 'MultiLineString', value: 'Multiple lines' },
-    { fieldType: 'Polygon', value: 'Polygon' },
-    { fieldType: 'MultiPolygon', value: 'Multiple polygons', fieldTypeIcon: 'multiPolygon' },
-    { fieldType: 'Codelist', value: 'Single select' },
-    { fieldType: 'Multiselect_Codelist', value: 'Multiple select' },
-    { fieldType: 'Link', value: 'Link' },
-    { fieldType: 'External_link', value: 'External link' },
-    { fieldType: 'Attachment', value: 'Attachment' }
-  ];
-
-  if (!isUndefined(fieldType)) {
-    const filteredTypes = fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, fieldType))[0];
-    return filteredTypes.value;
-  } else {
-    return '';
+  if (isUndefined(fieldType)) {
+     return null;
   }
+  
+  return config.fieldType.filter(field => TextUtils.areEquals(field.fieldType, fieldType))[0];
 };
 
 const getFilter = type => {
@@ -206,6 +183,7 @@ const getFilter = type => {
     case 'NUMBER_INTEGER':
       return 'int';
     case 'NUMBER_DECIMAL':
+      return 'num';
     case 'POINT':
       return 'coordinates';
     case 'DATE':

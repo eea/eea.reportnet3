@@ -1,3 +1,15 @@
+.datasetSchemaPropertiesWrapper {
+  margin-bottom: 1rem;
+  .header {
+    color: var(--subtitle-color);
+  }
+}
+
+.datasetSchemaToolbar {
+  border: 0px !important;
+  margin-bottom: 1rem;
+}
+
 .levelError {
   border-radius: 3px;
   color: white;
@@ -22,7 +34,34 @@
   color: var(--statusBox-info-color) !important;
 }
 
+.externalIntegrationsTab {
+  transform: rotate(-90deg);
+}
+
+.noTables {
+  margin: 1rem 0;
+  display: block;
+  font-weight: bold;
+  font-style: italic;
+}
+
+.tabs {
+  color: var(--tabview-color) !important;
+}
+
 .warning {
   background-color: var(--statusBox-warning-bg) !important;
   color: var(--statusBox-warning-color) !important;
+}
+
+.property {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  .propertyTitle {
+    font-weight: bold;
+  }
+  .propertyValue {
+    margin-left: 0.5rem;
+  }
 }

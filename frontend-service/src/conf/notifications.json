@@ -45,6 +45,12 @@
           "key": "IMPORT_DESIGN_FAILED_EVENT"
         },
         {
+          "key": "DOWNLOAD_ALL_TABS_INFO_FAILED"
+        },
+        {
+          "key": "DOWNLOAD_TABLE_DEFINITIONS_ERROR"
+        },
+        {
           "key": "EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
@@ -317,6 +323,9 @@
         },
         {
           "key": "GENERATE_QC_RULES_FILE_ERROR"
+        },
+        {
+          "key": "GENERATE_SCHEMAS_INFO_FILE_ERROR"
         },
         {
           "key": "CREATE_DATA_COLLECTION_ERROR"
@@ -704,6 +713,9 @@
           "key": "DOWNLOAD_VALIDATIONS_FILE_ERROR"
         },
         {
+          "key": "DOWNLOAD_SCHEMAS_INFO_FILE_ERROR"
+        },
+        {
           "key": "EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT"
         },
         {
@@ -759,6 +771,9 @@
         },
         {
           "key": "UNLOCK_DATASET_ERROR"
+        },
+        {
+          "key": "LOAD_DATASETS_SUMMARY_ERROR"
         }
       ]
     },
@@ -986,6 +1001,9 @@
           "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD"
         },
         {
+          "key": "AUTOMATICALLY_DOWNLOAD_SCHEMAS_INFO_FILE"
+        },
+        {
           "key": "AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE"
         },
         {
@@ -1093,6 +1111,8 @@
     "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
     "DISABLE_RULES_ERROR_EVENT",
     "RECEIVED_MESSAGE",
-    "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT"
+    "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT",
+    "EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT",
+    "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT"
   ]
 }

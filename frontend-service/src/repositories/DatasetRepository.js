@@ -21,7 +21,8 @@ export const DatasetRepository = {
       data: { nameTableSchema: tableSchemaName, notEmpty: true }
     }),
 
-  deleteData: async (datasetId, deletePrefilledTables) => await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteData, { datasetId, deletePrefilledTables }) }),
+  deleteData: async (datasetId, deletePrefilledTables) =>
+    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteData, { datasetId, deletePrefilledTables }) }),
 
   deleteAttachment: async (datasetId, fieldId) =>
     await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteAttachment, { datasetId, fieldId }) }),
@@ -76,6 +77,9 @@ export const DatasetRepository = {
     await HTTPRequester.download({
       url: getUrl(DatasetConfig.downloadPublicReferenceDatasetFileData, { dataflowId, fileName })
     }),
+
+  downloadTableDefinitions: async datasetSchemaId =>
+    await HTTPRequester.download({ url: getUrl(DatasetConfig.downloadTableDefinitions, { datasetSchemaId }) }),
 
   exportDatasetData: async (datasetId, fileType) =>
     await HTTPRequester.download({

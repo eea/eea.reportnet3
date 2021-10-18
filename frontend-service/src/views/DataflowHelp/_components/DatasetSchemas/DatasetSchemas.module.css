@@ -2,6 +2,10 @@
   border: 0px !important;
 }
 
+.index {
+  color: var(--subtitle-color);
+}
+
 .positioning {
   top: 0 !important;
 }

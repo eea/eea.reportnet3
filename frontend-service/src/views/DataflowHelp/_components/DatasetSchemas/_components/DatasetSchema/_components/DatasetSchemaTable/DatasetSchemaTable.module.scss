@@ -1,0 +1,13 @@
+.levelErrorTemplateWrapper {
+  display: flex;
+  justify-content: center;
+}
+.propertyValueTableName {
+  font-weight: bold;
+}
+.noRecords {
+  margin: 1rem 0;
+  display: block;
+  font-weight: bold;
+  font-style: italic;
+}
