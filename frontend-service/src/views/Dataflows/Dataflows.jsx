@@ -71,7 +71,8 @@ const Dataflows = withRouter(({ history, match }) => {
     isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
-    reference: []
+    reference: [],
+    tabClicked: false
   });
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
@@ -239,19 +240,31 @@ const Dataflows = withRouter(({ history, match }) => {
       if (TextUtils.areEquals(tabId, 'reporting')) {
         const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
-        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reporting' } });
+        dataflowsDispatch({
+          type: 'SET_DATAFLOWS',
+          payload: { data, type: 'reporting', contextCurrentDataflowType: userContext.currentDataflowType }
+        });
       } else if (TextUtils.areEquals(tabId, 'reference')) {
         const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
-        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reference' } });
+        dataflowsDispatch({
+          type: 'SET_DATAFLOWS',
+          payload: { data, type: 'reference', contextCurrentDataflowType: userContext.currentDataflowType }
+        });
       } else if (TextUtils.areEquals(tabId, 'business')) {
         const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
-        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } });
+        dataflowsDispatch({
+          type: 'SET_DATAFLOWS',
+          payload: { data, type: 'business', contextCurrentDataflowType: userContext.currentDataflowType }
+        });
       } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
         const data = await CitizenScienceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
-        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'citizenScience' } });
+        dataflowsDispatch({
+          type: 'SET_DATAFLOWS',
+          payload: { data, type: 'citizenScience', contextCurrentDataflowType: userContext.currentDataflowType }
+        });
       }
     } catch (error) {
       console.error('Dataflows - getDataflows.', error);
@@ -287,7 +300,15 @@ const Dataflows = withRouter(({ history, match }) => {
     setObligationToPrevious();
   };
 
-  const onChangeTab = index => dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
+  const onChangeTab = (index, value) => {
+    if (!isNil(value)) {
+      const [currentTabDataflowType] = Object.keys(config.dataflowType).filter(
+        type => config.dataflowType[type].key === value.id
+      );
+      userContext.setCurrentDataflowType(currentTabDataflowType);
+    }
+    dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
+  };
 
   const onLoadPermissions = () => {
     const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
@@ -360,7 +381,7 @@ const Dataflows = withRouter(({ history, match }) => {
           headerLabelChildrenCount={dataflowsCount}
           headerLabelLoading={loadingStatus}
           model={tabMenuItems}
-          onTabChange={event => onChangeTab(event.index)}
+          onTabChange={event => onChangeTab(event.index, event.value)}
         />
         <DataflowsList
           className="dataflowList-accepted-help-step"
