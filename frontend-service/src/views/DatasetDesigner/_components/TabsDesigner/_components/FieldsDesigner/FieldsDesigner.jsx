@@ -151,12 +151,10 @@ export const FieldsDesigner = ({
         }
       });
       setMarkedForDeletion(inmMarkedForDeletion);
+    } else if (checked) {
+      setMarkedForDeletion([...markedForDeletion, { fieldId, fieldType, fieldName, fieldIndex }]);
     } else {
-      if (checked) {
-        setMarkedForDeletion([...markedForDeletion, { fieldId, fieldType, fieldName, fieldIndex }]);
-      } else {
-        setMarkedForDeletion(markedForDeletion.filter(markedField => markedField.fieldId !== fieldId));
-      }
+      setMarkedForDeletion(markedForDeletion.filter(markedField => markedField.fieldId !== fieldId));
     }
   };
 
