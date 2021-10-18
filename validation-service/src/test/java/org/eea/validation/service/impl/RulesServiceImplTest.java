@@ -1175,58 +1175,6 @@ public class RulesServiceImplTest {
     }
   }
 
-  /**
-   * Insert rule in position test.
-   */
-  @Test
-  public void insertRuleInPositionTest() {
-    Rule rule = new Rule();
-    when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
-    when(rulesRepository.deleteRuleById(Mockito.any(), Mockito.any())).thenReturn(true);
-    when(rulesRepository.insertRuleInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
-        .thenReturn(true);
-    rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        0);
-    Mockito.verify(rulesRepository, times(1)).insertRuleInPosition(Mockito.any(), Mockito.any(),
-        Mockito.anyInt());
-  }
-
-  /**
-   * Insert rule in position no delete test.
-   */
-  @Test
-  public void insertRuleInPositionNoDeleteTest() {
-    when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
-    when(rulesRepository.deleteRuleById(Mockito.any(), Mockito.any())).thenReturn(false);
-    rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        0);
-    Mockito.verify(rulesRepository, times(1)).deleteRuleById(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Insert rule in position no insert test.
-   */
-  @Test
-  public void insertRuleInPositionNoInsertTest() {
-    when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
-    when(rulesRepository.deleteRuleById(Mockito.any(), Mockito.any())).thenReturn(true);
-    when(rulesRepository.insertRuleInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
-        .thenReturn(false);
-    rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        0);
-    Mockito.verify(rulesRepository, times(1)).insertRuleInPosition(Mockito.any(), Mockito.any(),
-        Mockito.anyInt());
-  }
-
-  /**
-   * Insert rule in position not found test.
-   */
-  @Test
-  public void insertRuleInPositionNotFoundTest() {
-    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(null);
-    Assert.assertEquals(false, rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac",
-        "5e44110d6a9e3a270ce13fac", 0));
-  }
 
   /**
    * Udate automatic rule all properties updated test.

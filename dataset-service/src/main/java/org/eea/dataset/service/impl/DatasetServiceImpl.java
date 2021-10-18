@@ -36,7 +36,6 @@ import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.RecordValidationMapper;
-import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValidation;
@@ -44,6 +43,7 @@ import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.domain.Validation;
 import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
@@ -52,6 +52,7 @@ import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository.IDError;
 import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
 import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.data.util.SortField;
@@ -95,12 +96,13 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -303,6 +305,10 @@ public class DatasetServiceImpl implements DatasetService {
   /** The record store controller. */
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
+
+  /** The validation repository. */
+  @Autowired
+  private ValidationRepository validationRepository;
 
   /** The import path. */
   @Value("${importPath}")
@@ -523,31 +529,6 @@ public class DatasetServiceImpl implements DatasetService {
     return result;
   }
 
-  /**
-   * Gets the by id.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the by id
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  @Deprecated
-  public DataSetVO getById(Long datasetId) throws EEAException {
-    DatasetValue datasetValue = new DatasetValue();
-    List<TableValue> allTableValues = tableRepository.findAllTables();
-    datasetValue.setTableValues(allTableValues);
-    datasetValue.setId(datasetId);
-    datasetValue.setIdDatasetSchema(datasetRepository.findIdDatasetSchemaById(datasetId));
-    for (TableValue tableValue : allTableValues) {
-      tableValue
-          .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
-    }
-    LOG.info("Get dataset by id: {}", datasetId);
-    return dataSetMapper.entityToClass(datasetValue);
-  }
 
   /**
    * Update dataset.
@@ -578,65 +559,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Cacheable(value = "dataFlowId", key = "#datasetId")
   public Long getDataFlowIdById(Long datasetId) {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
-  }
-
-  /**
-   * Gets the position from any object id.
-   *
-   * @param id the id
-   * @param idDataset the id dataset
-   * @param type the type
-   *
-   * @return the position from any object id
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public ValidationLinkVO getPositionFromAnyObjectId(final String id, final Long idDataset,
-      final EntityTypeEnum type) throws EEAException {
-
-    ValidationLinkVO validationLink = new ValidationLinkVO();
-    RecordValue record = new RecordValue();
-    List<RecordValue> records = new ArrayList<>();
-
-    // TABLE
-    if (EntityTypeEnum.TABLE == type) {
-      TableValue table = tableRepository.findByIdAndDatasetId_Id(Long.parseLong(id), idDataset);
-      records = recordRepository.findByTableValueNoOrder(table.getIdTableSchema(), null);
-      if (records != null && !records.isEmpty()) {
-        record = records.get(0);
-      }
-    }
-
-    // RECORD
-    if (EntityTypeEnum.RECORD == type) {
-      record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
-      records =
-          recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema(), null);
-    }
-
-    // FIELD
-    if (EntityTypeEnum.FIELD == type) {
-      FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
-      if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null) {
-        record = field.getRecord();
-        records = recordRepository
-            .findByTableValueNoOrder(record.getTableValue().getIdTableSchema(), null);
-      }
-    }
-
-    if (records != null && !records.isEmpty()) {
-      int recordPosition = records.indexOf(record);
-      validationLink.setIdTableSchema(record.getTableValue().getIdTableSchema());
-      validationLink.setPosition(Long.valueOf(recordPosition));
-      validationLink.setIdRecord(record.getId());
-    }
-
-    LOG.info(
-        "Validation error with idObject {} clicked in dataset {}. The position is {} from table schema {}",
-        id, idDataset, validationLink.getPosition(), validationLink.getIdTableSchema());
-    return validationLink;
   }
 
   /**
@@ -2123,26 +2045,6 @@ public class DatasetServiceImpl implements DatasetService {
     return result;
   }
 
-  /**
-   * Retrieve record value.
-   *
-   * @param idTableSchema the id table schema
-   * @param idFieldSchema the id field schema
-   *
-   * @return the list
-   */
-  @Deprecated
-  private List<RecordValue> retrieveRecordValue(String idTableSchema, String idFieldSchema) {
-    Optional.ofNullable(idFieldSchema).ifPresent(field -> SortFieldsHelper.setSortingField(field));
-    List<RecordValue> records = null;
-    try {
-      records = recordRepository.findByTableValueIdTableSchema(idTableSchema);
-    } finally {
-      SortFieldsHelper.cleanSortingField();
-    }
-
-    return records;
-  }
 
   /**
    * Sanitize records.
@@ -3648,4 +3550,77 @@ public class DatasetServiceImpl implements DatasetService {
 
   }
 
+  /**
+   * Gets the total failed validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the total failed validations by id dataset
+   */
+  @Override
+  public FailedValidationsDatasetVO getTotalFailedValidationsByIdDataset(Long datasetId,
+      String idTableSchema) {
+    DataSetMetabase dataset =
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+    FailedValidationsDatasetVO validation = new FailedValidationsDatasetVO();
+    validation.setErrors(new ArrayList<>());
+    validation.setIdDatasetSchema(dataset.getDatasetSchema());
+    validation.setIdDataset(datasetId);
+    Long countValidations = validationRepository.count();
+    validation.setErrors(getFieldAndRecordErrors(datasetId, idTableSchema));
+    validation.setTotalFilteredRecords(countValidations);
+    return validation;
+  }
+
+  /**
+   * Gets the field and record errors.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the field and record errors
+   */
+  private List<ErrorsValidationVO> getFieldAndRecordErrors(Long datasetId, String idTableSchema) {
+    List<ErrorsValidationVO> errors = new ArrayList<>();
+
+    for (FieldValidation fieldValidation : fieldValidationRepository
+        .findFieldValidationsByIdDatasetAndIdTableSchema(datasetId, idTableSchema)) {
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      error.setIdObject(fieldValidation.getFieldValue().getId());
+      error.setIdTableSchema(
+          fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema());
+      error.setNameFieldSchema(fieldValidation.getValidation().getFieldName());
+      refillErrorValidation(fieldValidation.getValidation(), error);
+      errors.add(error);
+    }
+
+    for (RecordValidation recordValidation : recordValidationRepository
+        .findRecordValidationsByIdDatasetAndIdTableSchema(datasetId, idTableSchema)) {
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      if (recordValidation.getRecordValue() != null) {
+        error.setIdObject(recordValidation.getRecordValue().getId());
+        error
+            .setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
+      }
+      refillErrorValidation(recordValidation.getValidation(), error);
+      errors.add(error);
+    }
+    LOG.info("Found all errors for field and records for dataset: {}", datasetId);
+    return errors;
+  }
+
+  /**
+   * Refill error validation.
+   *
+   * @param validation the validation
+   * @param error the error
+   */
+  private void refillErrorValidation(Validation validation, ErrorsValidationVO error) {
+    error.setIdValidation(validation.getId());
+    error.setLevelError(validation.getLevelError().name());
+    error.setMessage(validation.getMessage());
+    error.setNameTableSchema(validation.getTableName());
+    error.setTypeEntity(validation.getTypeEntity().name());
+    error.setValidationDate(validation.getValidationDate());
+    error.setShortCode(validation.getShortCode());
+  }
 }

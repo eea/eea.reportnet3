@@ -205,6 +205,32 @@ public class IntegrationControllerImpl implements IntegrationController {
     }
   }
 
+
+  /**
+   * Find extensions and operations private.
+   *
+   * @param integrationVO the integration VO
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/private/listPublicExtensionsOperations",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Integrations and Operations by Integration Criteria",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class,
+      responseContainer = "List", hidden = true)
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  public List<IntegrationVO> findExtensionsAndOperationsPrivate(@ApiParam(type = "Object",
+      value = "IntegrationVO Object") @RequestBody IntegrationVO integrationVO) {
+    try {
+      return integrationService.getOnlyExtensionsAndOperations(
+          integrationService.getAllIntegrationsByCriteria(integrationVO));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error finding integrations: {}", e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
   /**
    * Execute integration process.
    *
@@ -354,6 +380,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @PostMapping("/{integrationId}/runIntegration/dataset/{datasetId}")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASET_LEAD_REPORTER','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
   @ApiOperation(
       value = "Run an external integration process providing the integration id and the dataset where applies",
       response = ExecutionResultVO.class, hidden = true)

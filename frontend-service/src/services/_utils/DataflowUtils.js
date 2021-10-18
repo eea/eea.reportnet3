@@ -56,7 +56,7 @@ const parsePublicDataflowDTO = publicDataflowDTO =>
     obligation: ObligationUtils.parseObligation(publicDataflowDTO.obligation),
     referenceDatasets: DatasetUtils.parseDatasetListDTO(publicDataflowDTO.referenceDatasets),
     reportingDatasetsStatus: publicDataflowDTO.reportingStatus,
-    status: publicDataflowDTO.status === config.dataflowStatus.OPEN ? 'OPEN' : 'CLOSED',
+    status: publicDataflowDTO.status === config.dataflowStatus.OPEN && publicDataflowDTO.releasable ? 'open' : 'closed',
     type: publicDataflowDTO.type,
     webLinks: WebLinksUtils.parseWebLinkListDTO(publicDataflowDTO.weblinks)
   });
@@ -64,7 +64,7 @@ const parsePublicDataflowDTO = publicDataflowDTO =>
 const parseDataflowDTO = dataflowDTO =>
   new Dataflow({
     anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
-    creationDate: dataflowDTO.creationDate,
+    creationDate: dataflowDTO.creationDate > 0 ? dayjs(dataflowDTO.creationDate).format('YYYY-MM-DD') : '-',
     dataCollections: DataCollectionUtils.parseDataCollectionListDTO(dataflowDTO.dataCollections),
     dataProviderGroupId: dataflowDTO.dataProviderGroupId,
     dataProviderGroupName: dataflowDTO.dataProviderGroupName,
@@ -166,6 +166,20 @@ const getTechnicalAcceptanceStatus = (datasetsStatus = []) => {
     return config.datasetStatus.TECHNICALLY_ACCEPTED.label;
 };
 
+const parseDatasetsInfoDTO = datasetsDTO => {
+  return datasetsDTO.map(datasetDTO => {
+    return {
+      dataProviderCode: datasetDTO.dataProviderCode,
+      dataProviderName: datasetDTO.dataProviderName,
+      id: datasetDTO.id,
+      name: datasetDTO.dataSetName,
+      type: getDatasetType(datasetDTO.datasetTypeEnum)
+    };
+  });
+};
+
+const getDatasetType = datasetType => config.datasetType.find(type => type.key === datasetType)?.value;
+
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
@@ -173,6 +187,7 @@ export const DataflowUtils = {
   parseDataflowDTO,
   parseDataflowListDTO,
   parseDataProvidersUserList,
+  parseDatasetsInfoDTO,
   parsePublicDataflowDTO,
   parsePublicDataflowListDTO,
   parseSortedDataflowListDTO,

@@ -496,7 +496,7 @@ const useBigButtonList = ({
       buttonClass: 'schemaDataset',
       buttonIcon: dataflowState.isCopyDataCollectionToEUDatasetLoading ? 'spinner' : 'angleDoubleRight',
       buttonIconClass: dataflowState.isCopyDataCollectionToEUDatasetLoading ? 'spinner' : '',
-      caption: 'Copy Data Collections to EU Datasets',
+      caption: 'Copy Data Collections to EU datasets',
       handleRedirect: dataflowState.isCopyDataCollectionToEUDatasetLoading
         ? () => {}
         : () => onShowCopyDataCollectionToEUDatasetModal(),
@@ -530,7 +530,7 @@ const useBigButtonList = ({
       buttonClass: 'schemaDataset',
       buttonIcon: dataflowState.isExportEUDatasetLoading ? 'spinner' : 'fileExport',
       buttonIconClass: dataflowState.isExportEUDatasetLoading ? 'spinner' : '',
-      caption: 'Export EU Datasets',
+      caption: 'Export EU datasets',
       handleRedirect: dataflowState.isExportEUDatasetLoading ? () => {} : () => onShowExportEUDatasetModal(),
       layout: 'defaultBigButton',
       model: exportEUDatasetModel,

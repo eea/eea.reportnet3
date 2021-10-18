@@ -20,13 +20,21 @@ export const DataflowRepository = {
       data: { name, description, obligation: { obligationId }, releasable: true, type }
     }),
 
+  downloadAllSchemasInfo: async (dataflowId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(DataflowConfig.downloadAllSchemasInfo, { dataflowId, fileName })
+    }),
+
+  generateAllSchemasInfoFile: async dataflowId =>
+    await HTTPRequester.post({ url: getUrl(DataflowConfig.generateAllSchemasInfoFile, { dataflowId }) }),
+
+  downloadPublicAllSchemasInfoFile: async dataflowId =>
+    await HTTPRequester.download({ url: getUrl(DataflowConfig.downloadPublicAllSchemasInfoFile, { dataflowId }) }),
+
   getDetails: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDetails, { dataflowId }) }),
 
-  getDatasetsFinalFeedback: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsFinalFeedback, { dataflowId }) }),
-
-  getDatasetsReleasedStatus: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsReleasedStatus, { dataflowId }) }),
+  getDatasetsFinalFeedbackAndReleasedStatus: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsFinalFeedbackAndReleasedStatus, { dataflowId }) }),
 
   getDatasetsValidationStatistics: async (dataflowId, datasetSchemaId) =>
     await HTTPRequester.get({
@@ -99,5 +107,8 @@ export const DataflowRepository = {
         releasable: isReleasable,
         showPublicInfo
       }
-    })
+    }),
+
+  getDatasetsInfo: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsInfo, { dataflowId }) })
 };

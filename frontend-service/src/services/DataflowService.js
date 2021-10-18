@@ -6,8 +6,6 @@ import isNull from 'lodash/isNull';
 import orderBy from 'lodash/orderBy';
 import sortBy from 'lodash/sortBy';
 
-import { config } from 'conf';
-
 import { DataflowRepository } from 'repositories/DataflowRepository';
 
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
@@ -32,9 +30,6 @@ export const DataflowService = {
 
     const dataflows = dataflowsDTO.data.map(dataflowDTO => {
       dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
-      if (dataflowDTO.status === config.dataflowStatus.OPEN) {
-        dataflowDTO.status = dataflowDTO.releasable ? 'OPEN' : 'CLOSED';
-      }
       return dataflowDTO;
     });
 
@@ -56,6 +51,14 @@ export const DataflowService = {
 
   cloneSchemas: async (sourceDataflowId, targetDataflowId) =>
     await DataflowRepository.cloneSchemas(sourceDataflowId, targetDataflowId),
+
+  downloadAllSchemasInfo: async (dataflowId, fileName) =>
+    await DataflowRepository.downloadAllSchemasInfo(dataflowId, fileName),
+
+  generateAllSchemasInfoFile: async dataflowId => await DataflowRepository.generateAllSchemasInfoFile(dataflowId),
+
+  downloadPublicAllSchemasInfoFile: async dataflowId =>
+    await DataflowRepository.downloadPublicAllSchemasInfoFile(dataflowId),
 
   getDatasetsValidationStatistics: async (dataflowId, datasetSchemaId) => {
     const datasetsDashboardsDataDTO = await DataflowRepository.getDatasetsValidationStatistics(
@@ -179,7 +182,7 @@ export const DataflowService = {
   },
 
   getDatasetsFinalFeedback: async dataflowId => {
-    const datasetsFinalFeedbackDTO = await DataflowRepository.getDatasetsFinalFeedback(dataflowId);
+    const datasetsFinalFeedbackDTO = await DataflowRepository.getDatasetsFinalFeedbackAndReleasedStatus(dataflowId);
     return datasetsFinalFeedbackDTO.data.map(dataset => {
       return {
         dataProviderName: dataset.dataSetName,
@@ -192,7 +195,7 @@ export const DataflowService = {
   },
 
   getDatasetsReleasedStatus: async dataflowId => {
-    const datasetsReleasedStatusDTO = await DataflowRepository.getDatasetsReleasedStatus(dataflowId);
+    const datasetsReleasedStatusDTO = await DataflowRepository.getDatasetsFinalFeedbackAndReleasedStatus(dataflowId);
     datasetsReleasedStatusDTO.data.sort((a, b) => {
       let datasetName_A = a.dataSetName;
       let datasetName_B = b.dataSetName;
@@ -368,5 +371,11 @@ export const DataflowService = {
   getSchemasValidation: async dataflowId => await DataflowRepository.getSchemasValidation(dataflowId),
 
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
-    await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo)
+    await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo),
+
+  getDatasetsInfo: async dataflowId => {
+    const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
+    const parsedDatasetsInfoDTO = DataflowUtils.parseDatasetsInfoDTO(datasetsInfoDTO.data);
+    return sortBy(parsedDatasetsInfoDTO, 'id');
+  }
 };

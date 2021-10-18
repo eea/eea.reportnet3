@@ -124,7 +124,7 @@ function boolean isDateTime( String value ){
  	Date dateDrools = null;
     try {
       sdf.setLenient(false);
-      dateDrools = sdf.parse(value);
+      dateDrools = sdf.parse(value.replaceAll("[zZ]$", "").replace('T', ' '));
     } catch( Exception e ){
         return false;
     }

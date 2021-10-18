@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +34,6 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
-import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -68,6 +66,10 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * The Class DataSetControllerImpl.
@@ -129,15 +131,31 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @GetMapping("TableValueDataset/{id}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
-  public TableVO getDataTablesValues(@PathVariable("id") Long datasetId,
-      @RequestParam("idTableSchema") String idTableSchema,
-      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-      @RequestParam(value = "pageSize", required = false) Integer pageSize,
-      @RequestParam(value = "fields", required = false) String fields,
-      @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError,
-      @RequestParam(value = "idRules", required = false) String[] idRules,
-      @RequestParam(value = "fieldSchemaId", required = false) String fieldSchemaId,
-      @RequestParam(value = "fieldValue", required = false) String fieldValue) {
+  @ApiOperation(value = "Get the data in tables", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 400, message = "Dataset id incorrect"),
+      @ApiResponse(code = 404, message = "Dataset not found"),
+      @ApiResponse(code = 500, message = "Error getting the data")})
+  public TableVO getDataTablesValues(
+      @ApiParam(type = "Long", value = "dataset Id",
+          example = "0") @PathVariable("id") Long datasetId,
+      @ApiParam(type = "String", value = "table schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("idTableSchema") String idTableSchema,
+      @ApiParam(type = "Integer", value = "page number", example = "0") @RequestParam(
+          value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @ApiParam(type = "Integer", value = "page size",
+          example = "0") @RequestParam(value = "pageSize", required = false) Integer pageSize,
+      @ApiParam(type = "String", value = "name of fields",
+          example = "field1") @RequestParam(value = "fields", required = false) String fields,
+      @ApiParam(value = "Type Error", example = "INFO,WARNING") @RequestParam(value = "levelError",
+          required = false) ErrorTypeEnum[] levelError,
+      @ApiParam(value = "list of id Rules", example = "a,b,c") @RequestParam(value = "idRules",
+          required = false) String[] idRules,
+      @ApiParam(type = "String", value = "field Schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "fieldSchemaId",
+              required = false) String fieldSchemaId,
+      @ApiParam(type = "String", value = "value", example = "value") @RequestParam(
+          value = "fieldValue", required = false) String fieldValue) {
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -174,7 +192,12 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataset.id,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @PutMapping("/update")
-  public void updateDataset(@RequestBody DataSetVO dataset) {
+  @ApiOperation(value = "Update dataset", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated dataset"),
+      @ApiResponse(code = 404, message = "Dataset not found"),
+      @ApiResponse(code = 400, message = "Dataset not informed"),
+      @ApiResponse(code = 500, message = "Error updating  dataset")})
+  public void updateDataset(@ApiParam(value = "dataset object") @RequestBody DataSetVO dataset) {
     if (dataset == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
     }
@@ -202,16 +225,28 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @PostMapping("/{datasetId}/importFileData")
+  @ApiOperation(value = "Import file whith data")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
+      @ApiResponse(code = 400, message = "Error importing file"),
+      @ApiResponse(code = 500, message = "Error importing file")})
   public void importFileData(
-      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId,
-      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-      @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace,
-      @RequestParam(value = "integrationId", required = false) Long integrationId,
-      @RequestParam(value = "delimiter", required = false) String delimiter) {
+      @ApiParam(type = "Long", value = "dataset Id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "String", value = "table Schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+              required = false) String tableSchemaId,
+      @ApiParam(value = "the file") @RequestParam("file") MultipartFile file,
+      @ApiParam(type = "boolean", value = "replace data",
+          example = "true") @RequestParam(value = "replace", required = false) boolean replace,
+      @ApiParam(type = "Long", value = "integration Id", example = "0") @RequestParam(
+          value = "integrationId", required = false) Long integrationId,
+      @ApiParam(type = "String", value = "delimiter of file",
+          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
     try {
       fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
           delimiter);
@@ -228,127 +263,6 @@ public class DataSetControllerImpl implements DatasetController {
   }
 
   /**
-   * Load table data.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param file the file
-   * @param idTableSchema the id table schema
-   * @param replace the replace
-   * @param integrationId the integration id
-   */
-  @Override
-  @HystrixCommand
-  @Deprecated
-  @PostMapping("{id}/loadTableData/{idTableSchema}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN')")
-  public void loadTableData(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId,
-      @RequestParam("file") MultipartFile file, @PathVariable("idTableSchema") String idTableSchema,
-      @RequestParam(value = "replace", required = false) boolean replace,
-      @RequestParam(value = "integrationId", required = false) Long integrationId) {
-    String user = SecurityContextHolder.getContext().getAuthentication().getName();
-    Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
-    Map<String, Object> lockCriteria = new HashMap<>();
-    lockCriteria.put("signature", LockSignature.IMPORT_FILE_DATA.getValue());
-    lockCriteria.put("datasetId", datasetId);
-    try {
-      lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
-      importFileData(datasetId, dataflowId, providerId, idTableSchema, file, replace, integrationId,
-          null);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
-    }
-  }
-
-  /**
-   * Load dataset data.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param file the file
-   * @param replace the replace
-   * @param integrationId the integration id
-   */
-  @Override
-  @HystrixCommand
-  @Deprecated
-  @PostMapping("{id}/loadDatasetData")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN')")
-  public void loadDatasetData(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId,
-      @RequestParam("file") MultipartFile file,
-      @RequestParam(value = "replace", required = false) boolean replace,
-      @RequestParam(value = "integrationId", required = false) Long integrationId) {
-    String user = SecurityContextHolder.getContext().getAuthentication().getName();
-    Timestamp timeStamp = new Timestamp(System.currentTimeMillis());
-    Map<String, Object> lockCriteria = new HashMap<>();
-    lockCriteria.put("signature", LockSignature.IMPORT_FILE_DATA.getValue());
-    lockCriteria.put("datasetId", datasetId);
-    try {
-      lockService.createLock(timeStamp, user, LockType.METHOD, lockCriteria);
-      importFileData(datasetId, dataflowId, providerId, null, file, replace, integrationId, null);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "lock creation error", e);
-    }
-  }
-
-  /**
-   * Gets the position from any object id.
-   *
-   * @param id the id
-   * @param idDataset the id dataset
-   * @param type the type
-   * @return the position from any object id
-   */
-  @Override
-  @HystrixCommand
-  @GetMapping("findPositionFromAnyObject/{id}")
-  public ValidationLinkVO getPositionFromAnyObjectId(@PathVariable("id") String id,
-      @RequestParam("datasetId") Long idDataset, @RequestParam("type") EntityTypeEnum type) {
-
-    if (id == null || idDataset == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-
-    try {
-      return datasetService.getPositionFromAnyObjectId(id, idDataset, type);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
-    }
-  }
-
-  /**
-   * Gets the by id.
-   *
-   * @param datasetId the dataset id
-   * @return the by id
-   */
-  @Deprecated
-  @Override
-  @HystrixCommand
-  @GetMapping("{id}")
-  public DataSetVO getById(@PathVariable("id") Long datasetId) {
-    if (datasetId == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-    DataSetVO result = null;
-    try {
-      result = datasetService.getById(datasetId);
-    } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-    }
-    return result;
-  }
-
-  /**
    * Gets the data flow id by id.
    *
    * @param datasetId the dataset id
@@ -356,8 +270,10 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @GetMapping("{id}/dataflow")
-  public Long getDataFlowIdById(Long datasetId) {
+  @GetMapping("/private/{id}/dataflow")
+  @ApiOperation(value = "get Dataflow id by id", hidden = true)
+  public Long getDataFlowIdById(
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") Long datasetId) {
     return datasetService.getDataFlowIdById(datasetId);
   }
 
@@ -372,10 +288,17 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @PutMapping("/{id}/updateRecord")
   @LockMethod
+  @ApiOperation(value = "update Records", hidden = true)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
-  public void updateRecords(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
-      @RequestBody List<RecordVO> records,
-      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK) {
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated record"),
+      @ApiResponse(code = 404, message = "Record not found in dataset"),
+      @ApiResponse(code = 400, message = "record informed not found or table is read only")})
+  public void updateRecords(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
+      @ApiParam(value = "list of records") @RequestBody List<RecordVO> records,
+      @ApiParam(type = "boolean", value = "update cascade", example = "true") @RequestParam(
+          value = "updateCascadePK", required = false) boolean updateCascadePK) {
     if (datasetId == null || records == null || records.isEmpty()) {
       LOG_ERROR.error(
           "Error updating records. The datasetId or the records to update are emtpy or null");
@@ -407,10 +330,18 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @DeleteMapping("/{id}/record/{recordId}")
   @LockMethod
+  @ApiOperation(value = "delete record", hidden = true)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
-  public void deleteRecord(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
-      @PathVariable("recordId") String recordId,
-      @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK) {
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
+      @ApiResponse(code = 404, message = "record or dataset not found"), @ApiResponse(code = 400,
+          message = "error because table is read only or fixed number of records is active")})
+  public void deleteRecord(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
+      @ApiParam(type = "String", value = "record Id",
+          example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("recordId") String recordId,
+      @ApiParam(type = "boolean", value = "delete cascade", example = "true") @RequestParam(
+          value = "deleteCascadePK", required = false) boolean deleteCascadePK) {
     if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
         datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD)) {
       LOG_ERROR.error("Error deleting record in the datasetId {}. The table is read only",
@@ -448,9 +379,16 @@ public class DataSetControllerImpl implements DatasetController {
   @PostMapping("/{datasetId}/table/{tableSchemaId}/record")
   @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiOperation(value = "Insert records in table", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully inserted"), @ApiResponse(
+      code = 400,
+      message = "error because table is read only or fixed number of records is active or inserting")})
   public void insertRecords(
-      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
-      @PathVariable("tableSchemaId") String tableSchemaId, @RequestBody List<RecordVO> records) {
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "table schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("tableSchemaId") String tableSchemaId,
+      @ApiParam(value = "list of records") @RequestBody List<RecordVO> records) {
     if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, records.get(0).getIdRecordSchema(),
         EntityTypeEnum.RECORD)) {
       LOG_ERROR.error("Error inserting record in the datasetId {}. The table is read only",
@@ -487,9 +425,13 @@ public class DataSetControllerImpl implements DatasetController {
   @PostMapping("/{datasetId}/insertRecordsMultiTable")
   @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiOperation(value = "Insert records in different tables", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully inserted"),
+      @ApiResponse(code = 400, message = "error inserting records")})
   public void insertRecordsMultiTable(
-      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
-      @RequestBody List<TableVO> tableRecords) {
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "table Records") @RequestBody List<TableVO> tableRecords) {
     try {
       updateRecordHelper.executeMultiCreateProcess(datasetId, tableRecords);
     } catch (EEAException e) {
@@ -511,12 +453,21 @@ public class DataSetControllerImpl implements DatasetController {
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("/{datasetId}/deleteImportData")
   @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiOperation(value = "Delete Data")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
+      @ApiResponse(code = 403, message = "dataset not belong dataflow"),
+      @ApiResponse(code = 401, message = "Unauthorize"),
+      @ApiResponse(code = 500, message = "error deleting data")})
   public void deleteImportData(
-      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId,
-      @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
-          required = false) Boolean deletePrefilledTables) {
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "boolean", value = "delete prefilled tables",
+          example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
+              required = false) Boolean deletePrefilledTables) {
 
     // Rest API only: Check if the dataflow belongs to the dataset
     if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
@@ -542,12 +493,21 @@ public class DataSetControllerImpl implements DatasetController {
   @LockMethod(removeWhenFinish = false)
   @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiOperation(value = "Delete table data")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
+      @ApiResponse(code = 403, message = "dataset not belong dataflow"),
+      @ApiResponse(code = 401, message = "Unauthorize"),
+      @ApiResponse(code = 500, message = "error deleting data")})
   public void deleteImportTable(
-      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
-      @LockCriteria(name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId) {
-
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "table schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @LockCriteria(
+              name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
 
     // Rest API only: Check if the dataflow belongs to the dataset
     if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
@@ -573,9 +533,18 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
-  public ResponseEntity<byte[]> exportFile(@RequestParam("datasetId") Long datasetId,
-      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-      @RequestParam("mimeType") String mimeType) {
+  @ApiOperation(value = "Export file with data", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully export"),
+      @ApiResponse(code = 400, message = "Id table schema is incorrect"),
+      @ApiResponse(code = 500, message = "Error exporting file")})
+  public ResponseEntity<byte[]> exportFile(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @RequestParam("datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "table schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+              required = false) String tableSchemaId,
+      @ApiParam(type = "String", value = "mimeType (file extension)",
+          example = "csv") @RequestParam("mimeType") String mimeType) {
 
     String tableName =
         null != tableSchemaId ? datasetSchemaService.getTableSchemaName(null, tableSchemaId)
@@ -609,8 +578,14 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @GetMapping("/exportFileThroughIntegration")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','DATASET_OBSERVER','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER','REFERENCEDATASET_OBSERVER')")
-  public void exportFileThroughIntegration(@RequestParam("datasetId") Long datasetId,
-      @RequestParam("integrationId") Long integrationId) {
+  @ApiOperation(value = "export file through integration", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully exported"),
+      @ApiResponse(code = 500, message = "Error exporting file")})
+  public void exportFileThroughIntegration(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @RequestParam("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Integration Id",
+          example = "0") @RequestParam("integrationId") Long integrationId) {
     try {
       datasetService.exportFileThroughIntegration(datasetId, integrationId);
     } catch (EEAException e) {
@@ -627,9 +602,13 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @PostMapping("/{id}/insertIdSchema")
-  public void insertIdDataSchema(@PathVariable("id") Long datasetId,
-      @RequestParam("idDatasetSchema") String idDatasetSchema) {
+  @PostMapping("/private/{id}/insertIdSchema")
+  @ApiOperation(value = "insert dataschema id", hidden = true)
+  public void insertIdDataSchema(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("id") Long datasetId,
+      @ApiParam(type = "String", value = "dataset schema Id",
+          example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @RequestParam("idDatasetSchema") String idDatasetSchema) {
     try {
       datasetService.insertSchema(datasetId, idDatasetSchema);
     } catch (EEAException e) {
@@ -650,9 +629,16 @@ public class DataSetControllerImpl implements DatasetController {
   @PutMapping("/{id}/updateField")
   @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
-  public void updateField(@LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
-      @RequestBody FieldVO field,
-      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK) {
+  @ApiOperation(value = "Update field", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated field"),
+      @ApiResponse(code = 404, message = "Error updating field, field not found"),
+      @ApiResponse(code = 400, message = "Error updating field, table is read only")})
+  public void updateField(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
+      @ApiParam(value = "Field Object") @RequestBody FieldVO field,
+      @ApiParam(type = "boolean", value = "update cascade", example = "true") @RequestParam(
+          value = "updateCascadePK", required = false) boolean updateCascadePK) {
     if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, field.getIdFieldSchema(),
         EntityTypeEnum.FIELD)) {
       LOG_ERROR.error("Error updating a field in the dataset {}. The table is read only",
@@ -681,6 +667,9 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @PreAuthorize("isAuthenticated()")
+  @ApiOperation(value = "get Field Values Referenced", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+      @ApiResponse(code = 500, message = "Error getting data")})
   @GetMapping("/{id}/datasetSchemaId/{datasetSchemaId}/fieldSchemaId/{fieldSchemaId}/getFieldsValuesReferenced")
   public List<FieldVO> getFieldValuesReferenced(@PathVariable("id") Long datasetIdOrigin,
       @PathVariable("datasetSchemaId") String datasetSchemaId,
@@ -688,7 +677,6 @@ public class DataSetControllerImpl implements DatasetController {
       @RequestParam(value = "conditionalValue", required = false) String conditionalValue,
       @RequestParam(value = "searchValue", required = false) String searchValue,
       @RequestParam(value = "resultsNumber", required = false) Integer resultsNumber) {
-
     try {
       return datasetService.getFieldValuesReferenced(datasetIdOrigin, datasetSchemaId,
           fieldSchemaId, conditionalValue, searchValue, resultsNumber);
@@ -716,14 +704,28 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand(commandProperties = {@HystrixProperty(
       name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
   @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','DATASET_OBSERVER','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER','REFERENCEDATASET_OBSERVER')")
+  @ApiOperation(value = "ETL Export data")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully exported"),
+      @ApiResponse(code = 500, message = "Error exporting data"),
+      @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
   public ResponseEntity<StreamingResponseBody> etlExportDataset(
-      @PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId,
-      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-      @RequestParam(value = "limit", required = false) Integer limit,
-      @RequestParam(value = "offset", required = false) Integer offset,
-      @RequestParam(value = "filterValue", required = false) String filterValue,
-      @RequestParam(value = "columnName", required = false) String columnName) {
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "String", value = "Table Schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+              required = false) String tableSchemaId,
+      @ApiParam(type = "Integer", value = "offset,Number of data",
+          example = "0") @RequestParam(value = "limit", required = false) Integer limit,
+      @ApiParam(type = "Integer", value = "offset, Page number",
+          example = "0") @RequestParam(value = "offset", required = false) Integer offset,
+      @ApiParam(type = "String", value = "Filter value", example = "value") @RequestParam(
+          value = "filterValue", required = false) String filterValue,
+      @ApiParam(type = "String", value = "Column Name", example = "column") @RequestParam(
+          value = "columnName", required = false) String columnName) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -750,9 +752,18 @@ public class DataSetControllerImpl implements DatasetController {
   @Override
   @PostMapping("/{datasetId}/etlImport")
   @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
-  public void etlImportDataset(@PathVariable("datasetId") Long datasetId,
-      @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId) {
+  @ApiOperation(value = "ETL import data")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported"),
+      @ApiResponse(code = 500, message = "Error importing data"),
+      @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
+  public void etlImportDataset(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "Etl Dataset Object") @RequestBody ETLDatasetVO etlDatasetVO,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -790,10 +801,20 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @ApiOperation(value = "get Attachments")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully getted"),
+      @ApiResponse(code = 500, message = "Error getting attachments"),
+      @ApiResponse(code = 404, message = "Error downloading attachment from dataset")})
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
-  public ResponseEntity<byte[]> getAttachment(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("fieldId") String idField, @RequestParam(value = "dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId) {
+  public ResponseEntity<byte[]> getAttachment(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "Field Id",
+          example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
 
     LOG.info("Downloading attachment from the datasetId {}", datasetId);
     try {
@@ -821,8 +842,15 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @PutMapping("/{datasetId}/field/{fieldId}/attachment")
   @PreAuthorize("isAuthenticated()")
-  public void updateAttachment(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file) {
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully getted"),
+      @ApiResponse(code = 500, message = "Error updating attachment"),
+      @ApiResponse(code = 400, message = "table is read only or file format is invalid ")})
+  public void updateAttachment(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "Field Id",
+          example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField,
+      @ApiParam(value = "file") @RequestParam("file") MultipartFile file) {
 
     try {
       // Not allow insert attachment if the table is marked as read only. This not applies to design
@@ -857,8 +885,14 @@ public class DataSetControllerImpl implements DatasetController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
-  public void deleteAttachment(@PathVariable("datasetId") Long datasetId,
-      @PathVariable("fieldId") String idField) {
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
+      @ApiResponse(code = 404, message = "Error deleting attachment from dataset"),
+      @ApiResponse(code = 400, message = "Table is read only")})
+  public void deleteAttachment(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "Field Id",
+          example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField) {
     if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
         datasetService.findFieldSchemaIdById(datasetId, idField), EntityTypeEnum.FIELD)) {
       LOG_ERROR.error("Error updating an attachment in the datasetId {}. The table is read only",
@@ -883,8 +917,12 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @GetMapping("/private/getReferencedDatasetId")
-  public Long getReferencedDatasetId(@RequestParam("id") Long datasetIdOrigin,
-      @RequestParam("idFieldSchema") String idFieldSchema) {
+  @ApiOperation(value = "Get referenced by dataset id", hidden = true)
+  public Long getReferencedDatasetId(
+      @ApiParam(type = "Long", value = "Dataset Id origin",
+          example = "0") @PathVariable("dataflowId") @RequestParam("id") Long datasetIdOrigin,
+      @ApiParam(type = "String", value = "Field Schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("idFieldSchema") String idFieldSchema) {
     return datasetService.getReferencedDatasetId(datasetIdOrigin, idFieldSchema);
   }
 
@@ -896,7 +934,9 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @GetMapping("/private/datasetType/{datasetId}")
-  public DatasetTypeEnum getDatasetType(@PathVariable("datasetId") Long datasetId) {
+  @ApiOperation(value = "Get Dataset Type by dataset Id", hidden = true)
+  public DatasetTypeEnum getDatasetType(@ApiParam(type = "Long", value = "Dataset Id",
+      example = "0") @PathVariable("datasetId") Long datasetId) {
     return datasetMetabaseService.getDatasetType(datasetId);
   }
 
@@ -911,9 +951,14 @@ public class DataSetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping("/private/{id}/deleteForReplacing")
-  public void deleteDataBeforeReplacing(@PathVariable("id") Long datasetId,
-      @RequestParam("integrationId") Long integrationId,
-      @RequestParam("operation") IntegrationOperationTypeEnum operation) {
+  @ApiOperation(value = "delete data before replacing", hidden = true)
+  public void deleteDataBeforeReplacing(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("id") Long datasetId,
+      @ApiParam(type = "Long", value = "Integration Id",
+          example = "0") @RequestParam("integrationId") Long integrationId,
+      @ApiParam(
+          value = "Operation Object") @RequestParam("operation") IntegrationOperationTypeEnum operation) {
     // When deleting the data finishes, we send a kafka event to make the FME call to import data
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -930,9 +975,16 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the http entity
    */
   @Override
+  @ApiOperation(value = "export public file", hidden = true)
   @GetMapping("/exportPublicFile/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
-  public ResponseEntity<InputStreamResource> exportPublicFile(@PathVariable Long dataflowId,
-      @PathVariable Long dataProviderId, @RequestParam String fileName) {
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully exported file"),
+      @ApiResponse(code = 404, message = "File doesn't exist")})
+  public ResponseEntity<InputStreamResource> exportPublicFile(
+      @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @PathVariable Long dataflowId,
+      @ApiParam(type = "Long", value = "provider Id",
+          example = "0") @PathVariable Long dataProviderId,
+      @ApiParam(type = "String", value = "File Name",
+          example = "value") @RequestParam String fileName) {
 
     try {
       File zipContent = datasetService.exportPublicFile(dataflowId, dataProviderId, fileName);
@@ -952,9 +1004,14 @@ public class DataSetControllerImpl implements DatasetController {
    * @return the response entity
    */
   @Override
+  @ApiOperation(value = "export reference public file", hidden = true)
   @GetMapping("/exportPublicFile/dataflow/{dataflowId}")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully exported file"),
+      @ApiResponse(code = 404, message = "File doesn't exist")})
   public ResponseEntity<InputStreamResource> exportReferenceDatasetFile(
-      @PathVariable Long dataflowId, @RequestParam String fileName) {
+      @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @PathVariable Long dataflowId,
+      @ApiParam(type = "String", value = "File name",
+          example = "filename") @RequestParam String fileName) {
 
     try {
       File zipContent = datasetService.exportPublicFile(dataflowId, null, fileName);
@@ -963,6 +1020,104 @@ public class DataSetControllerImpl implements DatasetController {
       LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+  }
+
+
+  /**
+   * Check any schema available in public.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if successful
+   */
+  @Override
+  @ApiOperation(value = "Check if any schema is public", hidden = true)
+  @GetMapping("/private/checkAnySchemaAvailableInPublic")
+  public boolean checkAnySchemaAvailableInPublic(@ApiParam(type = "Long", value = "Dataflow Id",
+      example = "0") @RequestParam("dataflowId") Long dataflowId) {
+    return datasetService.checkAnySchemaAvailableInPublic(dataflowId);
+  }
+
+
+  /**
+   * Export dataset file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{datasetId}/exportDatasetFile")
+  @ApiOperation(value = "Export dataset file", hidden = true)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASET_OBSERVER','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  public void exportDatasetFile(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "mime type (extension file)",
+          example = "csv") @RequestParam("mimeType") String mimeType) {
+    LOG.info("Export dataset data from datasetId {}, with type {}", datasetId, mimeType);
+    fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
+
+  }
+
+
+
+  /**
+   * Download file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @Override
+  @GetMapping(value = "/{datasetId}/downloadFile",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Download file", hidden = true)
+  public void downloadFile(
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @PathVariable Long datasetId,
+      @ApiParam(type = "String", value = "File name",
+          example = "file.csv") @RequestParam String fileName,
+      @ApiParam(value = "response") HttpServletResponse response) {
+    try {
+      LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
+          datasetId, fileName);
+      File file = datasetService.downloadExportedFile(datasetId, fileName);
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
+      OutputStream out = response.getOutputStream();
+      FileInputStream in = new FileInputStream(file);
+      // copy from in to out
+      IOUtils.copyLarge(in, out);
+      out.close();
+      in.close();
+      // delete the file after downloading it
+      FileUtils.forceDelete(file);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error(
+          "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
+          datasetId, fileName, e.getMessage());
+    }
+
+
+  }
+
+
+  /**
+   * Creates the response entity.
+   *
+   * @param fileName the file name
+   * @param content the content
+   * @return the response entity
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private ResponseEntity<InputStreamResource> createResponseEntity(String fileName, File content)
+      throws IOException {
+
+    InputStreamResource resource = new InputStreamResource(FileUtils.openInputStream(content));
+    HttpHeaders header = new HttpHeaders();
+    header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+    return ResponseEntity.ok().headers(header).contentLength(content.length())
+        .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
   }
 
 
@@ -1006,91 +1161,5 @@ public class DataSetControllerImpl implements DatasetController {
     return result;
   }
 
-  /**
-   * Check any schema available in public.
-   *
-   * @param dataflowId the dataflow id
-   * @return true, if successful
-   */
-  @Override
-  @GetMapping("/private/checkAnySchemaAvailableInPublic")
-  public boolean checkAnySchemaAvailableInPublic(@RequestParam("dataflowId") Long dataflowId) {
-    return datasetService.checkAnySchemaAvailableInPublic(dataflowId);
-  }
-
-
-  /**
-   * Export dataset file.
-   *
-   * @param datasetId the dataset id
-   * @param mimeType the mime type
-   */
-  @Override
-  @HystrixCommand
-  @GetMapping(value = "/{datasetId}/exportDatasetFile")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASET_OBSERVER','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
-  public void exportDatasetFile(@PathVariable("datasetId") Long datasetId,
-      @RequestParam("mimeType") String mimeType) {
-    LOG.info("Export dataset data from datasetId {}, with type {}", datasetId, mimeType);
-    fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
-
-  }
-
-
-
-  /**
-   * Download file.
-   *
-   * @param datasetId the dataset id
-   * @param fileName the file name
-   * @param response the response
-   */
-  @Override
-  @GetMapping(value = "/{datasetId}/downloadFile",
-      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
-  public void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
-      HttpServletResponse response) {
-    try {
-      LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
-          datasetId, fileName);
-      File file = datasetService.downloadExportedFile(datasetId, fileName);
-      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-
-      OutputStream out = response.getOutputStream();
-      FileInputStream in = new FileInputStream(file);
-      // copy from in to out
-      IOUtils.copyLarge(in, out);
-      out.close();
-      in.close();
-      // delete the file after downloading it
-      FileUtils.forceDelete(file);
-    } catch (IOException | EEAException e) {
-      LOG_ERROR.error(
-          "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
-          datasetId, fileName, e.getMessage());
-    }
-
-
-  }
-
-
-  /**
-   * Creates the response entity.
-   *
-   * @param fileName the file name
-   * @param content the content
-   * @return the response entity
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  private ResponseEntity<InputStreamResource> createResponseEntity(String fileName, File content)
-      throws IOException {
-
-    InputStreamResource resource = new InputStreamResource(FileUtils.openInputStream(content));
-    HttpHeaders header = new HttpHeaders();
-    header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-    return ResponseEntity.ok().headers(header).contentLength(content.length())
-        .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
-  }
 
 }

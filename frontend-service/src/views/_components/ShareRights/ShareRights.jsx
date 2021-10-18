@@ -37,16 +37,13 @@ export const ShareRights = ({
   columnHeader,
   dataflowId,
   dataProviderId,
-  deleteColumnHeader,
   deleteConfirmHeader,
   deleteConfirmMessage,
   deleteErrorNotificationKey,
   editConfirmHeader,
   getErrorNotificationKey,
   isAdmin = false,
-  isBusinessDataflow = false,
   isUserRightManagementDialogVisible,
-  isSteward = false,
   placeholder,
   representativeId,
   roleOptions,
@@ -307,14 +304,8 @@ export const ShareRights = ({
   };
 
   const renderButtonsColumnTemplate = userRight => {
-    if (userType === userTypes.REQUESTER) {
-      if (notDeletableRolesRequester.includes(userRight?.role) && !isAdmin) {
-        return null;
-      }
-
-      if (isBusinessDataflow && !isAdmin && !isSteward) {
-        return null;
-      }
+    if (userType === userTypes.REQUESTER && notDeletableRolesRequester.includes(userRight?.role) && !isAdmin) {
+      return null;
     }
 
     return (
@@ -451,8 +442,7 @@ export const ShareRights = ({
               <Column body={renderRoleColumnTemplate} header={resourcesContext.messages['rolesColumn']} />
               <Column
                 body={renderButtonsColumnTemplate}
-                className={styles.emptyTableHeader}
-                header={deleteColumnHeader}
+                header={resourcesContext.messages['actions']}
                 style={{ width: '100px' }}
               />
             </DataTable>

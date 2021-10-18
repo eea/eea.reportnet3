@@ -1,7 +1,6 @@
 import { Fragment, useContext, useReducer, useRef } from 'react';
 
 import capitalize from 'lodash/capitalize';
-import isNull from 'lodash/isNull';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniqueId from 'lodash/uniqueId';
@@ -18,6 +17,7 @@ import { TreeViewExpandableItem } from './_components/TreeViewExpandableItem';
 
 import { treeViewReducer } from './_functions/Reducers/treeViewReducer';
 
+import { RecordUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -72,7 +72,7 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
 
   const groupFields = fields => {
     parseData(fields);
-    if (!isUndefined(fields) && !isNull(fields) && fields.length > 0) {
+    if (!isNil(fields) && fields.length > 0) {
       return (
         <DataTable
           ref={dataTableRef}
@@ -235,33 +235,57 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
 
   const getLabel = str => resourcesContext.messages[str] || str;
 
-  return (
-    !isUndefined(property) &&
-    !isNull(property) && (
-      <div
-        style={{
-          paddingTop: '12px',
-          paddingLeft: '3px',
-          marginLeft: '10px'
-        }}>
-        {typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean' ? (
-          <Fragment>
-            <span className={styles.propertyTitle}>
-              {!Number.isInteger(Number(propertyName)) ? `${getLabel(propertyName)}: ` : ''}
+  const renderTreeView = () => {
+    if (!isNil(property)) {
+      return (
+        <div
+          style={{
+            paddingTop: '12px',
+            paddingLeft: '3px',
+            marginLeft: '10px'
+          }}>
+          {renderTreeViewExpandableItem()}
+        </div>
+      );
+    }
+  };
+
+  const renderTreeViewExpandableItem = () => {
+    if (typeof property === 'number' || typeof property === 'string' || typeof property === 'boolean') {
+      return (
+        <Fragment>
+          <span className={styles.propertyTitle}>
+            {!Number.isInteger(Number(propertyName)) ? `${getLabel(propertyName)}: ` : ''}
+          </span>
+          {property !== '' ? (
+            <span
+              className={`${styles.propertyValue} ${className} ${
+                propertyName === 'tableSchemaName' ? styles.propertyValueTableName : ''
+              }`}>
+              {property.toString()}
             </span>
-            {property !== '' ? (
-              <span
-                className={`${styles.propertyValue} ${className} ${
-                  propertyName === 'tableSchemaName' ? styles.propertyValueTableName : ''
-                }`}>
-                {property.toString()}
-              </span>
-            ) : (
-              '-'
-            )}
-          </Fragment>
-        ) : (
+          ) : (
+            '-'
+          )}
+        </Fragment>
+      );
+    } else {
+      if (isNil(property.button)) {
+        return (
           <TreeViewExpandableItem
+            buttons={
+              !isNil(property.button)
+                ? [
+                    {
+                      className: `p-button-secondary-transparent`,
+                      icon: property.button.icon,
+                      label: property.button.label,
+                      tooltip: property.button.tooltip,
+                      onClick: property.button.onClick
+                    }
+                  ]
+                : undefined
+            }
             expanded={expandAll}
             items={!Number.isInteger(Number(propertyName)) ? [{ label: getLabel(propertyName) }] : []}>
             {!isUndefined(columnOptions[propertyName]) &&
@@ -290,44 +314,19 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
                 ))
               : null}
           </TreeViewExpandableItem>
-        )}
-      </div>
-    )
-  );
+        );
+      } else {
+        return null;
+      }
+    }
+  };
+
+  return renderTreeView();
 };
 
 const codelistTemplate = rowData => (
   <Chips disabled={true} name="Multiple/single selected items" pasteSeparator=";" value={rowData.codelistItems}></Chips>
 );
-
-const getFieldTypeValue = value => {
-  const fieldTypes = [
-    { fieldType: 'Number_Integer', value: 'Number - Integer', fieldTypeIcon: 'number-integer' },
-    { fieldType: 'Number_Decimal', value: 'Number - Decimal', fieldTypeIcon: 'number-decimal' },
-    { fieldType: 'Date', value: 'Date', fieldTypeIcon: 'calendar' },
-    { fieldType: 'Datetime', value: 'Datetime', fieldTypeIcon: 'clock' },
-    { fieldType: 'Text', value: 'Text', fieldTypeIcon: 'italic' },
-    // { fieldType: 'Rich_Text', value: 'Rich text', fieldTypeIcon: 'align-right' },
-    { fieldType: 'Textarea', value: 'Multiline text', fieldTypeIcon: 'align-right' },
-    { fieldType: 'Email', value: 'Email', fieldTypeIcon: 'email' },
-    { fieldType: 'URL', value: 'URL', fieldTypeIcon: 'url' },
-    { fieldType: 'Phone', value: 'Phone number', fieldTypeIcon: 'mobile' },
-    // { fieldType: 'Boolean', value: 'Boolean', fieldTypeIcon: 'boolean' },
-    { fieldType: 'Point', value: 'Point', fieldTypeIcon: 'point' },
-    { fieldType: 'MultiPoint', value: 'Multiple points', fieldTypeIcon: 'multiPoint' },
-    { fieldType: 'Linestring', value: 'Line', fieldTypeIcon: 'line' },
-    { fieldType: 'MultiLineString', value: 'Multiple lines', fieldTypeIcon: 'multiLineString' },
-    { fieldType: 'Polygon', value: 'Polygon', fieldTypeIcon: 'polygon' },
-    { fieldType: 'MultiPolygon', value: 'Multiple polygons', fieldTypeIcon: 'multiPolygon' },
-    // { fieldType: 'Circle', value: 'Circle', fieldTypeIcon: 'circle' },
-    { fieldType: 'Codelist', value: 'Single select', fieldTypeIcon: 'list' },
-    { fieldType: 'Multiselect_Codelist', value: 'Multiple select', fieldTypeIcon: 'multiselect' },
-    { fieldType: 'Link', value: 'Link', fieldTypeIcon: 'link' },
-    { fieldType: 'External_link', value: 'External link', fieldTypeIcon: 'externalLink' },
-    { fieldType: 'Attachment', value: 'Attachment', fieldTypeIcon: 'clip' }
-  ];
-  return fieldTypes.filter(field => TextUtils.areEquals(field.fieldType, value))[0];
-};
 
 const itemTemplate = (rowData, key) => {
   return (
@@ -346,9 +345,9 @@ const itemTemplate = (rowData, key) => {
 const typeTemplate = rowData => {
   return (
     <div style={{ display: 'flex', alignItems: 'baseline' }}>
-      <span style={{ margin: '.5em .25em 0 0.5em' }}>{getFieldTypeValue(rowData.type).value}</span>
+      <span style={{ margin: '.5em .25em 0 0.5em' }}>{RecordUtils.getFieldTypeValue(rowData.type).value}</span>
       <FontAwesomeIcon
-        icon={AwesomeIcons(getFieldTypeValue(rowData.type).fieldTypeIcon)}
+        icon={AwesomeIcons(RecordUtils.getFieldTypeValue(rowData.type).fieldTypeIcon)}
         role="presentation"
         style={{ marginLeft: 'auto', color: 'var(--treeview-table-icon-color)' }}
       />
