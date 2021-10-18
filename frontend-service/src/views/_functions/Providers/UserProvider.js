@@ -3,15 +3,13 @@ import { useContext, useReducer } from 'react';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import { config } from 'conf';
-
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { userReducer } from 'views/_functions/Reducers/userReducer';
 
 const userSettingsDefaultState = {
-  currentDataflowType: config.dataflowType.REPORTING.value,
+  currentDataflowType: undefined,
   userProps: {
     amPm24h: true,
     basemapLayer: 'Topographic',
