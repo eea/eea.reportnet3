@@ -788,7 +788,7 @@ export const FieldsDesigner = ({
               !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
             }`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead}
-            icon={'import'}
+            icon="import"
             label={resourcesContext.messages['importTableSchema']}
             onClick={() => manageDialogs('isImportTableSchemaDialogVisible', true)}
           />
@@ -797,7 +797,7 @@ export const FieldsDesigner = ({
               !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
             }`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead}
-            icon={'export'}
+            icon="export"
             label={resourcesContext.messages['exportTableSchema']}
             onClick={() => onExportTableSchema('csv', true)}
           />
@@ -806,7 +806,7 @@ export const FieldsDesigner = ({
               !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
             } datasetSchema-uniques-help-step`}
             disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
-            icon={'key'}
+            icon="key"
             label={resourcesContext.messages['addUniqueConstraint']}
             onClick={() => {
               manageDialogs('isManageUniqueConstraintDialogVisible', true);
@@ -822,7 +822,7 @@ export const FieldsDesigner = ({
               !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
             } datasetSchema-rowConstraint-help-step`}
             disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
-            icon={'horizontalSliders'}
+            icon="horizontalSliders"
             label={resourcesContext.messages['addRowConstraint']}
             onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
           />
@@ -958,7 +958,7 @@ export const FieldsDesigner = ({
           <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}></label>
           <label></label>
           <label></label>
-          <label>
+          {/* <label>
             <div
               className={`${styles.bulkDeleteButton} ${
                 markedForDeletion.length === 0 && bulkDelete ? styles.disabledButton : ''
@@ -1008,7 +1008,7 @@ export const FieldsDesigner = ({
             <ReactTooltip border={true} effect="solid" id="bulkDeleteCancelTooltip" place="top">
               {resourcesContext.messages['cancel']}
             </ReactTooltip>
-          </label>
+          </label> */}
         </div>
       )}
       {renderAllFields()}
