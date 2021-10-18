@@ -71,8 +71,7 @@ const Dataflows = withRouter(({ history, match }) => {
     isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
-    reference: [],
-    tabClicked: false
+    reference: []
   });
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
