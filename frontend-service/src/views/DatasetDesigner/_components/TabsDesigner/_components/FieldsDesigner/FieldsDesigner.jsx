@@ -11,6 +11,7 @@ import styles from './FieldsDesigner.module.scss';
 
 import { config } from 'conf';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
@@ -20,7 +21,10 @@ import { DataViewer } from 'views/_components/DataViewer';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { FieldDesigner } from './_components/FieldDesigner';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputTextarea } from 'views/_components/InputTextarea';
+import ReactTooltip from 'react-tooltip';
+import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
 
 import { DatasetService } from 'services/DatasetService';
@@ -29,10 +33,11 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
-import { FieldsDesignerUtils } from './_functions/Utils/FieldsDesignerUtils';
-import { MetadataUtils } from 'views/_functions/Utils';
+import { FieldsDesignerUtils } from 'views/_functions/Utils/FieldsDesignerUtils';
+import { MetadataUtils, RecordUtils } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { uniqueId } from 'lodash';
 
 export const FieldsDesigner = ({
   dataflowId,
@@ -63,22 +68,25 @@ export const FieldsDesigner = ({
   const validationContext = useContext(ValidationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [toPrefill, setToPrefill] = useState(false);
+  const [bulkDelete, setBulkDelete] = useState(false);
   const [errorMessageAndTitle, setErrorMessageAndTitle] = useState({ title: '', message: '' });
-  const [fields, setFields] = useState();
-  const [fieldToDeleteType, setFieldToDeleteType] = useState();
   const [exportTableSchema, setExportTableSchema] = useState(undefined);
   const [exportTableSchemaName, setExportTableSchemaName] = useState('');
+  const [fields, setFields] = useState();
+  const [fieldToDeleteType, setFieldToDeleteType] = useState();
+  const [fixedNumber, setFixedNumber] = useState(false);
   const [indexToDelete, setIndexToDelete] = useState();
   const [initialFieldIndexDragged, setInitialFieldIndexDragged] = useState();
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
-  const [notEmpty, setNotEmpty] = useState(true);
-  const [fixedNumber, setFixedNumber] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
+  const [markedForDeletion, setMarkedForDeletion] = useState([]);
+  const [notEmpty, setNotEmpty] = useState(true);
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
+  const [toPrefill, setToPrefill] = useState(false);
 
   useEffect(() => {
     if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {
@@ -102,6 +110,17 @@ export const FieldsDesigner = ({
           ['CODELIST', 'MULTISELECT_CODELIST', 'EXTERNAL_LINK', 'LINK', 'ATTACHMENT'].includes(field.type.toUpperCase())
         ).length > 0
       );
+      if (markedForDeletion.length > 0) {
+        const inmMarkedForDeletion = [...markedForDeletion];
+        inmMarkedForDeletion.forEach(markedField => {
+          const field = fields.find(field => field.fieldId === markedField.fieldId);
+          if (!isNil(field)) {
+            markedField.fieldType = RecordUtils.getFieldTypeValue(field.type)?.value;
+            markedField.fieldName = field.name;
+          }
+        });
+        setMarkedForDeletion(inmMarkedForDeletion);
+      }
     }
   }, [fields]);
 
@@ -110,6 +129,34 @@ export const FieldsDesigner = ({
       DownloadFile(exportTableSchema, exportTableSchemaName);
     }
   }, [exportTableSchema]);
+
+  useEffect(() => {
+    ReactTooltip.rebuild();
+  }, [bulkDelete]);
+
+  const onBulkCheck = ({
+    checked,
+    fieldId,
+    fieldIndex,
+    fieldName,
+    fieldsSelected = [],
+    fieldType,
+    multiple = false
+  }) => {
+    if (multiple) {
+      const inmMarkedForDeletion = [...markedForDeletion];
+      fieldsSelected.forEach(field => {
+        if (!markedForDeletion.some(markedField => markedField.fieldId === field.fieldId)) {
+          inmMarkedForDeletion.push(field);
+        }
+      });
+      setMarkedForDeletion(inmMarkedForDeletion);
+    } else if (checked) {
+      setMarkedForDeletion([...markedForDeletion, { fieldId, fieldType, fieldName, fieldIndex }]);
+    } else {
+      setMarkedForDeletion(markedForDeletion.filter(markedField => markedField.fieldId !== fieldId));
+    }
+  };
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
     setIsCodelistOrLink(
@@ -266,6 +313,7 @@ export const FieldsDesigner = ({
 
   const deleteField = async (deletedFieldIndex, deletedFieldType) => {
     try {
+      setIsLoading(true);
       await DatasetService.deleteFieldDesign(datasetId, fields[deletedFieldIndex].fieldId);
       const inmFields = [...fields];
       inmFields.splice(deletedFieldIndex, 1);
@@ -280,6 +328,49 @@ export const FieldsDesigner = ({
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
       }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteFields = async () => {
+    setIsLoading(true);
+
+    try {
+      const deletionPromises = markedForDeletion.map(async markedField => {
+        return await DatasetService.deleteFieldDesign(datasetId, markedField.fieldId);
+      });
+
+      Promise.all(deletionPromises)
+        .then(() => {
+          const filteredFields = fields.filter(
+            inmField => !markedForDeletion.some(markedField => markedField.fieldId === inmField.fieldId)
+          );
+          onChangeFields(
+            filteredFields,
+            markedForDeletion.some(markedField => TextUtils.areEquals(markedField.fieldType.fieldType, 'LINK')) ||
+              markedForDeletion.some(markedField =>
+                TextUtils.areEquals(markedField.fieldType.fieldType, 'EXTERNAL_LINK')
+              ),
+            table.tableSchemaId
+          );
+          setFields(filteredFields);
+          setIsDeleteDialogVisible(false);
+          setMarkedForDeletion([]);
+        })
+        .catch(error => {
+          console.error(`FieldsDesigner - deleteFields.`, error);
+        })
+        .finally(() => {
+          setBulkDelete(false);
+          setIsLoading(false);
+        });
+    } catch (error) {
+      console.error('FieldsDesigner - deleteFields.', error);
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      }
+      setIsLoading(false);
     }
   };
 
@@ -398,24 +489,68 @@ export const FieldsDesigner = ({
   const renderConfirmDialog = () => (
     <ConfirmDialog
       classNameConfirm={'p-button-danger'}
-      header={resourcesContext.messages['deleteFieldTitle']}
+      header={
+        markedForDeletion.length === 0
+          ? resourcesContext.messages['deleteFieldTitle']
+          : resourcesContext.messages['deleteFieldBulkTitle']
+      }
       labelCancel={resourcesContext.messages['no']}
       labelConfirm={resourcesContext.messages['yes']}
       onConfirm={() => {
-        deleteField(indexToDelete, fieldToDeleteType);
+        if (markedForDeletion.length === 0) {
+          deleteField(indexToDelete, fieldToDeleteType);
+        } else {
+          deleteFields();
+        }
         setIsDeleteDialogVisible(false);
       }}
       onHide={() => setIsDeleteDialogVisible(false)}
       visible={isDeleteDialogVisible}>
-      {resourcesContext.messages['deleteFieldConfirm']}
+      {markedForDeletion.length === 0
+        ? resourcesContext.messages['deleteFieldConfirm']
+        : resourcesContext.messages['deleteFieldBulkConfirm']}
+      {markedForDeletion.length > 0 ? (
+        <ul className={styles.markedForDeletionList}>
+          {markedForDeletion.map(markedField => (
+            <li key={uniqueId('markedField_')}>
+              <div>
+                <span data-for={markedField.fieldName} data-tip>
+                  {TextUtils.ellipsis(markedField.fieldName, 25)}
+                </span>
+              </div>
+              <div>
+                <span>
+                  {markedField.fieldType.fieldType}
+                  <FontAwesomeIcon icon={AwesomeIcons(markedField.fieldType.fieldTypeIcon)} role="presentation" />
+                </span>
+              </div>
+              <ReactTooltip
+                border={true}
+                className={styles.tooltip}
+                effect="solid"
+                id={markedField.fieldName}
+                place="top">
+                {markedField.fieldName}
+              </ReactTooltip>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        ''
+      )}
     </ConfirmDialog>
   );
 
   const renderAllFields = () => (
-    <Fragment>
+    <div className={styles.fieldsWrapper}>
+      {isLoading && (
+        <div className={styles.overlay}>
+          <Spinner className={styles.spinner} />
+        </div>
+      )}
       {viewType['tabularData'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
       {!viewType['tabularData'] && renderNewField()}
-    </Fragment>
+    </div>
   );
 
   const renderErrors = (errorTitle, error) => {
@@ -463,12 +598,14 @@ export const FieldsDesigner = ({
           isCodelistOrLink={isCodelistOrLink}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+          isLoading={isLoading}
           isReferenceDataset={isReferenceDataset}
           onCodelistAndLinkShow={onCodelistAndLinkShow}
           onFieldDragAndDrop={onFieldDragAndDrop}
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
           recordSchemaId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
+          setIsLoading={loading => setIsLoading(loading)}
           tableSchemaId={table.tableSchemaId}
           totalFields={!isNil(fields) ? fields.length : undefined}
         />
@@ -483,6 +620,7 @@ export const FieldsDesigner = ({
           return (
             <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
               <FieldDesigner
+                bulkDelete={bulkDelete}
                 checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
                 checkInvalidCharacters={name => FieldsDesignerUtils.checkInvalidCharacters(name)}
                 codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
@@ -521,15 +659,20 @@ export const FieldsDesigner = ({
                 isCodelistOrLink={isCodelistOrLink}
                 isDataflowOpen={isDataflowOpen}
                 isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+                isLoading={isLoading}
                 isReferenceDataset={isReferenceDataset}
                 key={field.fieldId}
+                markedForDeletion={markedForDeletion}
+                onBulkCheck={onBulkCheck}
                 onCodelistAndLinkShow={onCodelistAndLinkShow}
                 onFieldDelete={onFieldDelete}
                 onFieldDragAndDrop={onFieldDragAndDrop}
                 onFieldDragAndDropStart={onFieldDragAndDropStart}
                 onFieldUpdate={onFieldUpdate}
+                onNewFieldAdd={onFieldAdd}
                 onShowDialogError={onShowDialogError}
                 recordSchemaId={field.recordId}
+                setIsLoading={loading => setIsLoading(loading)}
                 tableSchemaId={table.tableSchemaId}
                 totalFields={!isNil(fields) ? fields.length : undefined}
               />
@@ -544,6 +687,7 @@ export const FieldsDesigner = ({
 
   const reorderField = async (draggedFieldIdx, droppedFieldName) => {
     try {
+      setIsLoading(true);
       const inmFields = [...fields];
       const droppedFieldIdx = FieldsDesignerUtils.getIndexByFieldName(droppedFieldName, inmFields);
       await DatasetService.updateFieldOrder(
@@ -559,6 +703,8 @@ export const FieldsDesigner = ({
       onChangeFields(inmFields, false, table.tableSchemaId);
     } catch (error) {
       console.error('FieldsDesigner - reorderField.', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -640,7 +786,7 @@ export const FieldsDesigner = ({
               !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
             }`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead}
-            icon={'import'}
+            icon="import"
             label={resourcesContext.messages['importTableSchema']}
             onClick={() => manageDialogs('isImportTableSchemaDialogVisible', true)}
           />
@@ -649,7 +795,7 @@ export const FieldsDesigner = ({
               !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
             }`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead}
-            icon={'export'}
+            icon="export"
             label={resourcesContext.messages['exportTableSchema']}
             onClick={() => onExportTableSchema('csv', true)}
           />
@@ -658,7 +804,7 @@ export const FieldsDesigner = ({
               !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
             } datasetSchema-uniques-help-step`}
             disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
-            icon={'key'}
+            icon="key"
             label={resourcesContext.messages['addUniqueConstraint']}
             onClick={() => {
               manageDialogs('isManageUniqueConstraintDialogVisible', true);
@@ -674,7 +820,7 @@ export const FieldsDesigner = ({
               !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) ? 'p-button-animated-blink' : null
             } datasetSchema-rowConstraint-help-step`}
             disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset)}
-            icon={'horizontalSliders'}
+            icon="horizontalSliders"
             label={resourcesContext.messages['addRowConstraint']}
             onClick={() => validationContext.onOpenModalFromRow(table.recordSchemaId)}
           />
@@ -800,13 +946,67 @@ export const FieldsDesigner = ({
               tooltipOptions={{ position: 'top' }}
             />
           </span>
-          <label className={styles.requiredWrap}>{resourcesContext.messages['required']}</label>
-          <label className={styles.readOnlyWrap}>{resourcesContext.messages['readOnly']}</label>
+          <label>{resourcesContext.messages['required']}</label>
+          <label>{resourcesContext.messages['readOnly']}</label>
           <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}>
             {resourcesContext.messages['newFieldPlaceHolder']}
           </label>
           <label>{resourcesContext.messages['newFieldDescriptionPlaceHolder']}</label>
           <label>{resourcesContext.messages['newFieldTypePlaceHolder']}</label>
+          <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}></label>
+          <label></label>
+          <label></label>
+          {/* <label>
+            <div
+              className={`${styles.bulkDeleteButton} ${
+                markedForDeletion.length === 0 && bulkDelete ? styles.disabledButton : ''
+              } ${bulkDelete ? styles.bulkConfirmDeleteButton : ''}`}
+              data-for="bulkDeleteTooltip"
+              data-tip
+              onClick={e => {
+                e.preventDefault();
+                if (markedForDeletion.length > 0) {
+                  setIsDeleteDialogVisible(true);
+                } else {
+                  setBulkDelete(!bulkDelete);
+                }
+              }}>
+              <FontAwesomeIcon
+                aria-label={resourcesContext.messages['deleteFieldLabel']}
+                icon={AwesomeIcons(!bulkDelete ? 'check' : 'delete')}
+              />
+              <span className="srOnly">{resourcesContext.messages['deleteFieldLabel']}</span>
+            </div>
+            {bulkDelete && (
+              <div
+                className={`${styles.bulkDeleteButton} ${styles.bulkCancelDeleteButton}`}
+                data-for="bulkDeleteCancelTooltip"
+                data-tip
+                onClick={e => {
+                  e.preventDefault();
+                  setMarkedForDeletion([]);
+                  setBulkDelete(false);
+                }}>
+                <FontAwesomeIcon aria-label={resourcesContext.messages['cancel']} icon={AwesomeIcons('cross')} />
+                <span className="srOnly">{resourcesContext.messages['cancel']}</span>
+              </div>
+            )}
+            <ReactTooltip border={true} effect="solid" id="bulkDeleteTooltip" place="top">
+              {!bulkDelete ? (
+                <div>
+                  <p>{resourcesContext.messages['bulkDeleteCheckTooltip']}</p>
+                  <p className={styles.bulkCancelDeleteButtonTooltip}>
+                    {resourcesContext.messages['bulkDeleteCheckTooltipShift']}
+                  </p>
+                </div>
+              ) : (
+                resourcesContext.messages['bulkDeleteConfirmTooltip']
+              )}
+            </ReactTooltip>
+            <ReactTooltip border={true} effect="solid" id="bulkDeleteCancelTooltip" place="top">
+              {resourcesContext.messages['cancel']}
+            </ReactTooltip>
+          </label> */}
         </div>
       )}
       {renderAllFields()}

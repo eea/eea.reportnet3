@@ -4,6 +4,7 @@ import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
+import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
 import { DataflowHelpReporterHelpConfig } from 'conf/help/dataflowHelp/reporter';
@@ -168,7 +169,8 @@ export const DataflowHelp = withRouter(({ history, match }) => {
                 dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
               ).datasetId;
             });
-            setDatasetsSchemas(completed);
+
+            setDatasetsSchemas(uniqBy(completed, 'datasetSchemaId'));
           });
         } else {
           setIsLoadingSchemas(false);
@@ -184,7 +186,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
                 designDataset => designDataset.datasetSchemaId === datasetSchema.datasetSchemaId
               ).datasetId;
             });
-            setDatasetsSchemas(completed);
+            setDatasetsSchemas(uniqBy(completed, 'datasetSchemaId'));
           });
         } else {
           setIsLoadingSchemas(false);

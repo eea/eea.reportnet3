@@ -1,3 +1,5 @@
+import isNil from 'lodash/isNil';
+
 export const dataflowsReducer = (state, { type, payload }) => {
   switch (type) {
     case 'SET_DATAFLOWS':
@@ -20,7 +22,8 @@ export const dataflowsReducer = (state, { type, payload }) => {
         [payload.type]: payload.data,
         dataflowsCountFirstLoad: false,
         dataflowsCount: { ...state.dataflowsCount, [payload.type]: payload.data.length },
-        activeIndex: state.dataflowsCountFirstLoad ? getIndex() : state.activeIndex
+        activeIndex:
+          isNil(payload.contextCurrentDataflowType) && state.dataflowsCountFirstLoad ? getIndex() : state.activeIndex
       };
 
     case 'HAS_PERMISSION':

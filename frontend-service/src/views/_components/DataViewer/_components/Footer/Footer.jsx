@@ -12,7 +12,7 @@ const Footer = ({ hasWritePermissions, isDataflowOpen, isDesignDatasetEditorRead
         disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
         icon="add"
         label={resourcesContext.messages['addRecord']}
-        onClick={() => onAddClick()}
+        onClick={onAddClick}
         style={{ float: 'left' }}
       />
       <Button

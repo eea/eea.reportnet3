@@ -127,12 +127,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
-  useEffect(() => {
-    if (!isEmpty(dataflowState.data)) {
-      userContext.setCurrentDataflowType(dataflowState.data.type);
-    }
-  }, [dataflowState.data]);
-
   const {
     obligation,
     setCheckedObligation,
@@ -271,7 +265,7 @@ const Dataflow = withRouter(({ history, match }) => {
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       datasetsInfoBtn: isAdmin && isNil(dataProviderId),
-      editBtn: isDesign && isLeadDesigner && !isAdmin && !isBusinessDataflow,
+      editBtn: isDesign && isLeadDesigner && !isBusinessDataflow,
       editBusinessBtn: (isAdmin || isLeadDesigner) && isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
