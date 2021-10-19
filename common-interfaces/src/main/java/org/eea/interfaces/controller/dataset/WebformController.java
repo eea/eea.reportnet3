@@ -1,10 +1,9 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
-import org.eea.interfaces.vo.dataset.schemas.WebformVO;
+import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 
 /**
@@ -21,14 +20,12 @@ public interface WebformController {
 
   }
 
-
   /**
-   * Gets the webforms list by dataset id.
+   * Gets the list webforms.
    *
-   * @param datasetId the dataset id
-   * @return the webforms list
+   * @return the list webforms
    */
-  @GetMapping("/{datasetId}/webforms")
-  List<WebformVO> getListWebformsByDatasetId(@PathVariable("datasetId") Long datasetId);
+  @GetMapping("/listAll")
+  List<WebformMetabaseVO> getListWebforms();
 
 }

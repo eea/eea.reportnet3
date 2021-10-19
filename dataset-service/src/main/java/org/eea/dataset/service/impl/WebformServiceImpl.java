@@ -1,10 +1,12 @@
 package org.eea.dataset.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
+import org.eea.dataset.mapper.WebformMetabaseMapper;
+import org.eea.dataset.persistence.metabase.repository.WebformRepository;
 import org.eea.dataset.service.WebformService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.schemas.WebformVO;
+import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
@@ -15,6 +17,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class WebformServiceImpl implements WebformService {
 
+  /** The webform repository. */
+  @Autowired
+  WebformRepository webformRepository;
+
+
+  /** The webform mapper. */
+  @Autowired
+  private WebformMetabaseMapper webformMetabaseMapper;
+
 
   /**
    * Gets the list webforms by dataset id.
@@ -24,10 +35,9 @@ public class WebformServiceImpl implements WebformService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<WebformVO> getListWebformsByDatasetId(Long datasetId) throws EEAException {
+  public List<WebformMetabaseVO> getListWebforms() throws EEAException {
 
-    List<WebformVO> webformsList = new ArrayList<>();
 
-    return webformsList;
+    return webformMetabaseMapper.entityListToClass(webformRepository.findAll());
   }
 }

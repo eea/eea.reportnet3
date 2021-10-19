@@ -2,7 +2,7 @@ package org.eea.dataset.service;
 
 import java.util.List;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.schemas.WebformVO;
+import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
 
 
 
@@ -19,5 +19,5 @@ public interface WebformService {
    * @return the list webforms by dataset id
    * @throws EEAException the EEA exception
    */
-  List<WebformVO> getListWebformsByDatasetId(Long datasetId) throws EEAException;
+  List<WebformMetabaseVO> getListWebforms() throws EEAException;
 }
