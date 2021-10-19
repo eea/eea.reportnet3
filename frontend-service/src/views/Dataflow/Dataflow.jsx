@@ -781,6 +781,25 @@ const Dataflow = withRouter(({ history, match }) => {
     </Fragment>
   );
 
+  const onConfirmReporterRestrictFromPublic = async () => {
+    manageDialogs('isReporterRestrictFromPublicDialogVisible', false);
+    try {
+      dataflowDispatch({
+        type: 'SET_IS_FETCHING_DATA',
+        payload: { isFetchingData: true }
+      });
+      await SnapshotService.update(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
+      onLoadReportingDataflow();
+    } catch (error) {
+      console.error('Dataflow - onConfirmReporterRestrictFromPublic.', error);
+      notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } });
+    } finally {
+      if (dataflowState.restrictFromPublic) {
+        dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: false });
+      }
+    }
+  };
+
   const onConfirmUpdateIsReleaseable = async () => {
     manageDialogs('isReleaseableDialogVisible', false);
     try {
@@ -1073,6 +1092,40 @@ const Dataflow = withRouter(({ history, match }) => {
             <label className={styles.isReleasableLabel} htmlFor="isReleasableCheckbox">
               <span className={styles.pointer} onClick={() => setIsReleaseable(!dataflowState.isReleasable)}>
                 {resourcesContext.messages['isReleasableDataflowCheckboxLabel']}
+              </span>
+            </label>
+          </ConfirmDialog>
+        )}
+
+        {dataflowState.isReporterRestrictFromPublicDialogVisible && (
+          <ConfirmDialog
+            disabledConfirm={!dataflowState.restrictFromPublic}
+            header={resourcesContext.messages['reporterRestrictFromPublicDialogHeader']}
+            iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
+            labelCancel={resourcesContext.messages['cancel']}
+            labelConfirm={resourcesContext.messages['save']}
+            onConfirm={onConfirmReporterRestrictFromPublic}
+            onHide={() => {
+              manageDialogs('isReporterRestrictFromPublicDialogVisible', false);
+              if (dataflowState.restrictFromPublic) {
+                dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: false });
+              }
+            }}
+            visible={dataflowState.isReporterRestrictFromPublicDialogVisible}>
+            <Checkbox
+              checked={dataflowState.restrictFromPublic}
+              id="reporterRestrictFromPublicCheckbox"
+              inputId="reporterRestrictFromPublicCheckbox"
+              onChange={e => dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: e.checked })}
+              role="checkbox"
+            />
+            <label className={styles.showPublicInfo} htmlFor="reporterRestrictFromPublicCheckbox">
+              <span
+                className={styles.pointer}
+                onClick={() =>
+                  dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
+                }>
+                {resourcesContext.messages['reporterRestrictFromPublicCheckboxLabel']}
               </span>
             </label>
           </ConfirmDialog>

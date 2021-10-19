@@ -1313,5 +1313,7 @@
     "duplicateDisabledMessage": "already exists",
     "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field",
     "reporterRestrictFromPublicftSideBarButton": "Reporter data status",
+    "reporterRestrictFromPublicDialogHeader": "Show/hide public dataflow data",
+    "reporterRestrictFromPublicCheckboxLabel": "Show/hide public dataflow data"
   }
 }
