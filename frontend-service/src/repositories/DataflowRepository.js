@@ -3,6 +3,8 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const DataflowRepository = {
+  countByType: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.countByType) }),
+
   getAll: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getAll) }),
 
   getCloneableDataflows: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getCloneableDataflows) }),
@@ -18,13 +20,21 @@ export const DataflowRepository = {
       data: { name, description, obligation: { obligationId }, releasable: true, type }
     }),
 
+  downloadAllSchemasInfo: async (dataflowId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(DataflowConfig.downloadAllSchemasInfo, { dataflowId, fileName })
+    }),
+
+  generateAllSchemasInfoFile: async dataflowId =>
+    await HTTPRequester.post({ url: getUrl(DataflowConfig.generateAllSchemasInfoFile, { dataflowId }) }),
+
+  downloadPublicAllSchemasInfoFile: async dataflowId =>
+    await HTTPRequester.download({ url: getUrl(DataflowConfig.downloadPublicAllSchemasInfoFile, { dataflowId }) }),
+
   getDetails: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDetails, { dataflowId }) }),
 
-  getDatasetsFinalFeedback: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsFinalFeedback, { dataflowId }) }),
-
-  getDatasetsReleasedStatus: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsReleasedStatus, { dataflowId }) }),
+  getDatasetsFinalFeedbackAndReleasedStatus: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsFinalFeedbackAndReleasedStatus, { dataflowId }) }),
 
   getDatasetsValidationStatistics: async (dataflowId, datasetSchemaId) =>
     await HTTPRequester.get({
@@ -97,5 +107,8 @@ export const DataflowRepository = {
         releasable: isReleasable,
         showPublicInfo
       }
-    })
+    }),
+
+  getDatasetsInfo: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsInfo, { dataflowId }) })
 };

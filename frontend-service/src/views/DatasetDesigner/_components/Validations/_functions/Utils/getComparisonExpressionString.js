@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import { getSelectedFieldById } from './getSelectedFieldById';
 
 const getDateFormattedField = (field, format) => {
-  return dayjs(field).format(format);
+  return field !== '' ? dayjs(field).format(format) : '';
 };
 const getPrefixedExpression = ({ expression, tabs, prefix, expressionEnd }) => {
   return `( ${prefix}( ${getSelectedFieldById(expression.field1, tabs).label} ) ${
@@ -48,7 +48,7 @@ const printExpression = (expression, tabs) => {
         case 'dateTime':
           return getExpressionString({
             ...expressionParameters,
-            expressionEnd: getDateFormattedField(expression.field2, 'YYYY-MM-DD HH:mm:ss')
+            expressionEnd: getDateFormattedField(expression.field2, 'YYYY-MM-DDTHH:mm:ss[Z]')
           });
         case 'yearDateTime':
           return getPrefixedExpression({ ...expressionParameters, prefix: 'Year' });

@@ -240,6 +240,7 @@ const TabView = withRouter(
             onTabMouseWheel={onTabMouseWheel}
             onTabNameError={onTabNameError}
             rightIcon={tab.props.rightIcon}
+            rightIconClass={tab.props.rightIconClass}
             scrollTo={scrollTo}
             selected={selected}
             tableSchemaId={tab.props.tableSchemaId}

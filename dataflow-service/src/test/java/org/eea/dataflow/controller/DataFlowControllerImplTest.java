@@ -23,6 +23,7 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -909,5 +910,19 @@ public class DataFlowControllerImplTest {
   public void accessEntityTest() {
     assertFalse("reference not allowed", dataFlowControllerImpl
         .accessEntity(TypeDataflowEnum.BUSINESS, EntityClassEnum.DATASET, 1L));
+  }
+
+  @Test
+  public void getDatasetSummaryByDataflowIdTest() throws EEAException {
+    List<DatasetsSummaryVO> datasetsSummary = new ArrayList<>();
+    Mockito.when(dataflowService.getDatasetSummary(Mockito.any())).thenReturn(datasetsSummary);
+    assertEquals(new ArrayList<>(), dataFlowControllerImpl.getDatasetSummaryByDataflowId(1L));
+  }
+
+  @Test
+  public void getDatasetSummaryByDataflowIdErrorTest() throws EEAException {
+    doThrow(new EEAException()).when(dataflowService).getDatasetSummary(Mockito.anyLong());
+    dataFlowControllerImpl.getDatasetSummaryByDataflowId(1L);
+    Mockito.verify(dataflowService, times(1)).getDatasetSummary(Mockito.anyLong());
   }
 }

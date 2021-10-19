@@ -132,7 +132,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         <Fragment>
           <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {RecordUtils.getFieldTypeValue(column.type)}
+            {RecordUtils.getFieldTypeValue(column.type)?.value}
           </span>
           <br />
           <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['description']}: </span>
@@ -164,7 +164,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         <Fragment>
           <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {RecordUtils.getFieldTypeValue(column.type)}
+            {RecordUtils.getFieldTypeValue(column.type)?.value}
           </span>
           <br />
           <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['description']}: </span>

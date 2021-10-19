@@ -20,13 +20,10 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { filterReducer } from './_functions/Reducers/filterReducer';
 
-import { useOnClickOutside } from 'views/_functions/Hooks/useOnClickOutside';
-
 import { ApplyFilterUtils } from './_functions/Utils/ApplyFilterUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
 import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
-
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const Filters = ({
@@ -50,7 +47,7 @@ export const Filters = ({
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const dateRef = useRef(null);
+  const calendarRefs = useRef([]);
 
   const [filterState, filterDispatch] = useReducer(filterReducer, {
     checkboxes: [],
@@ -111,7 +108,29 @@ export const Filters = ({
 
   const { input, multiselect, date, dropdown, checkbox } = FiltersUtils.getOptionsNames(options);
 
-  useOnClickOutside(dateRef, () => isEmpty(filterState.filterBy[date]) && onAnimateLabel([date], false));
+  useEffect(() => {
+    const listener = event => {
+      date.forEach(dateProperty => {
+        if (!calendarRefs.current[dateProperty] || calendarRefs.current[dateProperty].contains(event.target)) {
+          return;
+        }
+
+        if (!isEmpty(filterState.filterBy[dateProperty])) {
+          onAnimateLabel(dateProperty, true);
+        } else {
+          onAnimateLabel(dateProperty, false);
+        }
+      });
+    };
+
+    document.addEventListener('mousedown', listener);
+    document.addEventListener('touchstart', listener);
+
+    return () => {
+      document.removeEventListener('mousedown', listener);
+      document.removeEventListener('touchstart', listener);
+    };
+  }, [calendarRefs, filterState.filterBy]);
 
   const getCheckboxFilterState = property => {
     const [checkBox] = filterState.checkboxes.filter(checkbox => checkbox.property === property);
@@ -228,17 +247,20 @@ export const Filters = ({
 
     const checkedKeys = FiltersUtils.getSelectedKeys(filterState, filter, checkbox);
 
+    const dateKeys = FiltersUtils.getFilterKeys(filterState, filter, date);
+
     const filteredData = ApplyFilterUtils.onApplyFilters({
       actualFilterBy,
       checkbox,
       checkedKeys,
       data,
       date,
+      dateKeys,
       filter,
       filteredKeys: inputKeys,
+      multiselect,
       searchedKeys,
       selectedKeys,
-      multiselect,
       state: filterState,
       value
     });
@@ -338,12 +360,14 @@ export const Filters = ({
     }
   };
 
-  const renderCalendarFilter = property => {
+  const renderCalendarFilter = (property, label) => {
     const inputId = uniqueId();
     return (
-      <span className={styles.input} key={property} ref={dateRef}>
+      <span className={styles.input} key={property}>
         {renderOrderFilter(property)}
-        <span className={`p-float-label ${!sendData ? styles.label : ''}`}>
+        <span
+          className={`p-float-label ${!sendData ? styles.label : ''}`}
+          ref={el => (calendarRefs.current[property] = el)}>
           <Calendar
             baseZIndex={9999}
             className={styles.calendarFilter}
@@ -373,7 +397,7 @@ export const Filters = ({
             />
           )}
           <label className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label} htmlFor={inputId}>
-            {resourcesContext.messages[property]}
+            {isEmpty(label) ? resourcesContext.messages[property] : label}
           </label>
         </span>
         <label className="srOnly" htmlFor={inputId}>
@@ -429,7 +453,7 @@ export const Filters = ({
     );
   };
 
-  const renderDropdown = property => (
+  const renderDropdown = (property, label = '') => (
     <span className={`${styles.input}`} key={property}>
       {renderOrderFilter(property)}
       <Dropdown
@@ -440,7 +464,7 @@ export const Filters = ({
         id={`${property}_dropdown`}
         inputClassName={`p-float-label ${styles.label}`}
         inputId={property}
-        label={resourcesContext.messages[property]}
+        label={isEmpty(label) ? resourcesContext.messages[property] : label}
         onChange={event => onFilterData(property, event.value)}
         onMouseDown={event => {
           event.preventDefault();
@@ -562,11 +586,11 @@ export const Filters = ({
             renderMultiselectSelectFilter(property.name, property.showInput, property.label)
           );
         case 'dropdown':
-          return filterOption.properties.map(property => renderDropdown(property.name));
+          return filterOption.properties.map(property => renderDropdown(property.name, property.label));
         case 'checkbox':
           return filterOption.properties.map((property, i) => renderCheckboxFilter(property.name, property.label, i));
         case 'date':
-          return filterOption.properties.map(property => renderCalendarFilter(property.name));
+          return filterOption.properties.map(property => renderCalendarFilter(property.name, property.label));
         default:
           return '';
       }

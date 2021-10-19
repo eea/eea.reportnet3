@@ -49,7 +49,7 @@ public interface DatasetSchemaController {
    * @param id the id
    * @return the data set schema VO
    */
-  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaById(@PathVariable("id") String id);
 
   /**
@@ -62,12 +62,23 @@ public interface DatasetSchemaController {
   DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId);
 
   /**
+   * Find data schema by dataset id private.
+   *
+   * @param datasetId the dataset id
+   * @return the data set schema VO
+   */
+  @GetMapping(value = "/private/publicDatasetId/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetSchemaVO findDataSchemaByDatasetIdPrivate(@PathVariable("datasetId") Long datasetId);
+
+  /**
    * Gets the dataset schema id.
    *
    * @param datasetId the dataset id
    * @return the dataset schema id
    */
-  @GetMapping(value = "/getDataSchema/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/getDataSchema/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
   String getDatasetSchemaId(@PathVariable("datasetId") Long datasetId);
 
   /**
@@ -226,6 +237,19 @@ public interface DatasetSchemaController {
   List<UniqueConstraintVO> getUniqueConstraints(@PathVariable("schemaId") String datasetSchemaId,
       @PathVariable("dataflowId") Long dataflowId);
 
+  /**
+   * Gets the public unique constraints.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
+   * @return the public unique constraints
+   */
+  @GetMapping(value = "{schemaId}/getPublicUniqueConstraints/dataflow/{dataflowId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<UniqueConstraintVO> getPublicUniqueConstraints(
+      @PathVariable("schemaId") String datasetSchemaId,
+      @PathVariable("dataflowId") Long dataflowId);
+
 
   /**
    * Creates the unique constraint.
@@ -358,5 +382,17 @@ public interface DatasetSchemaController {
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
       @RequestParam(value = "replace", required = false) Boolean replace);
+
+
+  /**
+   * Export field schemas from dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the response entity
+   */
+  @GetMapping(value = "/dataset/{datasetId}/exportFieldSchemas",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<byte[]> exportFieldSchemasFromDataset(
+      @PathVariable("datasetId") Long datasetId);
 
 }

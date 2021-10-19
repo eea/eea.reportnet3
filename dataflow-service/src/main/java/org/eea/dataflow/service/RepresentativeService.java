@@ -56,16 +56,6 @@ public interface RepresentativeService {
    */
   List<DataProviderVO> getAllDataProviderByGroupId(Long groupId);
 
-
-  /**
-   * Find data provider group by dataflow id.
-   *
-   * @param dataflowId the dataflow id
-   * @return the data provider group VO
-   * @throws EEAException the EEA exception
-   */
-  DataProviderCodeVO findDataProviderGroupByDataflowId(Long dataflowId) throws EEAException;
-
   /**
    * Gets the represetatives by id data flow.
    *
@@ -214,4 +204,5 @@ public interface RepresentativeService {
    * @return the list
    */
   List<FMEUserVO> findFmeUsers();
+
 }

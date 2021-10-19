@@ -1,0 +1,8 @@
+[
+  { "key": "COLLECTION", "value": "dataCollection" },
+  { "key": "DESIGN", "value": "designDataset" },
+  { "key": "EUDATASET", "value": "euDataset" },
+  { "key": "REFERENCE", "value": "referenceDataset" },
+  { "key": "REPORTING", "value": "reportingDataset" },
+  { "key": "TEST", "value": "testDataset" }
+]

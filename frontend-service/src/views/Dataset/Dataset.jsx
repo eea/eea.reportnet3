@@ -641,7 +641,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getDataSchema = async () => {
     try {
-      const datasetSchema = await DatasetService.getSchema(datasetId);
+      const datasetSchema = await DatasetService.getSchema(dataflowId, datasetId);
       setDatasetSchemaAllTables(datasetSchema.tables);
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
@@ -1117,6 +1117,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           style={{ width: '90%' }}
           visible={validationsVisible}>
           <ShowValidationsList
+            dataflowId={dataflowId}
             datasetId={datasetId}
             datasetName={datasetName}
             datasetSchemaId={metadata?.dataset.datasetSchemaId}
@@ -1141,6 +1142,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           style={{ width: '90%' }}
           visible={validationListDialogVisible}>
           <QCList
+            dataflowId={dataflowId}
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={metadata?.dataset.datasetSchemaId}
