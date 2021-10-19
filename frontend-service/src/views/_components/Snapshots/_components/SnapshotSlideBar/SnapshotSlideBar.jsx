@@ -149,7 +149,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                   className={`${styles.createSnapshotButton} rp-btn secondary`}
                   disabled={!hasCorrectDescriptionLength(inputValue)}
                   icon="plus"
-                  onClick={() => onConfirmClick()}
+                  onClick={onConfirmClick}
                   type="submit"
                 />
               </div>

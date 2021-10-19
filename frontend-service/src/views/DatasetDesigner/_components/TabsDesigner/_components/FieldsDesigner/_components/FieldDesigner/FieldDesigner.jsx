@@ -7,8 +7,6 @@ import styles from './FieldDesigner.module.scss';
 
 import { config } from 'conf';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { AttachmentEditor } from './_components/AttachmentEditor';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
@@ -16,9 +14,11 @@ import { Checkbox } from 'views/_components/Checkbox';
 import { CodelistEditor } from './_components/CodelistEditor';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { LinkSelector } from './_components/LinkSelector';
+// import ReactTooltip from 'react-tooltip';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -28,11 +28,13 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { fieldDesignerReducer } from './_functions/Reducers/fieldDesignerReducer';
 
-import { RecordUtils } from 'views/_functions/Utils';
+import { FieldsDesignerUtils } from 'views/_functions/Utils/FieldsDesignerUtils';
+import { RecordUtils } from 'views/_functions/Utils/RecordUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const FieldDesigner = ({
   addField = false,
+  bulkDelete = false,
   checkDuplicates,
   checkInvalidCharacters,
   codelistItems,
@@ -60,7 +62,10 @@ export const FieldDesigner = ({
   isCodelistOrLink,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isLoading = false,
   isReferenceDataset,
+  markedForDeletion,
+  onBulkCheck,
   onCodelistAndLinkShow,
   onFieldDelete,
   onFieldDragAndDrop,
@@ -69,10 +74,12 @@ export const FieldDesigner = ({
   onNewFieldAdd,
   onShowDialogError,
   recordSchemaId,
+  setIsLoading = () => {},
   tableSchemaId,
   totalFields
 }) => {
   const geometricTypes = ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'];
+  const { areEquals } = TextUtils;
 
   const initialFieldDesignerState = {
     addFieldCallSent: false,
@@ -171,6 +178,11 @@ export const FieldDesigner = ({
     }
   }, [totalFields]);
 
+  const getDuplicatedName = () => {
+    const filteredFields = fields.filter(field => field.name.startsWith(`${fieldDesignerState.fieldValue}_`));
+    return `${fieldDesignerState.fieldValue}_${filteredFields.length + 1}`;
+  };
+
   const validField = () =>
     !isNil(fieldDesignerState.fieldTypeValue) &&
     fieldDesignerState.fieldTypeValue !== '' &&
@@ -188,14 +200,11 @@ export const FieldDesigner = ({
 
   const onChangeFieldType = type => {
     dispatchFieldDesigner({ type: 'SET_TYPE', payload: { type, previousType: fieldDesignerState.fieldTypeValue } });
-    if (
-      TextUtils.areEquals(type.fieldType, 'codelist') ||
-      TextUtils.areEquals(type.fieldType, 'multiselect_codelist')
-    ) {
+    if (areEquals(type.fieldType, 'codelist') || areEquals(type.fieldType, 'multiselect_codelist')) {
       onCodelistDropdownSelected(type);
-    } else if (TextUtils.areEquals(type.fieldType, 'link') || TextUtils.areEquals(type.fieldType, 'external_link')) {
+    } else if (areEquals(type.fieldType, 'link') || areEquals(type.fieldType, 'external_link')) {
       onLinkDropdownSelected(type);
-    } else if (TextUtils.areEquals(type.fieldType, 'attachment')) {
+    } else if (areEquals(type.fieldType, 'attachment')) {
       onAttachmentDropdownSelected(type);
     } else {
       if (fieldId === '-1') {
@@ -218,7 +227,7 @@ export const FieldDesigner = ({
             codelistItems: null,
             pk: geometricTypes.includes(type.fieldType.toUpperCase()) ? false : fieldDesignerState.fieldPKValue,
             type: parseGeospatialTypes(type.fieldType),
-            isLinkChange: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'LINK')
+            isLinkChange: areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'LINK')
           });
         } else {
           if (type !== '') {
@@ -372,9 +381,7 @@ export const FieldDesigner = ({
         if (!isUndefined(fieldDesignerState.fieldValue) && fieldDesignerState.fieldValue !== '') {
           onFieldAdd({
             codelistItems,
-            type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
-              ? 'EXTERNAL_LINK'
-              : 'LINK',
+            type: areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link') ? 'EXTERNAL_LINK' : 'LINK',
             referencedField: {
               ...link,
               referencedField: inmReferencedField
@@ -412,7 +419,7 @@ export const FieldDesigner = ({
     if (
       !isNil(fieldType) &&
       !isNil(fieldDesignerState.fieldPreviousTypeValue) &&
-      !TextUtils.areEquals(fieldType, fieldDesignerState.fieldPreviousTypeValue.fieldType)
+      !areEquals(fieldType, fieldDesignerState.fieldPreviousTypeValue.fieldType)
     ) {
       dispatchFieldDesigner({ type: 'RESET_REFERENCED_FIELD' });
     }
@@ -437,9 +444,11 @@ export const FieldDesigner = ({
     referencedField = fieldDesignerState.fieldLinkValue,
     required = fieldDesignerState.fieldRequiredValue,
     type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
-    validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
+    validExtensions = fieldDesignerState.fieldFileProperties.validExtensions,
+    isDuplicated = false
   }) => {
     try {
+      setIsLoading(true);
       const response = await DatasetService.createRecordDesign(datasetId, {
         codelistItems,
         description,
@@ -457,7 +466,9 @@ export const FieldDesigner = ({
         type,
         validExtensions
       });
-      dispatchFieldDesigner({ type: 'RESET_NEW_FIELD' });
+      if (!isDuplicated) {
+        dispatchFieldDesigner({ type: 'RESET_NEW_FIELD' });
+      }
       onNewFieldAdd({
         codelistItems,
         description,
@@ -494,6 +505,7 @@ export const FieldDesigner = ({
         }
       }
       dispatchFieldDesigner({ type: 'SET_ADD_FIELD_SENT', payload: false });
+      setIsLoading(false);
     }
   };
 
@@ -695,9 +707,7 @@ export const FieldDesigner = ({
         if (fieldId.toString() === '-1') {
           onFieldAdd({
             codelistItems,
-            type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
-              ? 'EXTERNAL_LINK'
-              : 'LINK',
+            type: areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link') ? 'EXTERNAL_LINK' : 'LINK',
             referencedField: {
               ...link,
               referencedField: inmReferencedField
@@ -709,9 +719,7 @@ export const FieldDesigner = ({
           fieldUpdate({
             codelistItems,
             isLinkChange: true,
-            type: TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link')
-              ? 'EXTERNAL_LINK'
-              : 'LINK',
+            type: areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link') ? 'EXTERNAL_LINK' : 'LINK',
             referencedField: {
               ...link,
               referencedField: inmReferencedField
@@ -758,6 +766,7 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
+      setIsLoading(true);
       await DatasetService.updateFieldDesign(datasetId, {
         codelistItems,
         description,
@@ -770,7 +779,7 @@ export const FieldDesigner = ({
         readOnly,
         recordId,
         referencedField:
-          TextUtils.areEquals(type, 'LINK') || TextUtils.areEquals(type, 'EXTERNAL_LINK')
+          areEquals(type, 'LINK') || areEquals(type, 'EXTERNAL_LINK')
             ? !isNil(referencedField)
               ? parseReferenceField(referencedField)
               : fieldDesignerState.fieldLinkValue
@@ -793,7 +802,7 @@ export const FieldDesigner = ({
         readOnly,
         recordId,
         referencedField:
-          TextUtils.areEquals(type, 'LINK') || TextUtils.areEquals(type, 'EXTERNAL_LINK')
+          areEquals(type, 'LINK') || areEquals(type, 'EXTERNAL_LINK')
             ? !isNil(referencedField)
               ? parseReferenceField(referencedField)
               : fieldDesignerState.fieldLinkValue
@@ -812,6 +821,8 @@ export const FieldDesigner = ({
           });
         }
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -839,6 +850,20 @@ export const FieldDesigner = ({
     </div>
   );
 
+  const renderAttachmentEditor = () => {
+    if (fieldDesignerState.isAttachmentEditorVisible) {
+      return (
+        <AttachmentEditor
+          isAttachmentEditorVisible={fieldDesignerState.isAttachmentEditorVisible}
+          onCancelSaveAttachment={onCancelSaveAttachment}
+          onSaveAttachment={onSaveAttachment}
+          selectedAttachment={fieldDesignerState.fieldFileProperties}
+          type={fieldDesignerState.fieldTypeValue.value}
+        />
+      );
+    }
+  };
+
   const renderCheckboxes = () => (
     <div>
       {!addField ? (
@@ -862,7 +887,8 @@ export const FieldDesigner = ({
             geometricTypes.includes(fieldDesignerState.fieldTypeValue.fieldType.toUpperCase())) ||
           (hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)) ||
           isDataflowOpen ||
-          isDesignDatasetEditorRead
+          isDesignDatasetEditorRead ||
+          isLoading
         }
         id={`${fieldId}_check_pk`}
         inputId={`${fieldId}_check_pk`}
@@ -872,21 +898,7 @@ export const FieldDesigner = ({
             onPKChange(e.checked);
           }
         }}
-        tooltip={
-          !isNil(fieldDesignerState.fieldTypeValue) &&
-          !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
-          geometricTypes.includes(fieldDesignerState.fieldTypeValue.fieldType.toUpperCase())
-            ? resourcesContext.messages['disabledPKGeom']
-            : hasPK && !fieldDesignerState.fieldPKValue
-            ? resourcesContext.messages['disabledPKHas']
-            : hasPK && fieldDesignerState.fieldPKReferencedValue
-            ? resourcesContext.messages['disabledPKLink']
-            : isDataflowOpen
-            ? resourcesContext.messages['disabledIsOpen']
-            : isDesignDatasetEditorRead
-            ? resourcesContext.messages['disabledEditorRead']
-            : null
-        }
+        tooltip={renderTooltipPK()}
         tooltipOptions={{ position: 'top' }}
       />
       <Checkbox
@@ -895,22 +907,14 @@ export const FieldDesigner = ({
         className={`${styles.checkRequired} datasetSchema-required-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
-        disabled={Boolean(fieldDesignerState.fieldPKValue) || isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={Boolean(fieldDesignerState.fieldPKValue) || isDataflowOpen || isDesignDatasetEditorRead || isLoading}
         id={`${fieldId}_check_required`}
         inputId={`${fieldId}_check_required`}
         label="Default"
         onChange={e => {
           onRequiredChange(e.checked);
         }}
-        tooltip={
-          Boolean(fieldDesignerState.fieldPKValue)
-            ? resourcesContext.messages['disabledRequiredPK']
-            : isDataflowOpen
-            ? resourcesContext.messages['disabledIsOpen']
-            : isDesignDatasetEditorRead
-            ? resourcesContext.messages['disabledEditorRead']
-            : null
-        }
+        tooltip={renderTooltipRequired()}
         tooltipOptions={{ position: 'top' }}
       />
       <Checkbox
@@ -919,7 +923,7 @@ export const FieldDesigner = ({
         className={`${styles.checkReadOnly} datasetSchema-readOnly-help-step ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
         id={`${fieldId}_check_readOnly`}
         inputId={`${fieldId}_check_readOnly`}
         label="Default"
@@ -928,128 +932,222 @@ export const FieldDesigner = ({
     </div>
   );
 
-  const renderCodelistFileAndLinkButtons = () =>
-    !isUndefined(fieldDesignerState.fieldTypeValue) &&
-    (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
-      fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist') ? (
-      <Button
-        className={`${styles.codelistButton} p-button-secondary-transparent ${
-          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        }`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
-        label={
-          !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
-            ? `${fieldDesignerState.codelistItems.join('; ')}`
-            : fieldDesignerState.fieldTypeValue.fieldType === 'Codelist'
-            ? resourcesContext.messages['codelistSelection']
-            : resourcesContext.messages['multiselectCodelistSelection']
-        }
-        onClick={() => onCodelistDropdownSelected()}
-        style={{ pointerEvents: 'auto' }}
-        tooltip={
-          !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
-            ? `${fieldDesignerState.codelistItems.join('; ')}`
-            : fieldDesignerState.fieldTypeValue.fieldType === 'Codelist'
-            ? resourcesContext.messages['codelistSelection']
-            : resourcesContext.messages['multiselectCodelistSelection']
-        }
-        tooltipOptions={{ position: 'top' }}
-      />
-    ) : !isUndefined(fieldDesignerState.fieldTypeValue) &&
+  const renderCodelistFileAndLinkButtons = () => {
+    if (
+      !isUndefined(fieldDesignerState.fieldTypeValue) &&
+      (fieldDesignerState.fieldTypeValue.fieldType === 'Codelist' ||
+        fieldDesignerState.fieldTypeValue.fieldType === 'Multiselect_Codelist')
+    ) {
+      return (
+        <Button
+          className={`${styles.codelistButton} p-button-secondary-transparent ${
+            fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+          }`}
+          disabled={isDataflowOpen || isDesignDatasetEditorRead}
+          label={
+            !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
+              ? `${fieldDesignerState.codelistItems.join('; ')}`
+              : fieldDesignerState.fieldTypeValue.fieldType === 'Codelist'
+              ? resourcesContext.messages['codelistSelection']
+              : resourcesContext.messages['multiselectCodelistSelection']
+          }
+          onClick={onCodelistDropdownSelected}
+          style={{ pointerEvents: 'auto' }}
+          tooltip={renderTooltipCodelist()}
+          tooltipOptions={{ position: 'top' }}
+        />
+      );
+    }
+    if (
+      !isUndefined(fieldDesignerState.fieldTypeValue) &&
       (fieldDesignerState.fieldTypeValue.fieldType === 'Link' ||
-        fieldDesignerState.fieldTypeValue.fieldType === 'External_link') ? (
-      <Button
-        className={`${styles.codelistButton} p-button-secondary-transparent ${
-          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        }`}
-        disabled={
-          isDataflowOpen ||
-          isDesignDatasetEditorRead ||
-          (!isNil(fieldDesignerState.fieldLinkValue) &&
-            !isEmpty(fieldDesignerState.fieldLinkValue) &&
-            isNil(fieldDesignerState.fieldLinkValue.name))
-        }
-        icon={
-          isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
-            ? null
-            : isNil(fieldDesignerState.fieldLinkValue.name)
-            ? 'spinnerAnimate'
-            : null
-        }
-        label={
-          isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
-            ? resourcesContext.messages['linkSelection']
-            : isNil(fieldDesignerState.fieldLinkValue.name)
-            ? '...'
-            : `${fieldDesignerState.fieldLinkValue.name}`
-        }
-        onClick={() => onLinkDropdownSelected()}
-        style={{ pointerEvents: 'auto' }}
-        tooltip={
-          isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
-            ? resourcesContext.messages['linkSelection']
-            : isNil(fieldDesignerState.fieldLinkValue.name)
-            ? '...'
-            : `${fieldDesignerState.fieldLinkValue.name}`
-        }
-        tooltipOptions={{ position: 'top' }}
-      />
-    ) : !isUndefined(fieldDesignerState.fieldTypeValue) &&
-      fieldDesignerState.fieldTypeValue.fieldType === 'Attachment' ? (
-      <Button
-        className={`${styles.codelistButton} p-button-secondary-transparent ${
-          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        }`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
-        label={`${resourcesContext.messages['validExtensions']} ${
-          !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
-          !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
-            ? fieldDesignerState.fieldFileProperties.validExtensions.join(', ')
-            : '*'
-        } - ${resourcesContext.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
-          resourcesContext.messages['MB']
-        }`}
-        onClick={() => onAttachmentDropdownSelected()}
-        style={{ pointerEvents: 'auto' }}
-        tooltip={`${resourcesContext.messages['validExtensions']} ${
-          !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
-          !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
-            ? fieldDesignerState.fieldFileProperties.validExtensions.join(', ')
-            : '*'
-        } - ${resourcesContext.messages['maxFileSize']} ${
-          !isNil(fieldDesignerState.fieldFileProperties.maxSize) &&
-          fieldDesignerState.fieldFileProperties.maxSize.toString() !== '0'
-            ? `${fieldDesignerState.fieldFileProperties.maxSize} ${resourcesContext.messages['MB']}`
-            : resourcesContext.messages['maxSizeNotDefined']
-        }`}
-        tooltipOptions={{ position: 'top' }}
-      />
-    ) : isCodelistOrLink ? (
-      <span
-        className={fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive}
-        style={{ width: '4rem', marginRight: '0.4rem' }}></span>
-    ) : null;
+        fieldDesignerState.fieldTypeValue.fieldType === 'External_link')
+    ) {
+      return (
+        <Button
+          className={`${styles.codelistButton} p-button-secondary-transparent ${
+            fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+          }`}
+          disabled={
+            isDataflowOpen ||
+            isDesignDatasetEditorRead ||
+            (!isNil(fieldDesignerState.fieldLinkValue) &&
+              !isEmpty(fieldDesignerState.fieldLinkValue) &&
+              isNil(fieldDesignerState.fieldLinkValue.name))
+          }
+          icon={
+            isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
+              ? null
+              : isNil(fieldDesignerState.fieldLinkValue.name)
+              ? 'spinnerAnimate'
+              : null
+          }
+          label={
+            isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
+              ? resourcesContext.messages['linkSelection']
+              : isNil(fieldDesignerState.fieldLinkValue.name)
+              ? '...'
+              : `${fieldDesignerState.fieldLinkValue.name}`
+          }
+          onClick={onLinkDropdownSelected}
+          style={{ pointerEvents: 'auto' }}
+          tooltip={renderTooltipLink()}
+          tooltipOptions={{ position: 'top' }}
+        />
+      );
+    }
+    if (
+      !isUndefined(fieldDesignerState.fieldTypeValue) &&
+      fieldDesignerState.fieldTypeValue.fieldType === 'Attachment'
+    ) {
+      return (
+        <Button
+          className={`${styles.codelistButton} p-button-secondary-transparent ${
+            fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+          }`}
+          disabled={isDataflowOpen || isDesignDatasetEditorRead}
+          label={`${resourcesContext.messages['validExtensions']} ${
+            !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
+            !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
+              ? fieldDesignerState.fieldFileProperties.validExtensions.join(', ')
+              : '*'
+          } - ${resourcesContext.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
+            resourcesContext.messages['MB']
+          }`}
+          onClick={onAttachmentDropdownSelected}
+          style={{ pointerEvents: 'auto' }}
+          tooltip={renderTooltipAttachment()}
+          tooltipOptions={{ position: 'top' }}
+        />
+      );
+    }
+    if (isCodelistOrLink) {
+      return (
+        <span
+          className={fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive}
+          style={{ width: '4rem', marginRight: '0.4rem' }}></span>
+      );
+    }
+  };
 
-  const renderDeleteButton = () =>
-    !addField ? (
-      <div
-        className={`${styles.button} ${styles.deleteButton} ${fieldPKReferenced ? styles.disabledDeleteButton : ''} ${
-          fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-        } ${isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
-        draggable={true}
-        href="#"
-        onClick={e => {
-          e.preventDefault();
-          onFieldDelete(index, fieldDesignerState.fieldTypeValue.fieldType);
-        }}
-        onDragStart={event => {
-          event.preventDefault();
-          event.stopPropagation();
-        }}>
-        <FontAwesomeIcon aria-label={resourcesContext.messages['deleteFieldLabel']} icon={AwesomeIcons('delete')} />
-        <span className="srOnly">{resourcesContext.messages['deleteFieldLabel']}</span>
-      </div>
-    ) : null;
+  const renderDeleteButton = () => {
+    if (!addField) {
+      if (!bulkDelete) {
+        return (
+          <div
+            className={`${styles.button} ${styles.deleteButton} ${
+              fieldPKReferenced ? styles.disabledDeleteButton : ''
+            } ${fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive} ${
+              isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''
+            }`}
+            draggable={true}
+            href="#"
+            onClick={e => {
+              e.preventDefault();
+              onFieldDelete(index, fieldDesignerState.fieldTypeValue.fieldType);
+            }}
+            onDragStart={event => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}>
+            <FontAwesomeIcon aria-label={resourcesContext.messages['deleteFieldLabel']} icon={AwesomeIcons('delete')} />
+            <span className="srOnly">{resourcesContext.messages['deleteFieldLabel']}</span>
+          </div>
+        );
+      } else {
+        return (
+          <Checkbox
+            checked={markedForDeletion.some(markedField => markedField.fieldId === fieldId)}
+            className={`${styles.checkBulkDelete} ${
+              fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+            } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
+            disabled={fieldPKReferenced || isDataflowOpen || isDesignDatasetEditorRead || isLoading}
+            id={`${fieldDesignerState.fieldValue}_mark_to_delete`}
+            inputId={`${fieldDesignerState.fieldValue}_mark_to_delete`}
+            onChange={e => {
+              if (e.originalEvent.shiftKey && markedForDeletion.length > 0) {
+                const idx = FieldsDesignerUtils.getIndexByFieldId(fieldId, fields);
+                const lastMarkedFieldIdx =
+                  markedForDeletion.length > 0 ? markedForDeletion[markedForDeletion.length - 1].fieldIndex : -1;
+                if (lastMarkedFieldIdx !== -1) {
+                  const initIdx = idx > lastMarkedFieldIdx ? lastMarkedFieldIdx : idx;
+                  const lastIdx = idx > lastMarkedFieldIdx ? idx : lastMarkedFieldIdx;
+                  const fieldsSelected = [
+                    {
+                      checked: true,
+                      fieldId,
+                      fieldType: fieldDesignerState.fieldTypeValue,
+                      fieldName: fieldDesignerState.fieldValue,
+                      fieldIndex: index
+                    }
+                  ];
+                  for (let i = initIdx; i <= lastIdx; i++) {
+                    if (!fieldsSelected.some(markedField => markedField.fieldId === fields[i].fieldId)) {
+                      fieldsSelected.push({
+                        checked: true,
+                        fieldId: fields[i].fieldId,
+                        fieldType: RecordUtils.getFieldTypeValue(fields[i].type)?.value,
+                        fieldName: fields[i].name,
+                        fieldIndex: i
+                      });
+                    }
+                  }
+                  onBulkCheck({ fieldsSelected, multiple: true });
+                }
+              } else {
+                onBulkCheck({
+                  checked: e.checked,
+                  fieldId,
+                  fieldType: fieldDesignerState.fieldTypeValue,
+                  fieldName: fieldDesignerState.fieldValue,
+                  fieldIndex: index
+                });
+              }
+            }}
+            role="checkbox"
+          />
+        );
+      }
+    }
+  };
+  const renderDuplicateButton = () => {
+    if (!addField) {
+      return (
+        <div
+          className={`${styles.button} ${styles.duplicateButton} ${
+            fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+          } ${isDataflowOpen || isLoading || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
+          // data-for={fieldDesignerState.fieldValue}
+          // data-tip
+          href="#"
+          onClick={e => {
+            e.preventDefault();
+            onFieldAdd({
+              codelistItems: fieldDesignerState.codelistItems,
+              description: fieldDesignerState.fieldDescriptionValue,
+              isDuplicated: true,
+              maxSize: fieldDesignerState.fieldFileProperties.maxSize,
+              pk: false,
+              pkHasMultipleValues: fieldDesignerState.fieldPkHasMultipleValues,
+              pkMustBeUsed: fieldDesignerState.fieldPkMustBeUsed,
+              name: getDuplicatedName(),
+              readOnly: fieldDesignerState.fieldReadOnlyValue,
+              recordId: recordSchemaId,
+              referencedField: fieldDesignerState.completeLink,
+              required: fieldDesignerState.fieldRequiredValue,
+              type: parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
+              validExtensions: fieldDesignerState.fieldFileProperties.validExtensions
+            });
+          }}>
+          <FontAwesomeIcon aria-label={resourcesContext.messages['duplicate']} icon={AwesomeIcons('clone')} />
+          <span className="srOnly">{resourcesContext.messages['duplicate']}</span>
+          {/* <ReactTooltip border={true} effect="solid" id={fieldDesignerState.fieldValue} place="top">
+          {resourcesContext.messages['duplicate']}
+        </ReactTooltip> */}
+        </div>
+      );
+    }
+  };
 
   const renderInputs = () => (
     <Fragment>
@@ -1058,7 +1156,7 @@ export const FieldDesigner = ({
         className={`${styles.inputField} ${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
         id={fieldName !== '' ? fieldName : 'newField'}
         keyfilter="schemaTableFields"
         maxLength={60}
@@ -1092,7 +1190,7 @@ export const FieldDesigner = ({
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
         collapsedHeight={33}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
         expandableOnClick={true}
         id={`${fieldName}_description`}
         key={fieldId}
@@ -1119,7 +1217,7 @@ export const FieldDesigner = ({
         className={`${styles.dropdownFieldType} ${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
           fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
         }`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
         inputId={`${fieldName}_fieldType`}
         itemTemplate={fieldTypeTemplate}
         name={resourcesContext.messages['newFieldTypePlaceHolder']}
@@ -1145,91 +1243,15 @@ export const FieldDesigner = ({
     </Fragment>
   );
 
-  return (
-    <Fragment>
-      <div
-        className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
-        draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
-        onDragEnd={e => {
-          onFieldDragEnd(e);
-        }}
-        onDragEnter={e => {
-          onFieldDragEnter(e);
-        }}
-        onDragLeave={onFieldDragLeave}
-        onDragOver={onFieldDragOver}
-        onDragStart={e => {
-          onFieldDragStart(e);
-        }}
-        onDrop={e => {
-          onFieldDragDrop(e);
-        }}
-        style={{ cursor: isDataflowOpen || isDesignDatasetEditorRead ? 'default' : 'grab' }}>
-        <div
-          className={`${styles.fieldSeparator} ${
-            fieldDesignerState.isDragging ? styles.fieldSeparatorDragging : ''
-          }`}></div>
-
-        {renderCheckboxes()}
-        {renderInputs()}
-        {renderCodelistFileAndLinkButtons()}
-        {!addField ? (
-          <Button
-            className={`p-button-secondary-transparent button ${styles.qcButton} ${
-              fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-            } ${
-              !isUndefined(fieldDesignerState.fieldTypeValue) &&
-              !config.validations.bannedFieldsNames.sqlFields.includes(
-                fieldDesignerState.fieldTypeValue.value.toLowerCase()
-              ) &&
-              !isDesignDatasetEditorRead &&
-              !(isDataflowOpen && isReferenceDataset)
-                ? 'p-button-animated-blink'
-                : null
-            }`}
-            disabled={
-              (!isUndefined(fieldDesignerState.fieldTypeValue) &&
-                config.validations.bannedFieldsNames.sqlFields.includes(
-                  fieldDesignerState.fieldTypeValue.value.toLowerCase()
-                )) ||
-              isDesignDatasetEditorRead ||
-              (isDataflowOpen && isReferenceDataset)
-            }
-            icon="horizontalSliders"
-            label={resourcesContext.messages['createFieldQC']}
-            onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
-            style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
-          />
-        ) : null}
-        {renderDeleteButton()}
-      </div>
-      {fieldDesignerState.isCodelistEditorVisible ? (
-        <CodelistEditor
-          isCodelistEditorVisible={fieldDesignerState.isCodelistEditorVisible}
-          onCancelSaveCodelist={onCancelSaveCodelist}
-          onSaveCodelist={onSaveCodelist}
-          selectedCodelist={fieldDesignerState.codelistItems}
-          type={fieldDesignerState.fieldTypeValue.value}
-        />
-      ) : null}
-      {fieldDesignerState.isAttachmentEditorVisible ? (
-        <AttachmentEditor
-          isAttachmentEditorVisible={fieldDesignerState.isAttachmentEditorVisible}
-          onCancelSaveAttachment={onCancelSaveAttachment}
-          onSaveAttachment={onSaveAttachment}
-          selectedAttachment={fieldDesignerState.fieldFileProperties}
-          type={fieldDesignerState.fieldTypeValue.value}
-        />
-      ) : null}
-      {fieldDesignerState.isLinkSelectorVisible ? (
+  const renderLinkSelector = () => {
+    if (fieldDesignerState.isLinkSelectorVisible) {
+      return (
         <LinkSelector
           datasetSchemaId={datasetSchemaId}
           fieldId={fieldId}
           fields={fields}
           hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
-          isExternalLink={
-            TextUtils.areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link') ? true : false
-          }
+          isExternalLink={areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link') ? true : false}
           isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
           isReferenceDataset={isReferenceDataset}
           linkedTableConditional={fieldLinkedTableConditional}
@@ -1242,8 +1264,46 @@ export const FieldDesigner = ({
           selectedLink={fieldDesignerState.fieldLinkValue}
           tableSchemaId={tableSchemaId}
         />
-      ) : null}
-      {fieldDesignerState.isQCManagerVisible ? (
+      );
+    }
+  };
+
+  const renderQCButton = () => {
+    if (!addField) {
+      return (
+        <Button
+          className={`p-button-secondary-transparent button ${styles.qcButton} ${
+            fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+          } ${
+            !isUndefined(fieldDesignerState.fieldTypeValue) &&
+            !config.validations.bannedFieldsNames.sqlFields.includes(
+              fieldDesignerState.fieldTypeValue.value.toLowerCase()
+            ) &&
+            !isDesignDatasetEditorRead &&
+            !(isDataflowOpen && isReferenceDataset)
+              ? 'p-button-animated-blink'
+              : null
+          }`}
+          disabled={
+            (!isUndefined(fieldDesignerState.fieldTypeValue) &&
+              config.validations.bannedFieldsNames.sqlFields.includes(
+                fieldDesignerState.fieldTypeValue.value.toLowerCase()
+              )) ||
+            isDesignDatasetEditorRead ||
+            (isDataflowOpen && isReferenceDataset)
+          }
+          icon="horizontalSliders"
+          label={resourcesContext.messages['createFieldQC']}
+          onClick={() => validationContext.onOpenModalFromField(fieldId, tableSchemaId)}
+          style={{ marginLeft: '0.4rem', alignSelf: !fieldDesignerState.isEditing ? 'center' : 'baseline' }}
+        />
+      );
+    }
+  };
+
+  const renderQCManager = () => {
+    if (fieldDesignerState.isQCManagerVisible) {
+      return (
         <Dialog
           blockScroll={false}
           contentStyle={{ overflow: 'auto' }}
@@ -1256,7 +1316,121 @@ export const FieldDesigner = ({
           zIndex={3003}>
           {}
         </Dialog>
-      ) : null}
+      );
+    }
+  };
+
+  const renderSingleMultipleSelector = () => {
+    if (fieldDesignerState.isCodelistEditorVisible) {
+      return (
+        <CodelistEditor
+          isCodelistEditorVisible={fieldDesignerState.isCodelistEditorVisible}
+          onCancelSaveCodelist={onCancelSaveCodelist}
+          onSaveCodelist={onSaveCodelist}
+          selectedCodelist={fieldDesignerState.codelistItems}
+          type={fieldDesignerState.fieldTypeValue.value}
+        />
+      );
+    }
+  };
+
+  const renderTooltipAttachment = () => {
+    return `${resourcesContext.messages['validExtensions']} ${
+      !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
+      !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
+        ? fieldDesignerState.fieldFileProperties.validExtensions.join(', ')
+        : '*'
+    } - ${resourcesContext.messages['maxFileSize']} ${
+      !isNil(fieldDesignerState.fieldFileProperties.maxSize) &&
+      fieldDesignerState.fieldFileProperties.maxSize.toString() !== '0'
+        ? `${fieldDesignerState.fieldFileProperties.maxSize} ${resourcesContext.messages['MB']}`
+        : resourcesContext.messages['maxSizeNotDefined']
+    }`;
+  };
+
+  const renderTooltipCodelist = () => {
+    if (!isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)) {
+      return `${fieldDesignerState.codelistItems.join('; ')}`;
+    }
+    if (areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'Codelist')) {
+      return resourcesContext.messages['codelistSelection'];
+    }
+    return resourcesContext.messages['multiselectCodelistSelection'];
+  };
+
+  const renderTooltipPK = () => {
+    if (
+      !isNil(fieldDesignerState.fieldTypeValue) &&
+      !isNil(fieldDesignerState.fieldTypeValue.fieldType) &&
+      geometricTypes.includes(fieldDesignerState.fieldTypeValue.fieldType.toUpperCase())
+    ) {
+      return resourcesContext.messages['disabledPKGeom'];
+    }
+    if (hasPK && !fieldDesignerState.fieldPKValue) {
+      return resourcesContext.messages['disabledPKHas'];
+    }
+    if (hasPK && fieldDesignerState.fieldPKReferencedValue) {
+      return resourcesContext.messages['disabledPKLink'];
+    }
+    if (isDataflowOpen) {
+      return resourcesContext.messages['disabledIsOpen'];
+    }
+    if (isDesignDatasetEditorRead) {
+      return resourcesContext.messages['disabledEditorRead'];
+    }
+  };
+
+  const renderTooltipLink = () => {
+    if (isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)) {
+      return resourcesContext.messages['linkSelection'];
+    }
+    if (isNil(fieldDesignerState.fieldLinkValue.name)) {
+      return '...';
+    }
+    return `${fieldDesignerState.fieldLinkValue.name}`;
+  };
+
+  const renderTooltipRequired = () => {
+    if (Boolean(fieldDesignerState.fieldPKValue)) {
+      return resourcesContext.messages['disabledRequiredPK'];
+    }
+    if (isDataflowOpen) {
+      return resourcesContext.messages['disabledIsOpen'];
+    }
+    if (isDesignDatasetEditorRead) {
+      return resourcesContext.messages['disabledEditorRead'];
+    }
+  };
+
+  return (
+    <Fragment>
+      <div
+        className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
+        draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
+        onDragEnd={onFieldDragEnd}
+        onDragEnter={onFieldDragEnter}
+        onDragLeave={onFieldDragLeave}
+        onDragOver={onFieldDragOver}
+        onDragStart={onFieldDragStart}
+        onDrop={onFieldDragDrop}
+        style={{ cursor: isDataflowOpen || isDesignDatasetEditorRead ? 'default' : 'grab' }}>
+        <div
+          className={`${styles.fieldSeparator} ${
+            fieldDesignerState.isDragging ? styles.fieldSeparatorDragging : ''
+          }`}></div>
+
+        {renderCheckboxes()}
+        {renderInputs()}
+        {renderCodelistFileAndLinkButtons()}
+        {renderQCButton()}
+        {renderDuplicateButton()}
+        {renderDeleteButton()}
+      </div>
+
+      {renderSingleMultipleSelector()}
+      {renderAttachmentEditor()}
+      {renderLinkSelector()}
+      {renderQCManager()}
     </Fragment>
   );
 };

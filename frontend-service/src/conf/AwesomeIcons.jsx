@@ -57,6 +57,7 @@ import {
   faLayerGroup,
   faLink,
   faList,
+  faListOl,
   faLock,
   faMapMarkedAlt,
   faMapPin,
@@ -259,6 +260,8 @@ export const AwesomeIcons = icon => {
       return faVectorSquare;
     case 'list':
       return faList;
+    case 'list-ol':
+      return faListOl;
     case 'thList':
       return faThList;
     case 'listClipboard':
