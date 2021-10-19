@@ -15,7 +15,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The Class WebForm.
+ * The Class WebformMetabase.
  */
 @Setter
 @Getter
@@ -36,10 +36,7 @@ public class WebformMetabase implements Serializable {
   @Column(name = "id", columnDefinition = "serial")
   private Long id;
 
-
-  /**
-   * The id webFormName.
-   */
+  /** The name. */
   @Field(value = "name")
   private String name;
 
