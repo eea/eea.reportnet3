@@ -306,7 +306,8 @@
   --inputtext-border: 1px solid var(--gray-50);
   --inputtext-border-color-hover: var(--gray-110);
   --inputtext-border-color-focus: var(--c-corporate-blue);
-  --inputtext-box-shadow-focus: 0 0 0 0.1em var(--c-corporate-blue);
+  --inputtext-box-shadow-color-focus: var(--c-corporate-blue-lighter);
+  --inputtext-box-shadow-focus: 0 0 0 0.1em var(--c-corporate-blue-lighter);
   --inputtext-placeholder: var(--main-font-color);
   --inputtext-border-error: 1px solid var(--errors);
   --inputtext-box-shadow-focus-error: 0 0 0 0.1em var(--errors);
