@@ -5,6 +5,9 @@
   margin-bottom: 4rem;
   display: flex;
   justify-content: center;
+  h3 {
+    color: var(--main-font-color);
+  }
   .boundaryContainer {
     position: relative;
     max-width: 50vw;
@@ -40,6 +43,7 @@
     }
     .errorTexts {
       margin-top: 2rem;
+      color: var(--main-font-color);
       p {
         margin: 0.5rem 0;
       }
