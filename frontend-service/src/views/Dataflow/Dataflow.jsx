@@ -788,7 +788,7 @@ const Dataflow = withRouter(({ history, match }) => {
         type: 'SET_IS_FETCHING_DATA',
         payload: { isFetchingData: true }
       });
-      await SnapshotService.update(dataflowId, dataProviderId, dataflowState.restrictFromPublic);
+      await SnapshotService.update(dataflowId, dataProviderId, dataflowState.restrictFromPublic); // TODO ADD REAL ENDPOINT
       onLoadReportingDataflow();
     } catch (error) {
       console.error('Dataflow - onConfirmReporterRestrictFromPublic.', error);
