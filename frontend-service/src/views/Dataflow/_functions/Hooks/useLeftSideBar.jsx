@@ -131,12 +131,22 @@ export const useLeftSideBar = (
         title: 'datasetsInfo'
       };
 
+      const reporterRestrictFromPublicBtn = {
+        className: 'dataflow-showPublicInfo-help-step',
+        icon: 'userLock',
+        isVisible: buttonsVisibility.reporterRestrictFromPublicBtn,
+        label: 'reporterRestrictFromPublicftSideBarButton',
+        onClick: () => manageDialogs('isReporterRestrictFromPublicDialogVisible', true),
+        title: 'reporterRestrictFromPublicftSideBarButton'
+      };
+
       //DON'T SORT ALPHABETICALLY
       const allButtons = [
         propertiesBtn,
         editBtn,
         editBusinessBtn,
         releaseableBtn,
+        reporterRestrictFromPublicBtn,
         showPublicInfoBtn,
         exportSchemaBtn,
         apiKeyBtn,

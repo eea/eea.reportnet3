@@ -258,6 +258,8 @@ const Dataflow = withRouter(({ history, match }) => {
         manageRequestersBtn: false,
         propertiesBtn: false,
         releaseableBtn: false,
+        reporterRestrictFromPublicBtn: false,
+        showPublicInfoBtn: false,
         usersListBtn: false
       };
     }
@@ -272,6 +274,7 @@ const Dataflow = withRouter(({ history, match }) => {
       manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
+      reporterRestrictFromPublicBtn: isLeadReporterOfCountry && !isBusinessDataflow && !isDesign,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
         isLeadReporterOfCountry || isNationalCoordinatorOfCountry || isReporterOfCountry || isLeadDesigner || isObserver

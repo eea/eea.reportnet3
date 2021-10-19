@@ -1311,7 +1311,7 @@
     "bulkDeleteConfirmTooltip": "Confirm",
     "duplicateDisabledTitle": "Duplicate disabled:",
     "duplicateDisabledMessage": "already exists",
-    "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field"
-
+    "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field",
+    "reporterRestrictFromPublicftSideBarButton": "Reporter data status",
   }
 }
