@@ -14,6 +14,14 @@ import lombok.ToString;
 @ToString
 public class WebformVO implements Serializable {
 
+  /** The Constant serialVersionUID. */
+  private static final long serialVersionUID = 4139947121363884781L;
+
+  /**
+   * The id.
+   */
+  private Long id;
+
   /**
    * The webFormName.
    */
