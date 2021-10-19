@@ -11,6 +11,7 @@ import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { Dialog } from 'views/_components/Dialog';
 import { DataTable } from 'views/_components/DataTable';
+import { Filters } from 'views/_components/Filters';
 import { LevelError } from 'views/_components/LevelError';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -24,6 +25,8 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   const [columns, setColumns] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [isFiltered, setIsFiltered] = useState(false);
 
   useEffect(() => {
     const headers = [
@@ -32,7 +35,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         header: resourcesContext.messages['message']
       },
       {
-        id: 'messageLevel',
+        id: 'levelError',
         header: resourcesContext.messages['notificationLevel'],
         template: notificationLevelTemplate
       },
@@ -56,13 +59,13 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     const notificationsArray = notificationContext.all.map(notification => {
       const message = DOMPurify.sanitize(notification.message, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 
-      const capitalizedMessageLevel = !isUndefined(notification.type)
+      const capitalizedLevelError = !isUndefined(notification.type)
         ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
         : notification.type;
 
       return {
         message: message,
-        messageLevel: capitalizedMessageLevel,
+        levelError: capitalizedLevelError,
         date: dayjs(notification.date).format(
           `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
             userContext.userProps.amPm24h ? '' : ' A'
@@ -91,6 +94,14 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     setNotifications(notificationsArray);
   }, [notificationContext, userContext]);
 
+  const filterOptions = [
+    { type: 'input', properties: [{ name: 'message' }] },
+    { type: 'date', properties: [{ name: 'date' }] },
+    { type: 'multiselect', properties: [{ name: 'levelError' }] }
+  ];
+
+  const getFilteredState = value => setIsFiltered(value);
+
   const getValidUrl = (url = '') => {
     let newUrl = window.decodeURIComponent(url);
     newUrl = newUrl.trim().replace(/\s/g, '');
@@ -118,9 +129,14 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   const notificationLevelTemplate = rowData => (
     <div className={styles.notificationLevelTemplateWrapper}>
-      <LevelError type={rowData.messageLevel.toLowerCase()} />
+      <LevelError type={rowData.levelError.toLowerCase()} />
     </div>
   );
+
+  const onLoadFilteredData = data => {
+    console.log({ data });
+    setFilteredData(data);
+  };
 
   return (
     isNotificationVisible && (
@@ -131,9 +147,18 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         header={resourcesContext.messages['notifications']}
         modal={true}
         onHide={() => setIsNotificationVisible(false)}
-        style={{ width: '60%' }}
+        style={{ width: '80%' }}
         visible={isNotificationVisible}
         zIndex={3100}>
+        <Filters
+          appendTo={document.body}
+          data={notifications || []}
+          getFilteredData={onLoadFilteredData}
+          getFilteredSearched={getFilteredState}
+          options={filterOptions}
+          // searchBy={['message', 'date', 'levelError']}
+        />
+        {console.log(notifications)}
         {notificationContext.all.length > 0 ? (
           <DataTable
             autoLayout={true}
@@ -144,7 +169,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
             rowsPerPageOptions={[5, 10, 15]}
             summary="notificationsList"
             totalRecords={notifications.length}
-            value={notifications}>
+            value={filteredData}>
             {columns}
           </DataTable>
         ) : (

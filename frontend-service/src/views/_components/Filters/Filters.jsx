@@ -27,6 +27,7 @@ import { SortUtils } from './_functions/Utils/SortUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const Filters = ({
+  appendTo = null,
   className,
   data = [],
   dropDownList,
@@ -369,6 +370,7 @@ export const Filters = ({
           className={`p-float-label ${!sendData ? styles.label : ''}`}
           ref={el => (calendarRefs.current[property] = el)}>
           <Calendar
+            appendTo={appendTo}
             baseZIndex={9999}
             className={styles.calendarFilter}
             dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
