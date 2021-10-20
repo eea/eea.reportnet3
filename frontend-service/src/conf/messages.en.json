@@ -1312,8 +1312,8 @@
     "duplicateDisabledTitle": "Duplicate disabled:",
     "duplicateDisabledMessage": "already exists",
     "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field",
-    "reporterRestrictFromPublicftSideBarButton": "Released data visibility",
-    "reporterRestrictFromPublicDialogHeader": "Show/hide released data",
+    "restrictFromPublicftSideBarButton": "Released data visibility",
+    "restrictFromPublicDialogHeader": "Show/hide released data",
     "updateRestrictFromPublicFailedEvent": "Error updating the released data visibility"
   }
 }

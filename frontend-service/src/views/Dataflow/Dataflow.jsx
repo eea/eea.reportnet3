@@ -259,7 +259,7 @@ const Dataflow = withRouter(({ history, match }) => {
         manageRequestersBtn: false,
         propertiesBtn: false,
         releaseableBtn: false,
-        reporterRestrictFromPublicBtn: false,
+        restrictFromPublicBtn: false,
         showPublicInfoBtn: false,
         usersListBtn: false
       };
@@ -275,7 +275,7 @@ const Dataflow = withRouter(({ history, match }) => {
       manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
-      reporterRestrictFromPublicBtn: isLeadReporterOfCountry && !isBusinessDataflow && !isDesign,
+      restrictFromPublicBtn: isLeadReporterOfCountry && !isBusinessDataflow && !isDesign,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
         isLeadReporterOfCountry || isNationalCoordinatorOfCountry || isReporterOfCountry || isLeadDesigner || isObserver
@@ -600,7 +600,7 @@ const Dataflow = withRouter(({ history, match }) => {
           );
 
           dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
-          dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: representative?.restrictFromPublic });
+          dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: representative.restrictFromPublic });
         }
       } else {
         if (!isEmpty(dataflow.representatives)) {
@@ -794,8 +794,8 @@ const Dataflow = withRouter(({ history, match }) => {
     </Fragment>
   );
 
-  const onConfirmReporterRestrictFromPublic = async () => {
-    manageDialogs('isReporterRestrictFromPublicDialogVisible', false);
+  const onConfirmRestrictFromPublic = async () => {
+    manageDialogs('isRestrictFromPublicDialogVisible', false);
     try {
       dataflowDispatch({
         type: 'SET_IS_FETCHING_DATA',
@@ -808,7 +808,7 @@ const Dataflow = withRouter(({ history, match }) => {
       ); // TODO ADD REAL ENDPOINT
       onLoadReportingDataflow();
     } catch (error) {
-      console.error('Dataflow - onConfirmReporterRestrictFromPublic.', error);
+      console.error('Dataflow - onConfirmRestrictFromPublic.', error);
       notificationContext.add({ type: 'UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT', content: { dataflowId } });
       dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: dataflowState.representative.restrictFromPublic });
     }
@@ -1111,19 +1111,19 @@ const Dataflow = withRouter(({ history, match }) => {
           </ConfirmDialog>
         )}
 
-        {dataflowState.isReporterRestrictFromPublicDialogVisible && (
+        {dataflowState.isRestrictFromPublicDialogVisible && (
           <ConfirmDialog
             disabledConfirm={
               dataflowState.restrictFromPublic === dataflowState.representative.restrictFromPublic ||
               dataflowState.isFetchingData
             }
-            header={resourcesContext.messages['reporterRestrictFromPublicDialogHeader']}
+            header={resourcesContext.messages['restrictFromPublicDialogHeader']}
             iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
             labelCancel={resourcesContext.messages['cancel']}
             labelConfirm={resourcesContext.messages['save']}
-            onConfirm={onConfirmReporterRestrictFromPublic}
+            onConfirm={onConfirmRestrictFromPublic}
             onHide={() => {
-              manageDialogs('isReporterRestrictFromPublicDialogVisible', false);
+              manageDialogs('isRestrictFromPublicDialogVisible', false);
               if (dataflowState.representative.restrictFromPublic !== dataflowState.restrictFromPublic) {
                 dataflowDispatch({
                   type: 'ON_ERROR_UPDATE_RESTRICT_FROM_PUBLIC',
@@ -1134,17 +1134,17 @@ const Dataflow = withRouter(({ history, match }) => {
                 });
               }
             }}
-            visible={dataflowState.isReporterRestrictFromPublicDialogVisible}>
+            visible={dataflowState.isRestrictFromPublicDialogVisible}>
             <Checkbox
               checked={dataflowState.restrictFromPublic}
-              id="reporterRestrictFromPublicCheckbox"
-              inputId="reporterRestrictFromPublicCheckbox"
+              id="restrictFromPublicCheckbox"
+              inputId="restrictFromPublicCheckbox"
               onChange={() =>
                 dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
               }
               role="checkbox"
             />
-            <label className={styles.showPublicInfo} htmlFor="reporterRestrictFromPublicCheckbox">
+            <label className={styles.showPublicInfo} htmlFor="restrictFromPublicCheckbox">
               <span
                 className={styles.pointer}
                 onClick={() =>
