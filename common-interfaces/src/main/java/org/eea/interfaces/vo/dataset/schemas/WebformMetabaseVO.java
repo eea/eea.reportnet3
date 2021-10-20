@@ -6,17 +6,26 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+
 /**
- * The Class WebFormVO.
+ * The Class WebformMetabaseVO.
  */
 @Setter
 @Getter
 @ToString
-public class WebformVO implements Serializable {
+public class WebformMetabaseVO implements Serializable {
+
 
   /**
-   * The webFormName.
+   *
    */
+  private static final long serialVersionUID = 5928873289242363790L;
+
+  /** The id. */
+  private Long id;
+
+
+  /** The name. */
   private String name;
 
   /**
@@ -45,7 +54,7 @@ public class WebformVO implements Serializable {
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    WebformVO other = (WebformVO) obj;
+    WebformMetabaseVO other = (WebformMetabaseVO) obj;
     return Objects.equals(name, other.name);
   }
 }

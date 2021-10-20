@@ -1,7 +1,7 @@
-CREATE TABLE IF NOT EXISTS public.webforms (
+CREATE TABLE IF NOT EXISTS public.webform (
 	id bigserial NOT NULL,
-	name varchar NULL,
-	CONSTRAINT webforms_pk PRIMARY KEY (id)
+	"name" varchar(255) NULL,
+	CONSTRAINT webform_pk PRIMARY KEY (id)
 );
 
-GRANT ALL ON TABLE public.webforms TO testuser, dataflow, dataset, validation, recordstore;
+GRANT ALL ON TABLE public.webform TO testuser, dataflow, dataset, validation, recordstore;

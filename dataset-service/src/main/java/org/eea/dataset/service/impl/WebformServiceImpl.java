@@ -1,14 +1,14 @@
 package org.eea.dataset.service.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.bson.types.ObjectId;
+import org.eea.dataset.mapper.WebformMetabaseMapper;
+import org.eea.dataset.persistence.metabase.repository.WebformRepository;
 import org.eea.dataset.persistence.schemas.domain.webform.WebformConfig;
 import org.eea.dataset.persistence.schemas.repository.WebformConfigRepository;
 import org.eea.dataset.service.WebformService;
-import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.schemas.WebformVO;
+import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,26 +26,32 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class WebformServiceImpl implements WebformService {
 
+
   @Autowired
   private WebformConfigRepository webformConfigRepository;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The webform repository. */
+  @Autowired
+  WebformRepository webformRepository;
+
+
+  /** The webform metabase mapper. */
+  @Autowired
+  private WebformMetabaseMapper webformMetabaseMapper;
+
+
 
   /**
-   * Gets the list webforms by dataset id.
+   * Gets the webforms list.
    *
-   * @param datasetId the dataset id
-   * @return the list webforms by dataset id
-   * @throws EEAException the EEA exception
+   * @return the webforms list
    */
   @Override
-  public List<WebformVO> getListWebformsByDatasetId(Long datasetId) throws EEAException {
-
-    List<WebformVO> webformsList = new ArrayList<>();
-
-    return webformsList;
+  public List<WebformMetabaseVO> getListWebforms() {
+    return webformMetabaseMapper.entityListToClass(webformRepository.findAll());
   }
 
 
