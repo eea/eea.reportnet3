@@ -306,7 +306,9 @@ const Dataflow = withRouter(({ history, match }) => {
         checked={dataflowState.restrictFromPublic}
         id="restrict_from_public_checkbox"
         inputId="restrict_from_public_checkbox"
-        onChange={e => dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: e.checked })}
+        onChange={e =>
+          dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
+        }
         role="checkbox"
       />
       <label
