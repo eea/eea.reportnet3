@@ -43,6 +43,7 @@ import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 import { IntegrationService } from 'services/IntegrationService';
 import { ValidationService } from 'services/ValidationService';
+import { WebformService } from 'services/WebformService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -455,6 +456,14 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   };
 
   const getUniqueConstraintsList = data => designerDispatch({ type: 'GET_UNIQUES', payload: { data } });
+
+  const getWebformList = async () => {
+    try {
+      return await WebformService.listAll();
+    } catch (error) {
+      console.log('error :>> ', error);
+    }
+  };
 
   const setIsTableCreated = isTableCreated => {
     designerDispatch({ type: 'SET_IS_TABLE_CREATED', payload: { isTableCreated } });

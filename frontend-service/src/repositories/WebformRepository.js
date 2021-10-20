@@ -7,5 +7,10 @@ export const WebformRepository = {
     await HTTPRequester.post({ url: getUrl(WebformConfig.createPamsRecords, { datasetId }), data: pamsRecord }),
 
   getSinglePamData: async (datasetId, groupPaMId) =>
-    await HTTPRequester.get({ url: getUrl(WebformConfig.getSinglePamData, { datasetId, groupPaMId }) })
+    await HTTPRequester.get({ url: getUrl(WebformConfig.getSinglePamData, { datasetId, groupPaMId }) }),
+
+  listAll: async () => {
+    const { data } = await HTTPRequester.get({ url: getUrl(WebformConfig.listAll) });
+    return data;
+  }
 };
