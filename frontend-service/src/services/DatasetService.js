@@ -240,13 +240,14 @@ export const DatasetService = {
       totalFilteredErrors: datasetErrorsDTO.data.totalFilteredRecords
     });
 
-    const errors = datasetErrorsDTO.data.errors.map(
+    dataset.errors = datasetErrorsDTO.data.errors.map(
       datasetErrorDTO =>
         datasetErrorDTO &&
         new DatasetError({
           entityType: datasetErrorDTO.typeEntity,
           fieldSchemaName: datasetErrorDTO.nameFieldSchema,
           levelError: datasetErrorDTO.levelError,
+          message: datasetErrorDTO.message,
           numberOfRecords: datasetErrorDTO.numberOfRecords,
           objectId: datasetErrorDTO.idObject,
           ruleId: datasetErrorDTO.idRule,
@@ -258,7 +259,6 @@ export const DatasetService = {
         })
     );
 
-    dataset.errors = errors;
     return dataset;
   },
 

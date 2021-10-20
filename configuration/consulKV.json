@@ -1466,5 +1466,17 @@
   {
     "key": "config/dataflow/exportDataflowSchemaInformationPath",
     "value": "JHtEQVRBRkxPV19FWFBPUlRfU0NIRU1BX0lORk9STUFUSU9OX1BBVEg6QzpcZXhwb3J0RGF0YWZsb3dTY2hlbWFJbmZvcm1hdGlvblx9"
+  },
+    {
+    "key": "config/apiGateway/zuul.routes.webform.path",
+    "value": "L3dlYmZvcm0vKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.webform.serviceId",
+    "value": "ZGF0YXNldA=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.webform.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]
