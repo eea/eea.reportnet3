@@ -117,6 +117,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isUserRightManagementDialogVisible: false,
     name: '',
     obligations: {},
+    representative: {},
     representativesImport: false,
     restrictFromPublic: false,
     showPublicInfo: false,
@@ -592,6 +593,15 @@ const Dataflow = withRouter(({ history, match }) => {
             setIsReceiptOutdated(isReceiptOutdated[0]);
           }
         }
+
+        if (!isEmpty(dataflow.representatives)) {
+          const representative = dataflowState.data.representatives?.find(
+            representative => representative.dataProviderId === parseInt(representativeId)
+          );
+
+          dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
+          dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: representative.restrictFromPublic });
+        }
       } else {
         if (!isEmpty(dataflow.representatives)) {
           const isReceiptOutdated = dataflow.representatives.map(representative => representative.isReceiptOutdated);
@@ -746,7 +756,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], onDataCollectionIsCompleted);
 
-  useCheckNotifications(['UPDATE_RELEASABLE_FAILED_EVENT'], setIsDataUpdated);
+  useCheckNotifications(
+    ['UPDATE_RELEASABLE_FAILED_EVENT', 'UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT'],
+    setIsDataUpdated
+  );
 
   const getImportExtensions = ['.csv'].join(', ').toLowerCase();
 
@@ -796,11 +809,8 @@ const Dataflow = withRouter(({ history, match }) => {
       onLoadReportingDataflow();
     } catch (error) {
       console.error('Dataflow - onConfirmReporterRestrictFromPublic.', error);
-      notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } });
-    } finally {
-      if (dataflowState.restrictFromPublic) {
-        dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: false });
-      }
+      notificationContext.add({ type: 'UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT', content: { dataflowId } });
+      dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: dataflowState.representative.restrictFromPublic });
     }
   };
 
@@ -1103,7 +1113,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReporterRestrictFromPublicDialogVisible && (
           <ConfirmDialog
-            disabledConfirm={!dataflowState.restrictFromPublic}
+            disabledConfirm={
+              dataflowState.restrictFromPublic === dataflowState.representative.restrictFromPublic ||
+              dataflowState.isFetchingData
+            }
             header={resourcesContext.messages['reporterRestrictFromPublicDialogHeader']}
             iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
             labelCancel={resourcesContext.messages['cancel']}
@@ -1111,8 +1124,14 @@ const Dataflow = withRouter(({ history, match }) => {
             onConfirm={onConfirmReporterRestrictFromPublic}
             onHide={() => {
               manageDialogs('isReporterRestrictFromPublicDialogVisible', false);
-              if (dataflowState.restrictFromPublic) {
-                dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: false });
+              if (dataflowState.representative.restrictFromPublic !== dataflowState.restrictFromPublic) {
+                dataflowDispatch({
+                  type: 'ON_ERROR_UPDATE_RESTRICT_FROM_PUBLIC',
+                  payload: {
+                    restrictFromPublic: dataflowState.representative.restrictFromPublic,
+                    isFetchingData: false
+                  }
+                });
               }
             }}
             visible={dataflowState.isReporterRestrictFromPublicDialogVisible}>
@@ -1120,7 +1139,9 @@ const Dataflow = withRouter(({ history, match }) => {
               checked={dataflowState.restrictFromPublic}
               id="reporterRestrictFromPublicCheckbox"
               inputId="reporterRestrictFromPublicCheckbox"
-              onChange={e => dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: e.checked })}
+              onChange={() =>
+                dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
+              }
               role="checkbox"
             />
             <label className={styles.showPublicInfo} htmlFor="reporterRestrictFromPublicCheckbox">
