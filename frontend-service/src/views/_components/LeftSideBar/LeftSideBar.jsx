@@ -32,7 +32,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   const handleJoyrideCallback = data => {
     const { action, status, type } = data;
 
-    if ([ACTIONS.CLOSE].includes(action)) {
+    if ([ACTIONS.CLOSE].includes(action) || [STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
       setHelpIndex(0);
       setRun(false);
     } else {
