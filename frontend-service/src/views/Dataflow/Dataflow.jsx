@@ -313,7 +313,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
         }
         style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
-        {resourcesContext.messages['restrictFromPublic']}
+        {resourcesContext.messages['restrictFromPublicCheckboxLabel']}
       </label>
     </div>
   );
@@ -1125,7 +1125,7 @@ const Dataflow = withRouter(({ history, match }) => {
                 onClick={() =>
                   dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
                 }>
-                {resourcesContext.messages['reporterRestrictFromPublicCheckboxLabel']}
+                {resourcesContext.messages['restrictFromPublicCheckboxLabel']}
               </span>
             </label>
           </ConfirmDialog>
