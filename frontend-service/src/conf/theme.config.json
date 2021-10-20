@@ -277,6 +277,7 @@
     "card-item-bg": "var(--bg)",
     "card-item-box-shadow": " 0 1px 3px rgba(0, 0, 0, 0.20), 0 1px 2px rgba(0, 0, 0, 0.40)",
     "card-item-box-shadow-hover": "0 10px 20px rgba(0, 0, 0, 0.21), 0 6px 6px rgba(0, 0, 0, 0.25)",
+    "card-checked-bg": "var(--bg)",
     "tooltip-body-bg": "var(--gray-110)",
     "tooltip-body-color": "var(--white)",
     "tooltip-body-border-color": "var(--gray-110)",
@@ -319,7 +320,8 @@
     "property-item-text-color": "var(--black)",
     "dialog-content-border-width": "1px",
     "footer-content-bg": "var(--bg)",
-    "help-modal-bg": "var(--bg)"
+    "help-modal-bg": "var(--bg)",
+    "error-boundary-bg": "var(--bg)"
   },
   "dark": {
     "bg": "var(--bg-dark-00dp)",
@@ -530,6 +532,7 @@
     "chart-color": "var(--main-font-color)",
     "card-design-dataflow-bg": "var(--bg-dark-16dp)",
     "card-design-dataflow-bg-hover": "var(--bg-dark-24dp)",
+    "card-checked-bg": "var(--bg-dark-04dp)",
     "multiselect-bg": "var(--bg-dark-00dp)",
     "multiselect-border": "1px solid var(--gray-75)",
     "multiselect-bg-hover": "var(--gray-15)",
@@ -564,8 +567,8 @@
     "field-designer-separator-bg": "rgba(255, 255, 255, 0.4)",
     "field-designer-separator-border-color": "var(--c-corporate-yellow)",
     "sidebar-bg": "var(--bg-dark-01dp)",
-    "sidebar-color": "var(--white)",
-    "sidebar-border": "1px solid var(--gray-50)",
+    "sidebar-color": "var(--white-font)",
+    "sidebar-border": "1px solid var(--sidebar-bg)",
     "sidebar-boxshadow": "0 0 6px 0 rgba(0, 0, 0, 0.16)",
     "sidebar-scrollbar-color": "var(--gray-75) var(--c-custom-gray)",
     "sidebar-scrollbar-bg": "var(--c-custom-gray)",
@@ -612,7 +615,7 @@
     "font-filters": "var(--main-font-color)",
     "header-footer-bg": "var(--bg-dark-04dp)",
     "eu-footer-bottom": "var(--bg-dark-04dp)",
-    "eu-footer-title": "var(--white)",
+    "eu-footer-title": "var(--white-font)",
     "font-release-date": "var(--success-color-darker)",
     "eu-link-footer-bottom": "var(--c-corporate-yellow)",
     "eu-link-hover-footer-bottom": "var(--c-corporate-yellow-lighter)",
@@ -643,7 +646,8 @@
     "property-item-text-color": "var(--c-corporate-yellow)",
     "dialog-content-border-width": "0 1px 0 1px",
     "footer-content-bg": "var(--bg-dark-03dp)",
-    "help-modal-bg": "var(--bg-dark-24dp)"
+    "help-modal-bg": "var(--bg-dark-24dp)",
+    "error-boundary-bg": "var(--bg-dark-24dp)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,

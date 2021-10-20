@@ -9,6 +9,7 @@
     color: var(--main-font-color);
   }
   .boundaryContainer {
+    background-color: var(--error-boundary-bg);
     position: relative;
     max-width: 50vw;
     box-shadow: 0 5px 0.5rem rgba(0, 0, 0, 0.6);

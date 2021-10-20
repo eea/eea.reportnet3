@@ -11,12 +11,13 @@
   padding: 1rem;
   position: relative;
   row-gap: 1rem;
-  transition: all 0.25s ease-in-out;
+  transition: all 0.1s ease-in-out;
 
   &:hover {
     box-shadow: var(--card-item-box-shadow-hover);
     transform: scale(1.02, 1.02);
-    transition: transform 0.2s ease;
+    transition: transform 0.1s ease;
+    background: var(--card-checked-bg);
   }
 
   &::before {
@@ -111,26 +112,6 @@
       width: 100%;
     }
   }
-
-  // &.DESIGN {
-  //   background: var(--c-lilac-100);
-
-  //   &::before {
-  //     background-image: url('/assets/images/logos/logo.png') !important;
-  //     background-position: 150% 50%;
-  //     background-repeat: no-repeat;
-  //     background-size: 50%;
-  //     border-radius: 15px;
-  //     bottom: 0;
-  //     content: '';
-  //     left: 0;
-  //     opacity: 0.5;
-  //     position: absolute;
-  //     right: 0;
-  //     top: 0;
-  //     width: 100%;
-  //   }
-  // }
 }
 
 .checked {
@@ -146,7 +127,7 @@
     top: 2px;
     width: calc(100% - 4px);
     height: calc(100% - 4px);
-    background: var(--bg);
+    background: var(--card-checked-bg);
     border-radius: 15px;
     opacity: 1;
 
