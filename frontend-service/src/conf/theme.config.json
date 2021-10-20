@@ -316,7 +316,9 @@
     "accordion-header-highlight-bg-color": "var(--gray-10)",
     "accordion-header-highlight-bg-color-hover": "var(--gray-25)",
     "accordion-header-highlight-border-hover": "1px solid var(--accordion-header-highlight-bg-color-hover)",
-    "property-item-text-color": "var(--black)"
+    "property-item-text-color": "var(--black)",
+    "dialog-content-border-width": "1px",
+    "footer-content-bg": "var(--bg)"
   },
   "dark": {
     "bg": "var(--bg-dark-00dp)",
@@ -637,7 +639,9 @@
     "accordion-header-highlight-bg-color": "var(--bg-dark-06dp)",
     "accordion-header-highlight-bg-color-hover": "var(--bg-dark-08dp)",
     "accordion-header-highlight-border-hover": "1px solid var(--accordion-header-highlight-bg-color-hover)",
-    "property-item-text-color": "var(--c-corporate-yellow)"
+    "property-item-text-color": "var(--c-corporate-yellow)",
+    "dialog-content-border-width": "0 1px 0 1px",
+    "footer-content-bg": "var(--bg-dark-03dp)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
