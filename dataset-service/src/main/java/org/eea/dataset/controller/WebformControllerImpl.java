@@ -35,7 +35,7 @@ public class WebformControllerImpl implements WebformController {
   @HystrixCommand
   @GetMapping("/listAll")
   @PreAuthorize("isAuthenticated()")
-  @ApiOperation(value = "Gets a list with all the webforms", hidden = false)
+  @ApiOperation(value = "Gets a list with all the webforms", hidden = true)
   public List<WebformMetabaseVO> getListWebforms() {
     return webformService.getListWebforms();
   }
