@@ -1,5 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 
+import { config } from 'conf';
+import { routes } from 'conf/routes';
+
+import camelCase from 'lodash/camelCase';
 import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -13,17 +17,22 @@ import { Dialog } from 'views/_components/Dialog';
 import { DataTable } from 'views/_components/DataTable';
 // import { Filters } from 'views/_components/Filters';
 import { LevelError } from 'views/_components/LevelError';
+import { Spinner } from 'views/_components/Spinner';
 
-import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
+import { NotificationService } from 'services/NotificationService';
+
+// import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
+import { isEmpty } from 'lodash';
 
 const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
-  const notificationContext = useContext(NotificationContext);
+  // const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [columns, setColumns] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
   // const [filteredData, setFilteredData] = useState([]);
   // const [isFiltered, setIsFiltered] = useState(false);
@@ -55,44 +64,13 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     ));
 
     setColumns(columnsArray);
+  }, [userContext]);
 
-    const notificationsArray = notificationContext.all.map(notification => {
-      const message = DOMPurify.sanitize(notification.message, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
-
-      const capitalizedLevelError = !isUndefined(notification.type)
-        ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
-        : notification.type;
-
-      return {
-        message: message,
-        levelError: capitalizedLevelError,
-        date: dayjs(notification.date).format(
-          `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-            userContext.userProps.amPm24h ? '' : ' A'
-          }`
-        ),
-
-        downloadButton: notification.onClick ? (
-          <span className={styles.center}>
-            <Button
-              className={`${styles.columnActionButton}`}
-              icon={'export'}
-              label={resourcesContext.messages['downloadFile']}
-              onClick={() => notification.onClick()}
-            />
-          </span>
-        ) : (
-          ''
-        ),
-        redirectionUrl: !isNil(notification.redirectionUrl)
-          ? `${window.location.protocol}//${window.location.hostname}${
-              window.location.port !== '' && window.location.port.toString() !== '80' ? `:${window.location.port}` : ''
-            }${notification.redirectionUrl}`
-          : ''
-      };
-    });
-    setNotifications(notificationsArray);
-  }, [notificationContext, userContext]);
+  useEffect(() => {
+    if (!isEmpty(columns)) {
+      onLoadNotifications();
+    }
+  }, [columns]);
 
   // const filterOptions = [
   //   { type: 'input', properties: [{ name: 'message' }] },
@@ -138,6 +116,95 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   //   setFilteredData(data);
   // };
 
+  const onLoadNotifications = async () => {
+    try {
+      setIsLoading(true);
+      const unparsedNotifications = await NotificationService.all();
+      console.log({ unparsedNotifications });
+      const parsedNotifications = unparsedNotifications.map(notification => {
+        return NotificationService.parse({
+          config: config.notifications.notificationSchema,
+          content: notification.content,
+          message: resourcesContext.messages[camelCase(notification.type)],
+          routes,
+          type: notification.type
+        });
+      });
+      console.log({ parsedNotifications });
+      const notificationsArray = parsedNotifications.map(notification => {
+        const message = DOMPurify.sanitize(notification.message, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+
+        const capitalizedLevelError = !isUndefined(notification.type)
+          ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
+          : notification.type;
+
+        return {
+          message: message,
+          levelError: capitalizedLevelError,
+          date: dayjs(notification.date).format(
+            `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
+              userContext.userProps.amPm24h ? '' : ' A'
+            }`
+          ),
+
+          downloadButton: notification.onClick ? (
+            <span className={styles.center}>
+              <Button
+                className={`${styles.columnActionButton}`}
+                icon={'export'}
+                label={resourcesContext.messages['downloadFile']}
+                onClick={() => notification.onClick()}
+              />
+            </span>
+          ) : (
+            ''
+          ),
+          redirectionUrl: !isNil(notification.redirectionUrl)
+            ? `${window.location.protocol}//${window.location.hostname}${
+                window.location.port !== '' && window.location.port.toString() !== '80'
+                  ? `:${window.location.port}`
+                  : ''
+              }${notification.redirectionUrl}`
+            : ''
+        };
+      });
+
+      console.log({ notificationsArray });
+      setNotifications(notificationsArray);
+    } catch (error) {
+      console.error('NotificationsList - onLoadNotifications.', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderNotifications = () => {
+    if (isLoading) {
+      return <Spinner />;
+    } else if (notifications.length > 0) {
+      return (
+        <DataTable
+          autoLayout={true}
+          loading={false}
+          paginator={true}
+          paginatorRight={<span>{`${resourcesContext.messages['totalRecords']}  ${notifications.length}`}</span>}
+          rows={10}
+          rowsPerPageOptions={[5, 10, 15]}
+          summary="notificationsList"
+          totalRecords={notifications.length}
+          value={notifications}>
+          {columns}
+        </DataTable>
+      );
+    } else {
+      return (
+        <div className={styles.notificationsWithoutTable}>
+          <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
+        </div>
+      );
+    }
+  };
+
   return (
     isNotificationVisible && (
       <Dialog
@@ -159,24 +226,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           // searchBy={['message', 'date', 'levelError']}
         /> */}
         {console.log(notifications)}
-        {notificationContext.all.length > 0 ? (
-          <DataTable
-            autoLayout={true}
-            loading={false}
-            paginator={true}
-            paginatorRight={<span>{`${resourcesContext.messages['totalRecords']}  ${notifications.length}`}</span>}
-            rows={10}
-            rowsPerPageOptions={[5, 10, 15]}
-            summary="notificationsList"
-            totalRecords={notifications.length}
-            value={notifications}>
-            {columns}
-          </DataTable>
-        ) : (
-          <div className={styles.notificationsWithoutTable}>
-            <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
-          </div>
-        )}
+        {renderNotifications()}
       </Dialog>
     )
   );

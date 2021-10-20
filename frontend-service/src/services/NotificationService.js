@@ -9,13 +9,48 @@ import { config as generalConfig } from 'conf';
 
 import { Notification } from 'entities/Notification';
 
+import { NotificationRepository } from 'repositories/NotificationRepository';
+
 import { NotificationUtils } from 'services/_utils/NotificationUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const NotificationService = {
-  // all: async () => {},
+  all: async () => {
+    // const notificationsDTO = await NotificationRepository.all();
+    const notificationsDTO = [
+      {
+        type: 'VALIDATE_DATA_INIT',
+        content: {
+          dataflowId: 666,
+          dataflowName: 'S39 DF',
+          dataProviderName: 'DESIGN',
+          datasetName: 'S4',
+          datasetId: 2911,
+          type: 'DESIGN'
+        },
+        date: new Date()
+      },
+      {
+        type: 'VALIDATION_FINISHED_EVENT',
+        content: {
+          dataflowId: 666,
+          dataflowName: 'S39 DF',
+          dataProviderName: 'DESIGN',
+          datasetName: 'S4',
+          datasetId: 2911,
+          type: 'DESIGN'
+        },
+        date: new Date()
+      }
+    ];
+    return notificationsDTO.map(notificationDTO => {
+      const { content, date, type } = notificationDTO;
+      return new Notification({ content, date, type });
+    });
+  },
+  create: async (type, date, content) => await NotificationRepository.create(type, date, content),
   // removeById: async () => {},
   // removeAll: async () => {},
   // readById: async () => {},
