@@ -277,41 +277,50 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     return fieldColumns;
   };
 
-  if (historicReleasesState.isLoading) {
-    return (
-      <div className={styles.historicReleasesWithoutTable}>
-        <div className={styles.spinner}>
-          <Spinner className={styles.spinnerPosition} />
-        </div>
-      </div>
-    );
-  }
-
-  return isEmpty(historicReleasesState.data) ? (
-    <div className={styles.historicReleasesWithoutTable}>
-      <div className={styles.noHistoricReleases}>{resourcesContext.messages['noHistoricReleases']}</div>
-    </div>
-  ) : (
-    <div className={styles.historicReleases}>
-      {historicReleasesView === 'dataCollection' && (
+  const renderFilters = () => {
+    if (historicReleasesView === 'dataCollection') {
+      return (
         <Filters
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFiltered}
           options={filterOptionsDataCollection}
         />
-      )}
+      );
+    }
 
-      {historicReleasesView === 'EUDataset' && (
+    if (historicReleasesView === 'EUDataset') {
+      return (
         <Filters
           data={historicReleasesState.data}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFiltered}
           options={filterOptionsEUDataset}
         />
-      )}
+      );
+    }
 
-      {!isEmpty(historicReleasesState.filteredData) ? (
+    if (historicReleasesView === 'reportingDataset') {
+      return (
+        <Filters
+          data={historicReleasesState.data}
+          getFilteredData={onLoadFilteredData}
+          getFilteredSearched={getFiltered}
+          options={filterOptionsReportingDataset}
+        />
+      );
+    }
+  };
+
+  const renderHistoricReleasesTable = () => {
+    if (isEmpty(historicReleasesState.filteredData)) {
+      return (
+        <div className={styles.emptyFilteredData}>
+          {resourcesContext.messages['noHistoricReleasesWithSelectedParameters']}
+        </div>
+      );
+    } else {
+      return (
         <DataTable
           autoLayout={true}
           className={
@@ -329,11 +338,36 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           {historicReleasesView === 'reportingDataset' &&
             renderReportingDatasetColumns(historicReleasesState.filteredData)}
         </DataTable>
-      ) : (
-        <div className={styles.emptyFilteredData}>
-          {resourcesContext.messages['noHistoricReleasesWithSelectedParameters']}
+      );
+    }
+  };
+
+  const renderHistoricReleasesContent = () => {
+    if (historicReleasesState.isLoading) {
+      return (
+        <div className={styles.historicReleasesWithoutTable}>
+          <div className={styles.spinner}>
+            <Spinner className={styles.spinnerPosition} />
+          </div>
         </div>
-      )}
-    </div>
-  );
+      );
+    }
+
+    if (isEmpty(historicReleasesState.data)) {
+      return (
+        <div className={styles.historicReleasesWithoutTable}>
+          <div className={styles.noHistoricReleases}>{resourcesContext.messages['noHistoricReleases']}</div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={styles.historicReleases}>
+        {renderFilters()}
+        {renderHistoricReleasesTable()}
+      </div>
+    );
+  };
+
+  return renderHistoricReleasesContent();
 };
