@@ -568,4 +568,11 @@ public class RepresentativeControllerImplTest {
     assertNotNull("is null", representativeControllerImpl
         .findRepresentativesByDataFlowIdAndProviderIdList(0L, new ArrayList<>()));
   }
+
+  @Test
+  public void updateRestrictFromPublic() {
+    representativeControllerImpl.updateRestricFromPublic(1L, 1L, true);
+    Mockito.verify(representativeService, times(1)).updateRepresentativeVisibilityRestrictions(
+        Mockito.anyLong(), Mockito.anyLong(), Mockito.anyBoolean());
+  }
 }

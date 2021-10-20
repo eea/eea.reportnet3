@@ -566,4 +566,27 @@ public class RepresentativeControllerImpl implements RepresentativeController {
         providerIdList);
   }
 
+  /**
+   * Update restric from public.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
+   */
+  @Override
+  @PutMapping(value = "/update/restricFromPublic")
+  @PreAuthorize("isAuthenticated()")
+  @ApiOperation(value = "Update representative visibility", hidden = true)
+  public void updateRestricFromPublic(
+      @ApiParam(value = "Dataflow Id", example = "0",
+          required = true) @RequestParam(value = "dataflowId", required = true) Long dataflowId,
+      @ApiParam(value = "Dataprovider Id", required = true) @RequestParam(value = "dataProviderId",
+          required = true) Long dataProviderId,
+      @ApiParam(value = "Should the representative be restricted to public view?", required = true,
+          defaultValue = "false") @RequestParam(value = "restrictFromPublic", required = true,
+              defaultValue = "false") Boolean restrictFromPublic) {
+    representativeService.updateRepresentativeVisibilityRestrictions(dataflowId, dataProviderId,
+        restrictFromPublic);
+  }
+
 }

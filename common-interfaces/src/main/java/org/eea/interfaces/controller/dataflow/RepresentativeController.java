@@ -242,4 +242,17 @@ public interface RepresentativeController {
       @PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerIdList") List<Long> providerIdList);
 
+  /**
+   * Update restric from public.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
+   */
+  @PutMapping(value = "/update/restricFromPublic")
+  void updateRestricFromPublic(@RequestParam(value = "dataflowId", required = true) Long dataflowId,
+      @RequestParam(value = "dataProviderId", required = true) Long dataProviderId,
+      @RequestParam(value = "restrictFromPublic", required = true,
+          defaultValue = "false") Boolean restrictFromPublic);
+
 }
