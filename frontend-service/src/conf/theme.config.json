@@ -318,7 +318,8 @@
     "accordion-header-highlight-border-hover": "1px solid var(--accordion-header-highlight-bg-color-hover)",
     "property-item-text-color": "var(--black)",
     "dialog-content-border-width": "1px",
-    "footer-content-bg": "var(--bg)"
+    "footer-content-bg": "var(--bg)",
+    "help-modal-bg": "var(--bg)"
   },
   "dark": {
     "bg": "var(--bg-dark-00dp)",
@@ -641,7 +642,8 @@
     "accordion-header-highlight-border-hover": "1px solid var(--accordion-header-highlight-bg-color-hover)",
     "property-item-text-color": "var(--c-corporate-yellow)",
     "dialog-content-border-width": "0 1px 0 1px",
-    "footer-content-bg": "var(--bg-dark-03dp)"
+    "footer-content-bg": "var(--bg-dark-03dp)",
+    "help-modal-bg": "var(--bg-dark-24dp)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
