@@ -304,38 +304,30 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     return fieldColumns;
   };
 
+  const getFilters = filterOptions => {
+    return (
+      <Filters
+        data={historicReleasesState.data}
+        getFilteredData={onLoadFilteredData}
+        getFilteredSearched={getFiltered}
+        options={filterOptions}
+      />
+    );
+  };
+
   const renderFilters = () => {
-    if (historicReleasesView === 'dataCollection') {
-      return (
-        <Filters
-          data={historicReleasesState.data}
-          getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFiltered}
-          options={filterOptionsDataCollection}
-        />
-      );
-    }
+    switch (historicReleasesView) {
+      case 'dataCollection':
+        return getFilters(filterOptionsDataCollection);
 
-    if (historicReleasesView === 'EUDataset') {
-      return (
-        <Filters
-          data={historicReleasesState.data}
-          getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFiltered}
-          options={filterOptionsEUDataset}
-        />
-      );
-    }
+      case 'EUDataset':
+        return getFilters(filterOptionsEUDataset);
 
-    if (historicReleasesView === 'reportingDataset') {
-      return (
-        <Filters
-          data={historicReleasesState.data}
-          getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFiltered}
-          options={filterOptionsReportingDataset}
-        />
-      );
+      case 'reportingDataset':
+        return getFilters(filterOptionsReportingDataset);
+
+      default:
+        return <div />;
     }
   };
 
