@@ -33,8 +33,6 @@ public class WebformServiceImpl implements WebformService {
    */
   @Override
   public List<WebformMetabaseVO> getListWebforms() {
-
-
     return webformMetabaseMapper.entityListToClass(webformRepository.findAll());
   }
 }

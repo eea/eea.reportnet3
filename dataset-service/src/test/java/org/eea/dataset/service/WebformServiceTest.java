@@ -15,13 +15,14 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
+
 /**
- * The Class ReportingDatasetServiceTest.
+ * The Class WebformServiceTest.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class WebformServiceTest {
 
-  /** The reporting dataset service. */
+
   @InjectMocks
   private WebformServiceImpl webformServiceImpl;
 
@@ -39,6 +40,11 @@ public class WebformServiceTest {
     MockitoAnnotations.openMocks(this);
   }
 
+  /**
+   * Gets the list webforms test.
+   *
+   * @return the list webforms test
+   */
   @Test
   public void getListWebformsTest() {
     when(webformRepository.findAll()).thenReturn(new ArrayList<>());
