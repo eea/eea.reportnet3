@@ -1,10 +1,13 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataset.schemas.WebformConfigVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 /**
@@ -30,5 +33,11 @@ public interface WebformController {
    */
   @GetMapping("/{datasetId}/webforms")
   List<WebformVO> getListWebformsByDatasetId(@PathVariable("datasetId") Long datasetId);
+
+  @PostMapping("/webformConfig")
+  void insertWebformConfig(@RequestBody WebformConfigVO webformConfig);
+
+  @GetMapping("/webformConfig/{id}")
+  String findWebformConfigById(@PathVariable("id") Long id);
 
 }
