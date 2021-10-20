@@ -21,15 +21,15 @@ public class WebformServiceImpl implements WebformService {
   WebformRepository webformRepository;
 
 
-  /** The webform mapper. */
+  /** The webform metabase mapper. */
   @Autowired
   private WebformMetabaseMapper webformMetabaseMapper;
 
 
   /**
-   * Gets the list webforms by dataset id.
+   * Gets the webforms list.
    *
-   * @return the list webforms by dataset id
+   * @return the webforms list
    */
   @Override
   public List<WebformMetabaseVO> getListWebforms() {

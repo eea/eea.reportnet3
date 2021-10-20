@@ -4,4 +4,4 @@ CREATE TABLE IF NOT EXISTS public.webform (
 	CONSTRAINT webforms_pk PRIMARY KEY (id)
 );
 
-GRANT ALL ON TABLE public.webforms TO testuser, dataflow, dataset, validation, recordstore;
+GRANT ALL ON TABLE public.webform TO testuser, dataflow, dataset, validation, recordstore;

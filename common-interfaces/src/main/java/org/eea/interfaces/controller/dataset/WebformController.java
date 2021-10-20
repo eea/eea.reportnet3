@@ -21,9 +21,9 @@ public interface WebformController {
   }
 
   /**
-   * Gets the list webforms.
+   * Gets the webforms list.
    *
-   * @return the list webforms
+   * @return the webforms list
    */
   @GetMapping("/listAll")
   List<WebformMetabaseVO> getListWebforms();

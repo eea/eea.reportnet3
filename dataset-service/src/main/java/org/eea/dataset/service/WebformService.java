@@ -12,9 +12,9 @@ public interface WebformService {
 
 
   /**
-   * Gets the list webforms by dataset id.
+   * Gets the webforms list.
    *
-   * @return the list webforms by dataset id
+   * @return the webforms list
    */
   List<WebformMetabaseVO> getListWebforms();
 }
