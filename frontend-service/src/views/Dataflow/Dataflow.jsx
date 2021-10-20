@@ -127,12 +127,6 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
-  useEffect(() => {
-    if (!isEmpty(dataflowState.data)) {
-      userContext.setCurrentDataflowType(dataflowState.data.type);
-    }
-  }, [dataflowState.data]);
-
   const {
     obligation,
     setCheckedObligation,
