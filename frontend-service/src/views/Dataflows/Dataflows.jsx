@@ -93,7 +93,12 @@ const Dataflows = withRouter(({ history, match }) => {
             id: 'citizenScience',
             label: resourcesContext.messages['citizenScienceDataflowsListTab']
           },
-          { className: styles.flow_tab, id: 'reference', label: resourcesContext.messages['referenceDataflowsListTab'] }
+          {
+            className: styles.flow_tab,
+            disabled: dataflowsState.dataflowsCountFirstLoad,
+            id: 'reference',
+            label: resourcesContext.messages['referenceDataflowsListTab']
+          }
         ]
       : [
           {
