@@ -11,7 +11,7 @@ import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { Dialog } from 'views/_components/Dialog';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
+// import { Filters } from 'views/_components/Filters';
 import { LevelError } from 'views/_components/LevelError';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -25,8 +25,8 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   const [columns, setColumns] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
-  const [isFiltered, setIsFiltered] = useState(false);
+  // const [filteredData, setFilteredData] = useState([]);
+  // const [isFiltered, setIsFiltered] = useState(false);
 
   useEffect(() => {
     const headers = [
@@ -94,13 +94,13 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     setNotifications(notificationsArray);
   }, [notificationContext, userContext]);
 
-  const filterOptions = [
-    { type: 'input', properties: [{ name: 'message' }] },
-    { type: 'date', properties: [{ name: 'date' }] },
-    { type: 'multiselect', properties: [{ name: 'levelError' }] }
-  ];
+  // const filterOptions = [
+  //   { type: 'input', properties: [{ name: 'message' }] },
+  //   { type: 'date', properties: [{ name: 'date' }] },
+  //   { type: 'multiselect', properties: [{ name: 'levelError' }] }
+  // ];
 
-  const getFilteredState = value => setIsFiltered(value);
+  // const getFilteredState = value => setIsFiltered(value);
 
   const getValidUrl = (url = '') => {
     let newUrl = window.decodeURIComponent(url);
@@ -133,10 +133,10 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     </div>
   );
 
-  const onLoadFilteredData = data => {
-    console.log({ data });
-    setFilteredData(data);
-  };
+  // const onLoadFilteredData = data => {
+  //   console.log({ data });
+  //   setFilteredData(data);
+  // };
 
   return (
     isNotificationVisible && (
@@ -150,14 +150,14 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         style={{ width: '80%' }}
         visible={isNotificationVisible}
         zIndex={3100}>
-        <Filters
+        {/* <Filters
           appendTo={document.body}
           data={notifications || []}
           getFilteredData={onLoadFilteredData}
           getFilteredSearched={getFilteredState}
           options={filterOptions}
           // searchBy={['message', 'date', 'levelError']}
-        />
+        /> */}
         {console.log(notifications)}
         {notificationContext.all.length > 0 ? (
           <DataTable
@@ -169,7 +169,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
             rowsPerPageOptions={[5, 10, 15]}
             summary="notificationsList"
             totalRecords={notifications.length}
-            value={filteredData}>
+            value={notifications}>
             {columns}
           </DataTable>
         ) : (
