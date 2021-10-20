@@ -8,7 +8,5 @@ export const SnapshotConfig = {
   release:
     '/snapshot/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}/release?restrictFromPublic={:restrictFromPublic}',
   restoreDesigner: '/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/restore',
-  restoreReporter: '/snapshot/{:snapshotId}/dataset/{:datasetId}/restore',
-  update:
-    '/snapshot/update/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}/restrictFromPublic={:restrictFromPublic}' // TODO ADD REAL ENDPOINT
+  restoreReporter: '/snapshot/{:snapshotId}/dataset/{:datasetId}/restore'
 };

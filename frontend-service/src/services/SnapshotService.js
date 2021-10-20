@@ -31,11 +31,5 @@ export const SnapshotService = {
     await SnapshotRepository.restoreReporter(dataflowId, datasetId, snapshotId),
 
   release: async (dataflowId, dataProviderId, restrictFromPublic) =>
-    await SnapshotRepository.release(dataflowId, dataProviderId, restrictFromPublic),
-
-  update: async (
-    dataflowId,
-    dataProviderId,
-    restrictFromPublic // TODO ADD REAL ENDPOINT
-  ) => await SnapshotRepository.update(dataflowId, dataProviderId, restrictFromPublic)
+    await SnapshotRepository.release(dataflowId, dataProviderId, restrictFromPublic)
 };
