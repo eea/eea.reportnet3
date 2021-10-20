@@ -144,8 +144,6 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    *
    * @param headerField the header field
    * @param asc the asc
-   * @param orderPart the order part
-   *
    * @return the string
    */
   private String addOrderBy(String headerField, Boolean asc) {
@@ -186,9 +184,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * Origin filter.
    *
    * @param originsFilter the origins filter
-   * @param group the group
    * @param entity the entity
-   *
    * @return the string
    */
   private String originFilter(String originsFilter, String entity) {
@@ -225,8 +221,6 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * Type entities.
    *
    * @param typeEntitiesFilter the type entities filter
-   * @param group the group
-   *
    * @return the string
    */
   private String typeEntities(List<EntityTypeEnum> typeEntitiesFilter) {
@@ -242,8 +236,6 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * Level error filter.
    *
    * @param levelErrorsFilter the level errors filter
-   * @param group the group
-   *
    * @return the string
    */
   private String levelErrorFilter(List<ErrorTypeEnum> levelErrorsFilter) {
