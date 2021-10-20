@@ -600,7 +600,7 @@ const Dataflow = withRouter(({ history, match }) => {
           );
 
           dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
-          dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: representative.restrictFromPublic });
+          dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: representative?.restrictFromPublic });
         }
       } else {
         if (!isEmpty(dataflow.representatives)) {
