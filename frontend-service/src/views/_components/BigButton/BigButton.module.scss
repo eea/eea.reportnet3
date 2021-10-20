@@ -31,7 +31,7 @@
   .defaultBigButton,
   .menuBigButton {
     align-items: center;
-    color: var(--white);
+    color: var(--white-font);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -39,10 +39,10 @@
 
     span {
       border-radius: 10px;
-      color: var(--white);
+      color: var(--white-font);
 
       &:hover {
-        color: var(--white);
+        color: var(--white-font);
       }
     }
   }

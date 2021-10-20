@@ -36,13 +36,13 @@ hr {
 select:focus,
 input:focus,
 textarea:focus {
-  border-color: var(--c-corporate-blue);
-  @include shadow-1px(var(--c-corporate-blue));
+  border-color: var(--inputtext-border-color-focus);
+  @include shadow-1px(var(--inputtext-box-shadow-color-focus));
   outline: none;
 }
 .p-dropdown:not(.p-disabled).p-focus {
-  border-color: var(--c-corporate-blue);
-  box-shadow: 0px 0px 1px 1px var(--c-corporate-blue);
+  border-color: var(--inputtext-border-color-focus);
+  box-shadow: 0px 0px 1px 1px var(--inputtext-box-shadow-color-focus);
   outline: none;
 }
 .formField.error input {

@@ -24,6 +24,7 @@
   --gray-10: #ebebeb;
   --gray-5: #f5f5f5;
   --white: #ffffff;
+  --white-font: #ffffffe7;
   --informative-color: #006fb4;
   --warning-color: #f29527;
   --success-color-lighter: #bcdbbc;
@@ -33,6 +34,7 @@
   --success-color-darker: #305327;
   --success-color-light: #aae5aa;
   --errors: #da2131;
+  --errors-dark-mode: #fc5050;
   --blockers: #fd2b3c;
 
   /* Main corporate colors */
@@ -130,6 +132,18 @@
   --public-custom-header-bg: #033166;
   --public-page-header-bg: #fff;
 
+  /* Dark mode backgrounds dp */
+  --bg-dark-00dp: #11191d;
+  --bg-dark-01dp: #1d2529;
+  --bg-dark-02dp: #22292d;
+  --bg-dark-03dp: #242b2f;
+  --bg-dark-04dp: #262e31;
+  --bg-dark-06dp: #2b3236;
+  --bg-dark-08dp: #2e3538;
+  --bg-dark-12dp: #33393d;
+  --bg-dark-16dp: #343b3f;
+  --bg-dark-24dp: #373e41;
+
   --header-height: 180px;
 
   /* Theme switcher */
@@ -148,6 +162,7 @@
 
   /* Header */
   --header-box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
+  // --header-box-shadow: 0 0 0.5rem rgb(127, 255, 7);
 
   /* Title */
   --title-icon-color: var(--gray-110);
@@ -306,7 +321,8 @@
   --inputtext-border: 1px solid var(--gray-50);
   --inputtext-border-color-hover: var(--gray-110);
   --inputtext-border-color-focus: var(--c-corporate-blue);
-  --inputtext-box-shadow-focus: 0 0 0 0.1em var(--c-corporate-blue);
+  --inputtext-box-shadow-color-focus: var(--c-corporate-blue-lighter);
+  --inputtext-box-shadow-focus: 0 0 0 0.1em var(--c-corporate-blue-lighter);
   --inputtext-placeholder: var(--main-font-color);
   --inputtext-border-error: 1px solid var(--errors);
   --inputtext-box-shadow-focus-error: 0 0 0 0.1em var(--errors);
