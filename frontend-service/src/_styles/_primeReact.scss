@@ -2866,6 +2866,7 @@ body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
 body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link .p-menuitem-text {
   color: var(--tabview-color);
 }
+
 body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link .p-menuitem-icon {
   color: var(--tabview-color);
   margin-right: 0.5em;
@@ -2875,8 +2876,8 @@ body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link:focus {
   outline-offset: 0;
 }
 body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem:not(.p-highlight):not(.p-disabled):hover .p-menuitem-link {
-  background-color: #dbdbdb;
-  border: 1px solid #dbdbdb;
+  background-color: var(--tabview-highlight-bg-hover);
+  border: 1px solid var(--tabview-highlight-bg-hover);
 }
 body
   .p-tabmenu
@@ -2884,7 +2885,7 @@ body
   .p-tabmenuitem:not(.p-highlight):not(.p-disabled):hover
   .p-menuitem-link
   .p-menuitem-text {
-  color: var(--tabview-color);
+  color: var(--tabview-highlight-color-hover);
 }
 body
   .p-tabmenu
