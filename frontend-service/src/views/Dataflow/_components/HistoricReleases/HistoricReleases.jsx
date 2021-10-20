@@ -250,7 +250,8 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           name: 'isDataCollectionReleased',
           label: resourcesContext.messages['onlyReleasedDataCollectionCheckboxLabel']
         },
-        { name: 'isEUReleased', label: resourcesContext.messages['onlyReleasedEUDatasetCheckboxLabel'] }
+        { name: 'isEUReleased', label: resourcesContext.messages['onlyReleasedEUDatasetCheckboxLabel'] },
+        { name: 'isRestrictedFromPublic', label: resourcesContext.messages['isRestrictedFromPublic'] }
       ]
     }
   ];
@@ -268,6 +269,17 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           )
         }
       ]
+    },
+    {
+      type: 'checkbox',
+      properties: [{ name: 'isRestrictedFromPublic', label: resourcesContext.messages['isRestrictedFromPublic'] }]
+    }
+  ];
+
+  const filterOptionsReportingDataset = [
+    {
+      type: 'checkbox',
+      properties: [{ name: 'isRestrictedFromPublic', label: resourcesContext.messages['isRestrictedFromPublic'] }]
     }
   ];
 
