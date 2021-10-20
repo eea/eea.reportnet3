@@ -443,7 +443,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   @Transactional
   public void validateFields(Long datasetId, KieBase kieBase, Pageable pageable,
-      boolean onlyEmptyFields, Long dataProviderId, String datasetSchema) {
+      boolean onlyEmptyFields) {
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     Page<FieldValue> fields = onlyEmptyFields ? fieldRepository.findEmptyFields(pageable)
         : fieldRepository.findAll(pageable);

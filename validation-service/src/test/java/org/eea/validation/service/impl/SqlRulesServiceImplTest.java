@@ -172,11 +172,10 @@ public class SqlRulesServiceImplTest {
 
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
     String auxId = new ObjectId().toString();
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabaseVO);
-    Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.EUDATASET);
     Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn(auxId);
 
@@ -211,10 +210,9 @@ public class SqlRulesServiceImplTest {
 
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabaseVO);
-    Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.REPORTING);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
@@ -257,10 +255,9 @@ public class SqlRulesServiceImplTest {
 
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabaseVO);
-    Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.REPORTING);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
@@ -285,10 +282,9 @@ public class SqlRulesServiceImplTest {
 
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabaseVO);
-    Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.EUDATASET);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
@@ -314,10 +310,9 @@ public class SqlRulesServiceImplTest {
 
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.DESIGN);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabaseVO);
-    Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.DESIGN);
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
@@ -375,10 +370,9 @@ public class SqlRulesServiceImplTest {
 
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.COLLECTION);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabaseVO);
-    Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.COLLECTION);
     Mockito.when(dataCollectionController.findDataCollectionIdByDataflowId(Mockito.any()))
         .thenReturn(new ArrayList<>());
     Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
@@ -416,10 +410,9 @@ public class SqlRulesServiceImplTest {
     String auxId = new ObjectId().toString();
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.COLLECTION);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabaseVO);
-    Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.COLLECTION);
     Mockito.when(dataCollectionController.findDataCollectionIdByDataflowId(Mockito.any()))
         .thenReturn(new ArrayList<>());
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
@@ -504,8 +497,6 @@ public class SqlRulesServiceImplTest {
     rule.setReferenceId(new ObjectId());
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
     dataset.setId(1L);
-    when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(new DataSetMetabaseVO());
     when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.anyLong())).thenReturn(schema);
     when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
 
@@ -573,8 +564,6 @@ public class SqlRulesServiceImplTest {
         .thenReturn(recordsValidation);
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
     dataset.setId(1L);
-    when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(new DataSetMetabaseVO());
     sqlRulesServiceImpl.retrieveTableData("", dataset, rule, Boolean.FALSE);
 
     Mockito.verify(datasetRepository, times(1)).queryRSExecution(Mockito.any(), Mockito.any(),
@@ -601,6 +590,7 @@ public class SqlRulesServiceImplTest {
     String schema = new ObjectId().toString();
     DataSetMetabaseVO dsMetabaseVO = new DataSetMetabaseVO();
     dsMetabaseVO.setDataflowId(1L);
+    dsMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.COLLECTION);
 
     RulesSchema ruleSchema = new RulesSchema();
     List<Rule> rules = new ArrayList<>();
@@ -658,8 +648,7 @@ public class SqlRulesServiceImplTest {
         .thenReturn(schema);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dsMetabaseVO);
-    Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.COLLECTION);
+
     Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
 
     Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
@@ -681,8 +670,9 @@ public class SqlRulesServiceImplTest {
     data.put("checkNoSQL", false);
 
     String schema = new ObjectId().toString();
-    DataSetMetabaseVO dsMetabaseVO = new DataSetMetabaseVO();
-    dsMetabaseVO.setDataflowId(1L);
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.COLLECTION);
 
     RulesSchema ruleSchema = new RulesSchema();
     List<Rule> rules = new ArrayList<>();
@@ -739,9 +729,7 @@ public class SqlRulesServiceImplTest {
     Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn(schema);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(dsMetabaseVO);
-    Mockito.when(datasetMetabaseController.getType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.COLLECTION);
+        .thenReturn(datasetMetabaseVO);
     Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
 
     ruleSchema.setRules(new ArrayList<>());

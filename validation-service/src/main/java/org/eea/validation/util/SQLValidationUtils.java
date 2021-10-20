@@ -141,16 +141,15 @@ public class SQLValidationUtils {
    * @param dataProviderCode the data provider code
    */
   public static void executeValidationSQLRule(Long datasetId, String ruleId,
-      String dataProviderCode, String dataSchemaId) {
+      String dataProviderCode) {
     Rule rule = sqlRulesService.getRule(datasetId, ruleId);
     DataSetMetabaseVO dataSetMetabaseVO =
         datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    TableValue tableToEvaluate =
-        getTableToEvaluate(datasetId, rule, dataProviderCode, dataSetMetabaseVO);
+    TableValue tableToEvaluate = getTableToEvaluate(rule, dataProviderCode, dataSetMetabaseVO);
     if (null != tableToEvaluate && null != tableToEvaluate.getId()
         && CollectionUtils.isNotEmpty(tableToEvaluate.getRecords())) {
       Optional<DataSetSchema> dataSetSchema =
-          schemasRepository.findById(new ObjectId(dataSchemaId));
+          schemasRepository.findById(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
       Optional<TableValue> tableValue = tableRepository.findById(tableToEvaluate.getId());
       String tableName = getTableName(dataSetSchema, tableValue);
       switch (rule.getType()) {
@@ -182,7 +181,7 @@ public class SQLValidationUtils {
    * @param dataProviderCode the data provider code
    * @return the table to evaluate
    */
-  private static TableValue getTableToEvaluate(Long datasetId, Rule rule, String dataProviderCode,
+  private static TableValue getTableToEvaluate(Rule rule, String dataProviderCode,
       DataSetMetabaseVO dataSetMetabaseVO) {
     TableValue table = null;
     String query = rule.getSqlSentence();
