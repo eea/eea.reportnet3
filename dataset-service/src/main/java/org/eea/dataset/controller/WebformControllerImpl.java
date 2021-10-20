@@ -52,7 +52,14 @@ public class WebformControllerImpl implements WebformController {
   }
 
 
+  /**
+   * Insert webform config.
+   *
+   * @param webformConfig the webform config
+   */
   @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/webformConfig")
   public void insertWebformConfig(@RequestBody WebformConfigVO webformConfig) {
 
@@ -64,7 +71,15 @@ public class WebformControllerImpl implements WebformController {
     }
   }
 
+  /**
+   * Find webform config by id.
+   *
+   * @param id the id
+   * @return the string
+   */
   @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @GetMapping("/webformConfig/{id}")
   public String findWebformConfigById(@PathVariable("id") Long id) {
 

@@ -12,9 +12,29 @@ import com.fasterxml.jackson.core.JsonProcessingException;
  */
 public interface WebformService {
 
+  /**
+   * Insert webform config.
+   *
+   * @param id the id
+   * @param name the name
+   * @param content the content
+   * @throws ParseException the parse exception
+   */
   void insertWebformConfig(Long id, String name, String content) throws ParseException;
 
+  /**
+   * Find webform config content by id.
+   *
+   * @param id the id
+   * @return the string
+   * @throws JsonProcessingException the json processing exception
+   */
   String findWebformConfigContentById(Long id) throws JsonProcessingException;
 
+  /**
+   * Gets the list webforms.
+   *
+   * @return the list webforms
+   */
   List<WebformMetabaseVO> getListWebforms();
 }

@@ -33,9 +33,20 @@ public interface WebformController {
   @GetMapping("/listAll")
   List<WebformMetabaseVO> getListWebforms();
 
+  /**
+   * Insert webform config.
+   *
+   * @param webformConfig the webform config
+   */
   @PostMapping("/webformConfig")
   void insertWebformConfig(@RequestBody WebformConfigVO webformConfig);
 
+  /**
+   * Find webform config by id.
+   *
+   * @param id the id
+   * @return the string
+   */
   @GetMapping("/webformConfig/{id}")
   String findWebformConfigById(@PathVariable("id") Long id);
 

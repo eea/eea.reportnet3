@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class WebformServiceImpl implements WebformService {
 
 
+  /** The webform config repository. */
   @Autowired
   private WebformConfigRepository webformConfigRepository;
 
@@ -55,6 +56,13 @@ public class WebformServiceImpl implements WebformService {
   }
 
 
+  /**
+   * Insert webform config.
+   *
+   * @param id the id
+   * @param name the name
+   * @param content the content
+   */
   @Override
   public void insertWebformConfig(Long id, String name, String content) {
     WebformConfig webform = new WebformConfig();
@@ -74,6 +82,13 @@ public class WebformServiceImpl implements WebformService {
     webformConfigRepository.save(webform);
   }
 
+  /**
+   * Find webform config content by id.
+   *
+   * @param id the id
+   * @return the string
+   * @throws JsonProcessingException the json processing exception
+   */
   @Override
   public String findWebformConfigContentById(Long id) throws JsonProcessingException {
     WebformConfig webform = webformConfigRepository.findByIdReferenced(id);
