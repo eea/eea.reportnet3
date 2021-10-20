@@ -313,11 +313,6 @@ export const ShowValidationsList = memo(
           tablesFilter
         );
 
-        data.errors.forEach(row => {
-          const ruleInfo = getRuleSchema(row.ruleId);
-          row.message = ruleInfo?.message.replaceAll('{%', '<').replaceAll('%}', '>');
-        });
-
         addTableSchemaId(data.errors);
         validationDispatch({
           type: 'SET_TOTAL_GROUPED_ERRORS',
