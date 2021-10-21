@@ -7,9 +7,10 @@ import styles from './DocumentFileUpload.module.scss';
 import { config } from 'conf';
 
 import { Button } from 'views/_components/Button';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
+import { Checkbox } from 'views/_components/Checkbox';
 import { Dropdown } from 'views/_components/Dropdown';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
-import { CharacterCounter } from 'views/_components/CharacterCounter';
 
 import { DocumentService } from 'services/DocumentService';
 
@@ -290,18 +291,27 @@ const DocumentFileUpload = ({
       </fieldset>
 
       <fieldset>
-        <div className={styles.checkboxIsPublic}>
-          <input
+        <div className={`${styles.checkboxIsPublic}`}>
+          <Checkbox
+            ariaLabelledBy="isPublic"
             checked={inputs.isPublic}
             id="isPublic"
+            inputId="isPublic"
             onChange={() => {
               setInputs(previousValues => {
                 return { ...previousValues, isPublic: !previousValues.isPublic };
               });
             }}
-            type="checkbox"
+            role="checkbox"
           />
-          <label htmlFor="isPublic" style={{ display: 'block' }}>
+          <label
+            htmlFor="isPublic"
+            onClick={() => {
+              setInputs(previousValues => {
+                return { ...previousValues, isPublic: !previousValues.isPublic };
+              });
+            }}
+            style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
             {resourcesContext.messages['checkboxIsPublic']}
           </label>
         </div>
