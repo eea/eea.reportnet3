@@ -644,7 +644,7 @@
     "accordion-header-highlight-bg-color-hover": "var(--bg-dark-12dp)",
     "accordion-header-highlight-border-hover": "1px solid  var(--gray-75)",
     "property-item-text-color": "var(--accent-color-dark-mode)",
-    "dialog-content-border-width": "0 1px 0 1px",
+    "dialog-content-border-width": "0 1px 1px 1px",
     "footer-content-bg": "var(--bg-dark-03dp)",
     "help-modal-bg": "var(--bg-dark-24dp)",
     "error-boundary-bg": "var(--bg-dark-24dp)"
