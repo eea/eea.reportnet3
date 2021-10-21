@@ -324,7 +324,10 @@
     "help-modal-bg": "var(--bg)",
     "eu-header-shadow": "0 4px 5px 0 var(--shadow-color-rgba)",
     "eu-header-bg": "var(--gray-10)",
-    "error-boundary-bg": "var(--bg)"
+    "error-boundary-bg": "var(--bg)",
+    "automatic-message-sender-bg": "var(--gray-25)",
+    "automatic-message-receiver-bg": "var(--gray-15)",
+    "automatic-message-text": "var(--gray-110)"
   },
   "dark": {
     "bg": "var(--bg-dark-00dp)",
@@ -652,7 +655,10 @@
     "help-modal-bg": "var(--bg-dark-24dp)",
     "eu-header-shadow": "0 4px 5px 0 var(--shadow-color-rgba)",
     "eu-header-bg": "var(--bg-dark-12dp)",
-    "error-boundary-bg": "var(--bg-dark-24dp)"
+    "error-boundary-bg": "var(--bg-dark-24dp)",
+    "automatic-message-sender-bg": "var(--bg-dark-16dp)",
+    "automatic-message-receiver-bg": "var(--bg-dark-24dp)",
+    "automatic-message-text": "var(--white-font)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
