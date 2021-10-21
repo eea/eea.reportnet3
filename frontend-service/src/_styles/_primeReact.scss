@@ -756,14 +756,14 @@ body .p-fileupload .p-progressbar {
   background-color: #f4f4f4;
 }
 body .p-fileupload-choose:not(.p-disabled):hover {
-  background-color: #116fbf;
-  color: #ffffff;
-  border-color: #116fbf;
+  background-color: var(--button-primary-bg-hover);
+  color: var(--button-primary-color-hover);
+  border-color: var(--button-primary-border-color-hover);
 }
 body .p-fileupload-choose:not(.p-disabled):active {
-  background-color: #005b9f;
-  color: #ffffff;
-  border-color: #005b9f;
+  background-color: var(--button-primary-bg-active);
+  color: var(--button-primary-color-active);
+  border-color: var(--button-primary-border-color-active);
 }
 body .p-password-panel {
   padding: 12px;
