@@ -291,7 +291,7 @@ const DocumentFileUpload = ({
       </fieldset>
 
       <fieldset>
-        <div className={`${styles.checkboxIsPublic}`}>
+        <div className={styles.checkboxIsPublic}>
           <Checkbox
             ariaLabelledBy="isPublic"
             checked={inputs.isPublic}
