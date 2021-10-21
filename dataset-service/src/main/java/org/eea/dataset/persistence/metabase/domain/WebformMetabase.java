@@ -9,7 +9,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -36,9 +35,13 @@ public class WebformMetabase implements Serializable {
   @Column(name = "id", columnDefinition = "serial")
   private Long id;
 
-  /** The name. */
-  @Field(value = "name")
-  private String name;
+  /** The label. */
+  @Column(name = "label")
+  private String label;
+
+  /** The value. */
+  @Column(name = "value")
+  private String value;
 
   /**
    * Hash code.
@@ -48,7 +51,7 @@ public class WebformMetabase implements Serializable {
   @Override
   public int hashCode() {
 
-    return Objects.hash(name);
+    return Objects.hash(id, label, value);
 
   }
 
@@ -67,6 +70,6 @@ public class WebformMetabase implements Serializable {
       return false;
     }
     WebformMetabase other = (WebformMetabase) obj;
-    return Objects.equals(name, other.name);
+    return Objects.equals(label, other.label) && Objects.equals(value, other.value);
   }
 }
