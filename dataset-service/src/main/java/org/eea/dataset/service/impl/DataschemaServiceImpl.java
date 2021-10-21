@@ -637,13 +637,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       tableSchema.put("notEmpty", newValue);
       updateNotEmptyRule(oldValue, newValue, tableSchemaVO.getIdTableSchema(), datasetId);
     }
-
-    if (schemasRepository.updateTableSchema(datasetSchemaId, tableSchema).getModifiedCount() != 1) {
-      LOG.error("Error updating the table with id schema {} from the dataset id {}", tableSchema,
-          datasetId);
-      throw new EEAException(
-          String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, tableSchema, datasetId));
-    }
+    schemasRepository.updateTableSchema(datasetSchemaId, tableSchema);
   }
 
   /**
