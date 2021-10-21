@@ -1,4 +1,11 @@
 .systemNotificationFormWrapper {
   display: flex;
   flex-direction: column;
+  > div > div {
+    padding: 0.75em;
+  }
+  .calendarWrapper {
+    display: flex;
+    flex-direction: row;
+  }
 }

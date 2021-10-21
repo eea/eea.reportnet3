@@ -1313,6 +1313,9 @@
     "duplicateDisabledMessage": "already exists",
     "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field",
     "systemNotifications": "Manage system notifications",
-    "noSystemNotifications": "There are no system notifications yet"
+    "noSystemNotifications": "There are no system notifications yet",
+    "availablePeriod": "Available period",
+    "from": "From",
+    "to": "To"
   }
 }

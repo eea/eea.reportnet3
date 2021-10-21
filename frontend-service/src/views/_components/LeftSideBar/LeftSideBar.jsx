@@ -94,7 +94,6 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
 
   const renderManageSystemNotifications = () => {
     const manageSystemNotificationsProps = {
-      buttonType: 'notifications',
       className: 'dataflowList-left-side-bar-system-notifications-help-step',
       href: '#',
       icon: 'comment',
