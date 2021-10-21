@@ -18,6 +18,9 @@ export const notificationReducer = (state, { type, payload }) => {
     case 'NEW_NOTIFICATION_ADDED':
       return { ...state, newNotification: false };
 
+    case 'HIDE_BY_KEY':
+      return { ...state, hidden: payload };
+
     case 'HIDE':
       return { ...state, hidden: [payload] };
 
