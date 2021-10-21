@@ -760,7 +760,7 @@ const Dataflow = withRouter(({ history, match }) => {
   useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], onDataCollectionIsCompleted);
 
   useCheckNotifications(
-    ['UPDATE_RELEASABLE_FAILED_EVENT', 'UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT'],
+    ['UPDATE_RELEASABLE_FAILED_EVENT', 'UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT', 'UPDATE_PUBLIC_STATUS_FAILED_EVENT'],
     setIsDataUpdated
   );
 
@@ -858,7 +858,7 @@ const Dataflow = withRouter(({ history, match }) => {
       onLoadReportingDataflow();
     } catch (error) {
       console.error('Dataflow - onConfirmUpdateShowPublicInfo.', error);
-      notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } });
+      notificationContext.add({ type: 'UPDATE_PUBLIC_STATUS_FAILED_EVENT', content: { dataflowId } });
       dataflowDispatch({
         type: 'ON_ERROR_UPDATE_IS_RELEASABLE',
         payload: { showPublicInfo: dataflowState.data.showPublicInfo, isFetchingData: false }

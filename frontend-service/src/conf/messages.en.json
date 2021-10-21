@@ -1314,6 +1314,7 @@
     "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field",
     "restrictFromPublicftSideBarButton": "Released data visibility",
     "restrictFromPublicDialogHeader": "Show/hide released data",
-    "updateRestrictFromPublicFailedEvent": "Error updating the released data visibility"
+    "updateRestrictFromPublicFailedEvent": "Error updating the released data visibility",
+    "updatePublicStatusFailedEvent": "Error updating the dataflow public status"
   }
 }
