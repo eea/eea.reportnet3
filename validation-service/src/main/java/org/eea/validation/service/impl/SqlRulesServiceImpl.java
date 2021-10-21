@@ -29,9 +29,6 @@ import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -44,6 +41,10 @@ import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.persistence.schemas.FieldSchema;
+import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
@@ -85,6 +86,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /** The dataset schema controller. */
   @Autowired
   private DatasetSchemaControllerZuul datasetSchemaController;
+
+  @Autowired
+  private SchemasRepository schemasRepository;
 
   /** The dataset metabase controller. */
   @Autowired
@@ -238,8 +242,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Override
   public TableValue retrieveTableData(String query, DataSetMetabaseVO dataSetMetabaseVO, Rule rule,
       Boolean ischeckDC) throws EEAInvalidSQLException {
-    DataSetSchemaVO schema =
-        datasetSchemaController.findDataSchemaByDatasetId(dataSetMetabaseVO.getId());
+    DataSetSchema dataschema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
     String entityName = "";
     Long idTable = null;
 
@@ -247,17 +251,17 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     switch (rule.getType()) {
       case FIELD:
-        entityName = retriveFieldName(schema, rule.getReferenceId().toString());
-        idTable = retriveIsTableFromFieldSchema(schema, rule.getReferenceId().toString(),
+        entityName = retriveFieldName(dataschema, rule.getReferenceId());
+        idTable = retriveIsTableFromFieldSchema(dataschema, rule.getReferenceId(),
             dataSetMetabaseVO.getId());
         break;
       case TABLE:
-        entityName = retriveTableName(schema, rule.getReferenceId().toString());
+        entityName = retriveTableName(dataschema, rule.getReferenceId());
         idTable = datasetRepository.getTableId(rule.getReferenceId().toString(),
             dataSetMetabaseVO.getId());
         break;
       case RECORD:
-        idTable = retriveIsTableFromRecordSchema(schema, rule.getReferenceId().toString(),
+        idTable = retriveIsTableFromRecordSchema(dataschema, rule.getReferenceId(),
             dataSetMetabaseVO.getId());
         break;
       case DATASET:
@@ -438,17 +442,17 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @return the long
    */
   @Transactional
-  private Long retriveIsTableFromFieldSchema(DataSetSchemaVO schema, String fieldSchemaId,
+  private Long retriveIsTableFromFieldSchema(DataSetSchema schema, ObjectId fieldSchemaId,
       Long datasetId) {
-    String tableSchemaId = "";
-    for (TableSchemaVO table : schema.getTableSchemas()) {
-      for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
-        if (field.getId().equals(fieldSchemaId)) {
+    ObjectId tableSchemaId = new ObjectId();
+    for (TableSchema table : schema.getTableSchemas()) {
+      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+        if (field.getIdFieldSchema().equals(fieldSchemaId)) {
           tableSchemaId = table.getIdTableSchema();
         }
       }
     }
-    return datasetRepository.getTableId(tableSchemaId, datasetId);
+    return datasetRepository.getTableId(tableSchemaId.toString(), datasetId);
   }
 
   /**
@@ -460,15 +464,15 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @return the long
    */
   @Transactional
-  private Long retriveIsTableFromRecordSchema(DataSetSchemaVO schema, String recordSchemaId,
+  private Long retriveIsTableFromRecordSchema(DataSetSchema schema, ObjectId recordSchemaId,
       Long datasetId) {
-    String tableSchemaId = "";
-    for (TableSchemaVO table : schema.getTableSchemas()) {
+    ObjectId tableSchemaId = new ObjectId();
+    for (TableSchema table : schema.getTableSchemas()) {
       if (table.getRecordSchema().getIdRecordSchema().equals(recordSchemaId)) {
         tableSchemaId = table.getIdTableSchema();
       }
     }
-    return datasetRepository.getTableId(tableSchemaId, datasetId);
+    return datasetRepository.getTableId(tableSchemaId.toString(), datasetId);
   }
 
   /**
@@ -478,9 +482,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param idTableSchema the id table schema
    * @return the string
    */
-  private String retriveTableName(DataSetSchemaVO schema, String idTableSchema) {
+  private String retriveTableName(DataSetSchema schema, ObjectId idTableSchema) {
     String tableName = "";
-    for (TableSchemaVO table : schema.getTableSchemas()) {
+    for (TableSchema table : schema.getTableSchemas()) {
       if (table.getIdTableSchema().equals(idTableSchema)) {
         tableName = table.getNameTableSchema();
       }
@@ -495,12 +499,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param idFieldSchema the id field schema
    * @return the string
    */
-  private String retriveFieldName(DataSetSchemaVO schema, String idFieldSchema) {
+  private String retriveFieldName(DataSetSchema schema, ObjectId idFieldSchema) {
     String fieldName = "";
-    for (TableSchemaVO table : schema.getTableSchemas()) {
-      for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
-        if (field.getId().equals(idFieldSchema)) {
-          fieldName = field.getName();
+    for (TableSchema table : schema.getTableSchemas()) {
+      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+        if (field.getIdFieldSchema().equals(idFieldSchema)) {
+          fieldName = field.getHeaderName();
         }
       }
     }
