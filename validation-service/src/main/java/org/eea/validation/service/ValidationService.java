@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.GroupValidationVO;
 import org.eea.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
@@ -229,7 +230,7 @@ public interface ValidationService {
    * @return the integer
    */
   Integer countEmptyFieldsDataset(@DatasetId Long datasetId);
-  
+
   /**
    * Exports validation data file.
    *
@@ -251,5 +252,15 @@ public interface ValidationService {
    * @throws EEAException the EEA exception
    */
   File downloadExportedFile(Long datasetId, String fileName) throws IOException;
+
+
+  /**
+   * Gets the rule message.
+   *
+   * @param dataset the dataset
+   * @param errors the errors
+   * @return the rule message
+   */
+  void getRuleMessage(DatasetValue dataset, List<GroupValidationVO> errors);
 
 }
