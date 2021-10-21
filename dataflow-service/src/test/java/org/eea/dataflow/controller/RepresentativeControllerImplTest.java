@@ -571,7 +571,7 @@ public class RepresentativeControllerImplTest {
 
   @Test
   public void updateRestrictFromPublicTest() {
-    representativeControllerImpl.updateRestricFromPublic(1L, 1L, true);
+    representativeControllerImpl.updateRestrictFromPublic(1L, 1L, true);
     Mockito.verify(representativeService, times(1)).updateRepresentativeVisibilityRestrictions(
         Mockito.anyLong(), Mockito.anyLong(), Mockito.anyBoolean());
   }
