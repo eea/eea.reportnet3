@@ -82,7 +82,6 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         historicReleases = uniqBy(
           data.map(historic => {
             return {
-              isRestrictedFromPublic: true,
               releaseDate: historic.releaseDate,
               dataProviderCode: historic.dataProviderCode
             };
