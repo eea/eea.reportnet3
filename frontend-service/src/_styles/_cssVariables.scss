@@ -36,6 +36,7 @@
   --errors: #da2131;
   --errors-dark-mode: #fc5050;
   --blockers: #fd2b3c;
+  --shadow-color-rgba: rgba(0, 0, 0, 0.4);
   --accent-color-dark-mode: #e2c08d;
 
   /* Main corporate colors */
@@ -544,6 +545,8 @@
   --map-marker-color: var(--c-corporate-blue-lighter);
 
   /*Eu header footer*/
+  --eu-header-shadow: 0 4px 5px 0 var(--shadow-color-rgba);
+  --eu-header-bg: var(--bg-dark-12dp);
   --eu-footer-bottom-bg: #d9d9d9;
   --eu-footer-bottom-font: #016394;
   --eu-footer-bottom: var(--eu-footer-bottom-bg);
