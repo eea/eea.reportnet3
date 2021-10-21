@@ -411,7 +411,7 @@
     "dropdown-border": "1px solid var(--gray-75)",
     "dropdown-border-color-hover": "var(--white)",
     "dropdown-bg-hover": "var(--white)",
-    "dropdown-bg-focus": "var(--white)",
+    "dropdown-bg-focus": "var(--accent-color-dark-mode)",
     "dropdown-trigger-bg": "var(--bg-dark-00dp)",
     "dropdown-trigger-color": "var(--white)",
     "dropdown-trigger-clear-icon-color": "var(--white)",
