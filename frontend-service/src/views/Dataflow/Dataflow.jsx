@@ -839,10 +839,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmUpdateShowPublicInfo = async () => {
     manageDialogs('isShowPublicInfoDialogVisible', false);
     try {
-      dataflowDispatch({
-        type: 'SET_IS_FETCHING_DATA',
-        payload: { isFetchingData: true }
-      });
+      dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: true } });
       await DataflowService.update(
         dataflowId,
         dataflowState.data.name,
@@ -967,11 +964,8 @@ const Dataflow = withRouter(({ history, match }) => {
               manageDialogs('isReleaseDialogVisible', false);
               if (dataflowState.representative.restrictFromPublic !== dataflowState.restrictFromPublic) {
                 dataflowDispatch({
-                  type: 'ON_ERROR_UPDATE_RESTRICT_FROM_PUBLIC',
-                  payload: {
-                    restrictFromPublic: dataflowState.representative.restrictFromPublic,
-                    isFetchingData: false
-                  }
+                  type: 'SET_RESTRICT_FROM_PUBLIC',
+                  payload: dataflowState.representative.restrictFromPublic
                 });
               }
             }}
