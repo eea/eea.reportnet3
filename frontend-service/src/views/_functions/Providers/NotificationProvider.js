@@ -78,6 +78,10 @@ const NotificationProvider = ({ children }) => {
 
         clearHiddenNotifications: () => dispatch({ type: 'CLEAR_HIDDEN' }),
 
+        removeHiddenByKey: key => {
+          dispatch({ type: 'HIDE_BY_KEY', payload: state.hidden.filter(notification => notification.key !== key) });
+        },
+
         hide: notificationDTO => {
           const { type, content } = notificationDTO;
 

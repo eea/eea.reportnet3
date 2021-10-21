@@ -489,6 +489,14 @@ public class SQLValidationUtils {
       for (String field : fieldsToReplace) {
         errorMessage = errorMessage.replace(field, getReplacement(field, rvAux, tableToEvaluate));
       }
+    } else if (object instanceof TableValue) {
+      TableValue tvAux = (TableValue) object;
+      for (String field : fieldsToReplace) {
+        if (null != tvAux) {
+          errorMessage = errorMessage.replace(field,
+              getReplacement(field, tvAux.getRecords().get(0), tableToEvaluate));
+        }
+      }
     }
     return errorMessage;
   }

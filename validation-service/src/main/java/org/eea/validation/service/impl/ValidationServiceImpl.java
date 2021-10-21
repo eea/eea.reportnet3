@@ -847,9 +847,9 @@ public class ValidationServiceImpl implements ValidationService {
     if (null != rules && null != rules.getRules()) {
       for (GroupValidationVO validation : errors) {
         for (Rule rule : rules.getRules()) {
-          if (EntityTypeEnum.FIELD == validation.getTypeEntity()
-              || EntityTypeEnum.RECORD == validation.getTypeEntity()
-                  && validation.getIdRule().equals(rule.getRuleId().toString())) {
+          if ((EntityTypeEnum.FIELD == validation.getTypeEntity()
+              || EntityTypeEnum.RECORD == validation.getTypeEntity())
+              && validation.getIdRule().equals(rule.getRuleId().toString())) {
             validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
           }
         }
