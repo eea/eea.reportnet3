@@ -14,7 +14,6 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
@@ -83,10 +82,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset schema controller. */
-  @Autowired
-  private DatasetSchemaControllerZuul datasetSchemaController;
-
+  /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
