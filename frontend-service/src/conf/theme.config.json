@@ -322,6 +322,8 @@
     "dialog-content-border-width": "1px",
     "footer-content-bg": "var(--bg)",
     "help-modal-bg": "var(--bg)",
+    "eu-header-shadow": "0 4px 5px 0 var(--shadow-color-rgba)",
+    "eu-header-bg": "var(--gray-10)",
     "error-boundary-bg": "var(--bg)"
   },
   "dark": {
@@ -648,6 +650,8 @@
     "dialog-content-border-width": "0 1px 1px 1px",
     "footer-content-bg": "var(--bg-dark-03dp)",
     "help-modal-bg": "var(--bg-dark-24dp)",
+    "eu-header-shadow": "0 4px 5px 0 var(--shadow-color-rgba)",
+    "eu-header-bg": "var(--bg-dark-12dp)",
     "error-boundary-bg": "var(--bg-dark-24dp)"
   },
   "baseHeaderHeight": 180,
