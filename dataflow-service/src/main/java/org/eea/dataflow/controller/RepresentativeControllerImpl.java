@@ -566,8 +566,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
         providerIdList);
   }
 
+
   /**
-   * Update restric from public.
+   * Update restrict from public.
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
