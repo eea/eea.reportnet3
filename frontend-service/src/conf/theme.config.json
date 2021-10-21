@@ -327,7 +327,8 @@
     "error-boundary-bg": "var(--bg)",
     "automatic-message-sender-bg": "var(--gray-25)",
     "automatic-message-receiver-bg": "var(--gray-15)",
-    "automatic-message-text": "var(--gray-110)"
+    "automatic-message-text": "var(--gray-110)",
+    "api-key-inputtext-bg": "var(--gray-5)"
   },
   "dark": {
     "bg": "var(--bg-dark-00dp)",
@@ -658,7 +659,8 @@
     "error-boundary-bg": "var(--bg-dark-24dp)",
     "automatic-message-sender-bg": "var(--bg-dark-16dp)",
     "automatic-message-receiver-bg": "var(--bg-dark-24dp)",
-    "automatic-message-text": "var(--white-font)"
+    "automatic-message-text": "var(--white-font)",
+    "api-key-inputtext-bg": "var(--bg-dark-04dp)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
