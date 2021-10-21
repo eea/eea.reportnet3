@@ -1153,7 +1153,7 @@ const Dataflow = withRouter(({ history, match }) => {
               }
               role="checkbox"
             />
-            <label className={styles.showPublicInfo} htmlFor="restrictFromPublicCheckbox">
+            <label className={styles.restrictFromPublic} htmlFor="restrictFromPublicCheckbox">
               <span
                 className={styles.pointer}
                 onClick={() =>
