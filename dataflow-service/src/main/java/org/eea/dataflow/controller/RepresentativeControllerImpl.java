@@ -575,7 +575,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @PutMapping(value = "/update/restricFromPublic")
-  @PreAuthorize("isAuthenticated()")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
   @ApiOperation(value = "Update representative visibility", hidden = true)
   public void updateRestricFromPublic(
       @ApiParam(value = "Dataflow Id", example = "0",
