@@ -301,7 +301,7 @@ const Dataflow = withRouter(({ history, match }) => {
   }, [dataflowId, dataflowState.isDataUpdated, representativeId]);
 
   const checkRestrictFromPublic = (
-    <div style={{ float: 'left' }}>
+    <div style={{ float: 'left', marginTop: '5px' }}>
       <Checkbox
         checked={dataflowState.restrictFromPublic}
         id="restrict_from_public_checkbox"
@@ -312,10 +312,11 @@ const Dataflow = withRouter(({ history, match }) => {
         role="checkbox"
       />
       <label
+        className={styles.restrictFromPublic}
         onClick={() =>
           dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
         }
-        style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+        style={{ cursor: 'pointer', fontWeight: 'bold' }}>
         {resourcesContext.messages['restrictFromPublicCheckboxLabel']}
       </label>
     </div>
