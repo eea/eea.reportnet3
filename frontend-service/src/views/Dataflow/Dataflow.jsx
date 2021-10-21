@@ -799,10 +799,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmRestrictFromPublic = async () => {
     manageDialogs('isRestrictFromPublicDialogVisible', false);
     try {
-      dataflowDispatch({
-        type: 'SET_IS_FETCHING_DATA',
-        payload: { isFetchingData: true }
-      });
+      dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: true } });
       await RepresentativeService.updateRestrictFromPublic(
         dataflowId,
         dataProviderId,
@@ -964,6 +961,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isReleaseDialogVisible && (
           <ConfirmDialog
+            disabledConfirm={
+              dataflowState.restrictFromPublic === dataflowState.representative.restrictFromPublic ||
+              dataflowState.isFetchingData
+            }
             footerAddon={dataflowState.anySchemaAvailableInPublic && !isBusinessDataflow && checkRestrictFromPublic}
             header={resourcesContext.messages['confirmReleaseHeader']}
             labelCancel={resourcesContext.messages['no']}
