@@ -833,10 +833,6 @@ const Dataflow = withRouter(({ history, match }) => {
     } catch (error) {
       console.error('Dataflow - onConfirmUpdateIsReleaseable.', error);
       notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } });
-      dataflowDispatch({
-        type: 'ON_ERROR_UPDATE_IS_RELEASABLE',
-        payload: { isReleasable: dataflowState.data.isReleasable, isFetchingData: false }
-      });
     }
   };
 
@@ -859,10 +855,6 @@ const Dataflow = withRouter(({ history, match }) => {
     } catch (error) {
       console.error('Dataflow - onConfirmUpdateShowPublicInfo.', error);
       notificationContext.add({ type: 'UPDATE_PUBLIC_STATUS_FAILED_EVENT', content: { dataflowId } });
-      dataflowDispatch({
-        type: 'ON_ERROR_UPDATE_IS_RELEASABLE',
-        payload: { showPublicInfo: dataflowState.data.showPublicInfo, isFetchingData: false }
-      });
     }
   };
 
