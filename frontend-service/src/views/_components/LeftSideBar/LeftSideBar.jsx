@@ -19,7 +19,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
+const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystemNotificationVisible }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -90,6 +90,22 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
       title: 'notifications'
     };
     return <LeftSideBarButton {...userNotificationsProps} />;
+  };
+
+  const renderManageSystemNotifications = () => {
+    const manageSystemNotificationsProps = {
+      buttonType: 'notifications',
+      className: 'dataflowList-left-side-bar-system-notifications-help-step',
+      href: '#',
+      icon: 'comment',
+      label: 'systemNotifications',
+      onClick: async e => {
+        e.preventDefault();
+        setIsSystemNotificationVisible(true);
+      },
+      title: 'systemNotifications'
+    };
+    return <LeftSideBarButton {...manageSystemNotificationsProps} />;
   };
 
   const renderHelp = () => {
@@ -178,6 +194,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
               {renderUserProfile()}
               {renderHelp()}
               {renderUserNotifications()}
+              {renderManageSystemNotifications()}
             </div>
             {!isEmpty(renderSectionButtons()) && (
               <Fragment>
