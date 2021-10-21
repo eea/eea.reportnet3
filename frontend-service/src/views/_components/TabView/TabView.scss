@@ -70,6 +70,33 @@ body
   .p-tabview.p-tabview-top
   .p-tabview-nav
   li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover
+  a
+  .p-tabview-right-icon,
+body
+  .p-tabview.p-tabview-bottom
+  .p-tabview-nav
+  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover
+  a
+  .p-tabview-right-icon,
+body
+  .p-tabview.p-tabview-left
+  .p-tabview-nav
+  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover
+  a
+  .p-tabview-right-icon,
+body
+  .p-tabview.p-tabview-right
+  .p-tabview-nav
+  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover
+  a
+  .p-tabview-right-icon {
+  margin-left: 0.5em;
+  color: var(--tabview-highlight-icon-color-hover);
+}
+body
+  .p-tabview.p-tabview-top
+  .p-tabview-nav
+  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):hover
   .p-tabview-close,
 body
   .p-tabview.p-tabview-bottom
@@ -98,6 +125,13 @@ body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight a
   border-left: var(--tabview-highlight-border);
   border-bottom: var(--tabview-highlight-border-bottom);
   color: var(--tabview-highlight-color);
+}
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight a .p-tabview-right-icon,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight a .p-tabview-right-icon,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight a .p-tabview-right-icon,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight a .p-tabview-right-icon {
+  margin-left: 0.5em;
+  color: var(--tabview-highlight-icon-color);
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight .p-tabview-close,
 body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight .p-tabview-close,
