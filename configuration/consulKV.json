@@ -1463,6 +1463,26 @@
     "key": "config/ums/eea.keycloak.listUsersMax",
     "value": "MTAwMA=="
   },
+    {
+    "key": "config/recordstore/management.metrics.export.elastic.index",
+    "value": "JHtFTEFTVElDX0lOREVYOkxvY2FsLVJlY29yZHN0b3JlLU1ldHJpY3N9"
+  },
+  {
+    "key": "config/recordstore/management.metrics.export.elastic.indexDateFormat",
+    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU0tZGR9"
+  },
+  {
+    "key": "config/recordstore/management.metrics.export.elastic.host",
+    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
+  },
+  {
+    "key": "config/recordstore/management.metrics.export.elastic.userName",
+    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
+  },
+  {
+    "key": "config/recordstore/management.metrics.export.elastic.password",
+    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
+  },
   {
     "key": "config/dataflow/exportDataflowSchemaInformationPath",
     "value": "JHtEQVRBRkxPV19FWFBPUlRfU0NIRU1BX0lORk9STUFUSU9OX1BBVEg6QzpcZXhwb3J0RGF0YWZsb3dTY2hlbWFJbmZvcm1hdGlvblx9"
