@@ -805,7 +805,7 @@ const Dataflow = withRouter(({ history, match }) => {
         dataflowId,
         dataProviderId,
         dataflowState.restrictFromPublic
-      ); // TODO ADD REAL ENDPOINT
+      );
       onLoadReportingDataflow();
     } catch (error) {
       console.error('Dataflow - onConfirmRestrictFromPublic.', error);

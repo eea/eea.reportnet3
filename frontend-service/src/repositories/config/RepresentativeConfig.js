@@ -14,6 +14,5 @@ export const RepresentativeConfig = {
   importFile: '/representative/import/{:dataflowId}/group/{:dataProviderGroupId}',
   updateDataProviderId: '/representative/update',
   updateLeadReporter: '/representative/leadReporter/update/dataflow/{:dataflowId}',
-  updateRestrictFromPublic:
-    '/representative/update/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}/restrictFromPublic={:restrictFromPublic}' // TODO ADD REAL ENDPOINT
+  updateRestrictFromPublic: '/representative/update/restrictFromPublic'
 };
