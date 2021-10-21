@@ -100,9 +100,6 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_RESTRICT_FROM_PUBLIC':
       return { ...state, restrictFromPublic: payload };
 
-    case 'ON_ERROR_UPDATE_RESTRICT_FROM_PUBLIC':
-      return { ...state, isFetchingData: payload.isFetchingData, restrictFromPublic: payload.restrictFromPublic };
-
     case 'ON_CLEAN_UP_RECEIPT':
       return { ...state, ...payload };
 

@@ -1128,11 +1128,8 @@ const Dataflow = withRouter(({ history, match }) => {
               manageDialogs('isRestrictFromPublicDialogVisible', false);
               if (dataflowState.representative.restrictFromPublic !== dataflowState.restrictFromPublic) {
                 dataflowDispatch({
-                  type: 'ON_ERROR_UPDATE_RESTRICT_FROM_PUBLIC',
-                  payload: {
-                    restrictFromPublic: dataflowState.representative.restrictFromPublic,
-                    isFetchingData: false
-                  }
+                  type: 'SET_RESTRICT_FROM_PUBLIC',
+                  payload: dataflowState.representative.restrictFromPublic
                 });
               }
             }}
