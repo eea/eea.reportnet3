@@ -9,6 +9,7 @@ import { config } from 'conf';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
+import { Checkbox } from 'views/_components/Checkbox';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
@@ -428,13 +429,18 @@ export const WebLinks = ({
 
             <fieldset>
               <div className={styles.checkboxIsPublic}>
-                <input
+                <Checkbox
+                  ariaLabelledBy="isPublic"
                   checked={webLinksState.webLink.isPublic}
                   id="isPublic"
+                  inputId="isPublic"
                   onChange={() => onIsPublicChange(!webLinksState.webLink.isPublic)}
-                  type="checkbox"
+                  role="checkbox"
                 />
-                <label htmlFor="isPublic" style={{ display: 'block' }}>
+                <label
+                  htmlFor="isPublic"
+                  onClick={() => onIsPublicChange(!webLinksState.webLink.isPublic)}
+                  style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
                   {resourcesContext.messages['checkboxIsPublic']}
                 </label>
               </div>
