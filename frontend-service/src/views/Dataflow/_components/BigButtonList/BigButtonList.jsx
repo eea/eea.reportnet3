@@ -84,16 +84,14 @@ export const BigButtonList = ({
   const [isActiveButton, setIsActiveButton] = useState(true);
   const [isCloningDataflow, setIsCloningDataflow] = useState(false);
   const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
-  const [isCopyDataCollectionToEUDatasetDialogVisible, setIsCopyDataCollectionToEUDatasetDialogVisible] = useState(
-    false
-  );
+  const [isCopyDataCollectionToEUDatasetDialogVisible, setIsCopyDataCollectionToEUDatasetDialogVisible] =
+    useState(false);
   const [isExportEUDatasetDialogVisible, setIsExportEUDatasetDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isImportingDataflow, setIsImportingDataflow] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
-  const [isManageManualAcceptanceDatasetDialogVisible, setIsManageManualAcceptanceDatasetDialogVisible] = useState(
-    false
-  );
+  const [isManageManualAcceptanceDatasetDialogVisible, setIsManageManualAcceptanceDatasetDialogVisible] =
+    useState(false);
   const [isManualTechnicalAcceptance, setIsManualTechnicalAcceptance] = useState(null);
   const [isManualTechnicalAcceptanceDialogVisible, setIsManualTechnicalAcceptanceDialogVisible] = useState(false);
   const [isUpdatedManualAcceptanceDatasets, setIsUpdatedManualAcceptanceDatasets] = useState(false);
@@ -718,9 +716,9 @@ export const BigButtonList = ({
                 })
               }}></p>
           ) : (
-            <p>
-              <div>{`${resourcesContext.messages['chooseExpirationDate']} `}</div>
-              <div>{`${resourcesContext.messages['chooseExpirationDateSecondLine']} `}</div>
+            <p className={styles.dataCollectionDialogMessagesWrapper}>
+              <span>{`${resourcesContext.messages['chooseExpirationDate']}`}</span>
+              <span>{`${resourcesContext.messages['chooseExpirationDateSecondLine']}`}</span>
             </p>
           )}
           <Calendar
@@ -789,7 +787,10 @@ export const BigButtonList = ({
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={() => onCreateDataCollectionsWithNotValids()}
-          onHide={() => setIsQCsNotValidWarningVisible(false)}
+          onHide={() => {
+            notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
+            setIsQCsNotValidWarningVisible(false);
+          }}
           visible={isQCsNotValidWarningVisible}>
           {TextUtils.parseText(resourcesContext.messages['notValidQCWarningBody'], {
             disabled: invalidAndDisabledRulesAmount.disabledRules,
