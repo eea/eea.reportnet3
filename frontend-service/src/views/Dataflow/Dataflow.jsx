@@ -597,7 +597,7 @@ const Dataflow = withRouter(({ history, match }) => {
         }
 
         if (!isEmpty(dataflow.representatives)) {
-          const representative = dataflowState.data.representatives?.find(
+          const representative = dataflow.representatives.find(
             representative => representative.dataProviderId === parseInt(representativeId)
           );
 
