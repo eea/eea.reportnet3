@@ -17,11 +17,11 @@
     margin-top: 0.5em;
   }
   .textarea {
-    background-color: var(--gray-5);
+    background-color: var(--api-key-inputtext-bg);
     border-radius: 4px 0px 0px 4px;
     border: none;
     box-shadow: 0 0 0 0 Transparent;
-    color: black;
+    color: var(--inputtext-color);
     font-weight: 600;
     margin: 0;
     width: 22em;
