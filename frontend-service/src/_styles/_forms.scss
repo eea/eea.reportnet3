@@ -94,3 +94,13 @@ form .error {
   @include shadow-1px(var(--errors));
   outline: none;
 }
+
+/* Inputs in autocomplete */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0px 0px 0px 30px var(--form-field-bg) inset !important;
+  -webkit-text-fill-color: var(--form-field-color);
+  box-shadow: 0 0 0 30px var(--form-field-bg) inset !important;
+}

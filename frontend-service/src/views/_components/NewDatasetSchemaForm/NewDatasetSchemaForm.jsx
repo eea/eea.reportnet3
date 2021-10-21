@@ -110,29 +110,31 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
   return (
     <form>
       <fieldset>
-        <input
-          className={`formField ${hasErrors ? styles.hasErrors : ''}`}
-          id={'datasetSchemaName'}
-          maxLength={250}
-          name="datasetSchemaName"
-          onBlur={() => checkInput()}
-          onChange={e => setDatasetSchemaName(e.target.value)}
-          onKeyPress={e => {
-            if (e.key === 'Enter') onConfirm(e);
-            else if (!validCharsRegex.test(e.key) || e.key === 'Dead') {
-              e.preventDefault();
-              return false;
-            }
-          }}
-          placeholder={resourcesContext.messages['createDatasetSchemaName']}
-          ref={inputRef}
-          type="text"
-          value={datasetSchemaName}
-        />
-        <label className="srOnly" htmlFor="datasetSchemaName">
-          {resourcesContext.messages['createDatasetSchemaName']}
-        </label>
-        {errorMessage['datasetSchemaName'] !== '' && <ErrorMessage message={errorMessage['datasetSchemaName']} />}
+        <div className="formField">
+          <input
+            className={`${hasErrors ? styles.hasErrors : ''}`}
+            id={'datasetSchemaName'}
+            maxLength={250}
+            name="datasetSchemaName"
+            onBlur={() => checkInput()}
+            onChange={e => setDatasetSchemaName(e.target.value)}
+            onKeyPress={e => {
+              if (e.key === 'Enter') onConfirm(e);
+              else if (!validCharsRegex.test(e.key) || e.key === 'Dead') {
+                e.preventDefault();
+                return false;
+              }
+            }}
+            placeholder={resourcesContext.messages['createDatasetSchemaName']}
+            ref={inputRef}
+            type="text"
+            value={datasetSchemaName}
+          />
+          <label className="srOnly" htmlFor="datasetSchemaName">
+            {resourcesContext.messages['createDatasetSchemaName']}
+          </label>
+          {errorMessage['datasetSchemaName'] !== '' && <ErrorMessage message={errorMessage['datasetSchemaName']} />}
+        </div>
       </fieldset>
 
       <fieldset>
