@@ -9,9 +9,9 @@ import { InputText } from 'views/_components/InputText';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const SystemNotificationsCreateForm = ({
-  isSystemNotificationVisible,
+  isSystemNotificationVisible: isVisible,
   onCreateSystemNotification,
-  setIsSystemNotificationVisible
+  onToggleVisibility
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
@@ -25,8 +25,8 @@ export const SystemNotificationsCreateForm = ({
 
   const systemNotificationsCreateFormFooter = (
     <Button
-      id="createSystemNotificationCreateForm"
       icon="add"
+      id="createSystemNotificationCreateForm"
       label={resourcesContext.messages['save']}
       onClick={() => onCreateSystemNotification(systemNotification)}
     />
@@ -40,9 +40,9 @@ export const SystemNotificationsCreateForm = ({
       footer={systemNotificationsCreateFormFooter}
       header={resourcesContext.messages['add']}
       modal={true}
-      onHide={() => setIsSystemNotificationVisible(false)}
+      onHide={() => onToggleVisibility(false)}
       style={{ width: '80%' }}
-      visible={isSystemNotificationVisible}
+      visible={isVisible}
       zIndex={3100}>
       <div className={styles.systemNotificationFormWrapper}>
         <div>

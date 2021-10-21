@@ -102,9 +102,9 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
 
   const systemNotificationsFooter = (
     <Button
+      icon="add"
       id="createSystemNotification"
       // className={`${styles.columnActionButton}`}
-      icon="add"
       label={resourcesContext.messages['add']}
       onClick={() => setIsVisibleCreateSysNotification(true)}
     />
@@ -202,27 +202,29 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
 
   return (
     <Fragment>
-      isSystemNotificationVisible && (
-      <Dialog
-        blockScroll={false}
-        className="edit-table"
-        contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
-        footer={systemNotificationsFooter}
-        header={resourcesContext.messages['systemNotifications']}
-        modal={true}
-        onHide={() => setIsSystemNotificationVisible(false)}
-        style={{ width: '80%' }}
-        visible={isSystemNotificationVisible}
-        zIndex={3100}>
-        {renderSystemNotifications()}
-      </Dialog>
-      ) isVisibleCreateSysNotification && (
-      <SystemNotificationsCreateForm
-        onCreateSystemNotification={onCreateSystemNotification}
-        isSystemNotificationVisible={isSystemNotificationVisible}
-        setIsSystemNotificationVisible={setIsSystemNotificationVisible}
-      />
-      )
+      {isSystemNotificationVisible && (
+        <Dialog
+          blockScroll={false}
+          className="edit-table"
+          contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
+          footer={systemNotificationsFooter}
+          header={resourcesContext.messages['systemNotifications']}
+          modal={true}
+          onHide={() => setIsSystemNotificationVisible(false)}
+          style={{ width: '80%' }}
+          visible={isSystemNotificationVisible}
+          zIndex={3100}>
+          {renderSystemNotifications()}
+        </Dialog>
+      )}
+      {console.log(isVisibleCreateSysNotification)}
+      {isVisibleCreateSysNotification && (
+        <SystemNotificationsCreateForm
+          isVisible={isVisibleCreateSysNotification}
+          onCreateSystemNotification={onCreateSystemNotification}
+          onToggleVisibility={setIsVisibleCreateSysNotification}
+        />
+      )}
     </Fragment>
   );
 };
