@@ -3270,6 +3270,7 @@ public class DatasetServiceImpl implements DatasetService {
           // and we have found the design dataset
           // with data to be copied into the
           // target dataset
+          LOG.info("Prefilling data into the datasetId {}.", datasetId);
           spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
 
           // create zip to the reference
