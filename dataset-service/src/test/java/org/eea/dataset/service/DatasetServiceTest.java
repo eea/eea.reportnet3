@@ -2387,8 +2387,21 @@ public class DatasetServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
 
+
+    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
+        .thenReturn(new ConnectionDataVO());
+    Mockito
+        .when(recordValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("recordId");
+    Mockito
+        .when(fieldValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("fieldId");
+
+
     datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
-    Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
+    Mockito.verify(attachmentRepository, times(1)).saveAll(Mockito.any());
   }
 
 
