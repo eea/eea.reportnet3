@@ -25,6 +25,7 @@ import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.GroupValidationVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -827,9 +828,7 @@ public class ValidationServiceImpl implements ValidationService {
     getRuleMessage(dataset, errors);
     validations.setErrors(errors);
 
-    validations
-        .setTotalRecords(Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId,
-            new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false).size()));
+    validations.setTotalRecords(Long.valueOf(errors.size()));
 
     return validations;
   }
@@ -841,13 +840,16 @@ public class ValidationServiceImpl implements ValidationService {
    * @param errors the errors
    * @return the rule message
    */
-  private void getRuleMessage(DatasetValue dataset, List<GroupValidationVO> errors) {
+  @Override
+  public void getRuleMessage(DatasetValue dataset, List<GroupValidationVO> errors) {
     RulesSchema rules =
         rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getIdDatasetSchema()));
-    for (GroupValidationVO validation : errors) {
-      if (null != rules && null != rules.getRules()) {
+    if (null != rules && null != rules.getRules()) {
+      for (GroupValidationVO validation : errors) {
         for (Rule rule : rules.getRules()) {
-          if (validation.getIdRule().equals(rule.getRuleId().toString())) {
+          if ((EntityTypeEnum.FIELD == validation.getTypeEntity()
+              || EntityTypeEnum.RECORD == validation.getTypeEntity())
+              && validation.getIdRule().equals(rule.getRuleId().toString())) {
             validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
           }
         }
