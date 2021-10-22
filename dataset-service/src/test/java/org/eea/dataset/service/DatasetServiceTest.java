@@ -3089,6 +3089,18 @@ public class DatasetServiceTest {
     attachment.setFieldValue(field);
     when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));
 
+    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
+        .thenReturn(new ConnectionDataVO());
+    Mockito
+        .when(recordValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("recordId");
+    Mockito
+        .when(fieldValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("fieldId");
+
+
     datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
     Mockito.verify(attachmentRepository, times(1)).saveAll(Mockito.any());
   }
@@ -3234,6 +3246,18 @@ public class DatasetServiceTest {
     attachment.setContent(expectedResult);
     when(attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(Mockito.anyString()))
         .thenReturn(Arrays.asList(attachment));
+
+    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
+        .thenReturn(new ConnectionDataVO());
+    Mockito
+        .when(recordValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("recordId");
+    Mockito
+        .when(fieldValueIdGenerator
+            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+        .thenReturn("fieldId");
+
     datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }

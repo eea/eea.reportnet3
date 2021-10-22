@@ -1703,7 +1703,13 @@ public class DatasetServiceImpl implements DatasetService {
       if (!targetRecords.isEmpty()) {
         // save values
         TenantResolver.setTenantName(String.format(DATASET_ID, targetDataset.getId()));
-        recordRepository.saveAll(targetRecords);
+        try {
+          storeRecords(targetDataset.getId(), targetRecords);
+        } catch (IOException | SQLException e) {
+          LOG_ERROR.error(
+              "Error saving the list of records into the dataset {} when executing a prefill data",
+              targetDataset.getId());
+        }
         // copy attachments too
         if (!attachments.isEmpty()) {
           attachmentRepository.saveAll(attachments);
@@ -3264,6 +3270,7 @@ public class DatasetServiceImpl implements DatasetService {
           // and we have found the design dataset
           // with data to be copied into the
           // target dataset
+          LOG.info("Prefilling data into the datasetId {}.", datasetId);
           spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
 
           // create zip to the reference
