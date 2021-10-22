@@ -150,7 +150,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const renderIsRestrictedFromPublicTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
-      {rowData.isRestrictedFromPublic ? (
+      {!rowData.isRestrictedFromPublic ? (
         <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
       ) : null}
     </div>
