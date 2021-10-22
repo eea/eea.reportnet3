@@ -249,9 +249,12 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           name: 'isDataCollectionReleased',
           label: resourcesContext.messages['onlyReleasedDataCollectionCheckboxLabel']
         },
-        { name: 'isEUReleased', label: resourcesContext.messages['onlyReleasedEUDatasetCheckboxLabel'] },
-        { name: 'isRestrictedFromPublic', label: resourcesContext.messages['isRestrictedFromPublic'] }
+        { name: 'isEUReleased', label: resourcesContext.messages['onlyReleasedEUDatasetCheckboxLabel'] }
       ]
+    },
+    {
+      type: 'multiselect',
+      properties: [{ name: 'isRestrictedFromPublic', label: resourcesContext.messages['isRestrictedFromPublic'] }]
     }
   ];
 

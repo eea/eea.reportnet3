@@ -1312,6 +1312,6 @@
     "duplicateDisabledTitle": "Duplicate disabled:",
     "duplicateDisabledMessage": "already exists",
     "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field",
-    "isRestrictedFromPublic": "Restrict from public"
+    "isRestrictedFromPublic": "Public available"
   }
 }
