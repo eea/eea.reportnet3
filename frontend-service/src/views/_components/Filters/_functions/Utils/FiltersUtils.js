@@ -111,6 +111,9 @@ const getOptionsTemplate = (filteredOptions, property) => {
       case 'role':
         template.push({ type: getUserRoleLabel(option), value: option });
         break;
+      case 'isRestrictedFromPublic':
+        template.push({ type: option, value: !option });
+        break;
       default:
         template.push({ type: option?.toString().toUpperCase(), value: option?.toString().toUpperCase() });
     }
