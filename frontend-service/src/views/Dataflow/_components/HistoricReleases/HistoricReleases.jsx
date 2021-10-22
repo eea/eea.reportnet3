@@ -269,19 +269,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             dataflowType,
             'historicReleaseDataProviderFilterLabel'
           )
-        }
+        },
+        { name: 'isRestrictedFromPublic', label: resourcesContext.messages['isRestrictedFromPublic'] }
       ]
-    },
-    {
-      type: 'checkbox',
-      properties: [{ name: 'isRestrictedFromPublic', label: resourcesContext.messages['isRestrictedFromPublic'] }]
-    }
-  ];
-
-  const filterOptionsReportingDataset = [
-    {
-      type: 'checkbox',
-      properties: [{ name: 'isRestrictedFromPublic', label: resourcesContext.messages['isRestrictedFromPublic'] }]
     }
   ];
 
@@ -318,18 +308,12 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   };
 
   const renderFilters = () => {
-    switch (historicReleasesView) {
-      case 'dataCollection':
-        return getFilters(filterOptionsDataCollection);
+    if (historicReleasesView === 'dataCollection') {
+      return getFilters(filterOptionsDataCollection);
+    }
 
-      case 'EUDataset':
-        return getFilters(filterOptionsEUDataset);
-
-      case 'reportingDataset':
-        return getFilters(filterOptionsReportingDataset);
-
-      default:
-        return <div />;
+    if (historicReleasesView === 'EUDataset') {
+      return getFilters(filterOptionsEUDataset);
     }
   };
 
