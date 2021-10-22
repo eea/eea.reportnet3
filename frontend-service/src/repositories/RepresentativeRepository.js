@@ -63,7 +63,7 @@ export const RepresentativeRepository = {
 
   updateRestrictFromPublic: async (dataflowId, dataProviderId, restrictFromPublic) =>
     await HTTPRequester.update({
-      url: getUrl(RepresentativeConfig.updateRestrictFromPublic, {}),
-      data: { dataProviderId, dataflowId, restrictFromPublic }
+      url: getUrl(RepresentativeConfig.updateRestrictFromPublic, { dataProviderId, dataflowId }),
+      data: { restrictFromPublic }
     })
 };
