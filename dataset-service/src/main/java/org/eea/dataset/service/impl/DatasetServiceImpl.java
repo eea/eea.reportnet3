@@ -1482,7 +1482,14 @@ public class DatasetServiceImpl implements DatasetService {
             // save values
             TenantResolver
                 .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
-            recordRepository.saveAll(recordDesignValuesList);
+            try {
+              storeRecords(targetDataset, recordDesignValuesList);
+            } catch (IOException | SQLException e) {
+              LOG_ERROR.error(
+                  "Error saving the list of records into the dataset {} when copying data",
+                  targetDataset);
+            }
+
             // copy attachments too
             if (!attachments.isEmpty()) {
               attachmentRepository.saveAll(attachments);
