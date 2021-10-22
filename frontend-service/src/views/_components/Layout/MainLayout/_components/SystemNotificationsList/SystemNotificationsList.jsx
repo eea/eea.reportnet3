@@ -1,18 +1,21 @@
-import { useContext, useEffect, useState, Fragment } from 'react';
+import { useContext, useEffect, useReducer, useState, Fragment } from 'react';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
 
 import camelCase from 'lodash/camelCase';
 import dayjs from 'dayjs';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import DOMPurify from 'dompurify';
 
 import styles from './SystemNotificationsList.module.scss';
 
+import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { DataTable } from 'views/_components/DataTable';
 import { LevelError } from 'views/_components/LevelError';
@@ -23,19 +26,34 @@ import { NotificationService } from 'services/NotificationService';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
-import { isEmpty } from 'lodash';
+
+import { systemNotificationReducer } from './_functions/Reducers/systemNotificationReducer';
 
 const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotificationVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const [systemNotificationState, dispatchSystemNotification] = useReducer(systemNotificationReducer, {
+    isVisibleCreateSysNotification: false,
+    editNotification: {},
+    formType: ''
+  });
+
+  const { isVisibleCreateSysNotification, editNotification, formType } = systemNotificationState;
+
   const [columns, setColumns] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isVisibleCreateSysNotification, setIsVisibleCreateSysNotification] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [systemNotifications, setSystemNotifications] = useState([]);
 
   useEffect(() => {
     const headers = [
+      {
+        id: 'key',
+        header: resourcesContext.messages['id']
+      },
       {
         id: 'message',
         header: resourcesContext.messages['message']
@@ -60,6 +78,15 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       <Column body={col.template} field={col.id} header={col.header} key={col.id} sortable={true} />
     ));
 
+    columnsArray.push(
+      <Column
+        body={actionsColumnButtons}
+        // className={styles.crudColumn}
+        header={resourcesContext.messages['actions']}
+        key="buttonsUniqueId"
+      />
+    );
+
     setColumns(columnsArray);
   }, [userContext]);
 
@@ -68,6 +95,23 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       onLoadSystemNotifications();
     }
   }, [columns]);
+
+  const actionsColumnButtons = rowData => {
+    console.log({ rowData });
+    return (
+      <div className={styles.actionsColumnButtons}>
+        <ActionsColumn
+          isDeletingDocument={isDeleting}
+          isUpdating={isUpdating}
+          onDeleteClick={() => setIsDeleteDialogVisible(true)}
+          onEditClick={() => onEditClick(rowData)}
+          rowDataId={rowData.key}
+          rowDeletingId={rowData.key}
+          rowUpdatingId={rowData.key}
+        />
+      </div>
+    );
+  };
 
   const getValidUrl = (url = '') => {
     let newUrl = window.decodeURIComponent(url);
@@ -106,13 +150,32 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       id="createSystemNotification"
       // className={`${styles.columnActionButton}`}
       label={resourcesContext.messages['add']}
-      onClick={() => setIsVisibleCreateSysNotification(true)}
+      onClick={() => onToggleCreateFormVisibility(true)}
     />
   );
 
   const onCreateSystemNotification = async systemNotification => {
     console.log('CREADA NOTIFICATION CON VALORES', systemNotification);
   };
+
+  const onDelete = async () => {
+    setIsDeleting(true);
+    try {
+      // await NotificationService.delete();
+      // onLoadSystemNotifications();
+    } catch (error) {
+      console.error('SystemNotificationsList - onDelete.', error);
+      // notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
+    } finally {
+      setIsDeleteDialogVisible(false);
+      setIsDeleting(false);
+    }
+  };
+
+  const onEditClick = rowData => {
+    dispatchSystemNotification({ type: 'ON_EDIT', payload: rowData });
+  };
+
   const onLoadSystemNotifications = async () => {
     try {
       setIsLoading(true);
@@ -134,6 +197,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
           : notification.type;
 
         return {
+          key: notification.key,
           message: message,
           levelError: capitalizedLevelError,
           date: dayjs(notification.date).format(
@@ -172,6 +236,9 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       setIsLoading(false);
     }
   };
+
+  const onToggleCreateFormVisibility = visible =>
+    dispatchSystemNotification({ type: 'ON_TOGGLE_CREATE_FORM_VISIBILITY', payload: visible });
 
   const renderSystemNotifications = () => {
     if (isLoading) {
@@ -220,10 +287,26 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       {console.log(isVisibleCreateSysNotification)}
       {isVisibleCreateSysNotification && (
         <SystemNotificationsCreateForm
+          formType={formType}
           isVisible={isVisibleCreateSysNotification}
+          notification={editNotification}
           onCreateSystemNotification={onCreateSystemNotification}
-          onToggleVisibility={setIsVisibleCreateSysNotification}
+          onToggleVisibility={onToggleCreateFormVisibility}
         />
+      )}
+      {isDeleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm="p-button-danger"
+          disabledConfirm={isDeleting}
+          header={resourcesContext.messages['deleteSystemNotificationHeader']}
+          iconConfirm={isDeleting ? 'spinnerAnimate' : 'check'}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={() => onDelete()}
+          onHide={() => setIsDeleteDialogVisible(false)}
+          visible={isDeleteDialogVisible}>
+          {resourcesContext.messages['deleteSystemNotificationConfirm']}
+        </ConfirmDialog>
       )}
     </Fragment>
   );

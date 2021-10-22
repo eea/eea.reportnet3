@@ -119,7 +119,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   const onLoadNotifications = async () => {
     try {
       setIsLoading(true);
-      const unparsedNotifications = await NotificationService.all();
+      const unparsedNotifications = await NotificationService.all(userContext.id);
       console.log({ unparsedNotifications });
       const parsedNotifications = unparsedNotifications.map(notification => {
         return NotificationService.parse({

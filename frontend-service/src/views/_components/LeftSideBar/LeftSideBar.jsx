@@ -193,7 +193,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
               {renderUserProfile()}
               {renderHelp()}
               {renderUserNotifications()}
-              {renderManageSystemNotifications()}
+              {/* {renderManageSystemNotifications()} */}
             </div>
             {!isEmpty(renderSectionButtons()) && (
               <Fragment>

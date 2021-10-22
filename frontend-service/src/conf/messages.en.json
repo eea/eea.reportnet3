@@ -1316,6 +1316,8 @@
     "noSystemNotifications": "There are no system notifications yet",
     "availablePeriod": "Available period",
     "from": "From",
-    "to": "To"
+    "to": "To",
+    "deleteSystemNotificationHeader": "Delete system notification",
+    "deleteSystemNotificationConfirm": "Are you sure you want to delete this system notification?"
   }
 }

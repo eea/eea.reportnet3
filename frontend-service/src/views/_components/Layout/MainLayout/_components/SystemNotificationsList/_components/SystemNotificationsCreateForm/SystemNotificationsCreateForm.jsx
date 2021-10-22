@@ -9,7 +9,12 @@ import { InputText } from 'views/_components/InputText';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const SystemNotificationsCreateForm = ({ isVisible, onCreateSystemNotification, onToggleVisibility }) => {
+export const SystemNotificationsCreateForm = ({
+  formType = '',
+  isVisible,
+  onCreateSystemNotification,
+  onToggleVisibility
+}) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [systemNotification, setSystemNotification] = useState({});

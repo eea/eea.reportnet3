@@ -17,8 +17,8 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const NotificationService = {
-  all: async () => {
-    // const notificationsDTO = await NotificationRepository.all();
+  all: async userId => {
+    // const notificationsDTO = await NotificationRepository.all(userId);
     const notificationsDTO = [
       {
         type: 'VALIDATE_DATA_INIT',

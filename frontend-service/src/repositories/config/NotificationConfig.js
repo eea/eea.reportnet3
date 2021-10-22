@@ -1,4 +1,4 @@
 export const NotificationConfig = {
-  all: '/notifications/all',
-  create: '/notifications/create'
+  all: '/notification/findUserNotifications/{:userId}',
+  create: '/notification/createUserNotification'
 };
