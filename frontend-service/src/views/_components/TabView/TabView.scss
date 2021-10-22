@@ -133,6 +133,33 @@ body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight a
   margin-left: 0.5em;
   color: var(--tabview-highlight-icon-color);
 }
+body
+  .p-tabview.p-tabview-top
+  .p-tabview-nav
+  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):active
+  a
+  .p-tabview-right-icon,
+body
+  .p-tabview.p-tabview-bottom
+  .p-tabview-nav
+  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):active
+  a
+  .p-tabview-right-icon,
+body
+  .p-tabview.p-tabview-left
+  .p-tabview-nav
+  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):active
+  a
+  .p-tabview-right-icon,
+body
+  .p-tabview.p-tabview-right
+  .p-tabview-nav
+  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):active
+  a
+  .p-tabview-right-icon {
+  margin-left: 0.5em;
+  color: var(--tabview-highlight-icon-color-active);
+}
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight .p-tabview-close,
 body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight .p-tabview-close,
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight .p-tabview-close,
