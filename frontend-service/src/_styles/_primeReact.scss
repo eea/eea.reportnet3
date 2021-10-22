@@ -1143,7 +1143,7 @@ body .p-fieldset .p-fieldset-content {
   padding: 0;
 }
 body .p-accordion .p-accordion-tab {
-  margin-bottom: 2px;
+  margin-bottom: 0.5rem;
 }
 body .p-accordion .p-accordion-header a {
   padding: 0.571em 1em;
@@ -1249,7 +1249,7 @@ body .p-tabview .p-tabview-panels .p-tabview-panel {
   padding: 0;
 }
 body .p-toolbar {
-  background-color: var(--bg);
+  background-color: var(--toolbar-panel-bg);
   border: var(--toolbar-border);
   padding: 0.571em 1em;
   -moz-border-radius: 3px;
