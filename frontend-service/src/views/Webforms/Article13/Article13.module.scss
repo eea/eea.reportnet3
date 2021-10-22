@@ -66,6 +66,7 @@
       width: 77%;
       .tableListId {
         align-items: center;
+        background-color: var(--button-disabled-webforms-bg-color);
         border-radius: 50%;
         box-shadow: var(--card-item-box-shadow);
         cursor: pointer;
@@ -75,16 +76,16 @@
         min-height: 40px;
         min-width: 40px;
         padding: 0.5rem;
-
         &:hover {
           box-shadow: var(--card-item-box-shadow-hover);
+          background-color: var(--button-webform-hover-color);
           transform: scale(1.02, 1.02);
           transition: transform 0.1s ease;
         }
       }
       .selected {
-        background-color: var(--c-corporate-blue-lighter);
-        color: var(--white);
+        background-color: var(--button-active-webforms);
+        color: var(--bg-dark-00dp);
       }
     }
 
