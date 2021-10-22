@@ -125,6 +125,8 @@ export const ManageReferenceDataflow = ({
         notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
       }
       setIsDeleting(false);
+    } finally {
+      userContext.setCurrentDataflowType(undefined);
     }
   };
 

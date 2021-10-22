@@ -33,7 +33,7 @@ public class EmailControllerImpl implements EmailController {
   @Override
   @PostMapping(value = "/private/send", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Sends a email message using an E-mail object with the information.",
-      hidden = true)
+      hidden = false)
   public void sendMessage(
       @ApiParam(value = "Email object containing the data") @RequestBody EmailVO emailVO) {
     emailService.sendMessage(emailVO);
