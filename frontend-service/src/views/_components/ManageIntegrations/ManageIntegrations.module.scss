@@ -114,11 +114,11 @@
           width: 100%;
 
           &.selected {
-            background-color: var(--external-integration-item-bg-color-selected);
+            background-color: var(--datatable-body-even-bg);
           }
 
           &:hover {
-            background-color: var(--external-integration-item-bg-color-hover);
+            background-color: var(--datatable-body-highlight-bg);
           }
 
           .key,
