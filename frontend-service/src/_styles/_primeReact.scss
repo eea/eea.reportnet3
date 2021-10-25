@@ -553,7 +553,7 @@ body .p-datepicker:not(.p-datepicker-inline) {
 }
 body .p-datepicker:not(.p-disabled) .p-datepicker-header .p-datepicker-prev:hover,
 body .p-datepicker:not(.p-disabled) .p-datepicker-header .p-datepicker-next:hover {
-  color: #004494;
+  color: var(--accent-color);
 }
 body .p-datepicker:not(.p-disabled) table td span:not(.p-highlight):not(.p-disabled):hover {
   background-color: var(--bg);
@@ -610,16 +610,16 @@ body .p-datepicker table td > span {
   border-radius: 3px;
 }
 body .p-datepicker table td > span.p-highlight {
-  color: #ffffff;
-  background-color: #004494;
+  color: var(--main-font-color-reverse);
+  background-color: var(--accent-color);
 }
 body .p-datepicker table td.p-datepicker-today > span {
   background-color: #d0d0d0;
   color: #404040;
 }
 body .p-datepicker table td.p-datepicker-today > span.p-highlight {
-  color: #ffffff;
-  background-color: #004494;
+  color: var(--main-font-color-reverse);
+  background-color: var(--accent-color);
 }
 body .p-datepicker .p-datepicker-buttonbar {
   border-top: 1px solid #d8dae2;

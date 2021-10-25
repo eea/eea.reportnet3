@@ -337,7 +337,9 @@
     "api-key-inputtext-bg": "var(--gray-5)",
     "list-item-title-bg": "var(--gray-10)",
     "toolbar-panel-bg": "var(--bg)",
-    "general-border-color": "var(--gray-25)"
+    "general-border-color": "var(--gray-25)",
+    "accent-color": "var(--informative-color)",
+    "main-font-color-reverse": "var(--white)"
   },
   "dark": {
     "bg": "var(--bg-dark-00dp)",
@@ -678,7 +680,9 @@
     "api-key-inputtext-bg": "var(--bg-dark-04dp)",
     "list-item-title-bg": "var(--bg-dark-01dp)",
     "toolbar-panel-bg": "var(--bg-dark-01dp)",
-    "general-border-color": "var(--gray-75)"
+    "general-border-color": "var(--gray-75)",
+    "accent-color": "var(--accent-color-dark-mode)",
+    "main-font-color-reverse": "var(--gray-110)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
