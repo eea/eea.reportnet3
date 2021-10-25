@@ -59,6 +59,17 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
 
   const getFilteredState = value => setIsDataFiltered(value);
 
+  const getFilters = filterOptions => {
+    return (
+      <Filters
+        data={userListData}
+        getFilteredData={onLoadFilteredData}
+        getFilteredSearched={getFilteredState}
+        options={filterOptions}
+      />
+    );
+  };
+
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {isDataFiltered && userListData.length !== filteredData.length
@@ -106,15 +117,14 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
 
   const renderFilters = () => {
     if (isNil(representativeId) && isNil(dataflowId)) {
-      return (
-        <Filters
-          data={userListData}
-          getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFilteredState}
-          options={filterOptionsNoRepresentative}
-        />
-      );
+      return getFilters(filterOptionsNoRepresentative);
     } else if (isNil(representativeId) && !isNil(dataflowId)) {
+      return getFilters(filterOptionsWithDataflowIdRepresentativeId);
+    } else {
+      return getFilters(filterOptionsHasRepresentativeId);
+    }
+  };
+
   const renderUsersListContent = () => {
     if (isLoading) {
       return <Spinner />;
