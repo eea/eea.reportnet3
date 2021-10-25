@@ -644,7 +644,7 @@
     "isCorrect": "Validity",
     "isDataCollectionReleased": "Data collection",
     "isEUReleased": "EU dataset",
-    "isPublic": "Is public",
+    "isPublic": "Public",
     "isReleasableDataflowCheckboxLabel": "Dataflow is open for releases",
     "isReleasableDataflowDialogHeader": "Open/close release period",
     "isReleased": "Released",
@@ -1316,6 +1316,6 @@
     "restrictFromPublicDialogHeader": "Show/hide released data",
     "updateRestrictFromPublicFailedEvent": "Error updating the released data visibility",
     "updatePublicStatusFailedEvent": "Error updating the dataflow public status",
-    "isRestrictedFromPublic": "Public available"
+    "isRestrictedFromPublic": "Public"
   }
 }
