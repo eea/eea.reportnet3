@@ -41,6 +41,8 @@ import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.junit.Before;
@@ -95,6 +97,10 @@ public class SqlRulesServiceImplTest {
   /** The eu dataset controller. */
   @Mock
   private EUDatasetControllerZuul euDatasetController;
+
+  /** The schemas repository. */
+  @Mock
+  private SchemasRepository schemasRepository;
 
   /** The sql rules service impl. */
   @InjectMocks
@@ -497,12 +503,14 @@ public class SqlRulesServiceImplTest {
     rule.setReferenceId(new ObjectId());
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
     dataset.setId(1L);
-    when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.anyLong())).thenReturn(schema);
+    dataset.setDatasetSchema("5ce524fad31fc52540abae73");
     when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
 
     when(datasetRepository.queryRSExecution(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(tableValue);
-
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setTableSchemas(new ArrayList<>());
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     sqlRulesServiceImpl.retrieveTableData("", dataset, rule, Boolean.FALSE);
 
     Mockito.verify(datasetRepository, times(1)).queryRSExecution(Mockito.any(), Mockito.any(),
@@ -552,9 +560,6 @@ public class SqlRulesServiceImplTest {
     rule.setType(EntityTypeEnum.DATASET);
     rule.setReferenceId(new ObjectId());
 
-
-    when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.anyLong())).thenReturn(schema);
-
     when(datasetRepository.queryRSExecution(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(tableValue);
 
@@ -564,6 +569,8 @@ public class SqlRulesServiceImplTest {
         .thenReturn(recordsValidation);
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
     dataset.setId(1L);
+    dataset.setDatasetSchema("5ce524fad31fc52540abae73");
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(new DataSetSchema());
     sqlRulesServiceImpl.retrieveTableData("", dataset, rule, Boolean.FALSE);
 
     Mockito.verify(datasetRepository, times(1)).queryRSExecution(Mockito.any(), Mockito.any(),
