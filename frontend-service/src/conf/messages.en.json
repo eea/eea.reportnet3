@@ -1130,7 +1130,6 @@
     "tableWithNoPKWarningTitle": "There are tables with no primary keys (PK)",
     "tabMenuConstraintData": "Info",
     "tabMenuExpression": "Expression",
-    "tabMenuTableRelations": "Table relations",
     "tabularDataView": "Tabular data",
     "targetDatasetSchema": "Reference schema",
     "targetTable": "Reference table",
