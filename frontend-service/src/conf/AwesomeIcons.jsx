@@ -100,7 +100,8 @@ import {
   faMeteor,
   faSearch,
   faTimesCircle,
-  faEdit
+  faEdit,
+  faUserLock
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -198,6 +199,8 @@ export const AwesomeIcons = icon => {
       return faTrashAlt;
     case 'solidDeleteCircle':
       return faTimesCircle;
+    case 'userLock':
+      return faUserLock;
     case 'deleteCircle':
       return farTimesCircle;
     case 'disk':
