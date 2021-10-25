@@ -557,6 +557,7 @@ body .p-datepicker:not(.p-disabled) .p-datepicker-header .p-datepicker-next:hove
 }
 body .p-datepicker:not(.p-disabled) table td span:not(.p-highlight):not(.p-disabled):hover {
   background-color: var(--bg);
+  color: var(--main-font-color);
 }
 body .p-datepicker:not(.p-disabled) .p-monthpicker .p-monthpicker-month:not(.p-highlight):hover {
   background-color: var(--bg);

@@ -84,8 +84,11 @@
         }
       }
       .selected {
-        background-color: var(--button-active-webforms);
-        color: var(--bg-dark-00dp);
+        background-color: var(--button-primary-bg);
+        color: var(--button-primary-color);
+        &:hover {
+          background-color: var(--button-primary-bg);
+        }
       }
     }
 
