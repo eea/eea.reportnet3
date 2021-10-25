@@ -52,7 +52,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
     const headers = [
       {
         id: 'key',
-        header: resourcesContext.messages['id']
+        header: `${resourcesContext.messages['type']} (${resourcesContext.messages['key']})`
       },
       {
         id: 'message',
@@ -145,13 +145,23 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
   );
 
   const systemNotificationsFooter = (
-    <Button
-      icon="add"
-      id="createSystemNotification"
-      // className={`${styles.columnActionButton}`}
-      label={resourcesContext.messages['add']}
-      onClick={() => onToggleCreateFormVisibility(true)}
-    />
+    <div>
+      <Button
+        className="p-button-animated-blink"
+        icon="add"
+        id="createSystemNotification"
+        // className={`${styles.columnActionButton}`}
+        label={resourcesContext.messages['add']}
+        onClick={() => onToggleCreateFormVisibility(true)}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon="cancel"
+        id="cancelCreateSystemNotification"
+        label={resourcesContext.messages['cancel']}
+        onClick={() => setIsSystemNotificationVisible(false)}
+      />
+    </div>
   );
 
   const onCreateSystemNotification = async systemNotification => {

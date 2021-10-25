@@ -1318,6 +1318,7 @@
     "from": "From",
     "to": "To",
     "deleteSystemNotificationHeader": "Delete system notification",
-    "deleteSystemNotificationConfirm": "Are you sure you want to delete this system notification?"
+    "deleteSystemNotificationConfirm": "Are you sure you want to delete this system notification?",
+    "key": "Key"
   }
 }

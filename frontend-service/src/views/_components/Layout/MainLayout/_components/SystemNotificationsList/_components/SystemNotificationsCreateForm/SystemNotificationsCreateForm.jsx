@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import styles from './SystemNotificationsCreateForm.module.scss';
 
@@ -12,13 +12,15 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 export const SystemNotificationsCreateForm = ({
   formType = '',
   isVisible,
+  notification = {},
   onCreateSystemNotification,
   onToggleVisibility
 }) => {
+  console.log({ notification });
   const resourcesContext = useContext(ResourcesContext);
 
-  const [systemNotification, setSystemNotification] = useState({});
-  console.log({ isVisible });
+  const [systemNotification, setSystemNotification] = useState(formType === 'EDIT' ? notification : {});
+
   const onChange = (property, value) => {
     const inmSystemNotification = { ...systemNotification };
     inmSystemNotification[property] = value;
@@ -26,12 +28,22 @@ export const SystemNotificationsCreateForm = ({
   };
 
   const systemNotificationsCreateFormFooter = (
-    <Button
-      icon="add"
-      id="createSystemNotificationCreateForm"
-      label={resourcesContext.messages['save']}
-      onClick={() => onCreateSystemNotification(systemNotification)}
-    />
+    <div>
+      <Button
+        // className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
+        icon="add"
+        id="createSystemNotificationCreateForm"
+        label={resourcesContext.messages['save']}
+        onClick={() => onCreateSystemNotification(systemNotification)}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon="cancel"
+        id="cancelCreateSystemNotificationCreateForm"
+        label={resourcesContext.messages['cancel']}
+        onClick={() => onToggleVisibility(false)}
+      />
+    </div>
   );
 
   return (
@@ -49,17 +61,17 @@ export const SystemNotificationsCreateForm = ({
       <div className={styles.systemNotificationFormWrapper}>
         <div>
           <div>
-            <label>{resourcesContext.messages['type']}</label>
+            <label>{`${resourcesContext.messages['type']} (${resourcesContext.messages['key']})`}</label>
           </div>
           <div>
             <InputText
-              id="systemNotificationType"
+              id="systemNotificationKey"
               // keyfilter={RecordUtils.getFilter(type)}
               // maxLength={getMaxCharactersByType(type)}
-              name="systemNotificationType"
-              onChange={e => onChange('type', e.target.value)}
+              name="systemNotificationKey"
+              onChange={e => onChange('key', e.target.value.replaceAll(' ', '_'))}
               type="text"
-              value={systemNotification.type}
+              value={systemNotification.key}
             />
           </div>
         </div>
