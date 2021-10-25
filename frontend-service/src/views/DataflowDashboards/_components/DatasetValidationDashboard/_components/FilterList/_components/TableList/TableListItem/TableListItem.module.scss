@@ -45,7 +45,7 @@
 }
 .checkbox:checked::before {
   height: 0.5rem;
-  border-color: var(--c-corporate-blue);
+  border-color: var(--accent-color);
   border-top-style: none;
   border-right-style: none;
   transform: rotate(-45deg);
