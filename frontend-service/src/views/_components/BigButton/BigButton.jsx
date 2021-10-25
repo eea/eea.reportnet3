@@ -39,6 +39,8 @@ export const BigButton = ({
   onSaveName,
   onWheel,
   placeholder,
+  publicAvailableInfo,
+  publicAvailableStatus,
   setErrorDialogData,
   tooltip
 }) => {
@@ -195,6 +197,12 @@ export const BigButton = ({
               {resourcesContext.messages['new'].toUpperCase()}
             </p>
           ))}
+        {publicAvailableInfo && (
+          <Icon
+            icon={publicAvailableStatus ? 'eye' : 'eye-slash'}
+            style={{ position: 'absolute', top: '0', left: '3px', fontSize: '1.8rem' }}
+          />
+        )}
       </div>
       {!isUndefined(isEditEnabled) && isEditEnabled ? (
         <InputText

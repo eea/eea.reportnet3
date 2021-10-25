@@ -269,6 +269,9 @@ const useBigButtonList = ({
 
     if (!buttonsVisibility.groupByRepresentative && isUniqRepresentative) {
       return allDatasets.map(dataset => {
+        const datasetRepresentative = dataflowState.data.representatives.find(
+          representative => representative.dataProviderId === dataset.dataProviderId
+        );
         return {
           buttonClass: 'dataset',
           buttonIcon: 'dataset',
@@ -290,12 +293,17 @@ const useBigButtonList = ({
             }
           ],
           onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
+          publicAvailableInfo: true,
+          publicAvailableStatus: !datasetRepresentative?.restrictFromPublic,
           visibility: true
         };
       });
     }
 
     return uniqBy(allDatasets, 'dataProviderId').map(dataset => {
+      const datasetRepresentative = dataflowState.data.representatives.find(
+        representative => representative.dataProviderId === dataset.dataProviderId
+      );
       return {
         buttonClass: 'dataset',
         buttonIcon: 'representative',
@@ -319,6 +327,8 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true),
+        publicAvailableInfo: true,
+        publicAvailableStatus: !datasetRepresentative?.restrictFromPublic,
         visibility: true
       };
     });
