@@ -21,6 +21,20 @@
           }
         },
         {
+          "key": "UPDATE_PUBLIC_STATUS_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
+          "key": "UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
           "key": "RESTORE_DATASET_SNAPSHOT_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET",
