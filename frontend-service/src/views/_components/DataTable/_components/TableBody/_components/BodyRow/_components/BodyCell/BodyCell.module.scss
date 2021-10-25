@@ -12,4 +12,7 @@
 .editCancelRowButton {
   border: 1px solid var(--general-border-color) !important;
   margin-left: 3px !important;
+  &:hover:enabled {
+    border: 1px solid var(--button-secondary-border-color-hover) !important;
+  }
 }
