@@ -1205,7 +1205,12 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isUserListVisible && (
           <Dialog
-            footer={renderDialogFooterCloseBtn('isUserListVisible')}
+            footer={
+              ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
+              dataflowState.status === config.dataflowStatus.OPEN
+                ? renderUserListDialogFooter()
+                : renderDialogFooterCloseBtn('isUserListVisible')
+            }
             header={
               ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
