@@ -619,7 +619,7 @@
     "chips-input-border-color-hover": "var(--accent-color-dark-mode)",
     "chips-input-color": "var(--white)",
     "chips-token-bg": "var(--gray-25)",
-    "chips-token-color": "var(--black)",
+    "chips-token-color": "var(--main-font-color-reverse)",
     "listbox-item-highlight-bg": "var(--accent-color-dark-mode)",
     "listbox-item-highlight-bg-hover": "var(--gray-110)",
     "listbox-item-highlight-color": "var(--black)",
