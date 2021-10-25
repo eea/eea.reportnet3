@@ -9,7 +9,7 @@
   border: 1px solid var(--general-border-color) !important;
   @include shadow-0em;
   margin-left: 3px !important;
-  &:hover {
+  &:hover:enabled {
     border-color: var(--button-secondary-border-color-hover) !important;
   }
 }

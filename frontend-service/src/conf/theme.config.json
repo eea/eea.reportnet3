@@ -339,14 +339,15 @@
     "toolbar-panel-bg": "var(--bg)",
     "general-border-color": "var(--gray-25)",
     "accent-color": "var(--informative-color)",
-    "main-font-color-reverse": "var(--white)"
+    "main-font-color-reverse": "var(--white)",
+    "errors": "var(--errors-light-mode)"
   },
   "dark": {
     "bg": "var(--bg-dark-00dp)",
     "main-font-color": "var(--white-font)",
     "breadCrumb-font-color": "var(--white-font)",
     "breadCrumb-icon-color": "var(--accent-color-dark-mode)",
-    "breadCrumb-chevron-color": "var(--c-corporate-blue-lighter)",
+    "breadCrumb-chevron-color": "var(--accent-color)",
     "leftSideBar-bg": "var(--bg-dark-02dp)",
     "leftSideBar-box-shadow": "0 5px 0.5rem rgba(255, 255, 255, 0.3)",
     "header-box-shadow": " 0 0 0.5rem rgba(0, 0, 0, 0.1)",
@@ -682,7 +683,8 @@
     "toolbar-panel-bg": "var(--bg-dark-01dp)",
     "general-border-color": "var(--gray-75)",
     "accent-color": "var(--accent-color-dark-mode)",
-    "main-font-color-reverse": "var(--gray-110)"
+    "main-font-color-reverse": "var(--gray-110)",
+    "errors": "var(--errors-dark-mode)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
