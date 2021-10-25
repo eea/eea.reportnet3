@@ -54,9 +54,12 @@
   left: 50%;
   transform: translateX(-50%);
 }
-.selectDataProvider {
+select {
   color: var(--dropdown-panel-color);
   background-color: var(--dropdown-panel-bg);
+  &:hover {
+    border-color: var(--dropdown-border-color-hover);
+  }
 }
 
 .disabled {
