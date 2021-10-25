@@ -113,7 +113,7 @@ pipeline {
         stage('Build Docker Images') {
             when {
                 expression {
-                   BRANCH_NAME == "release/v3.0.5.3-RC1" 
+                   return BRANCH_NAME == "release/v3.0.5.3-RC1" 
                 }
             }
             parallel {
