@@ -495,6 +495,7 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     } catch (InterruptedException e) {
       LOG_ERROR.error("Error sleeping after wiping data");
+      Thread.currentThread().interrupt();
     }
 
     FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));

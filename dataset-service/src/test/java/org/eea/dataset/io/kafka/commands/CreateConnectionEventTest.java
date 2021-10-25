@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.kafka.io.event.CreateConnectionEvent;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
@@ -55,6 +56,10 @@ public class CreateConnectionEventTest {
 
   /** The data. */
   private Map<String, Object> data;
+
+  @Mock
+  private TableRepository tableRepository;
+
 
   /**
    * Inits the mocks.
