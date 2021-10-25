@@ -450,6 +450,7 @@ export const BigButtonList = ({
   const onCreateDataCollectionsWithNotValids = async () => {
     setIsActiveButton(false);
     try {
+      notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
       await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, false);
     } catch (error) {
       console.error('BigButtonList - onCreateDataCollectionsWithNotValids.', error);
