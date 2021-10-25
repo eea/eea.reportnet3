@@ -1417,6 +1417,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       groups.add(
           createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.LEAD_REPORTER));
 
+        assignments.add(createAssignments(entry.getKey(), observer.getEmail(),
       if (null != entry.getValue()) {
         for (String email : entry.getValue()) {
           // Assign Dataset-%s-LEAD_REPORTER
