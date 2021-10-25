@@ -339,7 +339,8 @@
     "toolbar-panel-bg": "var(--bg)",
     "general-border-color": "var(--gray-25)",
     "accent-color": "var(--informative-color)",
-    "main-font-color-reverse": "var(--white)"
+    "main-font-color-reverse": "var(--white)",
+    "errors": "var(--errors-light-mode)"
   },
   "dark": {
     "bg": "var(--bg-dark-00dp)",
@@ -682,7 +683,8 @@
     "toolbar-panel-bg": "var(--bg-dark-01dp)",
     "general-border-color": "var(--gray-75)",
     "accent-color": "var(--accent-color-dark-mode)",
-    "main-font-color-reverse": "var(--gray-110)"
+    "main-font-color-reverse": "var(--gray-110)",
+    "errors": "var(--errors-dark-mode)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
