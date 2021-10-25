@@ -275,7 +275,7 @@ const Dataflow = withRouter(({ history, match }) => {
       manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
-      restrictFromPublicBtn: isLeadReporterOfCountry && !isBusinessDataflow && !isDesign,
+      restrictFromPublicBtn: isLeadReporterOfCountry && !isBusinessDataflow,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
         isLeadReporterOfCountry || isNationalCoordinatorOfCountry || isReporterOfCountry || isLeadDesigner || isObserver
