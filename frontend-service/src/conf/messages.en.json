@@ -1009,7 +1009,7 @@
     "restoreSnapshotConfirmationQuestion": "Are you sure you want to restore this dataset copy?",
     "restoreSnapshotMessage": "Restore copy",
     "restoreSnapshotTooltip": "Restore copy",
-    "restrictFromPublic": "Restrict from public view",
+    "restrictFromPublicCheckboxLabel": "Restrict from public view",
     "restrictFromPublicField": "Restricted from public view by country",
     "richTextFieldFormatRestriction": "Maximum of 10000 characters",
     "role": "Role",
@@ -1312,6 +1312,10 @@
     "duplicateDisabledTitle": "Duplicate disabled:",
     "duplicateDisabledMessage": "already exists",
     "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field",
+    "restrictFromPublicSideBarButton": "Released data visibility",
+    "restrictFromPublicDialogHeader": "Show/hide released data",
+    "updateRestrictFromPublicFailedEvent": "Error updating the released data visibility",
+    "updatePublicStatusFailedEvent": "Error updating the dataflow public status",
     "isRestrictedFromPublic": "Public available"
   }
 }
