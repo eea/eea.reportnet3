@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import dayjs from 'dayjs';
@@ -65,6 +65,10 @@ const Documents = ({
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
   const [rowDataState, setRowDataState] = useState();
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setSubmitting] = useState(false);
+
+  const footerRef = useRef(null);
 
   useEffect(() => {
     setAllDocuments(documents);
@@ -116,6 +120,29 @@ const Documents = ({
         </div>
       )}
     </span>
+  );
+
+  const onConfirm = () => {
+    if (footerRef.current) footerRef.current.onConfirm();
+  };
+
+  const dialogFooter = (
+    <fieldset>
+      <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
+        <Button
+          disabled={isSubmitting || isUploading}
+          icon={!isUploading ? (isEditForm ? 'check' : 'add') : 'spinnerAnimate'}
+          label={isEditForm ? resourcesContext.messages['save'] : resourcesContext.messages['upload']}
+          onClick={() => onConfirm()}
+        />
+        <Button
+          className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
+          icon="cancel"
+          label={resourcesContext.messages['cancel']}
+          onClick={() => setIsUploadDialogVisible(false)}
+        />
+      </div>
+    </fieldset>
   );
 
   const getAllDocuments = () => {
@@ -302,18 +329,21 @@ const Documents = ({
       {isUploadDialogVisible && (
         <Dialog
           className={styles.dialog}
+          footer={dialogFooter}
           header={isEditForm ? resourcesContext.messages['editDocument'] : resourcesContext.messages['uploadDocument']}
           onHide={onCancelDialog}
           visible={isUploadDialogVisible}>
           <DocumentFileUpload
             dataflowId={dataflowId}
             documentInitialValues={documentInitialValues}
+            footerRef={footerRef}
             isEditForm={isEditForm}
             isUploadDialogVisible={isUploadDialogVisible}
             onUpload={onUploadDocument}
             setFileUpdatingId={setFileUpdatingId}
             setIsUpdating={setIsUpdating}
-            setIsUploadDialogVisible={setIsUploadDialogVisible}
+            setIsUploading={setIsUploading}
+            setSubmitting={setSubmitting}
           />
         </Dialog>
       )}
