@@ -553,10 +553,11 @@ body .p-datepicker:not(.p-datepicker-inline) {
 }
 body .p-datepicker:not(.p-disabled) .p-datepicker-header .p-datepicker-prev:hover,
 body .p-datepicker:not(.p-disabled) .p-datepicker-header .p-datepicker-next:hover {
-  color: #004494;
+  color: var(--accent-color);
 }
 body .p-datepicker:not(.p-disabled) table td span:not(.p-highlight):not(.p-disabled):hover {
   background-color: var(--bg);
+  color: var(--main-font-color);
 }
 body .p-datepicker:not(.p-disabled) .p-monthpicker .p-monthpicker-month:not(.p-highlight):hover {
   background-color: var(--bg);
@@ -609,16 +610,16 @@ body .p-datepicker table td > span {
   border-radius: 3px;
 }
 body .p-datepicker table td > span.p-highlight {
-  color: #ffffff;
-  background-color: #004494;
+  color: var(--main-font-color-reverse);
+  background-color: var(--accent-color);
 }
 body .p-datepicker table td.p-datepicker-today > span {
   background-color: #d0d0d0;
   color: #404040;
 }
 body .p-datepicker table td.p-datepicker-today > span.p-highlight {
-  color: #ffffff;
-  background-color: #004494;
+  color: var(--main-font-color-reverse);
+  background-color: var(--accent-color);
 }
 body .p-datepicker .p-datepicker-buttonbar {
   border-top: 1px solid #d8dae2;
@@ -1143,7 +1144,7 @@ body .p-fieldset .p-fieldset-content {
   padding: 0;
 }
 body .p-accordion .p-accordion-tab {
-  margin-bottom: 2px;
+  margin-bottom: 0.5rem;
 }
 body .p-accordion .p-accordion-header a {
   padding: 0.571em 1em;
@@ -1249,7 +1250,7 @@ body .p-tabview .p-tabview-panels .p-tabview-panel {
   padding: 0;
 }
 body .p-toolbar {
-  background-color: var(--bg);
+  background-color: var(--toolbar-panel-bg);
   border: var(--toolbar-border);
   padding: 0.571em 1em;
   -moz-border-radius: 3px;

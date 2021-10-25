@@ -11,7 +11,8 @@ const parseRepresentativeDTO = representativeDTO => {
     id: representativeDTO.id,
     isReceiptDownloaded: representativeDTO.receiptDownloaded,
     isReceiptOutdated: representativeDTO.receiptOutdated,
-    leadReporters: parseLeadReporters(representativeDTO.leadReporters)
+    leadReporters: parseLeadReporters(representativeDTO.leadReporters),
+    restrictFromPublic: representativeDTO.restrictFromPublic
   });
 };
 

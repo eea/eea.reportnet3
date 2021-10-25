@@ -87,7 +87,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
           />
         </TabPanel>,
         <TabPanel
-          header={resourcesContext.messages.tabMenuTableRelations}
+          header={resourcesContext.messages.tabMenuExpression}
           headerClassName={showErrorOnRelationsTab ? styles.error : ''}
           key="datasetValidationRelations"
           leftIcon={showErrorOnRelationsTab ? 'pi pi-exclamation-circle' : ''}>
