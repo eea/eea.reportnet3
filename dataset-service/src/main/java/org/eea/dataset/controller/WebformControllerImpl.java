@@ -62,6 +62,7 @@ public class WebformControllerImpl implements WebformController {
   @HystrixCommand
   @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/private/webformConfig")
+  @ApiOperation(value = "Insert webform config json into the system", hidden = true)
   public void insertWebformConfig(@RequestBody WebformConfigVO webformConfig) {
     webformService.insertWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
         webformConfig.getContent());
@@ -77,6 +78,7 @@ public class WebformControllerImpl implements WebformController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/webformConfig/{id}")
+  @ApiOperation(value = "Get the webform config json", hidden = true)
   public String findWebformConfigById(@PathVariable("id") Long id) {
 
     String json = "";
