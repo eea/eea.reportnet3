@@ -101,6 +101,7 @@ import {
   faSearch,
   faTimesCircle,
   faEdit,
+  faUserLock,
   faCommentAlt,
   faComment,
   faCommentMedical
@@ -203,6 +204,8 @@ export const AwesomeIcons = icon => {
       return faTrashAlt;
     case 'solidDeleteCircle':
       return faTimesCircle;
+    case 'userLock':
+      return faUserLock;
     case 'deleteCircle':
       return farTimesCircle;
     case 'disk':
