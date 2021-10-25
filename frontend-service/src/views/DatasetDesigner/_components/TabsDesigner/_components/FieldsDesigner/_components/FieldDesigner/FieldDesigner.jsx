@@ -423,6 +423,7 @@ export const FieldDesigner = ({
     ) {
       dispatchFieldDesigner({ type: 'RESET_REFERENCED_FIELD' });
     }
+
     if (!isUndefined(fieldType)) {
       onCodelistAndLinkShow(fieldId, fieldType);
     }
@@ -951,7 +952,7 @@ export const FieldDesigner = ({
               ? resourcesContext.messages['codelistSelection']
               : resourcesContext.messages['multiselectCodelistSelection']
           }
-          onClick={onCodelistDropdownSelected}
+          onClick={() => onCodelistDropdownSelected()}
           style={{ pointerEvents: 'auto' }}
           tooltip={renderTooltipCodelist()}
           tooltipOptions={{ position: 'top' }}
@@ -989,7 +990,7 @@ export const FieldDesigner = ({
               ? '...'
               : `${fieldDesignerState.fieldLinkValue.name}`
           }
-          onClick={onLinkDropdownSelected}
+          onClick={() => onLinkDropdownSelected()}
           style={{ pointerEvents: 'auto' }}
           tooltip={renderTooltipLink()}
           tooltipOptions={{ position: 'top' }}
