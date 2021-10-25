@@ -37,4 +37,7 @@ public class ReleaseVO implements Serializable {
 
   /** The data provider code. */
   private String dataProviderCode;
+
+  /** The restrict from public. */
+  private Boolean restrictFromPublic;
 }
