@@ -160,8 +160,8 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true),
-        publicAvailableInfo: true,
-        publicAvailableStatus: !datasetRepresentative.restrictFromPublic,
+        restrictFromPublicInfo: true,
+        restrictFromPublicStatus: datasetRepresentative.restrictFromPublic,
         visibility: true
       };
     });

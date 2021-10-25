@@ -39,8 +39,8 @@ export const BigButton = ({
   onSaveName,
   onWheel,
   placeholder,
-  publicAvailableInfo,
-  publicAvailableStatus,
+  restrictFromPublicInfo,
+  restrictFromPublicStatus,
   setErrorDialogData,
   tooltip
 }) => {
@@ -197,9 +197,9 @@ export const BigButton = ({
               {resourcesContext.messages['new'].toUpperCase()}
             </p>
           ))}
-        {publicAvailableInfo && (
+        {restrictFromPublicInfo && (
           <Icon
-            icon={publicAvailableStatus ? 'eye' : 'eye-slash'}
+            icon={restrictFromPublicStatus ? 'eye-slash' : 'eye'}
             style={{ position: 'absolute', top: '0', left: '3px', fontSize: '1.8rem' }}
           />
         )}

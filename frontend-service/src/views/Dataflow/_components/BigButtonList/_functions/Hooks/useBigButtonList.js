@@ -293,8 +293,8 @@ const useBigButtonList = ({
             }
           ],
           onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
-          publicAvailableInfo: true,
-          publicAvailableStatus: !datasetRepresentative?.restrictFromPublic,
+          restrictFromPublicInfo: true,
+          restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
           visibility: true
         };
       });
@@ -327,8 +327,8 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true),
-        publicAvailableInfo: true,
-        publicAvailableStatus: !datasetRepresentative?.restrictFromPublic,
+        restrictFromPublicInfo: true,
+        restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
         visibility: true
       };
     });
