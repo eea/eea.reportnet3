@@ -41,7 +41,7 @@ body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a .p-tabview
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon {
   margin-left: 0.5em;
-  color: var(--tabview-highlight-icon-color);
+  color: var(--tabview-color);
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a:not(.p-disabled):focus,
 body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a:not(.p-disabled):focus,
@@ -91,7 +91,7 @@ body
   a
   .p-tabview-right-icon {
   margin-left: 0.5em;
-  color: var(--tabview-highlight-icon-color-hover);
+  color: var(--tabview-highlight-icon-color-hover) !important;
 }
 body
   .p-tabview.p-tabview-top
@@ -131,33 +131,6 @@ body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li.p-highlight 
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight a .p-tabview-right-icon,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight a .p-tabview-right-icon {
   margin-left: 0.5em;
-  color: var(--tabview-highlight-icon-color);
-}
-body
-  .p-tabview.p-tabview-top
-  .p-tabview-nav
-  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):active
-  a
-  .p-tabview-right-icon,
-body
-  .p-tabview.p-tabview-bottom
-  .p-tabview-nav
-  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):active
-  a
-  .p-tabview-right-icon,
-body
-  .p-tabview.p-tabview-left
-  .p-tabview-nav
-  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):active
-  a
-  .p-tabview-right-icon,
-body
-  .p-tabview.p-tabview-right
-  .p-tabview-nav
-  li.p-tabview-nav-li:not(.p-highlight):not(.p-disabled):active
-  a
-  .p-tabview-right-icon {
-  margin-left: 0.5em;
   color: var(--tabview-highlight-icon-color-active);
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li.p-highlight .p-tabview-close,
@@ -188,9 +161,8 @@ body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight:ho
 body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-right-icon,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-left-icon,
 body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li.p-highlight:hover a .p-tabview-right-icon {
-  color: var(--tabview-highlight-icon-color);
+  color: var(--tabview-highlight-icon-color-active);
 }
-
 body .p-tabview.p-tabview-top .p-tabview-nav {
   margin-bottom: -1px;
 }

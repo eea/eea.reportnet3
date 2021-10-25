@@ -45,8 +45,16 @@
   font-style: italic;
 }
 
+// li {
+//   &:focus {
+//     .tabs {
+//       color: var(--tabview-highlight-icon-color-active) !important;
+//     }
+//   }
+// }
+
 .tabs {
-  color: var(--tabview-highlight) !important;
+  color: var(--tabview-color);
 }
 
 .warning {
