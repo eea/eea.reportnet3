@@ -346,7 +346,7 @@
     "main-font-color": "var(--white-font)",
     "breadCrumb-font-color": "var(--white-font)",
     "breadCrumb-icon-color": "var(--accent-color-dark-mode)",
-    "breadCrumb-chevron-color": "var(--c-corporate-blue-lighter)",
+    "breadCrumb-chevron-color": "var(--accent-color)",
     "leftSideBar-bg": "var(--bg-dark-02dp)",
     "leftSideBar-box-shadow": "0 5px 0.5rem rgba(255, 255, 255, 0.3)",
     "header-box-shadow": " 0 0 0.5rem rgba(0, 0, 0, 0.1)",
