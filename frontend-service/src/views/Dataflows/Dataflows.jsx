@@ -244,6 +244,7 @@ const Dataflows = withRouter(({ history, match }) => {
       if (TextUtils.areEquals(tabId, 'reporting')) {
         const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
+        console.log({ data });
         dataflowsDispatch({
           type: 'SET_DATAFLOWS',
           payload: { data, type: 'reporting', contextCurrentDataflowType: userContext.currentDataflowType }

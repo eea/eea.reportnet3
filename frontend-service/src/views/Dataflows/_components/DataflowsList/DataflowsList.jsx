@@ -68,6 +68,7 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
       obligationId: dataflow.obligation?.obligationId?.toString(),
       pinned: pinnedDataflows.some(pinnedDataflow => pinnedDataflow === dataflow.id.toString()) ? 'pinned' : 'unpinned',
       reportingDatasetsStatus: dataflow.reportingDatasetsStatus,
+      showPublicInfo: dataflow.showPublicInfo,
       status: dataflow.status,
       statusKey: dataflow.statusKey,
       userRole: dataflow.userRole
@@ -269,6 +270,7 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
 
       return <div className={styles.noDataflows}>{resourcesContext.messages[emptyDataflowsMessage[visibleTab]]}</div>;
     }
+    console.log({ content });
 
     return !isEmpty(filteredData) ? (
       filteredData.map((dataflow, i) => (

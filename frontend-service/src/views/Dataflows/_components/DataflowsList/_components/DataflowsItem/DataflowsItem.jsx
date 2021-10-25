@@ -63,6 +63,16 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
 
   return layout(
     <Fragment>
+      {(isCustodian || isAdmin) && itemContent.showPublicInfo ? (
+        <div className={`${styles.upperIcon}`}>
+          <span data-for="showPublicInfo" data-tip>
+            <FontAwesomeIcon icon={AwesomeIcons('eye')} role="presentation" />
+          </span>
+          <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="showPublicInfo" place="top">
+            {resourcesContext.messages['showPublicInfo']}
+          </ReactTooltip>
+        </div>
+      ) : null}
       <div className={`${styles.icon}`}>
         <FontAwesomeIcon icon={AwesomeIcons('clone')} role="presentation" />
       </div>
