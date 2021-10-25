@@ -13,5 +13,7 @@ export const RepresentativeConfig = {
   getRepresentatives: '/representative/dataflow/{:dataflowId}',
   importFile: '/representative/import/{:dataflowId}/group/{:dataProviderGroupId}',
   updateDataProviderId: '/representative/update',
-  updateLeadReporter: '/representative/leadReporter/update/dataflow/{:dataflowId}'
+  updateLeadReporter: '/representative/leadReporter/update/dataflow/{:dataflowId}',
+  updateRestrictFromPublic:
+    '/representative/update/restrictFromPublic/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}?restrictFromPublic={:restrictFromPublic}'
 };
