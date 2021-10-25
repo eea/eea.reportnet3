@@ -277,11 +277,10 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const renderReportingDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
-      .filter(key => key.includes('releaseDate') || key.includes('isRestrictedFromPublic'))
+      .filter(key => key.includes('releaseDate'))
       .map(field => {
         let template = null;
         if (field === 'releaseDate') template = renderReleaseDateTemplate;
-        if (field === 'isRestrictedFromPublic') template = renderIsRestrictedFromPublicTemplate;
         return (
           <Column
             body={template}
