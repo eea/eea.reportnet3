@@ -1315,6 +1315,6 @@
     "restrictFromPublicDialogHeader": "Show/hide released data",
     "updateRestrictFromPublicFailedEvent": "Error updating the released data visibility",
     "updatePublicStatusFailedEvent": "Error updating the dataflow public status",
-    "isRestrictedFromPublic": "Public"
+    "restrictFromPublic": "Public"
   }
 }

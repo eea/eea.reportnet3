@@ -6,8 +6,8 @@ export class HistoricRelease {
     id,
     isDataCollectionReleased,
     isEUReleased,
-    isRestrictedFromPublic,
-    releaseDate
+    releaseDate,
+    restrictFromPublic
   } = {}) {
     this.dataProviderCode = dataProviderCode;
     this.datasetId = datasetId;
@@ -15,7 +15,7 @@ export class HistoricRelease {
     this.id = id;
     this.isDataCollectionReleased = isDataCollectionReleased;
     this.isEUReleased = isEUReleased;
-    this.isRestrictedFromPublic = isRestrictedFromPublic;
     this.releaseDate = releaseDate;
+    this.restrictFromPublic = restrictFromPublic;
   }
 }
