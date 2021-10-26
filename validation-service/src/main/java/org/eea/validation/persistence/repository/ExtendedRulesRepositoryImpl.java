@@ -241,6 +241,36 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   }
 
   /**
+   * Find rule.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param ruleId the rule id
+   * @return the rule
+   */
+  @Override
+  @CheckForNull
+  public RulesSchema findRulesByreferenceId(ObjectId datasetSchemaId, ObjectId referenceId) {
+    List<RulesSchema> result;
+    Document filterExpression = new Document();
+    filterExpression.append(INPUT, RULES);
+    filterExpression.append("as", "rule");
+    filterExpression.append("cond",
+        new Document("$eq", Arrays.asList("$$rule.referenceId", referenceId)));
+    filterExpression.append("cond",
+        new Document("$eq", Arrays.asList("$$rule.whenCondition", "isGeometry(this)")));
+    filterExpression.append("cond", new Document("$eq", Arrays.asList(RULE_ENABLED, true)));
+    Document filter = new Document(FILTER, filterExpression);
+    result = mongoTemplate.aggregate(Aggregation.newAggregation(
+        Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
+        Aggregation.project(LiteralConstants.ID_DATASET_SCHEMA)
+            .and(aggregationOperationContext -> filter).as(LiteralConstants.RULES)),
+        RulesSchema.class, RulesSchema.class).getMappedResults();
+
+    return result.isEmpty() ? null : result.get(0);
+  }
+
+
+  /**
    * Gets the rules with active criteria.
    *
    * @param datasetSchemaId the dataset schema id
@@ -260,7 +290,7 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
       result = mongoTemplate.aggregate(Aggregation.newAggregation(
           Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
           Aggregation.project(LiteralConstants.ID_DATASET_SCHEMA)
-              .and(aggregationOperationContext -> filter).as("rules")),
+              .and(aggregationOperationContext -> filter).as(LiteralConstants.RULES)),
           RulesSchema.class, RulesSchema.class).getMappedResults();
     } else {
       Query query = new Query();
