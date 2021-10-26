@@ -27,10 +27,6 @@
   position: absolute;
 }
 
-.dialog :global .p-dialog-content {
-  padding-bottom: 0 !important;
-}
-
 .emptyTableHeader {
   display: none;
   :global .p-column-title {
