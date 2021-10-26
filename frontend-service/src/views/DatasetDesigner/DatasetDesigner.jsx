@@ -465,7 +465,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     setWebformOptionsLoadingStatus('pending');
 
     try {
-      designerDispatch({ type: 'GET_WEBFORMS', payload: { data: await WebformService.listAll() } });
+      const data = await WebformService.listAll();
+      data.unshift({ id: null, label: 'No webform', value: null });
+
+      designerDispatch({ type: 'GET_WEBFORMS', payload: { data } });
       setWebformOptionsLoadingStatus('success');
     } catch (error) {
       console.error('DatasetsDesigner - getWebformList.', error);
