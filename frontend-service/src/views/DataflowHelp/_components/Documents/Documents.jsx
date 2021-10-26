@@ -62,11 +62,11 @@ const Documents = ({
   const [fileToDownload, setFileToDownload] = useState(undefined);
   const [fileUpdatingId, setFileUpdatingId] = useState(null);
   const [isEditForm, setIsEditForm] = useState(false);
+  const [isSubmitting, setSubmitting] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isUploadDialogVisible, setIsUploadDialogVisible] = useState(false);
-  const [rowDataState, setRowDataState] = useState();
   const [isUploading, setIsUploading] = useState(false);
-  const [isSubmitting, setSubmitting] = useState(false);
+  const [rowDataState, setRowDataState] = useState();
 
   const footerRef = useRef(null);
 
