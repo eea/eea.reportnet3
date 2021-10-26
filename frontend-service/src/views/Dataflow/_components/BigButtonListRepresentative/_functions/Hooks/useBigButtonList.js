@@ -136,6 +136,9 @@ const useBigButtonList = ({
     .map(dataset => {
       const datasetName = dataset.name;
       const datasetId = dataset.datasetId;
+      const datasetRepresentative = dataflowState.data.representatives.find(
+        representative => representative.dataProviderId === dataset.dataProviderId
+      );
       return {
         layout: 'defaultBigButton',
         buttonClass: 'dataset',
@@ -157,6 +160,8 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true),
+        restrictFromPublicInfo: true,
+        restrictFromPublicStatus: datasetRepresentative.restrictFromPublic,
         visibility: true
       };
     });
