@@ -57,6 +57,9 @@
 .selectDataProvider {
   color: var(--dropdown-panel-color);
   background-color: var(--dropdown-panel-bg);
+  &:hover {
+    border-color: var(--dropdown-border-color-hover);
+  }
 }
 
 .disabled {
