@@ -200,7 +200,7 @@ export const BigButton = ({
         {restrictFromPublicInfo && (
           <FontAwesomeIcon
             icon={AwesomeIcons(restrictFromPublicStatus ? 'eyeSlash' : 'eye')}
-            style={{ position: 'absolute', top: '5px', left: '2px', fontSize: '1.1rem' }}
+            style={{ position: 'absolute', top: '4px', left: '2px', fontSize: '1.2rem' }}
           />
         )}
       </div>
