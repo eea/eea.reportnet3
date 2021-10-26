@@ -340,7 +340,8 @@
     "general-border-color": "var(--gray-25)",
     "accent-color": "var(--informative-color)",
     "main-font-color-reverse": "var(--white)",
-    "errors": "var(--errors-light-mode)"
+    "errors": "var(--errors-light-mode)",
+    "big-button-menu-color": "var(--white)"
   },
   "dark": {
     "bg": "var(--bg-dark-00dp)",
@@ -684,7 +685,8 @@
     "general-border-color": "var(--gray-75)",
     "accent-color": "var(--accent-color-dark-mode)",
     "main-font-color-reverse": "var(--gray-110)",
-    "errors": "var(--errors-dark-mode)"
+    "errors": "var(--errors-dark-mode)",
+    "big-button-menu-color": "var(--white-font)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
