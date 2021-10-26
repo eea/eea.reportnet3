@@ -383,7 +383,6 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error(
           "Error deleting and export eu dataset integration with the datasetSchemaId {}, with message: {}",
           datasetSchemaId, e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
 

@@ -439,7 +439,7 @@ public class IntegrationControllerImplTest {
     Mockito.verify(integrationService, times(1)).deleteExportEuDataset(Mockito.anyString());
   }
 
-  @Test(expected = ResponseStatusException.class)
+  @Test
   public void testDeleteExportEuDatasetIntegrationException() throws EEAException {
     try {
       Mockito.doThrow(EEAException.class).when(integrationService)

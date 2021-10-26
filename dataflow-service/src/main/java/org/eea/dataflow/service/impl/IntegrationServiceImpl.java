@@ -307,8 +307,10 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Override
   public void deleteExportEuDataset(String datasetSchemaId) throws EEAException {
     IntegrationVO integration = getExportEUDatasetIntegration(datasetSchemaId);
-    CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
-    crudManager.delete(integration.getId());
+    if (null != integration) {
+      CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
+      crudManager.delete(integration.getId());
+    }
   }
 
   /**
