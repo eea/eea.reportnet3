@@ -10,6 +10,7 @@ import { Spinner } from 'views/_components/Spinner';
 
 import { WebformService } from 'services/WebformService';
 
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const Webforms = ({
@@ -22,6 +23,7 @@ export const Webforms = ({
   state,
   webformType
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [selectedConfiguration, setSelectedConfiguration] = useState({ tables: {} });
@@ -35,10 +37,11 @@ export const Webforms = ({
     setLoadingStatus('pending');
     try {
       const selectedWebform = options.find(item => item.value === webformType);
-      setSelectedConfiguration(await WebformService.getWebformConfig(selectedWebform.id));
+      setSelectedConfiguration(await WebformService.getWebformConfig(undefined));
       setLoadingStatus('success');
     } catch (error) {
       setLoadingStatus('failed');
+      notificationContext.add({ type: 'LOADING_WEBFORM_ERROR' });
     }
   };
 

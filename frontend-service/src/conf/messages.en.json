@@ -1317,6 +1317,7 @@
     "updateRestrictFromPublicFailedEvent": "Error updating the released data visibility",
     "updatePublicStatusFailedEvent": "Error updating the dataflow public status",
     "public": "Public",
-    "notPublic": "Not public"
+    "notPublic": "Not public",
+    "loadingWebformError": "Error loading webform"
   }
 }
