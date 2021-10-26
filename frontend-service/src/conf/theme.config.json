@@ -614,7 +614,7 @@
     "drag-and-drop-div-wide-border": "5px dashed var(--accent-color-dark-mode)",
     "drag-and-drop-div-opacity": "0.7",
     "drag-and-drop-div-low-opacity": "0.5",
-    "chips-input-box-shadow": "0 0 0 0.2em var(--c-corporate--lighter)",
+    "chips-input-box-shadow": "0 0 0 0.2em var(--accent-color-dark-mode)",
     "chips-input-box-shadow-error": "0 0 0 0.2em var(--errors-dark-mode)",
     "chips-input-border-color": "var(--accent-color-dark-mode)",
     "chips-input-border-color-hover": "var(--white-font)",
