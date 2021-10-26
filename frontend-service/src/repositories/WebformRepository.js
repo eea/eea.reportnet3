@@ -9,9 +9,8 @@ export const WebformRepository = {
   getSinglePamData: async (datasetId, groupPaMId) =>
     await HTTPRequester.get({ url: getUrl(WebformConfig.getSinglePamData, { datasetId, groupPaMId }) }),
 
-  listAll: async () => {
-    const { data } = await HTTPRequester.get({ url: getUrl(WebformConfig.listAll) });
-
+  getAll: async () => {
+    const { data } = await HTTPRequester.get({ url: getUrl(WebformConfig.getAll) });
     return data;
   },
 

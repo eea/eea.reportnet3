@@ -465,7 +465,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     setWebformOptionsLoadingStatus('pending');
 
     try {
-      const data = await WebformService.listAll();
+      const data = await WebformService.getAll();
       data.unshift({ id: null, label: 'No webform', value: null });
 
       designerDispatch({ type: 'GET_WEBFORMS', payload: { data } });

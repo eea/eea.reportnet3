@@ -8,7 +8,7 @@ export const WebformService = {
 
   getSinglePamData: async (datasetId, groupPaMId) => await WebformRepository.getSinglePamData(datasetId, groupPaMId),
 
-  listAll: async () => await WebformRepository.listAll(),
+  getAll: async () => await WebformRepository.getAll(),
 
   getWebformConfig: async webformId => await WebformRepository.getWebformConfig(webformId)
 };
