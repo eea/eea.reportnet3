@@ -198,9 +198,9 @@ export const BigButton = ({
             </p>
           ))}
         {restrictFromPublicInfo && (
-          <Icon
-            icon={restrictFromPublicStatus ? 'eye-slash' : 'eye'}
-            style={{ position: 'absolute', top: '0', left: '3px', fontSize: '1.8rem' }}
+          <FontAwesomeIcon
+            icon={AwesomeIcons(restrictFromPublicStatus ? 'eyeSlash' : 'eye')}
+            style={{ position: 'absolute', top: '5px', left: '2px', fontSize: '1.1rem' }}
           />
         )}
       </div>
