@@ -18,33 +18,34 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const NotificationService = {
   all: async () => {
-    // const notificationsDTO = await NotificationRepository.all();
-    const notificationsDTO = [
-      {
-        type: 'VALIDATE_DATA_INIT',
-        content: {
-          dataflowId: 666,
-          dataflowName: 'S39 DF',
-          dataProviderName: 'DESIGN',
-          datasetName: 'S4',
-          datasetId: 2911,
-          type: 'DESIGN'
-        },
-        date: new Date()
-      },
-      {
-        type: 'VALIDATION_FINISHED_EVENT',
-        content: {
-          dataflowId: 666,
-          dataflowName: 'S39 DF',
-          dataProviderName: 'DESIGN',
-          datasetName: 'S4',
-          datasetId: 2911,
-          type: 'DESIGN'
-        },
-        date: new Date()
-      }
-    ];
+    const notificationsDTO = await NotificationRepository.all();
+    // const notificationsDTO = [
+    //   {
+    //     type: 'VALIDATE_DATA_INIT',
+    //     content: {
+    //       dataflowId: 666,
+    //       dataflowName: 'S39 DF',
+    //       dataProviderName: 'DESIGN',
+    //       datasetName: 'S4',
+    //       datasetId: 2911,
+    //       type: 'DESIGN'
+    //     },
+    //     date: new Date()
+    //   },
+    //   {
+    //     type: 'VALIDATION_FINISHED_EVENT',
+    //     content: {
+    //       dataflowId: 666,
+    //       dataflowName: 'S39 DF',
+    //       dataProviderName: 'DESIGN',
+    //       datasetName: 'S4',
+    //       datasetId: 2911,
+    //       type: 'DESIGN'
+    //     },
+    //     date: new Date()
+    //   }
+    // ];
+    console.log({ notificationsDTO });
     return notificationsDTO.map(notificationDTO => {
       const { content, insertDate, type } = notificationDTO;
       return new Notification({ content, date: insertDate, type });
