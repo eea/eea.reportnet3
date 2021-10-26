@@ -7,29 +7,29 @@ import lombok.Setter;
 import lombok.ToString;
 
 
-/**
- * The Class WebformMetabaseVO.
- */
 @Setter
 @Getter
 @ToString
-public class WebformMetabaseVO implements Serializable {
+public class WebformConfigVO implements Serializable {
 
 
   /**
-   *
+   * 
    */
-  private static final long serialVersionUID = 5928873289242363790L;
+  private static final long serialVersionUID = 3025055091940745337L;
 
-  /** The id. */
-  private Long id;
+  /**
+   * The id.
+   */
+  private Long idReferenced;
+
+  /**
+   * The webFormName.
+   */
+  private String name;
 
 
-  /** The label. */
-  private String label;
-
-  /** The value. */
-  private String value;
+  private String content;
 
   /**
    * Hash code.
@@ -39,7 +39,7 @@ public class WebformMetabaseVO implements Serializable {
   @Override
   public int hashCode() {
 
-    return Objects.hash(id, label, value);
+    return Objects.hash(name);
 
   }
 
@@ -57,7 +57,7 @@ public class WebformMetabaseVO implements Serializable {
     if (obj == null || getClass() != obj.getClass()) {
       return false;
     }
-    WebformMetabaseVO other = (WebformMetabaseVO) obj;
-    return Objects.equals(label, other.label) && Objects.equals(value, other.value);
+    WebformConfigVO other = (WebformConfigVO) obj;
+    return Objects.equals(name, other.name);
   }
 }

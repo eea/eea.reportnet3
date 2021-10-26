@@ -19,6 +19,7 @@ import { DataflowService } from 'services/DataflowService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { reportingDataflowReducer } from './_functions/Reducers/reportingDataflowReducer';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
@@ -40,6 +41,7 @@ export const ManageDataflow = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const deleteInputRef = useRef(null);
   const formRef = useRef(null);
@@ -103,6 +105,8 @@ export const ManageDataflow = ({
         notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
       }
       setIsDeleting(false);
+    } finally {
+      userContext.setCurrentDataflowType(undefined);
     }
   };
 

@@ -46,6 +46,11 @@
   min-width: 20rem !important;
   min-height: 20rem !important;
   width: 40rem;
+
+  .dataCollectionDialogMessagesWrapper {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .calendar {

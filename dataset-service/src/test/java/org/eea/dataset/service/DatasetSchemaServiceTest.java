@@ -840,7 +840,7 @@ public class DatasetSchemaServiceTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
+  @Test(expected = NullPointerException.class)
   public void updateTableSchemaNullValuesTest() throws EEAException {
     DataSetMetabase dataSetMetabase = new DataSetMetabase();
     dataSetMetabase.setDatasetSchema("5eb4269d06390651aced7c93");
@@ -857,10 +857,7 @@ public class DatasetSchemaServiceTest {
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
     try {
       dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO);
-    } catch (EEAException e) {
-      Assert.assertEquals(
-          String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, tableSchema, 1L),
-          e.getMessage());
+    } catch (NullPointerException e) {
       throw e;
     }
   }
