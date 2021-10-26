@@ -53,8 +53,8 @@ public abstract class ReleaseMapper implements IMapper<Snapshot, ReleaseVO> {
     if (snapshot.getReportingDataset().getDataProviderId() != null) {
       releaseVO.setDataProviderCode(representativeControllerZuul
           .findDataProviderById(snapshot.getReportingDataset().getDataProviderId()).getCode());
-      List<RepresentativeVO> representatives =
-          representativeControllerZuul.findRepresentativesByIdDataFlow(snapshot.getDataflowId());
+      List<RepresentativeVO> representatives = representativeControllerZuul
+          .findRepresentativesByIdDataFlow(snapshot.getReportingDataset().getDataflowId());
       representatives.stream().forEach(representative -> {
         releaseVO.setRestrictFromPublic(representative.isRestrictFromPublic());
       });
