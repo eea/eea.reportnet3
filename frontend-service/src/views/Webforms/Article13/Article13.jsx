@@ -9,7 +9,6 @@ import uniqueId from 'lodash/uniqueId';
 import styles from './Article13.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { tables } from './article13.webform.json';
 
 import { Button } from 'views/_components/Button';
 import { TableManagement } from './_components/TableManagement';
@@ -30,7 +29,7 @@ import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const Article13 = ({ dataProviderId, dataflowId, datasetId, isReleasing, isReporting, state }) => {
+export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, isReporting, state, tables = [] }) => {
   const { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSinglePams } = Article13Utils;
   const { datasetSchema, datasetStatistics } = state;
   const { onParseWebformData, onParseWebformRecords, parseNewTableRecord, parsePamsRecords } = WebformsUtils;
