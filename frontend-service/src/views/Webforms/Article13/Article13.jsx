@@ -9,7 +9,6 @@ import uniqueId from 'lodash/uniqueId';
 import styles from './Article13.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-// import { tables } from './article13.webform.json';
 
 import { Button } from 'views/_components/Button';
 import { TableManagement } from './_components/TableManagement';

@@ -9,8 +9,6 @@ import uniqueId from 'lodash/uniqueId';
 
 import styles from './Article15.module.scss';
 
-// import { tables } from './article15.webform.json';
-
 import { Button } from 'views/_components/Button';
 import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
