@@ -242,6 +242,12 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   }, [userContext, dataflowState]);
 
+  useEffect(() => {
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_USERS_LIST_FAILED_EVENT')) {
+      setIsDownloadingUsersList(false);
+    }
+  }, [notificationContext.hidden]);
+
   const manageDialogs = (dialog, value, secondDialog, secondValue) =>
     dataflowDispatch({
       type: 'MANAGE_DIALOGS',
@@ -516,6 +522,9 @@ const Dataflow = withRouter(({ history, match }) => {
       setIsDownloadingUsersList(false);
     }
   };
+
+  useCheckNotifications(['AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE'], setIsDownloadingUsersList, false);
+
   function setIsDownloadingUsersList(isDownloadingUsersList) {
     dataflowDispatch({ type: 'SET_IS_DOWNLOADING_USERS_LIST', payload: isDownloadingUsersList });
   }
