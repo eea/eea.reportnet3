@@ -10,7 +10,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const NationalSystems = ({ dataflowId, dataProviderId, datasetId, state, tables }) => {
+export const NationalSystems = ({ dataflowId, dataProviderId, datasetId, state, tables = [] }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const { areEquals } = TextUtils;

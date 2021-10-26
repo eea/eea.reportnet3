@@ -29,7 +29,7 @@ import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, isReporting, state, tables }) => {
+export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, isReporting, state, tables = [] }) => {
   const { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSinglePams } = Article13Utils;
   const { datasetSchema, datasetStatistics } = state;
   const { onParseWebformData, onParseWebformRecords, parseNewTableRecord, parsePamsRecords } = WebformsUtils;

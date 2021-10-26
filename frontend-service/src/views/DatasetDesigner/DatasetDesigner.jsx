@@ -468,7 +468,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       designerDispatch({ type: 'GET_WEBFORMS', payload: { data: await WebformService.listAll() } });
       setWebformOptionsLoadingStatus('success');
     } catch (error) {
+      console.error('DatasetsDesigner - getWebformList.', error);
       setWebformOptionsLoadingStatus('failed');
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' });
     }
   };
 
@@ -1288,15 +1290,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     const webform = webformOptions.find(option => option.value === designerState.webform);
 
     if (webformOptionsLoadingStatus === 'pending') return <Spinner style={{ top: 0 }} />;
-
-    if (webformOptionsLoadingStatus === 'failed') {
-      return (
-        <div className={styles.reloadWebformOptionsDialog}>
-          <div className={styles.titleWrapper}>{resourcesContext.messages['somethingWentWrong']}</div>
-          <Button icon="refresh" label={'Refresh'} onClick={getWebformList} />
-        </div>
-      );
-    }
 
     return (
       <Fragment>

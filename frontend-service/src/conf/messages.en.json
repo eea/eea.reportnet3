@@ -1311,13 +1311,14 @@
     "duplicateDisabledTitle": "Duplicate disabled:",
     "duplicateDisabledMessage": "already exists",
     "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field",
-    "somethingWentWrong": "Something did not load properly. Please, hit the REFRESH button below to try again.",
+    "somethingWentWrongWebform": "Failed loading webform. Please click Refresh to try again.",
     "restrictFromPublicftSideBarButton": "Released data visibility",
     "restrictFromPublicDialogHeader": "Show/hide released data",
     "updateRestrictFromPublicFailedEvent": "Error updating the released data visibility",
     "updatePublicStatusFailedEvent": "Error updating the dataflow public status",
     "public": "Public",
     "notPublic": "Not public",
-    "loadingWebformError": "Error loading webform"
+    "loadingWebformError": "Error loading webform",
+    "loadingWebformOptionsError": "Error loading webforms"
   }
 }

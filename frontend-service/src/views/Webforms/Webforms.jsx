@@ -26,7 +26,7 @@ export const Webforms = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [selectedConfiguration, setSelectedConfiguration] = useState({ tables: {} });
+  const [selectedConfiguration, setSelectedConfiguration] = useState({ tables: [] });
   const [loadingStatus, setLoadingStatus] = useState('idle');
 
   useEffect(() => {
@@ -37,9 +37,10 @@ export const Webforms = ({
     setLoadingStatus('pending');
     try {
       const selectedWebform = options.find(item => item.value === webformType);
-      setSelectedConfiguration(await WebformService.getWebformConfig(undefined));
+      setSelectedConfiguration(await WebformService.getWebformConfig(selectedWebform.id));
       setLoadingStatus('success');
     } catch (error) {
+      console.error('Webforms - getWebformConfiguration.', error);
       setLoadingStatus('failed');
       notificationContext.add({ type: 'LOADING_WEBFORM_ERROR' });
     }
@@ -50,7 +51,7 @@ export const Webforms = ({
   if (loadingStatus === 'failed') {
     return (
       <div className={styles.somethingWentWrong}>
-        {resourcesContext.messages['somethingWentWrong']}
+        {resourcesContext.messages['somethingWentWrongWebform']}
         <Button icon="refresh" label={'Refresh'} onClick={getWebformConfiguration} />
       </div>
     );
