@@ -165,7 +165,6 @@
 
   /* Header */
   --header-box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
-  // --header-box-shadow: 0 0 0.5rem rgb(127, 255, 7);
 
   /* Title */
   --title-icon-color: var(--gray-110);
@@ -176,7 +175,6 @@
   /* Tabview */
   --tabview-bg: var(--gray-5);
   --tabview-border: 1px solid var(--gray-25);
-  /* --'tabview-border-bottom': '1px solid var(--bg)', */
   --tabview-color: var(--gray-110);
   --tabview-highlight-bg: var(--bg);
   --tabview-highlight-border: 1px solid var(--gray-25);
@@ -243,7 +241,6 @@
   --datatable-toolbar-border: 1px solid var(--gray-25);
 
   /* Paginator */
-
   --paginator-bg: var(--c-corporate-blue);
   --paginator-border: 1px solid var(--blue-75);
   --paginator-color: var(--white);
@@ -593,5 +590,6 @@
   --accordion-header-highlight-bg-color-hover: var(--gray-25);
   --accordion-header-highlight-border-hover: 1px solid var(--accordion-header-highlight-bg-color-hover);
 
+  /* Borders*/
   --general-border-style: '1px solid var(--general-border-color)';
 }
