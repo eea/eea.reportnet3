@@ -46,9 +46,9 @@ export const NotificationService = {
     //   }
     // ];
     console.log({ notificationsDTO });
-    return notificationsDTO.map(notificationDTO => {
-      const { content, insertDate, type } = notificationDTO;
-      return new Notification({ content, date: insertDate, type });
+    return notificationsDTO?.data?.map(notificationDTO => {
+      const { content, insertDate, eventType } = notificationDTO;
+      return new Notification({ content, date: insertDate, type: eventType });
     });
   },
   create: async (type, date, content) => await NotificationRepository.create(type, date, content),
