@@ -298,6 +298,22 @@ public class IntegrationServiceImpl implements IntegrationService {
   }
 
   /**
+   * Delete export eu dataset.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @throws EEAException the EEA exception
+   */
+  @Transactional
+  @Override
+  public void deleteExportEuDataset(String datasetSchemaId) throws EEAException {
+    IntegrationVO integration = getExportEUDatasetIntegration(datasetSchemaId);
+    if (null != integration) {
+      CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
+      crudManager.delete(integration.getId());
+    }
+  }
+
+  /**
    * Release populate EU dataset lock.
    *
    * @param dataflowId the dataflow id
