@@ -37,6 +37,7 @@ import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 import { IntegrationService } from 'services/IntegrationService';
 import { ValidationService } from 'services/ValidationService';
+import { WebformService } from 'services/WebformService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -118,6 +119,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [webformData, setWebformData] = useState(null);
+  const [webformOptions, setWebformOptions] = useState([]);
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -137,6 +139,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
     getMetadata();
+    if (isEmpty(webformOptions)) getWebformList();
   }, []);
 
   useEffect(() => {
@@ -290,6 +293,15 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getExportIntegrationsNames = exportOperationsList => {
     parseExportIntegrationsNames(exportOperationsList.map(element => element.name));
+  };
+
+  const getWebformList = async () => {
+    try {
+      setWebformOptions(await WebformService.getAll());
+    } catch (error) {
+      console.error('Dataset - getWebformList.', error);
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' });
+    }
   };
 
   const internalImportExtensionsList = config.importTypes.importDatasetTypes.map(type => {
@@ -1099,6 +1111,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           datasetId={datasetId}
           isReleasing={dataset.isReleasing}
           isReporting
+          options={webformOptions}
           state={{
             datasetSchema: { tables: datasetSchemaAllTables },
             schemaTables,
