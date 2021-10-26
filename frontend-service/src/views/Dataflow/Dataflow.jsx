@@ -92,6 +92,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isDataSchemaCorrect: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
+    isDownloadingUsersList: false,
     isExportDialogVisible: false,
     isExportEUDatasetLoading: false,
     isExporting: false,
@@ -503,13 +504,23 @@ const Dataflow = withRouter(({ history, match }) => {
   );
 
   const onDownloadUsersListByCountry = async () => {
-    console.log(`onDownloadUsersListByCountry`, onDownloadUsersListByCountry);
+    setIsDownloadingUsersList(true);
+    try {
+      console.log(`request`);
+    } catch (error) {
+      setIsDownloadingUsersList(false);
+    }
   };
+  function setIsDownloadingUsersList(isDownloadingUsersList) {
+    dataflowDispatch({ type: 'SET_IS_DOWNLOADING_USERS_LIST', payload: isDownloadingUsersList });
+  }
+
   const renderUserListDialogFooter = () => (
     <Fragment>
       <Button
         className="p-button-secondary p-button-animated-blink"
-        icon={'export'}
+        disabled={dataflowState.isDownloadingUsersList}
+        icon={dataflowState.isDownloadingUsersList ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadUsersListButtonLabel']}
         onClick={() => onDownloadUsersListByCountry()}
       />

@@ -64,6 +64,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_IS_DATA_UPDATED':
       return { ...state, isDataUpdated: !state.isDataUpdated };
 
+    case 'SET_IS_DOWNLOADING_USERS_LIST':
+      return { ...state, isDownloadingUsersList: payload };
+
     case 'SET_IS_EXPORT_EU_DATASET':
       return { ...state, isExportEUDatasetLoading: payload.isExportEUDatasetLoading };
 
