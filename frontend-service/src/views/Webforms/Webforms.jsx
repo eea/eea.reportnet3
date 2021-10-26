@@ -1,16 +1,41 @@
+import { useEffect, useState } from 'react';
+
+import isEmpty from 'lodash/isEmpty';
+
 import { Article13 } from './Article13';
 import { Article15 } from './Article15';
 import { NationalSystems } from './NationalSystems';
+import { Spinner } from 'views/_components/Spinner';
+
+import { WebformService } from 'services/WebformService';
 
 export const Webforms = ({
-  dataProviderId,
   dataflowId,
+  dataProviderId,
   datasetId,
   isReleasing,
   isReporting = false,
+  options,
   state,
   webformType
 }) => {
+  const [selectedConfiguration, setSelectedConfiguration] = useState({ tables: {} });
+
+  useEffect(() => {
+    getWebformConfiguration();
+  }, []);
+
+  const getWebformConfiguration = async () => {
+    try {
+      const selectedWebform = options.find(item => item.value === webformType);
+      setSelectedConfiguration(await WebformService.getWebformConfig(selectedWebform.id));
+    } catch (error) {
+      console.log('error :>> ', error);
+    }
+  };
+
+  if (isEmpty(selectedConfiguration.tables)) return <Spinner style={{ top: 0, margin: '1rem' }} />;
+
   switch (webformType) {
     case 'MMR-ART13':
       return (
@@ -21,6 +46,7 @@ export const Webforms = ({
           isReleasing={isReleasing}
           isReporting={isReporting}
           state={state}
+          tables={selectedConfiguration.tables}
         />
       );
     case 'MMR-ART15':
@@ -31,6 +57,7 @@ export const Webforms = ({
           datasetId={datasetId}
           isReporting={isReporting}
           state={state}
+          tables={selectedConfiguration.tables}
         />
       );
     case 'NATIONAL-SYSTEMS':
@@ -41,6 +68,7 @@ export const Webforms = ({
           datasetId={datasetId}
           isReporting={isReporting}
           state={state}
+          tables={selectedConfiguration.tables}
         />
       );
     default:

@@ -50,6 +50,7 @@ import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'vi
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { WebformService } from 'services/WebformService';
 
 export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const {
@@ -118,6 +119,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [webformData, setWebformData] = useState(null);
+  const [webformOptions, setWebformOptions] = useState([]);
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -137,6 +139,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
     getMetadata();
+    if (isEmpty(webformOptions)) getWebformList();
   }, []);
 
   useEffect(() => {
@@ -290,6 +293,14 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const getExportIntegrationsNames = exportOperationsList => {
     parseExportIntegrationsNames(exportOperationsList.map(element => element.name));
+  };
+
+  const getWebformList = async () => {
+    try {
+      setWebformOptions(await WebformService.listAll());
+    } catch (error) {
+      console.log('error :>> ', error);
+    }
   };
 
   const internalImportExtensionsList = config.importTypes.importDatasetTypes.map(type => {
@@ -1099,6 +1110,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           datasetId={datasetId}
           isReleasing={dataset.isReleasing}
           isReporting
+          options={webformOptions}
           state={{
             datasetSchema: { tables: datasetSchemaAllTables },
             schemaTables,

@@ -9,7 +9,7 @@ import uniqueId from 'lodash/uniqueId';
 
 import styles from './Article15.module.scss';
 
-import { tables } from './article15.webform.json';
+// import { tables } from './article15.webform.json';
 
 import { Button } from 'views/_components/Button';
 import { Spinner } from 'views/_components/Spinner';
@@ -20,7 +20,7 @@ import { article15Reducer } from './_functions/Reducers/article15Reducer';
 
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
-export const Article15 = ({ dataProviderId, dataflowId, datasetId, isReporting, state }) => {
+export const Article15 = ({ dataflowId, dataProviderId, datasetId, isReporting, state, tables }) => {
   const { datasetSchema } = state;
   const { getWebformTabs, onParseWebformData } = WebformsUtils;
 

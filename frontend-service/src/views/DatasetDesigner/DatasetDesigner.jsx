@@ -161,19 +161,23 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       tabularData: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'tabularData'),
       webform: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'webform')
     },
-    webform: null
+    webform: null,
+    webformOptions: [],
+    webformOptionsLoadingStatus: 'pending'
   });
 
   const {
     arePrefilledTablesDeleted,
-    datasetSchemaAllTables,
     datasetDescription,
+    datasetSchemaAllTables,
     dataViewerOptions,
     isDataflowOpen,
     isDeleteDialogVisible,
     isDesignDatasetEditorRead,
     isImportOtherSystemsDialogVisible,
-    isValidateDialogVisible
+    isValidateDialogVisible,
+    webformOptions,
+    webformOptionsLoadingStatus
   } = designerState;
 
   const exportMenuRef = useRef();
@@ -203,6 +207,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     leftSideBarContext.removeModels();
     onLoadSchema();
     callSetMetaData();
+    if (isEmpty(webformOptions)) getWebformList();
   }, []);
 
   useEffect(() => {
@@ -458,10 +463,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const getUniqueConstraintsList = data => designerDispatch({ type: 'GET_UNIQUES', payload: { data } });
 
   const getWebformList = async () => {
+    setWebformOptionsLoadingStatus('pending');
+
     try {
-      return await WebformService.listAll();
+      designerDispatch({ type: 'GET_WEBFORMS', payload: { data: await WebformService.listAll() } });
+      setWebformOptionsLoadingStatus('success');
     } catch (error) {
-      console.log('error :>> ', error);
+      setWebformOptionsLoadingStatus('failed');
     }
   };
 
@@ -470,6 +478,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   };
 
   const setIsLoading = value => designerDispatch({ type: 'SET_IS_LOADING', payload: { value } });
+
+  const setWebformOptionsLoadingStatus = loadingStatus =>
+    designerDispatch({ type: 'SET_WEBFORM_OPTIONS_LOADING_STATUS', payload: { loadingStatus } });
 
   const setIsLoadingFile = value => designerDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
 
@@ -753,12 +764,12 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             datasetStatistics: datasetStatisticsDTO,
             description: dataset.datasetSchemaDescription || '',
             levelErrorTypes: dataset.levelErrorTypes,
-            previousWebform: WebformsConfig.filter(item => item.value === dataset.webform)[0],
+            previousWebform: dataset.webform,
             referenceDataset: dataset.referenceDataset,
             schemaId: dataset.datasetSchemaId,
             tables: dataset.tables,
             schemaTables: tableSchemaList,
-            webform: WebformsConfig.filter(item => item.value === dataset.webform)[0]
+            webform: dataset.webform
           }
         });
       };
@@ -1130,10 +1141,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     return (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          {!isNil(designerState.webform) &&
-          !isNil(designerState.webform.value) &&
-          !isDataflowOpen &&
-          !isDesignDatasetEditorRead
+          {!isNil(designerState.webform) && !isDataflowOpen && !isDesignDatasetEditorRead
             ? renderRadioButtons()
             : switchView}
         </div>
@@ -1276,6 +1284,39 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       </label>
     </div>
   );
+
+  const renderWebformOptionsContent = () => {
+    const webform = webformOptions.find(option => option.value === designerState.webform);
+
+    if (webformOptionsLoadingStatus === 'pending') return <Spinner style={{ top: 0 }} />;
+
+    if (webformOptionsLoadingStatus === 'failed') {
+      return (
+        <div className={styles.reloadWebformOptionsDialog}>
+          <div className={styles.titleWrapper}>{resourcesContext.messages['somethingWentWrong']}</div>
+          <Button icon="refresh" label={'Refresh'} onClick={getWebformList} />
+        </div>
+      );
+    }
+
+    return (
+      <Fragment>
+        <div className={styles.titleWrapper}>{resourcesContext.messages['configureWebformMessage']}</div>
+        <Dropdown
+          appendTo={document.body}
+          ariaLabel={'configureWebform'}
+          inputId="configureWebformDropDown"
+          onChange={e =>
+            designerDispatch({ type: 'SET_SELECTED_WEBFORM', payload: { selectedWebform: e.target.value } })
+          }
+          optionLabel="label"
+          options={webformOptions}
+          placeholder={resourcesContext.messages['configureWebformPlaceholder']}
+          value={designerState.selectedWebform || webform}
+        />
+      </Fragment>
+    );
+  };
 
   const layout = children => (
     <MainLayout>
@@ -1540,12 +1581,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           </Toolbar>
         </div>
         {renderSwitchView()}
-        {!isNil(designerState.webform) && !isNil(designerState.webform.value) && designerState.viewType['webform'] ? (
+        {!isNil(designerState.webform) && designerState.viewType['webform'] ? (
           <Webforms
             dataflowId={dataflowId}
             datasetId={datasetId}
+            options={webformOptions}
             state={designerState}
-            webformType={designerState.webform.value}
+            webformType={designerState.webform}
           />
         ) : (
           <TabsDesigner
@@ -1677,19 +1719,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             }}
             style={{ width: '30%' }}
             visible={designerState.isConfigureWebformDialogVisible}>
-            <div className={styles.titleWrapper}>{resourcesContext.messages['configureWebformMessage']}</div>
-            <Dropdown
-              appendTo={document.body}
-              ariaLabel={'configureWebform'}
-              inputId="configureWebformDropDown"
-              onChange={e =>
-                designerDispatch({ type: 'SET_SELECTED_WEBFORM', payload: { selectedWebform: e.target.value } })
-              }
-              optionLabel="label"
-              options={WebformsConfig}
-              placeholder={resourcesContext.messages['configureWebformPlaceholder']}
-              value={isUndefined(designerState.selectedWebform) ? designerState.webform : designerState.selectedWebform}
-            />
+            {renderWebformOptionsContent()}
           </Dialog>
         )}
 
