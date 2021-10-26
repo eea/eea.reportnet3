@@ -196,7 +196,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return dataSetMetabaseMapper.entityListToClass(datasets);
   }
 
-
   /**
    * Fill dataset.
    *
