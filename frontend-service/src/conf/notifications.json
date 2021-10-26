@@ -342,6 +342,9 @@
           "key": "GENERATE_SCHEMAS_INFO_FILE_ERROR"
         },
         {
+          "key": "GENERATE_USERS_LIST_FILE_ERROR"
+        },
+        {
           "key": "CREATE_DATA_COLLECTION_ERROR"
         },
         {

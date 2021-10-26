@@ -55,10 +55,12 @@ export const DataflowService = {
   downloadAllSchemasInfo: async (dataflowId, fileName) =>
     await DataflowRepository.downloadAllSchemasInfo(dataflowId, fileName),
 
-  generateAllSchemasInfoFile: async dataflowId => await DataflowRepository.generateAllSchemasInfoFile(dataflowId),
-
   downloadPublicAllSchemasInfoFile: async dataflowId =>
     await DataflowRepository.downloadPublicAllSchemasInfoFile(dataflowId),
+
+  generateAllSchemasInfoFile: async dataflowId => await DataflowRepository.generateAllSchemasInfoFile(dataflowId),
+
+  generateUsersListFile: async dataflowId => await DataflowRepository.generateUsersListFile(dataflowId),
 
   getDatasetsValidationStatistics: async (dataflowId, datasetSchemaId) => {
     const datasetsDashboardsDataDTO = await DataflowRepository.getDatasetsValidationStatistics(

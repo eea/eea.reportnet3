@@ -508,8 +508,11 @@ const Dataflow = withRouter(({ history, match }) => {
     notificationContext.add({ type: 'DOWNLOAD_USERS_LIST_START' });
 
     try {
+      await DataflowService.generateUsersListFile(dataflowId);
       console.log(`request`);
     } catch (error) {
+      console.error('Dataflow - onDownloadUsersListByCountry.', error);
+      notificationContext.add({ type: 'GENERATE_USERS_LIST_FILE_ERROR' });
       setIsDownloadingUsersList(false);
     }
   };

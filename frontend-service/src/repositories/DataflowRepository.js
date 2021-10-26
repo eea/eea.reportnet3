@@ -25,11 +25,13 @@ export const DataflowRepository = {
       url: getUrl(DataflowConfig.downloadAllSchemasInfo, { dataflowId, fileName })
     }),
 
+  downloadPublicAllSchemasInfoFile: async dataflowId =>
+    await HTTPRequester.download({ url: getUrl(DataflowConfig.downloadPublicAllSchemasInfoFile, { dataflowId }) }),
   generateAllSchemasInfoFile: async dataflowId =>
     await HTTPRequester.post({ url: getUrl(DataflowConfig.generateAllSchemasInfoFile, { dataflowId }) }),
 
-  downloadPublicAllSchemasInfoFile: async dataflowId =>
-    await HTTPRequester.download({ url: getUrl(DataflowConfig.downloadPublicAllSchemasInfoFile, { dataflowId }) }),
+  generateUsersListFile: async dataflowId =>
+    await HTTPRequester.post({ url: getUrl(DataflowConfig.generateUsersListFile, { dataflowId }) }),
 
   getDetails: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDetails, { dataflowId }) }),
 
