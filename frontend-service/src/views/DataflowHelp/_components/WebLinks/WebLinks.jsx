@@ -275,23 +275,21 @@ export const WebLinks = ({
   };
 
   const dialogFooter = (
-    <fieldset>
-      <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
-        <Button
-          disabled={webLinksState.isSubmitting}
-          icon={getButtonIcon(webLinksState.isSubmitting)}
-          id="submitButton"
-          label={isNil(webLinksState.webLink.id) ? resourcesContext.messages['add'] : resourcesContext.messages['edit']}
-          onClick={() => onSaveRecord()}
-        />
-        <Button
-          className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
-          icon="cancel"
-          label={resourcesContext.messages['cancel']}
-          onClick={() => onHideAddEditDialog()}
-        />
-      </div>
-    </fieldset>
+    <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
+      <Button
+        disabled={webLinksState.isSubmitting}
+        icon={getButtonIcon(webLinksState.isSubmitting)}
+        id="submitButton"
+        label={isNil(webLinksState.webLink.id) ? resourcesContext.messages['add'] : resourcesContext.messages['edit']}
+        onClick={() => onSaveRecord()}
+      />
+      <Button
+        className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
+        icon="cancel"
+        label={resourcesContext.messages['cancel']}
+        onClick={() => onHideAddEditDialog()}
+      />
+    </div>
   );
 
   const webLinkEditButtons = webLink => {

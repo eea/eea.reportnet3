@@ -11,9 +11,9 @@ body .p-chips > ul.p-inputtext:not(.p-disabled):hover {
 body .p-chips > ul.p-inputtext:not(.p-disabled).p-focus {
   outline: 0 none;
   outline-offset: 0;
-  -webkit-box-shadow: var(--chips-input-box-shadow);
-  -moz-box-shadow: var(--chips-input-box-shadow);
-  box-shadow: var(--chips-input-box-shadow);
+  -webkit-box-shadow: var(--inputtext-box-shadow-focus);
+  -moz-box-shadow: var(--inputtext-box-shadow-focus);
+  box-shadow: var(--inputtext-box-shadow-focus);
   border-color: var(--chips-input-border-color);
 }
 body .p-chips > ul.p-inputtext .p-chips-input-token {

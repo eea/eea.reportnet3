@@ -617,7 +617,7 @@
     "chips-input-box-shadow": "0 0 0 0.2em var(--c-corporate--lighter)",
     "chips-input-box-shadow-error": "0 0 0 0.2em var(--errors-dark-mode)",
     "chips-input-border-color": "var(--accent-color-dark-mode)",
-    "chips-input-border-color-hover": "var(--accent-color-dark-mode)",
+    "chips-input-border-color-hover": "var(--white-font)",
     "chips-input-color": "var(--white)",
     "chips-token-bg": "var(--gray-25)",
     "chips-token-color": "var(--main-font-color-reverse)",

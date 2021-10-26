@@ -127,22 +127,20 @@ const Documents = ({
   };
 
   const dialogFooter = (
-    <fieldset>
-      <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
-        <Button
-          disabled={isSubmitting || isUploading}
-          icon={!isUploading ? (isEditForm ? 'check' : 'add') : 'spinnerAnimate'}
-          label={isEditForm ? resourcesContext.messages['save'] : resourcesContext.messages['upload']}
-          onClick={() => onConfirm()}
-        />
-        <Button
-          className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
-          icon="cancel"
-          label={resourcesContext.messages['cancel']}
-          onClick={() => setIsUploadDialogVisible(false)}
-        />
-      </div>
-    </fieldset>
+    <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
+      <Button
+        disabled={isSubmitting || isUploading}
+        icon={!isUploading ? (isEditForm ? 'check' : 'add') : 'spinnerAnimate'}
+        label={isEditForm ? resourcesContext.messages['save'] : resourcesContext.messages['upload']}
+        onClick={() => onConfirm()}
+      />
+      <Button
+        className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
+        icon="cancel"
+        label={resourcesContext.messages['cancel']}
+        onClick={() => setIsUploadDialogVisible(false)}
+      />
+    </div>
   );
 
   const getAllDocuments = () => {
