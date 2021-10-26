@@ -17,8 +17,8 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const NotificationService = {
-  all: async userId => {
-    // const notificationsDTO = await NotificationRepository.all(userId);
+  all: async () => {
+    // const notificationsDTO = await NotificationRepository.all();
     const notificationsDTO = [
       {
         type: 'VALIDATE_DATA_INIT',
@@ -46,8 +46,8 @@ export const NotificationService = {
       }
     ];
     return notificationsDTO.map(notificationDTO => {
-      const { content, date, type } = notificationDTO;
-      return new Notification({ content, date, type });
+      const { content, insertDate, type } = notificationDTO;
+      return new Notification({ content, date: insertDate, type });
     });
   },
   create: async (type, date, content) => await NotificationRepository.create(type, date, content),

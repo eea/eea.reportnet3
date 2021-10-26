@@ -26,7 +26,7 @@ const NotificationProvider = ({ children }) => {
     <NotificationContext.Provider
       value={{
         ...state,
-        add: notificationDTO => {
+        add: (notificationDTO, save = false) => {
           const { content, onClick, type } = notificationDTO;
           const notification = NotificationService.parse({
             config: config.notifications.notificationSchema,
@@ -44,6 +44,9 @@ const NotificationProvider = ({ children }) => {
           dispatch({
             type: 'NEW_NOTIFICATION_ADDED'
           });
+          if (save) {
+            NotificationService.create(type, new Date(), content);
+          }
         },
 
         read: notificationId => {

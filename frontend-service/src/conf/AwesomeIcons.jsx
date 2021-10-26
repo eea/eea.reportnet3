@@ -102,8 +102,6 @@ import {
   faTimesCircle,
   faEdit,
   faUserLock,
-  faCommentAlt,
-  faComment,
   faCommentMedical
 } from '@fortawesome/free-solid-svg-icons';
 
