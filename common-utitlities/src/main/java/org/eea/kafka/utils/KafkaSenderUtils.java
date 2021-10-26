@@ -1,8 +1,12 @@
 package org.eea.kafka.utils;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -29,6 +33,9 @@ public class KafkaSenderUtils {
 
   @Autowired
   private NotificableEventFactory notificableEventFactory;
+
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
 
   private static final Logger LOG = LoggerFactory.getLogger(KafkaSenderUtils.class);
 
@@ -77,6 +84,19 @@ public class KafkaSenderUtils {
    */
   public void releaseNotificableKafkaEvent(final EventType eventType, Map<String, Object> value,
       final NotificationVO notificationVO) throws EEAException {
+    UserNotificationVO userNotificationVO = new UserNotificationVO();
+    userNotificationVO.setEventType(eventType.toString());
+    userNotificationVO.setInsertDate(new Date());
+    UserNotificationContentVO content = new UserNotificationContentVO();
+    content.setDataflowId(notificationVO.getDataflowId());
+    content.setDataflowName(notificationVO.getDataflowName());
+    content.setDatasetId(notificationVO.getDatasetId());
+    content.setDatasetName(notificationVO.getDatasetName());
+    content.setProviderId(notificationVO.getProviderId());
+    userNotificationVO.setContent(content);
+
+    notificationControllerZuul.createUserNotificationPrivate(userNotificationVO);
+
     if (value == null) {
       value = new HashMap<>();
     }
