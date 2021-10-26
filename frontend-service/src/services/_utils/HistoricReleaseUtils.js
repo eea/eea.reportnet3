@@ -11,7 +11,7 @@ const parseHistoricReleaseListDTO = historicReleasesDTO =>
         isDataCollectionReleased: historicReleaseDTO.dcrelease,
         isEUReleased: historicReleaseDTO.eurelease,
         releaseDate: historicReleaseDTO.dateReleased,
-        restrictFromPublic: true
+        restrictFromPublic: historicReleaseDTO.restrictFromPublic
       })
   );
 
