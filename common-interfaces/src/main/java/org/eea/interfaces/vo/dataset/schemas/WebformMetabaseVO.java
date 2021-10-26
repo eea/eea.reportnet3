@@ -25,8 +25,11 @@ public class WebformMetabaseVO implements Serializable {
   private Long id;
 
 
-  /** The name. */
-  private String name;
+  /** The label. */
+  private String label;
+
+  /** The value. */
+  private String value;
 
   /**
    * Hash code.
@@ -36,7 +39,7 @@ public class WebformMetabaseVO implements Serializable {
   @Override
   public int hashCode() {
 
-    return Objects.hash(name);
+    return Objects.hash(id, label, value);
 
   }
 
@@ -55,6 +58,6 @@ public class WebformMetabaseVO implements Serializable {
       return false;
     }
     WebformMetabaseVO other = (WebformMetabaseVO) obj;
-    return Objects.equals(name, other.name);
+    return Objects.equals(label, other.label) && Objects.equals(value, other.value);
   }
 }

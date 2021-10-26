@@ -6,7 +6,8 @@ export class Representative {
     id,
     isReceiptDownloaded,
     isReceiptOutdated,
-    leadReporters
+    leadReporters,
+    restrictFromPublic
   } = {}) {
     this.dataProviderGroupId = dataProviderGroupId;
     this.dataProviderId = dataProviderId;
@@ -15,5 +16,6 @@ export class Representative {
     this.isReceiptOutdated = isReceiptOutdated;
     this.leadReporters = leadReporters;
     this.representativeId = id;
+    this.restrictFromPublic = restrictFromPublic;
   }
 }

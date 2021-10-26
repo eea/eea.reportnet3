@@ -58,5 +58,13 @@ export const RepresentativeService = {
     await RepresentativeRepository.updateDataProviderId(representativeId, dataProviderId),
 
   updateLeadReporter: async (leadReporterAccount, leadReporterId, representativeId, dataflowId) =>
-    await RepresentativeRepository.updateLeadReporter(leadReporterAccount, leadReporterId, representativeId, dataflowId)
+    await RepresentativeRepository.updateLeadReporter(
+      leadReporterAccount,
+      leadReporterId,
+      representativeId,
+      dataflowId
+    ),
+
+  updateRestrictFromPublic: async (dataflowId, dataProviderId, restrictFromPublic) =>
+    await RepresentativeRepository.updateRestrictFromPublic(dataflowId, dataProviderId, restrictFromPublic)
 };
