@@ -502,6 +502,26 @@ const Dataflow = withRouter(({ history, match }) => {
     />
   );
 
+  const onDownloadUsersListByCountry = async () => {
+    console.log(`onDownloadUsersListByCountry`, onDownloadUsersListByCountry);
+  };
+  const renderUserListDialogFooter = () => (
+    <Fragment>
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'export'}
+        label={resourcesContext.messages['downloadUsersListButtonLabel']}
+        onClick={() => onDownloadUsersListByCountry()}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={'cancel'}
+        label={resourcesContext.messages['close']}
+        onClick={() => manageDialogs('isUserListVisible', false)}
+      />
+    </Fragment>
+  );
+
   const getCurrentDatasetId = () => {
     if (isEmpty(dataflowState.data)) return null;
 
