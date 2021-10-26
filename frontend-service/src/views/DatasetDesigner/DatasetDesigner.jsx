@@ -12,7 +12,6 @@ import { config } from 'conf';
 import { DatasetConfig } from 'repositories/config/DatasetConfig';
 import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
-import WebformsConfig from 'conf/webforms.config.json';
 
 import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';

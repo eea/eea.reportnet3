@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
-import isEmpty from 'lodash/isEmpty';
+import styles from './Webforms.module.scss';
 
 import { Article13 } from './Article13';
 import { Article15 } from './Article15';
+import { Button } from 'views/_components/Button';
 import { NationalSystems } from './NationalSystems';
 import { Spinner } from 'views/_components/Spinner';
 
 import { WebformService } from 'services/WebformService';
+
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const Webforms = ({
   dataflowId,
@@ -15,26 +18,40 @@ export const Webforms = ({
   datasetId,
   isReleasing,
   isReporting = false,
-  options,
+  options = [],
   state,
   webformType
 }) => {
+  const resourcesContext = useContext(ResourcesContext);
+
   const [selectedConfiguration, setSelectedConfiguration] = useState({ tables: {} });
+  const [loadingStatus, setLoadingStatus] = useState('idle');
 
   useEffect(() => {
     getWebformConfiguration();
   }, []);
 
   const getWebformConfiguration = async () => {
+    setLoadingStatus('pending');
     try {
       const selectedWebform = options.find(item => item.value === webformType);
       setSelectedConfiguration(await WebformService.getWebformConfig(selectedWebform.id));
+      setLoadingStatus('success');
     } catch (error) {
-      console.log('error :>> ', error);
+      setLoadingStatus('failed');
     }
   };
 
-  if (isEmpty(selectedConfiguration.tables)) return <Spinner style={{ top: 0, margin: '1rem' }} />;
+  if (loadingStatus === 'pending') return <Spinner style={{ top: 0, margin: '1rem' }} />;
+
+  if (loadingStatus === 'failed') {
+    return (
+      <div className={styles.somethingWentWrong}>
+        {resourcesContext.messages['somethingWentWrong']}
+        <Button icon="refresh" label={'Refresh'} onClick={getWebformConfiguration} />
+      </div>
+    );
+  }
 
   switch (webformType) {
     case 'MMR-ART13':

@@ -299,7 +299,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     try {
       setWebformOptions(await WebformService.listAll());
     } catch (error) {
-      console.log('error :>> ', error);
+      console.error('Dataset - getWebformList:>> ', error);
     }
   };
 
