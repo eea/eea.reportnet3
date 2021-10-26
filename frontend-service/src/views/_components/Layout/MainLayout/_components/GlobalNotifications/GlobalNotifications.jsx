@@ -20,6 +20,7 @@ const GlobalNotifications = () => {
   useEffect(() => {
     downloadAllSchemasInfoFile();
     downloadQCRulesFile();
+    downloadUsersListFile();
     downloadValidationsFile();
     downloadExportFMEFile();
     downloadExportDatasetFile();
@@ -76,6 +77,17 @@ const GlobalNotifications = () => {
     } finally {
       notificationContext.clearHiddenNotifications();
     }
+  };
+
+  const downloadUsersListFile = async () => {
+    console.log(`downloadUsersListFile`, downloadUsersListFile);
+    const notification = findHiddenNotification('EXPORT_USERS_LIST_COMPLETED_EVENT');
+
+    if (isNil(notification)) {
+      return;
+    }
+
+    try {
   };
 
   const downloadValidationsFile = async () => {
