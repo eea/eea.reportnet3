@@ -27,6 +27,17 @@ export const DataflowRepository = {
 
   downloadPublicAllSchemasInfoFile: async dataflowId =>
     await HTTPRequester.download({ url: getUrl(DataflowConfig.downloadPublicAllSchemasInfoFile, { dataflowId }) }),
+
+  downloadQCRulesFile: async (datasetId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(DataflowConfig.downloadQCRulesFile, { datasetId, fileName })
+    }),
+
+  downloadUsersListFile: async (datasetId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(DataflowConfig.downloadUsersListFile, { datasetId, fileName })
+    }),
+
   generateAllSchemasInfoFile: async dataflowId =>
     await HTTPRequester.post({ url: getUrl(DataflowConfig.generateAllSchemasInfoFile, { dataflowId }) }),
 

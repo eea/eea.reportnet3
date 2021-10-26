@@ -727,6 +727,9 @@
           "key": "DOWNLOAD_QC_RULES_FILE_ERROR"
         },
         {
+          "key": "DOWNLOAD_USERS_LIST_FILE_ERROR"
+        },
+        {
           "key": "DOWNLOAD_VALIDATIONS_FILE_ERROR"
         },
         {
@@ -1022,6 +1025,9 @@
         },
         {
           "key": "AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE"
+        },
+        {
+          "key": "AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE"
         },
         {
           "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE"

@@ -88,6 +88,21 @@ const GlobalNotifications = () => {
     }
 
     try {
+      const { data } = await DataflowService.downloadUsersListFile(
+        notification.content.datasetId,
+        notification.content.fileName
+      );
+      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE' });
+
+      if (data.size !== 0) {
+        DownloadFile(data, notification.content.fileName);
+      }
+    } catch (error) {
+      console.error('GlobalNotifications - downloadUsersListFile.', error);
+      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' });
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
   };
 
   const downloadValidationsFile = async () => {

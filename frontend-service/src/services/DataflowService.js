@@ -58,6 +58,9 @@ export const DataflowService = {
   downloadPublicAllSchemasInfoFile: async dataflowId =>
     await DataflowRepository.downloadPublicAllSchemasInfoFile(dataflowId),
 
+  downloadUsersListFile: async (datasetId, fileName) =>
+    await DataflowRepository.downloadUsersListFile(datasetId, fileName),
+
   generateAllSchemasInfoFile: async dataflowId => await DataflowRepository.generateAllSchemasInfoFile(dataflowId),
 
   generateUsersListFile: async dataflowId => await DataflowRepository.generateUsersListFile(dataflowId),
