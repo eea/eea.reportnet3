@@ -505,6 +505,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onDownloadUsersListByCountry = async () => {
     setIsDownloadingUsersList(true);
+    notificationContext.add({ type: 'DOWNLOAD_USERS_LIST_START' });
+
     try {
       console.log(`request`);
     } catch (error) {
