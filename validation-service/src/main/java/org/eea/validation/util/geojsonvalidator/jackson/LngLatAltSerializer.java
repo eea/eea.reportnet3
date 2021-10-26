@@ -6,8 +6,19 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
+/**
+ * The Class LngLatAltSerializer.
+ */
 public class LngLatAltSerializer extends JsonSerializer<LngLatAlt> {
 
+  /**
+   * Serialize.
+   *
+   * @param value the value
+   * @param jgen the jgen
+   * @param provider the provider
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   public void serialize(LngLatAlt value, JsonGenerator jgen, SerializerProvider provider)
       throws IOException {

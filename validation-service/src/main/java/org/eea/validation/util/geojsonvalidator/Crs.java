@@ -7,6 +7,9 @@ import org.eea.validation.util.geojsonvalidator.jackson.CrsType;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * The Class Crs.
+ */
 @Getter
 @Setter
 public class Crs implements Serializable {

@@ -1,5 +1,12 @@
 package org.eea.validation.util.geojsonvalidator.jackson;
 
+/**
+ * The Enum CrsType.
+ */
 public enum CrsType {
-  name, link;
+
+  /** The name. */
+  name,
+  /** The link. */
+  link;
 }

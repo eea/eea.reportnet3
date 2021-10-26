@@ -9,8 +9,19 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
+/**
+ * The Class LngLatAltDeserializer.
+ */
 public class LngLatAltDeserializer extends JsonDeserializer<LngLatAlt> {
 
+  /**
+   * Deserialize.
+   *
+   * @param jp the jp
+   * @param ctxt the ctxt
+   * @return the lng lat alt
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Override
   public LngLatAlt deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
     if (jp.isExpectedStartArrayToken()) {
@@ -19,6 +30,14 @@ public class LngLatAltDeserializer extends JsonDeserializer<LngLatAlt> {
     return null;
   }
 
+  /**
+   * Deserialize array.
+   *
+   * @param jp the jp
+   * @param ctxt the ctxt
+   * @return the lng lat alt
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   protected LngLatAlt deserializeArray(JsonParser jp, DeserializationContext ctxt)
       throws IOException {
     LngLatAlt node = new LngLatAlt();
@@ -40,6 +59,15 @@ public class LngLatAltDeserializer extends JsonDeserializer<LngLatAlt> {
     return node;
   }
 
+  /**
+   * Extract double.
+   *
+   * @param jp the jp
+   * @param ctxt the ctxt
+   * @param optional the optional
+   * @return the double
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   private double extractDouble(JsonParser jp, DeserializationContext ctxt, boolean optional)
       throws IOException {
     JsonToken token = jp.nextToken();
