@@ -270,7 +270,6 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
 
       return <div className={styles.noDataflows}>{resourcesContext.messages[emptyDataflowsMessage[visibleTab]]}</div>;
     }
-    console.log({ content });
 
     return !isEmpty(filteredData) ? (
       filteredData.map((dataflow, i) => (

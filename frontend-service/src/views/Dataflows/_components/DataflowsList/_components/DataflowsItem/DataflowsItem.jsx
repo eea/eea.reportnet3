@@ -32,6 +32,29 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
     setIsPinned(itemContent.pinned === 'pinned');
   }, [itemContent, isPinning]);
 
+  const renderShowPublicInfo = () => {
+    const id = uniqueId(itemContent.showPublicInfo ? 'showPublicInfo' : 'doNotShowPublicInfo');
+    if ((isCustodian || isAdmin) && itemContent.statusKey === config.dataflowStatus.OPEN) {
+      return (
+        <div className={`${styles.upperIcon}`}>
+          <div>
+            <span data-for={id} data-tip>
+              <FontAwesomeIcon
+                icon={AwesomeIcons(itemContent.showPublicInfo ? 'eye' : 'eyeSlash')}
+                role="presentation"
+              />
+            </span>
+            <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={id} place="top">
+              {resourcesContext.messages[itemContent.showPublicInfo ? 'public' : 'notPublic']}
+            </ReactTooltip>
+          </div>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  };
+
   const layout = children => {
     return (
       <div
@@ -63,16 +86,7 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
 
   return layout(
     <Fragment>
-      {(isCustodian || isAdmin) && itemContent.showPublicInfo ? (
-        <div className={`${styles.upperIcon}`}>
-          <span data-for="showPublicInfo" data-tip>
-            <FontAwesomeIcon icon={AwesomeIcons('eye')} role="presentation" />
-          </span>
-          <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="showPublicInfo" place="top">
-            {resourcesContext.messages['showPublicInfo']}
-          </ReactTooltip>
-        </div>
-      ) : null}
+      {renderShowPublicInfo()}
       <div className={`${styles.icon}`}>
         <FontAwesomeIcon icon={AwesomeIcons('clone')} role="presentation" />
       </div>
