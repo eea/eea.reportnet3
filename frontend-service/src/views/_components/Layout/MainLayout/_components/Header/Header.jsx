@@ -253,11 +253,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         userContext.userProps.showLogoutConfirmation ? setConfirmVisible(true) : userLogout();
       }}>
       <FontAwesomeIcon
+        alt="Logout"
         aria-hidden={false}
         aria-label="Logout"
         className={styles.logoutButton}
         icon={AwesomeIcons('logout')}
-        role="presentation"
+        role="button"
       />
     </div>
   );
