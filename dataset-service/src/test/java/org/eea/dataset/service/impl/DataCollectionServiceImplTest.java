@@ -31,6 +31,7 @@ import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -165,6 +166,9 @@ public class DataCollectionServiceImplTest {
 
   @Mock
   private TestDatasetRepository testDatasetRepository;
+
+  @Mock
+  private IntegrationControllerZuul integrationControllerZuul;
 
   /** The lead reporters VO. */
   private List<LeadReporterVO> leadReportersVO;

@@ -39,6 +39,7 @@ import org.eea.dataset.service.model.IntegrityDataCollection;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -248,6 +249,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The reference dataset repository. */
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;
+
+  /** The integration controller zuul. */
+  @Autowired
+  private IntegrationControllerZuul integrationControllerZuul;
 
   /**
    * Gets the dataflow status.
@@ -474,6 +479,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         if (isCreation) {
           datasetSchemaService.updateReferenceDataset(dataset.getId(), dataset.getDatasetSchema(),
               true);
+          LOG.info("There are reference datasets. Deleting its export eu dataset integrations");
+          integrationControllerZuul.deleteExportEuDatasetIntegration(dataset.getDatasetSchema());
         }
       }
     });
