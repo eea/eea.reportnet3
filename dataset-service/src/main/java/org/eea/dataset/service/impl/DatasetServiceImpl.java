@@ -3647,10 +3647,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws EEAException the EEA exception
    */
   private void checkRestrictFromPublic(Long dataflowId, Long dataProviderId) throws EEAException {
-    List<Long> dataProviders = new ArrayList<>();
-    dataProviders.add(dataProviderId);
-    List<RepresentativeVO> representatives = representativeControllerZuul
-        .findRepresentativesByDataFlowIdAndProviderIdList(dataflowId, dataProviders);
+    List<RepresentativeVO> representatives =
+        representativeControllerZuul.findRepresentativesByDataFlowIdAndProviderIdList(dataflowId,
+            Arrays.asList(dataProviderId));
     for (RepresentativeVO representative : representatives) {
       if (representative.isRestrictFromPublic()) {
         throw new EEAException(EEAErrorMessage.IS_RESTRICT_FROM_PUBLIC);
