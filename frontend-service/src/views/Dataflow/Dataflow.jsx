@@ -529,7 +529,7 @@ const Dataflow = withRouter(({ history, match }) => {
   }
 
   const renderUserListDialogFooter = () => (
-    <Fragment>
+    <div className={styles.buttonsRolesFooter}>
       <Button
         className="p-button-secondary p-button-animated-blink"
         disabled={dataflowState.isDownloadingUsersList}
@@ -538,12 +538,12 @@ const Dataflow = withRouter(({ history, match }) => {
         onClick={() => onDownloadUsersListByCountry()}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary p-button-animated-blink ${styles.closeButton}`}
         icon={'cancel'}
         label={resourcesContext.messages['close']}
         onClick={() => manageDialogs('isUserListVisible', false)}
       />
-    </Fragment>
+    </div>
   );
 
   const getCurrentDatasetId = () => {
