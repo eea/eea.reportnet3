@@ -4,15 +4,13 @@ import uniqueId from 'lodash/uniqueId';
 
 import styles from './NationalSystems.module.scss';
 
-import { tables } from './nationalSystems.webform.json';
-
 import { NationalSystemsTable } from './_components/NationalSystemsTable';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const NationalSystems = ({ dataProviderId, dataflowId, datasetId, state }) => {
+export const NationalSystems = ({ dataflowId, dataProviderId, datasetId, state, tables = [] }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const { areEquals } = TextUtils;

@@ -39,6 +39,8 @@ export const BigButton = ({
   onSaveName,
   onWheel,
   placeholder,
+  restrictFromPublicInfo,
+  restrictFromPublicStatus,
   setErrorDialogData,
   tooltip
 }) => {
@@ -195,6 +197,12 @@ export const BigButton = ({
               {resourcesContext.messages['new'].toUpperCase()}
             </p>
           ))}
+        {restrictFromPublicInfo && (
+          <FontAwesomeIcon
+            icon={AwesomeIcons(restrictFromPublicStatus ? 'eyeSlash' : 'eye')}
+            style={{ position: 'absolute', top: '4px', left: '2px', fontSize: '1.2rem' }}
+          />
+        )}
       </div>
       {!isUndefined(isEditEnabled) && isEditEnabled ? (
         <InputText

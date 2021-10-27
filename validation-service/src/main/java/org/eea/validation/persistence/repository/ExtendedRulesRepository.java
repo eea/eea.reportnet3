@@ -208,4 +208,12 @@ public interface ExtendedRulesRepository {
    * @return true, if successful
    */
   boolean emptyRulesOfSchemaByDatasetSchemaId(ObjectId datasetSchemaId);
+
+  /**
+   * Find rules byreference id.
+   *
+   * @param referenceId the reference id
+   * @return the rule
+   */
+  RulesSchema findRulesByreferenceId(ObjectId datasetSchemaId, ObjectId referenceId);
 }

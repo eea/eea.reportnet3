@@ -9,6 +9,7 @@ import { config } from 'conf';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
+import { Checkbox } from 'views/_components/Checkbox';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
@@ -273,6 +274,24 @@ export const WebLinks = ({
     return 'edit';
   };
 
+  const dialogFooter = (
+    <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
+      <Button
+        disabled={webLinksState.isSubmitting}
+        icon={getButtonIcon(webLinksState.isSubmitting)}
+        id="submitButton"
+        label={isNil(webLinksState.webLink.id) ? resourcesContext.messages['add'] : resourcesContext.messages['edit']}
+        onClick={() => onSaveRecord()}
+      />
+      <Button
+        className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
+        icon="cancel"
+        label={resourcesContext.messages['cancel']}
+        onClick={() => onHideAddEditDialog()}
+      />
+    </div>
+  );
+
   const webLinkEditButtons = webLink => {
     const getDeleteButtonIcon = () => {
       if (deletingId === webLink.id) {
@@ -364,6 +383,7 @@ export const WebLinks = ({
           blockScroll={false}
           className={styles.dialog}
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
+          footer={dialogFooter}
           header={
             isNil(webLinksState.webLink.id)
               ? resourcesContext.messages['createNewWebLink']
@@ -428,37 +448,20 @@ export const WebLinks = ({
 
             <fieldset>
               <div className={styles.checkboxIsPublic}>
-                <input
+                <Checkbox
+                  ariaLabelledBy="isPublic"
                   checked={webLinksState.webLink.isPublic}
                   id="isPublic"
+                  inputId="isPublic"
                   onChange={() => onIsPublicChange(!webLinksState.webLink.isPublic)}
-                  type="checkbox"
+                  role="checkbox"
                 />
-                <label htmlFor="isPublic" style={{ display: 'block' }}>
+                <label
+                  htmlFor="isPublic"
+                  onClick={() => onIsPublicChange(!webLinksState.webLink.isPublic)}
+                  style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
                   {resourcesContext.messages['checkboxIsPublic']}
                 </label>
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
-                <Button
-                  disabled={webLinksState.isSubmitting}
-                  icon={getButtonIcon(webLinksState.isSubmitting)}
-                  id="submitButton"
-                  label={
-                    isNil(webLinksState.webLink.id)
-                      ? resourcesContext.messages['add']
-                      : resourcesContext.messages['edit']
-                  }
-                  onClick={() => onSaveRecord()}
-                />
-                <Button
-                  className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
-                  icon="cancel"
-                  label={resourcesContext.messages['cancel']}
-                  onClick={() => onHideAddEditDialog()}
-                />
               </div>
             </fieldset>
           </form>

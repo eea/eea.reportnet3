@@ -253,16 +253,16 @@ public class ValidationHelper implements DisposableBean {
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
     LOG.info("Collecting Dataset Validation tasks");
-    releaseDatasetValidation(datasetId, processId);
+    releaseDatasetValidation(dataset, processId);
     LOG.info("Collecting Table Validation tasks");
-    releaseTableValidation(datasetId, processId);
+    releaseTableValidation(dataset, processId);
     LOG.info("Collecting Record Validation tasks");
     if (rules.getRules().stream().anyMatch(rule -> EntityTypeEnum.RECORD.equals(rule.getType()))) {
-      releaseRecordsValidation(datasetId, processId);
+      releaseRecordsValidation(dataset, processId);
     }
     LOG.info("Collecting Field Validation tasks");
 
-    releaseFieldsValidation(datasetId, processId, !filterEmptyFields(rules.getRules()));
+    releaseFieldsValidation(dataset, processId, !filterEmptyFields(rules.getRules()));
     startProcess(processId);
   }
 
@@ -489,14 +489,16 @@ public class ValidationHelper implements DisposableBean {
    * @param uuId the uu id
    * @param fullCountFields the full count fields
    */
-  private void releaseFieldsValidation(Long datasetId, String uuId, boolean onlyEmptyFields) {
+  private void releaseFieldsValidation(final DataSetMetabaseVO dataset, String uuId,
+      boolean onlyEmptyFields) {
     int i = 0;
     if (fieldBatchSize != 0) {
       for (Integer totalFields =
-          onlyEmptyFields ? validationService.countEmptyFieldsDataset(datasetId)
-              : validationService.countFieldsDataset(datasetId); totalFields >= 0; totalFields =
-                  totalFields - fieldBatchSize) {
-        releaseFieldValidation(datasetId, uuId, i++, onlyEmptyFields);
+          onlyEmptyFields ? validationService.countEmptyFieldsDataset(dataset.getId())
+              : validationService
+                  .countFieldsDataset(dataset.getId()); totalFields >= 0; totalFields =
+                      totalFields - fieldBatchSize) {
+        releaseFieldValidation(dataset, uuId, i++, onlyEmptyFields);
       }
     }
   }
@@ -507,13 +509,13 @@ public class ValidationHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param uuId the uu id
    */
-  private void releaseRecordsValidation(Long datasetId, String uuId) {
+  private void releaseRecordsValidation(final DataSetMetabaseVO dataset, String uuId) {
     int i = 0;
     if (recordBatchSize != 0) {
       for (Integer totalRecords =
-          validationService.countRecordsDataset(datasetId); totalRecords >= 0; totalRecords =
+          validationService.countRecordsDataset(dataset.getId()); totalRecords >= 0; totalRecords =
               totalRecords - recordBatchSize) {
-        releaseRecordValidation(datasetId, uuId, i++);
+        releaseRecordValidation(dataset, uuId, i++);
       }
     }
   }
@@ -525,14 +527,14 @@ public class ValidationHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param uuId the uu id
    */
-  private void releaseTableValidation(Long datasetId, String uuId) {
-    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
+  private void releaseTableValidation(final DataSetMetabaseVO dataset, String uuId) {
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + dataset.getId());
 
     List<TableValue> tableList = tableRepository.findAll();
     int i = 0;
     for (Integer totalTables = tableList.size(); totalTables > 0; totalTables = totalTables - 1) {
       Long idTable = tableList.get(i++).getId();
-      releaseTableValidation(datasetId, uuId, idTable);
+      releaseTableValidation(dataset, uuId, idTable);
     }
   }
 
@@ -543,9 +545,9 @@ public class ValidationHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param processId the uuid
    */
-  private void releaseDatasetValidation(final Long datasetId, final String processId) {
+  private void releaseDatasetValidation(final DataSetMetabaseVO dataset, final String processId) {
     Map<String, Object> value = new HashMap<>();
-    value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.DATASET_ID, dataset.getId());
     value.put("uuid", processId);
     value.put("user", processesMap.get(processId).getRequestingUser());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DATASET, value);
@@ -558,12 +560,15 @@ public class ValidationHelper implements DisposableBean {
    * @param processId the processId
    * @param idTable the idTable
    */
-  private void releaseTableValidation(final Long datasetId, final String processId, Long idTable) {
+  private void releaseTableValidation(final DataSetMetabaseVO dataset, final String processId,
+      Long idTable) {
     Map<String, Object> value = new HashMap<>();
-    value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.DATASET_ID, dataset.getId());
     value.put("uuid", processId);
     value.put("idTable", idTable);
     value.put("user", processesMap.get(processId).getRequestingUser());
+    value.put("dataProviderId", dataset.getDataProviderId());
+    value.put("datasetSchema", dataset.getDatasetSchema());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
   }
 
@@ -574,9 +579,10 @@ public class ValidationHelper implements DisposableBean {
    * @param processId the processId
    * @param numPag the numPag
    */
-  private void releaseRecordValidation(final Long datasetId, final String processId, int numPag) {
+  private void releaseRecordValidation(final DataSetMetabaseVO dataset, final String processId,
+      int numPag) {
     Map<String, Object> value = new HashMap<>();
-    value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.DATASET_ID, dataset.getId());
     value.put("uuid", processId);
     value.put("numPag", numPag);
     value.put("user", processesMap.get(processId).getRequestingUser());
@@ -592,14 +598,16 @@ public class ValidationHelper implements DisposableBean {
    * @param numPag the numPag
    * @param onlyEmptyFields the only empty fields
    */
-  private void releaseFieldValidation(final Long datasetId, final String processId, int numPag,
-      boolean onlyEmptyFields) {
+  private void releaseFieldValidation(final DataSetMetabaseVO dataset, final String processId,
+      int numPag, boolean onlyEmptyFields) {
     Map<String, Object> value = new HashMap<>();
-    value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.DATASET_ID, dataset.getId());
     value.put("uuid", processId);
     value.put("numPag", numPag);
     value.put("user", processesMap.get(processId).getRequestingUser());
     value.put("onlyEmptyFields", onlyEmptyFields);
+    value.put("dataProviderId", dataset.getDataProviderId());
+    value.put("datasetSchema", dataset.getDatasetSchema());
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_FIELD, value);
 
 
