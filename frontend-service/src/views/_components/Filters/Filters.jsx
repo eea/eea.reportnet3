@@ -381,7 +381,6 @@ export const Filters = ({
             onFocus={() => onAnimateLabel(property, true)}
             readOnlyInput={true}
             selectionMode="range"
-            showWeek={true}
             style={{ zoom: '0.95' }}
             value={filterState.filterBy[property]}
             yearNavigator={true}
