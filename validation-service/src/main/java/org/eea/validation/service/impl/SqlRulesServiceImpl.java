@@ -682,9 +682,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       Long dataflowId, Map<Long, Long> datasetIdOldNew) {
     List<TestDatasetVO> testDatasetVOList =
         testDatasetControllerZuul.findTestDatasetByDataflowId(dataflowId);
+    List<ReferenceDatasetVO> referenceDatasets =
+        referenceDatasetController.findReferenceDatasetByDataflowId(dataflowId);
     Map<String, Long> testDatasetSchamasMap = new HashMap<>();
     for (TestDatasetVO testDataset : testDatasetVOList) {
       testDatasetSchamasMap.put(testDataset.getDatasetSchema(), testDataset.getId());
+    }
+    for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+      testDatasetSchamasMap.put(referenceDataset.getDatasetSchema(), referenceDataset.getId());
     }
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
       String key = auxDatasetMap.getKey();
@@ -711,9 +716,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       Long dataflowId, Map<Long, Long> datasetIdOldNew) {
     List<DataCollectionVO> dataCollectionList =
         dataCollectionController.findDataCollectionIdByDataflowId(dataflowId);
+    List<ReferenceDatasetVO> referenceDatasets =
+        referenceDatasetController.findReferenceDatasetByDataflowId(dataflowId);
     Map<String, Long> dataCollectionSchamasMap = new HashMap<>();
     for (DataCollectionVO dataCollection : dataCollectionList) {
       dataCollectionSchamasMap.put(dataCollection.getDatasetSchema(), dataCollection.getId());
+    }
+    for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+      dataCollectionSchamasMap.put(referenceDataset.getDatasetSchema(), referenceDataset.getId());
     }
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
       String key = auxDatasetMap.getKey();
@@ -739,9 +749,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   private String modifyQueryForEU(String query, Map<String, Long> datasetSchemasMap,
       Long dataflowId, Map<Long, Long> datasetIdOldNew) {
     List<EUDatasetVO> euDatasetList = euDatasetController.findEUDatasetByDataflowId(dataflowId);
+    List<ReferenceDatasetVO> referenceDatasets =
+        referenceDatasetController.findReferenceDatasetByDataflowId(dataflowId);
     Map<String, Long> euDatasetSchamasMap = new HashMap<>();
     for (EUDatasetVO euDataset : euDatasetList) {
       euDatasetSchamasMap.put(euDataset.getDatasetSchema(), euDataset.getId());
+    }
+    for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+      euDatasetSchamasMap.put(referenceDataset.getDatasetSchema(), referenceDataset.getId());
     }
 
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
@@ -771,6 +786,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       Map<String, Long> datasetSchemasMap, Long dataflowId, Map<Long, Long> datasetIdOldNew) {
     List<ReportingDatasetVO> reportingDatasetList =
         datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
+    List<ReferenceDatasetVO> referenceDatasets =
+        referenceDatasetController.findReferenceDatasetByDataflowId(dataflowId);
     List<RepresentativeVO> dataprovidersVOList =
         representativeController.findRepresentativesByIdDataFlow(dataflowId);
     List<Long> dataprovidersIdList = new ArrayList<>();
@@ -783,12 +800,19 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     for (ReportingDatasetVO dataset : reportingDatasetList) {
       datasetIdList.add(dataset.getDatasetSchema());
     }
+
+    for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+      datasetIdList.add(referenceDataset.getDatasetSchema());
+    }
     Map<String, Long> reportingDatasetSchemasMap = new HashMap<>();
     for (ReportingDatasetVO reportingDataset : reportingDatasetList) {
       if (dataprovidersIdList.contains(reportingDataset.getDataProviderId())) {
         reportingDatasetSchemasMap.put(reportingDataset.getDatasetSchema(),
             reportingDataset.getId());
       }
+    }
+    for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+      reportingDatasetSchemasMap.put(referenceDataset.getDatasetSchema(), referenceDataset.getId());
     }
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
       if (datasetIdList.contains(auxDatasetMap.getKey())) {
