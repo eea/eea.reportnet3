@@ -215,5 +215,14 @@ public interface ExtendedRulesRepository {
    * @param referenceId the reference id
    * @return the rule
    */
-  RulesSchema findRulesByreferenceId(ObjectId datasetSchemaId, ObjectId referenceId);
+  RulesSchema findGeometryRulesByreferenceId(ObjectId datasetSchemaId, ObjectId referenceId);
+
+  /**
+   * Find geometry SQL rules byreference id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the rules schema
+   */
+  Rule findGeometrySQLRulesByreferenceId(ObjectId datasetSchemaId, ObjectId referenceId);
 }

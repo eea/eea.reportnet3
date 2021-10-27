@@ -241,15 +241,16 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
   }
 
   /**
-   * Find rule.
+   * Find geometry rules by reference id.
    *
    * @param datasetSchemaId the dataset schema id
-   * @param ruleId the rule id
-   * @return the rule
+   * @param referenceId the reference id
+   * @return the rules schema
    */
   @Override
   @CheckForNull
-  public RulesSchema findRulesByreferenceId(ObjectId datasetSchemaId, ObjectId referenceId) {
+  public RulesSchema findGeometryRulesByreferenceId(ObjectId datasetSchemaId,
+      ObjectId referenceId) {
     List<RulesSchema> result;
     Document filterExpression = new Document();
     filterExpression.append(INPUT, RULES);
@@ -267,6 +268,39 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
         RulesSchema.class, RulesSchema.class).getMappedResults();
 
     return result.isEmpty() ? null : result.get(0);
+  }
+
+
+  /**
+   * Find geometry rules by reference id.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param referenceId the reference id
+   * @return the rules schema
+   */
+  @Override
+  @CheckForNull
+  public Rule findGeometrySQLRulesByreferenceId(ObjectId datasetSchemaId, ObjectId referenceId) {
+    Document filterExpression = new Document();
+    filterExpression.append(INPUT, RULES);
+    filterExpression.append("as", "rule");
+    filterExpression.append("cond",
+        new Document("$eq", Arrays.asList("$$rule.referenceId", referenceId)));
+    filterExpression.append("cond",
+        new Document("$eq", Arrays.asList("$$rule.whenCondition", "checkGeometriesSQL(this)")));
+    Document filter = new Document(FILTER, filterExpression);
+    RulesSchema rulesSchema = mongoTemplate.aggregate(Aggregation.newAggregation(
+        Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
+        Aggregation.project().and(aggregationOperationContext -> filter)
+            .as(LiteralConstants.RULES)),
+        RulesSchema.class, RulesSchema.class).getUniqueMappedResult();
+    if (rulesSchema != null) {
+      List<Rule> rules = rulesSchema.getRules();
+      if (rules != null && !rules.isEmpty()) {
+        return rules.get(0);
+      }
+    }
+    return null;
   }
 
 

@@ -76,15 +76,17 @@ public class GeometryValidationUtils {
       String datasetSchemaId =
           fieldValue.getRecord().getTableValue().getDatasetId().getIdDatasetSchema();
       Rule rule = retriveRules(datasetSchemaId, fieldValue);
-      Document fieldSchemaDoc =
-          schemasRepository.findFieldSchema(datasetSchemaId, fieldValue.getIdFieldSchema());
-      Document tableSchemaDoc = schemasRepository.findTableSchema(datasetSchemaId,
-          fieldValue.getRecord().getTableValue().getIdTableSchema());
-      String fieldName = fieldSchemaDoc.get("headerName").toString();
-      String tableName = tableSchemaDoc.get("nameTableSchema").toString();
-      Validation validation = createValidation(rule, tableName, fieldName, errorMsg);
-      createFieldValueValidations(fieldValue, validation);
-      saveFieldValidations(fieldValue);
+      if (null != rule) {
+        Document fieldSchemaDoc =
+            schemasRepository.findFieldSchema(datasetSchemaId, fieldValue.getIdFieldSchema());
+        Document tableSchemaDoc = schemasRepository.findTableSchema(datasetSchemaId,
+            fieldValue.getRecord().getTableValue().getIdTableSchema());
+        String fieldName = fieldSchemaDoc.get("headerName").toString();
+        String tableName = tableSchemaDoc.get("nameTableSchema").toString();
+        Validation validation = createValidation(rule, tableName, fieldName, errorMsg);
+        createFieldValueValidations(fieldValue, validation);
+        saveFieldValidations(fieldValue);
+      }
     }
     return true;
   }
@@ -97,7 +99,7 @@ public class GeometryValidationUtils {
    */
   private static Rule retriveRules(String datasetSchemaId, FieldValue fieldValue) {
 
-    RulesSchema retrivedRules = rulesRepository.findRulesByreferenceId(
+    RulesSchema retrivedRules = rulesRepository.findGeometryRulesByreferenceId(
         new ObjectId(datasetSchemaId), new ObjectId(fieldValue.getIdFieldSchema()));
     Rule rule = null;
     for (Rule auxRule : retrivedRules.getRules()) {
