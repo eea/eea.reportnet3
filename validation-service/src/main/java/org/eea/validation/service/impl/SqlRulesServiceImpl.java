@@ -644,21 +644,25 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       Map<String, Long> datasetSchemasMap = getMapOfDatasetsOnQuery(query);
       DatasetTypeEnum datasetType = dataSetMetabaseVO.getDatasetTypeEnum();
       Long dataflowId = dataSetMetabaseVO.getDataflowId();
-
+      List<ReferenceDatasetVO> referenceDatasets =
+          referenceDatasetController.findReferenceDatasetByDataflowId(dataflowId);
       Map<Long, Long> datasetIdOldNew = new HashMap<>();
       switch (datasetType) {
         case COLLECTION:
-          query = modifyQueryForCollection(query, datasetSchemasMap, dataflowId, datasetIdOldNew);
+          query = modifyQueryForCollection(query, datasetSchemasMap, dataflowId, datasetIdOldNew,
+              referenceDatasets);
           break;
         case EUDATASET:
-          query = modifyQueryForEU(query, datasetSchemasMap, dataflowId, datasetIdOldNew);
+          query = modifyQueryForEU(query, datasetSchemasMap, dataflowId, datasetIdOldNew,
+              referenceDatasets);
           break;
         case REPORTING:
           query = modifyQueryForReportingDataset(dataSetMetabaseVO.getDataProviderId(), query,
-              datasetSchemasMap, dataflowId, datasetIdOldNew);
+              datasetSchemasMap, dataflowId, datasetIdOldNew, referenceDatasets);
           break;
         case TEST:
-          query = modifyQueryForTestDataset(query, datasetSchemasMap, dataflowId, datasetIdOldNew);
+          query = modifyQueryForTestDataset(query, datasetSchemasMap, dataflowId, datasetIdOldNew,
+              referenceDatasets);
           break;
         case DESIGN:
         default:
@@ -669,6 +673,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     return query;
   }
 
+
   /**
    * Modify query for test dataset.
    *
@@ -676,14 +681,15 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param datasetSchemasMap the dataset schemas map
    * @param dataflowId the dataflow id
    * @param datasetIdOldNew the dataset id old new
+   * @param referenceDatasets the reference datasets
    * @return the string
    */
   private String modifyQueryForTestDataset(String query, Map<String, Long> datasetSchemasMap,
-      Long dataflowId, Map<Long, Long> datasetIdOldNew) {
+      Long dataflowId, Map<Long, Long> datasetIdOldNew,
+      List<ReferenceDatasetVO> referenceDatasets) {
     List<TestDatasetVO> testDatasetVOList =
         testDatasetControllerZuul.findTestDatasetByDataflowId(dataflowId);
-    List<ReferenceDatasetVO> referenceDatasets =
-        referenceDatasetController.findReferenceDatasetByDataflowId(dataflowId);
+
     Map<String, Long> testDatasetSchamasMap = new HashMap<>();
     for (TestDatasetVO testDataset : testDatasetVOList) {
       testDatasetSchamasMap.put(testDataset.getDatasetSchema(), testDataset.getId());
@@ -710,14 +716,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param datasetSchemasMap the dataset schemas map
    * @param dataflowId the dataflow id
    * @param datasetIdOldNew the dataset id old new
+   * @param referenceDatasets the reference datasets
    * @return the string
    */
   private String modifyQueryForCollection(String query, Map<String, Long> datasetSchemasMap,
-      Long dataflowId, Map<Long, Long> datasetIdOldNew) {
+      Long dataflowId, Map<Long, Long> datasetIdOldNew,
+      List<ReferenceDatasetVO> referenceDatasets) {
     List<DataCollectionVO> dataCollectionList =
         dataCollectionController.findDataCollectionIdByDataflowId(dataflowId);
-    List<ReferenceDatasetVO> referenceDatasets =
-        referenceDatasetController.findReferenceDatasetByDataflowId(dataflowId);
     Map<String, Long> dataCollectionSchamasMap = new HashMap<>();
     for (DataCollectionVO dataCollection : dataCollectionList) {
       dataCollectionSchamasMap.put(dataCollection.getDatasetSchema(), dataCollection.getId());
@@ -744,13 +750,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param datasetSchemasMap the dataset schemas map
    * @param dataflowId the dataflow id
    * @param datasetIdOldNew the dataset id old new
+   * @param referenceDatasets the reference datasets
    * @return the string
    */
   private String modifyQueryForEU(String query, Map<String, Long> datasetSchemasMap,
-      Long dataflowId, Map<Long, Long> datasetIdOldNew) {
+      Long dataflowId, Map<Long, Long> datasetIdOldNew,
+      List<ReferenceDatasetVO> referenceDatasets) {
     List<EUDatasetVO> euDatasetList = euDatasetController.findEUDatasetByDataflowId(dataflowId);
-    List<ReferenceDatasetVO> referenceDatasets =
-        referenceDatasetController.findReferenceDatasetByDataflowId(dataflowId);
     Map<String, Long> euDatasetSchamasMap = new HashMap<>();
     for (EUDatasetVO euDataset : euDatasetList) {
       euDatasetSchamasMap.put(euDataset.getDatasetSchema(), euDataset.getId());
@@ -775,19 +781,19 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /**
    * Modify query for reporting dataset.
    *
-   * @param datasetId the dataset id
+   * @param dataProviderId the data provider id
    * @param query the query
    * @param datasetSchemasMap the dataset schemas map
    * @param dataflowId the dataflow id
    * @param datasetIdOldNew the dataset id old new
+   * @param referenceDatasets the reference datasets
    * @return the string
    */
   private String modifyQueryForReportingDataset(Long dataProviderId, String query,
-      Map<String, Long> datasetSchemasMap, Long dataflowId, Map<Long, Long> datasetIdOldNew) {
+      Map<String, Long> datasetSchemasMap, Long dataflowId, Map<Long, Long> datasetIdOldNew,
+      List<ReferenceDatasetVO> referenceDatasets) {
     List<ReportingDatasetVO> reportingDatasetList =
         datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
-    List<ReferenceDatasetVO> referenceDatasets =
-        referenceDatasetController.findReferenceDatasetByDataflowId(dataflowId);
     List<RepresentativeVO> dataprovidersVOList =
         representativeController.findRepresentativesByIdDataFlow(dataflowId);
     List<Long> dataprovidersIdList = new ArrayList<>();
