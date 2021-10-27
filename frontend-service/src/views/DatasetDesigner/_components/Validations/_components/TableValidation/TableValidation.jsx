@@ -569,43 +569,57 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
       checkComparisonRelation(creationFormState.candidateRule.relations.links)
     );
   };
-  const renderRowQCsFooter = (
+
+  const renderSubmitButton = () => {
+    if (validationContext.ruleEdit && !isNil(creationFormState.candidateRule?.id)) {
+      return (
+        <span data-for="createTooltip" data-tip>
+          <Button
+            className="p-button-primary p-button-text-icon-left"
+            disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
+            icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
+            id={`${componentName}__update`}
+            label={resourcesContext.messages['update']}
+            onClick={() => onUpdateValidationRule()}
+            type="button"
+          />
+        </span>
+      );
+    } else {
+      return (
+        <span data-for="createTooltip" data-tip>
+          <Button
+            className={`p-button-primary p-button-text-icon-left ${
+              !creationFormState.isValidationCreationDisabled && !isSubmitDisabled ? 'p-button-animated-blink' : ''
+            }`}
+            disabled={getIsCreationDisabled()}
+            icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
+            id={`${componentName}__create`}
+            label={resourcesContext.messages['create']}
+            onClick={() => onCreateValidationRule()}
+            type="button"
+          />
+        </span>
+      );
+    }
+  };
+
+  const renderTooltip = () => {
+    if (creationFormState.isValidationCreationDisabled || isSubmitDisabled) {
+      return (
+        <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+          <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
+        </ReactTooltip>
+      );
+    }
+  };
+
+  const renderDialogFooter = (
     <div className={styles.footer}>
       <div className={`${styles.section} ${styles.footerToolBar}`}>
         <div className={styles.subsection}>
-          {validationContext.ruleEdit && !isNil(creationFormState.candidateRule?.id) ? (
-            <span data-for="createTooltip" data-tip>
-              <Button
-                className="p-button-primary p-button-text-icon-left"
-                disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
-                icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                id={`${componentName}__update`}
-                label={resourcesContext.messages['update']}
-                onClick={() => onUpdateValidationRule()}
-                type="button"
-              />
-            </span>
-          ) : (
-            <span data-for="createTooltip" data-tip>
-              <Button
-                className={`p-button-primary p-button-text-icon-left ${
-                  !creationFormState.isValidationCreationDisabled && !isSubmitDisabled ? 'p-button-animated-blink' : ''
-                }`}
-                disabled={getIsCreationDisabled()}
-                icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
-                id={`${componentName}__create`}
-                label={resourcesContext.messages['create']}
-                onClick={() => onCreateValidationRule()}
-                type="button"
-              />
-            </span>
-          )}
-          {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
-            <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
-              <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
-            </ReactTooltip>
-          )}
-
+          {renderSubmitButton()}
+          {renderTooltip()}
           <Button
             className="p-button-secondary p-button-text-icon-left p-button-animated-blink button-right-aligned"
             icon="cancel"
@@ -623,7 +637,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
     validationContext.isVisible && (
       <Dialog
         className={styles.dialog}
-        footer={renderRowQCsFooter}
+        footer={renderDialogFooter}
         header={
           validationContext.ruleEdit
             ? resourcesContext.messages.editTableConstraint
