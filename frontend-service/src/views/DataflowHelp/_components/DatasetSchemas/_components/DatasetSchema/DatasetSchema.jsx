@@ -542,7 +542,7 @@ const DatasetSchema = ({
 
         {renderProperties()}
       </div>
-      <TabView activeIndex={0} hasQueryString={false} name="DatasetSchemas">
+      <TabView activeIndex={0} className="sameColor" hasQueryString={false} name="DatasetSchemas">
         {renderTables()}
         {renderQCs()}
         {renderUniques()}
