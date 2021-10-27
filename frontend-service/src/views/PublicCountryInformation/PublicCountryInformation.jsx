@@ -362,7 +362,13 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     <span>
       {text}{' '}
       <a href={url} rel="noreferrer" target="_blank" title={text}>
-        <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalUrl')} />
+        <FontAwesomeIcon
+          aria-hidden={false}
+          ariaLabel={text}
+          className="p-breadcrumb-home"
+          icon={AwesomeIcons('externalUrl')}
+          role="button"
+        />
       </a>
     </span>
   );
@@ -403,6 +409,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
               sortField={sortField}
               sortOrder={sortOrder}
               sortable={true}
+              summary="country dataflows"
               totalRecords={totalRecords}
               value={dataflows}>
               {renderColumns(dataflows)}
