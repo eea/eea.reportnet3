@@ -329,7 +329,7 @@
     "footer-content-bg": "var(--bg)",
     "help-modal-bg": "var(--bg)",
     "eu-header-shadow": "0 4px 5px 0 var(--shadow-color-rgba)",
-    "eu-header-bg": "var(--gray-10)",
+    "eu-header-bg": "var(var(--gray-110)",
     "error-boundary-bg": "var(--bg)",
     "automatic-message-sender-bg": "var(--gray-25)",
     "automatic-message-receiver-bg": "var(--gray-15)",
