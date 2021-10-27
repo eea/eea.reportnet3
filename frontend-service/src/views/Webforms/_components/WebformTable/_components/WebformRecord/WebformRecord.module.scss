@@ -4,6 +4,7 @@
   padding: 2rem 2rem 2rem 2rem;
   position: relative;
   color: var(--general-text-color);
+  border-radius: 3px;
 
   .actionButtons {
     padding: 1rem;
@@ -173,7 +174,7 @@
       .infoButton {
         background-color: var(--white) !important;
         border-radius: 50% !important;
-        color: red !important;
+        color: var(--errors) !important;
         font-size: 12pt !important;
         height: 0.7em !important;
         margin-left: 0.4rem !important;
@@ -255,8 +256,8 @@
     border: 1px solid var(--gray-25);
   }
   .title {
-    border-radius: 10px;
-    border: 0.1rem solid var(--gray-25);
+    border-radius: 3px;
+    border: var(--general-border-style);
     padding: 0 1rem;
     margin: 0.5rem 0;
   }
@@ -278,10 +279,10 @@
 
 .subTable,
 .showInsideParentTable {
-  border-radius: 10px;
+  border-radius: 3px;
   height: 100%;
   width: 100%;
-
+  border-color: var(--general-border-color);
   .title {
     display: flex;
     align-items: center;

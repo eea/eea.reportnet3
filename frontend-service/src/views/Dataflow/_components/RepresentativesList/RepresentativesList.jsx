@@ -502,7 +502,7 @@ const RepresentativesList = ({
           onConfirm={() => onDeleteConfirm()}
           onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
           visible={formState.isVisibleConfirmDeleteDialog}>
-          {resourcesContext.messages['manageRolesDialogConfirmDeleteProviderQuestion']}
+          <p>{resourcesContext.messages['manageRolesDialogConfirmDeleteProviderQuestion']}</p>
         </ConfirmDialog>
       )}
 
@@ -520,7 +520,7 @@ const RepresentativesList = ({
             formDispatcher({ type: 'LEAD_REPORTER_DELETE_ID', payload: { id: null } });
           }}
           visible={isVisibleDialog.deleteLeadReporter}>
-          {resourcesContext.messages['manageRolesDialogConfirmDeleteQuestion']}
+          <p>{resourcesContext.messages['manageRolesDialogConfirmDeleteQuestion']}</p>
         </ConfirmDialog>
       )}
     </div>
