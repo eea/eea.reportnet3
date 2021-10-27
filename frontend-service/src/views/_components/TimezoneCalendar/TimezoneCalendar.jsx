@@ -8,7 +8,7 @@ import utc from 'dayjs/plugin/utc';
 import styles from './TimezoneCalendar.module.scss';
 
 import { Button } from 'views/_components/Button';
-import { Calendar } from 'primereact/calendar';
+import { Calendar } from 'views/_components/Calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputMask } from 'views/_components/InputMask';
 import { Portal } from 'views/_components/Portal';

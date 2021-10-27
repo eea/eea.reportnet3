@@ -24,13 +24,13 @@
     background: var(--c-corporate-blue);
     align-self: flex-end;
     &.automatic {
-      background-color: var(--gray-25) !important;
+      background-color: var(--automatic-message-sender-bg) !important;
       .messageTextWrapper {
         .messageText {
-          color: var(--gray-110);
+          color: var(--automatic-message-text);
         }
         .datetime {
-          color: var(--gray-110);
+          color: var(--automatic-message-text);
         }
       }
     }
@@ -104,13 +104,13 @@
     color: var(--white);
     background: var(--c-lilac-300);
     &.automatic {
-      background-color: var(--gray-15) !important;
+      background-color: var(--automatic-message-receiver-bg) !important;
       .messageTextWrapper {
         .messageText {
-          color: var(--gray-110);
+          color: var(--automatic-message-text);
         }
         .datetime {
-          color: var(--gray-110);
+          color: var(--automatic-message-text);
         }
       }
     }

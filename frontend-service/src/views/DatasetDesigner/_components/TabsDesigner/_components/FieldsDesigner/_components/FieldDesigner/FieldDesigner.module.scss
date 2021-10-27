@@ -79,10 +79,13 @@
 
 .codelistButton {
   margin-left: 0.4rem !important;
-  border: 1px solid var(--gray-25) !important;
+  border: 1px solid var(--general-border-color) !important;
   width: 8%;
   height: 1.95rem;
   width: 4rem;
+  &:hover {
+    border-color: var(--button-secondary-border-color-hover) !important;
+  }
 }
 
 .codelistButton span {
@@ -99,11 +102,12 @@
   margin-left: 0.4rem;
   border-radius: 3px;
   height: 1.95rem;
-  border: 1px solid var(--c-custom-gray);
+  border: 1px solid var(--general-border-color);
   color: var(--main-font-color);
   &:hover {
-    background-color: var(--c-custom-gray);
+    background-color: var(--button-secondary-transparent-bg-hover);
     color: var(--main-font-color);
+    border-color: var(--button-secondary-border-color-hover);
   }
 }
 
@@ -112,6 +116,7 @@
   cursor: pointer;
   &:hover {
     color: var(--errors);
+    border-color: var(--button-secondary-border-color-hover);
   }
 }
 
@@ -128,7 +133,8 @@
 .duplicateButton {
   cursor: pointer;
   &:hover {
-    background-color: var(--c-custom-gray);
+    background-color: var(--button-secondary-transparent-bg-hover);
+    border-color: var(--button-secondary-border-color-hover);
   }
 }
 
@@ -170,8 +176,11 @@
 }
 
 .qcButton {
-  border: 1px solid var(--c-custom-gray) !important;
+  border: 1px solid var(--general-border-color) !important;
   align-self: center;
+  &:hover {
+    border-color: var(--button-secondary-border-color-hover) !important;
+  }
 }
 
 .linkDisabled {
