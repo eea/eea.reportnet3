@@ -341,7 +341,8 @@
     "accent-color": "var(--informative-color)",
     "main-font-color-reverse": "var(--white)",
     "errors": "var(--errors-light-mode)",
-    "big-button-menu-color": "var(--white)"
+    "big-button-menu-color": "var(--white)",
+    "app-title-color": "var(--accent-color)"
   },
   "dark": {
     "bg": "var(--bg-dark-00dp)",
@@ -686,7 +687,8 @@
     "accent-color": "var(--accent-color-dark-mode)",
     "main-font-color-reverse": "var(--gray-110)",
     "errors": "var(--errors-dark-mode)",
-    "big-button-menu-color": "var(--white-font)"
+    "big-button-menu-color": "var(--white-font)",
+    "app-title-color": "var(--white-font)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,

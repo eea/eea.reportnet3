@@ -6,7 +6,8 @@ import styles from './Footer.module.scss';
 import { routes } from 'conf/routes';
 
 import eeaLogo from 'views/_assets/images/logos/reportnet-3.0-logo.png';
-import eeaLogoDark from 'views/_assets/images/logos/reportnet-3.0-logo-white.png';
+import logoDarkMode from 'views/_assets/images/logos/logo-dark-mode.png';
+import eeaLogoDark from 'views/_assets/images/logos/reportnet-3.0-logo-dark-mode.png';
 import logo from 'views/_assets/images/logos/logo.png';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -40,7 +41,12 @@ export const Footer = withRouter(({ history }) => {
               history.push(getUrl(routes.ACCESS_POINT));
             }}
             title={resourcesContext.messages['titleHeader']}>
-            <img alt="Reportnet app logo" className={styles.appLogo} height="50px" src={logo} />
+            <img
+              alt="Reportnet app logo"
+              className={styles.appLogo}
+              height="50px"
+              src={themeContext.currentTheme !== 'dark' ? logo : logoDarkMode}
+            />
             <h1 className={styles.appTitle}>{resourcesContext.messages['titleHeader']}</h1>
           </a>
         </div>
