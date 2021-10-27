@@ -36,7 +36,7 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
               />
             ) : (
               <FontAwesomeIcon
-                aria-label={resourcesContext.messages['howDoYouKnow']}
+                ariaLabel={resourcesContext.messages['howDoYouKnow']}
                 className="p-breadcrumb-home"
                 icon={AwesomeIcons('angleDown')}
                 role="button"

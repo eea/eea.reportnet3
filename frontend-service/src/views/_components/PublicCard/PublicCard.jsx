@@ -42,7 +42,13 @@ export const PublicCard = ({
     <span>
       {text}{' '}
       <span className={styles.link} onMouseDown={e => onOpenTab(e, url)} title={text}>
-        <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalUrl')} />
+        <FontAwesomeIcon
+          aria-hidden={false}
+          aria-label={url}
+          className="p-breadcrumb-home"
+          icon={AwesomeIcons('externalUrl')}
+          role="button"
+        />
       </span>
     </span>
   );
