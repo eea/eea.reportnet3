@@ -6,9 +6,9 @@ import styles from './Footer.module.scss';
 import { routes } from 'conf/routes';
 
 import eeaLogo from 'views/_assets/images/logos/reportnet-3.0-logo.png';
-import logoDarkMode from 'views/_assets/images/logos/logo-dark-mode.png';
 import eeaLogoDark from 'views/_assets/images/logos/reportnet-3.0-logo-dark-mode.png';
 import logo from 'views/_assets/images/logos/logo.png';
+import logoDarkMode from 'views/_assets/images/logos/logo-dark-mode.png';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
