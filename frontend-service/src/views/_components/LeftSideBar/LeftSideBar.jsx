@@ -165,8 +165,17 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
         steps={leftSideBarContext.steps}
         styles={{
           options: {
-            primaryColor: 'var(--c-corporate-blue)',
+            arrowColor: 'var(--help-modal-bg)',
+            backgroundColor: 'var(--help-modal-bg)',
+            primaryColor: 'var(--button-primary-bg)',
+            textColor: 'var(--main-font-color)',
             zIndex: 10000
+          },
+          buttonNext: {
+            color: 'var(--button-primary-color)'
+          },
+          buttonBack: {
+            color: 'var(--main-font-color)'
           }
         }}
       />
