@@ -115,6 +115,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
       setTabContents([
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}
+          headerClassName={showErrorOnInfoTab ? styles.error : ''}
           key="datasetValidationInfo"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
