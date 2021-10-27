@@ -76,7 +76,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * The Constant SORT_DATE_QUERY.
    */
   private static final String SORT_DATE_QUERY =
-      ", CASE WHEN is_date(fv.value)= true THEN CAST(fv.value as date) END as orden ";
+      ", CASE WHEN is_date(fv.value)= true THEN CAST(fv.value as timestamp) END as orden ";
 
   /**
    * The Constant SORT_STRING_QUERY.
@@ -154,7 +154,8 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
         || DataType.NUMBER_INTEGER.equals(dataTypePk))) {
       queryBuilder.append(SORT_NUMBER_QUERY);
       sortQueryType = SortQueryType.NUMBER;
-    } else if (dataTypePk != null && DataType.DATE.equals(dataTypePk)) {
+    } else if (dataTypePk != null
+        && (DataType.DATE.equals(dataTypePk) || DataType.DATETIME.equals(dataTypePk))) {
       queryBuilder.append(SORT_DATE_QUERY);
       sortQueryType = SortQueryType.DATE;
     } else {
