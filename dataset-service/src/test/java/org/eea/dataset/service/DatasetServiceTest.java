@@ -3673,6 +3673,25 @@ public class DatasetServiceTest {
     Mockito.verify(recordRepository, times(0)).deleteRecordWithId(Mockito.any());
   }
 
+  @Test(expected = EEAException.class)
+  public void exportPublicFileExceptionTest() throws IOException, EEAException {
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setDataProviderId(1L);
+    representativeVO.setRestrictFromPublic(true);
+    List<RepresentativeVO> representatives = new ArrayList<>();
+    representatives.add(representativeVO);
+    Mockito
+        .when(representativeControllerZuul
+            .findRepresentativesByDataFlowIdAndProviderIdList(Mockito.any(), Mockito.any()))
+        .thenReturn(representatives);
+    try {
+      datasetService.exportPublicFile(1L, 1L, "test");
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.IS_RESTRICT_FROM_PUBLIC, e.getMessage());
+      throw e;
+    }
+  }
+
   /**
    * After tests we remove the files.
    */
