@@ -3653,7 +3653,7 @@ public class DatasetServiceImpl implements DatasetService {
         .findRepresentativesByDataFlowIdAndProviderIdList(dataflowId, dataProviders);
     for (RepresentativeVO representative : representatives) {
       if (representative.isRestrictFromPublic()) {
-        throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_PUBLIC);
+        throw new EEAException(EEAErrorMessage.IS_RESTRICT_FROM_PUBLIC);
       }
     }
   }
