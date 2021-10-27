@@ -963,6 +963,15 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     <Fragment>
       <Button
         className="p-button-secondary p-button-animated-blink"
+        disabled={designerState.isDownloadingQCRules}
+        icon={designerState.isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
+        label={resourcesContext.messages['downloadQCsButtonLabel']}
+        onClick={() => onDownloadQCRules()}
+        style={{ float: 'left' }}
+      />
+
+      <Button
+        className="p-button-secondary p-button-animated-blink"
         icon={'plus'}
         label={resourcesContext.messages['createFieldValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('field', 'validationsListDialog')}
@@ -990,13 +999,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         onClick={() => validateQcRules()}
         tooltip={resourcesContext.messages['validateRulesBtnTootip']}
         tooltipOptions={{ position: 'top' }}
-      />
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        disabled={designerState.isDownloadingQCRules}
-        icon={designerState.isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
-        label={resourcesContext.messages['downloadQCsButtonLabel']}
-        onClick={() => onDownloadQCRules()}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
