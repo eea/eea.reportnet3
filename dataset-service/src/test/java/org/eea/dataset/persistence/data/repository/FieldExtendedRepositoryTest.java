@@ -7,6 +7,7 @@ import javax.persistence.Query;
 import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +49,9 @@ public class FieldExtendedRepositoryTest {
   @Mock
   private Query query;
 
+  @Mock
+  private Session session;
+
 
   /**
    * Inits the mocks.
@@ -61,10 +65,8 @@ public class FieldExtendedRepositoryTest {
   public void findByIdFieldSchemaWithTagOrderedTest() throws PSQLException {
 
     List<FieldVO> fieldsVO = new ArrayList<>();
-    Mockito.when(entityManager.createQuery(Mockito.anyString())).thenReturn(query);
-    fieldExtendedRepository.findByIdFieldSchemaWithTagOrdered("5d4abe555b1c1e0001477410",
-        "5d4abe555b1c1e0001477410", "8", "5d4abe555b1c1e0001477410", "8", DataType.NUMBER_INTEGER,
-        15);
+    Mockito.when(entityManager.getDelegate()).thenReturn(session);
+    Mockito.when(session.doReturningWork(Mockito.any())).thenReturn(new ArrayList<FieldVO>());
     Assert.assertEquals(fieldsVO,
         fieldExtendedRepository.findByIdFieldSchemaWithTagOrdered("5d4abe555b1c1e0001477410",
             "5d4abe555b1c1e0001477410", "8", "5d4abe555b1c1e0001477410", "8",
