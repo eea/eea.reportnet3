@@ -10,6 +10,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import defaultAvatar from 'views/_assets/images/avatars/defaultAvatar.png';
 import logo from 'views/_assets/images/logos/logo.png';
+import logoDarkMode from 'views/_assets/images/logos/logo-dark-mode.png';
 import styles from './Header.module.scss';
 import ReportnetPublicLogo from 'views/_assets/images/logos/reportnet_public_logo.svg';
 
@@ -141,7 +142,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       {isPublic ? (
         <img alt="Reportnet 3" className={styles.appLogo} height="50px" src={ReportnetPublicLogo} />
       ) : (
-        <img alt="Reportnet 3" className={styles.appLogo} height="50px" src={logo} />
+        <img
+          alt="Reportnet 3"
+          className={styles.appLogo}
+          height="50px"
+          src={themeContext.currentTheme !== 'dark' ? logo : logoDarkMode}
+        />
       )}
     </a>
   );

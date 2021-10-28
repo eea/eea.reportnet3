@@ -116,6 +116,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
       setTabContents([
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}
+          headerClassName={showErrorOnInfoTab ? styles.error : ''}
           key="fieldInfoTab"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
