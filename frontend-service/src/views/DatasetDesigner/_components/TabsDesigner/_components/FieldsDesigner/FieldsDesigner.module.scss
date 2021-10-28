@@ -28,7 +28,7 @@
 .fieldsHeader {
   display: flex;
   flex-direction: row;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
   color: var(--main-font-color);
   font-weight: bold;
   span {
@@ -73,6 +73,9 @@
     &:nth-child(9) {
       width: 2rem;
       margin-right: 0.7rem;
+      span {
+        margin-left: 0.5rem;
+      }
     }
     &:nth-child(10) {
       width: 2rem;

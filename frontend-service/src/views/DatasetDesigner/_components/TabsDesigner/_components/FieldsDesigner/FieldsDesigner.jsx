@@ -26,6 +26,7 @@ import { InputTextarea } from 'views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
 import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
+// import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -85,6 +86,7 @@ export const FieldsDesigner = ({
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
   const [markedForDeletion, setMarkedForDeletion] = useState([]);
   const [notEmpty, setNotEmpty] = useState(true);
+  const [refElement, setRefElement] = useState();
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
   const [toPrefill, setToPrefill] = useState(false);
 
@@ -102,6 +104,12 @@ export const FieldsDesigner = ({
       setFixedNumber(table.fixedNumber || false);
     }
   }, [table]);
+
+  useEffect(() => {
+    if (!isLoading && !isNil(refElement)) {
+      refElement.focus();
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     if (!isUndefined(fields)) {
@@ -605,7 +613,10 @@ export const FieldsDesigner = ({
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
           recordSchemaId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
-          setIsLoading={loading => setIsLoading(loading)}
+          setIsLoading={(loading, ref) => {
+            setRefElement(ref.element);
+            setIsLoading(loading);
+          }}
           tableSchemaId={table.tableSchemaId}
           totalFields={!isNil(fields) ? fields.length : undefined}
         />
@@ -672,7 +683,6 @@ export const FieldsDesigner = ({
                 onNewFieldAdd={onFieldAdd}
                 onShowDialogError={onShowDialogError}
                 recordSchemaId={field.recordId}
-                setIsLoading={loading => setIsLoading(loading)}
                 tableSchemaId={table.tableSchemaId}
                 totalFields={!isNil(fields) ? fields.length : undefined}
               />
@@ -955,7 +965,12 @@ export const FieldsDesigner = ({
           <label>{resourcesContext.messages['newFieldTypePlaceHolder']}</label>
           <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}></label>
           <label></label>
-          <label></label>
+          <label>
+            {/* <TooltipButton
+              message={resourcesContext.messages['duplicateField']}
+              uniqueIdentifier={resourcesContext.messages['duplicateField']}
+            /> */}
+          </label>
           {/* <label>
             <div
               className={`${styles.bulkDeleteButton} ${
