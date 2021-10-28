@@ -85,6 +85,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -3017,6 +3018,11 @@ public class DatasetServiceTest {
         Mockito.anyBoolean())).thenReturn(expectedResult);
     Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
         Mockito.anyLong())).thenReturn(datasetMetabaseList);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setId(1L);
+    dataflow.setType(TypeDataflowEnum.REPORTING);
+    Mockito.when(dataflowControllerZull.findById(Mockito.any(), Mockito.any()))
+        .thenReturn(dataflow);
     datasetService.savePublicFiles(1L, 1L);
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }
