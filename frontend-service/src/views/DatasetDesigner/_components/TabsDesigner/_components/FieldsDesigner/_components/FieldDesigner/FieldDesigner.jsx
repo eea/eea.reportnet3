@@ -1397,7 +1397,9 @@ export const FieldDesigner = ({
   return (
     <Fragment>
       <div
-        className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
+        className={`${styles.draggableFieldDiv} ${
+          fieldDesignerState.isDragging ? styles.disablePointerEvent : ''
+        } fieldRow datasetSchema-fieldDesigner-help-step`}
         draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
         onDragEnd={onFieldDragEnd}
         onDragEnter={onFieldDragEnter}
