@@ -29,7 +29,7 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
             {resourcesContext.messages['howDoYouKnow']}
             {openGloban ? (
               <FontAwesomeIcon
-                ariaLabel={resourcesContext.messages['howDoYouKnow']}
+                aria-label={resourcesContext.messages['howDoYouKnow']}
                 className="p-breadcrumb-home"
                 icon={AwesomeIcons('angleSingleUp')}
                 role="button"
@@ -44,7 +44,7 @@ export const EuHeader = ({ euHeaderElementStyle, globanElementStyle }) => {
             )}
           </span>
           {openGloban && (
-            <div class={styles.ban}>
+            <div className={styles.ban}>
               <p>{resourcesContext.messages['allOfficialEuropeanUnionWebsiteAddresses']}</p>
               <p>
                 <a href="//europa.eu/european-union/contact/institutions-bodies_en">

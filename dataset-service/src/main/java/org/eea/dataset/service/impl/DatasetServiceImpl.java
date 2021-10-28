@@ -2967,6 +2967,7 @@ public class DatasetServiceImpl implements DatasetService {
     // we compound the route and create the file
     File file = null;
     if (dataProviderId != null) {
+      checkRestrictFromPublic(dataflowId, dataProviderId);
       file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
           "dataProvider-" + dataProviderId.toString()), fileName);
     } else {
@@ -3636,5 +3637,23 @@ public class DatasetServiceImpl implements DatasetService {
     error.setTypeEntity(validation.getTypeEntity().name());
     error.setValidationDate(validation.getValidationDate());
     error.setShortCode(validation.getShortCode());
+  }
+
+  /**
+   * Check restrict from public.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @throws EEAException the EEA exception
+   */
+  private void checkRestrictFromPublic(Long dataflowId, Long dataProviderId) throws EEAException {
+    List<RepresentativeVO> representatives =
+        representativeControllerZuul.findRepresentativesByDataFlowIdAndProviderIdList(dataflowId,
+            Arrays.asList(dataProviderId));
+    for (RepresentativeVO representative : representatives) {
+      if (representative.isRestrictFromPublic()) {
+        throw new EEAException(EEAErrorMessage.IS_RESTRICT_FROM_PUBLIC);
+      }
+    }
   }
 }
