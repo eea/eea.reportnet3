@@ -17,9 +17,6 @@
     &:focus {
       border-color: var(--inputtext-border-color-focus-error) !important;
     }
-    &:not(:focus) {
-      box-shadow: none !important;
-    }
     &:hover {
       border-color: var(--inputtext-border-color-hover-error) !important;
     }
