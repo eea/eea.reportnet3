@@ -54,6 +54,10 @@ body .p-checkbox .p-checkbox-box:not(.p-disabled).p-focus {
   -moz-box-shadow: var(--checkbox-box-box-shadow-focus);
   box-shadow: var(--checkbox-box-box-shadow-focus);
   border-color: var(--checkbox-box-bg-focus);
+  &:not(:focus) {
+    box-shadow: none;
+    border: var(--checkbox-box-border);
+  }
 }
 body .p-checkbox .p-checkbox-box.p-highlight {
   border-color: var(--checkbox-box-highlight-border-color);
