@@ -184,7 +184,7 @@ function boolean isPhone(String value){
  
 ///////////////////////////////////////VALIDATION GEOMETRY TYPES///////////////////////////////////////////////////////
 function boolean isGeometry(FieldValue fieldValue){
-	return FKValidationUtils.isGeometry(fieldValue);
+	return GeometryValidationUtils.isGeometry(fieldValue);
 }
 
 ///////////////////////////////////////VALIDATION GEOMETRY TYPES CHECK EPSG AND SRID///////////////////////////////////////////////////////
