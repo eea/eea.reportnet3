@@ -18,7 +18,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { LinkSelector } from './_components/LinkSelector';
-import ReactTooltip from 'react-tooltip';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -449,7 +448,7 @@ export const FieldDesigner = ({
     isDuplicated = false
   }) => {
     try {
-      setIsLoading(true);
+      setIsLoading(true, inputRef.current);
       const response = await DatasetService.createRecordDesign(datasetId, {
         codelistItems,
         description,
@@ -506,7 +505,7 @@ export const FieldDesigner = ({
         }
       }
       dispatchFieldDesigner({ type: 'SET_ADD_FIELD_SENT', payload: false });
-      setIsLoading(false);
+      setIsLoading(false, inputRef.current);
     }
   };
 
@@ -767,7 +766,6 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
-      setIsLoading(true);
       await DatasetService.updateFieldDesign(datasetId, {
         codelistItems,
         description,
@@ -822,8 +820,6 @@ export const FieldDesigner = ({
           });
         }
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -1118,8 +1114,6 @@ export const FieldDesigner = ({
           className={`${styles.button} ${styles.duplicateButton} ${
             fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
           } ${isDataflowOpen || isLoading || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
-          data-for={`${fieldDesignerState.fieldValue}_tooltip`}
-          data-tip
           href="#"
           onClick={e => {
             e.preventDefault();
@@ -1142,9 +1136,6 @@ export const FieldDesigner = ({
           }}>
           <FontAwesomeIcon aria-label={resourcesContext.messages['duplicate']} icon={AwesomeIcons('clone')} />
           <span className="srOnly">{resourcesContext.messages['duplicate']}</span>
-          <ReactTooltip border={true} effect="solid" id={`${fieldDesignerState.fieldValue}_tooltip`} place="top">
-            {resourcesContext.messages['duplicate']}
-          </ReactTooltip>
         </div>
       );
     }
@@ -1406,7 +1397,9 @@ export const FieldDesigner = ({
   return (
     <Fragment>
       <div
-        className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
+        className={`${styles.draggableFieldDiv} ${
+          fieldDesignerState.isDragging ? styles.disablePointerEvent : ''
+        } fieldRow datasetSchema-fieldDesigner-help-step`}
         draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
         onDragEnd={onFieldDragEnd}
         onDragEnter={onFieldDragEnter}
