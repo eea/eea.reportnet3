@@ -1331,6 +1331,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       }}>
       <div className={styles.noScrollDatasetDesigner}>
         <Title
+          ariaLabelledBy={designerState.datasetSchemaName}
           icon="pencilRuler"
           iconSize="3.4rem"
           subtitle={designerState.dataflowName}
@@ -1364,7 +1365,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             <div className={styles.datasetConfigurationButtons}>
               <div>
                 <Checkbox
-                  ariaLabelledBy="reference_dataset_label"
+                  aria-labelledby="reference_dataset_label"
                   checked={designerState.referenceDataset}
                   disabled={isDesignDatasetEditorRead || isDataflowOpen || isReferenceDataset}
                   id="reference_dataset"

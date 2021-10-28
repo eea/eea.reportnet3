@@ -27,6 +27,7 @@ export const PropertyItem = ({ content, title, redirectTo }) => {
             className={styles.icon}
             icon={AwesomeIcons(isOpen ? 'angleDown' : 'angleRight')}
             onClick={onToggleVisibility}
+            role="button"
           />
           {title}
         </h3>

@@ -70,7 +70,7 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
         <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
           <FontAwesomeIcon
             alt={resourcesContext.messages['pinDataflow']}
-            ariaLabel={resourcesContext.messages['pinDataflow']}
+            aria-label={itemContent.pinned}
             className={`${isPinned ? styles.pinned : styles.notPinned} ${isPinning ? 'fa-spin' : null}`}
             icon={!isPinning ? AwesomeIcons('pin') : AwesomeIcons('spinner')}
             onClick={async () => {
