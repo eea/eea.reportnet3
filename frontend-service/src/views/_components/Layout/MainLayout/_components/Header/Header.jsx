@@ -157,7 +157,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   const localhostEnvironmentAlert = isLocalEnvironment() && (
     <div className={styles.localhostAlert}>
       <FontAwesomeIcon
-        aria-labelledby={resourcesContext.messages['localhostAlert']}
+        ariaLabelledby={resourcesContext.messages['localhostAlert']}
         icon={AwesomeIcons('localhostAlert')}
         role="button"
         title={resourcesContext.messages['localhostAlert']}
