@@ -26,7 +26,6 @@ import { InputTextarea } from 'views/_components/InputTextarea';
 import ReactTooltip from 'react-tooltip';
 import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
-// import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -965,12 +964,7 @@ export const FieldsDesigner = ({
           <label>{resourcesContext.messages['newFieldTypePlaceHolder']}</label>
           <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}></label>
           <label></label>
-          <label>
-            {/* <TooltipButton
-              message={resourcesContext.messages['duplicateField']}
-              uniqueIdentifier={resourcesContext.messages['duplicateField']}
-            /> */}
-          </label>
+          <label></label>
           {/* <label>
             <div
               className={`${styles.bulkDeleteButton} ${
