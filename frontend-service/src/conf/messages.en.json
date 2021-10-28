@@ -1320,6 +1320,7 @@
     "notPublic": "Not public",
     "loadingWebformError": "Error loading webform",
     "loadingWebformOptionsError": "Error loading webforms",
-    "restrictFromPublic": "Public"
+    "restrictFromPublic": "Public",
+    "duplicateField": "Duplicate field"
   }
 }
