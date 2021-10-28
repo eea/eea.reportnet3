@@ -611,7 +611,6 @@ export class Dropdown extends Component {
           onKeyDown={this.onInputKeyDown}
           readOnly={true}
           ref={el => (this.focusInput = el)}
-          role="listbox"
           tabIndex={this.props.tabIndex}
           type="text"
         />

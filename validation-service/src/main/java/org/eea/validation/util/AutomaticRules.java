@@ -428,13 +428,15 @@ public class AutomaticRules {
 
     String fieldName = document.getString("headerName");
 
-    String sql = "select rv.id as record_id ,fv.id as %s_id,"
+    String sql = "select * from ( select rv.id as record_id ,fv.id as %s_id,"
         + " public.ST_isValidReason(public.ST_SetSRID(public.ST_GeomFromGeoJSON(fv.value::json->'geometry'),"
-        + " ((fv.value::json->'properties')::json->>'srid')::integer)) as reason "
+        + " ((fv.value::json->'properties')::json->>'srid')::integer)) as reason,"
+        + " public.ST_SetSRID(public.ST_GeomFromGeoJSON(fv.value::json->'geometry'), "
+        + " ((fv.value::json->'properties')::json->>'srid')::integer) as value "
         + " from dataset_%s.field_value fv inner join dataset_%s.record_value rv "
-        + " on rv.id = fv.id_record where fv.value <> '' and public.is_valid_json(fv.value) and geometry is null;";
-    {
-    }
+        + " on rv.id = fv.id_record where fv.value <> '' and public.is_valid_json(fv.value) and geometry is null ) tableAux "
+        + " where public.ST_isValid(value) = false;";
+
     String sqlResult = String.format(sql, fieldName, datasetId, datasetId);
 
     return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, whenCondition, message,
