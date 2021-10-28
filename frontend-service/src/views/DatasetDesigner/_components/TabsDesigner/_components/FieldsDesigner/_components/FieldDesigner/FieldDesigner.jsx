@@ -1393,7 +1393,6 @@ export const FieldDesigner = ({
       return resourcesContext.messages['disabledEditorRead'];
     }
   };
-  console.log('fieldDesignerState.isDragging :>> ', fieldDesignerState.isDragging);
 
   return (
     <Fragment>
