@@ -1402,11 +1402,14 @@ export const FieldDesigner = ({
       return resourcesContext.messages['disabledEditorRead'];
     }
   };
+  console.log('fieldDesignerState.isDragging :>> ', fieldDesignerState.isDragging);
 
   return (
     <Fragment>
       <div
-        className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
+        className={`${styles.draggableFieldDiv} ${
+          fieldDesignerState.isDragging ? styles.disablePointerEvent : ''
+        } fieldRow datasetSchema-fieldDesigner-help-step`}
         draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
         onDragEnd={onFieldDragEnd}
         onDragEnter={onFieldDragEnter}
