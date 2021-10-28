@@ -504,7 +504,7 @@ export const PublicDataflowInformation = withRouter(
               <div className={styles.dataTableTitle}>{resourcesContext.messages['reportingDatasets']}</div>
               <DataTable
                 autoLayout
-                summary={'representatives'}
+                summary={resourcesContext.messages['reportingDatasets']}
                 totalRecords={representatives.length}
                 value={representatives}>
                 {renderRepresentativeColumns(representatives)}
@@ -514,7 +514,11 @@ export const PublicDataflowInformation = withRouter(
           {!isEmpty(referenceDatasets) && (
             <div className={styles.dataTableWrapper}>
               <div className={styles.dataTableTitle}>{resourcesContext.messages['referenceDatasets']}</div>
-              <DataTable autoLayout totalRecords={referenceDatasets.length} value={referenceDatasets}>
+              <DataTable
+                autoLayout
+                summary={resourcesContext.messages['referenceDatasets']}
+                totalRecords={referenceDatasets.length}
+                value={referenceDatasets}>
                 {renderReferenceDatasetsColumns(referenceDatasets)}
               </DataTable>
             </div>
@@ -522,7 +526,11 @@ export const PublicDataflowInformation = withRouter(
           {!isEmpty(documents) && (
             <div className={styles.dataTableWrapper}>
               <div className={styles.dataTableTitle}>{resourcesContext.messages['documents']}</div>
-              <DataTable autoLayout totalRecords={documents.length} value={documents}>
+              <DataTable
+                autoLayout
+                summary={resourcesContext.messages['documents']}
+                totalRecords={documents.length}
+                value={documents}>
                 {renderDocumentsColumns(documents)}
               </DataTable>
             </div>
@@ -530,7 +538,11 @@ export const PublicDataflowInformation = withRouter(
           {!isEmpty(webLinks) && (
             <div className={styles.dataTableWrapper}>
               <div className={styles.dataTableTitle}>{resourcesContext.messages['webLinks']}</div>
-              <DataTable autoLayout totalRecords={webLinks.length} value={webLinks}>
+              <DataTable
+                autoLayout
+                summary={resourcesContext.messages['webLinks']}
+                totalRecords={webLinks.length}
+                value={webLinks}>
                 {renderWebLinksColumns(webLinks)}
               </DataTable>
             </div>

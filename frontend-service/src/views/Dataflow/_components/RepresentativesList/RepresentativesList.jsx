@@ -463,6 +463,7 @@ const RepresentativesList = ({
         <div className={styles.table}>
           {formState.isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
           <DataTable
+            summary={resourcesContext.messages['manageRolesDialogHeader']}
             value={
               formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
                 ? formState.representatives.filter(representative => !isNil(representative.representativeId))

@@ -1124,6 +1124,7 @@ const DataViewer = withRouter(
             sortField={sort.sortField}
             sortOrder={sort.sortOrder}
             sortable={true}
+            summary={'data viewer'}
             totalRecords={
               !isNil(records.totalFilteredRecords) &&
               (isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== ''))
@@ -1145,6 +1146,7 @@ const DataViewer = withRouter(
             <DataTable
               autoLayout={true}
               className={styles.itemTable}
+              summary={resourcesContext.messages['columnInfo']}
               value={DataViewerUtils.getFieldValues(colsSchema, selectedHeader, [
                 'header',
                 'description',

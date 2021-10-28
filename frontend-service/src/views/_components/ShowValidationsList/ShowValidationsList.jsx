@@ -599,6 +599,7 @@ export const ShowValidationsList = memo(
                 sortField={sortField}
                 sortOrder={sortOrder}
                 sortable={true}
+                summary={resourcesContext.messages['noNotifications']}
                 totalRecords={totalFilteredRecords}
                 value={fetchedData}>
                 {columns}

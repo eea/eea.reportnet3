@@ -409,7 +409,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
               sortField={sortField}
               sortOrder={sortOrder}
               sortable={true}
-              summary="country dataflows"
+              summary={resourcesContext.messages['dataflows']}
               totalRecords={totalRecords}
               value={dataflows}>
               {renderColumns(dataflows)}

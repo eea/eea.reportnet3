@@ -89,6 +89,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
           paginator={true}
           rows={state.pagination.rows}
           rowsPerPageOptions={[5, 10, 15]}
+          summary={resourcesContext.messages['referencingDataflowsDialogHeader']}
           value={state.filteredData}>
           <Column
             body={renderNameColumnTemplate}

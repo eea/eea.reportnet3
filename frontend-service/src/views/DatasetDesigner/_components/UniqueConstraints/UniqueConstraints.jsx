@@ -204,6 +204,7 @@ export const UniqueConstraints = ({
           paginatorRight={getPaginatorRecordsCount()}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
+          summary={resourcesContext.messages['uniqueConstraints']}
           totalRecords={constraintsState.filteredData.length}
           value={constraintsState.filteredData}>
           {renderColumns(constraintsState.filteredData)}

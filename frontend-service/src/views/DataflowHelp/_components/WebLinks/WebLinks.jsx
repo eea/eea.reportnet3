@@ -366,6 +366,7 @@ export const WebLinks = ({
         selectionMode="single"
         sortField={sortFieldWebLinks}
         sortOrder={sortOrderWebLinks}
+        summary={resourcesContext.messages['webLinks']}
         value={webLinks}>
         {webLinksState.webLinksColumns}
       </DataTable>

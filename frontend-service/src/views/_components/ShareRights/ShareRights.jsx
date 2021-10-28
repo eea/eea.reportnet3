@@ -436,7 +436,7 @@ export const ShareRights = ({
               paginator={true}
               rows={shareRightsState.pagination.rows}
               rowsPerPageOptions={[5, 10, 15]}
-              summary="shareRights"
+              summary="manage users"
               value={shareRightsState.filteredData}>
               <Column body={renderAccountTemplate} header={columnHeader} />
               <Column body={renderRoleColumnTemplate} header={resourcesContext.messages['rolesColumn']} />

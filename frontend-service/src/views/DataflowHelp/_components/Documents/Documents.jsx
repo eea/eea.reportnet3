@@ -312,6 +312,7 @@ const Documents = ({
         selectionMode="single"
         sortField={sortFieldDocuments}
         sortOrder={sortOrderDocuments}
+        summary={resourcesContext.messages['documents']}
         value={allDocuments}>
         {renderDocumentsColumns()}
       </DataTable>

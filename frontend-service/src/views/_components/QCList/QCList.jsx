@@ -725,6 +725,7 @@ export const QCList = withRouter(
               }}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
+              summary={resourcesContext.messages['qcRules']}
               totalRecords={tabsValidationsState.validationList.validations.length}
               value={cloneDeep(tabsValidationsState.filteredData)}>
               {renderColumns(tabsValidationsState.validationList.validations)}
