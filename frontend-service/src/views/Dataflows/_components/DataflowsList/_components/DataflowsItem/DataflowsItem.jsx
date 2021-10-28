@@ -42,6 +42,7 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
               <FontAwesomeIcon
                 icon={AwesomeIcons(itemContent.showPublicInfo ? 'eye' : 'eyeSlash')}
                 role="presentation"
+                style={{ opacity: '0.6' }}
               />
             </span>
             <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={id} place="top">
