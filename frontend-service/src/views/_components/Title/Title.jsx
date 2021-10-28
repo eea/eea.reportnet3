@@ -10,6 +10,7 @@ const Title = memo(({ icon, iconSize, insideTitle, subtitle, title }) => {
     <div className={styles.titleWrap}>
       <div className={styles.iconWrap}>
         <FontAwesomeIcon
+          ariaLabelledBy={title}
           className={styles.icon}
           icon={AwesomeIcons(icon)}
           role="presentation"

@@ -502,7 +502,11 @@ export const PublicDataflowInformation = withRouter(
           {!isEmpty(representatives) && (
             <div className={styles.dataTableWrapper}>
               <div className={styles.dataTableTitle}>{resourcesContext.messages['reportingDatasets']}</div>
-              <DataTable autoLayout totalRecords={representatives.length} value={representatives}>
+              <DataTable
+                autoLayout
+                summary={'representatives'}
+                totalRecords={representatives.length}
+                value={representatives}>
                 {renderRepresentativeColumns(representatives)}
               </DataTable>
             </div>

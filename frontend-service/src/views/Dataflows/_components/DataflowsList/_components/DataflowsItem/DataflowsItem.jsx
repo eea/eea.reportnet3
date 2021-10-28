@@ -68,7 +68,8 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
         </Link>
         <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
           <FontAwesomeIcon
-            aria-label={resourcesContext.messages['pinDataflow']}
+            alt={resourcesContext.messages['pinDataflow']}
+            ariaLabel={resourcesContext.messages['pinDataflow']}
             className={`${isPinned ? styles.pinned : styles.notPinned} ${isPinning ? 'fa-spin' : null}`}
             icon={!isPinning ? AwesomeIcons('pin') : AwesomeIcons('spinner')}
             onClick={async () => {
@@ -76,6 +77,7 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
               await reorderDataflows(itemContent, !isPinned);
               setIsPinning(false);
             }}
+            role="presentation"
           />
         </div>
       </div>
