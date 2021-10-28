@@ -2935,7 +2935,7 @@ public class DatasetServiceImpl implements DatasetService {
           new File(directoryDataflow, "dataProvider-" + representative.getDataProviderId());
       // we create the dataprovider folder to save it andwe always delete it and put new files
       FileUtils.deleteDirectory(directoryDataProvider);
-      DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, dataSetDataProvider);
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
       if (!TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
         createAllDatasetFiles(dataflowId, representative.getDataProviderId());
       } else {

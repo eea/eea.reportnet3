@@ -3021,8 +3021,7 @@ public class DatasetServiceTest {
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setId(1L);
     dataflow.setType(TypeDataflowEnum.REPORTING);
-    Mockito.when(dataflowControllerZull.findById(Mockito.any(), Mockito.any()))
-        .thenReturn(dataflow);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     datasetService.savePublicFiles(1L, 1L);
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }
