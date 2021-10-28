@@ -45,18 +45,6 @@
   font-style: italic;
 }
 
-// li {
-//   &:focus {
-//     .tabs {
-//       color: var(--tabview-highlight-icon-color-active) !important;
-//     }
-//   }
-// }
-
-.tabs {
-  color: var(--tabview-color);
-}
-
 .warning {
   background-color: var(--statusBox-warning-bg) !important;
   color: var(--statusBox-warning-color) !important;

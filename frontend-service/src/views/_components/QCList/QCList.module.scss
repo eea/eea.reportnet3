@@ -79,7 +79,7 @@
       box-shadow: none;
     }
 
-    &:hover {
+    &:enabled:hover {
       border-color: var(--button-secondary-border-color-hover) !important;
     }
   }
@@ -122,7 +122,7 @@
   border: 1px solid var(--general-border-color) !important;
   @include shadow-0em;
   margin-left: 3px !important;
-  &:hover {
+  &:enabled:hover {
     border-color: var(--button-secondary-border-color-hover) !important;
   }
 }

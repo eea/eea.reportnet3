@@ -288,10 +288,7 @@ const DatasetSchema = ({
   };
 
   const renderTables = () => (
-    <TabPanel
-      header={resourcesContext.messages['tablesAndFields']}
-      rightIcon={config.icons['table']}
-      rightIconClass={styles.tabs}>
+    <TabPanel header={resourcesContext.messages['tablesAndFields']} rightIcon={config.icons['table']}>
       <Toolbar className={styles.datasetSchemaToolbar}>
         <div className="p-toolbar-group-left">
           <Button
@@ -316,10 +313,7 @@ const DatasetSchema = ({
   );
 
   const renderUniques = () => (
-    <TabPanel
-      header={resourcesContext.messages['uniques']}
-      rightIcon={config.icons['key']}
-      rightIconClass={styles.tabs}>
+    <TabPanel header={resourcesContext.messages['uniques']} rightIcon={config.icons['key']}>
       <DatasetSchemaTable
         columnOptions={columnOptions}
         fields={!isNil(parsedDesignDataset.uniques) ? parsedDesignDataset.uniques : []}
@@ -329,10 +323,7 @@ const DatasetSchema = ({
   );
 
   const renderQCs = () => (
-    <TabPanel
-      header={resourcesContext.messages['qcRules']}
-      rightIcon={config.icons['horizontalSliders']}
-      rightIconClass={styles.tabs}>
+    <TabPanel header={resourcesContext.messages['qcRules']} rightIcon={config.icons['horizontalSliders']}>
       <Button
         className={`p-button-rounded p-button-secondary-transparent ${
           !isDownloadingQCs ? 'p-button-animated-blink' : ''
@@ -542,7 +533,7 @@ const DatasetSchema = ({
 
         {renderProperties()}
       </div>
-      <TabView activeIndex={0} hasQueryString={false} name="DatasetSchemas">
+      <TabView activeIndex={0} className="sameColor" hasQueryString={false} name="DatasetSchemas">
         {renderTables()}
         {renderQCs()}
         {renderUniques()}
