@@ -180,4 +180,11 @@ public interface IntegrationService {
   IntegrationVO getIntegration(Long integrationId);
 
 
+  /**
+   * Delete export eu dataset.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @throws EEAException the EEA exception
+   */
+  void deleteExportEuDataset(String datasetSchemaId) throws EEAException;
 }

@@ -54,7 +54,7 @@
   cursor: -webkit-grabbing;
 }
 
-.draggableFieldDiv * {
+.disablePointerEvent * {
   pointer-events: none;
 }
 

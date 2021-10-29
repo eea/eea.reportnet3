@@ -431,4 +431,24 @@ public class IntegrationControllerImplTest {
         integrationControllerImpl.executeIntegrationProcess(null, null, null, null, null));
   }
 
+
+  @Test
+  public void testDeleteExportEuDatasetIntegration() throws EEAException {
+    Mockito.doNothing().when(integrationService).deleteExportEuDataset(Mockito.anyString());
+    integrationControllerImpl.deleteExportEuDatasetIntegration("5ce524fad31fc52540abae73");
+    Mockito.verify(integrationService, times(1)).deleteExportEuDataset(Mockito.anyString());
+  }
+
+  @Test
+  public void testDeleteExportEuDatasetIntegrationException() throws EEAException {
+    try {
+      Mockito.doThrow(EEAException.class).when(integrationService)
+          .deleteExportEuDataset(Mockito.anyString());
+      integrationControllerImpl.deleteExportEuDatasetIntegration("5ce524fad31fc52540abae73");
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
 }
