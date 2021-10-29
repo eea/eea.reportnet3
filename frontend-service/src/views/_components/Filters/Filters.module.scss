@@ -293,11 +293,11 @@
     &:focus,
     &:enabled:focus {
       box-shadow: 0 0 0 0 var(--blue-120) !important;
-      border-color: var(--gray-25) !important;
+      border-color: var(--general-border-color) !important;
     }
 
     &:hover {
-      border-color: var(--gray-25) !important;
+      border-color: var(--general-border-color) !important;
     }
 
     &:active {
