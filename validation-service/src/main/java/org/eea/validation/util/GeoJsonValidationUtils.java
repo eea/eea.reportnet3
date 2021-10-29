@@ -1,9 +1,6 @@
 package org.eea.validation.util;
 
 import org.eea.validation.persistence.data.domain.FieldValue;
-import org.eea.validation.util.geojsonvalidator.Feature;
-import org.eea.validation.util.geojsonvalidator.FeatureCollection;
-import org.eea.validation.util.geojsonvalidator.GeoJsonObject;
 import org.eea.validation.util.geojsonvalidator.GeometryCollection;
 import org.eea.validation.util.geojsonvalidator.LineString;
 import org.eea.validation.util.geojsonvalidator.MultiLineString;
@@ -41,12 +38,53 @@ public class GeoJsonValidationUtils {
     try {
       String aux = fieldValue.getValue();
       if (!aux.isEmpty()) {
-        GeoJsonObject object = new ObjectMapper().readValue(aux, GeoJsonObject.class);
-        if (object instanceof Point || object instanceof Polygon || object instanceof MultiPoint
-            || object instanceof MultiPolygon || object instanceof LineString
-            || object instanceof MultiLineString || object instanceof GeometryCollection
-            || object instanceof Feature || object instanceof FeatureCollection) {
-          result = "";
+        switch (fieldValue.getType()) {
+          case POINT:
+            Point point = new ObjectMapper().readValue(aux, Point.class);
+            if (point instanceof Point) {
+              result = "";
+            }
+            break;
+          case LINESTRING:
+            LineString lineString = new ObjectMapper().readValue(aux, LineString.class);
+            if (lineString instanceof LineString) {
+              result = "";
+            }
+            break;
+          case POLYGON:
+            Polygon polygon = new ObjectMapper().readValue(aux, Polygon.class);
+            if (polygon instanceof Polygon) {
+              result = "";
+            }
+            break;
+          case MULTIPOINT:
+            MultiPoint multiPoint = new ObjectMapper().readValue(aux, MultiPoint.class);
+            if (multiPoint instanceof MultiPoint) {
+              result = "";
+            }
+            break;
+          case MULTILINESTRING:
+            MultiLineString multiLineString =
+                new ObjectMapper().readValue(aux, MultiLineString.class);
+            if (multiLineString instanceof MultiLineString) {
+              result = "";
+            }
+            break;
+          case MULTIPOLYGON:
+            MultiPolygon multiPolygon = new ObjectMapper().readValue(aux, MultiPolygon.class);
+            if (multiPolygon instanceof MultiPolygon) {
+              result = "";
+            }
+            break;
+          case GEOMETRYCOLLECTION:
+            GeometryCollection geometryCollection =
+                new ObjectMapper().readValue(aux, GeometryCollection.class);
+            if (geometryCollection instanceof GeometryCollection) {
+              result = "";
+            }
+            break;
+          default:
+            result = "";
         }
       }
     } catch (JsonProcessingException e) {
