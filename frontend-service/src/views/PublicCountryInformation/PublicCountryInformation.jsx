@@ -364,7 +364,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       <a href={url} rel="noreferrer" target="_blank" title={text}>
         <FontAwesomeIcon
           aria-hidden={false}
-          ariaLabel={text}
+          aria-label={text}
           className="p-breadcrumb-home"
           icon={AwesomeIcons('externalUrl')}
           role="button"

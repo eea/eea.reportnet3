@@ -218,6 +218,7 @@ export const PublicDataflowInformation = withRouter(
             <Fragment>
               <FontAwesomeIcon
                 aria-hidden={false}
+                aria-labelledby="navigateTooltip"
                 className={`p-breadcrumb-home ${styles.link}`}
                 data-for="navigateTooltip"
                 data-tip

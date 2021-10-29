@@ -60,13 +60,13 @@ export const PublicCountries = withRouter(({ history }) => {
         onMouseDown={e => onOpenCountry(e)}>
         <ReactCountryFlag
           alt={country.name}
-          ariaLabel={country.name}
+          aria-label={country.name}
           className={styles.flag}
           countryCode={country.flag}
           svg
         />
 
-        <div className={styles.titleWrap}>
+        <div className={styles.titleWrap} id={country.name}>
           <h3>{country.name}</h3>
         </div>
 
