@@ -343,7 +343,8 @@
     "main-font-color-reverse": "var(--white)",
     "errors": "var(--errors-light-mode)",
     "big-button-menu-color": "var(--white)",
-    "app-title-color": "var(--accent-color)"
+    "app-title-color": "var(--accent-color)",
+    "submenu-header-bg": "var(--gray-10)"
   },
   "dark": {
     "bg": "var(--bg-dark-00dp)",
@@ -690,7 +691,8 @@
     "main-font-color-reverse": "var(--gray-110)",
     "errors": "var(--errors-dark-mode)",
     "big-button-menu-color": "var(--white-font)",
-    "app-title-color": "var(--white-font)"
+    "app-title-color": "var(--white-font)",
+    "submenu-header-bg": "var(--bg-dark-01dp)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
