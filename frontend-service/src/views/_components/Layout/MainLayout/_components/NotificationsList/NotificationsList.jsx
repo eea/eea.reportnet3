@@ -17,7 +17,6 @@ import { Dialog } from 'views/_components/Dialog';
 import { DataTable } from 'views/_components/DataTable';
 // import { Filters } from 'views/_components/Filters';
 import { LevelError } from 'views/_components/LevelError';
-import { Spinner } from 'views/_components/Spinner';
 
 import { NotificationService } from 'services/NotificationService';
 
@@ -200,13 +199,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   };
 
   const renderNotifications = () => {
-    if (isLoading) {
-      return (
-        <div className={styles.loadingSpinner}>
-          <Spinner className={styles.spinnerPosition} />
-        </div>
-      );
-    } else if (notifications.length > 0) {
+    if (notifications.length > 0) {
       return (
         <DataTable
           autoLayout={true}
