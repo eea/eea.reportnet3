@@ -1478,5 +1478,17 @@
   {
     "key": "config/apiGateway/zuul.routes.webform.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.notification.path",
+    "value": "L25vdGlmaWNhdGlvbi8qKg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.notification.serviceId",
+    "value": "Y29tbXVuaWNhdGlvbg=="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.notification.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

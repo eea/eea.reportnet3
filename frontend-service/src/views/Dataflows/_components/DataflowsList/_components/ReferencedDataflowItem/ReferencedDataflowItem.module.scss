@@ -19,7 +19,7 @@
       grid-template-rows: 15% 50% 25%;
       row-gap: 1rem;
       column-gap: 1.5rem;
-      color: var(--gray-110);
+      color: var(--main-font-color);
       padding: 1rem;
 
       @media (max-width: 1440px) {
@@ -46,9 +46,11 @@
     }
 
     &.DESIGN {
-      background-color: var(--c-lilac-100);
+      color: var(--main-font-color);
+      background: var(--card-design-dataflow-bg);
+
       &:hover {
-        background-color: #c2c8cf;
+        background: var(--card-design-dataflow-bg-hover);
       }
     }
     &.OPEN,

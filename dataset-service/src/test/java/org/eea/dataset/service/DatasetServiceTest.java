@@ -85,6 +85,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -3017,6 +3018,10 @@ public class DatasetServiceTest {
         Mockito.anyBoolean())).thenReturn(expectedResult);
     Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
         Mockito.anyLong())).thenReturn(datasetMetabaseList);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setId(1L);
+    dataflow.setType(TypeDataflowEnum.REPORTING);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     datasetService.savePublicFiles(1L, 1L);
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
   }
@@ -3671,6 +3676,25 @@ public class DatasetServiceTest {
         .thenReturn("5cf0e9b3b793310e9ceca190");
     datasetService.deleteImportData(1L, false);
     Mockito.verify(recordRepository, times(0)).deleteRecordWithId(Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void exportPublicFileExceptionTest() throws IOException, EEAException {
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setDataProviderId(1L);
+    representativeVO.setRestrictFromPublic(true);
+    List<RepresentativeVO> representatives = new ArrayList<>();
+    representatives.add(representativeVO);
+    Mockito
+        .when(representativeControllerZuul
+            .findRepresentativesByDataFlowIdAndProviderIdList(Mockito.any(), Mockito.any()))
+        .thenReturn(representatives);
+    try {
+      datasetService.exportPublicFile(1L, 1L, "test");
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.IS_RESTRICT_FROM_PUBLIC, e.getMessage());
+      throw e;
+    }
   }
 
   /**

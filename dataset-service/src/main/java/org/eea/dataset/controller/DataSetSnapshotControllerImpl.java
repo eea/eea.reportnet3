@@ -15,7 +15,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -589,9 +588,6 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
     if (null != dataflow && dataflow.isReleasable()) {
       try {
-        if (TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
-          restrictFromPublic = true;
-        }
         datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId,
             restrictFromPublic);
       } catch (EEAException e) {

@@ -7,7 +7,6 @@
   box-shadow: var(--calendar-box-shadow);
   animation: slideDown 0.3s;
   transition: all 300ms ease;
-
   .buttonWrapper {
     margin-top: 0.5rem;
     button {
@@ -17,6 +16,7 @@
 
   .labelDate,
   .labelText {
+    color: var(--main-font-color);
     margin-left: 0.2rem;
     font-size: smaller;
   }

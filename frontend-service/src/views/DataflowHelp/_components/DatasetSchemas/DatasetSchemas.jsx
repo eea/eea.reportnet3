@@ -5,7 +5,7 @@ import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import pick from 'lodash/pick';
 
-import styles from './DatasetSchemas.module.css';
+import styles from './DatasetSchemas.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { DatasetSchema } from './_components/DatasetSchema';

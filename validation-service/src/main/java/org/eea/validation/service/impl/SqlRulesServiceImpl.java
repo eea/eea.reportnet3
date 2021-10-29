@@ -644,21 +644,25 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       Map<String, Long> datasetSchemasMap = getMapOfDatasetsOnQuery(query);
       DatasetTypeEnum datasetType = dataSetMetabaseVO.getDatasetTypeEnum();
       Long dataflowId = dataSetMetabaseVO.getDataflowId();
-
+      List<ReferenceDatasetVO> referenceDatasets =
+          referenceDatasetController.findReferenceDatasetByDataflowId(dataflowId);
       Map<Long, Long> datasetIdOldNew = new HashMap<>();
       switch (datasetType) {
         case COLLECTION:
-          query = modifyQueryForCollection(query, datasetSchemasMap, dataflowId, datasetIdOldNew);
+          query = modifyQueryForCollection(query, datasetSchemasMap, dataflowId, datasetIdOldNew,
+              referenceDatasets);
           break;
         case EUDATASET:
-          query = modifyQueryForEU(query, datasetSchemasMap, dataflowId, datasetIdOldNew);
+          query = modifyQueryForEU(query, datasetSchemasMap, dataflowId, datasetIdOldNew,
+              referenceDatasets);
           break;
         case REPORTING:
           query = modifyQueryForReportingDataset(dataSetMetabaseVO.getDataProviderId(), query,
-              datasetSchemasMap, dataflowId, datasetIdOldNew);
+              datasetSchemasMap, dataflowId, datasetIdOldNew, referenceDatasets);
           break;
         case TEST:
-          query = modifyQueryForTestDataset(query, datasetSchemasMap, dataflowId, datasetIdOldNew);
+          query = modifyQueryForTestDataset(query, datasetSchemasMap, dataflowId, datasetIdOldNew,
+              referenceDatasets);
           break;
         case DESIGN:
         default:
@@ -669,6 +673,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     return query;
   }
 
+
   /**
    * Modify query for test dataset.
    *
@@ -676,20 +681,28 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param datasetSchemasMap the dataset schemas map
    * @param dataflowId the dataflow id
    * @param datasetIdOldNew the dataset id old new
+   * @param referenceDatasets the reference datasets
    * @return the string
    */
   private String modifyQueryForTestDataset(String query, Map<String, Long> datasetSchemasMap,
-      Long dataflowId, Map<Long, Long> datasetIdOldNew) {
+      Long dataflowId, Map<Long, Long> datasetIdOldNew,
+      List<ReferenceDatasetVO> referenceDatasets) {
     List<TestDatasetVO> testDatasetVOList =
         testDatasetControllerZuul.findTestDatasetByDataflowId(dataflowId);
+
     Map<String, Long> testDatasetSchamasMap = new HashMap<>();
     for (TestDatasetVO testDataset : testDatasetVOList) {
       testDatasetSchamasMap.put(testDataset.getDatasetSchema(), testDataset.getId());
     }
+    for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+      testDatasetSchamasMap.put(referenceDataset.getDatasetSchema(), referenceDataset.getId());
+    }
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
       String key = auxDatasetMap.getKey();
       Long testDatasetId = testDatasetSchamasMap.get(key);
-      datasetIdOldNew.put(auxDatasetMap.getValue(), testDatasetId);
+      if (null != testDatasetId) {
+        datasetIdOldNew.put(auxDatasetMap.getValue(), testDatasetId);
+      }
     }
     for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
       query = query.replaceAll(DATASET + auxDatasetOldAndNew.getKey(),
@@ -705,20 +718,27 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param datasetSchemasMap the dataset schemas map
    * @param dataflowId the dataflow id
    * @param datasetIdOldNew the dataset id old new
+   * @param referenceDatasets the reference datasets
    * @return the string
    */
   private String modifyQueryForCollection(String query, Map<String, Long> datasetSchemasMap,
-      Long dataflowId, Map<Long, Long> datasetIdOldNew) {
+      Long dataflowId, Map<Long, Long> datasetIdOldNew,
+      List<ReferenceDatasetVO> referenceDatasets) {
     List<DataCollectionVO> dataCollectionList =
         dataCollectionController.findDataCollectionIdByDataflowId(dataflowId);
     Map<String, Long> dataCollectionSchamasMap = new HashMap<>();
     for (DataCollectionVO dataCollection : dataCollectionList) {
       dataCollectionSchamasMap.put(dataCollection.getDatasetSchema(), dataCollection.getId());
     }
+    for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+      dataCollectionSchamasMap.put(referenceDataset.getDatasetSchema(), referenceDataset.getId());
+    }
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
       String key = auxDatasetMap.getKey();
       Long datasetDatacollection = dataCollectionSchamasMap.get(key);
-      datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+      if (null != datasetDatacollection) {
+        datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+      }
     }
     for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
       query = query.replaceAll(DATASET + auxDatasetOldAndNew.getKey(),
@@ -734,20 +754,27 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param datasetSchemasMap the dataset schemas map
    * @param dataflowId the dataflow id
    * @param datasetIdOldNew the dataset id old new
+   * @param referenceDatasets the reference datasets
    * @return the string
    */
   private String modifyQueryForEU(String query, Map<String, Long> datasetSchemasMap,
-      Long dataflowId, Map<Long, Long> datasetIdOldNew) {
+      Long dataflowId, Map<Long, Long> datasetIdOldNew,
+      List<ReferenceDatasetVO> referenceDatasets) {
     List<EUDatasetVO> euDatasetList = euDatasetController.findEUDatasetByDataflowId(dataflowId);
     Map<String, Long> euDatasetSchamasMap = new HashMap<>();
     for (EUDatasetVO euDataset : euDatasetList) {
       euDatasetSchamasMap.put(euDataset.getDatasetSchema(), euDataset.getId());
     }
+    for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+      euDatasetSchamasMap.put(referenceDataset.getDatasetSchema(), referenceDataset.getId());
+    }
 
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
       String key = auxDatasetMap.getKey();
-      Long datasetDatacollection = euDatasetSchamasMap.get(key);
-      datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+      Long eudataset = euDatasetSchamasMap.get(key);
+      if (null != eudataset) {
+        datasetIdOldNew.put(auxDatasetMap.getValue(), eudataset);
+      }
     }
 
     for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
@@ -760,15 +787,17 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /**
    * Modify query for reporting dataset.
    *
-   * @param datasetId the dataset id
+   * @param dataProviderId the data provider id
    * @param query the query
    * @param datasetSchemasMap the dataset schemas map
    * @param dataflowId the dataflow id
    * @param datasetIdOldNew the dataset id old new
+   * @param referenceDatasets the reference datasets
    * @return the string
    */
   private String modifyQueryForReportingDataset(Long dataProviderId, String query,
-      Map<String, Long> datasetSchemasMap, Long dataflowId, Map<Long, Long> datasetIdOldNew) {
+      Map<String, Long> datasetSchemasMap, Long dataflowId, Map<Long, Long> datasetIdOldNew,
+      List<ReferenceDatasetVO> referenceDatasets) {
     List<ReportingDatasetVO> reportingDatasetList =
         datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
     List<RepresentativeVO> dataprovidersVOList =
@@ -783,6 +812,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     for (ReportingDatasetVO dataset : reportingDatasetList) {
       datasetIdList.add(dataset.getDatasetSchema());
     }
+
+    for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+      datasetIdList.add(referenceDataset.getDatasetSchema());
+    }
     Map<String, Long> reportingDatasetSchemasMap = new HashMap<>();
     for (ReportingDatasetVO reportingDataset : reportingDatasetList) {
       if (dataprovidersIdList.contains(reportingDataset.getDataProviderId())) {
@@ -790,11 +823,16 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             reportingDataset.getId());
       }
     }
+    for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+      reportingDatasetSchemasMap.put(referenceDataset.getDatasetSchema(), referenceDataset.getId());
+    }
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
       if (datasetIdList.contains(auxDatasetMap.getKey())) {
         String key = auxDatasetMap.getKey();
-        Long datasetDatacollection = reportingDatasetSchemasMap.get(key);
-        datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+        Long reportingDataset = reportingDatasetSchemasMap.get(key);
+        if (null != reportingDataset) {
+          datasetIdOldNew.put(auxDatasetMap.getValue(), reportingDataset);
+        }
       }
     }
     for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
