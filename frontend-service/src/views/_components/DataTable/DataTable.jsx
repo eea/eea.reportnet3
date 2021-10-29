@@ -479,6 +479,7 @@ export class DataTable extends Component {
   }
 
   onPageChange(event) {
+    console.log('EEEE', event.currentPage);
     this.setState({ currentPage: event.currentPage, pageInputTooltip: event.pageInputTooltip });
 
     if (this.props.onPage) this.props.onPage(event);

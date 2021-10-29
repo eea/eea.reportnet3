@@ -18,6 +18,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const NotificationService = {
   all: async ({ pageNum, pageSize }) => {
+    console.log(pageNum, pageSize);
     const notificationsDTO = await NotificationRepository.all(pageNum, pageSize);
     // const notificationsDTO = [
     //   {
@@ -46,17 +47,14 @@ export const NotificationService = {
     //   }
     // ];
     console.log({ notificationsDTO });
-    notificationsDTO.userNotifications = notificationsDTO.data;
-    notificationsDTO.totalRecords = notificationsDTO.data.length;
-    console.log({ notificationsDTO });
     const notifications = {};
 
-    notifications.userNotifications = notificationsDTO?.userNotifications?.map(notificationDTO => {
+    notifications.userNotifications = notificationsDTO?.data?.userNotifications?.map(notificationDTO => {
       const { content, insertDate, eventType } = notificationDTO;
       return new Notification({ content, date: insertDate, type: eventType });
     });
 
-    notifications.totalRecords = notificationsDTO.totalRecords;
+    notifications.totalRecords = notificationsDTO.data.totalRecords;
     console.log(notifications);
     return notifications;
   },
@@ -94,7 +92,9 @@ export const NotificationService = {
             type.toString() !== 'VALIDATION_FINISHED_EVENT'
               ? routes[navigateTo.section]
               : routes[NotificationUtils.getSectionValidationRedirectionUrl(content.type)];
-          notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
+          console.log(section, urlParameters);
+          //TODO - Quitar comentario
+          // notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
 
           if (!isNil(navigateTo.hasQueryString) && navigateTo.hasQueryString) {
             notificationDTO.redirectionUrl = `${notificationDTO.redirectionUrl}${window.location.search}`;

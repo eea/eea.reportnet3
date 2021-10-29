@@ -35,10 +35,10 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   const [isLoading, setIsLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [paginationInfo, setPaginationInfo] = useState({
-    totalRecords: 0,
     recordsPerPage: userContext.userProps.rowsPerPage,
     firstPageRecord: 0
   });
+  const [totalRecords, setTotalRecords] = useState(0);
   // const [filteredData, setFilteredData] = useState([]);
   // const [isFiltered, setIsFiltered] = useState(false);
 
@@ -122,6 +122,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   // };
 
   const onChangePage = event => {
+    console.log({ event });
     setPaginationInfo({ ...paginationInfo, recordsPerPage: event.rows, firstPageRecord: event.first });
     onLoadNotifications(event.first, event.rows);
   };
@@ -133,6 +134,12 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         pageNum: Math.floor(fRow / nRows),
         pageSize: nRows
       });
+
+      // setPaginationInfo({
+      //   ...paginationInfo,
+      //   recordsPerPage: rowsPerPage,
+      //   totalRecords: unparsedNotifications.totalRecords
+      // });
       console.log({ unparsedNotifications });
       const parsedNotifications = unparsedNotifications.userNotifications.map(notification => {
         return NotificationService.parse({
@@ -182,7 +189,8 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         };
       });
 
-      console.log({ notificationsArray });
+      console.log(unparsedNotifications.totalRecords);
+      setTotalRecords(unparsedNotifications.totalRecords);
       setNotifications(notificationsArray);
     } catch (error) {
       console.error('NotificationsList - onLoadNotifications.', error);
@@ -193,19 +201,26 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   const renderNotifications = () => {
     if (isLoading) {
-      return <Spinner />;
+      return (
+        <div className={styles.loadingSpinner}>
+          <Spinner className={styles.spinnerPosition} />
+        </div>
+      );
     } else if (notifications.length > 0) {
       return (
         <DataTable
           autoLayout={true}
+          first={paginationInfo.firstPageRecord}
+          hasDefaultCurrentPage={true}
+          lazy={true}
           loading={isLoading}
           onPage={onChangePage}
           paginator={true}
-          paginatorRight={<span>{`${resourcesContext.messages['totalRecords']}  ${paginationInfo.totalRecords}`}</span>}
+          paginatorRight={<span>{`${resourcesContext.messages['totalRecords']} ${totalRecords}`}</span>}
           rows={paginationInfo.recordsPerPage}
           rowsPerPageOptions={[5, 10, 20]}
           summary="notificationsList"
-          totalRecords={paginationInfo.totalRecords}
+          totalRecords={totalRecords}
           value={notifications}>
           {columns}
         </DataTable>

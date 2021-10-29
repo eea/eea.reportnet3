@@ -67,6 +67,7 @@ export class Paginator extends Component {
   }
 
   getPageCount() {
+    console.log(this.props.totalRecords, this.props.rows);
     return Math.ceil(this.props.totalRecords / this.props.rows) || 1;
   }
 
@@ -122,6 +123,7 @@ export class Paginator extends Component {
   }
 
   getPage() {
+    console.log(this.props.first, this.props.rows, Math.floor(this.props.first / this.props.rows));
     return Math.floor(this.props.first / this.props.rows);
   }
 
