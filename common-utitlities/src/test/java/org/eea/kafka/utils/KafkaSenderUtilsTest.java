@@ -2,6 +2,7 @@ package org.eea.kafka.utils;
 
 import java.util.HashMap;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.io.KafkaSender;
@@ -35,6 +36,10 @@ public class KafkaSenderUtilsTest {
   /** The kafka sender. */
   @Mock
   private KafkaSender kafkaSender;
+
+  /** The notification controller zuul. */
+  @Mock
+  private NotificationControllerZuul notificationControllerZuul;
 
   /**
    * Inits the mocks.
@@ -73,6 +78,8 @@ public class KafkaSenderUtilsTest {
     Mockito.when(notificableEventFactory.getNotificableEventHandler(Mockito.any()))
         .thenReturn(notificableEventHandler);
     Mockito.when(notificableEventHandler.getMap(Mockito.any())).thenReturn(null);
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.any());
     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
         new HashMap<>(), new NotificationVO());
     Mockito.verify(kafkaSender, Mockito.times(1)).sendMessage(Mockito.any());

@@ -139,6 +139,7 @@
     "inputtext-border-color-hover": "var(--gray-75)",
     "inputtext-box-shadow-color-focus": "var(--c-corporate-blue)",
     "inputtext-border-color-focus": "var(--c-corporate-blue)",
+    "inputtext-border-color-focus-error": "var(--errors)",
     "inputtext-box-shadow-focus": "0 0 0 0.1em var(--c-corporate-blue)",
     "inputtext-box-shadow-focus-error": "0 0 0 0.1em var(--errors)",
     "inputtext-placeholder": "var(--black)",
@@ -329,7 +330,7 @@
     "footer-content-bg": "var(--bg)",
     "help-modal-bg": "var(--bg)",
     "eu-header-shadow": "0 4px 5px 0 var(--shadow-color-rgba)",
-    "eu-header-bg": "var(--gray-10)",
+    "eu-header-bg": "var(--gray-110)",
     "error-boundary-bg": "var(--bg)",
     "automatic-message-sender-bg": "var(--gray-25)",
     "automatic-message-receiver-bg": "var(--gray-15)",
@@ -341,7 +342,8 @@
     "accent-color": "var(--informative-color)",
     "main-font-color-reverse": "var(--white)",
     "errors": "var(--errors-light-mode)",
-    "big-button-menu-color": "var(--white)"
+    "big-button-menu-color": "var(--white)",
+    "app-title-color": "var(--accent-color)"
   },
   "dark": {
     "bg": "var(--bg-dark-00dp)",
@@ -484,6 +486,7 @@
     "inputtext-box-shadow-color-focus": "var(--accent-color-dark-mode)",
     "inputtext-box-shadow-focus": "0 0 0 0.1em var(--accent-color-dark-mode)",
     "inputtext-border-color-focus": "var(--accent-color-dark-mode)",
+    "inputtext-border-color-focus-error": "var(--errors)",
     "inputtext-box-shadow-focus-error": "0 0 0 0.1em var(--errors-dark-mode)",
     "inputtext-placeholder": "var(--white-font)",
     "treeview-expandable-color": "var(--white-font)",
@@ -686,7 +689,8 @@
     "accent-color": "var(--accent-color-dark-mode)",
     "main-font-color-reverse": "var(--gray-110)",
     "errors": "var(--errors-dark-mode)",
-    "big-button-menu-color": "var(--white-font)"
+    "big-button-menu-color": "var(--white-font)",
+    "app-title-color": "var(--white-font)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,

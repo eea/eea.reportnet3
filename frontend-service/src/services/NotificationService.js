@@ -17,8 +17,8 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const NotificationService = {
-  all: async () => {
-    const notificationsDTO = await NotificationRepository.all();
+  all: async ({ pageNum, pageSize }) => {
+    const notificationsDTO = await NotificationRepository.all(pageNum, pageSize);
     // const notificationsDTO = [
     //   {
     //     type: 'VALIDATE_DATA_INIT',
@@ -46,10 +46,19 @@ export const NotificationService = {
     //   }
     // ];
     console.log({ notificationsDTO });
-    return notificationsDTO?.data?.map(notificationDTO => {
+    notificationsDTO.userNotifications = notificationsDTO.data;
+    notificationsDTO.totalRecords = notificationsDTO.data.length;
+    console.log({ notificationsDTO });
+    const notifications = {};
+
+    notifications.userNotifications = notificationsDTO?.userNotifications?.map(notificationDTO => {
       const { content, insertDate, eventType } = notificationDTO;
       return new Notification({ content, date: insertDate, type: eventType });
     });
+
+    notifications.totalRecords = notificationsDTO.totalRecords;
+    console.log(notifications);
+    return notifications;
   },
   create: async (type, date, content) => await NotificationRepository.create(type, date, content),
   // removeById: async () => {},

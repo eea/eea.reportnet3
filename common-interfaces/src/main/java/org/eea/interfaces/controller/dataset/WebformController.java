@@ -38,7 +38,7 @@ public interface WebformController {
    *
    * @param webformConfig the webform config
    */
-  @PostMapping("/webformConfig")
+  @PostMapping("/private/webformConfig")
   void insertWebformConfig(@RequestBody WebformConfigVO webformConfig);
 
   /**
