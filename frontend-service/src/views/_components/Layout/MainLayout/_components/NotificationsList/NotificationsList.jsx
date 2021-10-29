@@ -34,6 +34,11 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   const [columns, setColumns] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [paginationInfo, setPaginationInfo] = useState({
+    totalRecords: 0,
+    recordsPerPage: userContext.userProps.rowsPerPage,
+    firstPageRecord: 0
+  });
   // const [filteredData, setFilteredData] = useState([]);
   // const [isFiltered, setIsFiltered] = useState(false);
 
@@ -68,7 +73,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   useEffect(() => {
     if (!isEmpty(columns)) {
-      onLoadNotifications();
+      onLoadNotifications(0, paginationInfo.recordsPerPage);
     }
   }, [columns]);
 
@@ -116,12 +121,20 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   //   setFilteredData(data);
   // };
 
-  const onLoadNotifications = async () => {
+  const onChangePage = event => {
+    setPaginationInfo({ ...paginationInfo, recordsPerPage: event.rows, firstPageRecord: event.first });
+    onLoadNotifications(event.first, event.rows);
+  };
+
+  const onLoadNotifications = async (fRow, nRows) => {
     try {
       setIsLoading(true);
-      const unparsedNotifications = await NotificationService.all();
+      const unparsedNotifications = await NotificationService.all({
+        pageNum: Math.floor(fRow / nRows),
+        pageSize: nRows
+      });
       console.log({ unparsedNotifications });
-      const parsedNotifications = unparsedNotifications.map(notification => {
+      const parsedNotifications = unparsedNotifications.userNotifications.map(notification => {
         return NotificationService.parse({
           config: config.notifications.notificationSchema,
           content: notification.content,
@@ -185,13 +198,14 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       return (
         <DataTable
           autoLayout={true}
-          loading={false}
+          loading={isLoading}
+          onPage={onChangePage}
           paginator={true}
-          paginatorRight={<span>{`${resourcesContext.messages['totalRecords']}  ${notifications.length}`}</span>}
-          rows={10}
-          rowsPerPageOptions={[5, 10, 15]}
+          paginatorRight={<span>{`${resourcesContext.messages['totalRecords']}  ${paginationInfo.totalRecords}`}</span>}
+          rows={paginationInfo.recordsPerPage}
+          rowsPerPageOptions={[5, 10, 20]}
           summary="notificationsList"
-          totalRecords={notifications.length}
+          totalRecords={paginationInfo.totalRecords}
           value={notifications}>
           {columns}
         </DataTable>

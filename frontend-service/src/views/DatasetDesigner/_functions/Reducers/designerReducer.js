@@ -48,6 +48,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'GET_UNIQUES':
       return { ...state, uniqueConstraintsList: payload.data };
 
+    case 'GET_WEBFORMS':
+      return { ...state, webformOptions: payload.data };
+
     case 'HAS_WRITE_PERMISSIONS':
       return { ...state, hasWritePermissions: payload.hasWritePermissions };
 
@@ -206,6 +209,9 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'SET_ARE_PREFILLED_TABLES_DELETED':
       return { ...state, arePrefilledTablesDeleted: payload.arePrefilledTablesDeleted };
+
+    case 'SET_WEBFORM_OPTIONS_LOADING_STATUS':
+      return { ...state, webformOptionsLoadingStatus: payload.loadingStatus };
 
     default:
       return state;

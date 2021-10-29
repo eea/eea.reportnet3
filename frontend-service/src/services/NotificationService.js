@@ -17,38 +17,48 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const NotificationService = {
-  all: async () => {
-    // const notificationsDTO = await NotificationRepository.all();
-    const notificationsDTO = [
-      {
-        type: 'VALIDATE_DATA_INIT',
-        content: {
-          dataflowId: 666,
-          dataflowName: 'S39 DF',
-          dataProviderName: 'DESIGN',
-          datasetName: 'S4',
-          datasetId: 2911,
-          type: 'DESIGN'
-        },
-        date: new Date()
-      },
-      {
-        type: 'VALIDATION_FINISHED_EVENT',
-        content: {
-          dataflowId: 666,
-          dataflowName: 'S39 DF',
-          dataProviderName: 'DESIGN',
-          datasetName: 'S4',
-          datasetId: 2911,
-          type: 'DESIGN'
-        },
-        date: new Date()
-      }
-    ];
-    return notificationsDTO.map(notificationDTO => {
-      const { content, date, type } = notificationDTO;
-      return new Notification({ content, date, type });
+  all: async ({ pageNum, pageSize }) => {
+    const notificationsDTO = await NotificationRepository.all(pageNum, pageSize);
+    // const notificationsDTO = [
+    //   {
+    //     type: 'VALIDATE_DATA_INIT',
+    //     content: {
+    //       dataflowId: 666,
+    //       dataflowName: 'S39 DF',
+    //       dataProviderName: 'DESIGN',
+    //       datasetName: 'S4',
+    //       datasetId: 2911,
+    //       type: 'DESIGN'
+    //     },
+    //     date: new Date()
+    //   },
+    //   {
+    //     type: 'VALIDATION_FINISHED_EVENT',
+    //     content: {
+    //       dataflowId: 666,
+    //       dataflowName: 'S39 DF',
+    //       dataProviderName: 'DESIGN',
+    //       datasetName: 'S4',
+    //       datasetId: 2911,
+    //       type: 'DESIGN'
+    //     },
+    //     date: new Date()
+    //   }
+    // ];
+    console.log({ notificationsDTO });
+    notificationsDTO.userNotifications = notificationsDTO.data;
+    notificationsDTO.totalRecords = notificationsDTO.data.length;
+    console.log({ notificationsDTO });
+    const notifications = {};
+
+    notifications.userNotifications = notificationsDTO?.userNotifications?.map(notificationDTO => {
+      const { content, insertDate, eventType } = notificationDTO;
+      return new Notification({ content, date: insertDate, type: eventType });
     });
+
+    notifications.totalRecords = notificationsDTO.totalRecords;
+    console.log(notifications);
+    return notifications;
   },
   create: async (type, date, content) => await NotificationRepository.create(type, date, content),
   // removeById: async () => {},

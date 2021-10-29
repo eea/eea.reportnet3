@@ -1,4 +1,4 @@
 export const NotificationConfig = {
-  all: '/notifications/all',
-  create: '/notifications/create'
+  all: '/notification/findUserNotifications?pageNum={:pageNum}&pageSize={:pageSize}',
+  create: '/notification/createUserNotification'
 };

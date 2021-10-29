@@ -6,6 +6,7 @@ import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.AfterMapping;
@@ -16,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
- * The Interface SnapshotMapper.
+ * The Class ReleaseMapper.
  */
 @Mapper(componentModel = "spring")
 public abstract class ReleaseMapper implements IMapper<Snapshot, ReleaseVO> {
@@ -52,6 +53,11 @@ public abstract class ReleaseMapper implements IMapper<Snapshot, ReleaseVO> {
     if (snapshot.getReportingDataset().getDataProviderId() != null) {
       releaseVO.setDataProviderCode(representativeControllerZuul
           .findDataProviderById(snapshot.getReportingDataset().getDataProviderId()).getCode());
+      List<RepresentativeVO> representatives = representativeControllerZuul
+          .findRepresentativesByIdDataFlow(snapshot.getReportingDataset().getDataflowId());
+      representatives.stream().forEach(representative -> {
+        releaseVO.setRestrictFromPublic(representative.isRestrictFromPublic());
+      });
     }
   }
 

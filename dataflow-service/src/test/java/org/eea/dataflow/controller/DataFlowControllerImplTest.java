@@ -9,6 +9,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,8 +20,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
+import org.eea.dataflow.service.file.DataflowHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -31,6 +35,7 @@ import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.lock.service.LockService;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,6 +92,11 @@ public class DataFlowControllerImplTest {
   @Mock
   private LockService lockService;
 
+  @Mock
+  private DataflowHelper dataflowHelper;
+
+  @Mock
+  HttpServletResponse httpServletResponse;
 
   /**
    * Inits the mocks.
@@ -924,5 +934,59 @@ public class DataFlowControllerImplTest {
     doThrow(new EEAException()).when(dataflowService).getDatasetSummary(Mockito.anyLong());
     dataFlowControllerImpl.getDatasetSummaryByDataflowId(1L);
     Mockito.verify(dataflowService, times(1)).getDatasetSummary(Mockito.anyLong());
+  }
+
+  @Test
+  public void exportSchemaInformationTest() throws EEAException, IOException {
+    Mockito.doNothing().when(dataflowHelper).exportSchemaInformation(1L);
+    dataFlowControllerImpl.exportSchemaInformation(1L);
+    Mockito.verify(dataflowHelper, times(1)).exportSchemaInformation(Mockito.anyLong());
+  }
+
+  @Test
+  public void exportSchemaInformationEEAExceptionTest() throws EEAException, IOException {
+    Mockito.doThrow(EEAException.class).when(dataflowHelper).exportSchemaInformation(1L);
+    dataFlowControllerImpl.exportSchemaInformation(1L);
+    Mockito.verify(dataflowHelper, times(1)).exportSchemaInformation(Mockito.anyLong());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void downloadSchemaInformationIOExceptionTest() throws EEAException, IOException {
+    Mockito.when(dataflowHelper.downloadSchemaInformation(Mockito.any(), Mockito.any()))
+        .thenReturn(new File(""));
+    try {
+      dataFlowControllerImpl.downloadSchemaInformation(0L, "", httpServletResponse);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void downloadPublicSchemaInformationTest() throws EEAException, IOException {
+    dataFlowControllerImpl.downloadPublicSchemaInformation(1L);
+    Mockito.verify(dataflowHelper, times(1)).downloadPublicSchemaInformation(Mockito.anyLong());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void downloadPublicSchemaInformationEEAExceptionTest() throws EEAException, IOException {
+    Mockito.when(dataflowService.getPublicDataflowById(1L)).thenThrow(EEAException.class);
+    try {
+      dataFlowControllerImpl.downloadPublicSchemaInformation(1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void downloadPublicSchemaInformationIOExceptionTest() throws EEAException, IOException {
+    Mockito.when(dataflowHelper.downloadPublicSchemaInformation(1L)).thenThrow(IOException.class);
+    try {
+      dataFlowControllerImpl.downloadPublicSchemaInformation(1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
   }
 }

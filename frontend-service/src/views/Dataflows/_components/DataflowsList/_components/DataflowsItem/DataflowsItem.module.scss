@@ -1,7 +1,6 @@
 .container {
   position: relative;
   border: none;
-  background-color: var(--c-lilac-100);
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -19,7 +18,7 @@
       grid-template-rows: 15% 50% 25%;
       row-gap: 1rem;
       column-gap: 1.5rem;
-      color: var(--gray-110);
+      color: var(--main-font-color);
       padding: 1rem;
       .card_component {
         &_btn {
@@ -62,9 +61,11 @@
       }
     }
     &.DESIGN {
-      background-color: var(--c-lilac-100);
+      color: var(--main-font-color);
+      background: var(--card-design-dataflow-bg);
+
       &:hover {
-        background-color: #c2c8cf;
+        background: var(--card-design-dataflow-bg-hover);
       }
     }
     &.OPEN,
@@ -151,11 +152,17 @@
     font-size: 2.5rem;
     opacity: 0.6;
   }
+  .upperIcon {
+    grid-column: 1/2;
+    grid-row: 1/3;
+    margin: 0px;
+    font-size: 1.5rem;
+  }
 
   .dataflowDates {
     grid-column: 3/3;
     grid-row: 1/2;
-    color: var(--gray-110);
+    color: var(--main-font-color);
     font-size: 1rem;
     margin-left: auto;
     margin-right: 3rem;

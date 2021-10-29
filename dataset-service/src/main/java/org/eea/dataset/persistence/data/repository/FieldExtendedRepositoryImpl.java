@@ -18,7 +18,6 @@ import javax.persistence.Query;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.FieldValue;
-import org.eea.dataset.service.model.FieldValueWithLabel;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.multitenancy.TenantResolver;
@@ -30,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
+
 
 
 /**
@@ -70,48 +70,50 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * The Constant SORT_NUMBER_QUERY.
    */
   private static final String SORT_NUMBER_QUERY =
-      ",CASE WHEN is_numeric(fv.value)= true THEN CAST(fv.value as java.math.BigDecimal) END as orden ";
+      ",CASE WHEN is_numeric(fv.value)= true THEN CAST(fv.value as numeric) END as orden ";
 
   /**
    * The Constant SORT_DATE_QUERY.
    */
   private static final String SORT_DATE_QUERY =
-      ", CASE WHEN is_date(fv.value)= true THEN CAST(fv.value as java.sql.Date) END as orden ";
+      ", CASE WHEN is_date(fv.value)= true THEN CAST(fv.value as timestamp) END as orden ";
 
   /**
    * The Constant SORT_STRING_QUERY.
    */
-  private static final String SORT_STRING_QUERY = ",CAST(fv.value as java.lang.String) as orden ";
+  private static final String SORT_STRING_QUERY = ",CAST(fv.value as text) as orden ";
 
   /**
    * The Constant QUERY_1.
    */
-  private static final String QUERY_1 = "SELECT DISTINCT fv as fieldValue, tag as label ";
+  private static final String QUERY_1 =
+      "SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record, fv.geometry, tag.value as label ";
 
   /**
    * The Constant QUERY_2_WITHOUT_CONDITIONAL.
    */
   private static final String QUERY_2_WITHOUT_CONDITIONAL =
-      "FROM FieldValue fv, FieldValue tag  WHERE fv.idFieldSchema = :fieldSchemaId ";
+      "FROM field_value fv, field_value tag  WHERE fv.id_field_schema = :fieldSchemaId ";
 
   /**
    * The Constant QUERY_2_WITH_CONDITIONAL.
    */
   private static final String QUERY_2_WITH_CONDITIONAL =
-      "FROM FieldValue fv, FieldValue tag, FieldValue cond  WHERE fv.idFieldSchema = :fieldSchemaId ";
+      "FROM field_value fv, field_value tag, field_value cond  WHERE fv.id_field_schema = :fieldSchemaId ";
 
   /**
    * The Constant QUERY_3.
    */
   private static final String QUERY_3 =
-      "AND tag.idFieldSchema = :labelId AND fv.record.id = tag.record.id " + " AND fv.value <> '' "
+      "AND tag.id_field_schema = :labelId AND fv.id_record = tag.id_record "
+          + " AND fv.value <> '' "
           + " AND (:searchText IS NULL or LOWER(fv.value) like LOWER(CONCAT('%',:searchText,'%')) or LOWER(tag.value) like LOWER(CONCAT('%',:searchText,'%')) ) ";
 
   /**
    * The Constant QUERY_3_CONDITIONAL.
    */
   private static final String QUERY_3_CONDITIONAL =
-      "AND (cond.idFieldSchema = :conditionalId AND cond.value = :conditionalValue AND cond.record.id = fv.record.id or :conditionalId IS NULL) ";
+      "AND (cond.id_field_schema = :conditionalId AND cond.value = :conditionalValue AND cond.id_record = fv.id_record or :conditionalId IS NULL) ";
 
   /**
    * The Constant QUERY_ORDER.
@@ -144,7 +146,6 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
       Integer resultsNumber) throws DataIntegrityViolationException {
 
     List<FieldVO> fieldsVO = new ArrayList<>();
-    List<FieldValueWithLabel> fields = new ArrayList<>();
 
     StringBuilder queryBuilder = new StringBuilder();
     SortQueryType sortQueryType = SortQueryType.STRING;
@@ -153,7 +154,8 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
         || DataType.NUMBER_INTEGER.equals(dataTypePk))) {
       queryBuilder.append(SORT_NUMBER_QUERY);
       sortQueryType = SortQueryType.NUMBER;
-    } else if (dataTypePk != null && DataType.DATE.equals(dataTypePk)) {
+    } else if (dataTypePk != null
+        && (DataType.DATE.equals(dataTypePk) || DataType.DATETIME.equals(dataTypePk))) {
       queryBuilder.append(SORT_DATE_QUERY);
       sortQueryType = SortQueryType.DATE;
     } else {
@@ -166,31 +168,18 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     }
     queryBuilder.append(QUERY_ORDER);
 
-    Query query = entityManager.createQuery(queryBuilder.toString());
-    query.setParameter("fieldSchemaId", idPk);
-    query.setParameter("labelId", labelSchemaId);
-    query.setParameter("searchText", searchValue);
+    String finalQuery = queryBuilder.toString();
+    finalQuery = finalQuery.replace(":fieldSchemaId", "'" + idPk + "'")
+        .replace(":labelId", "'" + labelSchemaId + "'")
+        .replace(":searchText", "'" + searchValue + "'");
     if (StringUtils.isNotBlank(conditionalSchemaId)) {
-      query.setParameter("conditionalId", conditionalSchemaId);
-      query.setParameter("conditionalValue", conditionalValue);
+      finalQuery = finalQuery.replace(":conditionalId", "'" + conditionalSchemaId + "'")
+          .replace(":conditionalValue", "'" + conditionalValue + "'");
     }
-    query.setMaxResults(resultsNumber);
+    System.out.println(finalQuery);
+    Session session = (Session) entityManager.getDelegate();
 
-    List<Object[]> sqlResults = query.getResultList();
-    // Map the results of the query
-    for (Object[] row : sqlResults) {
-      FieldValueWithLabel fv = new FieldValueWithLabel();
-      fv.setFieldValue((FieldValue) row[0]);
-      fv.setLabel((FieldValue) row[1]);
-      fields.add(fv);
-    }
-    fields.stream().forEach(fExtended -> {
-      if (fExtended != null) {
-        FieldVO fieldVO = fieldNoValidationMapper.entityToClass(fExtended.getFieldValue());
-        fieldVO.setLabel(fExtended.getLabel().getValue());
-        fieldsVO.add(fieldVO);
-      }
-    });
+    fieldsVO = executeQueryfindByIdFieldSchemaWithTagOrdered(session, finalQuery);
 
     // Remove the duplicate values
     HashSet<String> seen = new HashSet<>();
@@ -199,12 +188,16 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     // Remove all values that are not of the correct type
     if (sortQueryType == SortQueryType.NUMBER) {
       fieldsVO.removeIf(e -> !stringIsNumeric(e.getValue()));
+      if (DataType.NUMBER_INTEGER.equals(dataTypePk)) {
+        fieldsVO.removeIf(e -> !stringIsInteger(e.getValue()));
+      }
     } else if (sortQueryType == SortQueryType.DATE) {
       fieldsVO.removeIf(e -> !stringIsDate(e.getValue()));
     }
 
     return fieldsVO;
   }
+
 
 
   /**
@@ -261,6 +254,35 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   }
 
   /**
+   * Execute queryfind by id field schema with tag ordered.
+   *
+   * @param session the session
+   * @param quericita the quericita
+   * @return the list
+   */
+  private List<FieldVO> executeQueryfindByIdFieldSchemaWithTagOrdered(Session session,
+      String quericita) {
+    return session.doReturningWork(new ReturningWork<List<FieldVO>>() {
+      @Override
+      public List<FieldVO> execute(Connection conn) throws SQLException {
+        try (PreparedStatement stmt = conn.prepareStatement(quericita);
+            ResultSet rs = stmt.executeQuery();) {
+          List<FieldVO> fields = new ArrayList<>();
+          while (rs.next()) {
+            FieldVO fieldVO = new FieldVO();
+            fieldVO.setId(rs.getString("id"));
+            fieldVO.setValue(rs.getString("value"));
+            fieldVO.setIdFieldSchema(rs.getString("id_field_schema"));
+            fieldVO.setLabel(rs.getString("label"));
+            fields.add(fieldVO);
+          }
+          return fields;
+        }
+      }
+    });
+  }
+
+  /**
    * List to string.
    *
    * @param datasetId the dataset id
@@ -285,6 +307,24 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     }
     try {
       Double.parseDouble(strNum);
+    } catch (NumberFormatException nfe) {
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * String is integer.
+   *
+   * @param strNum the str num
+   * @return true, if successful
+   */
+  private boolean stringIsInteger(String strNum) {
+    if (strNum == null) {
+      return false;
+    }
+    try {
+      Integer.parseInt(strNum);
     } catch (NumberFormatException nfe) {
       return false;
     }

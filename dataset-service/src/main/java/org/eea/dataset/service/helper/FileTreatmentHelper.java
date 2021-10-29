@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -52,8 +53,11 @@ import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
@@ -179,6 +183,9 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private IFileParserFactory fileParserFactory;
 
+  @Autowired
+  private NotificationControllerZuul notificationControlerZuul;
+
   /**
    * Initialize the executor service.
    */
@@ -212,6 +219,14 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
       boolean replace, Long integrationId, String delimiter) throws EEAException {
+
+    UserNotificationVO userNotificationVO = new UserNotificationVO();
+    userNotificationVO.setEventType(EventType.DATASET_DATA_LOADING_INIT.toString());
+    userNotificationVO.setInsertDate(new Date());
+    UserNotificationContentVO content = new UserNotificationContentVO();
+    content.setDatasetId(datasetId);
+    userNotificationVO.setContent(content);
+    notificationControlerZuul.createUserNotificationPrivate(userNotificationVO);
 
     if (delimiter != null && delimiter.length() > 1) {
       LOG_ERROR.error("the size of the delimiter cannot be greater than 1");
@@ -427,7 +442,7 @@ public class FileTreatmentHelper implements DisposableBean {
       List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
       String delimiter, String mimeType) throws IOException, EEAException {
     if (null != integrationVO) {
-      fmeFileProcess(datasetId, files.get(0), integrationVO, mimeType);
+      fmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId, replace);
     } else {
       importExecutorService.submit(() -> {
         try {
@@ -440,6 +455,7 @@ public class FileTreatmentHelper implements DisposableBean {
     }
   }
 
+
   /**
    * Fme file process.
    *
@@ -447,12 +463,13 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param file the file
    * @param integrationVO the integration VO
    * @param mimeType the mime type
+   * @param tableSchemaId the table schema id
+   * @param replace the replace
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
-   * @throws FeignException the feign exception
    */
   private void fmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO,
-      String mimeType) throws IOException, EEAException {
+      String mimeType, String tableSchemaId, boolean replace) throws IOException, EEAException {
 
     LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
     boolean error = false;
@@ -479,12 +496,21 @@ public class FileTreatmentHelper implements DisposableBean {
         releaseLockReleasingProcess(datasetId);
       }
 
+      // delete precious data if necessary
+      wipeData(datasetId, tableSchemaId, replace);
+
+      // Wait a second before continue to avoid duplicated insertions
+      Thread.sleep(1000);
+
       if ((Integer) integrationController
           .executeIntegrationProcess(IntegrationToolTypeEnum.FME,
               IntegrationOperationTypeEnum.IMPORT, file.getName(), datasetId, integrationVO)
           .getExecutionResultParams().get("id") == 0) {
         error = true;
       }
+    } catch (InterruptedException e) {
+      LOG_ERROR.error("Error sleeping after wiping data");
+      Thread.currentThread().interrupt();
     }
 
     FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
@@ -644,7 +670,7 @@ public class FileTreatmentHelper implements DisposableBean {
       if (null != tableSchemaId) {
         datasetService.deleteTableBySchema(tableSchemaId, datasetId);
       } else {
-        datasetService.deleteImportData(datasetId, false);
+        datasetService.deleteImportData(datasetId, true);
       }
     }
   }

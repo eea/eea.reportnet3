@@ -437,7 +437,20 @@ public enum EventType {
 
   /** The export schema information failed event. */
   EXPORT_SCHEMA_INFORMATION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "export_schema_information_failed_event", true);
+      "export_schema_information_failed_event", true),
+
+
+  // Front Notifications
+
+  /** The dataset data loading init. */
+  DATASET_DATA_LOADING_INIT(LiteralConstants.DATA_REPORTING_TOPIC, "dataset_data_loading_init",
+      true),
+
+  /** The document uploading init info. */
+  DOCUMENT_UPLOADING_INIT_INFO(LiteralConstants.DATA_REPORTING_TOPIC,
+      "document_uploading_init_info", true)
+
+  ;
 
   /** The topic. */
   private String topic;
