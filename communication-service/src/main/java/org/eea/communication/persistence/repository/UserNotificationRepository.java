@@ -16,6 +16,7 @@ public interface UserNotificationRepository
    * Find by user id.
    *
    * @param userId the user id
+   * @param pageable the pageable
    * @return the list
    */
   List<UserNotification> findByUserId(String userId, Pageable pageable);

@@ -69,6 +69,8 @@ public class NotificationControllerImpl implements NotificationController {
   /**
    * Find user notifications by user.
    *
+   * @param pageNum the page num
+   * @param pageSize the page size
    * @return the list
    */
   @Override
