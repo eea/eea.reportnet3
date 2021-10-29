@@ -700,7 +700,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
       String key = auxDatasetMap.getKey();
       Long testDatasetId = testDatasetSchamasMap.get(key);
-      datasetIdOldNew.put(auxDatasetMap.getValue(), testDatasetId);
+      if (null != testDatasetId) {
+        datasetIdOldNew.put(auxDatasetMap.getValue(), testDatasetId);
+      }
     }
     for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
       query = query.replaceAll(DATASET + auxDatasetOldAndNew.getKey(),
@@ -734,7 +736,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
       String key = auxDatasetMap.getKey();
       Long datasetDatacollection = dataCollectionSchamasMap.get(key);
-      datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+      if (null != datasetDatacollection) {
+        datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+      }
     }
     for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
       query = query.replaceAll(DATASET + auxDatasetOldAndNew.getKey(),
@@ -767,8 +771,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
       String key = auxDatasetMap.getKey();
-      Long datasetDatacollection = euDatasetSchamasMap.get(key);
-      datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+      Long eudataset = euDatasetSchamasMap.get(key);
+      if (null != eudataset) {
+        datasetIdOldNew.put(auxDatasetMap.getValue(), eudataset);
+      }
     }
 
     for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
@@ -823,8 +829,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
       if (datasetIdList.contains(auxDatasetMap.getKey())) {
         String key = auxDatasetMap.getKey();
-        Long datasetDatacollection = reportingDatasetSchemasMap.get(key);
-        datasetIdOldNew.put(auxDatasetMap.getValue(), datasetDatacollection);
+        Long reportingDataset = reportingDatasetSchemasMap.get(key);
+        if (null != reportingDataset) {
+          datasetIdOldNew.put(auxDatasetMap.getValue(), reportingDataset);
+        }
       }
     }
     for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
