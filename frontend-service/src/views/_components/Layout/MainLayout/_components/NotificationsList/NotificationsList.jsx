@@ -122,39 +122,51 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     </div>
   );
 
-  return (
-    isNotificationVisible && (
-      <Dialog
-        blockScroll={false}
-        className="edit-table"
-        contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
-        header={resourcesContext.messages['notifications']}
-        modal={true}
-        onHide={() => setIsNotificationVisible(false)}
-        style={{ width: '60%' }}
-        visible={isNotificationVisible}
-        zIndex={3100}>
-        {notificationContext.all.length > 0 ? (
-          <DataTable
-            autoLayout={true}
-            loading={false}
-            paginator={true}
-            paginatorRight={<span>{`${resourcesContext.messages['totalRecords']}  ${notifications.length}`}</span>}
-            rows={10}
-            rowsPerPageOptions={[5, 10, 15]}
-            summary={resourcesContext.messages['titleValidations']}
-            totalRecords={notifications.length}
-            value={notifications}>
-            {columns}
-          </DataTable>
-        ) : (
-          <div className={styles.notificationsWithoutTable}>
-            <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
-          </div>
-        )}
-      </Dialog>
-    )
-  );
+  const renderNotificationsListContent = () => {
+    if (isNotificationVisible) {
+      return (
+        <Dialog
+          blockScroll={false}
+          className="edit-table"
+          contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
+          header={resourcesContext.messages['notifications']}
+          modal={true}
+          onHide={() => setIsNotificationVisible(false)}
+          style={{ width: '60%' }}
+          visible={isNotificationVisible}
+          zIndex={3100}>
+          {renderNotificationsListTable()}
+        </Dialog>
+      );
+    }
+  };
+
+  const renderNotificationsListTable = () => {
+    if (notificationContext.all.length > 0) {
+      return (
+        <DataTable
+          autoLayout={true}
+          loading={false}
+          paginator={true}
+          paginatorRight={<span>{`${resourcesContext.messages['totalRecords']}  ${notifications.length}`}</span>}
+          rows={10}
+          rowsPerPageOptions={[5, 10, 15]}
+          summary={resourcesContext.messages['titleValidations']}
+          totalRecords={notifications.length}
+          value={notifications}>
+          {columns}
+        </DataTable>
+      );
+    } else {
+      return (
+        <div className={styles.notificationsWithoutTable}>
+          <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
+        </div>
+      );
+    }
+  };
+
+  return renderNotificationsListContent();
 };
 
 export { NotificationsList };
