@@ -17,6 +17,7 @@ import { Dialog } from 'views/_components/Dialog';
 import { DataTable } from 'views/_components/DataTable';
 // import { Filters } from 'views/_components/Filters';
 import { LevelError } from 'views/_components/LevelError';
+import { Spinner } from 'views/_components/Spinner';
 
 import { NotificationService } from 'services/NotificationService';
 
@@ -219,11 +220,19 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         </DataTable>
       );
     } else {
-      return (
-        <div className={styles.notificationsWithoutTable}>
-          <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
-        </div>
-      );
+      if (isLoading) {
+        return (
+          <div className={styles.loadingSpinner}>
+            <Spinner className={styles.spinnerPosition} />
+          </div>
+        );
+      } else {
+        return (
+          <div className={styles.notificationsWithoutTable}>
+            <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
+          </div>
+        );
+      }
     }
   };
 
