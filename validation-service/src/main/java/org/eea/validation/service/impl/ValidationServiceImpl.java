@@ -249,8 +249,6 @@ public class ValidationServiceImpl implements ValidationService {
     } catch (RuntimeException e) {
       LOG_ERROR.error("The Dataset Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(dataset, e);
-    } finally {
-      kieSession.dispose();
     }
     return dataset.getDatasetValidations();
   }
@@ -271,8 +269,6 @@ public class ValidationServiceImpl implements ValidationService {
     } catch (RuntimeException e) {
       LOG_ERROR.error("The Table Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(table, e);
-    } finally {
-      kieSession.dispose();
     }
     return table.getTableValidations() == null ? new ArrayList<>() : table.getTableValidations();
   }
@@ -296,8 +292,6 @@ public class ValidationServiceImpl implements ValidationService {
     } catch (RuntimeException e) {
       LOG_ERROR.error("The Record Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(record, e);
-    } finally {
-      kieSession.dispose();
     }
 
     return null == record.getRecordValidations() || record.getRecordValidations().isEmpty()
@@ -323,8 +317,6 @@ public class ValidationServiceImpl implements ValidationService {
     } catch (RuntimeException e) {
       LOG_ERROR.error("The Field Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(field, e);
-    } finally {
-      kieSession.dispose();
     }
     return null == field.getFieldValidations() || field.getFieldValidations().isEmpty()
         ? new ArrayList<>()
