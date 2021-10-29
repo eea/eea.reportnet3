@@ -37,9 +37,11 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
       setRun(false);
     } else {
       if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
-        setHelpIndex({ helpIndex: helpIndex + (data.action === ACTIONS.PREV ? -1 : 1) });
-      } else if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
-        setRun({ run: false });
+        setHelpIndex(helpIndex + (data.action === 'prev' ? -1 : 1));
+      } else {
+        if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+          setRun(false);
+        }
       }
     }
   };
