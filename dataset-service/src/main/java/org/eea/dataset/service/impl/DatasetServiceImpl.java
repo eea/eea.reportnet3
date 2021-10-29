@@ -93,6 +93,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -1482,7 +1483,14 @@ public class DatasetServiceImpl implements DatasetService {
             // save values
             TenantResolver
                 .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
-            recordRepository.saveAll(recordDesignValuesList);
+            try {
+              storeRecords(targetDataset, recordDesignValuesList);
+            } catch (IOException | SQLException e) {
+              LOG_ERROR.error(
+                  "Error saving the list of records into the dataset {} when copying data",
+                  targetDataset);
+            }
+
             // copy attachments too
             if (!attachments.isEmpty()) {
               attachmentRepository.saveAll(attachments);
@@ -1703,7 +1711,13 @@ public class DatasetServiceImpl implements DatasetService {
       if (!targetRecords.isEmpty()) {
         // save values
         TenantResolver.setTenantName(String.format(DATASET_ID, targetDataset.getId()));
-        recordRepository.saveAll(targetRecords);
+        try {
+          storeRecords(targetDataset.getId(), targetRecords);
+        } catch (IOException | SQLException e) {
+          LOG_ERROR.error(
+              "Error saving the list of records into the dataset {} when executing a prefill data",
+              targetDataset.getId());
+        }
         // copy attachments too
         if (!attachments.isEmpty()) {
           attachmentRepository.saveAll(attachments);
@@ -2921,9 +2935,8 @@ public class DatasetServiceImpl implements DatasetService {
           new File(directoryDataflow, "dataProvider-" + representative.getDataProviderId());
       // we create the dataprovider folder to save it andwe always delete it and put new files
       FileUtils.deleteDirectory(directoryDataProvider);
-
-      if (!representative.isRestrictFromPublic()) {
-        // we check if the representative have permit to do it
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+      if (!TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
         createAllDatasetFiles(dataflowId, representative.getDataProviderId());
       } else {
         // we delete all file names in the table dataset
@@ -2954,6 +2967,7 @@ public class DatasetServiceImpl implements DatasetService {
     // we compound the route and create the file
     File file = null;
     if (dataProviderId != null) {
+      checkRestrictFromPublic(dataflowId, dataProviderId);
       file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
           "dataProvider-" + dataProviderId.toString()), fileName);
     } else {
@@ -3264,6 +3278,7 @@ public class DatasetServiceImpl implements DatasetService {
           // and we have found the design dataset
           // with data to be copied into the
           // target dataset
+          LOG.info("Prefilling data into the datasetId {}.", datasetId);
           spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
 
           // create zip to the reference
@@ -3622,5 +3637,23 @@ public class DatasetServiceImpl implements DatasetService {
     error.setTypeEntity(validation.getTypeEntity().name());
     error.setValidationDate(validation.getValidationDate());
     error.setShortCode(validation.getShortCode());
+  }
+
+  /**
+   * Check restrict from public.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @throws EEAException the EEA exception
+   */
+  private void checkRestrictFromPublic(Long dataflowId, Long dataProviderId) throws EEAException {
+    List<RepresentativeVO> representatives =
+        representativeControllerZuul.findRepresentativesByDataFlowIdAndProviderIdList(dataflowId,
+            Arrays.asList(dataProviderId));
+    for (RepresentativeVO representative : representatives) {
+      if (representative.isRestrictFromPublic()) {
+        throw new EEAException(EEAErrorMessage.IS_RESTRICT_FROM_PUBLIC);
+      }
+    }
   }
 }

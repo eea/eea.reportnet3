@@ -72,7 +72,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0 0 2vw 1vw;
+  margin: 0 0 2vw 0;
 
   .datasetConfigurationButtons {
     display: flex;
@@ -153,4 +153,10 @@
       color: var(--main-font-color);
     }
   }
+}
+
+.reloadWebformOptionsDialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

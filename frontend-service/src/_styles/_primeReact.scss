@@ -54,6 +54,10 @@ body .p-checkbox .p-checkbox-box:not(.p-disabled).p-focus {
   -moz-box-shadow: var(--checkbox-box-box-shadow-focus);
   box-shadow: var(--checkbox-box-box-shadow-focus);
   border-color: var(--checkbox-box-bg-focus);
+  &:not(:focus) {
+    box-shadow: none;
+    border: var(--checkbox-box-border);
+  }
 }
 body .p-checkbox .p-checkbox-box.p-highlight {
   border-color: var(--checkbox-box-highlight-border-color);
@@ -538,8 +542,8 @@ body .p-slider:not(.p-disabled) .p-slider-handle:hover {
 body .p-datepicker {
   padding: 0.857em;
   min-width: 20em;
-  background-color: #ffffff;
-  color: #404040;
+  background-color: var(--bg);
+  color: var(--main-font-color);
   border: 1px solid #a6a6a6;
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
@@ -553,17 +557,18 @@ body .p-datepicker:not(.p-datepicker-inline) {
 }
 body .p-datepicker:not(.p-disabled) .p-datepicker-header .p-datepicker-prev:hover,
 body .p-datepicker:not(.p-disabled) .p-datepicker-header .p-datepicker-next:hover {
-  color: #004494;
+  color: var(--accent-color);
 }
 body .p-datepicker:not(.p-disabled) table td span:not(.p-highlight):not(.p-disabled):hover {
-  background-color: #eaeaea;
+  background-color: var(--bg);
+  color: var(--main-font-color);
 }
 body .p-datepicker:not(.p-disabled) .p-monthpicker .p-monthpicker-month:not(.p-highlight):hover {
-  background-color: #eaeaea;
+  background-color: var(--bg);
 }
 body .p-datepicker .p-datepicker-header {
   padding: 0.429em 0.857em 0.429em 0.857em;
-  background-color: #ffffff;
+  background-color: var(--bg);
   color: #404040;
   -moz-border-radius: 0;
   -webkit-border-radius: 0;
@@ -573,7 +578,7 @@ body .p-datepicker .p-datepicker-header .p-datepicker-prev,
 body .p-datepicker .p-datepicker-header .p-datepicker-next {
   cursor: pointer;
   top: 0;
-  color: #a6a6a6;
+  color: var(--main-font-color);
   -moz-transition: color 0.2s, box-shadow 0.2s;
   -o-transition: color 0.2s, box-shadow 0.2s;
   -webkit-transition: color 0.2s, box-shadow 0.2s;
@@ -601,7 +606,7 @@ body .p-datepicker table td {
 body .p-datepicker table td > span {
   display: block;
   text-align: center;
-  color: #404040;
+  color: var(--main-font-color);
   cursor: pointer;
   padding: 0.5em;
   -moz-border-radius: 3px;
@@ -609,16 +614,16 @@ body .p-datepicker table td > span {
   border-radius: 3px;
 }
 body .p-datepicker table td > span.p-highlight {
-  color: #ffffff;
-  background-color: #004494;
+  color: var(--main-font-color-reverse);
+  background-color: var(--accent-color);
 }
 body .p-datepicker table td.p-datepicker-today > span {
   background-color: #d0d0d0;
   color: #404040;
 }
 body .p-datepicker table td.p-datepicker-today > span.p-highlight {
-  color: #ffffff;
-  background-color: #004494;
+  color: var(--main-font-color-reverse);
+  background-color: var(--accent-color);
 }
 body .p-datepicker .p-datepicker-buttonbar {
   border-top: 1px solid #d8dae2;
@@ -648,6 +653,11 @@ body .p-datepicker .p-monthpicker .p-monthpicker-month {
 body .p-datepicker .p-monthpicker .p-monthpicker-month.p-highlight {
   color: #ffffff;
   background-color: #004494;
+}
+body .p-datepicker-month,
+body .p-datepicker-year {
+  background-color: var(--bg);
+  color: var(--main-font-color);
 }
 body .p-datepicker.p-datepicker-timeonly {
   padding: 0;
@@ -751,14 +761,14 @@ body .p-fileupload .p-progressbar {
   background-color: #f4f4f4;
 }
 body .p-fileupload-choose:not(.p-disabled):hover {
-  background-color: #116fbf;
-  color: #ffffff;
-  border-color: #116fbf;
+  background-color: var(--button-primary-bg-hover);
+  color: var(--button-primary-color-hover);
+  border-color: var(--button-primary-border-color-hover);
 }
 body .p-fileupload-choose:not(.p-disabled):active {
-  background-color: #005b9f;
-  color: #ffffff;
-  border-color: #005b9f;
+  background-color: var(--button-primary-bg-active);
+  color: var(--button-primary-color-active);
+  border-color: var(--button-primary-border-color-active);
 }
 body .p-password-panel {
   padding: 12px;
@@ -1138,7 +1148,7 @@ body .p-fieldset .p-fieldset-content {
   padding: 0;
 }
 body .p-accordion .p-accordion-tab {
-  margin-bottom: 2px;
+  margin-bottom: 0.5rem;
 }
 body .p-accordion .p-accordion-header a {
   padding: 0.571em 1em;
@@ -1244,7 +1254,7 @@ body .p-tabview .p-tabview-panels .p-tabview-panel {
   padding: 0;
 }
 body .p-toolbar {
-  background-color: var(--bg);
+  background-color: var(--toolbar-panel-bg);
   border: var(--toolbar-border);
   padding: 0.571em 1em;
   -moz-border-radius: 3px;
@@ -2330,6 +2340,7 @@ body .p-dialog .p-dialog-content {
   padding: 1em;
   max-height: 90vh;
   overflow: auto;
+  border-width: var(--dialog-content-border-width);
 }
 
 body .p-dialog .p-dialog-footer {
@@ -2861,6 +2872,7 @@ body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link {
 body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link .p-menuitem-text {
   color: var(--tabview-color);
 }
+
 body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link .p-menuitem-icon {
   color: var(--tabview-color);
   margin-right: 0.5em;
@@ -2870,8 +2882,8 @@ body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem .p-menuitem-link:focus {
   outline-offset: 0;
 }
 body .p-tabmenu .p-tabmenu-nav .p-tabmenuitem:not(.p-highlight):not(.p-disabled):hover .p-menuitem-link {
-  background-color: #dbdbdb;
-  border: 1px solid #dbdbdb;
+  background-color: var(--tabview-highlight-bg-hover);
+  border: 1px solid var(--tabview-highlight-bg-hover);
 }
 body
   .p-tabmenu
@@ -2879,7 +2891,7 @@ body
   .p-tabmenuitem:not(.p-highlight):not(.p-disabled):hover
   .p-menuitem-link
   .p-menuitem-text {
-  color: var(--tabview-color);
+  color: var(--tabview-highlight-color-hover);
 }
 body
   .p-tabmenu

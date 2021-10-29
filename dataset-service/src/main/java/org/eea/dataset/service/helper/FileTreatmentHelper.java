@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -52,8 +53,11 @@ import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
@@ -179,6 +183,9 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private IFileParserFactory fileParserFactory;
 
+  @Autowired
+  private NotificationControllerZuul notificationControlerZuul;
+
   /**
    * Initialize the executor service.
    */
@@ -212,6 +219,14 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
       boolean replace, Long integrationId, String delimiter) throws EEAException {
+
+    UserNotificationVO userNotificationVO = new UserNotificationVO();
+    userNotificationVO.setEventType(EventType.DATASET_DATA_LOADING_INIT.toString());
+    userNotificationVO.setInsertDate(new Date());
+    UserNotificationContentVO content = new UserNotificationContentVO();
+    content.setDatasetId(datasetId);
+    userNotificationVO.setContent(content);
+    notificationControlerZuul.createUserNotificationPrivate(userNotificationVO);
 
     if (delimiter != null && delimiter.length() > 1) {
       LOG_ERROR.error("the size of the delimiter cannot be greater than 1");
@@ -495,6 +510,7 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     } catch (InterruptedException e) {
       LOG_ERROR.error("Error sleeping after wiping data");
+      Thread.currentThread().interrupt();
     }
 
     FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
