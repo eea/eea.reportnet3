@@ -1,7 +1,13 @@
 package org.eea.communication.service.impl;
 
+import static org.junit.Assert.assertNotNull;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import org.eea.communication.mapper.UserNotificationMapper;
+import org.eea.communication.persistence.repository.UserNotificationRepository;
 import org.eea.kafka.domain.EventType;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 
 /**
@@ -24,6 +32,14 @@ public class NotificationServiceImplTest {
   /** The template. */
   @Mock
   private SimpMessagingTemplate template;
+
+  /** The user notification repository. */
+  @Mock
+  private UserNotificationRepository userNotificationRepository;
+
+  /** The user notification mapper. */
+  @Mock
+  private UserNotificationMapper userNotificationMapper;
 
   /**
    * Inits the mocks.
@@ -40,8 +56,8 @@ public class NotificationServiceImplTest {
   public void sendTest1() {
     Mockito.doNothing().when(template).convertAndSendToUser(Mockito.anyString(),
         Mockito.anyString(), Mockito.any());
-    Assert.assertTrue(notificationServiceImpl.send("user", EventType.IMPORT_REPORTING_COMPLETED_EVENT,
-        new HashMap<String, Object>()));
+    Assert.assertTrue(notificationServiceImpl.send("user",
+        EventType.IMPORT_REPORTING_COMPLETED_EVENT, new HashMap<String, Object>()));
   }
 
   /**
@@ -51,8 +67,8 @@ public class NotificationServiceImplTest {
   public void sendTest2() {
     Mockito.doNothing().when(template).convertAndSendToUser(Mockito.anyString(),
         Mockito.anyString(), Mockito.any());
-    Assert.assertFalse(notificationServiceImpl.send(null, EventType.IMPORT_REPORTING_COMPLETED_EVENT,
-        new HashMap<String, Object>()));
+    Assert.assertFalse(notificationServiceImpl.send(null,
+        EventType.IMPORT_REPORTING_COMPLETED_EVENT, new HashMap<String, Object>()));
   }
 
   /**
@@ -75,5 +91,19 @@ public class NotificationServiceImplTest {
         Mockito.anyString(), Mockito.any());
     Assert.assertFalse(
         notificationServiceImpl.send("user", EventType.IMPORT_REPORTING_COMPLETED_EVENT, null));
+  }
+
+  /**
+   * Find user notifications by user paginated test.
+   */
+  @Test
+  public void findUserNotificationsByUserPaginatedTest() {
+    UsernamePasswordAuthenticationToken authentication =
+        new UsernamePasswordAuthenticationToken("user", "123", new HashSet<>());
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "userIdTest");
+    authentication.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    assertNotNull(notificationServiceImpl.findUserNotificationsByUserPaginated(0, 10));
   }
 }
