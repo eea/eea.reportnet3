@@ -315,7 +315,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       List<RepresentativeVO> representatives =
           representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
       for (RepresentativeVO representative : representatives) {
-        snap.setRestrictFromPublic(representative.isRestrictFromPublic());
+        if (snap.getReportingDataset().getDataProviderId()
+            .equals(representative.getDataProviderId())) {
+          snap.setRestrictFromPublic(representative.isRestrictFromPublic());
+        }
       }
 
       snap.setAutomatic(
