@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -206,6 +207,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The document controller zuul. */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
+
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -915,10 +921,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     if (!EventType.RELEASE_COMPLETED_EVENT.equals(event)) {
       try {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(event, value,
-            NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .datasetId(datasetId).error(error).build());
+        NotificationVO notificationVO = NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .datasetId(datasetId).error(error).build();
+        notificationVO.setDatasetName(
+            dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName());
+        Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
+        notificationVO.setDataflowId(dataflowId);
+        notificationVO
+            .setDataflowName(dataflowControllerZuul.getMetabaseById(dataflowId).getName());
+        kafkaSenderUtils.releaseNotificableKafkaEvent(event, value, notificationVO);
       } catch (EEAException ex) {
         LOG.error("Error realeasing event {} due to error {}", event, ex.getMessage(), ex);
       }

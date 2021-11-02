@@ -447,8 +447,6 @@ public class FileTreatmentHelperTest {
         .thenReturn(integrationVO);
     Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(executionResultVO);
-    Mockito.doNothing().when(notificationControllerZuul)
-        .createUserNotificationPrivate(Mockito.any());
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false, 1L,
         null);

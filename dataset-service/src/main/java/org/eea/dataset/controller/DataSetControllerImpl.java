@@ -21,14 +21,15 @@ import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -112,6 +113,10 @@ public class DataSetControllerImpl implements DatasetController {
   /** The lock service. */
   @Autowired
   private LockService lockService;
+
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
 
   /**
    * Gets the data tables values.
@@ -247,6 +252,14 @@ public class DataSetControllerImpl implements DatasetController {
           value = "integrationId", required = false) Long integrationId,
       @ApiParam(type = "String", value = "delimiter of file",
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    userNotificationContentVO.setDatasetId(datasetId);
+    userNotificationContentVO.setProviderId(providerId);
+    notificationControllerZuul.createUserNotificationPrivate("DATASET_DATA_LOADING_INIT",
+        userNotificationContentVO);
+
     try {
       fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
           delimiter);
@@ -469,6 +482,13 @@ public class DataSetControllerImpl implements DatasetController {
           example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
               required = false) Boolean deletePrefilledTables) {
 
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    userNotificationContentVO.setDatasetId(datasetId);
+    userNotificationContentVO.setProviderId(providerId);
+    notificationControllerZuul.createUserNotificationPrivate("DELETE_DATASET_DATA_INIT",
+        userNotificationContentVO);
+
     // Rest API only: Check if the dataflow belongs to the dataset
     if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -508,6 +528,13 @@ public class DataSetControllerImpl implements DatasetController {
           example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @ApiParam(type = "Long", value = "provider Id",
           example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    userNotificationContentVO.setDatasetId(datasetId);
+    userNotificationContentVO.setProviderId(providerId);
+    notificationControllerZuul.createUserNotificationPrivate("DELETE_TABLE_DATA_INIT",
+        userNotificationContentVO);
 
     // Rest API only: Check if the dataflow belongs to the dataset
     if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
@@ -1055,6 +1082,12 @@ public class DataSetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "mime type (extension file)",
           example = "csv") @RequestParam("mimeType") String mimeType) {
     LOG.info("Export dataset data from datasetId {}, with type {}", datasetId, mimeType);
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDatasetId(datasetId);
+    notificationControllerZuul.createUserNotificationPrivate("EXPORT_DATASET_DATA",
+        userNotificationContentVO);
+
     fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
 
   }
