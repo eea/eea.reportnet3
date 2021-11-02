@@ -93,6 +93,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -2934,9 +2935,8 @@ public class DatasetServiceImpl implements DatasetService {
           new File(directoryDataflow, "dataProvider-" + representative.getDataProviderId());
       // we create the dataprovider folder to save it andwe always delete it and put new files
       FileUtils.deleteDirectory(directoryDataProvider);
-
-      if (!representative.isRestrictFromPublic()) {
-        // we check if the representative have permit to do it
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+      if (!TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
         createAllDatasetFiles(dataflowId, representative.getDataProviderId());
       } else {
         // we delete all file names in the table dataset
