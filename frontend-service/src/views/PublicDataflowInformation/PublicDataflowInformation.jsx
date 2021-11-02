@@ -86,7 +86,7 @@ export const PublicDataflowInformation = withRouter(
                 className={styles.downloadIcon}
                 key={publicFileName}
                 onClick={() => onFileDownload(rowData.dataProviderId, publicFileName)}>
-                <FontAwesomeIcon data-for={publicFileName} data-tip icon={AwesomeIcons('7z')} />
+                <FontAwesomeIcon data-for={publicFileName} data-tip icon={AwesomeIcons('7z')} role="button" />
                 <ReactTooltip
                   border={true}
                   className={styles.tooltipClass}
@@ -128,7 +128,7 @@ export const PublicDataflowInformation = withRouter(
             className={styles.downloadIcon}
             key={rowData.publicFileName}
             onClick={() => onFileDownload(null, rowData.publicFileName)}>
-            <FontAwesomeIcon data-for={rowData.publicFileName} data-tip icon={AwesomeIcons('7z')} />
+            <FontAwesomeIcon data-for={rowData.publicFileName} data-tip icon={AwesomeIcons('7z')} role="button" />
             <ReactTooltip
               border={true}
               className={styles.tooltipClass}
@@ -404,7 +404,7 @@ export const PublicDataflowInformation = withRouter(
       return (
         <div className={styles.filesContainer}>
           <span className={styles.downloadIcon} key={rowData.file} onClick={() => onDownloadDocument(rowData)}>
-            <FontAwesomeIcon data-for={rowData.file} data-tip icon={AwesomeIcons('7z')} />
+            <FontAwesomeIcon data-for={rowData.file} data-tip icon={AwesomeIcons('7z')} role="button" />
             <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id={rowData.file} place="top">
               <span>{rowData.file}</span>
             </ReactTooltip>

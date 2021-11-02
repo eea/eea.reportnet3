@@ -257,6 +257,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
                 data-for={publicFileName.fileName}
                 data-tip
                 icon={AwesomeIcons('7z')}
+                role="button"
               />
               <ReactTooltip
                 border={true}
@@ -306,6 +307,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
                 data-for={referencePublicFilesName.fileName}
                 data-tip
                 icon={AwesomeIcons('7z')}
+                role="button"
               />
               <ReactTooltip
                 border={true}
