@@ -1,6 +1,7 @@
 package org.eea.kafka.utils;
 
 import java.util.HashMap;
+import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.kafka.domain.EventType;
@@ -78,8 +79,22 @@ public class KafkaSenderUtilsTest {
     Mockito.when(notificableEventFactory.getNotificableEventHandler(Mockito.any()))
         .thenReturn(notificableEventHandler);
     Mockito.when(notificableEventHandler.getMap(Mockito.any())).thenReturn(null);
+
+    Map<String, Object> notificationMap = new HashMap<String, Object>();
+    notificationMap.put("dataflowId", 1L);
+    notificationMap.put("dataflowName", "dfName");
+    notificationMap.put("datasetId", 2L);
+    notificationMap.put("datasetName", "dsName");
+    notificationMap.put("dataProviderName", 3L);
+
+    Mockito
+        .when(notificableEventFactory
+            .getNotificableEventHandler(EventType.VALIDATION_FINISHED_EVENT).getMap(Mockito.any()))
+        .thenReturn(notificationMap);
+
     Mockito.doNothing().when(notificationControllerZuul)
-        .createUserNotificationPrivate(Mockito.any());
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION,
         new HashMap<>(), new NotificationVO());
     Mockito.verify(kafkaSender, Mockito.times(1)).sendMessage(Mockito.any());

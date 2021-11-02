@@ -3,7 +3,9 @@ package org.eea.dataset.controller;
 import java.util.List;
 import org.eea.dataset.service.EUDatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -35,6 +37,9 @@ public class EUDatasetControllerImpl implements EUDatasetController {
   @Autowired
   private EUDatasetService euDatasetService;
 
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
 
   /**
    * The Constant LOG.
@@ -78,6 +83,12 @@ public class EUDatasetControllerImpl implements EUDatasetController {
   public void populateDataFromDataCollection(
       @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
           name = "dataflowId") @PathVariable("dataflowId") Long dataflowId) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    notificationControllerZuul.createUserNotificationPrivate("COPY_TO_EU_DATASET_INIT",
+        userNotificationContentVO);
+
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
