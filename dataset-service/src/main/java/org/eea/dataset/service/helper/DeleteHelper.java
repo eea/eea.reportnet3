@@ -7,6 +7,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
@@ -89,11 +90,11 @@ public class DeleteHelper {
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
         .tableSchemaId(tableSchemaId).build();
-    notificationVO
-        .setDatasetName(datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName());
-    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-    notificationVO.setDataflowId(dataflowId);
-    notificationVO.setDataflowName(dataflowControllerZuul.getMetabaseById(dataflowId).getName());
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+    notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+    notificationVO.setDataflowName(
+        dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
 
     value.put(LiteralConstants.DATASET_ID, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
@@ -128,11 +129,11 @@ public class DeleteHelper {
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
         .build();
-    notificationVO
-        .setDatasetName(datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName());
-    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-    notificationVO.setDataflowId(dataflowId);
-    notificationVO.setDataflowName(dataflowControllerZuul.getMetabaseById(dataflowId).getName());
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+    notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+    notificationVO.setDataflowName(
+        dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
 
     value.put(LiteralConstants.DATASET_ID, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);

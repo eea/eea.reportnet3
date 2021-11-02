@@ -929,12 +929,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         NotificationVO notificationVO = NotificationVO.builder()
             .user(SecurityContextHolder.getContext().getAuthentication().getName())
             .datasetId(datasetId).error(error).build();
-        notificationVO.setDatasetName(
-            dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName());
-        Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
-        notificationVO.setDataflowId(dataflowId);
-        notificationVO
-            .setDataflowName(dataflowControllerZuul.getMetabaseById(dataflowId).getName());
+        DataSetMetabaseVO datasetMetabaseVO =
+            dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+        notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+        notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+        notificationVO.setDataflowName(
+            dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
         kafkaSenderUtils.releaseNotificableKafkaEvent(event, value, notificationVO);
       } catch (EEAException ex) {
         LOG.error("Error realeasing event {} due to error {}", event, ex.getMessage(), ex);

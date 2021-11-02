@@ -70,6 +70,7 @@ public class DeleteHelperTest {
         Mockito.any(), Mockito.any());
     DataSetMetabaseVO dsmbVO = new DataSetMetabaseVO();
     dsmbVO.setDataSetName("dsName");
+    dsmbVO.setDataflowId(1L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(dsmbVO);
     DataFlowVO dfVO = new DataFlowVO();
     dfVO.setName("dfName");
@@ -90,6 +91,7 @@ public class DeleteHelperTest {
         Mockito.any(), Mockito.any());
     DataSetMetabaseVO dsmbVO = new DataSetMetabaseVO();
     dsmbVO.setDataSetName("dsName");
+    dsmbVO.setDataflowId(1L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(dsmbVO);
     DataFlowVO dfVO = new DataFlowVO();
     dfVO.setName("dfName");
