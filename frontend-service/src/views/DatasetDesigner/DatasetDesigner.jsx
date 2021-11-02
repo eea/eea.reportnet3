@@ -1264,6 +1264,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const deletePrefilledDataCheckbox = (
     <div className={styles.checkboxWrapper}>
       <Checkbox
+        ariaLabelledBy="arePrefilledTablesDeleted"
         checked={arePrefilledTablesDeleted}
         id="arePrefilledTablesDeleted"
         inputId="arePrefilledTablesDeleted"
@@ -1365,7 +1366,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             <div className={styles.datasetConfigurationButtons}>
               <div>
                 <Checkbox
-                  aria-labelledby="reference_dataset_label"
+                  ariaLabelledBy="reference_dataset_label"
                   checked={designerState.referenceDataset}
                   disabled={isDesignDatasetEditorRead || isDataflowOpen || isReferenceDataset}
                   id="reference_dataset"

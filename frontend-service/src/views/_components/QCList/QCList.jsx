@@ -203,8 +203,10 @@ export const QCList = withRouter(
     );
 
     const automaticTemplate = rowData => (
-      <div className={styles.checkedValueColumn}>
-        {rowData.automatic ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+      <div className={styles.checkedValueColumn} id={rowData.automatic}>
+        {rowData.automatic ? (
+          <FontAwesomeIcon alt={rowData.automatic} className={styles.icon} icon={AwesomeIcons('check')} />
+        ) : null}
       </div>
     );
 
