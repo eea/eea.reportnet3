@@ -11,9 +11,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.kafka.domain.ConsumerGroupVO;
@@ -102,6 +105,9 @@ public class ValidationHelperTest {
    */
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
+  @Mock
+  private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
   /**
    * The data.
@@ -270,8 +276,10 @@ public class ValidationHelperTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
-    Mockito.when(datasetMetabaseControllerZuul.getType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.REPORTING);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
+    dataset.setId(1L);
+    dataset.setDataflowId(1L);
     DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
     datasetMetabase.setId(1L);
     datasetMetabase.setDatasetSchema("5cf0e9b3b793310e9ceca190");
@@ -288,6 +296,52 @@ public class ValidationHelperTest {
     Mockito.verify(validationService, Mockito.times(1)).deleteAllValidation(Mockito.eq(1l));
     Mockito.verify(kafkaSenderUtils, Mockito.times(2))
         .releaseKafkaEvent(Mockito.any(EEAEventVO.class));
+  }
+
+
+  @Test
+  public void executeValidation2() throws EEAException {
+    ReflectionTestUtils.setField(validationHelper, "fieldBatchSize", 20);
+    ReflectionTestUtils.setField(validationHelper, "recordBatchSize", 20);
+    ReflectionTestUtils.setField(validationHelper, "initialTax", 2);
+    List<TableValue> tables = new ArrayList<>();
+    TableValue table = new TableValue();
+    table.setId(1l);
+    tables.add(table);
+
+    ConsumerGroupVO consumerGroups = new ConsumerGroupVO();
+    Collection<MemberDescriptionVO> members = new ArrayList<>();
+
+    MemberDescriptionVO member = new MemberDescriptionVO();
+    members.add(member);
+    consumerGroups.setMembers(members);
+
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
+    dataset.setId(1L);
+    dataset.setDataflowId(1L);
+    DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
+    datasetMetabase.setId(1L);
+    datasetMetabase.setDatasetSchema("5cf0e9b3b793310e9ceca190");
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabase);
+    RulesSchema rules = new RulesSchema();
+    Rule rule = new Rule();
+    rule.setSqlSentence("SELECT * from dataset_1.\"t1\"");
+    rule.setType(EntityTypeEnum.RECORD);
+    rule.setEnabled(true);
+    rules.setRules(Arrays.asList(rule));
+
+    ReferenceDatasetVO reference = new ReferenceDatasetVO();
+    reference.setId(23L);
+    reference.setDatasetSchema(new ObjectId().toString());
+
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(Arrays.asList(rule));
+
+    validationHelper.executeValidation(1l, "1", false, true);
+    Mockito.verify(referenceDatasetControllerZuul, Mockito.times(1))
+        .findReferenceDatasetByDataflowId(Mockito.any());
+
   }
 
 

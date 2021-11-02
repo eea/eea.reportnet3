@@ -23,6 +23,7 @@ import org.eea.dataset.service.impl.DatasetServiceImpl;
 import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
@@ -97,6 +98,10 @@ public class DataSetControllerImplTest {
 
   @Mock
   HttpServletResponse httpServletResponse;
+
+  /** The notification controller zuul. */
+  @Mock
+  private NotificationControllerZuul notificationControllerZuul;
 
   /** The records. */
   private List<RecordVO> records;
@@ -1009,6 +1014,9 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void importFileDataTest() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),
         Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
     dataSetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", null, true, 1L,
@@ -1024,6 +1032,9 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void importFileDataExceptionTest() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(Mockito.anyLong(),
         Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
@@ -1058,6 +1069,9 @@ public class DataSetControllerImplTest {
 
   @Test
   public void deleteImportDataTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     dataSetControllerImpl.deleteImportData(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
         Mockito.anyBoolean());
@@ -1065,6 +1079,9 @@ public class DataSetControllerImplTest {
 
   @Test
   public void deleteImportDataRestApiTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     dataSetControllerImpl.deleteImportData(1L, 1L, 1L, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
@@ -1073,6 +1090,9 @@ public class DataSetControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void deleteImportDataRestApiForbiddenTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(2L);
     try {
       dataSetControllerImpl.deleteImportData(1L, 1L, null, false);
@@ -1084,6 +1104,9 @@ public class DataSetControllerImplTest {
 
   @Test
   public void deleteImportTableTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any());
@@ -1091,6 +1114,9 @@ public class DataSetControllerImplTest {
 
   @Test
   public void deleteImportTableRestApiTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", 1L, 1L);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
@@ -1099,6 +1125,9 @@ public class DataSetControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void deleteImportTableRestApiForbiddenTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(2L);
     try {
       dataSetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", 1L, null);
@@ -1110,7 +1139,6 @@ public class DataSetControllerImplTest {
 
   @Test
   public void exportDatasetTest() throws IOException, EEAException {
-
     dataSetControllerImpl.exportDatasetFile(1L, FileTypeEnum.XLSX.getValue());
     Mockito.verify(fileTreatmentHelper, times(1)).exportDatasetFile(Mockito.anyLong(),
         Mockito.any());

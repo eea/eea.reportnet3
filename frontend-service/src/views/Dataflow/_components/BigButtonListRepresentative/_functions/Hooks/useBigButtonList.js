@@ -160,7 +160,7 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true),
-        restrictFromPublicInfo: true,
+        restrictFromPublicInfo: dataflowState.showPublicInfo,
         restrictFromPublicStatus: datasetRepresentative.restrictFromPublic,
         visibility: true
       };

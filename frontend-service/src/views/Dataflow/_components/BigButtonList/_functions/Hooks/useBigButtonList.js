@@ -293,7 +293,7 @@ const useBigButtonList = ({
             }
           ],
           onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
-          restrictFromPublicInfo: true,
+          restrictFromPublicInfo: dataflowState.showPublicInfo,
           restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
           visibility: true
         };
@@ -327,7 +327,7 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true),
-        restrictFromPublicInfo: true,
+        restrictFromPublicInfo: dataflowState.showPublicInfo,
         restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
         visibility: true
       };

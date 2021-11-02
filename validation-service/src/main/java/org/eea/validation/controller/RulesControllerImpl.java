@@ -11,7 +11,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -75,6 +77,10 @@ public class RulesControllerImpl implements RulesController {
   /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
+
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
 
 
   /**
@@ -755,6 +761,12 @@ public class RulesControllerImpl implements RulesController {
   public void exportQCCSV(@ApiParam(value = "Dataset id used in the export process.",
       example = "10") @PathVariable("datasetId") Long datasetId) {
     LOG.info("Export dataset QC from datasetId {}, with type .csv", datasetId);
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDatasetId(datasetId);
+    notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_QC_RULES_START",
+        userNotificationContentVO);
+
     try {
       rulesService.exportQCCSV(datasetId);
     } catch (EEAException | IOException e) {

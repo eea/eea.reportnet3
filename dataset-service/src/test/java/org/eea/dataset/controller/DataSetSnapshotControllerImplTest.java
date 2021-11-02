@@ -16,6 +16,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
@@ -65,6 +66,10 @@ public class DataSetSnapshotControllerImplTest {
   /** The dataflow controller zull. */
   @Mock
   private DataFlowControllerZuul dataflowControllerZull;
+
+  /** The notification controller zuul. */
+  @Mock
+  private NotificationControllerZuul notificationControllerZuul;
 
   /** The security context. */
   private SecurityContext securityContext;
@@ -185,6 +190,9 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test
   public void testRestoreSnapshot() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(lockService.findByCriteria(Mockito.any())).thenReturn(null);
@@ -200,6 +208,9 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testRestoreSnapshotsException() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
@@ -218,6 +229,9 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testRestoreSnapshotsException2() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(lockService.findByCriteria(Mockito.any())).thenReturn(null);
@@ -319,6 +333,9 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test
   public void testRestoreSchemaSnapshots() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     dataSetSnapshotControllerImpl.restoreSchemaSnapshot(1L, 1L);
@@ -397,6 +414,9 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void restoreSnapshotTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     dataSetSnapshotControllerImpl.restoreSnapshot(null, 1L);
@@ -409,6 +429,9 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testRestoreSchemaSnapshotsException2() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException()).when(datasetSnapshotService).restoreSchemaSnapshot(Mockito.any(),
@@ -539,6 +562,9 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test
   public void createReleaseSnapshots() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setReleasable(true);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -555,6 +581,9 @@ public class DataSetSnapshotControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createReleaseSnapshotsThrow() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setReleasable(true);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
