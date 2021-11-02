@@ -1,8 +1,10 @@
 package org.eea.communication.controller;
 
+import java.util.Date;
 import org.eea.communication.service.NotificationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.communication.UserNotificationListVO;
 import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,14 +54,19 @@ public class NotificationControllerImpl implements NotificationController {
   /**
    * Creates the user notification private.
    *
-   * @param userNotificationVO the user notification VO
+   * @param eventType the event type
+   * @param content the content
    */
   @Override
   @PostMapping(value = "/private/createUserNotification")
-  @ApiOperation(value = "Create User Notification", hidden = true)
-  public void createUserNotificationPrivate(@ApiParam(
-      value = "Notification Schema containing the data") @RequestBody UserNotificationVO userNotificationVO) {
+  @ApiOperation(value = "Create User Notification Private", hidden = true)
+  public void createUserNotificationPrivate(@RequestParam("eventType") String eventType,
+      @RequestBody UserNotificationContentVO content) {
     try {
+      UserNotificationVO userNotificationVO = new UserNotificationVO();
+      userNotificationVO.setEventType(eventType);
+      userNotificationVO.setInsertDate(new Date());
+      userNotificationVO.setContent(content);
       notificationService.createUserNotification(userNotificationVO);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);

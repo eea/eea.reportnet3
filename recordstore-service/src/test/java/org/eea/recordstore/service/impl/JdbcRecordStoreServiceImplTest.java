@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -22,6 +23,7 @@ import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetContro
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
@@ -107,6 +109,10 @@ public class JdbcRecordStoreServiceImplTest {
 
   @Mock
   private EUDatasetControllerZuul euDatasetControllerZuul;
+
+  /** The dataflow controller zuul. */
+  @Mock
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   @Mock
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
@@ -238,6 +244,14 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(queryExector.startCopy(Mockito.anyString(), Mockito.anyBoolean()))
         .thenReturn(copyOut);
     Mockito.when(((BaseConnection) connection).getQueryExecutor()).thenReturn(queryExector);
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(1L))
+        .thenReturn(datasetMetabaseVO);
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
 
     driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
@@ -307,6 +321,14 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(queryExector.startCopy(Mockito.anyString(), Mockito.anyBoolean()))
         .thenReturn(copyOut);
     Mockito.when(((BaseConnection) connection).getQueryExecutor()).thenReturn(queryExector);
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(1L))
+        .thenReturn(datasetMetabaseVO);
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
 
     driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
@@ -339,8 +361,15 @@ public class JdbcRecordStoreServiceImplTest {
         .thenReturn(copyOut);
     Mockito.when(((BaseConnection) connection).getQueryExecutor()).thenReturn(queryExector);
     doThrow(new NullPointerException("")).when(datasetControllerZuul).getDatasetType(Mockito.any());
-    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
-        .thenReturn(new DataSetMetabaseVO());
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(1L))
+        .thenReturn(datasetMetabaseVO);
+    Mockito.doNothing().when(dataSetSnapshotControllerZuul).releaseLocksFromReleaseDatasets(1L, 1L);
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
     driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
         Mockito.anyString())).thenReturn(connection);
@@ -376,8 +405,14 @@ public class JdbcRecordStoreServiceImplTest {
         .thenReturn(copyOut);
     Mockito.when(((BaseConnection) connection).getQueryExecutor()).thenReturn(queryExector);
     doThrow(new NullPointerException("")).when(datasetControllerZuul).getDatasetType(Mockito.any());
-    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
-        .thenReturn(new DataSetMetabaseVO());
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(1L))
+        .thenReturn(datasetMetabaseVO);
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
     driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
         Mockito.anyString())).thenReturn(connection);
@@ -453,6 +488,10 @@ public class JdbcRecordStoreServiceImplTest {
     datasetMetabase.setDataProviderId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetMetabase);
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.EUDATASET, false, true);
     Mockito.verify(lockService, Mockito.times(2)).removeLockByCriteria(Mockito.any());
   }

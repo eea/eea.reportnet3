@@ -7,7 +7,9 @@ import java.util.Map;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
@@ -63,6 +65,10 @@ public class IntegrationControllerImpl implements IntegrationController {
   /** The lock service. */
   @Autowired
   private LockService lockService;
+
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
 
   /**
    * The Constant LOG_ERROR.
@@ -279,6 +285,12 @@ public class IntegrationControllerImpl implements IntegrationController {
   public List<ExecutionResultVO> executeEUDatasetExport(
       @ApiParam(value = "Dataflow Id", example = "0") @LockCriteria(
           name = "dataflowId") @RequestParam("dataflowId") Long dataflowId) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    notificationControllerZuul.createUserNotificationPrivate("EXPORT_EU_DATASET_INIT",
+        userNotificationContentVO);
+
     List<ExecutionResultVO> results = null;
     try {
       integrationService.addPopulateEUDatasetLock(dataflowId);
@@ -410,6 +422,11 @@ public class IntegrationControllerImpl implements IntegrationController {
       @ApiParam(value = "Should the external integration replace the existing data?",
           example = "true", defaultValue = "false") @RequestParam(value = "replace",
               defaultValue = "false") Boolean replace) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDatasetId(datasetId);
+    notificationControllerZuul.createUserNotificationPrivate("DATASET_IMPORT_INIT",
+        userNotificationContentVO);
 
     try {
       integrationService.addLocks(datasetId);
