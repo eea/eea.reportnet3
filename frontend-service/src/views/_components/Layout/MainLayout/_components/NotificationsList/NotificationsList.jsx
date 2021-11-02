@@ -110,11 +110,14 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     );
   };
 
-  const notificationLevelTemplate = rowData => (
-    <div className={styles.notificationLevelTemplateWrapper}>
-      <LevelError type={rowData.levelError.toLowerCase()} />
-    </div>
-  );
+  const notificationLevelTemplate = rowData => {
+    console.log(rowData);
+    return (
+      <div className={styles.notificationLevelTemplateWrapper}>
+        <LevelError type={rowData.levelError?.toLowerCase()} />
+      </div>
+    );
+  };
 
   // const onLoadFilteredData = data => {
   //   console.log({ data });
@@ -145,6 +148,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         return NotificationService.parse({
           config: config.notifications.notificationSchema,
           content: notification.content,
+          date: notification.date,
           message: resourcesContext.messages[camelCase(notification.type)],
           routes,
           type: notification.type

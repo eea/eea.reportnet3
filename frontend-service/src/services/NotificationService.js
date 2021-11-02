@@ -63,7 +63,7 @@ export const NotificationService = {
   // removeAll: async () => {},
   // readById: async () => {},
   // readAll: async () => {},
-  parse: ({ config, content = {}, message, onClick, routes, type }) => {
+  parse: ({ config, content = {}, date, message, onClick, routes, type }) => {
     if (type === 'UPDATED_DATASET_STATUS') {
       content.datasetStatus = capitalize(content.datasetStatus.split('_').join(' '));
     }
@@ -85,32 +85,56 @@ export const NotificationService = {
 
         if (!isUndefined(navigateTo) && !isNull(navigateTo)) {
           const urlParameters = {};
+
           navigateTo.parameters.forEach(parameter => {
             urlParameters[parameter] = content[parameter];
           });
+          //TODO CAMBIAR DESIGN
           const section =
             type.toString() !== 'VALIDATION_FINISHED_EVENT'
               ? routes[navigateTo.section]
-              : routes[NotificationUtils.getSectionValidationRedirectionUrl(content.type)];
+              : routes[
+                  NotificationUtils.getSectionValidationRedirectionUrl(
+                    //!isNil(content.type) ? content.type : content.typeStatus
+                    'DESIGN'
+                  )
+                ];
           console.log(section, urlParameters);
           //TODO - Quitar comentario
-          // notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
+          notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
 
           if (!isNil(navigateTo.hasQueryString) && navigateTo.hasQueryString) {
             notificationDTO.redirectionUrl = `${notificationDTO.redirectionUrl}${window.location.search}`;
           }
+
           notificationDTO.message = TextUtils.parseText(notificationDTO.message, {
             navigateTo: notificationDTO.redirectionUrl
           });
         }
+
+        // content: {
+        //   dataflowName,
+        //   datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+        //   datasetName,
+        //   title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
+        // }
         contentKeys.forEach(key => {
           if (isUndefined(navigateTo) || !navigateTo.parameters.includes(key)) {
             const shortKey = camelCase(`short-${kebabCase(key)}`);
             content[shortKey] = TextUtils.ellipsis(content[key], generalConfig.notifications.STRING_LENGTH_MAX);
           }
         });
+
+        if (type.toString() === 'DATASET_DATA_LOADING_INIT') {
+          console.log({ content });
+          content.datasetLoading = ' is loading...';
+          content.datasetLoadingMessage = 'The dataset ';
+          content.title = TextUtils.ellipsis('datasetName', generalConfig.notifications.STRING_LENGTH_MAX);
+        }
+
         notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);
-        notificationDTO.date = new Date();
+        console.log(content);
+        notificationDTO.date = new Date(date);
       }
     });
     return new Notification(notificationDTO);

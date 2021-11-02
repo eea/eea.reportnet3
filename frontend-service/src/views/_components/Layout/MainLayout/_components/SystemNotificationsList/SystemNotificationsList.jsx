@@ -140,7 +140,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
 
   const notificationLevelTemplate = rowData => (
     <div className={styles.notificationLevelTemplateWrapper}>
-      <LevelError type={rowData.levelError.toLowerCase()} />
+      <LevelError type={rowData.levelError?.toLowerCase()} />
     </div>
   );
 
@@ -194,6 +194,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         return NotificationService.parse({
           config: config.notifications.notificationSchema,
           content: notification.content,
+          date: notification.date,
           message: resourcesContext.messages[camelCase(notification.type)],
           routes,
           type: notification.type

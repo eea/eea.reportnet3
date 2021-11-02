@@ -34,6 +34,7 @@ const NotificationProvider = ({ children }) => {
           const notification = NotificationService.parse({
             config: config.notifications.notificationSchema,
             content,
+            date: new Date(),
             message: resourcesContext.messages[camelCase(type)],
             onClick,
             routes,
