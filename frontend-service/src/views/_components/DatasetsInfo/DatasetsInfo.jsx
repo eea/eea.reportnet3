@@ -109,10 +109,10 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     }
 
     return (
-      <Fragment>
+      <div className={styles.datasets}>
         {renderFilters()}
         {renderDatasetsInfoTable()}
-      </Fragment>
+      </div>
     );
   };
 

@@ -644,7 +644,7 @@
     "isCorrect": "Validity",
     "isDataCollectionReleased": "Data collection",
     "isEUReleased": "EU dataset",
-    "isPublic": "Is public",
+    "isPublic": "Public",
     "isReleasableDataflowCheckboxLabel": "Dataflow is open for releases",
     "isReleasableDataflowDialogHeader": "Open/close release period",
     "isReleased": "Released",
@@ -1311,11 +1311,16 @@
     "duplicateDisabledTitle": "Duplicate disabled:",
     "duplicateDisabledMessage": "already exists",
     "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field",
-    "restrictFromPublicftSideBarButton": "Released data visibility",
+    "somethingWentWrongWebform": "Failed loading webform. Please click Refresh to try again.",
+    "restrictFromPublicSideBarButton": "Released data visibility",
     "restrictFromPublicDialogHeader": "Show/hide released data",
     "updateRestrictFromPublicFailedEvent": "Error updating the released data visibility",
     "updatePublicStatusFailedEvent": "Error updating the dataflow public status",
     "public": "Public",
-    "notPublic": "Not public"
+    "notPublic": "Not public",
+    "loadingWebformError": "Error loading webform",
+    "loadingWebformOptionsError": "Error loading webforms",
+    "restrictFromPublic": "Public",
+    "duplicateField": "Duplicate field"
   }
 }

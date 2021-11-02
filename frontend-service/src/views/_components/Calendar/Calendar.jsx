@@ -16,7 +16,6 @@ export const Calendar = forwardRef((props, _) => {
     inputRef,
     keepInvalid,
     key,
-    locale,
     maxDate,
     minDate,
     monthNavigator,
@@ -38,6 +37,32 @@ export const Calendar = forwardRef((props, _) => {
     yearNavigator,
     yearRange
   } = props;
+
+  const locale = {
+    firstDayOfWeek: 1,
+    dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+    monthNames: [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ],
+    monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    today: 'Today',
+    clear: 'Clear',
+    weekHeader: 'Wk'
+  };
+
   return (
     <PrimeCalendar
       appendTo={appendTo}

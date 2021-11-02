@@ -11,7 +11,7 @@
     justify-content: space-between;
 
     .title {
-      color: var(--breadCrumb-font-color);
+      color: var(--subtitle-color);
       user-select: none;
 
       .icon {
@@ -34,7 +34,7 @@
     }
 
     > span {
-      color: var(--property-item-text-color);
+      color: var(--main-font-color);
       margin: 0.25rem 0;
     }
   }

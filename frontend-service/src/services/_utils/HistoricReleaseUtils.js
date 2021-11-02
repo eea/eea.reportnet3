@@ -10,7 +10,8 @@ const parseHistoricReleaseListDTO = historicReleasesDTO =>
         id: historicReleaseDTO.id,
         isDataCollectionReleased: historicReleaseDTO.dcrelease,
         isEUReleased: historicReleaseDTO.eurelease,
-        releaseDate: historicReleaseDTO.dateReleased
+        releaseDate: historicReleaseDTO.dateReleased,
+        restrictFromPublic: historicReleaseDTO.restrictFromPublic
       })
   );
 

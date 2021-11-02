@@ -135,9 +135,9 @@ export const useLeftSideBar = (
         className: 'dataflow-showPublicInfo-help-step',
         icon: 'userLock',
         isVisible: buttonsVisibility.restrictFromPublicBtn,
-        label: 'restrictFromPublicftSideBarButton',
+        label: 'restrictFromPublicSideBarButton',
         onClick: () => manageDialogs('isRestrictFromPublicDialogVisible', true),
-        title: 'restrictFromPublicftSideBarButton'
+        title: 'restrictFromPublicSideBarButton'
       };
 
       //DON'T SORT ALPHABETICALLY

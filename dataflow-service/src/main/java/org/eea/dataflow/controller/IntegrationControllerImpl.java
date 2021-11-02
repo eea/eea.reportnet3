@@ -379,6 +379,24 @@ public class IntegrationControllerImpl implements IntegrationController {
     integrationService.deleteSchemaIntegrations(datasetSchemaId);
   }
 
+  /**
+   * Delete export eu dataset integration.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  @DeleteMapping("/private/deleteExportEuDataset")
+  @ApiOperation(value = "Delete an export EU Dataset Integration", hidden = true)
+  public void deleteExportEuDatasetIntegration(
+      @RequestParam("datasetSchemaId") String datasetSchemaId) {
+    try {
+      integrationService.deleteExportEuDataset(datasetSchemaId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(
+          "Error deleting and export eu dataset integration with the datasetSchemaId {}, with message: {}",
+          datasetSchemaId, e.getMessage());
+    }
+  }
 
 
   /**

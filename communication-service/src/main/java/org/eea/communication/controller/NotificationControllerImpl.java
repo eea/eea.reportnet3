@@ -1,11 +1,11 @@
 package org.eea.communication.controller;
 
 import java.util.Date;
-import java.util.List;
 import org.eea.communication.service.NotificationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.communication.UserNotificationListVO;
 import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -76,14 +76,20 @@ public class NotificationControllerImpl implements NotificationController {
   /**
    * Find user notifications by user.
    *
+   * @param pageNum the page num
+   * @param pageSize the page size
    * @return the list
    */
   @Override
   @PreAuthorize("isAuthenticated()")
   @GetMapping(value = "/findUserNotifications")
   @ApiOperation(value = "Retrieves all user notifications form a user", hidden = true)
-  public List<UserNotificationVO> findUserNotificationsByUser() {
+  public UserNotificationListVO findUserNotificationsByUser(
+      @ApiParam(type = "Integer", value = "page number", example = "0") @RequestParam(
+          value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @ApiParam(type = "Integer", value = "page size",
+          example = "0") @RequestParam(value = "pageSize", required = false) Integer pageSize) {
 
-    return notificationService.findUserNotificationsByUser();
+    return notificationService.findUserNotificationsByUserPaginated(pageNum, pageSize);
   }
 }
