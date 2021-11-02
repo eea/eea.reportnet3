@@ -1,21 +1,28 @@
 package org.eea.validation.util;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
@@ -120,6 +127,15 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private RulesRepository rulesRepository;
 
+  /** The reference dataset controller zuul. */
+  @Autowired
+  private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
+
+
+  /** The Constant DATASET_: {@value}. */
+  private static final String DATASET = "dataset_";
+
+
   /**
    * Instantiates a new file loader helper.
    */
@@ -222,7 +238,9 @@ public class ValidationHelper implements DisposableBean {
   public void executeValidation(@LockCriteria(name = "datasetId") final Long datasetId,
       String processId, boolean released, boolean updateViews) throws EEAException {
 
-    DatasetTypeEnum type = datasetMetabaseControllerZuul.getType(datasetId);
+    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    DatasetTypeEnum type = dataset.getDatasetTypeEnum();
+
 
     if (DatasetTypeEnum.DESIGN.equals(type)) {
       executeValidationProcess(datasetId, processId, released);
@@ -232,9 +250,112 @@ public class ValidationHelper implements DisposableBean {
       Map<String, Object> values = new HashMap<>();
       values.put(LiteralConstants.DATASET_ID, datasetId);
       values.put("released", released);
+      values.put("referencesToRefresh",
+          List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
+              dataset.getDataflowId(), dataset.getDatasetSchema())));
       kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
     }
   }
+
+  /**
+   * Update materialized views of reference datasets in SQL.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaId the dataset schema id
+   * @return the sets the
+   */
+  private Set<Long> updateMaterializedViewsOfReferenceDatasetsInSQL(Long datasetId, Long dataflowId,
+      String datasetSchemaId) {
+    List<Rule> rules = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
+    Set<Long> datasetsToRefresh = new HashSet<>();
+    Map<String, Long> testDatasetSchemasMap = new HashMap<>();
+    Map<Long, Long> datasetIdOldNew = new HashMap<>();
+    List<ReferenceDatasetVO> referenceDatasets =
+        referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId);
+
+    for (Rule rule : rules) {
+      String query = rule.getSqlSentence();
+      if (StringUtils.isNotBlank(query) && query.contains(DATASET) && rule.isEnabled()) {
+        Map<String, Long> datasetSchemasMap = getMapOfDatasetsOnQuery(query);
+
+        List<Long> referenceDatasetsId =
+            referenceDatasets.stream().map(ReferenceDatasetVO::getId).collect(Collectors.toList());
+        for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+          testDatasetSchemasMap.put(referenceDataset.getDatasetSchema(), referenceDataset.getId());
+        }
+        for (Map.Entry<String, Long> auxDatasetMap : datasetSchemasMap.entrySet()) {
+          String key = auxDatasetMap.getKey();
+          Long testDatasetId = testDatasetSchemasMap.get(key);
+          if (null != testDatasetId) {
+            datasetIdOldNew.put(auxDatasetMap.getValue(), testDatasetId);
+          }
+          if (referenceDatasetsId.contains(testDatasetId)) {
+            datasetsToRefresh.add(testDatasetId);
+          }
+        }
+
+        List<String> datasetsInQuery = getListOfDatasetsOnQuery(query);
+        Set<String> datasetsNotChanged = new HashSet<>(datasetsInQuery);
+        for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
+          datasetsNotChanged.remove(auxDatasetOldAndNew.getKey().toString());
+        }
+        datasetsToRefresh
+            .addAll(datasetsNotChanged.stream().map(Long::parseLong).collect(Collectors.toList()));
+
+      }
+    }
+    LOG.info("Datasets to refresh present in the sqls to perform: {}", datasetsToRefresh);
+    return datasetsToRefresh;
+  }
+
+  /**
+   * Gets the map of datasets on query.
+   *
+   * @param query the query
+   * @return the map of datasets on query
+   */
+  private Map<String, Long> getMapOfDatasetsOnQuery(String query) {
+    Map<String, Long> datasetSchamasMap = new HashMap<>();
+    String[] words = query.split("\\s+");
+    for (String word : words) {
+      if (word.contains(DATASET)) {
+        try {
+          String datasetIdFromotherSchemas =
+              word.substring(word.indexOf('_') + 1, word.indexOf('.'));
+
+          datasetSchamasMap.put(
+              datasetMetabaseControllerZuul
+                  .findDatasetSchemaIdById(Long.parseLong(datasetIdFromotherSchemas)),
+              Long.parseLong(datasetIdFromotherSchemas));
+        } catch (StringIndexOutOfBoundsException | NumberFormatException e) {
+          LOG_ERROR.error("Error validating SQL rule, processing the sentence {}. Message {}",
+              query, e.getMessage(), e);
+          throw e;
+        }
+      }
+    }
+    return datasetSchamasMap;
+  }
+
+  /**
+   * Gets the list of datasets on query.
+   *
+   * @param query the query
+   * @return the list of datasets on query
+   */
+  private List<String> getListOfDatasetsOnQuery(String query) {
+    List<String> datasetsIdList = new ArrayList<>();
+    String[] words = query.split("\\s+");
+    for (String word : words) {
+      if (word.contains(DATASET)) {
+        String datasetId = word.substring(word.indexOf(DATASET) + 8, word.indexOf('.'));
+        datasetsIdList.add(datasetId);
+      }
+    }
+    return datasetsIdList;
+  }
+
 
   /**
    * Execute validation process.

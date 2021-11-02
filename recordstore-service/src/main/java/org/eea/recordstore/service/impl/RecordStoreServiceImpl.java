@@ -434,4 +434,16 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     LOG.info("Create or Update Query-Materialized View");
   }
 
+  /**
+   * Launch update materialized query view.
+   *
+   * @param datasetId the dataset id
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  @Override
+  public void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException {
+    LOG.info("Refresh Query-Materialized View");
+  }
+
+
 }

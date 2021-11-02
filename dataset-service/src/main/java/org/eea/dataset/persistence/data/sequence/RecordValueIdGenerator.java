@@ -7,6 +7,8 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -15,6 +17,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class RecordValueIdGenerator implements IdentifierGenerator {
 
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Generate.
@@ -31,14 +37,21 @@ public class RecordValueIdGenerator implements IdentifierGenerator {
       throws HibernateException {
 
     RecordValue record = (RecordValue) object;
-    String prefix = null;
-    String datasetId = record.getTableValue().getDatasetId().getId().toString();
-    // Set the provider code to create Hash
-    if (null == record.getDataProviderCode()) {
-      Double aux = Math.random();
-      prefix = "RECORD" + aux.toString() + "DS";
+    String prefix = Double.toString(Math.random());
+    String datasetId = "";
+    if (record != null && record.getTableValue() != null
+        && record.getTableValue().getDatasetId() != null
+        && record.getTableValue().getDatasetId().getId() != null) {
+      datasetId = record.getTableValue().getDatasetId().getId().toString();
+      // Set the provider code to create Hash
+      if (null == record.getDataProviderCode()) {
+        Double aux = Math.random();
+        prefix = "RECORD" + aux.toString() + "DS";
+      } else {
+        prefix = record.getDataProviderCode();
+      }
     } else {
-      prefix = record.getDataProviderCode();
+      LOG_ERROR.error("Error generating record serial id number. Record {}", record);
     }
     String idcompose = datasetId + prefix + UUID.randomUUID();
     return DigestUtils.md5Hex(idcompose).toUpperCase();
