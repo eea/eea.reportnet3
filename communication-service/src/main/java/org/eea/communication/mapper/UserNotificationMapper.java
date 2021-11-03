@@ -24,7 +24,8 @@ public interface UserNotificationMapper extends IMapper<UserNotification, UserNo
   @Mapping(source = "dataflowName", target = "content.dataflowName")
   @Mapping(source = "datasetId", target = "content.datasetId")
   @Mapping(source = "datasetName", target = "content.datasetName")
-  @Mapping(source = "providerId", target = "content.dataProviderName")
+  @Mapping(source = "providerId", target = "content.providerId")
+  @Mapping(source = "dataProviderName", target = "content.dataProviderName")
   @Mapping(source = "typeStatus", target = "content.typeStatus")
   @Mapping(source = "customContent", target = "content.customContent")
   UserNotificationVO entityToClass(UserNotification entity);
@@ -40,7 +41,8 @@ public interface UserNotificationMapper extends IMapper<UserNotification, UserNo
   @Mapping(source = "content.dataflowName", target = "dataflowName")
   @Mapping(source = "content.datasetId", target = "datasetId")
   @Mapping(source = "content.datasetName", target = "datasetName")
-  @Mapping(source = "content.providerId", target = "dataProviderName")
+  @Mapping(source = "content.providerId", target = "providerId")
+  @Mapping(source = "content.dataProviderName", target = "dataProviderName")
   @Mapping(source = "content.typeStatus", target = "typeStatus")
   @Mapping(source = "content.customContent", target = "customContent")
   UserNotification classToEntity(UserNotificationVO entity);
