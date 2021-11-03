@@ -218,7 +218,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       headerInfo.put("Content-Disposition",
           "attachment; filename*=UTF-8''\"" + URLEncoder.encode(fileName, "UTF-8") + "\"");
     } catch (UnsupportedEncodingException e) {
-      LOG.error("Error in: {}", fileName);
+      LOG_ERROR.error("Error encoding file: {}", fileName);
     }
     headerInfo.put(CONTENT_TYPE, "application/octet-stream");
     headerInfo.put(ACCEPT, APPLICATION_JSON);
