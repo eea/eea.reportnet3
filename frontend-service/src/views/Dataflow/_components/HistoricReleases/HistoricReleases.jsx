@@ -101,7 +101,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       getDataProviderCode(historicReleases);
     } catch (error) {
       console.error('HistoricReleases - onLoadHistoricReleases.', error);
-      notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
+      notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' }, true);
     } finally {
       isLoading(false);
     }

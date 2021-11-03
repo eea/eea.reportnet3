@@ -46,7 +46,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isNil(urlErrorType)) {
-      notificationContext.add({ type: ErrorUtils.parseErrorType(urlErrorType) });
+      notificationContext.add({ type: ErrorUtils.parseErrorType(urlErrorType) }, true);
     }
   }, [urlErrorType]);
 

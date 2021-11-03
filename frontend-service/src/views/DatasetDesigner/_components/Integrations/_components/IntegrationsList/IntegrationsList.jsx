@@ -129,7 +129,7 @@ export const IntegrationsList = ({
       refreshList(true);
     } catch (error) {
       console.error('IntegrationsList - onDeleteIntegration.', error);
-      notificationContext.add({ type: 'DELETE_INTEGRATION_ERROR' });
+      notificationContext.add({ type: 'DELETE_INTEGRATION_ERROR' }, true);
       integrationListDispatch({ type: 'IS_DELETING', payload: false });
     } finally {
       isDeleteDialogVisible(false);
@@ -149,7 +149,7 @@ export const IntegrationsList = ({
       refreshList(false);
     } catch (error) {
       console.error('IntegrationsList - onLoadIntegrations.', error);
-      notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
+      notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' }, true);
     } finally {
       isLoading(false);
       setIsUpdating(false);

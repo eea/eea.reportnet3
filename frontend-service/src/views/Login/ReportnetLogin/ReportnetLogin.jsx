@@ -61,10 +61,13 @@ const ReportnetLogin = ({ history }) => {
         history.push(getUrl(routes.DATAFLOWS));
       } catch (error) {
         console.error('ReportnetLogin - onLogin.', error);
-        notificationContext.add({
-          type: 'USER_SERVICE_OLD_LOGIN_ERROR',
-          content: {}
-        });
+        notificationContext.add(
+          {
+            type: 'USER_SERVICE_OLD_LOGIN_ERROR',
+            content: {}
+          },
+          true
+        );
         userContext.onLogout();
         const errorResponse = error.response;
         if (!isUndefined(errorResponse) && errorResponse.status === 500) {

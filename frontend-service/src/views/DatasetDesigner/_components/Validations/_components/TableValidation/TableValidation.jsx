@@ -383,9 +383,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
       onHide();
     } catch (error) {
       console.error('TableValidation - onCreateValidationRule.', error);
-      notificationContext.add({
-        type: 'QC_RULE_CREATION_ERROR'
-      });
+      notificationContext.add({ type: 'QC_RULE_CREATION_ERROR' }, true);
     } finally {
       setIsSubmitDisabled(false);
     }
@@ -412,9 +410,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
       onHide();
     } catch (error) {
       console.error('TableValidation - onUpdateValidationRule.', error);
-      notificationContext.add({
-        type: 'QC_RULE_UPDATING_ERROR'
-      });
+      notificationContext.add({ type: 'QC_RULE_UPDATING_ERROR' }, true);
     } finally {
       setIsSubmitDisabled(false);
     }

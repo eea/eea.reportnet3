@@ -86,13 +86,8 @@ export const ManageIntegrations = ({
   });
 
   const { editorView, externalParameters, parameterKey, parametersErrors } = manageIntegrationsState;
-  const {
-    isDuplicatedIntegrationName,
-    isDuplicatedParameter,
-    isFormEmpty,
-    isParameterEditing,
-    printError
-  } = ManageIntegrationsUtils;
+  const { isDuplicatedIntegrationName, isDuplicatedParameter, isFormEmpty, isParameterEditing, printError } =
+    ManageIntegrationsUtils;
 
   const isEditingParameter = isParameterEditing(externalParameters);
   const isEmptyForm = isFormEmpty(manageIntegrationsState);
@@ -131,7 +126,7 @@ export const ManageIntegrations = ({
       });
     } catch (error) {
       console.error('ManageIntegrations - getRepositories.', error);
-      notificationContext.add({ type: 'ERROR_LOADING_REPOSITORIES' });
+      notificationContext.add({ type: 'ERROR_LOADING_REPOSITORIES' }, true);
     } finally {
       isLoading(false);
     }
@@ -148,7 +143,7 @@ export const ManageIntegrations = ({
         });
       } catch (error) {
         console.error('ManageIntegrations - getProcesses.', error);
-        notificationContext.add({ type: 'ERROR_LOADING_PROCESSES' });
+        notificationContext.add({ type: 'ERROR_LOADING_PROCESSES' }, true);
       }
     } else {
       manageIntegrationsDispatch({ type: 'GET_PROCESSES', payload: { data: [] } });
@@ -212,7 +207,7 @@ export const ManageIntegrations = ({
       refreshList(true);
     } catch (error) {
       console.error('ManageIntegrations - onCreateIntegration.', error);
-      notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' });
+      notificationContext.add({ type: 'CREATE_INTEGRATION_ERROR' }, true);
       setIsCreating(false);
     } finally {
       setClonedData({});
@@ -325,7 +320,7 @@ export const ManageIntegrations = ({
       refreshList(true);
     } catch (error) {
       console.error('ManageIntegrations - onUpdateIntegration.', error);
-      notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' });
+      notificationContext.add({ type: 'UPDATE_INTEGRATION_ERROR' }, true);
       setIsUpdating(false);
     } finally {
       setClonedData({});
