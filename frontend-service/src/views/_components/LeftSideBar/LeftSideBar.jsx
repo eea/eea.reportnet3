@@ -191,7 +191,8 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
           },
           buttonBack: {
             color: 'var(--main-font-color)'
-          }
+          },
+          overlay: { backgroundColor: 'var(--help-overlay-bg)' }
         }}
       />
       <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
