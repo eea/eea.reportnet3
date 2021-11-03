@@ -132,7 +132,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
       await UserService.logout();
     } catch (error) {
       console.error('LeftSideBar - userLogout.', error);
-      notificationContext.add({ type: 'USER_LOGOUT_ERROR' });
+      notificationContext.add({ type: 'USER_LOGOUT_ERROR' }, true);
     } finally {
       userContext.onLogout();
     }
@@ -202,7 +202,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
               {renderUserProfile()}
               {renderHelp()}
               {renderUserNotifications()}
-              {renderManageSystemNotifications()}
+              {/* {renderManageSystemNotifications()} */}
             </div>
             {!isEmpty(renderSectionButtons()) && (
               <Fragment>

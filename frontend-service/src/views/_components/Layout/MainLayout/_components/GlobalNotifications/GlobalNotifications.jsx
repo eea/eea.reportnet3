@@ -47,7 +47,7 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadAllSchemasInfoFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_SCHEMAS_INFO_FILE_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_SCHEMAS_INFO_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }
@@ -72,7 +72,7 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadQCRulesFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }
@@ -97,7 +97,7 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadValidationsFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_FILE_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }
@@ -144,7 +144,7 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadExportFMEFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }
@@ -170,7 +170,7 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadExportDatasetFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }

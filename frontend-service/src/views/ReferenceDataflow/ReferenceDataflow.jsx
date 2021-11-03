@@ -144,10 +144,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       userContext.onTokenRefresh(userObject);
     } catch (error) {
       console.error('ReferenceDataflow - onRefreshToken.', error);
-      notificationContext.add({
-        key: 'TOKEN_REFRESH_ERROR',
-        content: {}
-      });
+      notificationContext.add(
+        {
+          key: 'TOKEN_REFRESH_ERROR',
+          content: {}
+        },
+        true
+      );
       await UserService.logout();
       userContext.onLogout();
     } finally {
@@ -194,10 +197,13 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     } catch (error) {
       console.error('ReferenceDataflow - onSaveDatasetName.', error);
       if (error?.response?.status === 400) {
-        notificationContext.add({
-          type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME',
-          content: { schemaName: value }
-        });
+        notificationContext.add(
+          {
+            type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME',
+            content: { schemaName: value }
+          },
+          true
+        );
       }
     }
   };
@@ -244,7 +250,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       }
     } catch (error) {
       console.error('ReferenceDataflow - onLoadReferenceDataflow.', error);
-      notificationContext.add({ type: 'LOADING_REFERENCE_DATAFLOW_ERROR', error });
+      notificationContext.add({ type: 'LOADING_REFERENCE_DATAFLOW_ERROR', error }, true);
       history.push(getUrl(routes.DATAFLOWS));
     } finally {
       setIsLoading(false);

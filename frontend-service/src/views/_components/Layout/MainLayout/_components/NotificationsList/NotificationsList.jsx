@@ -65,7 +65,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     ];
 
     let columnsArray = headers.map(col => (
-      <Column body={col.template} field={col.id} header={col.header} key={col.id} sortable={true} />
+      <Column body={col.template} field={col.id} header={col.header} key={col.id} />
     ));
 
     setColumns(columnsArray);

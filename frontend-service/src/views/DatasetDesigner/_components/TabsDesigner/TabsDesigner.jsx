@@ -245,10 +245,13 @@ export const TabsDesigner = withRouter(
         console.error('TabsDesigner - addTable.', error);
         if (error?.response.status === 400) {
           if (error.response?.data?.message?.includes('name invalid')) {
-            notificationContext.add({
-              type: 'DATASET_SCHEMA_TABLE_INVALID_NAME',
-              content: { tableName: header }
-            });
+            notificationContext.add(
+              {
+                type: 'DATASET_SCHEMA_TABLE_INVALID_NAME',
+                content: { tableName: header }
+              },
+              true
+            );
           }
         }
       }
@@ -455,18 +458,20 @@ export const TabsDesigner = withRouter(
         await DatasetService.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId);
         const inmTabs = [...tabs];
         inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
-        inmTabs[
-          TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')
-        ].tableSchemaName = tableSchemaName;
+        inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].tableSchemaName =
+          tableSchemaName;
         setTabs(inmTabs);
       } catch (error) {
         console.error('TabsDesigner - updateTableName.', error);
         if (error?.response.status === 400) {
           if (error.response?.data?.message?.includes('name invalid')) {
-            notificationContext.add({
-              type: 'DATASET_SCHEMA_TABLE_INVALID_NAME',
-              content: { tableName: tableSchemaName }
-            });
+            notificationContext.add(
+              {
+                type: 'DATASET_SCHEMA_TABLE_INVALID_NAME',
+                content: { tableName: tableSchemaName }
+              },
+              true
+            );
           }
         }
       }

@@ -131,10 +131,10 @@ const BigButtonListReference = withRouter(
         await DataflowService.cloneSchemas(cloneDataflow.id, dataflowId);
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
         } else {
           console.error('BigButtonListReference - cloneDatasetSchemas.', error);
-          notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' });
+          notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' }, true);
         }
       }
     };
@@ -151,7 +151,7 @@ const BigButtonListReference = withRouter(
         return await MetadataUtils.getMetadata(ids);
       } catch (error) {
         console.error('BigButtonListReference - getMetadata.', error);
-        notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId } });
+        notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId } }, true);
       }
     };
 
@@ -168,7 +168,7 @@ const BigButtonListReference = withRouter(
       } catch (error) {
         console.error('BigButtonListReference - onDeleteDatasetSchema.', error);
         if (error.response.status === 401) {
-          notificationContext.add({ type: 'DELETE_DATASET_SCHEMA_LINK_ERROR' });
+          notificationContext.add({ type: 'DELETE_DATASET_SCHEMA_LINK_ERROR' }, true);
         }
       } finally {
         hideLoading();
@@ -190,10 +190,13 @@ const BigButtonListReference = withRouter(
           dataflow: { name: dataflowName }
         } = await getMetadata({ dataflowId });
 
-        notificationContext.add({
-          type: 'CREATE_REFERENCE_DATASETS_ERROR',
-          content: { referenceDataflowId: dataflowId, dataflowName }
-        });
+        notificationContext.add(
+          {
+            type: 'CREATE_REFERENCE_DATASETS_ERROR',
+            content: { referenceDataflowId: dataflowId, dataflowName }
+          },
+          true
+        );
         setIsCreatingReferenceDatasets(false);
       } finally {
         handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });
@@ -215,10 +218,13 @@ const BigButtonListReference = withRouter(
           dataflow: { name: dataflowName }
         } = await getMetadata({ dataflowId });
 
-        notificationContext.add({
-          type: 'CREATE_REFERENCE_DATASETS_ERROR',
-          content: { referenceDataflowId: dataflowId, dataflowName }
-        });
+        notificationContext.add(
+          {
+            type: 'CREATE_REFERENCE_DATASETS_ERROR',
+            content: { referenceDataflowId: dataflowId, dataflowName }
+          },
+          true
+        );
         setIsCreatingReferenceDatasets(false);
       } finally {
         handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });

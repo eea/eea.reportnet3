@@ -135,19 +135,20 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
       onUpdateData();
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('Article13 - onAddPamsRecord.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
         } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add({
-          type: 'ADD_RECORDS_ERROR',
-          content: { dataflowId, dataflowName, datasetId, datasetName, tableName: '' }
-        });
+        notificationContext.add(
+          {
+            type: 'ADD_RECORDS_ERROR',
+            content: { dataflowId, dataflowName, datasetId, datasetName, tableName: '' }
+          },
+          true
+        );
       }
       if (type === 'single') {
         setIsAddingSingleRecord(false);
@@ -165,19 +166,20 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
       onUpdateData();
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('Article13 - onAddTableRecord.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
         } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add({
-          type: 'ADD_RECORDS_ERROR',
-          content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
-        });
+        notificationContext.add(
+          {
+            type: 'ADD_RECORDS_ERROR',
+            content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
+          },
+          true
+        );
       }
     }
   };

@@ -129,18 +129,19 @@ export const WebformTable = ({
       } catch (error) {
         console.error('WebformTable - onAddMultipleWebform.', error);
         if (error.response.status === 423) {
-          notificationContext.add({
-            type: 'GENERIC_BLOCKED_ERROR'
-          });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
         } else {
           const {
             dataflow: { name: dataflowName },
             dataset: { name: datasetName }
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-          notificationContext.add({
-            type: 'ADD_RECORDS_ERROR',
-            content: { dataflowId, dataflowName, datasetId, datasetName, tableName: webformData.title }
-          });
+          notificationContext.add(
+            {
+              type: 'ADD_RECORDS_ERROR',
+              content: { dataflowId, dataflowName, datasetId, datasetName, tableName: webformData.title }
+            },
+            true
+          );
         }
         webformTableDispatch({
           type: 'SET_IS_ADDING_MULTIPLE',
@@ -191,10 +192,13 @@ export const WebformTable = ({
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'TABLE_DATA_BY_ID_ERROR',
-        content: { dataflowId, dataflowName, datasetId, datasetName }
-      });
+      notificationContext.add(
+        {
+          type: 'TABLE_DATA_BY_ID_ERROR',
+          content: { dataflowId, dataflowName, datasetId, datasetName }
+        },
+        true
+      );
     } finally {
       isLoading(false);
       setIsLoading(false);

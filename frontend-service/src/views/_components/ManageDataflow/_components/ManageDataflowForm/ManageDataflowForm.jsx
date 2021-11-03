@@ -128,13 +128,13 @@ const ManageDataflowForm = forwardRef(
                 name: { message: resourcesContext.messages['dataflowNameExists'], hasErrors: true }
               };
             });
-            notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
+            notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' }, true);
           } else {
             const notification = isEditForm
               ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: data.id, dataflowName: name } }
               : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
 
-            notificationContext.add(notification);
+            notificationContext.add(notification, true);
           }
         } finally {
           onSubmit(false);

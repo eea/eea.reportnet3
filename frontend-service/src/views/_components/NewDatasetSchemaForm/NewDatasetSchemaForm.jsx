@@ -87,17 +87,26 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
         } = metadata;
 
         if (error.response?.data?.message?.includes('duplicated')) {
-          notificationContext.add({
-            type: 'DATASET_SCHEMA_CREATION_ERROR_DUPLICATED',
-            content: { schemaName: datasetSchemaName }
-          });
+          notificationContext.add(
+            {
+              type: 'DATASET_SCHEMA_CREATION_ERROR_DUPLICATED',
+              content: { schemaName: datasetSchemaName }
+            },
+            true
+          );
         } else if (error.response?.data?.message?.includes('name invalid')) {
-          notificationContext.add({
-            type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME',
-            content: { schemaName: datasetSchemaName }
-          });
+          notificationContext.add(
+            {
+              type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME',
+              content: { schemaName: datasetSchemaName }
+            },
+            true
+          );
         } else {
-          notificationContext.add({ type: 'DATASET_SCHEMA_CREATION_ERROR', content: { dataflowId, dataflowName } });
+          notificationContext.add(
+            { type: 'DATASET_SCHEMA_CREATION_ERROR', content: { dataflowId, dataflowName } },
+            true
+          );
           onCreate();
         }
       } finally {

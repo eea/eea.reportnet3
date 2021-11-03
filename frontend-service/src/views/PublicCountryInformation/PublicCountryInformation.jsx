@@ -118,13 +118,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
     } catch (error) {
       console.error('PublicCountryInformation - onFileDownload.', error);
       if (error.response.status === 404) {
-        notificationContext.add({
-          type: 'DOWNLOAD_DATASET_FILE_NOT_FOUND_EVENT'
-        });
+        notificationContext.add({ type: 'DOWNLOAD_DATASET_FILE_NOT_FOUND_EVENT' }, true);
       } else {
-        notificationContext.add({
-          type: 'DOWNLOAD_DATASET_FILE_ERROR'
-        });
+        notificationContext.add({ type: 'DOWNLOAD_DATASET_FILE_ERROR' }, true);
       }
     }
   };
@@ -147,7 +143,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       setPublicInformation(data.publicDataflows);
     } catch (error) {
       console.error('PublicCountryInformation - onLoadPublicCountryInformation.', error);
-      notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' });
+      notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' }, true);
     } finally {
       setIsLoading(false);
     }
