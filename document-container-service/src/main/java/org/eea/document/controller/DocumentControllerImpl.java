@@ -10,8 +10,10 @@ import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
@@ -59,6 +61,10 @@ public class DocumentControllerImpl implements DocumentController {
   @Autowired
   private DataFlowDocumentControllerZuul dataflowController;
 
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
+
   /**
    * The Constant LOG.
    */
@@ -82,6 +88,12 @@ public class DocumentControllerImpl implements DocumentController {
       @RequestParam("description") final String description,
       @RequestParam("language") final String language,
       @RequestParam("isPublic") final Boolean isPublic) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    notificationControllerZuul.createUserNotificationPrivate("DOCUMENT_UPLOADING_INIT_INFO",
+        userNotificationContentVO);
+
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -187,6 +199,12 @@ public class DocumentControllerImpl implements DocumentController {
       @PathVariable("dataflowId") final Long dataflowId, @RequestParam(value = "deleteMetabase",
           required = false, defaultValue = "true") final Boolean deleteMetabase)
       throws Exception {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    notificationControllerZuul.createUserNotificationPrivate("DELETE_DOCUMENT_INIT_INFO",
+        userNotificationContentVO);
+
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -226,6 +244,12 @@ public class DocumentControllerImpl implements DocumentController {
       @RequestParam(name = "language", required = false) final String language,
       @PathVariable("idDocument") final Long idDocument,
       @RequestParam("isPublic") final Boolean isPublic) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    notificationControllerZuul.createUserNotificationPrivate("DOCUMENT_UPLOADING_INIT_INFO",
+        userNotificationContentVO);
+
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());

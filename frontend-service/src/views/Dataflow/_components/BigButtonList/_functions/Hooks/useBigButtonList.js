@@ -12,6 +12,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const useBigButtonList = ({
   dataflowId,
@@ -52,6 +53,8 @@ const useBigButtonList = ({
     config.permissions.roles.CUSTODIAN.key,
     config.permissions.roles.STEWARD.key
   ]);
+
+  const restrictFromPublicAccess = isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business');
 
   const getButtonsVisibility = useCallback(() => {
     const isDesigner =
@@ -293,7 +296,8 @@ const useBigButtonList = ({
             }
           ],
           onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
-          restrictFromPublicInfo: true,
+          restrictFromPublicAccess: restrictFromPublicAccess,
+          restrictFromPublicInfo: dataflowState.showPublicInfo,
           restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
           visibility: true
         };
@@ -327,7 +331,8 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true),
-        restrictFromPublicInfo: true,
+        restrictFromPublicAccess: restrictFromPublicAccess,
+        restrictFromPublicInfo: dataflowState.showPublicInfo,
         restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
         visibility: true
       };

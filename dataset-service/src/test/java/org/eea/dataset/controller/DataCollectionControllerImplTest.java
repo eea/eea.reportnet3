@@ -8,6 +8,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -43,6 +44,10 @@ public class DataCollectionControllerImplTest {
 
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
+
+  /** The notification controller zuul. */
+  @Mock
+  private NotificationControllerZuul notificationControllerZuul;
 
   @Mock
   private DataCollectionService dataCollectionService;
@@ -102,6 +107,9 @@ public class DataCollectionControllerImplTest {
 
   @Test
   public void createEmptyDataCollectionTestException() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setStatus(TypeStatusEnum.DRAFT);
     Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
@@ -118,6 +126,9 @@ public class DataCollectionControllerImplTest {
 
   @Test
   public void createEmptyDataCollectionTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     DataFlowVO dataflow = new DataFlowVO();
