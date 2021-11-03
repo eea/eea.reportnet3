@@ -119,7 +119,7 @@ const getOptionsTemplate = (filteredOptions, property) => {
     }
   });
 
-  return sortBy(template, 'type');
+  return sortBy(template);
 };
 
 const getOptionsTypes = (data, property, list, sortErrors) => {
