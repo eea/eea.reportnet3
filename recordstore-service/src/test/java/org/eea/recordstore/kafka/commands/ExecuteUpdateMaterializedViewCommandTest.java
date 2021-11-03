@@ -1,5 +1,6 @@
 package org.eea.recordstore.kafka.commands;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.kafka.domain.EEAEventVO;
@@ -37,6 +38,7 @@ public class ExecuteUpdateMaterializedViewCommandTest {
     data.put("user", "user");
     data.put("dataset_id", "1");
     data.put("released", true);
+    data.put("referencesToRefresh", Arrays.asList(1));
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.UPDATE_MATERIALIZED_VIEW_EVENT);
     eeaEventVO.setData(data);

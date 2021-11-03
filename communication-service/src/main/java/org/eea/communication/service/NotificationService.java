@@ -1,8 +1,8 @@
 package org.eea.communication.service;
 
-import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.communication.UserNotificationListVO;
 import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.kafka.domain.EventType;
 
@@ -33,7 +33,10 @@ public interface NotificationService {
   /**
    * Find user notifications by user.
    *
+   * @param pagenNum the pagen num
+   * @param pageSize the page size
    * @return the list
    */
-  public List<UserNotificationVO> findUserNotificationsByUser();
+  public UserNotificationListVO findUserNotificationsByUserPaginated(Integer pagenNum,
+      Integer pageSize);
 }

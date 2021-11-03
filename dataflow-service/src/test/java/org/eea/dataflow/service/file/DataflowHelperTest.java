@@ -2,6 +2,7 @@ package org.eea.dataflow.service.file;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.commons.io.FileUtils;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.exception.EEAException;
@@ -33,6 +35,7 @@ import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.EeaUserDetails;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -200,5 +203,15 @@ public class DataflowHelperTest {
   @Test
   public void downloadPublicSchemaInformationTest() throws EEAException, IOException {
     assertNotNull(dataflowHelper.downloadPublicSchemaInformation(1L));
+  }
+
+  @After
+  public void afterTests() {
+    File file = new File("./dataflow-1-Schema_Information");
+    try {
+      FileUtils.deleteDirectory(file);
+    } catch (IOException e) {
+
+    }
   }
 }
