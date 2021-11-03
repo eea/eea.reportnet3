@@ -1,6 +1,7 @@
 package org.eea.communication.persistence;
 
 import java.util.Date;
+import java.util.Map;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -63,4 +64,8 @@ public class UserNotification {
   /** The type status. */
   @Field(value = "typeStatus")
   private TypeStatusEnum typeStatus;
+
+  /** The custom content. */
+  @Field(value = "customContent")
+  private Map<String, String> customContent;
 }
