@@ -23,6 +23,8 @@ export const BigButtonListRepresentative = ({
   dataflowState,
   dataProviderId,
   handleRedirect,
+  isLeadReporterOfCountry,
+  manageDialogs,
   match,
   onCleanUpReceipt,
   onOpenReleaseConfirmDialog,
@@ -106,6 +108,7 @@ export const BigButtonListRepresentative = ({
               dataProviderId,
               getDataHistoricReleases,
               handleRedirect,
+              isLeadReporterOfCountry,
               match,
               onLoadReceiptData,
               onOpenReleaseConfirmDialog,
@@ -114,7 +117,7 @@ export const BigButtonListRepresentative = ({
             })
               .filter(button => button.visibility)
               .map(button => (
-                <BigButton key={button.caption} {...button} />
+                <BigButton key={button.caption} manageDialogs={manageDialogs} {...button} />
               ))}
           </div>
         </div>

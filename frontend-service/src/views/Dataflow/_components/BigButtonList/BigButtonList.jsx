@@ -52,6 +52,7 @@ export const BigButtonList = ({
   dataProviderId,
   handleRedirect,
   isLeadReporterOfCountry,
+  manageDialogs,
   onCleanUpReceipt,
   onOpenReleaseConfirmDialog,
   onSaveName,
@@ -562,7 +563,7 @@ export const BigButtonList = ({
     setErrorDialogData
   })
     .filter(button => button.visibility)
-    .map(button => <BigButton key={button.caption} {...button} />);
+    .map(button => <BigButton key={button.caption} manageDialogs={manageDialogs} {...button} />);
 
   const getManageAcceptanceDataset = data => setDatasetFeedbackStatusToEdit(data);
 
