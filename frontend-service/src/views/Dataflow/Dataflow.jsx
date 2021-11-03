@@ -612,6 +612,14 @@ const Dataflow = withRouter(({ history, match }) => {
           if (isReceiptOutdated.length === 1) {
             setIsReceiptOutdated(isReceiptOutdated[0]);
           }
+
+          if (isLeadReporter) {
+            const representative = dataflow.representatives[0];
+            if (!isEmpty(representative)) {
+              dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
+              dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: representative.restrictFromPublic });
+            }
+          }
         }
       }
     } catch (error) {
