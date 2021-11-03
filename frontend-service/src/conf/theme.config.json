@@ -343,7 +343,8 @@
     "user-image-bg-hover": "var(--main-font-color)",
     "user-image-bg-opacity": "0.6",
     "webform-table-bg": "var(--gray-10)",
-    "webform-table-border": "1px solid var(--gray-10)"
+    "webform-table-border": "1px solid var(--gray-10)",
+    "left-sidebar-text-color": "var(--white)",
   },
   "dark": {
     "accent-color": "var(--accent-color-dark-mode)",
@@ -690,7 +691,8 @@
     "user-image-bg-hover": "var(--main-font-color)",
     "user-image-bg-opacity": "0.6",
     "webform-table-bg": "var(--bg-dark-01dp)",
-    "webform-table-border": "1px solid var(--gray-75)"
+    "webform-table-border": "1px solid var(--gray-75)",
+    "left-sidebar-text-color": "var(--white-font)",
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
