@@ -1411,8 +1411,8 @@ export const FieldDesigner = ({
   return (
     <Fragment>
       <div
-        className={`${styles.draggableFieldDiv} ${
-          fieldDesignerState.isDragging ? styles.disablePointerEvent : ''
+        className={`${styles.draggableFieldDiv} ${fieldDesignerState.isDragging ? styles.disablePointerEvent : ''} ${
+          fieldDesignerState.isDragging && styles.fieldSeparatorDragging
         } fieldRow datasetSchema-fieldDesigner-help-step`}
         draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
         onDragEnd={onFieldDragEnd}
@@ -1422,11 +1422,6 @@ export const FieldDesigner = ({
         onDragStart={onFieldDragStart}
         onDrop={onFieldDragDrop}
         style={{ cursor: isDataflowOpen || isDesignDatasetEditorRead ? 'default' : 'grab' }}>
-        <div
-          className={`${styles.fieldSeparator} ${
-            fieldDesignerState.isDragging ? styles.fieldSeparatorDragging : ''
-          }`}></div>
-
         {renderCheckboxes()}
         {renderInputs()}
         {renderCodelistFileAndLinkButtons()}
