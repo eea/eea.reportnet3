@@ -5,6 +5,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -56,8 +57,12 @@ public class DeleteDatasetValueCompletedEventTest {
    *
    * @throws EEAException the EEA exception
    */
-  // @Test
+  @Test
   public void testGetMap() throws EEAException {
+
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     Assert.assertEquals("datasetName",
         deleteDatasetValueCompletedEvent
             .getMap(NotificationVO.builder().user("user").datasetId(1L).dataflowId(1L)
@@ -70,13 +75,14 @@ public class DeleteDatasetValueCompletedEventTest {
    *
    * @throws EEAException the EEA exception
    */
-  // @Test
+  @Test
   public void testGetMapNulls() throws EEAException {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any()))
-        .thenReturn(new DataFlowVO());
     Assert.assertNull(deleteDatasetValueCompletedEvent
         .getMap(NotificationVO.builder().user("user").datasetId(1L).error("error").build())
         .get("datasetName"));
