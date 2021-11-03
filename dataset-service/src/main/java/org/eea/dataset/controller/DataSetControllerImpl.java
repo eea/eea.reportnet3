@@ -253,13 +253,6 @@ public class DataSetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "delimiter of file",
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
 
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDataflowId(dataflowId);
-    userNotificationContentVO.setDatasetId(datasetId);
-    userNotificationContentVO.setProviderId(providerId);
-    notificationControllerZuul.createUserNotificationPrivate("DATASET_DATA_LOADING_INIT",
-        userNotificationContentVO);
-
     try {
       fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
           delimiter);
