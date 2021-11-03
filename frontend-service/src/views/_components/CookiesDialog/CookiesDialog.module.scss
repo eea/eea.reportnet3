@@ -2,7 +2,7 @@
   width: 982px;
   height: 160px;
   background-color: var(--cookies-bg);
-  color: var(--white);
+  color: var(--cookies-content-color);
   align-self: center;
   padding: 1rem;
   h3 {
@@ -10,21 +10,21 @@
   }
   > p {
     a {
-      color: var(--white);
+      color: var(--cookies-content-color);
       text-decoration: underline;
       &:hover {
-        color: var(--white);
+        color: var(--cookies-content-color);
       }
       &:visited {
-        color: var(--white);
+        color: var(--cookies-content-color);
       }
     }
   }
   > div {
     button {
       background: transparent;
-      border: 2px solid white;
-      color: white;
+      border: 2px solid var(--cookies-content-color);
+      color: var(--cookies-content-color);
       padding: 0.5rem;
       font-size: 1rem;
       &:hover {
