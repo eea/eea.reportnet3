@@ -81,7 +81,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
       });
     } catch (error) {
       console.error('CloneSchemas - onLoadDataflows.', error);
-      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
+      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' }, true);
     } finally {
       isLoading(false);
     }

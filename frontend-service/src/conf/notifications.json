@@ -783,18 +783,14 @@
             "parameters": ["dataflowId", "datasetId", "datasetName"]
           }
         },
-        {
-          "key": "UNLOCK_DATASET_ERROR"
-        },
-        {
-          "key": "LOAD_DATASETS_SUMMARY_ERROR"
-        },
-        {
-          "key": "LOADING_WEBFORM_ERROR"
-        },
-        {
-          "key": "LOADING_WEBFORM_OPTIONS_ERROR"
-        }
+        { "key": "UNLOCK_DATASET_ERROR" },
+        { "key": "LOAD_DATASETS_SUMMARY_ERROR" },
+        { "key": "LOADING_WEBFORM_ERROR" },
+        { "key": "LOADING_WEBFORM_OPTIONS_ERROR" },
+        { "key": "EXPORT_DATASET_FAILED_EVENT" },
+        { "key": "DOWNLOAD_VALIDATIONS_FAILED_EVENT" },
+        { "key": "EXPORT_QC_FAILED_EVENT" },
+        { "key": "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT" }
       ]
     },
     {
@@ -1017,25 +1013,23 @@
             "parameters": ["dataflowId", "dataProvider", "representativeId"]
           }
         },
-        {
-          "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD"
-        },
-        {
-          "key": "AUTOMATICALLY_DOWNLOAD_SCHEMAS_INFO_FILE"
-        },
-        {
-          "key": "AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE"
-        },
-        {
-          "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE"
-        },
+        { "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD" },
+        { "key": "AUTOMATICALLY_DOWNLOAD_SCHEMAS_INFO_FILE" },
+        { "key": "AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE" },
+        { "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE" },
         {
           "key": "IMPORT_FIELD_SCHEMA_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]
           }
-        }
+        },
+        { "key": "EXPORT_DATASET_COMPLETED_EVENT" },
+        { "key": "DOWNLOAD_VALIDATIONS_COMPLETED_EVENT" },
+        { "key": "EXPORT_QC_COMPLETED_EVENT" },
+        { "key": "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT" },
+        { "key": "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT" },
+        { "key": "EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT" }
       ]
     },
     {
@@ -1044,7 +1038,8 @@
       "fixed": false,
       "types": [
         {
-          "key": "DATASET_DATA_LOADING_INIT"
+          "key": "DATASET_DATA_LOADING_INIT",
+          "messageKeys": {}
         },
         {
           "key": "DOCUMENT_UPLOADING_INIT_INFO"

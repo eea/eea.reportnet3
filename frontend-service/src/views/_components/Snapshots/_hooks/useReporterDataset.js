@@ -42,10 +42,10 @@ const useReporterDataset = (datasetId, dataflowId) => {
       snapshotDispatch({ type: 'ON_SNAPSHOT_RESET' });
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('useReporterDataset - onCreateSnapshot.', error);
-        notificationContext.add({ type: 'CREATE_BY_ID_REPORTER_ERROR', content: {} });
+        notificationContext.add({ type: 'CREATE_BY_ID_REPORTER_ERROR', content: {} }, true);
       }
     } finally {
       setIsSnapshotDialogVisible(false);
@@ -58,10 +58,10 @@ const useReporterDataset = (datasetId, dataflowId) => {
       onLoadSnapshotList();
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('useReporterDataset - onDeleteSnapshot.', error);
-        notificationContext.add({ type: 'DELETED_BY_ID_REPORTER_ERROR', content: {} });
+        notificationContext.add({ type: 'DELETED_BY_ID_REPORTER_ERROR', content: {} }, true);
       }
     } finally {
       setIsSnapshotDialogVisible(false);
@@ -76,7 +76,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
       setIsLoadingSnapshotListData(false);
     } catch (error) {
       console.error('useReporterDataset - onLoadSnapshotList.', error);
-      notificationContext.add({ type: 'ALL_REPORTER_ERROR', content: {} });
+      notificationContext.add({ type: 'ALL_REPORTER_ERROR', content: {} }, true);
       setIsLoadingSnapshotListData(false);
     }
   };
@@ -93,10 +93,10 @@ const useReporterDataset = (datasetId, dataflowId) => {
       await SnapshotService.restoreReporter(dataflowId, datasetId, snapshotState.snapShotId);
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('useReporterDataset - onRestoreSnapshot.', error);
-        notificationContext.add({ type: 'RESTORE_DATASET_SNAPSHOT_FAILED_EVENT', content: {} });
+        notificationContext.add({ type: 'RESTORE_DATASET_SNAPSHOT_FAILED_EVENT', content: {} }, true);
       }
     } finally {
       setIsSnapshotDialogVisible(false);

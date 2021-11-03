@@ -495,10 +495,13 @@ export const FieldDesigner = ({
       console.error('FieldDesigner - onFieldAdd.', error);
       if (error?.response.status === 400) {
         if (error.response?.data?.message?.includes('name invalid')) {
-          notificationContext.add({
-            type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
-            content: { fieldName: name }
-          });
+          notificationContext.add(
+            {
+              type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
+              content: { customContent: { fieldName: name } }
+            },
+            true
+          );
         }
       }
     } finally {
@@ -817,10 +820,13 @@ export const FieldDesigner = ({
       console.error('FieldDesigner - fieldUpdate.', error);
       if (error?.response.status === 400) {
         if (error.response?.data?.message?.includes('name invalid')) {
-          notificationContext.add({
-            type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
-            content: { fieldName: name }
-          });
+          notificationContext.add(
+            {
+              type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
+              content: { customContent: { fieldName: name } }
+            },
+            true
+          );
         }
       }
     }

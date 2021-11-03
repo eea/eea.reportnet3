@@ -300,7 +300,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       setWebformOptions(await WebformService.getAll());
     } catch (error) {
       console.error('Dataset - getWebformList.', error);
-      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' });
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
     }
   };
 
@@ -392,7 +392,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       setExternalOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
     } catch (error) {
       console.error('Dataset - getFileExtensions.', error);
-      notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
+      notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' }, true);
     }
   };
 
@@ -402,7 +402,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       setMetadata(metaData);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
-      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } }, true);
     }
   };
 
@@ -413,17 +413,20 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await DatasetService.deleteData(datasetId);
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('Dataset - onConfirmDelete.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
         } = metadata;
-        notificationContext.add({
-          type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
-          content: { dataflowId, datasetId, dataflowName, datasetName }
-        });
+        notificationContext.add(
+          {
+            type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
+            content: { dataflowId, datasetId, dataflowName, datasetName }
+          },
+          true
+        );
       }
     }
   };
@@ -432,33 +435,37 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     try {
       setValidateDialogVisible(false);
       await DatasetService.validate(datasetId);
-      notificationContext.add({
-        type: 'VALIDATE_DATA_INIT',
-        content: {
-          origin: datasetName,
-          dataflowId,
-          dataflowName: metadata.dataflow.name,
-          datasetId,
-          datasetName: datasetSchemaName
-        }
-      });
-    } catch (error) {
-      if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
-      } else {
-        console.error('Dataset - onConfirmValidate.', error);
-        notificationContext.add({
-          type: 'VALIDATE_REPORTING_DATA_ERROR',
+      notificationContext.add(
+        {
+          type: 'VALIDATE_DATA_INIT',
           content: {
-            origin: datasetName,
+            customContent: { origin: datasetName },
             dataflowId,
             dataflowName: metadata.dataflow.name,
             datasetId,
             datasetName: datasetSchemaName
           }
-        });
+        },
+        true
+      );
+    } catch (error) {
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+      } else {
+        console.error('Dataset - onConfirmValidate.', error);
+        notificationContext.add(
+          {
+            type: 'VALIDATE_REPORTING_DATA_ERROR',
+            content: {
+              customContent: { origin: datasetName },
+              dataflowId,
+              dataflowName: metadata.dataflow.name,
+              datasetId,
+              datasetName: datasetSchemaName
+            }
+          },
+          true
+        );
       }
     }
   };
@@ -470,20 +477,26 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onImportDatasetError = async ({ xhr }) => {
     if (xhr.status === 400) {
-      notificationContext.add({
-        type: 'IMPORT_REPORTING_BAD_REQUEST_ERROR',
-        content: { dataflowId, datasetId, datasetName: datasetSchemaName }
-      });
+      notificationContext.add(
+        {
+          type: 'IMPORT_REPORTING_BAD_REQUEST_ERROR',
+          content: { dataflowId, datasetId, datasetName: datasetSchemaName }
+        },
+        true
+      );
     }
     if (xhr.status === 423) {
-      notificationContext.add({
-        type: 'GENERIC_BLOCKED_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          datasetName: datasetSchemaName
-        }
-      });
+      notificationContext.add(
+        {
+          type: 'GENERIC_BLOCKED_ERROR',
+          content: {
+            dataflowId,
+            datasetId,
+            datasetName: datasetSchemaName
+          }
+        },
+        true
+      );
     }
   };
 
@@ -502,18 +515,19 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       });
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('Dataset - onImportOtherSystems.', error);
-        notificationContext.add({
-          type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT',
-          content: {
-            dataflowName: metadata.dataflow.name,
-            datasetName: datasetName
-          }
-        });
+        notificationContext.add(
+          {
+            type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT',
+            content: {
+              dataflowName: metadata.dataflow.name,
+              datasetName: datasetName
+            }
+          },
+          true
+        );
       }
     }
   };
@@ -563,28 +577,32 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       dataset: { name: datasetName }
     } = metadata;
 
-    notificationContext.add({
-      type: exportNotification,
-      content: {
-        dataflowName: dataflowName,
-        datasetName: datasetName
-      }
-    });
+    notificationContext.add(
+      {
+        type: exportNotification,
+        content: {
+          dataflowName: dataflowName,
+          datasetName: datasetName
+        }
+      },
+      true
+    );
   };
 
   const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
-    notificationContext.add({
-      type: 'EXPORT_DATASET_DATA'
-    });
+    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       console.error('Dataset - onExportDataExternalIntegration.', error);
-      notificationContext.add({
-        type: 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT',
-        content: { dataflowId, datasetId, datasetName: datasetSchemaName }
-      });
+      notificationContext.add(
+        {
+          type: 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT',
+          content: { dataflowId, datasetId, datasetName: datasetSchemaName }
+        },
+        true
+      );
     }
   };
 
@@ -628,10 +646,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = metadata;
-      notificationContext.add({
-        type: 'REPORTING_ERROR',
-        content: { dataflowId, datasetId, dataflowName, datasetName }
-      });
+      notificationContext.add(
+        {
+          type: 'REPORTING_ERROR',
+          content: { dataflowId, datasetId, dataflowName, datasetName }
+        },
+        true
+      );
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOWS));
       }
@@ -739,7 +760,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           datasetName
         }
       };
-      notificationContext.add(datasetError);
+      notificationContext.add(datasetError, true);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }
@@ -797,7 +818,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await ValidationService.generateQCRulesFile(datasetId);
     } catch (error) {
       console.error('DatasetDesigner - onDownloadQCRules.', error);
-      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' });
+      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
       setIsDownloadingQCRules(false);
     }
   };
@@ -847,16 +868,21 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
     } = metadata;
-    notificationContext.add({
-      type: 'DATASET_DATA_LOADING_INIT',
-      content: {
-        datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-        title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
-        datasetLoading: resourcesContext.messages['datasetLoading'],
-        dataflowName,
-        datasetName
-      }
-    });
+    notificationContext.add(
+      {
+        type: 'DATASET_DATA_LOADING_INIT',
+        content: {
+          customContent: {
+            datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+            title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
+            datasetLoading: resourcesContext.messages['datasetLoading']
+          },
+          dataflowName,
+          datasetName
+        }
+      },
+      true
+    );
   };
 
   const renderDashboardFooter = (
@@ -914,7 +940,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await ValidationService.generateShowValidationsFile(datasetId);
     } catch (error) {
       console.error('Dataset - onDownloadValidations.', error);
-      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' }, true);
       setIsDownloadingValidations(false);
     }
   };
@@ -927,7 +953,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       onLoadDatasetSchema();
     } catch (error) {
       console.error('Dataset - onConfirmUpdateReferenceDataset.', error);
-      notificationContext.add({ type: 'UNLOCK_DATASET_ERROR' });
+      notificationContext.add({ type: 'UNLOCK_DATASET_ERROR' }, true);
     }
   };
 
