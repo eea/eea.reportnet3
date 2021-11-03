@@ -122,10 +122,13 @@ const BigButtonListReference = withRouter(
       handleDialogs({ dialog: 'cloneDialogVisible', isVisible: false });
       setCloneLoading(true);
 
-      notificationContext.add({
-        type: 'CLONE_DATASET_SCHEMAS_INIT',
-        content: { sourceDataflowName: cloneDataflow.name, targetDataflowName: dataflowState.name }
-      });
+      notificationContext.add(
+        {
+          type: 'CLONE_DATASET_SCHEMAS_INIT',
+          content: { customContent: { sourceDataflowName: cloneDataflow.name, targetDataflowName: dataflowState.name } }
+        },
+        true
+      );
 
       try {
         await DataflowService.cloneSchemas(cloneDataflow.id, dataflowId);
@@ -193,7 +196,7 @@ const BigButtonListReference = withRouter(
         notificationContext.add(
           {
             type: 'CREATE_REFERENCE_DATASETS_ERROR',
-            content: { referenceDataflowId: dataflowId, dataflowName }
+            content: { customContent: { referenceDataflowId: dataflowId }, dataflowName }
           },
           true
         );
@@ -221,7 +224,7 @@ const BigButtonListReference = withRouter(
         notificationContext.add(
           {
             type: 'CREATE_REFERENCE_DATASETS_ERROR',
-            content: { referenceDataflowId: dataflowId, dataflowName }
+            content: { customContent: { referenceDataflowId: dataflowId }, dataflowName }
           },
           true
         );

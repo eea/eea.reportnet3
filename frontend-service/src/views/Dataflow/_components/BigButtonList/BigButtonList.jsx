@@ -185,10 +185,13 @@ export const BigButtonList = ({
   const cloneDatasetSchemas = async () => {
     setCloneDialogVisible(false);
 
-    notificationContext.add({
-      type: 'CLONE_DATASET_SCHEMAS_INIT',
-      content: { sourceDataflowName: cloneDataflow.name, targetDataflowName: dataflowName }
-    });
+    notificationContext.add(
+      {
+        type: 'CLONE_DATASET_SCHEMAS_INIT',
+        content: { customContent: { sourceDataflowName: cloneDataflow.name, targetDataflowName: dataflowName } }
+      },
+      true
+    );
     setIsCloningDataflow(true);
 
     try {

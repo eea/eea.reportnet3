@@ -145,7 +145,7 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
         notificationContext.add(
           {
             type: 'ADD_RECORDS_ERROR',
-            content: { dataflowId, dataflowName, datasetId, datasetName, tableName: '' }
+            content: { dataflowId, dataflowName, datasetId, datasetName, customContent: { tableName: '' } }
           },
           true
         );
@@ -176,7 +176,7 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
         notificationContext.add(
           {
             type: 'ADD_RECORDS_ERROR',
-            content: { dataflowId, datasetId, dataflowName, datasetName, tableName: '' }
+            content: { dataflowId, datasetId, dataflowName, datasetName, customContent: { tableName: '' } }
           },
           true
         );

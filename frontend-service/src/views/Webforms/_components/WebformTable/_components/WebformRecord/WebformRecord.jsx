@@ -99,7 +99,7 @@ export const WebformRecord = ({
         notificationContext.add(
           {
             type: 'DELETE_RECORD_BY_ID_ERROR',
-            content: { dataflowId, dataflowName, datasetId, datasetName, tableName }
+            content: { dataflowId, dataflowName, datasetId, datasetName, customContent: { tableName } }
           },
           true
         );

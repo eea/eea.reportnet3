@@ -691,7 +691,7 @@ const Dataflow = withRouter(({ history, match }) => {
       console.error('Dataflow - onSaveName.', error);
       if (error?.response?.status === 400) {
         notificationContext.add(
-          { type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME', content: { schemaName: value } },
+          { type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME', content: { customContent: { schemaName: value } } },
           true
         );
       }

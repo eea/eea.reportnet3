@@ -567,16 +567,19 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     manageDialogs('isValidateDialogVisible', false);
     try {
       await DatasetService.validate(datasetId);
-      notificationContext.add({
-        type: 'VALIDATE_DATA_INIT',
-        content: {
-          origin: 'DESIGN',
-          dataflowId,
-          dataflowName: designerState.dataflowName,
-          datasetId,
-          datasetName: designerState.datasetSchemaName
-        }
-      });
+      notificationContext.add(
+        {
+          type: 'VALIDATE_DATA_INIT',
+          content: {
+            customContent: { origin: 'DESIGN' },
+            dataflowId,
+            dataflowName: designerState.dataflowName,
+            datasetId,
+            datasetName: designerState.datasetSchemaName
+          }
+        },
+        true
+      );
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -586,7 +589,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           {
             type: 'VALIDATE_DESIGN_DATA_ERROR',
             content: {
-              origin: 'DESIGN',
+              customContent: { origin: 'DESIGN' },
               dataflowId,
               dataflowName: designerState.dataflowName,
               datasetId,
@@ -882,16 +885,21 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
-      notificationContext.add({
-        type: 'DATASET_DATA_LOADING_INIT',
-        content: {
-          dataflowName,
-          datasetLoading: resourcesContext.messages['datasetLoading'],
-          datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-          datasetName,
-          title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
-        }
-      });
+      notificationContext.add(
+        {
+          type: 'DATASET_DATA_LOADING_INIT',
+          content: {
+            customContent: {
+              datasetLoading: resourcesContext.messages['datasetLoading'],
+              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+              title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
+            },
+            dataflowName,
+            datasetName
+          }
+        },
+        true
+      );
     } catch (error) {
       console.error('DatasetDesigner - onUpload.', error);
       notificationContext.add(

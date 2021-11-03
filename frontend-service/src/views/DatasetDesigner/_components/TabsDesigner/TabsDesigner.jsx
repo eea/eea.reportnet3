@@ -248,7 +248,7 @@ export const TabsDesigner = withRouter(
             notificationContext.add(
               {
                 type: 'DATASET_SCHEMA_TABLE_INVALID_NAME',
-                content: { tableName: header }
+                content: { customContent: { tableName: header } }
               },
               true
             );
@@ -468,7 +468,7 @@ export const TabsDesigner = withRouter(
             notificationContext.add(
               {
                 type: 'DATASET_SCHEMA_TABLE_INVALID_NAME',
-                content: { tableName: tableSchemaName }
+                content: { customContent: { tableName: tableSchemaName } }
               },
               true
             );

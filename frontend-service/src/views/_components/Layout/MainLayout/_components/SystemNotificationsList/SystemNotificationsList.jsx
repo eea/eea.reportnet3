@@ -97,7 +97,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
   }, [columns]);
 
   const actionsColumnButtons = rowData => {
-    console.log({ rowData });
     return (
       <div className={styles.actionsColumnButtons}>
         <ActionsColumn
@@ -165,7 +164,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
   );
 
   const onCreateSystemNotification = async systemNotification => {
-    console.log('CREADA NOTIFICATION CON VALORES', systemNotification);
+    // console.log('', systemNotification);
   };
 
   const onDelete = async () => {
@@ -239,7 +238,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         };
       });
 
-      console.log({ notificationsArray });
       setSystemNotifications(notificationsArray);
     } catch (error) {
       console.error('SystemNotificationsList - onLoadSystemNotifications.', error);
@@ -295,7 +293,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
           {renderSystemNotifications()}
         </Dialog>
       )}
-      {console.log(isVisibleCreateSysNotification)}
       {isVisibleCreateSysNotification && (
         <SystemNotificationsCreateForm
           formType={formType}

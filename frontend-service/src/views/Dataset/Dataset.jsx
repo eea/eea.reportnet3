@@ -435,16 +435,19 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     try {
       setValidateDialogVisible(false);
       await DatasetService.validate(datasetId);
-      notificationContext.add({
-        type: 'VALIDATE_DATA_INIT',
-        content: {
-          origin: datasetName,
-          dataflowId,
-          dataflowName: metadata.dataflow.name,
-          datasetId,
-          datasetName: datasetSchemaName
-        }
-      });
+      notificationContext.add(
+        {
+          type: 'VALIDATE_DATA_INIT',
+          content: {
+            customContent: { origin: datasetName },
+            dataflowId,
+            dataflowName: metadata.dataflow.name,
+            datasetId,
+            datasetName: datasetSchemaName
+          }
+        },
+        true
+      );
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -454,7 +457,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           {
             type: 'VALIDATE_REPORTING_DATA_ERROR',
             content: {
-              origin: datasetName,
+              customContent: { origin: datasetName },
               dataflowId,
               dataflowName: metadata.dataflow.name,
               datasetId,
@@ -588,9 +591,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
-    notificationContext.add({
-      type: 'EXPORT_DATASET_DATA'
-    });
+    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
@@ -867,16 +868,21 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
     } = metadata;
-    notificationContext.add({
-      type: 'DATASET_DATA_LOADING_INIT',
-      content: {
-        datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-        title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
-        datasetLoading: resourcesContext.messages['datasetLoading'],
-        dataflowName,
-        datasetName
-      }
-    });
+    notificationContext.add(
+      {
+        type: 'DATASET_DATA_LOADING_INIT',
+        content: {
+          customContent: {
+            datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+            title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
+            datasetLoading: resourcesContext.messages['datasetLoading']
+          },
+          dataflowName,
+          datasetName
+        }
+      },
+      true
+    );
   };
 
   const renderDashboardFooter = (

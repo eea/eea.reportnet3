@@ -131,7 +131,7 @@ const ActionsToolbar = ({
             datasetId,
             dataflowName,
             datasetName,
-            tableName
+            customContent: { tableName }
           }
         },
         true

@@ -138,7 +138,13 @@ export const WebformTable = ({
           notificationContext.add(
             {
               type: 'ADD_RECORDS_ERROR',
-              content: { dataflowId, dataflowName, datasetId, datasetName, tableName: webformData.title }
+              content: {
+                dataflowId,
+                dataflowName,
+                datasetId,
+                datasetName,
+                customContent: { tableName: webformData.title }
+              }
             },
             true
           );

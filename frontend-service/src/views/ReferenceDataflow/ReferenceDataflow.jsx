@@ -146,7 +146,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       console.error('ReferenceDataflow - onRefreshToken.', error);
       notificationContext.add(
         {
-          key: 'TOKEN_REFRESH_ERROR',
+          type: 'TOKEN_REFRESH_ERROR',
           content: {}
         },
         true
@@ -200,7 +200,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
         notificationContext.add(
           {
             type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME',
-            content: { schemaName: value }
+            content: { customContent: { schemaName: value } }
           },
           true
         );

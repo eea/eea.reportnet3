@@ -227,16 +227,19 @@ const GlobalNotifications = () => {
       dataset: { name: datasetName }
     } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
-    notificationContext.add({
-      type: 'VALIDATE_DATA_INIT',
-      content: {
-        origin: 'DESIGN',
-        dataflowId,
-        dataflowName,
-        datasetId,
-        datasetName
-      }
-    });
+    notificationContext.add(
+      {
+        type: 'VALIDATE_DATA_INIT',
+        content: {
+          customContent: { origin: 'DESIGN' },
+          dataflowId,
+          dataflowName,
+          datasetId,
+          datasetName
+        }
+      },
+      true
+    );
   };
 
   useCheckNotifications(
@@ -269,16 +272,19 @@ const GlobalNotifications = () => {
       dataset: { name: datasetName }
     } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
-    notificationContext.add({
-      type: 'VALIDATE_DATA_INIT',
-      content: {
-        origin: 'REPORTING',
-        dataflowId,
-        dataflowName,
-        datasetId,
-        datasetName
-      }
-    });
+    notificationContext.add(
+      {
+        type: 'VALIDATE_DATA_INIT',
+        content: {
+          customContent: { origin: 'REPORTING' },
+          dataflowId,
+          dataflowName,
+          datasetId,
+          datasetName
+        }
+      },
+      true
+    );
   };
 
   useCheckNotifications(

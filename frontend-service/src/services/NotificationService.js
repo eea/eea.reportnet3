@@ -4,6 +4,7 @@ import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
 import kebabCase from 'lodash/kebabCase';
+import merge from 'lodash/merge';
 
 import { config as generalConfig } from 'conf';
 
@@ -18,35 +19,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const NotificationService = {
   all: async ({ pageNum, pageSize }) => {
-    console.log(pageNum, pageSize);
     const notificationsDTO = await NotificationRepository.all(pageNum, pageSize);
-    // const notificationsDTO = [
-    //   {
-    //     type: 'VALIDATE_DATA_INIT',
-    //     content: {
-    //       dataflowId: 666,
-    //       dataflowName: 'S39 DF',
-    //       dataProviderName: 'DESIGN',
-    //       datasetName: 'S4',
-    //       datasetId: 2911,
-    //       type: 'DESIGN'
-    //     },
-    //     date: new Date()
-    //   },
-    //   {
-    //     type: 'VALIDATION_FINISHED_EVENT',
-    //     content: {
-    //       dataflowId: 666,
-    //       dataflowName: 'S39 DF',
-    //       dataProviderName: 'DESIGN',
-    //       datasetName: 'S4',
-    //       datasetId: 2911,
-    //       type: 'DESIGN'
-    //     },
-    //     date: new Date()
-    //   }
-    // ];
-    console.log({ notificationsDTO });
     const notifications = {};
 
     notifications.userNotifications = notificationsDTO?.data?.userNotifications?.map(notificationDTO => {
@@ -55,7 +28,6 @@ export const NotificationService = {
     });
 
     notifications.totalRecords = notificationsDTO.data.totalRecords;
-    console.log(notifications);
     return notifications;
   },
   create: async (type, date, content) => await NotificationRepository.create(type, date, content),
@@ -64,6 +36,9 @@ export const NotificationService = {
   // readById: async () => {},
   // readAll: async () => {},
   parse: ({ config, content = {}, date, message, onClick, routes, type }) => {
+    content = merge(content, content.customContent);
+    delete content.customContent;
+
     if (type === 'UPDATED_DATASET_STATUS') {
       content.datasetStatus = capitalize(content.datasetStatus.split('_').join(' '));
     }
@@ -89,18 +64,15 @@ export const NotificationService = {
           navigateTo.parameters.forEach(parameter => {
             urlParameters[parameter] = content[parameter];
           });
-          //TODO CAMBIAR DESIGN
+
           const section =
             type.toString() !== 'VALIDATION_FINISHED_EVENT'
               ? routes[navigateTo.section]
               : routes[
                   NotificationUtils.getSectionValidationRedirectionUrl(
-                    //!isNil(content.type) ? content.type : content.typeStatus
-                    'DESIGN'
+                    !isNil(content.type) ? content.type : content.typeStatus
                   )
                 ];
-          console.log(section, urlParameters);
-          //TODO - Quitar comentario
           notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
 
           if (!isNil(navigateTo.hasQueryString) && navigateTo.hasQueryString) {
@@ -112,12 +84,6 @@ export const NotificationService = {
           });
         }
 
-        // content: {
-        //   dataflowName,
-        //   datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-        //   datasetName,
-        //   title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
-        // }
         contentKeys.forEach(key => {
           if (isUndefined(navigateTo) || !navigateTo.parameters.includes(key)) {
             const shortKey = camelCase(`short-${kebabCase(key)}`);
@@ -125,15 +91,7 @@ export const NotificationService = {
           }
         });
 
-        if (type.toString() === 'DATASET_DATA_LOADING_INIT') {
-          console.log({ content });
-          content.datasetLoading = ' is loading...';
-          content.datasetLoadingMessage = 'The dataset ';
-          content.title = TextUtils.ellipsis('datasetName', generalConfig.notifications.STRING_LENGTH_MAX);
-        }
-
         notificationDTO.message = TextUtils.parseText(notificationDTO.message, content);
-        console.log(content);
         notificationDTO.date = new Date(date);
       }
     });

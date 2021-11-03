@@ -205,7 +205,7 @@ export const TableManagement = ({
         notificationContext.add(
           {
             type: 'DELETE_RECORD_BY_ID_ERROR',
-            content: { dataflowId, dataflowName, datasetId, datasetName, tableName: 'tableName' }
+            content: { dataflowId, dataflowName, datasetId, datasetName }
           },
           true
         );

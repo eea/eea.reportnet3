@@ -111,21 +111,14 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   };
 
   const notificationLevelTemplate = rowData => {
-    console.log(rowData);
     return (
       <div className={styles.notificationLevelTemplateWrapper}>
-        <LevelError type={rowData.levelError?.toLowerCase()} />
+        <LevelError type={rowData.levelError.toLowerCase()} />
       </div>
     );
   };
 
-  // const onLoadFilteredData = data => {
-  //   console.log({ data });
-  //   setFilteredData(data);
-  // };
-
   const onChangePage = event => {
-    console.log({ event });
     setPaginationInfo({ ...paginationInfo, recordsPerPage: event.rows, firstPageRecord: event.first });
     onLoadNotifications(event.first, event.rows);
   };
@@ -138,12 +131,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         pageSize: nRows
       });
 
-      // setPaginationInfo({
-      //   ...paginationInfo,
-      //   recordsPerPage: rowsPerPage,
-      //   totalRecords: unparsedNotifications.totalRecords
-      // });
-      console.log({ unparsedNotifications });
       const parsedNotifications = unparsedNotifications.userNotifications.map(notification => {
         return NotificationService.parse({
           config: config.notifications.notificationSchema,
@@ -154,7 +141,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           type: notification.type
         });
       });
-      console.log({ parsedNotifications });
       const notificationsArray = parsedNotifications.map(notification => {
         const message = DOMPurify.sanitize(notification.message, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 
@@ -193,7 +179,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         };
       });
 
-      console.log(unparsedNotifications.totalRecords);
       setTotalRecords(unparsedNotifications.totalRecords);
       setNotifications(notificationsArray);
     } catch (error) {
@@ -252,15 +237,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         style={{ width: '80%' }}
         visible={isNotificationVisible}
         zIndex={3100}>
-        {/* <Filters
-          appendTo={document.body}
-          data={notifications || []}
-          getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFilteredState}
-          options={filterOptions}
-          // searchBy={['message', 'date', 'levelError']}
-        /> */}
-        {console.log(notifications)}
         {renderNotifications()}
       </Dialog>
     )

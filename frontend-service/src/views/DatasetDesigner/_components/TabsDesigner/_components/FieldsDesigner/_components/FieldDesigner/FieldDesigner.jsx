@@ -495,7 +495,7 @@ export const FieldDesigner = ({
           notificationContext.add(
             {
               type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
-              content: { fieldName: name }
+              content: { customContent: { fieldName: name } }
             },
             true
           );
@@ -820,7 +820,7 @@ export const FieldDesigner = ({
           notificationContext.add(
             {
               type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
-              content: { fieldName: name }
+              content: { customContent: { fieldName: name } }
             },
             true
           );

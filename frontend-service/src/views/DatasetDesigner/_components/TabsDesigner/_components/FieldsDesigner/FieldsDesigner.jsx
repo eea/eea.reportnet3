@@ -773,7 +773,7 @@ export const FieldsDesigner = ({
             datasetId,
             dataflowName,
             datasetName,
-            tableName: designerState.tableName
+            customContent: { tableName: designerState.tableName }
           }
         },
         true

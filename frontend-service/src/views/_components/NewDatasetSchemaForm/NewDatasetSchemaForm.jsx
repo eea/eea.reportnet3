@@ -90,7 +90,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
           notificationContext.add(
             {
               type: 'DATASET_SCHEMA_CREATION_ERROR_DUPLICATED',
-              content: { schemaName: datasetSchemaName }
+              content: { customContent: { schemaName: datasetSchemaName } }
             },
             true
           );
@@ -98,7 +98,7 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
           notificationContext.add(
             {
               type: 'DATASET_SCHEMA_CREATION_ERROR_INVALID_NAME',
-              content: { schemaName: datasetSchemaName }
+              content: { customContent: { schemaName: datasetSchemaName } }
             },
             true
           );

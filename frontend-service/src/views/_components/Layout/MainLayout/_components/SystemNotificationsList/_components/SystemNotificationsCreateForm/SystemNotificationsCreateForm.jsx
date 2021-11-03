@@ -16,7 +16,6 @@ export const SystemNotificationsCreateForm = ({
   onCreateSystemNotification,
   onToggleVisibility
 }) => {
-  console.log({ notification });
   const resourcesContext = useContext(ResourcesContext);
 
   const [systemNotification, setSystemNotification] = useState(formType === 'EDIT' ? notification : {});
