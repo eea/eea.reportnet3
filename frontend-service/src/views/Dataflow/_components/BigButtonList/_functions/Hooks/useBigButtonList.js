@@ -487,8 +487,6 @@ const useBigButtonList = ({
     .filter(dataset => dataset.dataProviderId === dataProviderId)
     .some(dataset => dataset.isReleased);
 
-  console.log('dataflowState.restrictFromPublic :>> ', dataflowState.restrictFromPublic);
-
   const onBuildReleaseButton = () => {
     return [
       {
