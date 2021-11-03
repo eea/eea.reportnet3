@@ -484,6 +484,11 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     // Release the notification
     try {
       if (null != eventType) {
+        notificationVO.setDatasetName(datasetMetabaseControllerZuul
+            .findDatasetMetabaseById(fmeJob.getDatasetId()).getDataSetName());
+        notificationVO
+            .setDataflowName(dataflowService.getMetabaseById(fmeJob.getDataflowId()).getName());
+
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
       }
     } catch (EEAException e) {

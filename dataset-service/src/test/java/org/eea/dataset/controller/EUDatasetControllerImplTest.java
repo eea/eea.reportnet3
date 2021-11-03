@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataset.service.EUDatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.junit.Assert;
 import org.junit.Before;
@@ -35,6 +36,10 @@ public class EUDatasetControllerImplTest {
   /** The eu dataset service. */
   @Mock
   private EUDatasetService euDatasetService;
+
+  /** The notification controller zuul. */
+  @Mock
+  private NotificationControllerZuul notificationControllerZuul;
 
   /** The list EU datasets. */
   private List<EUDatasetVO> listEUDatasets;
@@ -80,6 +85,9 @@ public class EUDatasetControllerImplTest {
    */
   @Test
   public void populateDataFromDataCollectionTest() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(euDatasetService).populateEUDatasetWithDataCollection(Mockito.any());
@@ -94,6 +102,9 @@ public class EUDatasetControllerImplTest {
    */
   @Test
   public void populateDataFromDataCollectionExceptionTest() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException("failed")).when(euDatasetService)

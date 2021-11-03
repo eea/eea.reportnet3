@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -61,6 +63,10 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   /** The lock service. */
   @Autowired
   private LockService lockService;
+
+  /** The notification controller zuul. */
+  @Autowired
+  NotificationControllerZuul notificationControllerZuul;
 
   /**
    * Undo data collection creation.
@@ -121,6 +127,10 @@ public class DataCollectionControllerImpl implements DataCollectionController {
           example = "true") @RequestParam(defaultValue = "true",
               name = "stopAndNotifyPKError") boolean stopAndNotifyPKError) {
 
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataCollectionVO.getIdDataflow());
+    userNotificationContentVO.setDatasetName(dataCollectionVO.getDataSetName());
+
     Date date = dataCollectionVO.getDueDate();
     Long dataflowId = dataCollectionVO.getIdDataflow();
     // new check: dataflow is Reference dataset?
@@ -131,6 +141,12 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       showPublicInfo = false;
       manualCheck = false;
       stopAndNotifySQLErrors = false;
+
+      notificationControllerZuul.createUserNotificationPrivate("CREATE_REFERENCE_DATASETS_INIT",
+          userNotificationContentVO);
+    } else {
+      notificationControllerZuul.createUserNotificationPrivate("CREATE_DATA_COLLECTION_INIT",
+          userNotificationContentVO);
     }
 
     // Continue if the dataflow exists and is DESIGN
