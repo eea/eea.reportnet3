@@ -118,10 +118,10 @@ export const NationalSystemsField = ({
       await DatasetService.updateField(datasetId, option, field.fieldId, field.fieldType, parsedValue);
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('NationalSystemsField - onEditorSubmitValue.', error);
-        notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' });
+        notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
       }
     }
   };
@@ -155,14 +155,10 @@ export const NationalSystemsField = ({
 
   const onUploadFileError = async ({ xhr }) => {
     if (xhr.status === 400) {
-      notificationContext.add({
-        type: 'UPLOAD_FILE_ERROR'
-      });
+      notificationContext.add({ type: 'UPLOAD_FILE_ERROR' }, true);
     }
     if (xhr.status === 423) {
-      notificationContext.add({
-        type: 'GENERIC_BLOCKED_ERROR'
-      });
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
     }
   };
 

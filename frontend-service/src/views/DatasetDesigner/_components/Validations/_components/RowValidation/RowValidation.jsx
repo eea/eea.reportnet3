@@ -307,9 +307,7 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
       onHide();
     } catch (error) {
       console.error('RowValidation - onCreateValidationRule.', error);
-      notificationContext.add({
-        type: 'QC_RULE_CREATION_ERROR'
-      });
+      notificationContext.add({ type: 'QC_RULE_CREATION_ERROR' }, true);
     } finally {
       setIsSubmitDisabled(false);
     }
@@ -335,9 +333,7 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
       onHide();
     } catch (error) {
       console.error('RowValidation - onUpdateValidationRule.', error);
-      notificationContext.add({
-        type: 'QC_RULE_UPDATING_ERROR'
-      });
+      notificationContext.add({ type: 'QC_RULE_UPDATING_ERROR' }, true);
     } finally {
       setIsSubmitDisabled(false);
     }

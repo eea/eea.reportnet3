@@ -333,7 +333,7 @@ export const FieldsDesigner = ({
     } catch (error) {
       console.error('FieldsDesigner - deleteField.', error);
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       }
     } finally {
       setIsLoading(false);
@@ -375,7 +375,7 @@ export const FieldsDesigner = ({
     } catch (error) {
       console.error('FieldsDesigner - deleteFields.', error);
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       }
       setIsLoading(false);
     }
@@ -743,9 +743,7 @@ export const FieldsDesigner = ({
   };
 
   const onUpload = async () => {
-    notificationContext.add({
-      type: 'IMPORT_TABLE_SCHEMA_INIT'
-    });
+    notificationContext.add({ type: 'IMPORT_TABLE_SCHEMA_INIT' });
     manageDialogs('isImportTableSchemaDialogVisible', false);
   };
 
@@ -767,22 +765,25 @@ export const FieldsDesigner = ({
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName,
-          tableName: designerState.tableName
-        }
-      });
+      notificationContext.add(
+        {
+          type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId,
+            dataflowName,
+            datasetName,
+            customContent: { tableName: designerState.tableName }
+          }
+        },
+        true
+      );
     }
   };
 
   const onImportTableSchemaError = async ({ xhr }) => {
     if (xhr.status === 423) {
-      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
     }
   };
 
