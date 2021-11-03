@@ -66,10 +66,13 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
       DownloadFile(data, message.messageAttachment.name);
     } catch (error) {
       console.error('Message - onFileDownload.', error);
-      notificationContext.add({
-        type: 'FEEDBACK_DOWNLOAD_MESSAGE_ATTACHMENT_ERROR',
-        content: {}
-      });
+      notificationContext.add(
+        {
+          type: 'FEEDBACK_DOWNLOAD_MESSAGE_ATTACHMENT_ERROR',
+          content: {}
+        },
+        true
+      );
     } finally {
       setIsDownloading(false);
     }

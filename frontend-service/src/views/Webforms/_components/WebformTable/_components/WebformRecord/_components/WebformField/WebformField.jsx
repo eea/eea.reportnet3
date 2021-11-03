@@ -177,9 +177,7 @@ export const WebformField = ({
       webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
     } catch (error) {
       console.error('WebformField - onFilter.', error);
-      notificationContext.add({
-        type: 'GET_REFERENCED_LINK_VALUES_ERROR'
-      });
+      notificationContext.add({ type: 'GET_REFERENCED_LINK_VALUES_ERROR' }, true);
     } finally {
       webformFieldDispatch({ type: 'SET_IS_LOADING_DATA', payload: false });
     }
@@ -226,13 +224,13 @@ export const WebformField = ({
       }
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('WebformField - onEditorSubmitValue.', error);
         if (updateInCascade) {
-          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' });
+          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' }, true);
         } else {
-          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' });
+          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
         }
       }
     } finally {
@@ -271,14 +269,10 @@ export const WebformField = ({
 
   const onUploadFileError = async ({ xhr }) => {
     if (xhr.status === 400) {
-      notificationContext.add({
-        type: 'UPLOAD_FILE_ERROR'
-      });
+      notificationContext.add({ type: 'UPLOAD_FILE_ERROR' }, true);
     }
     if (xhr.status === 423) {
-      notificationContext.add({
-        type: 'GENERIC_BLOCKED_ERROR'
-      });
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
     }
   };
 

@@ -19,7 +19,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
+const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystemNotificationVisible }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -92,6 +92,21 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
     return <LeftSideBarButton {...userNotificationsProps} />;
   };
 
+  const renderManageSystemNotifications = () => {
+    const manageSystemNotificationsProps = {
+      className: 'dataflowList-left-side-bar-system-notifications-help-step',
+      href: '#',
+      icon: 'comment',
+      label: 'systemNotifications',
+      onClick: async e => {
+        e.preventDefault();
+        setIsSystemNotificationVisible(true);
+      },
+      title: 'systemNotifications'
+    };
+    return <LeftSideBarButton {...manageSystemNotificationsProps} />;
+  };
+
   const renderHelp = () => {
     const userHelpProps = {
       className: 'dataflowList-left-side-bar-help-help-step',
@@ -117,7 +132,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
       await UserService.logout();
     } catch (error) {
       console.error('LeftSideBar - userLogout.', error);
-      notificationContext.add({ type: 'USER_LOGOUT_ERROR' });
+      notificationContext.add({ type: 'USER_LOGOUT_ERROR' }, true);
     } finally {
       userContext.onLogout();
     }
@@ -187,6 +202,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
               {renderUserProfile()}
               {renderHelp()}
               {renderUserNotifications()}
+              {/* {renderManageSystemNotifications()} */}
             </div>
             {!isEmpty(renderSectionButtons()) && (
               <Fragment>

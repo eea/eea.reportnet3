@@ -170,16 +170,10 @@ const DocumentFileUpload = ({
       } catch (error) {
         console.error('DocumentFileUpload - onConfirm.', error);
         if (isEditForm) {
-          notificationContext.add({
-            type: 'DOCUMENT_EDITING_ERROR',
-            content: {}
-          });
+          notificationContext.add({ type: 'DOCUMENT_EDITING_ERROR', content: {} }, true);
           setIsUpdating(false);
         } else {
-          notificationContext.add({
-            type: 'DOCUMENT_UPLOADING_ERROR',
-            content: {}
-          });
+          notificationContext.add({ type: 'DOCUMENT_UPLOADING_ERROR', content: {} }, true);
         }
         onUpload();
         setFileUpdatingId('');
