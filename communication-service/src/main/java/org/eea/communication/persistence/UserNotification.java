@@ -65,6 +65,7 @@ public class UserNotification {
   @Field(value = "typeStatus")
   private TypeStatusEnum typeStatus;
 
+  /** The custom content. */
   @Field(value = "customContent")
   private Map<String, String> customContent;
 }
