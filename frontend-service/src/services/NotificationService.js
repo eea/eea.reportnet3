@@ -30,11 +30,17 @@ export const NotificationService = {
     notifications.totalRecords = notificationsDTO.data.totalRecords;
     return notifications;
   },
+
   create: async (type, date, content) => await NotificationRepository.create(type, date, content),
+
   // removeById: async () => {},
+
   // removeAll: async () => {},
+
   // readById: async () => {},
+
   // readAll: async () => {},
+
   parse: ({ config, content = {}, date, message, onClick, routes, type }) => {
     content = merge(content, content.customContent);
     delete content.customContent;
@@ -97,6 +103,7 @@ export const NotificationService = {
     });
     return new Notification(notificationDTO);
   },
+
   parseHidden: ({ type, content = {}, config }) => {
     const notificationDTO = {};
     const notificationTypeConfig = config.filter(

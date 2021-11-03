@@ -15,19 +15,16 @@ import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { Dialog } from 'views/_components/Dialog';
 import { DataTable } from 'views/_components/DataTable';
-// import { Filters } from 'views/_components/Filters';
 import { LevelError } from 'views/_components/LevelError';
 import { Spinner } from 'views/_components/Spinner';
 
 import { NotificationService } from 'services/NotificationService';
 
-// import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 import { isEmpty } from 'lodash';
 
 const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
-  // const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -39,8 +36,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     firstPageRecord: 0
   });
   const [totalRecords, setTotalRecords] = useState(0);
-  // const [filteredData, setFilteredData] = useState([]);
-  // const [isFiltered, setIsFiltered] = useState(false);
 
   useEffect(() => {
     const headers = [
@@ -76,14 +71,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       onLoadNotifications(0, paginationInfo.recordsPerPage);
     }
   }, [columns]);
-
-  // const filterOptions = [
-  //   { type: 'input', properties: [{ name: 'message' }] },
-  //   { type: 'date', properties: [{ name: 'date' }] },
-  //   { type: 'multiselect', properties: [{ name: 'levelError' }] }
-  // ];
-
-  // const getFilteredState = value => setIsFiltered(value);
 
   const getValidUrl = (url = '') => {
     let newUrl = window.decodeURIComponent(url);
