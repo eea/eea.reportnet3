@@ -9,12 +9,14 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const useBigButtonList = ({
   dataflowState,
   dataProviderId,
   getDataHistoricReleases,
   handleRedirect,
+  isLeadReporterOfCountry,
   match,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
@@ -160,7 +162,8 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true),
-        restrictFromPublicInfo: true,
+        restrictFromPublicAccess: isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business'),
+        restrictFromPublicInfo: dataflowState.showPublicInfo,
         restrictFromPublicStatus: datasetRepresentative.restrictFromPublic,
         visibility: true
       };

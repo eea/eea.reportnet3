@@ -260,6 +260,7 @@ const DatasetSchema = ({
 
   const renderProperties = () => (
     <div>
+      {renderProperty(resourcesContext.messages['datasetSchemaDescription'], designDataset.datasetSchemaDescription)}
       {renderIconProperty(resourcesContext.messages['availableInPublic'], designDataset.availableInPublic)}
       {renderIconProperty(resourcesContext.messages['referenceDataset'], designDataset.referenceDataset)}
     </div>

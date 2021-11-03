@@ -1,22 +1,25 @@
 package org.eea.communication.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.eea.communication.mapper.UserNotificationMapper;
 import org.eea.communication.persistence.UserNotification;
 import org.eea.communication.persistence.repository.UserNotificationRepository;
 import org.eea.communication.service.NotificationService;
 import org.eea.communication.service.model.Notification;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.communication.UserNotificationListVO;
 import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.kafka.domain.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
  * The Class NotificationServiceImpl.
@@ -40,6 +43,10 @@ public class NotificationServiceImpl implements NotificationService {
   /** The user notification repository. */
   @Autowired
   private UserNotificationRepository userNotificationRepository;
+
+  /** The user notification mapper. */
+  @Autowired
+  private UserNotificationMapper userNotificationMapper;
 
   /**
    * Send.
@@ -72,15 +79,18 @@ public class NotificationServiceImpl implements NotificationService {
     try {
       UserNotification userNotification = new UserNotification();
       userNotification.setUserId(SecurityContextHolder.getContext().getAuthentication().getName());
-      userNotification.setEventType(EventType.valueOf(userNotificationVO.getEventType()));
+      userNotification.setEventType(
+          (userNotificationVO.getEventType() != null) ? userNotificationVO.getEventType() : "");
       userNotification.setInsertDate(userNotificationVO.getInsertDate());
-      userNotification.setDataflowId(userNotificationVO.getContent().getDataflowId());
-      userNotification.setDataflowName(userNotificationVO.getContent().getDataflowName());
-      userNotification.setProviderId(userNotificationVO.getContent().getProviderId());
-      userNotification.setDataProviderName(userNotificationVO.getContent().getDataProviderName());
-      userNotification.setDatasetId(userNotificationVO.getContent().getDatasetId());
-      userNotification.setDatasetName(userNotificationVO.getContent().getDatasetName());
-      userNotification.setTypeStatus(userNotificationVO.getContent().getTypeStatus());
+      if (userNotificationVO.getContent() != null) {
+        userNotification.setDataflowId(userNotificationVO.getContent().getDataflowId());
+        userNotification.setDataflowName(userNotificationVO.getContent().getDataflowName());
+        userNotification.setProviderId(userNotificationVO.getContent().getProviderId());
+        userNotification.setDataProviderName(userNotificationVO.getContent().getDataProviderName());
+        userNotification.setDatasetId(userNotificationVO.getContent().getDatasetId());
+        userNotification.setDatasetName(userNotificationVO.getContent().getDatasetName());
+        userNotification.setTypeStatus(userNotificationVO.getContent().getTypeStatus());
+      }
       userNotificationRepository.save(userNotification);
       LOG.info("User Notification created succesfully in mongo");
     } catch (IllegalArgumentException e) {
@@ -92,29 +102,24 @@ public class NotificationServiceImpl implements NotificationService {
   /**
    * Find user notifications by user.
    *
+   * @param pageNum the page num
+   * @param pageSize the page size
    * @return the list
    */
   @Override
-  public List<UserNotificationVO> findUserNotificationsByUser() {
-
+  public UserNotificationListVO findUserNotificationsByUserPaginated(Integer pageNum,
+      Integer pageSize) {
+    Pageable pageable = PageRequest.of(pageNum, pageSize);
+    UserNotificationListVO userNotificationListVO = new UserNotificationListVO();
     List<UserNotification> listUserNotification = userNotificationRepository
-        .findByUserId(SecurityContextHolder.getContext().getAuthentication().getName());
-    List<UserNotificationVO> listUserNotificationVO = new ArrayList<>();
-    for (UserNotification userNotification : listUserNotification) {
-      UserNotificationVO userNotificationVO = new UserNotificationVO();
-      userNotificationVO.setInsertDate(userNotification.getInsertDate());
-      userNotificationVO.setEventType(userNotification.getEventType().toString());
-      UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-      userNotificationContentVO.setDataflowId(userNotification.getDataflowId());
-      userNotificationContentVO.setDataflowName(userNotification.getDataflowName());
-      userNotificationContentVO.setDatasetId(userNotification.getDatasetId());
-      userNotificationContentVO.setDatasetName(userNotification.getDatasetName());
-      userNotificationContentVO.setProviderId(userNotification.getProviderId());
-      userNotificationContentVO.setDataProviderName(userNotification.getDataProviderName());
-      userNotificationContentVO.setTypeStatus(userNotification.getTypeStatus());
-      userNotificationVO.setContent(userNotificationContentVO);
-      listUserNotificationVO.add(userNotificationVO);
-    }
-    return listUserNotificationVO;
+        .findByUserId(SecurityContextHolder.getContext().getAuthentication().getName(), pageable);
+    List<UserNotification> totalRecords = userNotificationRepository
+        .findByUserId(SecurityContextHolder.getContext().getAuthentication().getName(), null);
+    List<UserNotificationVO> listUserNotificationVO =
+        userNotificationMapper.entityListToClass(listUserNotification);
+    userNotificationListVO.setUserNotifications(listUserNotificationVO);
+    userNotificationListVO.setTotalRecords(
+        !CollectionUtils.isEmpty(totalRecords) ? Long.valueOf(totalRecords.size()) : 0);
+    return userNotificationListVO;
   }
 }

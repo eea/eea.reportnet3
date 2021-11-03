@@ -12,8 +12,10 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.lock.LockVO;
@@ -74,6 +76,10 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The dataflow controller zull. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZull;
+
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
 
   /** The lock service. */
   @Autowired
@@ -229,6 +235,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @ApiParam(type = "Long", value = "snapshot Id",
           example = "0") @PathVariable("idSnapshot") Long idSnapshot) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDatasetId(datasetId);
+    notificationControllerZuul.createUserNotificationPrivate("RESTORE_DATASET_SNAPSHOT_INIT_INFO",
+        userNotificationContentVO);
+
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -380,6 +392,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           name = "datasetId") @PathVariable("idDesignDataset") Long datasetId,
       @ApiParam(type = "Long", value = "snapshot Id",
           example = "0") @PathVariable("idSnapshot") Long idSnapshot) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDatasetId(datasetId);
+    notificationControllerZuul.createUserNotificationPrivate("RESTORE_DATASET_SNAPSHOT_INIT_INFO",
+        userNotificationContentVO);
+
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -578,6 +596,12 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
       @ApiParam(type = "boolean", value = "Restric from public", example = "true") @RequestParam(
           name = "restrictFromPublic", required = true,
           defaultValue = "false") boolean restrictFromPublic) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    userNotificationContentVO.setProviderId(dataProviderId);
+    notificationControllerZuul.createUserNotificationPrivate("RELEASE_START_EVENT",
+        userNotificationContentVO);
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
