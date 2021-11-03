@@ -30,14 +30,14 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   const [run, setRun] = useState(false);
 
   const handleJoyrideCallback = data => {
-    const { action, status, type } = data;
+    const { action, index, status, type } = data;
 
     if ([ACTIONS.CLOSE].includes(action) || [STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
       setHelpIndex(0);
       setRun(false);
     } else {
       if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
-        setHelpIndex(helpIndex + (data.action === 'prev' ? -1 : 1));
+        setHelpIndex(index + (action === ACTIONS.PREV ? -1 : 1));
       } else {
         if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
           setRun(false);
