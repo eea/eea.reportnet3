@@ -77,20 +77,8 @@ public class NotificationServiceImpl implements NotificationService {
   @Override
   public void createUserNotification(UserNotificationVO userNotificationVO) throws EEAException {
     try {
-      UserNotification userNotification = new UserNotification();
+      UserNotification userNotification = userNotificationMapper.classToEntity(userNotificationVO);
       userNotification.setUserId(SecurityContextHolder.getContext().getAuthentication().getName());
-      userNotification.setEventType(
-          (userNotificationVO.getEventType() != null) ? userNotificationVO.getEventType() : "");
-      userNotification.setInsertDate(userNotificationVO.getInsertDate());
-      if (userNotificationVO.getContent() != null) {
-        userNotification.setDataflowId(userNotificationVO.getContent().getDataflowId());
-        userNotification.setDataflowName(userNotificationVO.getContent().getDataflowName());
-        userNotification.setProviderId(userNotificationVO.getContent().getProviderId());
-        userNotification.setDataProviderName(userNotificationVO.getContent().getDataProviderName());
-        userNotification.setDatasetId(userNotificationVO.getContent().getDatasetId());
-        userNotification.setDatasetName(userNotificationVO.getContent().getDatasetName());
-        userNotification.setTypeStatus(userNotificationVO.getContent().getTypeStatus());
-      }
       userNotificationRepository.save(userNotification);
       LOG.info("User Notification created succesfully in mongo");
     } catch (IllegalArgumentException e) {

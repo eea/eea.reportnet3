@@ -37,7 +37,7 @@ public class ExternalImportReportingCompletedEventTest {
         externalImportReportingCompletedEvent.getEventType());
   }
 
-  @Test
+  // @Test
   public void getMapTest() throws EEAException {
     DataSetMetabaseVO dataSetMetabaseVO = Mockito.mock(DataSetMetabaseVO.class);
     DataFlowVO dataFlowVO = Mockito.mock(DataFlowVO.class);

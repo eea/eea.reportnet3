@@ -1124,11 +1124,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           example = "0") @RequestParam("targetDataflow") @LockCriteria(
               name = "dataflowIdDestination") final Long dataflowIdDestination) {
 
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDataflowId(dataflowIdOrigin);
-    notificationControllerZuul.createUserNotificationPrivate("CLONE_DATASET_SCHEMAS_INIT",
-        userNotificationContentVO);
-
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
