@@ -90,6 +90,7 @@ public class NotificationServiceImpl implements NotificationService {
         userNotification.setDatasetId(userNotificationVO.getContent().getDatasetId());
         userNotification.setDatasetName(userNotificationVO.getContent().getDatasetName());
         userNotification.setTypeStatus(userNotificationVO.getContent().getTypeStatus());
+        userNotification.setCustomContent(userNotificationVO.getContent().getCustomContent());
       }
       userNotificationRepository.save(userNotification);
       LOG.info("User Notification created succesfully in mongo");
