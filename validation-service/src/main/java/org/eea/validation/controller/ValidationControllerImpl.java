@@ -104,11 +104,6 @@ public class ValidationControllerImpl implements ValidationController {
       @ApiParam(value = "Is the dataset released?", example = "true",
           required = false) @RequestParam(value = "released", required = false) boolean released) {
 
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDatasetId(datasetId);
-    notificationControllerZuul.createUserNotificationPrivate("VALIDATE_DATA_INIT",
-        userNotificationContentVO);
-
     LOG.info(
         "The user invoking ValidationControllerImpl.validateDataSetData is {} and the datasetId {}",
         SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);

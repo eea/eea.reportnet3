@@ -679,6 +679,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       List<FKDataCollection> newDCsRegistry = new ArrayList<>();
       List<FKDataCollection> newEUsRegistry = new ArrayList<>();
       List<FKDataCollection> newTESTsRegistry = new ArrayList<>();
+      List<FKDataCollection> newReferencesRegistry = new ArrayList<>();
+
 
       List<IntegrityDataCollection> lIntegrityDataCollections = new ArrayList<>();
       if (!referenceDataflow) {
@@ -736,6 +738,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               referenceDatasetIdsEmails.put(referenceDatasetId, emails);
             }
           }
+          RulesSchemaVO rulesSchemaVO = rulesControllerZuul
+              .findRuleSchemaByDatasetId(referenceDataset.getDatasetSchema(), dataflowId);
+          List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
+          prepareFKAndIntegrityForEUandDC(referenceDatasetId, newReferencesRegistry,
+              lIntegrityDataCollections, referenceDataset, integritieVOs);
         }
       }
 
@@ -773,6 +780,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       addForeignRelationsFromNewDCandEUs(newDCsRegistry);
       addForeignRelationsFromNewDCandEUs(newEUsRegistry);
       addForeignRelationsFromNewDCandEUs(newTESTsRegistry);
+      addForeignRelationsFromNewDCandEUs(newReferencesRegistry);
       if (lIntegrityDataCollections != null) {
         addDatasetForeignRelations(lIntegrityDataCollections);
       }

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -77,8 +78,9 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
             : dataSetMetabaseVO.getDataSetName();
 
     DatasetTypeEnum type = dataSetMetabaseVO.getDatasetTypeEnum();
-    String dataflowName =
-        dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId()).getName();
+    DataFlowVO dataFlowVO =
+        dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+    String dataflowName = dataFlowVO.getName();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
@@ -88,6 +90,7 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
     notification.put("dataflowName", dataflowName);
     notification.put("dataProviderName", dataProviderName);
     notification.put("type", type);
+    notification.put("typeStatus", dataFlowVO.getStatus().toString());
     return notification;
   }
 }

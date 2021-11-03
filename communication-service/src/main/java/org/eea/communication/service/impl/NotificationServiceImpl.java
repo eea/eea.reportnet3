@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -77,20 +78,8 @@ public class NotificationServiceImpl implements NotificationService {
   @Override
   public void createUserNotification(UserNotificationVO userNotificationVO) throws EEAException {
     try {
-      UserNotification userNotification = new UserNotification();
+      UserNotification userNotification = userNotificationMapper.classToEntity(userNotificationVO);
       userNotification.setUserId(SecurityContextHolder.getContext().getAuthentication().getName());
-      userNotification.setEventType(
-          (userNotificationVO.getEventType() != null) ? userNotificationVO.getEventType() : "");
-      userNotification.setInsertDate(userNotificationVO.getInsertDate());
-      if (userNotificationVO.getContent() != null) {
-        userNotification.setDataflowId(userNotificationVO.getContent().getDataflowId());
-        userNotification.setDataflowName(userNotificationVO.getContent().getDataflowName());
-        userNotification.setProviderId(userNotificationVO.getContent().getProviderId());
-        userNotification.setDataProviderName(userNotificationVO.getContent().getDataProviderName());
-        userNotification.setDatasetId(userNotificationVO.getContent().getDatasetId());
-        userNotification.setDatasetName(userNotificationVO.getContent().getDatasetName());
-        userNotification.setTypeStatus(userNotificationVO.getContent().getTypeStatus());
-      }
       userNotificationRepository.save(userNotification);
       LOG.info("User Notification created succesfully in mongo");
     } catch (IllegalArgumentException e) {
@@ -109,7 +98,7 @@ public class NotificationServiceImpl implements NotificationService {
   @Override
   public UserNotificationListVO findUserNotificationsByUserPaginated(Integer pageNum,
       Integer pageSize) {
-    Pageable pageable = PageRequest.of(pageNum, pageSize);
+    Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("insertDate").descending());
     UserNotificationListVO userNotificationListVO = new UserNotificationListVO();
     List<UserNotification> listUserNotification = userNotificationRepository
         .findByUserId(SecurityContextHolder.getContext().getAuthentication().getName(), pageable);
