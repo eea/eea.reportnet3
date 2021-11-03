@@ -650,7 +650,7 @@ public class PaMServiceImpl implements PaMService {
 
       for (FieldValue fieldValue : fieldValuesWithData) {
         // we split and separate any , value
-        List<String> items = Arrays.asList(fieldValue.getValue().split("\\s*,\\s*"));
+        List<String> items = Arrays.asList(fieldValue.getValue().split("\\s*;\\s*"));
 
         List<Long> itemsLong = new ArrayList();
         // we split and separate any value and transfrom to a long list
@@ -695,7 +695,7 @@ public class PaMServiceImpl implements PaMService {
 
       for (FieldValue fieldValue : fieldValuesWithData) {
         // we split and separate any , value
-        List<String> items = Arrays.asList(fieldValue.getValue().split("\\s*,\\s*"));
+        List<String> items = Arrays.asList(fieldValue.getValue().split("\\s*;\\s*"));
 
         // we split and separate any value and transfrom to a long list
         List<Long> itemsLong = new ArrayList();
@@ -731,21 +731,21 @@ public class PaMServiceImpl implements PaMService {
       if (i == itemsLong.size() - 1) {
         valueCompose.append(itemsLong.get(i));
       } else {
-        valueCompose.append(itemsLong.get(i)).append(", ");
+        valueCompose.append(itemsLong.get(i)).append("; ");
       }
     }
     // we delete the espaces and commas in the 1 or 2 char in the string to clean it
-    if (',' == valueCompose.charAt(0) || ' ' == valueCompose.charAt(0)) {
+    if (';' == valueCompose.charAt(0) || ' ' == valueCompose.charAt(0)) {
       valueCompose.substring(1, valueCompose.length() - 1);
-      if (',' == valueCompose.charAt(0) || ' ' == valueCompose.charAt(0)) {
+      if (';' == valueCompose.charAt(0) || ' ' == valueCompose.charAt(0)) {
         valueCompose.substring(1, valueCompose.length() - 1);
       }
     }
     // we delete the espaces and commas in the last or penultimate char in the string to clean it
-    if (',' == valueCompose.charAt(valueCompose.length() - 1)
+    if (';' == valueCompose.charAt(valueCompose.length() - 1)
         || ' ' == valueCompose.charAt(valueCompose.length() - 1)) {
       valueCompose.substring(0, valueCompose.length() - 1);
-      if (',' == valueCompose.charAt(valueCompose.length() - 1)
+      if (';' == valueCompose.charAt(valueCompose.length() - 1)
           || ' ' == valueCompose.charAt(valueCompose.length() - 1)) {
         valueCompose.substring(0, valueCompose.length() - 1);
       }

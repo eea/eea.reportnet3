@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -97,7 +98,7 @@ public class NotificationServiceImpl implements NotificationService {
   @Override
   public UserNotificationListVO findUserNotificationsByUserPaginated(Integer pageNum,
       Integer pageSize) {
-    Pageable pageable = PageRequest.of(pageNum, pageSize);
+    Pageable pageable = PageRequest.of(pageNum, pageSize, Sort.by("insertDate").descending());
     UserNotificationListVO userNotificationListVO = new UserNotificationListVO();
     List<UserNotification> listUserNotification = userNotificationRepository
         .findByUserId(SecurityContextHolder.getContext().getAuthentication().getName(), pageable);
