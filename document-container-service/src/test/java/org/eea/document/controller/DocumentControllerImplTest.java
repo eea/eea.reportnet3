@@ -10,6 +10,7 @@ import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.junit.Before;
@@ -52,6 +53,10 @@ public class DocumentControllerImplTest {
   @Mock
   private DataFlowDocumentControllerZuul dataflowController;
 
+  /** The notification controller zuul. */
+  @Mock
+  private NotificationControllerZuul notificationControllerZuul;
+
   /** The security context. */
   SecurityContext securityContext;
 
@@ -79,6 +84,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void uploadDocumentTestException() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
@@ -96,6 +104,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void uploadDocumentTestException1() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
@@ -113,6 +124,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void uploadDocumentTestException2() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
@@ -131,6 +145,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void uploadDocumentTestException3() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException()).when(documentService).uploadDocument(Mockito.any(), Mockito.any(),
@@ -150,6 +167,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void uploadDocumentTestException4() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
@@ -170,6 +190,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void uploadDocumentSuccessTest() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(documentService).uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(),
@@ -258,6 +281,9 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentExceptionNullTest() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(null);
@@ -271,6 +297,9 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentExceptionTest() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
@@ -286,6 +315,9 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentException2Test() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
@@ -301,6 +333,9 @@ public class DocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void deleteDocumentException3Test() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(FeignException.class).when(dataflowController).getDocumentInfoById(Mockito.any());
@@ -314,6 +349,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void deleteDocumentSuccessTest() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     FileResponse content = new FileResponse();
@@ -332,6 +370,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void updateDocumentExceptionTest() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
@@ -350,6 +391,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void updateDocumentException2Test() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
@@ -370,6 +414,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void updateDocumentException3Test() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
@@ -391,6 +438,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void updateDocumentSuccessTest() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
@@ -409,6 +459,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void updateDocumentSuccess2Test() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
@@ -425,6 +478,9 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void updateDocumentSuccess3Test() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());

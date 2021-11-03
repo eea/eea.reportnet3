@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -208,6 +209,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The document controller zuul. */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /** The reference dataset controller zuul. */
   @Autowired
@@ -921,10 +926,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     if (!EventType.RELEASE_COMPLETED_EVENT.equals(event)) {
       try {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(event, value,
-            NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .datasetId(datasetId).error(error).build());
+        NotificationVO notificationVO = NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .datasetId(datasetId).error(error).build();
+        DataSetMetabaseVO datasetMetabaseVO =
+            dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+        notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+        notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+        notificationVO.setDataflowName(
+            dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+        kafkaSenderUtils.releaseNotificableKafkaEvent(event, value, notificationVO);
       } catch (EEAException ex) {
         LOG.error("Error realeasing event {} due to error {}", event, ex.getMessage(), ex);
       }
@@ -1176,7 +1187,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
     LOG.info("These views: {} have been refreshed.", viewList);
   }
-
 
 
   /**

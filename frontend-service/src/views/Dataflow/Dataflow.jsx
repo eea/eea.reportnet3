@@ -275,7 +275,7 @@ const Dataflow = withRouter(({ history, match }) => {
       manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
-      restrictFromPublicBtn: isLeadReporterOfCountry && !isBusinessDataflow,
+      restrictFromPublicBtn: isLeadReporterOfCountry && dataflowState.showPublicInfo && !isBusinessDataflow,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
         isLeadReporterOfCountry || isNationalCoordinatorOfCountry || isReporterOfCountry || isLeadDesigner || isObserver
@@ -901,6 +901,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowType={dataflowState.dataflowType}
           handleRedirect={handleRedirect}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
+          manageDialogs={manageDialogs}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
           onSaveName={onSaveName}
@@ -918,6 +919,8 @@ const Dataflow = withRouter(({ history, match }) => {
           dataProviderId={dataProviderId}
           dataflowState={dataflowState}
           handleRedirect={handleRedirect}
+          isLeadReporterOfCountry={isLeadReporterOfCountry}
+          manageDialogs={manageDialogs}
           match={match}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}

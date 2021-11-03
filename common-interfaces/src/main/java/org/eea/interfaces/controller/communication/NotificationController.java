@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.communication;
 
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.communication.UserNotificationListVO;
 import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -31,10 +32,12 @@ public interface NotificationController {
   /**
    * Creates the user notification private.
    *
-   * @param userNotificationVO the user notification VO
+   * @param eventType the event type
+   * @param content the content
    */
   @PostMapping(value = "/private/createUserNotification")
-  void createUserNotificationPrivate(@RequestBody UserNotificationVO userNotificationVO);
+  void createUserNotificationPrivate(@RequestParam("eventType") String eventType,
+      @RequestBody UserNotificationContentVO content);
 
   /**
    * Find user notifications by user.
