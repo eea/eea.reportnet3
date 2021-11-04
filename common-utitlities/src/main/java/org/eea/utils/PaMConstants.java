@@ -132,7 +132,7 @@ public final class PaMConstants {
   public static final String TYPE_POLICY_INSTRUMENT = "TypePolicyInstrument";
 
   /** The Constant SEPARATOR: {@value}. */
-  public static final String SEPARATOR = ", ";
+  public static final String SEPARATOR = "; ";
 
   /** The Constant GHG_AFFECTED: {@value}. */
   public static final String GHG_AFFECTED = "GHGAffected";

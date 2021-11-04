@@ -2,6 +2,8 @@ package org.eea.dataflow.integration.executor.fme.service.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
@@ -211,7 +213,13 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     }
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
-    headerInfo.put("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+
+    try {
+      headerInfo.put("Content-Disposition",
+          "attachment; filename*=UTF-8''\"" + URLEncoder.encode(fileName, "UTF-8") + "\"");
+    } catch (UnsupportedEncodingException e) {
+      LOG_ERROR.error("Error encoding file: {}", fileName);
+    }
     headerInfo.put(CONTENT_TYPE, "application/octet-stream");
     headerInfo.put(ACCEPT, APPLICATION_JSON);
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
