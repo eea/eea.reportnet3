@@ -11,7 +11,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const useBigButtonList = ({
+const useBigButtonListRepresentative = ({
   dataflowState,
   dataProviderId,
   getDataHistoricReleases,
@@ -222,4 +222,4 @@ const useBigButtonList = ({
   ];
 };
 
-export { useBigButtonList };
+export { useBigButtonListRepresentative };
