@@ -5,6 +5,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -47,16 +48,18 @@ public class RestoreDatasetSchemaSnapshotCompletedEventTest {
         restoreDatasetSchemaSnapshotCompletedEvent.getEventType());
   }
 
-  // @Test
+  @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(5,
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowVO.getStatus()).thenReturn(TypeStatusEnum.DESIGN);
+    Assert.assertEquals(6,
         restoreDatasetSchemaSnapshotCompletedEvent
             .getMap(NotificationVO.builder().user("user").datasetId(1L).dataflowId(1L)
                 .datasetName("datasetName").dataflowName("dataflowName").build())
             .size());
   }
 
-  // @Test
+  @Test
   public void getMapFromMinimumDataTest() throws EEAException {
     Mockito.when(dataSetControllerZuul.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
@@ -64,7 +67,8 @@ public class RestoreDatasetSchemaSnapshotCompletedEventTest {
     Mockito.when(datasetVO.getDataSetName()).thenReturn("datasetName");
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
-    Assert.assertEquals(5, restoreDatasetSchemaSnapshotCompletedEvent
+    Mockito.when(dataflowVO.getStatus()).thenReturn(TypeStatusEnum.DESIGN);
+    Assert.assertEquals(6, restoreDatasetSchemaSnapshotCompletedEvent
         .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
   }
 }
