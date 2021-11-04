@@ -6,6 +6,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -127,6 +128,9 @@ public class KafkaSenderUtils {
     content.setDataProviderName(dataProviderName);
     content.setTypeStatus((notificationMap.get("typeStatus") != null)
         ? TypeStatusEnum.valueOf(notificationMap.get("typeStatus").toString())
+        : null);
+    content.setType((notificationMap.get("type") != null)
+        ? DatasetTypeEnum.valueOf(notificationMap.get("type").toString())
         : null);
     notificationControllerZuul.createUserNotificationPrivate(eventType, content);
     LOG.info("Save user notification, eventType: {}, notification content: {}", eventType, content);
