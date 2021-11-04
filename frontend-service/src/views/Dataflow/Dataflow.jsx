@@ -912,6 +912,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowState={dataflowState}
           dataflowType={dataflowState.dataflowType}
           handleRedirect={handleRedirect}
+          isLeadReporter={isLeadReporter}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           manageDialogs={manageDialogs}
           onCleanUpReceipt={onCleanUpReceipt}

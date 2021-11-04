@@ -27,6 +27,7 @@ const useBigButtonList = ({
   isActiveButton,
   isCloningDataflow,
   isImportingDataflow,
+  isLeadReporter,
   isLeadReporterOfCountry,
   onCloneDataflow,
   onImportSchema,
@@ -54,7 +55,7 @@ const useBigButtonList = ({
     config.permissions.roles.STEWARD.key
   ]);
 
-  const restrictFromPublicAccess = isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business');
+  const restrictFromPublicAccess = isLeadReporter && !TextUtils.areEquals(dataflowState.status, 'business');
 
   const getButtonsVisibility = useCallback(() => {
     const isDesigner =
