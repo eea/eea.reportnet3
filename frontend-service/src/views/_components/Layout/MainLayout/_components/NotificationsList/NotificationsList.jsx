@@ -100,9 +100,11 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   const notificationLevelTemplate = rowData => {
     return (
-      <div className={styles.notificationLevelTemplateWrapper}>
-        <LevelError type={rowData.levelError.toLowerCase()} />
-      </div>
+      !isNil(rowData.levelError) && (
+        <div className={styles.notificationLevelTemplateWrapper}>
+          <LevelError type={rowData.levelError.toLowerCase()} />
+        </div>
+      )
     );
   };
 
