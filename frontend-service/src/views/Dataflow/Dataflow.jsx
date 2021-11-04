@@ -601,8 +601,7 @@ const Dataflow = withRouter(({ history, match }) => {
           );
 
           if (!isEmpty(representative)) {
-            dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
-            dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: representative.restrictFromPublic });
+            setRepresentativeAndRestrictFromPublic(representative, representative.restrictFromPublic);
           }
         }
       } else {
@@ -616,8 +615,7 @@ const Dataflow = withRouter(({ history, match }) => {
           if (isLeadReporter) {
             const representative = dataflow.representatives[0];
             if (!isEmpty(representative)) {
-              dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
-              dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: representative.restrictFromPublic });
+              setRepresentativeAndRestrictFromPublic(representative, representative.restrictFromPublic);
             }
           }
         }
@@ -907,11 +905,16 @@ const Dataflow = withRouter(({ history, match }) => {
       );
 
       if (!isEmpty(representative)) {
-        dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
-        dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: representative.restrictFromPublic });
+        setRepresentativeAndRestrictFromPublic(representative, representative.restrictFromPublic);
       }
     }
   };
+
+  const setRepresentativeAndRestrictFromPublic = (representative, restrictFromPublic) => {
+    dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
+    dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: restrictFromPublic });
+  };
+
   const getBigButtonList = () => {
     if (isNil(representativeId)) {
       return (
