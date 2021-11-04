@@ -901,7 +901,16 @@ const Dataflow = withRouter(({ history, match }) => {
   ];
 
   const setSelectedRepresentative = dataProviderId => {
-    console.log(`dataProviderId`, dataProviderId);
+    if (isEmpty(dataflowState.representative) || dataProviderId !== dataflowState.representative.dataProviderId) {
+      const representative = dataflowState.data.representatives.find(
+        representative => representative.dataProviderId === dataProviderId
+      );
+
+      if (!isEmpty(representative)) {
+        dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
+        dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: representative.restrictFromPublic });
+      }
+    }
   };
   const getBigButtonList = () => {
     if (isNil(representativeId)) {
