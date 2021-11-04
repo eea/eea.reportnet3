@@ -491,8 +491,14 @@ public class SQLValidationUtils {
       TableValue tvAux = (TableValue) object;
       for (String field : fieldsToReplace) {
         if (null != tvAux) {
-          errorMessage = errorMessage.replace(field,
-              getReplacement(field, tvAux.getRecords().get(0), tableToEvaluate));
+          String replacement = "";
+          for (RecordValue record : tvAux.getRecords()) {
+            replacement = getReplacement(field, record, tableToEvaluate);
+            if (!"".equals(replacement)) {
+              break;
+            }
+          }
+          errorMessage = errorMessage.replace(field, replacement);
         }
       }
     }
