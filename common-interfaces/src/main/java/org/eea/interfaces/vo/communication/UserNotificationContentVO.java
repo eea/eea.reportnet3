@@ -39,6 +39,12 @@ public class UserNotificationContentVO {
   /** The type. */
   private DatasetTypeEnum type;
 
+  /** The table schema name. */
+  private String tableSchemaName;
+
+  /** The file name. */
+  private String fileName;
+
   /** The custom content. */
   private Map<String, String> customContent;
 }
