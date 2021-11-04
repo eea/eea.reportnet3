@@ -28,6 +28,7 @@ export const BigButton = ({
   caption,
   dataflowStatus,
   datasetSchemaInfo,
+  dataProviderId,
   enabled = true,
   handleRedirect = () => {},
   helpClassName,
@@ -43,6 +44,7 @@ export const BigButton = ({
   restrictFromPublicAccess,
   restrictFromPublicInfo,
   restrictFromPublicStatus,
+  setSelectedRepresentative = () => {},
   setErrorDialogData,
   tooltip
 }) => {
@@ -202,7 +204,10 @@ export const BigButton = ({
         {restrictFromPublicInfo && (
           <FontAwesomeIcon
             icon={AwesomeIcons(restrictFromPublicStatus ? 'eyeSlash' : 'eye')}
-            onClick={() => restrictFromPublicAccess && manageDialogs('isRestrictFromPublicDialogVisible', true)}
+            onClick={() => {
+              restrictFromPublicAccess && manageDialogs('isRestrictFromPublicDialogVisible', true);
+              setSelectedRepresentative(dataProviderId);
+            }}
             style={{ position: 'absolute', top: '4px', left: '2px', fontSize: '1.2rem' }}
           />
         )}

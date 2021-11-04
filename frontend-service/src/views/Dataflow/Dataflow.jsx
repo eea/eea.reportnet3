@@ -900,6 +900,9 @@ const Dataflow = withRouter(({ history, match }) => {
     { label: config.permissions.roles.EDITOR_READ.label, role: config.permissions.roles.EDITOR_READ.key }
   ];
 
+  const setSelectedRepresentative = dataProviderId => {
+    console.log(`dataProviderId`, dataProviderId);
+  };
   const getBigButtonList = () => {
     if (isNil(representativeId)) {
       return (
@@ -919,6 +922,7 @@ const Dataflow = withRouter(({ history, match }) => {
           setIsCopyDataCollectionToEUDatasetLoading={setIsCopyDataCollectionToEUDatasetLoading}
           setIsExportEUDatasetLoading={setIsExportEUDatasetLoading}
           setIsReceiptLoading={setIsReceiptLoading}
+          setSelectedRepresentative={setSelectedRepresentative}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
         />
       );

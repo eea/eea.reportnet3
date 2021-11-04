@@ -306,6 +306,7 @@ const useBigButtonList = ({
         buttonClass: 'dataset',
         buttonIcon: 'representative',
         caption: dataset.name,
+        dataProviderId: dataset.dataProviderId,
         handleRedirect: () => {
           handleRedirect(
             getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true)
