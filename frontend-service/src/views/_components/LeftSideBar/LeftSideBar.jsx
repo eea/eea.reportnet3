@@ -19,7 +19,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
+const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystemNotificationVisible }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -30,14 +30,14 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
   const [run, setRun] = useState(false);
 
   const handleJoyrideCallback = data => {
-    const { action, status, type } = data;
+    const { action, index, status, type } = data;
 
     if ([ACTIONS.CLOSE].includes(action) || [STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
       setHelpIndex(0);
       setRun(false);
     } else {
       if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
-        setHelpIndex(helpIndex + (data.action === 'prev' ? -1 : 1));
+        setHelpIndex(index + (action === ACTIONS.PREV ? -1 : 1));
       } else {
         if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
           setRun(false);
@@ -92,6 +92,21 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
     return <LeftSideBarButton {...userNotificationsProps} />;
   };
 
+  const renderManageSystemNotifications = () => {
+    const manageSystemNotificationsProps = {
+      className: 'dataflowList-left-side-bar-system-notifications-help-step',
+      href: '#',
+      icon: 'comment',
+      label: 'systemNotifications',
+      onClick: async e => {
+        e.preventDefault();
+        setIsSystemNotificationVisible(true);
+      },
+      title: 'systemNotifications'
+    };
+    return <LeftSideBarButton {...manageSystemNotificationsProps} />;
+  };
+
   const renderHelp = () => {
     const userHelpProps = {
       className: 'dataflowList-left-side-bar-help-help-step',
@@ -117,7 +132,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
       await UserService.logout();
     } catch (error) {
       console.error('LeftSideBar - userLogout.', error);
-      notificationContext.add({ type: 'USER_LOGOUT_ERROR' });
+      notificationContext.add({ type: 'USER_LOGOUT_ERROR' }, true);
     } finally {
       userContext.onLogout();
     }
@@ -176,7 +191,8 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
           },
           buttonBack: {
             color: 'var(--main-font-color)'
-          }
+          },
+          overlay: { backgroundColor: 'var(--help-overlay-bg)' }
         }}
       />
       <div className={`${styles.leftSideBar}${leftSideBarContext.isLeftSideBarOpened ? ` ${styles.open}` : ''}`}>
@@ -187,6 +203,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible }) => {
               {renderUserProfile()}
               {renderHelp()}
               {renderUserNotifications()}
+              {/* {renderManageSystemNotifications()} */}
             </div>
             {!isEmpty(renderSectionButtons()) && (
               <Fragment>

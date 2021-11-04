@@ -6,7 +6,6 @@ import styles from './DocumentFileUpload.module.scss';
 
 import { config } from 'conf';
 
-import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { Dropdown } from 'views/_components/Dropdown';
@@ -171,16 +170,10 @@ const DocumentFileUpload = ({
       } catch (error) {
         console.error('DocumentFileUpload - onConfirm.', error);
         if (isEditForm) {
-          notificationContext.add({
-            type: 'DOCUMENT_EDITING_ERROR',
-            content: {}
-          });
+          notificationContext.add({ type: 'DOCUMENT_EDITING_ERROR', content: {} }, true);
           setIsUpdating(false);
         } else {
-          notificationContext.add({
-            type: 'DOCUMENT_UPLOADING_ERROR',
-            content: {}
-          });
+          notificationContext.add({ type: 'DOCUMENT_UPLOADING_ERROR', content: {} }, true);
         }
         onUpload();
         setFileUpdatingId('');

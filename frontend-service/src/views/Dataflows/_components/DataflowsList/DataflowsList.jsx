@@ -82,7 +82,7 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
       return await UserService.updateConfiguration(userProperties);
     } catch (error) {
       console.error('DataflowsList - changeUserProperties.', error);
-      notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' });
+      notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' }, true);
     }
   };
 

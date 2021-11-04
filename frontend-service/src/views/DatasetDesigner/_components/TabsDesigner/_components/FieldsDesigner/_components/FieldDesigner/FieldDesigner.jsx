@@ -1,7 +1,9 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import ReactTooltip from 'react-tooltip';
 
 import styles from './FieldDesigner.module.scss';
 
@@ -18,7 +20,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { LinkSelector } from './_components/LinkSelector';
-// import ReactTooltip from 'react-tooltip';
+import { Portal } from 'views/_components/Portal';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -449,7 +451,7 @@ export const FieldDesigner = ({
     isDuplicated = false
   }) => {
     try {
-      setIsLoading(true);
+      setIsLoading(true, inputRef.current);
       const response = await DatasetService.createRecordDesign(datasetId, {
         codelistItems,
         description,
@@ -493,10 +495,13 @@ export const FieldDesigner = ({
       console.error('FieldDesigner - onFieldAdd.', error);
       if (error?.response.status === 400) {
         if (error.response?.data?.message?.includes('name invalid')) {
-          notificationContext.add({
-            type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
-            content: { fieldName: name }
-          });
+          notificationContext.add(
+            {
+              type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
+              content: { customContent: { fieldName: name } }
+            },
+            true
+          );
         }
       }
     } finally {
@@ -506,7 +511,7 @@ export const FieldDesigner = ({
         }
       }
       dispatchFieldDesigner({ type: 'SET_ADD_FIELD_SENT', payload: false });
-      setIsLoading(false);
+      setIsLoading(false, inputRef.current);
     }
   };
 
@@ -767,7 +772,6 @@ export const FieldDesigner = ({
     validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
   }) => {
     try {
-      setIsLoading(true);
       await DatasetService.updateFieldDesign(datasetId, {
         codelistItems,
         description,
@@ -816,14 +820,15 @@ export const FieldDesigner = ({
       console.error('FieldDesigner - fieldUpdate.', error);
       if (error?.response.status === 400) {
         if (error.response?.data?.message?.includes('name invalid')) {
-          notificationContext.add({
-            type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
-            content: { fieldName: name }
-          });
+          notificationContext.add(
+            {
+              type: 'DATASET_SCHEMA_FIELD_INVALID_NAME',
+              content: { customContent: { fieldName: name } }
+            },
+            true
+          );
         }
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -1111,6 +1116,15 @@ export const FieldDesigner = ({
       }
     }
   };
+
+  const duplicateButtonTooltipName = `${fieldDesignerState.fieldValue}_tooltip`;
+
+  const renderDuplicateButtonTooltip = () => (
+    <ReactTooltip border effect="solid" id={duplicateButtonTooltipName} place="top">
+      {resourcesContext.messages['duplicate']}
+    </ReactTooltip>
+  );
+
   const renderDuplicateButton = () => {
     if (!addField) {
       return (
@@ -1118,8 +1132,8 @@ export const FieldDesigner = ({
           className={`${styles.button} ${styles.duplicateButton} ${
             fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
           } ${isDataflowOpen || isLoading || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
-          // data-for={fieldDesignerState.fieldValue}
-          // data-tip
+          data-for={duplicateButtonTooltipName}
+          data-tip
           href="#"
           onClick={e => {
             e.preventDefault();
@@ -1142,9 +1156,6 @@ export const FieldDesigner = ({
           }}>
           <FontAwesomeIcon aria-label={resourcesContext.messages['duplicate']} icon={AwesomeIcons('clone')} />
           <span className="srOnly">{resourcesContext.messages['duplicate']}</span>
-          {/* <ReactTooltip border={true} effect="solid" id={fieldDesignerState.fieldValue} place="top">
-          {resourcesContext.messages['duplicate']}
-        </ReactTooltip> */}
         </div>
       );
     }
@@ -1406,7 +1417,9 @@ export const FieldDesigner = ({
   return (
     <Fragment>
       <div
-        className={`${styles.draggableFieldDiv} fieldRow datasetSchema-fieldDesigner-help-step`}
+        className={`${styles.draggableFieldDiv} ${fieldDesignerState.isDragging ? styles.disablePointerEvent : ''} ${
+          fieldDesignerState.isDragging && styles.fieldSeparatorDragging
+        } fieldRow datasetSchema-fieldDesigner-help-step`}
         draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
         onDragEnd={onFieldDragEnd}
         onDragEnter={onFieldDragEnter}
@@ -1415,16 +1428,12 @@ export const FieldDesigner = ({
         onDragStart={onFieldDragStart}
         onDrop={onFieldDragDrop}
         style={{ cursor: isDataflowOpen || isDesignDatasetEditorRead ? 'default' : 'grab' }}>
-        <div
-          className={`${styles.fieldSeparator} ${
-            fieldDesignerState.isDragging ? styles.fieldSeparatorDragging : ''
-          }`}></div>
-
         {renderCheckboxes()}
         {renderInputs()}
         {renderCodelistFileAndLinkButtons()}
         {renderQCButton()}
         {renderDuplicateButton()}
+        <Portal>{renderDuplicateButtonTooltip()}</Portal>
         {renderDeleteButton()}
       </div>
 

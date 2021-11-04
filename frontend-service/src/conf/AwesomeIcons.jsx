@@ -101,7 +101,8 @@ import {
   faSearch,
   faTimesCircle,
   faEdit,
-  faUserLock
+  faUserLock,
+  faCommentMedical
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -183,6 +184,8 @@ export const AwesomeIcons = icon => {
       return faCogs;
     case 'collapsed':
       return faCaretRight;
+    case 'comment':
+      return faCommentMedical;
     case 'comments':
       return faComments;
     case 'compass':

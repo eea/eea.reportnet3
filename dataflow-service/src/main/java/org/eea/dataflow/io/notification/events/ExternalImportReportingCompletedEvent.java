@@ -5,6 +5,7 @@ import java.util.Map;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
@@ -51,7 +52,8 @@ public class ExternalImportReportingCompletedEvent implements NotificableEventHa
     Long dataflowId = notificationVO.getDataflowId();
     String datasetName =
         dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataSetName();
-    String dataflowName = dataflowService.getMetabaseById(dataflowId).getName();
+    DataFlowVO dataFlowVO = dataflowService.getMetabaseById(dataflowId);
+    String dataflowName = dataFlowVO.getName();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
@@ -60,6 +62,7 @@ public class ExternalImportReportingCompletedEvent implements NotificableEventHa
     notification.put("datasetName", datasetName);
     notification.put("dataflowName", dataflowName);
     notification.put("fileName", notificationVO.getFileName());
+    notification.put("typeStatus", dataFlowVO.getStatus().toString());
     return notification;
   }
 }

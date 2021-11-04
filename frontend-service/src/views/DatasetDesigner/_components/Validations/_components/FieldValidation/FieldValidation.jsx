@@ -116,6 +116,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
       setTabContents([
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}
+          headerClassName={showErrorOnInfoTab ? styles.error : ''}
           key="fieldInfoTab"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
@@ -275,7 +276,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
       onHide();
     } catch (error) {
       console.error('FieldValidation - onCreateValidationRule.', error);
-      notificationContext.add({ type: 'QC_RULE_CREATION_ERROR' });
+      notificationContext.add({ type: 'QC_RULE_CREATION_ERROR' }, true);
     } finally {
       setIsSubmitDisabled(false);
     }
@@ -293,9 +294,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
       onHide();
     } catch (error) {
       console.error('FieldValidation - onUpdateValidationRule.', error);
-      notificationContext.add({
-        type: 'QC_RULE_UPDATING_ERROR'
-      });
+      notificationContext.add({ type: 'QC_RULE_UPDATING_ERROR' }, true);
     } finally {
       setIsSubmitDisabled(false);
     }

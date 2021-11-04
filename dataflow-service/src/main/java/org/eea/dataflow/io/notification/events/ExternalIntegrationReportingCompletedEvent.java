@@ -5,6 +5,7 @@ import java.util.Map;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
@@ -52,7 +53,8 @@ public class ExternalIntegrationReportingCompletedEvent implements NotificableEv
 
     Long dataflowId = notificationVO.getDataflowId();
     Long datasetId = notificationVO.getDatasetId();
-    String dataflowName = dataflowService.getMetabaseById(dataflowId).getName();
+    DataFlowVO dataFlowVO = dataflowService.getMetabaseById(dataflowId);
+    String dataflowName = dataFlowVO.getName();
     String datasetName = "";
     if (datasetId != null) {
       datasetName =
@@ -64,6 +66,7 @@ public class ExternalIntegrationReportingCompletedEvent implements NotificableEv
     notification.put("datasetId", notificationVO.getDatasetId());
     notification.put("datasetName", datasetName);
     notification.put("dataflowName", dataflowName);
+    notification.put("typeStatus", dataFlowVO.getStatus().toString());
 
     return notification;
   }

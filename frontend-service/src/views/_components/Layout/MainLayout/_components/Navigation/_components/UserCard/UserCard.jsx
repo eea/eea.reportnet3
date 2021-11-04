@@ -41,9 +41,7 @@ const UserCard = memo(() => {
               await UserService.logout();
             } catch (error) {
               console.error('UserCard - logout.', error);
-              notificationContext.add({
-                type: 'USER_LOGOUT_ERROR'
-              });
+              notificationContext.add({ type: 'USER_LOGOUT_ERROR' }, true);
             } finally {
               userContext.onLogout();
             }

@@ -6,6 +6,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -55,11 +56,13 @@ public class DeleteDatasetValueCompletedEvent implements NotificableEventHandler
     Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
         : datasetService.getDataFlowIdById(notificationVO.getDatasetId());
     DataSetMetabaseVO datasetVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+
     String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
         : datasetVO.getDataSetName();
     String dataflowName =
         notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
-            : dataflowControllerZuul.getMetabaseById(dataflowId).getName();
+            : dataFlowVO.getName();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
@@ -67,6 +70,7 @@ public class DeleteDatasetValueCompletedEvent implements NotificableEventHandler
     notification.put("dataflowId", dataflowId);
     notification.put("datasetName", datasetName);
     notification.put("dataflowName", dataflowName);
+    notification.put("typeStatus", dataFlowVO.getStatus().toString());
     return notification;
   }
 }

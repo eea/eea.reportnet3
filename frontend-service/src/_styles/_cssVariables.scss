@@ -33,6 +33,7 @@
   --success-color-dark: #39632f;
   --success-color-darker: #305327;
   --success-color-light: #aae5aa;
+  --errors: #da2131;
   --errors-dark-mode: #fc5050;
   --errors-light-mode: #da2131;
   --blockers: #fd2b3c;
@@ -543,7 +544,7 @@
 
   /*Eu header footer*/
   --eu-header-shadow: 0 4px 5px 0 var(--shadow-color-rgba);
-  --eu-header-bg: var(--bg-dark-12dp);
+  --eu-header-bg: var(--gray-110);
   --eu-footer-bottom-bg: #d9d9d9;
   --eu-footer-bottom-font: #016394;
   --eu-footer-bottom: var(--eu-footer-bottom-bg);
@@ -591,4 +592,10 @@
 
   /* Borders*/
   --general-border-style: '1px solid var(--general-border-color)';
+
+  /* Left sidebar*/
+  --left-sidebar-text-color: var(--white);
+
+  /* Cookies*/
+  --cookies-content-color: var(--white);
 }

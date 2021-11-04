@@ -231,7 +231,7 @@ export const ShareRights = ({
       });
     } catch (error) {
       console.error('ShareRights - getAllUsers.', error);
-      notificationContext.add({ type: getErrorNotificationKey });
+      notificationContext.add({ type: getErrorNotificationKey }, true);
     } finally {
       onResetAll();
     }
@@ -261,7 +261,7 @@ export const ShareRights = ({
       onDataChange();
     } catch (error) {
       console.error('ShareRights - onDeleteUserRight.', error);
-      notificationContext.add({ type: deleteErrorNotificationKey });
+      notificationContext.add({ type: deleteErrorNotificationKey }, true);
       onResetAll();
     } finally {
       onToggleDeletingUser(false);
@@ -290,12 +290,15 @@ export const ShareRights = ({
             type: 'SET_ACCOUNT_NOT_FOUND',
             payload: { accountNotFound: true, accountHasError: true }
           });
-          notificationContext.add({ type: 'EMAIL_NOT_FOUND_ERROR' });
+          notificationContext.add({ type: 'EMAIL_NOT_FOUND_ERROR' }, true);
         } else if (error?.response?.status === 400) {
           shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
-          notificationContext.add({ type: 'IMPOSSIBLE_ROLE_ERROR' });
+          notificationContext.add({ type: 'IMPOSSIBLE_ROLE_ERROR' }, true);
         } else {
-          notificationContext.add({ type: userRight.isNew ? addErrorNotificationKey : updateErrorNotificationKey });
+          notificationContext.add(
+            { type: userRight.isNew ? addErrorNotificationKey : updateErrorNotificationKey },
+            true
+          );
         }
       } finally {
         setIsButtonLoading(false);

@@ -1,12 +1,11 @@
 package org.eea.kafka.utils;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
-import org.eea.interfaces.vo.communication.UserNotificationVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -84,25 +83,54 @@ public class KafkaSenderUtils {
    */
   public void releaseNotificableKafkaEvent(final EventType eventType, Map<String, Object> value,
       final NotificationVO notificationVO) throws EEAException {
-    UserNotificationVO userNotificationVO = new UserNotificationVO();
-    userNotificationVO.setEventType(eventType.toString());
-    userNotificationVO.setInsertDate(new Date());
-    UserNotificationContentVO content = new UserNotificationContentVO();
-    content.setDataflowId(notificationVO.getDataflowId());
-    content.setDataflowName(notificationVO.getDataflowName());
-    content.setDatasetId(notificationVO.getDatasetId());
-    content.setDatasetName(notificationVO.getDatasetName());
-    content.setProviderId(notificationVO.getProviderId());
-    userNotificationVO.setContent(content);
-
-    notificationControllerZuul.createUserNotificationPrivate(userNotificationVO);
 
     if (value == null) {
       value = new HashMap<>();
     }
-    value.put("notification",
-        notificableEventFactory.getNotificableEventHandler(eventType).getMap(notificationVO));
+    Map<String, Object> notificationMap =
+        notificableEventFactory.getNotificableEventHandler(eventType).getMap(notificationVO);
+
+    saveUserNotification(eventType.toString(), notificationMap);
+    value.put("notification", notificationMap);
     releaseKafkaEvent(eventType, value);
     LOG.info("released kafaka event {}", eventType);
   }
+
+  /**
+   * Save user notification.
+   *
+   * @param eventType the event type
+   * @param notificationMap the notification map
+   */
+  private void saveUserNotification(String eventType, Map<String, Object> notificationMap) {
+    Long dataflowId = (notificationMap.get("dataflowId") != null)
+        ? Long.parseLong(notificationMap.get("dataflowId").toString())
+        : null;
+    String dataflowName = (notificationMap.get("dataflowName") != null)
+        ? notificationMap.get("dataflowName").toString()
+        : null;
+    Long datasetId = (notificationMap.get("datasetId") != null)
+        ? Long.parseLong(notificationMap.get("datasetId").toString())
+        : null;
+    String datasetName =
+        (notificationMap.get("datasetName") != null) ? notificationMap.get("datasetName").toString()
+            : null;
+    String dataProviderName = (notificationMap.get("dataProviderName") != null)
+        ? notificationMap.get("dataProviderName").toString()
+        : null;
+
+    UserNotificationContentVO content = new UserNotificationContentVO();
+    content.setDataflowId(dataflowId);
+    content.setDataflowName(dataflowName);
+    content.setDatasetId(datasetId);
+    content.setDatasetName(datasetName);
+    content.setDataProviderName(dataProviderName);
+    content.setTypeStatus((notificationMap.get("typeStatus") != null)
+        ? TypeStatusEnum.valueOf(notificationMap.get("typeStatus").toString())
+        : null);
+    notificationControllerZuul.createUserNotificationPrivate(eventType, content);
+    LOG.info("Save user notification, eventType: {}, notification content: {}", eventType, content);
+
+  }
+
 }

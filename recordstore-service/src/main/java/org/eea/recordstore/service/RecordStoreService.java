@@ -143,12 +143,19 @@ public interface RecordStoreService {
   /**
    * Update materialized query view.
    *
-   * @param dataflowId the dataflow id
-   * @param released
-   * @param user
+   * @param datasetId the dataset id
+   * @param user the user
+   * @param released the released
    */
-  void updateMaterializedQueryView(Long dataflowId, String user, Boolean released);
+  void updateMaterializedQueryView(Long datasetId, String user, Boolean released);
 
+  /**
+   * Launch update materialized query view.
+   *
+   * @param datasetId the dataset id
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException;
 
 
 }

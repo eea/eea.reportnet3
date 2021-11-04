@@ -1,5 +1,6 @@
 package org.eea.interfaces.vo.communication;
 
+import java.util.Map;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,4 +34,7 @@ public class UserNotificationContentVO {
 
   /** The type status. */
   private TypeStatusEnum typeStatus;
+
+  /** The custom content. */
+  private Map<String, String> customContent;
 }

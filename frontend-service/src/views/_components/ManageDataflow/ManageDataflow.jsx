@@ -99,10 +99,10 @@ export const ManageDataflow = ({
       await DataflowService.delete(dataflowId);
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('ManageDataflow - onDeleteDataflow.', error);
-        notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
+        notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } }, true);
       }
       setIsDeleting(false);
     } finally {
@@ -127,6 +127,7 @@ export const ManageDataflow = ({
 
   const onSave = () => {
     if (formRef.current) formRef.current.handleSubmit(reportingDataflowState.pinDataflow);
+    onHideDataflowDialog();
   };
 
   const renderCancelButton = action => (

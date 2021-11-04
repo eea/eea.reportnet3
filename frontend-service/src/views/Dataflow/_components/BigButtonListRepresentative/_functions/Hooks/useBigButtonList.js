@@ -9,12 +9,14 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const useBigButtonList = ({
   dataflowState,
   dataProviderId,
   getDataHistoricReleases,
   handleRedirect,
+  isLeadReporterOfCountry,
   match,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
@@ -136,9 +138,6 @@ const useBigButtonList = ({
     .map(dataset => {
       const datasetName = dataset.name;
       const datasetId = dataset.datasetId;
-      const datasetRepresentative = dataflowState.data.representatives.find(
-        representative => representative.dataProviderId === dataset.dataProviderId
-      );
       return {
         layout: 'defaultBigButton',
         buttonClass: 'dataset',
@@ -160,8 +159,6 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true),
-        restrictFromPublicInfo: true,
-        restrictFromPublicStatus: datasetRepresentative.restrictFromPublic,
         visibility: true
       };
     });
@@ -189,6 +186,10 @@ const useBigButtonList = ({
     );
   };
 
+  const isReleased = dataflowState.data.datasets
+    .filter(dataset => dataset.dataProviderId === parseInt(match.params.representativeId))
+    .some(dataset => dataset.isReleased);
+
   const onBuildReleaseButton = () => {
     return [
       {
@@ -200,6 +201,9 @@ const useBigButtonList = ({
         handleRedirect: dataflowState.isReleasable && !getIsReleasing() ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
+        restrictFromPublicAccess: isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business'),
+        restrictFromPublicInfo: dataflowState.showPublicInfo,
+        restrictFromPublicStatus: dataflowState.restrictFromPublic && isReleased,
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }

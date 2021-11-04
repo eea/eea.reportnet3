@@ -52,8 +52,14 @@ public class Snapshot extends DataSetMetabase {
   @Column(name = "DATACOLLECTION_ID")
   private Long dataCollectionId;
 
+  /** The automatic. */
   @Column(name = "AUTOMATIC")
   private Boolean automatic;
+
+  /** The restrict from public. */
+  @Column(name = "RESTRICT_FROM_PUBLIC")
+  private Boolean restrictFromPublic;
+
 
   /**
    * Equals.
