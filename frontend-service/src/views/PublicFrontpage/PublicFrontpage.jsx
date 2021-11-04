@@ -22,7 +22,6 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { PublicCard } from '../_components/PublicCard/PublicCard';
 
 import { ErrorUtils } from 'views/_functions/Utils';
 
@@ -47,7 +46,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
 
   useEffect(() => {
     if (!isNil(urlErrorType)) {
-      notificationContext.add({ type: ErrorUtils.parseErrorType(urlErrorType) });
+      notificationContext.add({ type: ErrorUtils.parseErrorType(urlErrorType) }, true);
     }
   }, [urlErrorType]);
 
@@ -183,40 +182,6 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                     <strong>View by country dataflow status and download reported data</strong>
                   </p>
                 </div>
-              </div>
-            </div>
-            <div className={styles.currentDataflows}>
-              <h3>Dataflows in scope of Reportnet 3:</h3>
-              <div className={styles.dataflowsList}>
-                {config.publicFrontpage.dataflows.map(dataflow => (
-                  <PublicCard
-                    card={dataflow}
-                    dataflowId={dataflow.id}
-                    dueDate={dataflow.targetDate}
-                    frequency={dataflow.reportingFrequency}
-                    key={dataflow.key}
-                    landingPageCard={true}
-                    pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
-                    subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
-                    title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
-                  />
-                ))}
-              </div>
-              <h3>EEA Voluntary Dataflows:</h3>
-              <div className={styles.dataflowsList}>
-                {config.publicFrontpage.voluntaryDataflows.map(dataflow => (
-                  <PublicCard
-                    card={dataflow}
-                    dataflowId={dataflow.id}
-                    dueDate={dataflow.targetDate}
-                    frequency={dataflow.reportingFrequency}
-                    key={dataflow.key}
-                    landingPageCard={true}
-                    pilotScenarioAmbition={dataflow.pilotScenarioAmbition}
-                    subtitle={{ text: dataflow.legalInstrument, url: dataflow.legalInstrumentUrl }}
-                    title={{ text: dataflow.dataflow, url: dataflow.dataFlowUrl }}
-                  />
-                ))}
               </div>
             </div>
             <div className={styles.otherPortals}>

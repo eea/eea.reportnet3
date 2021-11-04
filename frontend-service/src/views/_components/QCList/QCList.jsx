@@ -119,7 +119,7 @@ export const QCList = withRouter(
         onUpdateData();
       } catch (error) {
         console.error('ValidationsList - onDeleteValidation.', error);
-        notificationContext.add({ type: 'DELETE_RULE_ERROR' });
+        notificationContext.add({ type: 'DELETE_RULE_ERROR' }, true);
         validationId('');
       } finally {
         onHideDeleteDialog();
@@ -180,7 +180,7 @@ export const QCList = withRouter(
         );
       } catch (error) {
         console.error('ValidationsList - onLoadValidationsList.', error);
-        notificationContext.add({ type: 'VALIDATION_SERVICE_GET_ALL_ERROR' });
+        notificationContext.add({ type: 'VALIDATION_SERVICE_GET_ALL_ERROR' }, true);
       } finally {
         updatedRuleId = null;
         isFetchingData = false;
@@ -640,9 +640,7 @@ export const QCList = withRouter(
         onUpdateData();
       } catch (error) {
         console.error('FieldValidation - onUpdateValidationRule.', error);
-        notificationContext.add({
-          type: 'QC_RULE_UPDATING_ERROR'
-        });
+        notificationContext.add({ type: 'QC_RULE_UPDATING_ERROR' }, true);
       }
     };
 

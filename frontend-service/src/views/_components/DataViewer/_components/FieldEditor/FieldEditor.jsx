@@ -191,9 +191,7 @@ const FieldEditor = ({
       setLinkItemsOptions(linkItems);
     } catch (error) {
       console.error('FieldEditor - onFilter.', error);
-      notificationContext.add({
-        type: 'GET_REFERENCED_LINK_VALUES_ERROR'
-      });
+      notificationContext.add({ type: 'GET_REFERENCED_LINK_VALUES_ERROR' }, true);
     } finally {
       setIsLoadingData(false);
     }

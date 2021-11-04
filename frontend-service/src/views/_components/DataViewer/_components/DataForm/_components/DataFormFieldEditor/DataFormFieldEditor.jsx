@@ -285,9 +285,7 @@ const DataFormFieldEditor = ({
       return linkItems;
     } catch (error) {
       console.error('DataFormFieldEditor - getLinkItemsWithEmptyOption.', error);
-      notificationContext.add({
-        type: 'GET_REFERENCED_LINK_VALUES_ERROR'
-      });
+      notificationContext.add({ type: 'GET_REFERENCED_LINK_VALUES_ERROR' }, true);
     } finally {
       setIsLoadingData(false);
     }

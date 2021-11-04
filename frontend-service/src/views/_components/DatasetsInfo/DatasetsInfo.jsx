@@ -53,7 +53,7 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
       setDatasetsInfo(datasets);
     } catch (error) {
       console.error('DatasetsInfo - onLoadDatasetsSummary.', error);
-      notificationContext.add({ type: 'LOAD_DATASETS_SUMMARY_ERROR' });
+      notificationContext.add({ type: 'LOAD_DATASETS_SUMMARY_ERROR' }, true);
     } finally {
       setIsLoading(false);
     }
@@ -109,10 +109,10 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     }
 
     return (
-      <Fragment>
+      <div className={styles.datasets}>
         {renderFilters()}
         {renderDatasetsInfoTable()}
-      </Fragment>
+      </div>
     );
   };
 

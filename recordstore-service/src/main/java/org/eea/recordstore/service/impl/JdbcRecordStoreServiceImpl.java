@@ -23,17 +23,20 @@ import java.util.Map;
 import javax.sql.DataSource;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
+import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -206,6 +209,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The document controller zuul. */
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
+
+  /** The reference dataset controller zuul. */
+  @Autowired
+  private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -915,10 +926,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     if (!EventType.RELEASE_COMPLETED_EVENT.equals(event)) {
       try {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(event, value,
-            NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .datasetId(datasetId).error(error).build());
+        NotificationVO notificationVO = NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .datasetId(datasetId).error(error).build();
+        DataSetMetabaseVO datasetMetabaseVO =
+            dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+        notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+        notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+        notificationVO.setDataflowName(
+            dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+        kafkaSenderUtils.releaseNotificableKafkaEvent(event, value, notificationVO);
       } catch (EEAException ex) {
         LOG.error("Error realeasing event {} due to error {}", event, ex.getMessage(), ex);
       }
@@ -1124,6 +1141,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             launchUpdateMaterializedQueryView(dataset.getId());
           }
           break;
+        case REFERENCE:
+          List<ReferenceDatasetVO> references =
+              referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId);
+          for (ReferenceDatasetVO dataset : references) {
+            launchUpdateMaterializedQueryView(dataset.getId());
+          }
+          break;
         default:
           break;
       }
@@ -1150,7 +1174,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param datasetId the dataset id
    * @throws RecordStoreAccessException the record store access exception
    */
-  private void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException {
+  @Override
+  public void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException {
     String viewToUpdate =
         "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
     List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);

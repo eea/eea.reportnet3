@@ -1,13 +1,13 @@
 .contentWrap {
-  border-radius: 10px;
+  border-radius: 3px;
   height: 100%;
   margin-top: 1rem;
   width: 100%;
 
   .title {
     align-items: center;
-    border-radius: 10px;
-    border: 0.1rem solid var(--gray-25);
+    border-radius: 3px;
+    border: var(--webform-table-border);
     color: var(--title-color);
     display: flex;
     font-weight: 400;

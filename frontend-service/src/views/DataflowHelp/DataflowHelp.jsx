@@ -132,7 +132,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       setDataflowName(data.name);
     } catch (error) {
       console.error('DataflowHelp - getDataflowName.', error);
-      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
+      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} }, true);
     }
   };
 
@@ -149,7 +149,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       }
     } catch (error) {
       console.error('DataflowHelp - onLoadDatasetSchema.', error);
-      notificationContext.add({ type: 'IMPORT_DESIGN_FAILED_EVENT' });
+      notificationContext.add({ type: 'IMPORT_DESIGN_FAILED_EVENT' }, true);
     }
   };
 
@@ -194,7 +194,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       }
     } catch (error) {
       console.error('DataflowHelp - onLoadDatasetsSchemas.', error);
-      notificationContext.add({ type: 'LOAD_DATASETS_ERROR', content: {} });
+      notificationContext.add({ type: 'LOAD_DATASETS_ERROR', content: {} }, true);
     }
   };
 
@@ -208,7 +208,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       setDocuments(loadedDocuments);
     } catch (error) {
       console.error('DataflowHelp - onLoadDocuments.', error);
-      notificationContext.add({ type: 'LOAD_DOCUMENTS_ERROR', content: {} });
+      notificationContext.add({ type: 'LOAD_DOCUMENTS_ERROR', content: {} }, true);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOWS));
       }
@@ -225,7 +225,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       setWebLinks(loadedWebLinks);
     } catch (error) {
       console.error('DataflowHelp - onLoadWebLinks.', error);
-      notificationContext.add({ type: 'LOAD_WEB_LINKS_ERROR', content: {} });
+      notificationContext.add({ type: 'LOAD_WEB_LINKS_ERROR', content: {} }, true);
     } finally {
       setIsLoadingWeblinks(false);
     }

@@ -16,12 +16,14 @@ import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
 import org.eea.dataflow.integration.executor.fme.service.impl.FMECommunicationServiceImpl;
 import org.eea.dataflow.persistence.domain.FMEJob;
 import org.eea.dataflow.persistence.repository.FMEJobRepository;
+import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
@@ -71,6 +73,10 @@ public class FMECommunicationServiceTest {
 
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
+  /** The dataflow service. */
+  @Mock
+  private DataflowService dataflowService;
 
   @Before
   public void initMocks() {
@@ -265,8 +271,13 @@ public class FMECommunicationServiceTest {
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
     fmeJob.setFileName("Test.csv");
+    fmeJob.setDataflowId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
     fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -282,8 +293,13 @@ public class FMECommunicationServiceTest {
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
     fmeJob.setFileName("Test.csv");
+    fmeJob.setDataflowId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
     fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -299,8 +315,14 @@ public class FMECommunicationServiceTest {
     fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
     fmeJob.setFileName("Test.csv");
+    fmeJob.setDataflowId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
     fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -317,8 +339,13 @@ public class FMECommunicationServiceTest {
     fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT);
     fmeJob.setFileName("Test.csv");
+    fmeJob.setDataflowId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
     fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -335,8 +362,13 @@ public class FMECommunicationServiceTest {
     fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
     fmeJob.setFileName("Test.csv");
+    fmeJob.setDataflowId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
     fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -352,8 +384,13 @@ public class FMECommunicationServiceTest {
     fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
     fmeJob.setFileName("Test.csv");
+    fmeJob.setDataflowId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
     fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -369,8 +406,12 @@ public class FMECommunicationServiceTest {
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
     fmeJob.setFileName("Test.csv");
+    fmeJob.setDataflowId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
     fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -387,8 +428,14 @@ public class FMECommunicationServiceTest {
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM);
     fmeJob.setFileName("Test.csv");
+    fmeJob.setDataflowId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
+
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
     fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -399,6 +446,16 @@ public class FMECommunicationServiceTest {
     FMEJob fmeJob = new FMEJob();
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT);
+    fmeJob.setDataflowId(1L);
+    fmeJob.setDatasetId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
+
     fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -409,6 +466,15 @@ public class FMECommunicationServiceTest {
     FMEJob fmeJob = new FMEJob();
     fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT);
+    fmeJob.setDataflowId(1L);
+    fmeJob.setDatasetId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
+
     fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -419,6 +485,14 @@ public class FMECommunicationServiceTest {
     FMEJob fmeJob = new FMEJob();
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT);
+    fmeJob.setDataflowId(1L);
+    fmeJob.setDatasetId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
     fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -429,6 +503,15 @@ public class FMECommunicationServiceTest {
     FMEJob fmeJob = new FMEJob();
     fmeJob.setProviderId(null);
     fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT);
+    fmeJob.setDataflowId(1L);
+    fmeJob.setDatasetId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
     fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -439,6 +522,14 @@ public class FMECommunicationServiceTest {
     FMEJob fmeJob = new FMEJob();
     fmeJob.setProviderId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    fmeJob.setDataflowId(1L);
+    fmeJob.setDatasetId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
     fmeCommunicationService.releaseNotifications(fmeJob, 0L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -448,7 +539,15 @@ public class FMECommunicationServiceTest {
   public void releaseNotificationsExportEUDatasetFailedTest() throws EEAException {
     FMEJob fmeJob = new FMEJob();
     fmeJob.setProviderId(null);
+    fmeJob.setDataflowId(1L);
+    fmeJob.setDatasetId(1L);
     fmeJob.setOperation(IntegrationOperationTypeEnum.EXPORT_EU_DATASET);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setName("dfName");
+    Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
     fmeCommunicationService.releaseNotifications(fmeJob, 1L, true);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());

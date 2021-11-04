@@ -9,6 +9,7 @@ import { config } from 'conf';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
+import { Checkbox } from 'views/_components/Checkbox';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
@@ -170,7 +171,7 @@ export const WebLinks = ({
       onLoadWebLinks();
     } catch (error) {
       console.error('WebLinks - onDeleteWebLink.', error);
-      notificationContext.add({ type: 'DELETE_WEB_LINK_ERROR' });
+      notificationContext.add({ type: 'DELETE_WEB_LINK_ERROR' }, true);
     } finally {
       webLinksDispatch({ type: 'ON_DELETE_END' });
       setDeletingId('');
@@ -216,17 +217,11 @@ export const WebLinks = ({
         } catch (error) {
           console.error('WebLinks - onSaveRecord - add.', error);
           if (error.response.status === 400) {
-            notificationContext.add({
-              type: 'WRONG_WEB_LINK_ERROR'
-            });
+            notificationContext.add({ type: 'WRONG_WEB_LINK_ERROR' }, true);
           } else if (error.response.status === 409) {
-            notificationContext.add({
-              type: 'DUPLICATED_WEB_LINK_ERROR'
-            });
+            notificationContext.add({ type: 'DUPLICATED_WEB_LINK_ERROR' }, true);
           } else {
-            notificationContext.add({
-              type: 'ADD_WEB_LINK_ERROR'
-            });
+            notificationContext.add({ type: 'ADD_WEB_LINK_ERROR' }, true);
           }
         } finally {
           webLinksDispatch({ type: 'SET_IS_SUBMITTING', payload: { isSubmitting: false } });
@@ -240,17 +235,11 @@ export const WebLinks = ({
         } catch (error) {
           console.error('WebLinks - onSaveRecord - update.', error);
           if (error.response.status === 400) {
-            notificationContext.add({
-              type: 'WRONG_WEB_LINK_ERROR'
-            });
+            notificationContext.add({ type: 'WRONG_WEB_LINK_ERROR' }, true);
           } else if (error.response.status === 409) {
-            notificationContext.add({
-              type: 'DUPLICATED_WEB_LINK_ERROR'
-            });
+            notificationContext.add({ type: 'DUPLICATED_WEB_LINK_ERROR' }, true);
           } else {
-            notificationContext.add({
-              type: 'EDIT_WEB_LINK_ERROR'
-            });
+            notificationContext.add({ type: 'EDIT_WEB_LINK_ERROR' }, true);
           }
         } finally {
           webLinksDispatch({
@@ -272,6 +261,24 @@ export const WebLinks = ({
 
     return 'edit';
   };
+
+  const dialogFooter = (
+    <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
+      <Button
+        disabled={webLinksState.isSubmitting}
+        icon={getButtonIcon(webLinksState.isSubmitting)}
+        id="submitButton"
+        label={isNil(webLinksState.webLink.id) ? resourcesContext.messages['add'] : resourcesContext.messages['edit']}
+        onClick={() => onSaveRecord()}
+      />
+      <Button
+        className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
+        icon="cancel"
+        label={resourcesContext.messages['cancel']}
+        onClick={() => onHideAddEditDialog()}
+      />
+    </div>
+  );
 
   const webLinkEditButtons = webLink => {
     const getDeleteButtonIcon = () => {
@@ -364,6 +371,7 @@ export const WebLinks = ({
           blockScroll={false}
           className={styles.dialog}
           contentStyle={{ height: '80%', maxHeight: '80%', overflow: 'auto' }}
+          footer={dialogFooter}
           header={
             isNil(webLinksState.webLink.id)
               ? resourcesContext.messages['createNewWebLink']
@@ -428,37 +436,20 @@ export const WebLinks = ({
 
             <fieldset>
               <div className={styles.checkboxIsPublic}>
-                <input
+                <Checkbox
+                  ariaLabelledBy="isPublic"
                   checked={webLinksState.webLink.isPublic}
                   id="isPublic"
+                  inputId="isPublic"
                   onChange={() => onIsPublicChange(!webLinksState.webLink.isPublic)}
-                  type="checkbox"
+                  role="checkbox"
                 />
-                <label htmlFor="isPublic" style={{ display: 'block' }}>
+                <label
+                  htmlFor="isPublic"
+                  onClick={() => onIsPublicChange(!webLinksState.webLink.isPublic)}
+                  style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
                   {resourcesContext.messages['checkboxIsPublic']}
                 </label>
-              </div>
-            </fieldset>
-
-            <fieldset>
-              <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
-                <Button
-                  disabled={webLinksState.isSubmitting}
-                  icon={getButtonIcon(webLinksState.isSubmitting)}
-                  id="submitButton"
-                  label={
-                    isNil(webLinksState.webLink.id)
-                      ? resourcesContext.messages['add']
-                      : resourcesContext.messages['edit']
-                  }
-                  onClick={() => onSaveRecord()}
-                />
-                <Button
-                  className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
-                  icon="cancel"
-                  label={resourcesContext.messages['cancel']}
-                  onClick={() => onHideAddEditDialog()}
-                />
               </div>
             </fieldset>
           </form>

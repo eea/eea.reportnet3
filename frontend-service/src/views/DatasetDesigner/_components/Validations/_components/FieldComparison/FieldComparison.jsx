@@ -70,6 +70,7 @@ export const FieldComparison = ({
       </div>
       <div className={styles.section}>
         <textarea
+          className="p-inputtext p-inputtextarea p-component"
           cols="30"
           id="fieldComparisonTextarea"
           name=""

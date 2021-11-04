@@ -65,8 +65,19 @@
   margin: 2rem 0;
   width: 100%;
 
+  .input {
+    &:first-of-type {
+      margin-left: 0 !important;
+    }
+  }
+
+  .checkboxWrap {
+    margin-left: 1rem;
+  }
+
   .input,
   .inputCheckbox {
+    margin-left: 1rem;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -282,6 +293,11 @@
     &:focus,
     &:enabled:focus {
       box-shadow: 0 0 0 0 var(--blue-120) !important;
+      border-color: var(--general-border-color) !important;
+    }
+
+    &:hover {
+      border-color: var(--general-border-color) !important;
     }
 
     &:active {

@@ -93,7 +93,12 @@ const Dataflows = withRouter(({ history, match }) => {
             id: 'citizenScience',
             label: resourcesContext.messages['citizenScienceDataflowsListTab']
           },
-          { className: styles.flow_tab, id: 'reference', label: resourcesContext.messages['referenceDataflowsListTab'] }
+          {
+            className: styles.flow_tab,
+            disabled: dataflowsState.dataflowsCountFirstLoad,
+            id: 'reference',
+            label: resourcesContext.messages['referenceDataflowsListTab']
+          }
         ]
       : [
           {
@@ -117,7 +122,7 @@ const Dataflows = withRouter(({ history, match }) => {
     getDataflowsCount();
 
     if (!isNil(dataflowsErrorType)) {
-      notificationContext.add({ type: ErrorUtils.parseErrorType(dataflowsErrorType) });
+      notificationContext.add({ type: ErrorUtils.parseErrorType(dataflowsErrorType) }, true);
     }
   }, []);
 
@@ -267,7 +272,7 @@ const Dataflows = withRouter(({ history, match }) => {
       }
     } catch (error) {
       console.error('Dataflows - getDataflows.', error);
-      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
+      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' }, true);
     } finally {
       setLoading(false);
     }
@@ -281,7 +286,7 @@ const Dataflows = withRouter(({ history, match }) => {
       dataflowsDispatch({ type: 'SET_DATAFLOWS_COUNT', payload: data });
     } catch (error) {
       console.error('Dataflows - getDataflows.', error);
-      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
+      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' }, true);
     }
   };
 

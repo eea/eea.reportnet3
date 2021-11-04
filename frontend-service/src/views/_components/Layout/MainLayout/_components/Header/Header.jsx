@@ -10,6 +10,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import defaultAvatar from 'views/_assets/images/avatars/defaultAvatar.png';
 import logo from 'views/_assets/images/logos/logo.png';
+import logoDarkMode from 'views/_assets/images/logos/logo-dark-mode.png';
 import styles from './Header.module.scss';
 import ReportnetPublicLogo from 'views/_assets/images/logos/reportnet_public_logo.svg';
 
@@ -141,7 +142,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       {isPublic ? (
         <img alt="Reportnet 3" className={styles.appLogo} height="50px" src={ReportnetPublicLogo} />
       ) : (
-        <img alt="Reportnet 3" className={styles.appLogo} height="50px" src={logo} />
+        <img
+          alt="Reportnet 3"
+          className={styles.appLogo}
+          height="50px"
+          src={themeContext.currentTheme !== 'dark' ? logo : logoDarkMode}
+        />
       )}
     </a>
   );
@@ -193,9 +199,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         await UserService.updateConfiguration(inmUserProperties);
       } catch (error) {
         console.error('Header - userLogout - updateConfiguration.', error);
-        notificationContext.add({
-          type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
-        });
+        notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' }, true);
       }
     }
     userContext.socket.deactivate();
@@ -203,9 +207,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       await UserService.logout();
     } catch (error) {
       console.error('Header - userLogout - logout.', error);
-      notificationContext.add({
-        type: 'USER_LOGOUT_ERROR'
-      });
+      notificationContext.add({ type: 'USER_LOGOUT_ERROR' }, true);
     } finally {
       userContext.onLogout();
     }
@@ -247,11 +249,12 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         userContext.userProps.showLogoutConfirmation ? setConfirmVisible(true) : userLogout();
       }}>
       <FontAwesomeIcon
+        alt="Logout"
         aria-hidden={false}
         aria-label="Logout"
         className={styles.logoutButton}
         icon={AwesomeIcons('logout')}
-        role="presentation"
+        role="button"
       />
     </div>
   );

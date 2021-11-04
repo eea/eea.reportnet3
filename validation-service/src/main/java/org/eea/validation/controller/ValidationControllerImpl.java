@@ -12,7 +12,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -76,6 +78,10 @@ public class ValidationControllerImpl implements ValidationController {
   /** The load validations helper. */
   @Autowired
   private LoadValidationsHelper loadValidationsHelper;
+
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
 
 
   /**
@@ -278,6 +284,12 @@ public class ValidationControllerImpl implements ValidationController {
   public void exportValidationDataCSV(@ApiParam(value = "Dataset id used in the export process",
       example = "1") @PathVariable("datasetId") Long datasetId) {
     LOG.info("Export dataset validation data from datasetId {}, with type .csv", datasetId);
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDatasetId(datasetId);
+    notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_VALIDATIONS_START",
+        userNotificationContentVO);
+
     try {
       validationService.exportValidationFile(datasetId);
     } catch (EEAException | IOException e) {

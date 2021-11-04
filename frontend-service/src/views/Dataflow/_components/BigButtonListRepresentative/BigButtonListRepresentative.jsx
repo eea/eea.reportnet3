@@ -23,6 +23,8 @@ export const BigButtonListRepresentative = ({
   dataflowState,
   dataProviderId,
   handleRedirect,
+  isLeadReporterOfCountry,
+  manageDialogs,
   match,
   onCleanUpReceipt,
   onOpenReleaseConfirmDialog,
@@ -77,9 +79,7 @@ export const BigButtonListRepresentative = ({
       onCleanUpReceipt();
     } catch (error) {
       console.error('BigButtonListRepresentative - onLoadReceiptData.', error);
-      notificationContext.add({
-        type: 'LOAD_RECEIPT_DATA_ERROR'
-      });
+      notificationContext.add({ type: 'LOAD_RECEIPT_DATA_ERROR' }, true);
     } finally {
       setIsReceiptLoading(false);
     }
@@ -108,6 +108,7 @@ export const BigButtonListRepresentative = ({
               dataProviderId,
               getDataHistoricReleases,
               handleRedirect,
+              isLeadReporterOfCountry,
               match,
               onLoadReceiptData,
               onOpenReleaseConfirmDialog,
@@ -116,7 +117,7 @@ export const BigButtonListRepresentative = ({
             })
               .filter(button => button.visibility)
               .map(button => (
-                <BigButton key={button.caption} {...button} />
+                <BigButton key={button.caption} manageDialogs={manageDialogs} {...button} />
               ))}
           </div>
         </div>

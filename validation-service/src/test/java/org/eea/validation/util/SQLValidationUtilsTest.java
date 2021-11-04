@@ -125,11 +125,13 @@ public class SQLValidationUtilsTest {
 
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
-    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(new ObjectId().toString());
+    DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
+    datasetMetabase.setDatasetSchema(new ObjectId().toString());
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabase);
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.anyLong(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(table);
 
     sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, null);
@@ -162,14 +164,15 @@ public class SQLValidationUtilsTest {
     List<TableSchema> tableSchemas = new ArrayList<>();
     tableSchemas.add(tableS);
     schema.setTableSchemas(tableSchemas);
-
+    DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
+    datasetMetabase.setDatasetSchema(new ObjectId().toString());
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabase);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
-    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(new ObjectId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.anyLong(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.any(),
         Mockito.any(), Mockito.any())).thenReturn(table);
 
     sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
@@ -202,13 +205,14 @@ public class SQLValidationUtilsTest {
     List<TableSchema> tableSchemas = new ArrayList<>();
     tableSchemas.add(tableS);
     schema.setTableSchemas(tableSchemas);
-
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
+    DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
+    datasetMetabase.setDatasetSchema(new ObjectId().toString());
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabase);
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
-    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(new ObjectId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
 
@@ -240,12 +244,14 @@ public class SQLValidationUtilsTest {
     tableSchemas.add(tableS);
     schema.setTableSchemas(tableSchemas);
 
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
-    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(new ObjectId().toString());
+    DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
+    datasetMetabase.setDatasetSchema(new ObjectId().toString());
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabase);
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
 
@@ -285,12 +291,14 @@ public class SQLValidationUtilsTest {
     tableSchemas.add(tableS);
     schema.setTableSchemas(tableSchemas);
 
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
-    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(new ObjectId().toString());
+    DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
+    datasetMetabase.setDatasetSchema(new ObjectId().toString());
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabase);
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
 
@@ -331,13 +339,14 @@ public class SQLValidationUtilsTest {
     List<TableSchema> tableSchemas = new ArrayList<>();
     tableSchemas.add(tableS);
     schema.setTableSchemas(tableSchemas);
-
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
+    DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
+    datasetMetabase.setDatasetSchema(new ObjectId().toString());
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabase);
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
-    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(rule.getReferenceId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
 
@@ -382,7 +391,7 @@ public class SQLValidationUtilsTest {
 
     DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
     DatasetValue dataset = new DatasetValue();
-
+    datasetMetabase.setDatasetSchema(new ObjectId().toString());
     List<DatasetValidation> datasetValidations = new ArrayList<>();
     DatasetValidation datasetValidation = new DatasetValidation();
     datasetValidation.setId(1L);
@@ -391,7 +400,7 @@ public class SQLValidationUtilsTest {
 
 
     Mockito.when(datasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
@@ -444,20 +453,19 @@ public class SQLValidationUtilsTest {
 
     DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
     DatasetValue dataset = new DatasetValue();
+    datasetMetabase.setDatasetSchema(new ObjectId().toString());
 
     List<DatasetValidation> datasetValidations = new ArrayList<>();
     dataset.setDatasetValidations(datasetValidations);
 
 
     Mockito.when(datasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
-    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.anyLong(), Mockito.any(),
+    Mockito.when(sqlRulesService.retrieveTableData(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any())).thenReturn(table);
     Mockito.when(sqlRulesService.getRule(Mockito.anyLong(), Mockito.any())).thenReturn(rule);
     Mockito.when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(table);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabase);
-    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(new ObjectId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
 

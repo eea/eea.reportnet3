@@ -52,6 +52,7 @@ export const BigButtonList = ({
   dataProviderId,
   handleRedirect,
   isLeadReporterOfCountry,
+  manageDialogs,
   onCleanUpReceipt,
   onOpenReleaseConfirmDialog,
   onSaveName,
@@ -84,16 +85,14 @@ export const BigButtonList = ({
   const [isActiveButton, setIsActiveButton] = useState(true);
   const [isCloningDataflow, setIsCloningDataflow] = useState(false);
   const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
-  const [isCopyDataCollectionToEUDatasetDialogVisible, setIsCopyDataCollectionToEUDatasetDialogVisible] = useState(
-    false
-  );
+  const [isCopyDataCollectionToEUDatasetDialogVisible, setIsCopyDataCollectionToEUDatasetDialogVisible] =
+    useState(false);
   const [isExportEUDatasetDialogVisible, setIsExportEUDatasetDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isImportingDataflow, setIsImportingDataflow] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
-  const [isManageManualAcceptanceDatasetDialogVisible, setIsManageManualAcceptanceDatasetDialogVisible] = useState(
-    false
-  );
+  const [isManageManualAcceptanceDatasetDialogVisible, setIsManageManualAcceptanceDatasetDialogVisible] =
+    useState(false);
   const [isManualTechnicalAcceptance, setIsManualTechnicalAcceptance] = useState(null);
   const [isManualTechnicalAcceptanceDialogVisible, setIsManualTechnicalAcceptanceDialogVisible] = useState(false);
   const [isUpdatedManualAcceptanceDatasets, setIsUpdatedManualAcceptanceDatasets] = useState(false);
@@ -186,20 +185,23 @@ export const BigButtonList = ({
   const cloneDatasetSchemas = async () => {
     setCloneDialogVisible(false);
 
-    notificationContext.add({
-      type: 'CLONE_DATASET_SCHEMAS_INIT',
-      content: { sourceDataflowName: cloneDataflow.name, targetDataflowName: dataflowName }
-    });
+    notificationContext.add(
+      {
+        type: 'CLONE_DATASET_SCHEMAS_INIT',
+        content: { customContent: { sourceDataflowName: cloneDataflow.name, targetDataflowName: dataflowName } }
+      },
+      true
+    );
     setIsCloningDataflow(true);
 
     try {
       await DataflowService.cloneSchemas(cloneDataflow.id, dataflowId);
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('BigButtonList - cloneDatasetSchemas.', error);
-        notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' });
+        notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' }, true);
       }
     }
   };
@@ -254,7 +256,7 @@ export const BigButtonList = ({
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
       console.error('BigButtonList - getMetadata.', error);
-      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId } });
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId } }, true);
     }
   };
 
@@ -289,7 +291,7 @@ export const BigButtonList = ({
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
 
-      notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } });
+      notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } }, true);
       setIsActiveButton(true);
     } finally {
       setDataCollectionDialog(false);
@@ -302,9 +304,9 @@ export const BigButtonList = ({
 
   const onImportSchemaError = async ({ xhr }) => {
     if (xhr.status === 423) {
-      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
     } else {
-      notificationContext.add({ type: 'IMPORT_DATASET_SCHEMA_FAILED_EVENT' });
+      notificationContext.add({ type: 'IMPORT_DATASET_SCHEMA_FAILED_EVENT' }, true);
     }
   };
 
@@ -342,7 +344,7 @@ export const BigButtonList = ({
       setExportEUDatasetIntegration(IntegrationsUtils.parseIntegration(euDatasetExportIntegration));
     } catch (error) {
       console.error('BigButtonList - onLoadEUDatasetIntegration.', error);
-      notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' });
+      notificationContext.add({ type: 'LOAD_INTEGRATIONS_ERROR' }, true);
     }
   };
 
@@ -369,7 +371,7 @@ export const BigButtonList = ({
     } catch (error) {
       console.error('BigButtonList - onDeleteDatasetSchema.', error);
       if (error.response.status === 401) {
-        notificationContext.add({ type: 'DELETE_DATASET_SCHEMA_LINK_ERROR' });
+        notificationContext.add({ type: 'DELETE_DATASET_SCHEMA_LINK_ERROR' }, true);
       }
     } finally {
       hideLoading();
@@ -391,10 +393,10 @@ export const BigButtonList = ({
       setIsCopyDataCollectionToEUDatasetLoading(false);
 
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' });
+        notificationContext.add({ type: 'DATA_COLLECTION_LOCKED_ERROR' }, true);
       } else {
         console.error('BigButtonList - onCopyDataCollectionToEUDataset.', error);
-        notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' });
+        notificationContext.add({ type: 'COPY_DATA_COLLECTION_EU_DATASET_ERROR' }, true);
       }
     }
   };
@@ -410,10 +412,10 @@ export const BigButtonList = ({
       setIsExportEUDatasetLoading(false);
 
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'EU_DATASET_LOCKED_ERROR' });
+        notificationContext.add({ type: 'EU_DATASET_LOCKED_ERROR' }, true);
       } else {
         console.error('BigButtonList - onExportEUDataset.', error);
-        notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' });
+        notificationContext.add({ type: 'EXPORT_EU_DATASET_ERROR' }, true);
       }
     }
   };
@@ -427,9 +429,7 @@ export const BigButtonList = ({
       onCleanUpReceipt();
     } catch (error) {
       console.error('BigButtonList - onLoadReceiptData.', error);
-      notificationContext.add({
-        type: 'LOAD_RECEIPT_DATA_ERROR'
-      });
+      notificationContext.add({ type: 'LOAD_RECEIPT_DATA_ERROR' }, true);
     } finally {
       setIsReceiptLoading(false);
     }
@@ -452,6 +452,7 @@ export const BigButtonList = ({
   const onCreateDataCollectionsWithNotValids = async () => {
     setIsActiveButton(false);
     try {
+      notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
       await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, false);
     } catch (error) {
       console.error('BigButtonList - onCreateDataCollectionsWithNotValids.', error);
@@ -459,7 +460,7 @@ export const BigButtonList = ({
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
 
-      notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } });
+      notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } }, true);
 
       setIsActiveButton(true);
     } finally {
@@ -565,7 +566,7 @@ export const BigButtonList = ({
     setErrorDialogData
   })
     .filter(button => button.visibility)
-    .map(button => <BigButton key={button.caption} {...button} />);
+    .map(button => <BigButton key={button.caption} manageDialogs={manageDialogs} {...button} />);
 
   const getManageAcceptanceDataset = data => setDatasetFeedbackStatusToEdit(data);
 
@@ -718,9 +719,9 @@ export const BigButtonList = ({
                 })
               }}></p>
           ) : (
-            <p>
-              <div>{`${resourcesContext.messages['chooseExpirationDate']} `}</div>
-              <div>{`${resourcesContext.messages['chooseExpirationDateSecondLine']} `}</div>
+            <p className={styles.dataCollectionDialogMessagesWrapper}>
+              <span>{`${resourcesContext.messages['chooseExpirationDate']}`}</span>
+              <span>{`${resourcesContext.messages['chooseExpirationDateSecondLine']}`}</span>
             </p>
           )}
           <Calendar
@@ -789,7 +790,10 @@ export const BigButtonList = ({
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={() => onCreateDataCollectionsWithNotValids()}
-          onHide={() => setIsQCsNotValidWarningVisible(false)}
+          onHide={() => {
+            notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
+            setIsQCsNotValidWarningVisible(false);
+          }}
           visible={isQCsNotValidWarningVisible}>
           {TextUtils.parseText(resourcesContext.messages['notValidQCWarningBody'], {
             disabled: invalidAndDisabledRulesAmount.disabledRules,

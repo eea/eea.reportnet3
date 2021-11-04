@@ -12,7 +12,6 @@ import { config } from 'conf';
 import { DatasetConfig } from 'repositories/config/DatasetConfig';
 import { DatasetSchemaRequesterEmptyHelpConfig } from 'conf/help/datasetSchema/requester/empty';
 import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchema/requester/withTabs';
-import WebformsConfig from 'conf/webforms.config.json';
 
 import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
@@ -43,6 +42,7 @@ import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 import { IntegrationService } from 'services/IntegrationService';
 import { ValidationService } from 'services/ValidationService';
+import { WebformService } from 'services/WebformService';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -160,19 +160,23 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       tabularData: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'tabularData'),
       webform: TextUtils.areEquals(QuerystringUtils.getUrlParamValue('view'), 'webform')
     },
-    webform: null
+    webform: null,
+    webformOptions: [],
+    webformOptionsLoadingStatus: 'pending'
   });
 
   const {
     arePrefilledTablesDeleted,
-    datasetSchemaAllTables,
     datasetDescription,
+    datasetSchemaAllTables,
     dataViewerOptions,
     isDataflowOpen,
     isDeleteDialogVisible,
     isDesignDatasetEditorRead,
     isImportOtherSystemsDialogVisible,
-    isValidateDialogVisible
+    isValidateDialogVisible,
+    webformOptions,
+    webformOptionsLoadingStatus
   } = designerState;
 
   const exportMenuRef = useRef();
@@ -202,6 +206,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     leftSideBarContext.removeModels();
     onLoadSchema();
     callSetMetaData();
+    if (isEmpty(webformOptions)) getWebformList();
   }, []);
 
   useEffect(() => {
@@ -430,7 +435,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       });
     } catch (error) {
       console.error('DatasetDesigner - getFileExtensions.', error);
-      notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' });
+      notificationContext.add({ type: 'LOADING_FILE_EXTENSIONS_ERROR' }, true);
     }
   };
 
@@ -439,7 +444,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       return await MetadataUtils.getMetadata(ids);
     } catch (error) {
       console.error('DatasetDesigner - getMetadata.', error);
-      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } }, true);
     } finally {
       setIsLoading(false);
     }
@@ -456,11 +461,30 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
   const getUniqueConstraintsList = data => designerDispatch({ type: 'GET_UNIQUES', payload: { data } });
 
+  const getWebformList = async () => {
+    setWebformOptionsLoadingStatus('pending');
+
+    try {
+      const data = await WebformService.getAll();
+      data.unshift({ id: null, label: 'No webform', value: null });
+
+      designerDispatch({ type: 'GET_WEBFORMS', payload: { data } });
+      setWebformOptionsLoadingStatus('success');
+    } catch (error) {
+      console.error('DatasetsDesigner - getWebformList.', error);
+      setWebformOptionsLoadingStatus('failed');
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
+    }
+  };
+
   const setIsTableCreated = isTableCreated => {
     designerDispatch({ type: 'SET_IS_TABLE_CREATED', payload: { isTableCreated } });
   };
 
   const setIsLoading = value => designerDispatch({ type: 'SET_IS_LOADING', payload: { value } });
+
+  const setWebformOptionsLoadingStatus = loadingStatus =>
+    designerDispatch({ type: 'SET_WEBFORM_OPTIONS_LOADING_STATUS', payload: { loadingStatus } });
 
   const setIsLoadingFile = value => designerDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
 
@@ -543,33 +567,37 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     manageDialogs('isValidateDialogVisible', false);
     try {
       await DatasetService.validate(datasetId);
-      notificationContext.add({
-        type: 'VALIDATE_DATA_INIT',
-        content: {
-          origin: 'DESIGN',
-          dataflowId,
-          dataflowName: designerState.dataflowName,
-          datasetId,
-          datasetName: designerState.datasetSchemaName
-        }
-      });
-    } catch (error) {
-      if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
-      } else {
-        console.error('DatasetDesigner - onConfirmValidate.', error);
-        notificationContext.add({
-          type: 'VALIDATE_DESIGN_DATA_ERROR',
+      notificationContext.add(
+        {
+          type: 'VALIDATE_DATA_INIT',
           content: {
-            origin: 'DESIGN',
+            customContent: { origin: 'DESIGN' },
             dataflowId,
             dataflowName: designerState.dataflowName,
             datasetId,
             datasetName: designerState.datasetSchemaName
           }
-        });
+        },
+        true
+      );
+    } catch (error) {
+      if (error.response.status === 423) {
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+      } else {
+        console.error('DatasetDesigner - onConfirmValidate.', error);
+        notificationContext.add(
+          {
+            type: 'VALIDATE_DESIGN_DATA_ERROR',
+            content: {
+              customContent: { origin: 'DESIGN' },
+              dataflowId,
+              dataflowName: designerState.dataflowName,
+              datasetId,
+              datasetName: designerState.datasetSchemaName
+            }
+          },
+          true
+        );
       }
     }
   };
@@ -582,18 +610,21 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       onResetDelete();
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('Dataset - onConfirmDelete.', error);
-        notificationContext.add({
-          type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
-          content: {
-            dataflowId,
-            datasetId,
-            dataflowName: designerState.dataflowName,
-            datasetName: designerState.datasetSchemaName
-          }
-        });
+        notificationContext.add(
+          {
+            type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
+            content: {
+              dataflowId,
+              datasetId,
+              dataflowName: designerState.dataflowName,
+              datasetName: designerState.datasetSchemaName
+            }
+          },
+          true
+        );
       }
     }
   };
@@ -609,10 +640,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       dataset: { name: datasetName }
     } = await getMetadata({ dataflowId, datasetId });
 
-    notificationContext.add({
-      type: exportNotification,
-      content: { dataflowName: dataflowName, datasetName: datasetName }
-    });
+    notificationContext.add(
+      {
+        type: exportNotification,
+        content: { dataflowName: dataflowName, datasetName: datasetName }
+      },
+      true
+    );
   };
 
   const onExportDataExternalIntegration = async integrationId => {
@@ -623,10 +657,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
     } catch (error) {
       console.error('DatasetDesigner - onExportDataExternalIntegration.', error);
-      notificationContext.add({
-        type: 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT',
-        content: { dataflowId, datasetId, datasetName: designerState.datasetSchemaName }
-      });
+      notificationContext.add(
+        {
+          type: 'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT',
+          content: { dataflowId, datasetId, datasetName: designerState.datasetSchemaName }
+        },
+        true
+      );
     }
   };
 
@@ -744,12 +781,12 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             datasetStatistics: datasetStatisticsDTO,
             description: dataset.datasetSchemaDescription || '',
             levelErrorTypes: dataset.levelErrorTypes,
-            previousWebform: WebformsConfig.filter(item => item.value === dataset.webform)[0],
+            previousWebform: dataset.webform,
             referenceDataset: dataset.referenceDataset,
             schemaId: dataset.datasetSchemaId,
             tables: dataset.tables,
             schemaTables: tableSchemaList,
-            webform: WebformsConfig.filter(item => item.value === dataset.webform)[0]
+            webform: dataset.webform
           }
         });
       };
@@ -848,22 +885,30 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
-      notificationContext.add({
-        type: 'DATASET_DATA_LOADING_INIT',
-        content: {
-          dataflowName,
-          datasetLoading: resourcesContext.messages['datasetLoading'],
-          datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-          datasetName,
-          title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
-        }
-      });
+      notificationContext.add(
+        {
+          type: 'DATASET_DATA_LOADING_INIT',
+          content: {
+            customContent: {
+              datasetLoading: resourcesContext.messages['datasetLoading'],
+              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+              title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
+            },
+            dataflowName,
+            datasetName
+          }
+        },
+        true
+      );
     } catch (error) {
       console.error('DatasetDesigner - onUpload.', error);
-      notificationContext.add({
-        type: 'EXTERNAL_IMPORT_DESIGN_FAILED_EVENT',
-        content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
-      });
+      notificationContext.add(
+        {
+          type: 'EXTERNAL_IMPORT_DESIGN_FAILED_EVENT',
+          content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
+        },
+        true
+      );
     }
   };
 
@@ -874,24 +919,30 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
   const onImportDatasetError = async ({ xhr }) => {
     if (xhr.status === 400) {
-      notificationContext.add({
-        type: 'IMPORT_DESIGN_BAD_REQUEST_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          datasetName: designerState.datasetSchemaName
-        }
-      });
+      notificationContext.add(
+        {
+          type: 'IMPORT_DESIGN_BAD_REQUEST_ERROR',
+          content: {
+            dataflowId,
+            datasetId,
+            datasetName: designerState.datasetSchemaName
+          }
+        },
+        true
+      );
     }
     if (xhr.status === 423) {
-      notificationContext.add({
-        type: 'GENERIC_BLOCKED_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          datasetName: designerState.datasetSchemaName
-        }
-      });
+      notificationContext.add(
+        {
+          type: 'GENERIC_BLOCKED_ERROR',
+          content: {
+            dataflowId,
+            datasetId,
+            datasetName: designerState.datasetSchemaName
+          }
+        },
+        true
+      );
     }
   };
 
@@ -913,15 +964,16 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       });
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('DatasetDesigner - onImportOtherSystems.', error);
-        notificationContext.add({
-          type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
-          content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
-        });
+        notificationContext.add(
+          {
+            type: 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_FAILED_EVENT',
+            content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
+          },
+          true
+        );
       }
     }
   };
@@ -1029,7 +1081,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       await ValidationService.generateQCRulesFile(datasetId);
     } catch (error) {
       console.error('DatasetDesigner - onDownloadQCRules.', error);
-      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' });
+      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
       setIsDownloadingQCRules(false);
     }
   };
@@ -1042,7 +1094,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       await ValidationService.generateShowValidationsFile(datasetId);
     } catch (error) {
       console.error('DatasetDesigner - onDownloadValidations.', error);
-      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' }, true);
 
       setIsDownloadingValidations(false);
     }
@@ -1121,10 +1173,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     return (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          {!isNil(designerState.webform) &&
-          !isNil(designerState.webform.value) &&
-          !isDataflowOpen &&
-          !isDesignDatasetEditorRead
+          {!isNil(designerState.webform) && !isDataflowOpen && !isDesignDatasetEditorRead
             ? renderRadioButtons()
             : switchView}
         </div>
@@ -1267,6 +1316,30 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       </label>
     </div>
   );
+
+  const renderWebformOptionsContent = () => {
+    const webform = webformOptions.find(option => option.value === designerState.webform);
+
+    if (webformOptionsLoadingStatus === 'pending') return <Spinner style={{ top: 0 }} />;
+
+    return (
+      <Fragment>
+        <div className={styles.titleWrapper}>{resourcesContext.messages['configureWebformMessage']}</div>
+        <Dropdown
+          appendTo={document.body}
+          ariaLabel={'configureWebform'}
+          inputId="configureWebformDropDown"
+          onChange={e =>
+            designerDispatch({ type: 'SET_SELECTED_WEBFORM', payload: { selectedWebform: e.target.value } })
+          }
+          optionLabel="label"
+          options={webformOptions}
+          placeholder={resourcesContext.messages['configureWebformPlaceholder']}
+          value={designerState.selectedWebform || webform}
+        />
+      </Fragment>
+    );
+  };
 
   const layout = children => (
     <MainLayout>
@@ -1531,12 +1604,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           </Toolbar>
         </div>
         {renderSwitchView()}
-        {!isNil(designerState.webform) && !isNil(designerState.webform.value) && designerState.viewType['webform'] ? (
+        {!isNil(designerState.webform) && designerState.viewType['webform'] ? (
           <Webforms
             dataflowId={dataflowId}
             datasetId={datasetId}
+            options={webformOptions}
             state={designerState}
-            webformType={designerState.webform.value}
+            webformType={designerState.webform}
           />
         ) : (
           <TabsDesigner
@@ -1668,19 +1742,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             }}
             style={{ width: '30%' }}
             visible={designerState.isConfigureWebformDialogVisible}>
-            <div className={styles.titleWrapper}>{resourcesContext.messages['configureWebformMessage']}</div>
-            <Dropdown
-              appendTo={document.body}
-              ariaLabel={'configureWebform'}
-              inputId="configureWebformDropDown"
-              onChange={e =>
-                designerDispatch({ type: 'SET_SELECTED_WEBFORM', payload: { selectedWebform: e.target.value } })
-              }
-              optionLabel="label"
-              options={WebformsConfig}
-              placeholder={resourcesContext.messages['configureWebformPlaceholder']}
-              value={isUndefined(designerState.selectedWebform) ? designerState.webform : designerState.selectedWebform}
-            />
+            {renderWebformOptionsContent()}
           </Dialog>
         )}
 

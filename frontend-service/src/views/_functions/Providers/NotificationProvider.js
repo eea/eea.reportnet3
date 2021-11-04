@@ -26,11 +26,15 @@ const NotificationProvider = ({ children }) => {
     <NotificationContext.Provider
       value={{
         ...state,
-        add: notificationDTO => {
+        add: (notificationDTO, save = false) => {
           const { content, onClick, type } = notificationDTO;
+          if (save) {
+            NotificationService.create(notificationDTO.type, new Date(), notificationDTO.content);
+          }
           const notification = NotificationService.parse({
             config: config.notifications.notificationSchema,
             content,
+            date: new Date(),
             message: resourcesContext.messages[camelCase(type)],
             onClick,
             routes,
@@ -77,6 +81,10 @@ const NotificationProvider = ({ children }) => {
         },
 
         clearHiddenNotifications: () => dispatch({ type: 'CLEAR_HIDDEN' }),
+
+        removeHiddenByKey: key => {
+          dispatch({ type: 'HIDE_BY_KEY', payload: state.hidden.filter(notification => notification.key !== key) });
+        },
 
         hide: notificationDTO => {
           const { type, content } = notificationDTO;

@@ -7,6 +7,7 @@
 
 .documentsToolbar {
   border: 0px !important;
+  margin-bottom: 0.5rem;
 }
 
 .downloadIcon {
@@ -24,10 +25,6 @@
 }
 .downloadIconArrow:hover {
   position: absolute;
-}
-
-.dialog :global .p-dialog-content {
-  padding-bottom: 0 !important;
 }
 
 .emptyTableHeader {

@@ -128,10 +128,13 @@ export const ListMessages = ({
       onMessageDelete(messageIdToDelete);
     } catch (error) {
       console.error('ListMessages - onConfirmDeleteMessage.', error);
-      notificationContext.add({
-        type: 'FEEDBACK_DELETE_MESSAGE_ERROR',
-        content: {}
-      });
+      notificationContext.add(
+        {
+          type: 'FEEDBACK_DELETE_MESSAGE_ERROR',
+          content: {}
+        },
+        true
+      );
     }
   };
 

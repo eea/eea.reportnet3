@@ -68,6 +68,7 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
       obligationId: dataflow.obligation?.obligationId?.toString(),
       pinned: pinnedDataflows.some(pinnedDataflow => pinnedDataflow === dataflow.id.toString()) ? 'pinned' : 'unpinned',
       reportingDatasetsStatus: dataflow.reportingDatasetsStatus,
+      showPublicInfo: dataflow.showPublicInfo,
       status: dataflow.status,
       statusKey: dataflow.statusKey,
       userRole: dataflow.userRole
@@ -81,7 +82,7 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
       return await UserService.updateConfiguration(userProperties);
     } catch (error) {
       console.error('DataflowsList - changeUserProperties.', error);
-      notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' });
+      notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' }, true);
     }
   };
 
