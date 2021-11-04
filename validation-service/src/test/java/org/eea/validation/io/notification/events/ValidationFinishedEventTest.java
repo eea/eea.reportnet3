@@ -8,6 +8,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -53,7 +54,7 @@ public class ValidationFinishedEventTest {
   }
 
 
-  // @Test
+  @Test
   public void getMapFromMinimumDataTest() throws EEAException {
 
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
@@ -74,10 +75,10 @@ public class ValidationFinishedEventTest {
 
 
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+    Mockito.when(dataflowVO.getStatus()).thenReturn(TypeStatusEnum.DESIGN);
     Map<String, Object> result =
         validationFinishedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L).build());
-    Assert.assertEquals(7, result.size());
+    Assert.assertEquals(8, result.size());
     Assert.assertEquals("user", result.get("user"));
     Assert.assertEquals(1L, result.get("datasetId"));
     Assert.assertEquals(2L, result.get("dataflowId"));
