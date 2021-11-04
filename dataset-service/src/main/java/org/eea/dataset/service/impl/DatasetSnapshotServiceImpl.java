@@ -312,12 +312,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setEuReleased(false);
 
       Long dataflowId = metabaseRepository.findDataflowIdById(idDataset);
-      List<RepresentativeVO> representatives =
-          representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
-      for (RepresentativeVO representative : representatives) {
-        if (snap.getReportingDataset().getDataProviderId()
-            .equals(representative.getDataProviderId())) {
-          snap.setRestrictFromPublic(representative.isRestrictFromPublic());
+      if (snap.getReportingDataset() != null
+          && snap.getReportingDataset().getDataProviderId() != null) {
+        List<RepresentativeVO> representatives =
+            representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
+        for (RepresentativeVO representative : representatives) {
+          if (snap.getReportingDataset().getDataProviderId()
+              .equals(representative.getDataProviderId())) {
+            snap.setRestrictFromPublic(representative.isRestrictFromPublic());
+          }
         }
       }
 
