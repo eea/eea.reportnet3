@@ -46,7 +46,8 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       {
         id: 'levelError',
         header: resourcesContext.messages['notificationLevel'],
-        template: notificationLevelTemplate
+        template: notificationLevelTemplate,
+        style: { width: '6rem' }
       },
       {
         id: 'date',
@@ -60,7 +61,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     ];
 
     let columnsArray = headers.map(col => (
-      <Column body={col.template} field={col.id} header={col.header} key={col.id} />
+      <Column body={col.template} field={col.id} header={col.header} key={col.id} style={col.style} />
     ));
 
     setColumns(columnsArray);
@@ -99,9 +100,11 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   const notificationLevelTemplate = rowData => {
     return (
-      <div className={styles.notificationLevelTemplateWrapper}>
-        <LevelError type={rowData.levelError.toLowerCase()} />
-      </div>
+      !isNil(rowData.levelError) && (
+        <div className={styles.notificationLevelTemplateWrapper}>
+          <LevelError type={rowData.levelError.toLowerCase()} />
+        </div>
+      )
     );
   };
 
