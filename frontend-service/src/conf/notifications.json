@@ -790,7 +790,9 @@
         { "key": "EXPORT_DATASET_FAILED_EVENT" },
         { "key": "DOWNLOAD_VALIDATIONS_FAILED_EVENT" },
         { "key": "EXPORT_QC_FAILED_EVENT" },
-        { "key": "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT" }
+        { "key": "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT" },
+        { "key": "DISABLE_RULES_ERROR_EVENT" },
+        { "key": "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT" }
       ]
     },
     {
@@ -1111,7 +1113,8 @@
         },
         {
           "key": "IMPORT_TABLE_SCHEMA_INIT"
-        }
+        },
+        { "key": "RECEIVED_MESSAGE" }
       ]
     }
   ],

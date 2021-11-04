@@ -1338,6 +1338,9 @@
     "externalExportDesignCompletedEvent": "External design export file generated successfully",
     "externalExportReportingCompletedEvent": "External reporting export file generated successfully",
     "exportSchemaInformationCompletedEvent": "Schemas info file generated successfully",
-    "exportSchemaInformationFailedEvent": "Failed generating Schemas info file"
+    "exportSchemaInformationFailedEvent": "Failed generating Schemas info file",
+    "receivedMessage": "Message received",
+    "disabledRulesErrorEvent": "Failed disabling rules",
+    "noPkReferenceDataflowErrorEvent": "There is no PK in reference dataflow"
   }
 }
