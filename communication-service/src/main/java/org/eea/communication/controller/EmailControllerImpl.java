@@ -1,5 +1,7 @@
 package org.eea.communication.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.eea.communication.service.EmailService;
 import org.eea.interfaces.controller.communication.EmailController;
 import org.eea.interfaces.vo.communication.EmailVO;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/email")
+@Api(value=" Email Controller ", hidden = true)
 public class EmailControllerImpl implements EmailController {
 
   /** The email service. */
@@ -28,6 +31,7 @@ public class EmailControllerImpl implements EmailController {
    */
   @Override
   @PostMapping(value = "/private/send", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Method to send a message by email", hidden = true)
   public void sendMessage(@RequestBody EmailVO emailVO) {
     emailService.sendMessage(emailVO);
   }
