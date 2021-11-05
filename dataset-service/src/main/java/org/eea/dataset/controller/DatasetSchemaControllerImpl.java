@@ -1253,8 +1253,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           name = "dataflowId") @RequestParam(value = "dataflowId") Long dataflowId,
       @ApiParam(value = "File") @RequestParam("file") MultipartFile file) {
 
+    DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataflowId);
+    userNotificationContentVO.setDataflowName(dataflowVO.getName());
     notificationControllerZuul.createUserNotificationPrivate("IMPORT_DATASET_SCHEMA_INIT",
         userNotificationContentVO);
 
