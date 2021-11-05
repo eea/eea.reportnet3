@@ -202,8 +202,8 @@ const useBigButtonList = ({
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
         restrictFromPublicAccess: isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business'),
-        restrictFromPublicInfo: dataflowState.showPublicInfo,
-        restrictFromPublicStatus: dataflowState.restrictFromPublic && isReleased,
+        restrictFromPublicInfo: dataflowState.showPublicInfo && isReleased,
+        restrictFromPublicStatus: dataflowState.restrictFromPublic,
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }
