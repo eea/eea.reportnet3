@@ -575,7 +575,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             dataflowId,
             dataflowName: designerState.dataflowName,
             datasetId,
-            datasetName: designerState.datasetSchemaName
+            datasetName: designerState.datasetSchemaName,
+            type: 'DESIGN'
           }
         },
         true
