@@ -1031,7 +1031,14 @@
         { "key": "EXPORT_QC_COMPLETED_EVENT" },
         { "key": "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT" },
         { "key": "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT" },
-        { "key": "EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT" }
+        { "key": "EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT" },
+        {
+          "key": "DELETE_DATASET_SCHEMA_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        }
       ]
     },
     {

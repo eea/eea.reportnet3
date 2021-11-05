@@ -72,13 +72,14 @@ export const NotificationService = {
           });
 
           const section =
-            type.toString() !== 'VALIDATION_FINISHED_EVENT'
+            type.toString() !== 'VALIDATION_FINISHED_EVENT' && type.toString() !== 'VALIDATE_DATA_INIT'
               ? routes[navigateTo.section]
               : routes[
                   NotificationUtils.getSectionValidationRedirectionUrl(
-                    !isNil(content.type) ? content.type : content.typeStatus
+                    !isNil(content.type) ? content.type : !isNil(content.typeStatus) ? content.typeStatus : 'DESIGN'
                   )
                 ];
+
           notificationDTO.redirectionUrl = getUrl(section, urlParameters, true);
 
           if (!isNil(navigateTo.hasQueryString) && navigateTo.hasQueryString) {

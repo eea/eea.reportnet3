@@ -117,6 +117,10 @@ public class DeleteHelper {
     LOG.info("Deleting data from dataset {}", datasetId);
     datasetService.deleteImportData(datasetId, deletePrefilledTables);
 
+    EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+        ? EventType.DELETE_DATASET_DATA_COMPLETED_EVENT
+        : EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT;
+
     // Release the lock manually
     Map<String, Object> deleteDatasetValues = new HashMap<>();
     deleteDatasetValues.put(LiteralConstants.SIGNATURE,
@@ -138,8 +142,7 @@ public class DeleteHelper {
     value.put(LiteralConstants.DATASET_ID, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATASET_DATA_COMPLETED_EVENT,
-          value, notificationVO);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error releasing notification: {}", e.getMessage());
     }

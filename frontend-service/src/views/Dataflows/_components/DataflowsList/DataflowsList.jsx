@@ -119,9 +119,15 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
     });
 
     if (isPinned) {
-      notificationContext.add({ type: 'DATAFLOW_PINNED_INIT' });
+      notificationContext.add(
+        { type: 'DATAFLOW_PINNED_INIT', content: { customContent: { dataflowName: pinnedItem.name } } },
+        true
+      );
     } else {
-      notificationContext.add({ type: 'DATAFLOW_UNPINNED_INIT' });
+      notificationContext.add(
+        { type: 'DATAFLOW_UNPINNED_INIT', content: { customContent: { dataflowName: pinnedItem.name } } },
+        true
+      );
     }
 
     const orderedFilteredData = orderBy(

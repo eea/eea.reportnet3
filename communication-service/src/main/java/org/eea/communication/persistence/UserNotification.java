@@ -73,4 +73,12 @@ public class UserNotification {
   /** The type. */
   @Field(value = "type")
   private DatasetTypeEnum type;
+
+  /** The table schema name. */
+  @Field(value = "tableSchemaName")
+  private String tableSchemaName;
+
+  /** The file name. */
+  @Field(value = "fileName")
+  private String fileName;
 }

@@ -120,6 +120,13 @@ public class KafkaSenderUtils {
         ? notificationMap.get("dataProviderName").toString()
         : null;
 
+    String tableSchemaName = (notificationMap.get("tableSchemaName") != null)
+        ? notificationMap.get("tableSchemaName").toString()
+        : null;
+    String fileName =
+        (notificationMap.get("fileName") != null) ? notificationMap.get("fileName").toString()
+            : null;
+
     UserNotificationContentVO content = new UserNotificationContentVO();
     content.setDataflowId(dataflowId);
     content.setDataflowName(dataflowName);
@@ -132,6 +139,8 @@ public class KafkaSenderUtils {
     content.setType((notificationMap.get("type") != null)
         ? DatasetTypeEnum.valueOf(notificationMap.get("type").toString())
         : null);
+    content.setTableSchemaName(tableSchemaName);
+    content.setFileName(fileName);
     notificationControllerZuul.createUserNotificationPrivate(eventType, content);
     LOG.info("Save user notification, eventType: {}, notification content: {}", eventType, content);
 

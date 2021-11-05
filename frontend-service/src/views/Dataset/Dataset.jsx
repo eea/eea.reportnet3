@@ -443,7 +443,8 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             dataflowId,
             dataflowName: metadata.dataflow.name,
             datasetId,
-            datasetName: datasetSchemaName
+            datasetName: datasetSchemaName,
+            type: 'REPORTING'
           }
         },
         true
