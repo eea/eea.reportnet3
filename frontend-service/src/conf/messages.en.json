@@ -607,7 +607,7 @@
     "importDatasetSchemaFailedEvent": "Error importing the dataflow schema",
     "importDatasetSchemaInit": "Loading dataflow schema in <strong>{:dataflowName} <strong>",
     "importDesignBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
-    "importDesignCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "importDesignCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importDesignFailedEvent": "Failed loading schema",
     "importFieldSchemaCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importFieldSchemaFailedEvent": "Error importing table schema definition",
