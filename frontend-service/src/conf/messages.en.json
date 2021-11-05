@@ -1341,6 +1341,7 @@
     "exportSchemaInformationFailedEvent": "Failed generating Schemas info file",
     "receivedMessage": "Message received",
     "disabledRulesErrorEvent": "Failed disabling rules",
-    "noPkReferenceDataflowErrorEvent": "There is no PK in reference dataflow"
+    "noPkReferenceDataflowErrorEvent": "There is no PK in reference dataflow",
+    "deleteDatasetSchemaCompletedEvent": "Delete dataset schema data finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>"
   }
 }
