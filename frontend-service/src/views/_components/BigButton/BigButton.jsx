@@ -187,9 +187,14 @@ export const BigButton = ({
         )}
         {infoStatus &&
           (infoStatusIcon ? (
-            <Icon icon="cloudUpload" style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} />
+            <Icon
+              className={styles.notClickableIcon}
+              icon="cloudUpload"
+              style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }}
+            />
           ) : (
             <p
+              className={styles.notClickableIcon}
               style={{
                 position: 'absolute',
                 top: '0',
@@ -203,6 +208,7 @@ export const BigButton = ({
           ))}
         {restrictFromPublicInfo && (
           <FontAwesomeIcon
+            className={`${!restrictFromPublicStatus && styles.notClickableIcon}`}
             icon={AwesomeIcons(restrictFromPublicStatus ? 'eyeSlash' : 'eye')}
             onClick={() => {
               restrictFromPublicAccess && manageDialogs('isRestrictFromPublicDialogVisible', true);
