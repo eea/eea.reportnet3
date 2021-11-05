@@ -216,6 +216,7 @@ const GlobalNotifications = () => {
         notification.key === 'EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT' ||
         notification.key === 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT' ||
         notification.key === 'DELETE_TABLE_SCHEMA_COMPLETED_EVENT' ||
+        notification.key === 'DELETE_DATASET_SCHEMA_COMPLETED_EVENT' ||
         notification.key === 'RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT'
     );
 
@@ -249,6 +250,7 @@ const GlobalNotifications = () => {
       'EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT',
       'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT',
       'DELETE_TABLE_SCHEMA_COMPLETED_EVENT',
+      'DELETE_DATASET_SCHEMA_COMPLETED_EVENT',
       'RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT'
     ],
     notifyValidateDataInitDesign
