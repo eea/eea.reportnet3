@@ -5,6 +5,7 @@ import { routes } from 'conf/routes';
 
 import camelCase from 'lodash/camelCase';
 import dayjs from 'dayjs';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import DOMPurify from 'dompurify';
@@ -20,11 +21,12 @@ import { Spinner } from 'views/_components/Spinner';
 
 import { NotificationService } from 'services/NotificationService';
 
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
-import { isEmpty } from 'lodash';
 
 const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -131,7 +133,8 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           type: notification.type
         });
       });
-      const notificationsArray = parsedNotifications.map(notification => {
+
+      const notificationsArray = parsedNotifications.map((notification, i) => {
         const message = DOMPurify.sanitize(notification.message, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 
         const capitalizedLevelError = !isUndefined(notification.type)
@@ -139,6 +142,8 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           : notification.type;
 
         return {
+          index: i + nRows * Math.floor(fRow / nRows),
+          key: notification.key,
           message: message,
           levelError: capitalizedLevelError,
           date: dayjs(notification.date).format(
@@ -190,6 +195,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           onPage={onChangePage}
           paginator={true}
           paginatorRight={<span>{`${resourcesContext.messages['totalRecords']} ${totalRecords}`}</span>}
+          rowClassName={newNotificationsClassName}
           rows={paginationInfo.recordsPerPage}
           rowsPerPageOptions={[5, 10, 20]}
           summary="notificationsList"
@@ -215,6 +221,12 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     }
   };
 
+  const newNotificationsClassName = rowData => {
+    return {
+      'p-highlight': rowData.index < notificationContext.all.length
+    };
+  };
+
   return (
     isNotificationVisible && (
       <Dialog
@@ -223,7 +235,10 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
         header={resourcesContext.messages['notifications']}
         modal={true}
-        onHide={() => setIsNotificationVisible(false)}
+        onHide={() => {
+          setIsNotificationVisible(false);
+          notificationContext.deleteAll();
+        }}
         style={{ width: '80%' }}
         visible={isNotificationVisible}
         zIndex={3100}>
