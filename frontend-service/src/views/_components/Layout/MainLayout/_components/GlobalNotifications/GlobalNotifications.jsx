@@ -235,7 +235,8 @@ const GlobalNotifications = () => {
           dataflowId,
           dataflowName,
           datasetId,
-          datasetName
+          datasetName,
+          type: 'DESIGN'
         }
       },
       true
@@ -280,7 +281,8 @@ const GlobalNotifications = () => {
           dataflowId,
           dataflowName,
           datasetId,
-          datasetName
+          datasetName,
+          type: 'REPORTING'
         }
       },
       true
