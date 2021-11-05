@@ -921,7 +921,7 @@ public class FileTreatmentHelper implements DisposableBean {
     // Send notification
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .datasetName(nameFile).datasetType(datasetType).build();
+        .datasetName(dataset.getDataSetName()).datasetType(datasetType).build();
 
     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
         notificationVO);

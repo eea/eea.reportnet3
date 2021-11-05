@@ -18,6 +18,7 @@ import { ErrorBoundaryFallback } from 'views/_components/ErrorBoundaryFallback';
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { NotificationsList } from './_components/NotificationsList';
+import { SystemNotificationsList } from './_components/SystemNotificationsList';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
@@ -34,6 +35,7 @@ export const MainLayout = withRouter(({ children, isPublic = false, history }) =
   const userContext = useContext(UserContext);
 
   const [isNotificationVisible, setIsNotificationVisible] = useState(false);
+  const [isSystemNotificationVisible, setIsSystemNotificationVisible] = useState(false);
   const [margin, setMargin] = useState('50px');
   const [mainContentStyle, setMainContentStyle] = useState({
     height: `auto`,
@@ -182,9 +184,19 @@ export const MainLayout = withRouter(({ children, isPublic = false, history }) =
             setIsNotificationVisible={setIsNotificationVisible}
           />
         )}
+        {isSystemNotificationVisible && (
+          <SystemNotificationsList
+            isSystemNotificationVisible={isSystemNotificationVisible}
+            setIsSystemNotificationVisible={setIsSystemNotificationVisible}
+          />
+        )}
         <Header isPublic={isPublic} onMainContentStyleChange={onMainContentStyleChange} />
         <div className={styles.mainContent} id="mainContent" style={mainContentStyle}>
-          <LeftSideBar onToggleSideBar={onToggleSideBar} setIsNotificationVisible={setIsNotificationVisible} />
+          <LeftSideBar
+            onToggleSideBar={onToggleSideBar}
+            setIsNotificationVisible={setIsNotificationVisible}
+            setIsSystemNotificationVisible={setIsSystemNotificationVisible}
+          />
 
           <div className={styles.pageContent} id="pageContent" style={pageContentStyle}>
             {children}

@@ -74,7 +74,7 @@ export const ManageManualAcceptanceDataset = ({
       refreshManualAcceptanceDatasets(true);
     } catch (error) {
       console.error('ManageManualAcceptanceDataset - onUpdateDataset.', error);
-      notificationContext.add({ type: 'UPDATE_DATASET_FEEDBACK_STATUS_ERROR' });
+      notificationContext.add({ type: 'UPDATE_DATASET_FEEDBACK_STATUS_ERROR' }, true);
     } finally {
       manageDialogs(false);
     }

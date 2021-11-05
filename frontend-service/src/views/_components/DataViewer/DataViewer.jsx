@@ -377,10 +377,13 @@ const DataViewer = withRouter(
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
         } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add({
-          type: 'TABLE_DATA_BY_ID_ERROR',
-          content: { dataflowId, datasetId, dataflowName, datasetName }
-        });
+        notificationContext.add(
+          {
+            type: 'TABLE_DATA_BY_ID_ERROR',
+            content: { dataflowId, datasetId, dataflowName, datasetName }
+          },
+          true
+        );
       } finally {
         setIsLoading(false);
       }
@@ -525,17 +528,20 @@ const DataViewer = withRouter(
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
         } else {
           console.error('DataViewer - onConfirmDeleteTable.', error);
           const {
             dataflow: { name: dataflowName },
             dataset: { name: datasetName }
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-          notificationContext.add({
-            type: 'DELETE_TABLE_DATA_BY_ID_ERROR',
-            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-          });
+          notificationContext.add(
+            {
+              type: 'DELETE_TABLE_DATA_BY_ID_ERROR',
+              content: { dataflowId, datasetId, dataflowName, datasetName, customContent: { tableName } }
+            },
+            true
+          );
         }
       } finally {
         setDeleteDialogVisible(false);
@@ -564,17 +570,20 @@ const DataViewer = withRouter(
         dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
         } else {
           console.error('DataViewer - onConfirmDeleteRow.', error);
           const {
             dataflow: { name: dataflowName },
             dataset: { name: datasetName }
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-          notificationContext.add({
-            type: 'DELETE_RECORD_BY_ID_ERROR',
-            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-          });
+          notificationContext.add(
+            {
+              type: 'DELETE_RECORD_BY_ID_ERROR',
+              content: { dataflowId, datasetId, dataflowName, datasetName, customContent: { tableName } }
+            },
+            true
+          );
         }
       } finally {
         setDeleteDialogVisible(false);
@@ -631,17 +640,20 @@ const DataViewer = withRouter(
             );
           } catch (error) {
             if (error.response.status === 423) {
-              notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+              notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
             } else {
               console.error('DataViewer - onEditorSubmitValue.', error);
               const {
                 dataflow: { name: dataflowName },
                 dataset: { name: datasetName }
               } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-              notificationContext.add({
-                type: 'UPDATE_FIELD_BY_ID_ERROR',
-                content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-              });
+              notificationContext.add(
+                {
+                  type: 'UPDATE_FIELD_BY_ID_ERROR',
+                  content: { dataflowId, datasetId, dataflowName, datasetName, customContent: { tableName } }
+                },
+                true
+              );
             }
           }
         }
@@ -695,23 +707,26 @@ const DataViewer = withRouter(
         }
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
         } else {
           console.error('DataViewer - onPasteAccept.', error);
           const {
             dataflow: { name: dataflowName },
             dataset: { name: datasetName }
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-          notificationContext.add({
-            type: 'ADD_RECORDS_PASTING_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              dataflowName,
-              datasetName,
-              tableName
-            }
-          });
+          notificationContext.add(
+            {
+              type: 'ADD_RECORDS_PASTING_ERROR',
+              content: {
+                dataflowId,
+                datasetId,
+                dataflowName,
+                datasetName,
+                customContent: { tableName }
+              }
+            },
+            true
+          );
         }
       } finally {
         setConfirmPasteVisible(false);
@@ -755,17 +770,20 @@ const DataViewer = withRouter(
           onRefresh();
         } catch (error) {
           if (error.response.status === 423) {
-            notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+            notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
           } else {
             console.error('DataViewer - onSaveRecord - add.', error);
             const {
               dataflow: { name: dataflowName },
               dataset: { name: datasetName }
             } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-            notificationContext.add({
-              type: 'ADD_RECORDS_BY_ID_ERROR',
-              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-            });
+            notificationContext.add(
+              {
+                type: 'ADD_RECORDS_BY_ID_ERROR',
+                content: { dataflowId, datasetId, dataflowName, datasetName, customContent: { tableName } }
+              },
+              true
+            );
           }
         } finally {
           if (!addAnotherOne) {
@@ -781,17 +799,20 @@ const DataViewer = withRouter(
           onRefresh();
         } catch (error) {
           if (error.response.status === 423) {
-            notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+            notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
           } else {
             console.error('DataViewer - onSaveRecord - update.', error);
             const {
               dataflow: { name: dataflowName },
               dataset: { name: datasetName }
             } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-            notificationContext.add({
-              type: 'UPDATE_RECORDS_BY_ID_ERROR',
-              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-            });
+            notificationContext.add(
+              {
+                type: 'UPDATE_RECORDS_BY_ID_ERROR',
+                content: { dataflowId, datasetId, dataflowName, datasetName, customContent: { tableName } }
+              },
+              true
+            );
           }
         } finally {
           onCancelRowEdit();
@@ -838,16 +859,21 @@ const DataViewer = withRouter(
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'DATASET_DATA_LOADING_INIT',
-        content: {
-          datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-          title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
-          datasetLoading: resourcesContext.messages['datasetLoading'],
-          dataflowName,
-          datasetName
-        }
-      });
+      notificationContext.add(
+        {
+          type: 'DATASET_DATA_LOADING_INIT',
+          content: {
+            dataflowName,
+            datasetName,
+            customContent: {
+              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+              title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
+              datasetLoading: resourcesContext.messages['datasetLoading']
+            }
+          }
+        },
+        true
+      );
     };
 
     const addRowDialogFooter = (
@@ -1022,7 +1048,7 @@ const DataViewer = withRouter(
 
     const onImportTableError = async ({ xhr }) => {
       if (xhr.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       }
     };
 

@@ -35,6 +35,10 @@
     {
       "content": "4. Notifications – Provides the history of all notifications (which appear in the top right of the screen) as a list",
       "target": ".dataflowList-left-side-bar-notifications-help-step"
+    },
+    {
+      "content": "5. System notifications – Provides a tool to manage the system notifications",
+      "target": ".dataflowList-left-side-bar-system-notifications-help-step"
     }
   ]
 }

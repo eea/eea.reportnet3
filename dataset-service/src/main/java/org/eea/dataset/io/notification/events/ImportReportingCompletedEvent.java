@@ -6,6 +6,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -33,6 +34,8 @@ public class ImportReportingCompletedEvent implements NotificableEventHandler {
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
+
+
   /**
    * Gets the event type.
    *
@@ -54,14 +57,16 @@ public class ImportReportingCompletedEvent implements NotificableEventHandler {
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
     Long datasetId = notificationVO.getDatasetId();
     DataSetMetabaseVO datasetVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+
     Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
         : datasetVO.getDataflowId();
+    DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
 
     String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
         : datasetVO.getDataSetName();
     String dataflowName =
         notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
-            : dataflowControllerZuul.getMetabaseById(dataflowId).getName();
+            : dataFlowVO.getName();
     String tableSchemaId = notificationVO.getTableSchemaId();
     String tableSchemaName = notificationVO.getTableSchemaName();
 
@@ -79,6 +84,7 @@ public class ImportReportingCompletedEvent implements NotificableEventHandler {
     notification.put("dataflowName", dataflowName);
     notification.put("tableSchemaName", tableSchemaName);
     notification.put("fileName", notificationVO.getFileName());
+    notification.put("typeStatus", dataFlowVO.getStatus().toString());
     return notification;
   }
 }

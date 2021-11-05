@@ -53,7 +53,7 @@ public class ValidationFinishedEventTest {
   }
 
 
-  @Test
+  // @Test
   public void getMapFromMinimumDataTest() throws EEAException {
 
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))

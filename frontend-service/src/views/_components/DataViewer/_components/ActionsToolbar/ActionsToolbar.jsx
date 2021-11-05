@@ -123,16 +123,19 @@ const ActionsToolbar = ({
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName,
-          tableName
-        }
-      });
+      notificationContext.add(
+        {
+          type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId,
+            dataflowName,
+            datasetName,
+            customContent: { tableName }
+          }
+        },
+        true
+      );
     } finally {
       setIsLoadingFile(false);
     }
