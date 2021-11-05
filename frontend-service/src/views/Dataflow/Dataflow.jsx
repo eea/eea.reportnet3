@@ -809,10 +809,15 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmRestrictFromPublic = async () => {
     manageDialogs('isRestrictFromPublicDialogVisible', false);
     try {
+      const selectedDataProviderId = dataProviderId || dataflowState.representative.dataProviderId;
+      dataflowDispatch({
+        type: 'IS_RESTRICT_FROM_PUBLIC_LOADING',
+        payload: { value: true, dataProviderId: selectedDataProviderId }
+      });
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: true } });
       await RepresentativeService.updateRestrictFromPublic(
         dataflowId,
-        dataProviderId,
+        selectedDataProviderId,
         dataflowState.restrictFromPublic
       );
       onLoadReportingDataflow();
