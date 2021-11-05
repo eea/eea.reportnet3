@@ -607,7 +607,7 @@
     "importDatasetSchemaFailedEvent": "Error importing the dataflow schema",
     "importDatasetSchemaInit": "Loading dataflow schema in <strong>{:dataflowName} <strong>",
     "importDesignBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
-    "importDesignCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "importDesignCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importDesignFailedEvent": "Failed loading schema",
     "importFieldSchemaCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importFieldSchemaFailedEvent": "Error importing table schema definition",
@@ -1342,6 +1342,7 @@
     "receivedMessage": "Message received",
     "disabledRulesErrorEvent": "Failed disabling rules",
     "noPkReferenceDataflowErrorEvent": "There is no PK in reference dataflow",
+    "deleteDatasetSchemaCompletedEvent": "Delete dataset schema data finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "automaticQcHeader": "Automatic",
     "enabledQcHeader": "Enabled"
   }

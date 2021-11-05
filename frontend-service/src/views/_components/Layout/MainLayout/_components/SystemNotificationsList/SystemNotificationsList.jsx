@@ -45,7 +45,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  // const [isUpdating, setIsUpdating] = useState(false);
   const [systemNotifications, setSystemNotifications] = useState([]);
 
   useEffect(() => {
@@ -101,7 +101,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       <div className={styles.actionsColumnButtons}>
         <ActionsColumn
           isDeletingDocument={isDeleting}
-          isUpdating={isUpdating}
+          // isUpdating={isUpdating}
           onDeleteClick={() => setIsDeleteDialogVisible(true)}
           onEditClick={() => onEditClick(rowData)}
           rowDataId={rowData.key}
