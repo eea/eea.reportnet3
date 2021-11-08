@@ -35,6 +35,7 @@ export const BigButton = ({
   index,
   infoStatus,
   infoStatusIcon,
+  isRestrictFromPublicUpdating,
   layout,
   manageDialogs = () => {},
   model,
@@ -168,6 +169,14 @@ export const BigButton = ({
     }
   };
 
+  const getRestrictFromPublicIcon = () => {
+    if (isRestrictFromPublicUpdating) {
+      return AwesomeIcons('spinner');
+    } else {
+      return AwesomeIcons(restrictFromPublicStatus ? 'eyeSlash' : 'eye');
+    }
+  };
+
   const defaultBigButton = (
     <Fragment>
       <div
@@ -208,8 +217,10 @@ export const BigButton = ({
           ))}
         {restrictFromPublicInfo && (
           <FontAwesomeIcon
-            className={`${!restrictFromPublicStatus && styles.notClickableIcon}`}
-            icon={AwesomeIcons(restrictFromPublicStatus ? 'eyeSlash' : 'eye')}
+            className={`${!restrictFromPublicStatus && styles.notClickableIcon} ${
+              isRestrictFromPublicUpdating && 'fa-spin'
+            }`}
+            icon={getRestrictFromPublicIcon()}
             onClick={() => {
               restrictFromPublicAccess && manageDialogs('isRestrictFromPublicDialogVisible', true);
               setSelectedRepresentative(dataProviderId);

@@ -111,6 +111,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isReleaseableDialogVisible: false,
     isReleaseDialogVisible: false,
     isReportingDataflowDialogVisible: false,
+    isRestrictFromPublicUpdating: {},
     isShowPublicInfoDialogVisible: false,
     isSnapshotDialogVisible: false,
     isUserListVisible: false,
@@ -918,6 +919,10 @@ const Dataflow = withRouter(({ history, match }) => {
   const setRepresentativeAndRestrictFromPublic = (representative, restrictFromPublic) => {
     dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
     dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: restrictFromPublic });
+    dataflowDispatch({
+      type: 'IS_RESTRICT_FROM_PUBLIC_LOADING',
+      payload: { value: false, dataProviderId: dataflowState.representative.dataProviderId }
+    });
   };
 
   const getBigButtonList = () => {
