@@ -37,6 +37,10 @@
       "target": ".dataflowList-left-side-bar-notifications-help-step"
     },
     {
+      "content": "5. System notifications – Provides a tool to manage the system notifications",
+      "target": ".dataflowList-left-side-bar-system-notifications-help-step"
+    },
+    {
       "content": "Below the line is the context menu. The context menu changes on each screen. On this screen, you can",
       "target": ".dataflowList-left-side-bar-mid-section-help-step"
     },

@@ -258,7 +258,7 @@ export const PublicDataflowInformation = withRouter(
         }
       } catch (error) {
         console.error('PublicDataflowInformation - onDownloadAllSchemasInfo .', error);
-        notificationContext.add({ type: 'GENERATE_SCHEMAS_INFO_FILE_ERROR' });
+        notificationContext.add({ type: 'GENERATE_SCHEMAS_INFO_FILE_ERROR' }, true);
       } finally {
         setIsDownloading(false);
       }
@@ -286,13 +286,9 @@ export const PublicDataflowInformation = withRouter(
       } catch (error) {
         console.error('PublicDataflowInformation - onFileDownload.', error);
         if (error.response.status === 404) {
-          notificationContext.add({
-            type: 'DOWNLOAD_DATASET_FILE_NOT_FOUND_EVENT'
-          });
+          notificationContext.add({ type: 'DOWNLOAD_DATASET_FILE_NOT_FOUND_EVENT' }, true);
         } else {
-          notificationContext.add({
-            type: 'DOWNLOAD_DATASET_FILE_ERROR'
-          });
+          notificationContext.add({ type: 'DOWNLOAD_DATASET_FILE_ERROR' }, true);
         }
       }
     };
@@ -307,7 +303,7 @@ export const PublicDataflowInformation = withRouter(
         if (error.response.status === 404 || error.response.status === 400) {
           setIsWrongUrlDataflowId(true);
         } else {
-          notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' });
+          notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' }, true);
         }
       } finally {
         setIsLoading(false);

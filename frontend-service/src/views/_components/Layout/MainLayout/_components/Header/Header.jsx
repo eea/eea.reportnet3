@@ -198,9 +198,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
         await UserService.updateConfiguration(inmUserProperties);
       } catch (error) {
         console.error('Header - userLogout - updateConfiguration.', error);
-        notificationContext.add({
-          type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
-        });
+        notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' }, true);
       }
     }
     userContext.socket.deactivate();
@@ -208,9 +206,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       await UserService.logout();
     } catch (error) {
       console.error('Header - userLogout - logout.', error);
-      notificationContext.add({
-        type: 'USER_LOGOUT_ERROR'
-      });
+      notificationContext.add({ type: 'USER_LOGOUT_ERROR' }, true);
     } finally {
       userContext.onLogout();
     }

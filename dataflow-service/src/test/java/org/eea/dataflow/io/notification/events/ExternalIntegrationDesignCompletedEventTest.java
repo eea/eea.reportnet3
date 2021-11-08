@@ -4,6 +4,7 @@ import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -46,7 +47,8 @@ public class ExternalIntegrationDesignCompletedEventTest {
     Mockito.when(dataSetMetabaseVO.getDataSetName()).thenReturn("datasetName");
     Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
     Mockito.when(dataFlowVO.getName()).thenReturn("dataflowName");
-    Assert.assertEquals(5, externalIntegrationCompletedEvent
+    Mockito.when(dataFlowVO.getStatus()).thenReturn(TypeStatusEnum.DESIGN);
+    Assert.assertEquals(6, externalIntegrationCompletedEvent
         .getMap(NotificationVO.builder().user("user").datasetId(1L).dataflowId(1L).build()).size());
   }
 }

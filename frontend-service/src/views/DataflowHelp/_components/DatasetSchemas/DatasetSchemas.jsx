@@ -65,7 +65,7 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
       await DataflowService.generateAllSchemasInfoFile(dataflowId);
     } catch (error) {
       console.error('DatasetSchema - onDownloadAllSchemasInfo .', error);
-      notificationContext.add({ type: 'GENERATE_SCHEMAS_INFO_FILE_ERROR' });
+      notificationContext.add({ type: 'GENERATE_SCHEMAS_INFO_FILE_ERROR' }, true);
       setIsDownloading(false);
     }
   };
@@ -188,7 +188,7 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
       const schemaError = {
         type: error.message
       };
-      notificationContext.add(schemaError);
+      notificationContext.add(schemaError, true);
     }
   };
 
@@ -257,7 +257,7 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
       const schemaError = {
         type: error.message
       };
-      notificationContext.add(schemaError);
+      notificationContext.add(schemaError, true);
     }
   };
 
@@ -338,7 +338,7 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
       const schemaError = {
         type: error.message
       };
-      notificationContext.add(schemaError);
+      notificationContext.add(schemaError, true);
     }
   };
 

@@ -186,7 +186,7 @@ const Documents = ({
       await DocumentService.delete(document.id, dataflowId);
     } catch (error) {
       console.error('Documents - onDeleteDocument.', error);
-      notificationContext.add({ type: 'DELETE_DOCUMENT_ERROR', content: {} });
+      notificationContext.add({ type: 'DELETE_DOCUMENT_ERROR', content: {} }, true);
       setIsDeletingDocument(false);
       setFileDeletingId('');
     } finally {

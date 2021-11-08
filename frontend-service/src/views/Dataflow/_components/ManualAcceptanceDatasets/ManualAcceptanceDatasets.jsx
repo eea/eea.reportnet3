@@ -73,7 +73,7 @@ export const ManualAcceptanceDatasets = ({
       refreshManualAcceptanceDatasets(false);
     } catch (error) {
       console.error('ManualAcceptanceDatasets - onLoadManualAcceptanceDatasets.', error);
-      notificationContext.add({ type: 'LOAD_DATASETS_RELEASES_ERROR' });
+      notificationContext.add({ type: 'LOAD_DATASETS_RELEASES_ERROR' }, true);
     } finally {
       isLoading(false);
     }

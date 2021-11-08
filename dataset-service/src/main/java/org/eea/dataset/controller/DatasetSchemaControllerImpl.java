@@ -1124,11 +1124,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           example = "0") @RequestParam("targetDataflow") @LockCriteria(
               name = "dataflowIdDestination") final Long dataflowIdDestination) {
 
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDataflowId(dataflowIdOrigin);
-    notificationControllerZuul.createUserNotificationPrivate("CLONE_DATASET_SCHEMAS_INIT",
-        userNotificationContentVO);
-
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
@@ -1183,7 +1178,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the table schemas ids
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @GetMapping(value = "/getTableSchemasIds/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get list of table Schema ids")
@@ -1258,8 +1253,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           name = "dataflowId") @RequestParam(value = "dataflowId") Long dataflowId,
       @ApiParam(value = "File") @RequestParam("file") MultipartFile file) {
 
+    DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataflowId);
+    userNotificationContentVO.setDataflowName(dataflowVO.getName());
     notificationControllerZuul.createUserNotificationPrivate("IMPORT_DATASET_SCHEMA_INIT",
         userNotificationContentVO);
 

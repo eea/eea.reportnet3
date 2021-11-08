@@ -263,7 +263,7 @@ const useBigButtonList = ({
         datasetId: dataset.datasetId,
         datasetName: dataset.name,
         dataProviderId: dataset.dataProviderId,
-        isReleased: dataset.isReleased,
+        isReleased: isNil(dataset.isReleased) ? false : dataset.isReleased,
         name: dataset.datasetSchemaName
       };
     });
@@ -272,9 +272,6 @@ const useBigButtonList = ({
 
     if (!buttonsVisibility.groupByRepresentative && isUniqRepresentative) {
       return allDatasets.map(dataset => {
-        const datasetRepresentative = dataflowState.data.representatives.find(
-          representative => representative.dataProviderId === dataset.dataProviderId
-        );
         return {
           buttonClass: 'dataset',
           buttonIcon: 'dataset',
@@ -296,9 +293,6 @@ const useBigButtonList = ({
             }
           ],
           onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
-          restrictFromPublicAccess: restrictFromPublicAccess,
-          restrictFromPublicInfo: dataflowState.showPublicInfo,
-          restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
           visibility: true
         };
       });
@@ -332,7 +326,7 @@ const useBigButtonList = ({
         ],
         onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true),
         restrictFromPublicAccess: restrictFromPublicAccess,
-        restrictFromPublicInfo: dataflowState.showPublicInfo,
+        restrictFromPublicInfo: dataflowState.showPublicInfo && dataset.isReleased,
         restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
         visibility: true
       };
@@ -489,6 +483,10 @@ const useBigButtonList = ({
     ];
   };
 
+  const isReleased = dataflowState.data.datasets
+    .filter(dataset => dataset.dataProviderId === dataProviderId)
+    .some(dataset => dataset.isReleased);
+
   const onBuildReleaseButton = () => {
     return [
       {
@@ -501,6 +499,9 @@ const useBigButtonList = ({
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
+        restrictFromPublicAccess: restrictFromPublicAccess,
+        restrictFromPublicInfo: dataflowState.showPublicInfo && isReleased,
+        restrictFromPublicStatus: dataflowState.restrictFromPublic,
         visibility: buttonsVisibility.release
       }
     ];

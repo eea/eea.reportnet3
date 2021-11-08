@@ -1014,8 +1014,6 @@ public class DataSetControllerImplTest {
    */
   @Test
   public void importFileDataTest() throws EEAException {
-    Mockito.doNothing().when(notificationControllerZuul)
-        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
     Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),
         Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
@@ -1032,8 +1030,6 @@ public class DataSetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void importFileDataExceptionTest() throws EEAException {
-    Mockito.doNothing().when(notificationControllerZuul)
-        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(Mockito.anyLong(),

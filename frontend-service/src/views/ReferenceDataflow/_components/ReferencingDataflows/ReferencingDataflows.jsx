@@ -42,7 +42,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
       });
     } catch (error) {
       console.error('ReferencingDataflows - onLoadDataflows.', error);
-      notificationContext.add({ type: 'LOADING_REFERENCING_DATAFLOWS_ERROR', error });
+      notificationContext.add({ type: 'LOADING_REFERENCING_DATAFLOWS_ERROR', error }, true);
     }
   };
 

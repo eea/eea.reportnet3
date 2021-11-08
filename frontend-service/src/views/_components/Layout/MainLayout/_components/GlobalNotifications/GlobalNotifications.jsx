@@ -47,7 +47,7 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadAllSchemasInfoFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_SCHEMAS_INFO_FILE_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_SCHEMAS_INFO_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }
@@ -72,7 +72,7 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadQCRulesFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }
@@ -97,7 +97,7 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadValidationsFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_FILE_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }
@@ -144,7 +144,7 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadExportFMEFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }
@@ -170,7 +170,7 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadExportDatasetFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }
@@ -216,6 +216,7 @@ const GlobalNotifications = () => {
         notification.key === 'EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT' ||
         notification.key === 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT' ||
         notification.key === 'DELETE_TABLE_SCHEMA_COMPLETED_EVENT' ||
+        notification.key === 'DELETE_DATASET_SCHEMA_COMPLETED_EVENT' ||
         notification.key === 'RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT'
     );
 
@@ -227,16 +228,20 @@ const GlobalNotifications = () => {
       dataset: { name: datasetName }
     } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
-    notificationContext.add({
-      type: 'VALIDATE_DATA_INIT',
-      content: {
-        origin: 'DESIGN',
-        dataflowId,
-        dataflowName,
-        datasetId,
-        datasetName
-      }
-    });
+    notificationContext.add(
+      {
+        type: 'VALIDATE_DATA_INIT',
+        content: {
+          customContent: { origin: 'DESIGN' },
+          dataflowId,
+          dataflowName,
+          datasetId,
+          datasetName,
+          type: 'DESIGN'
+        }
+      },
+      true
+    );
   };
 
   useCheckNotifications(
@@ -245,6 +250,7 @@ const GlobalNotifications = () => {
       'EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT',
       'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT',
       'DELETE_TABLE_SCHEMA_COMPLETED_EVENT',
+      'DELETE_DATASET_SCHEMA_COMPLETED_EVENT',
       'RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT'
     ],
     notifyValidateDataInitDesign
@@ -269,16 +275,20 @@ const GlobalNotifications = () => {
       dataset: { name: datasetName }
     } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
-    notificationContext.add({
-      type: 'VALIDATE_DATA_INIT',
-      content: {
-        origin: 'REPORTING',
-        dataflowId,
-        dataflowName,
-        datasetId,
-        datasetName
-      }
-    });
+    notificationContext.add(
+      {
+        type: 'VALIDATE_DATA_INIT',
+        content: {
+          customContent: { origin: 'REPORTING' },
+          dataflowId,
+          dataflowName,
+          datasetId,
+          datasetName,
+          type: 'REPORTING'
+        }
+      },
+      true
+    );
   };
 
   useCheckNotifications(

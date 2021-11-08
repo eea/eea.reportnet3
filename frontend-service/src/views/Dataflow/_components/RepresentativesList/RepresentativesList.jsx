@@ -166,7 +166,7 @@ const RepresentativesList = ({
       });
     } catch (error) {
       console.error('RepresentativesList - getRepresentatives.', error);
-      notificationContext.add({ type: 'GET_REPRESENTATIVES_ERROR' });
+      notificationContext.add({ type: 'GET_REPRESENTATIVES_ERROR' }, true);
     }
   };
 
@@ -208,7 +208,7 @@ const RepresentativesList = ({
         formDispatcher({ type: 'REFRESH' });
       } catch (error) {
         console.error('RepresentativesList - onAddRepresentative.', error);
-        notificationContext.add({ type: 'ADD_DATA_PROVIDER_ERROR' });
+        notificationContext.add({ type: 'ADD_DATA_PROVIDER_ERROR' }, true);
       } finally {
         formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
       }
@@ -239,7 +239,7 @@ const RepresentativesList = ({
         formDispatcher({ type: 'REFRESH' });
       } catch (error) {
         console.error('RepresentativesList - onDataProviderIdChange.', error);
-        notificationContext.add({ type: 'UPDATE_DATA_PROVIDER_ERROR' });
+        notificationContext.add({ type: 'UPDATE_DATA_PROVIDER_ERROR' }, true);
       } finally {
         formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
       }
@@ -267,7 +267,7 @@ const RepresentativesList = ({
       formDispatcher({ type: 'DELETE_REPRESENTATIVE', payload: { updatedList } });
     } catch (error) {
       console.error('RepresentativesList - onDeleteConfirm.', error);
-      notificationContext.add({ type: 'DELETE_REPRESENTATIVE_ERROR' });
+      notificationContext.add({ type: 'DELETE_REPRESENTATIVE_ERROR' }, true);
     } finally {
       formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' });
       setIsDeleting(false);
@@ -281,7 +281,7 @@ const RepresentativesList = ({
       formDispatcher({ type: 'REFRESH' });
     } catch (error) {
       console.error('RepresentativesList - onDeleteLeadReporter.', error);
-      notificationContext.add({ type: 'DELETE_LEAD_REPORTER_ERROR' });
+      notificationContext.add({ type: 'DELETE_LEAD_REPORTER_ERROR' }, true);
     } finally {
       handleDialogs('deleteLeadReporter', false);
       setIsDeleting(false);

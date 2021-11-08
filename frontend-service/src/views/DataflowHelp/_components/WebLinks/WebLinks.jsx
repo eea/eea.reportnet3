@@ -171,7 +171,7 @@ export const WebLinks = ({
       onLoadWebLinks();
     } catch (error) {
       console.error('WebLinks - onDeleteWebLink.', error);
-      notificationContext.add({ type: 'DELETE_WEB_LINK_ERROR' });
+      notificationContext.add({ type: 'DELETE_WEB_LINK_ERROR' }, true);
     } finally {
       webLinksDispatch({ type: 'ON_DELETE_END' });
       setDeletingId('');
@@ -217,17 +217,11 @@ export const WebLinks = ({
         } catch (error) {
           console.error('WebLinks - onSaveRecord - add.', error);
           if (error.response.status === 400) {
-            notificationContext.add({
-              type: 'WRONG_WEB_LINK_ERROR'
-            });
+            notificationContext.add({ type: 'WRONG_WEB_LINK_ERROR' }, true);
           } else if (error.response.status === 409) {
-            notificationContext.add({
-              type: 'DUPLICATED_WEB_LINK_ERROR'
-            });
+            notificationContext.add({ type: 'DUPLICATED_WEB_LINK_ERROR' }, true);
           } else {
-            notificationContext.add({
-              type: 'ADD_WEB_LINK_ERROR'
-            });
+            notificationContext.add({ type: 'ADD_WEB_LINK_ERROR' }, true);
           }
         } finally {
           webLinksDispatch({ type: 'SET_IS_SUBMITTING', payload: { isSubmitting: false } });
@@ -241,17 +235,11 @@ export const WebLinks = ({
         } catch (error) {
           console.error('WebLinks - onSaveRecord - update.', error);
           if (error.response.status === 400) {
-            notificationContext.add({
-              type: 'WRONG_WEB_LINK_ERROR'
-            });
+            notificationContext.add({ type: 'WRONG_WEB_LINK_ERROR' }, true);
           } else if (error.response.status === 409) {
-            notificationContext.add({
-              type: 'DUPLICATED_WEB_LINK_ERROR'
-            });
+            notificationContext.add({ type: 'DUPLICATED_WEB_LINK_ERROR' }, true);
           } else {
-            notificationContext.add({
-              type: 'EDIT_WEB_LINK_ERROR'
-            });
+            notificationContext.add({ type: 'EDIT_WEB_LINK_ERROR' }, true);
           }
         } finally {
           webLinksDispatch({

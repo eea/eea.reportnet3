@@ -93,9 +93,6 @@ public class ValidationControllerImplTest {
    */
   @Test
   public void validateDataSetDataTest1() throws EEAException {
-    Mockito.doNothing().when(notificationControllerZuul)
-        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
-
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
@@ -113,9 +110,6 @@ public class ValidationControllerImplTest {
    */
   @Test
   public void validateDataSetDataTest2() throws EEAException {
-    Mockito.doNothing().when(notificationControllerZuul)
-        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
-
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     validationController.validateDataSetData(1L, false);
@@ -130,9 +124,6 @@ public class ValidationControllerImplTest {
    */
   @Test
   public void validateDataSetDataTest3() throws EEAException {
-    Mockito.doNothing().when(notificationControllerZuul)
-        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
-
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {

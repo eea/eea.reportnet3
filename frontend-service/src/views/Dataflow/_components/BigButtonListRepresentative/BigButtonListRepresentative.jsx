@@ -79,9 +79,7 @@ export const BigButtonListRepresentative = ({
       onCleanUpReceipt();
     } catch (error) {
       console.error('BigButtonListRepresentative - onLoadReceiptData.', error);
-      notificationContext.add({
-        type: 'LOAD_RECEIPT_DATA_ERROR'
-      });
+      notificationContext.add({ type: 'LOAD_RECEIPT_DATA_ERROR' }, true);
     } finally {
       setIsReceiptLoading(false);
     }
