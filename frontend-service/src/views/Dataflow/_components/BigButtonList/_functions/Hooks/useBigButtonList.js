@@ -281,8 +281,6 @@ const useBigButtonList = ({
           handleRedirect: () => {
             handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
           },
-          infoStatus: dataset.isReleased,
-          infoStatusIcon: true,
           layout: 'defaultBigButton',
           model: [
             {
@@ -314,8 +312,6 @@ const useBigButtonList = ({
           );
         },
         helpClassName: 'dataflow-dataset-container-help-step',
-        infoStatus: dataset.isReleased,
-        infoStatusIcon: true,
         layout: 'defaultBigButton',
         model: [
           {
@@ -499,6 +495,8 @@ const useBigButtonList = ({
         enabled: dataflowState.isReleasable,
         handleRedirect: dataflowState.isReleasable && !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
+        infoStatus: isReleased,
+        infoStatusIcon: true,
         layout: 'defaultBigButton',
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
         restrictFromPublicAccess: restrictFromPublicAccess,

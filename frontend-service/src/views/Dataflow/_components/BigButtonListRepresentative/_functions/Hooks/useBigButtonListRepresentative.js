@@ -143,8 +143,6 @@ const useBigButtonListRepresentative = ({
         buttonClass: 'dataset',
         buttonIcon: 'dataset',
         caption: dataset.name,
-        infoStatus: dataset.isReleased,
-        infoStatusIcon: dataset.isReleased,
         handleRedirect: () => {
           handleRedirect(getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true));
         },
@@ -200,6 +198,8 @@ const useBigButtonListRepresentative = ({
         enabled: dataflowState.isReleasable,
         handleRedirect: dataflowState.isReleasable && !getIsReleasing() ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
+        infoStatus: isReleased,
+        infoStatusIcon: isReleased,
         layout: 'defaultBigButton',
         restrictFromPublicAccess: isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business'),
         restrictFromPublicInfo: dataflowState.showPublicInfo,
