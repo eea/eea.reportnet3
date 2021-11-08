@@ -197,13 +197,14 @@ const useBigButtonList = ({
         buttonIcon: getIsReleasing() ? 'spinner' : 'released',
         buttonIconClass: getIsReleasing() ? 'spinner' : 'released',
         caption: resourcesContext.messages['releaseDataCollection'],
-        enabled: dataflowState.isReleasable,
+        enabled: dataflowState.isReleasable && !getIsReleasing(),
         handleRedirect: dataflowState.isReleasable && !getIsReleasing() ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
-        restrictFromPublicAccess: isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business'),
-        restrictFromPublicInfo: dataflowState.showPublicInfo,
-        restrictFromPublicStatus: dataflowState.restrictFromPublic && isReleased,
+        restrictFromPublicAccess:
+          isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business') && !getIsReleasing(),
+        restrictFromPublicInfo: dataflowState.showPublicInfo && isReleased,
+        restrictFromPublicStatus: dataflowState.restrictFromPublic,
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }
