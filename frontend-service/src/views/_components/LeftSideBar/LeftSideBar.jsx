@@ -92,20 +92,20 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
     return <LeftSideBarButton {...userNotificationsProps} />;
   };
 
-  // const renderManageSystemNotifications = () => {
-  //   const manageSystemNotificationsProps = {
-  //     className: 'dataflowList-left-side-bar-system-notifications-help-step',
-  //     href: '#',
-  //     icon: 'comment',
-  //     label: 'systemNotifications',
-  //     onClick: async e => {
-  //       e.preventDefault();
-  //       setIsSystemNotificationVisible(true);
-  //     },
-  //     title: 'systemNotifications'
-  //   };
-  //   return <LeftSideBarButton {...manageSystemNotificationsProps} />;
-  // };
+  const renderManageSystemNotifications = () => {
+    const manageSystemNotificationsProps = {
+      className: 'dataflowList-left-side-bar-system-notifications-help-step',
+      href: '#',
+      icon: 'comment',
+      label: 'systemNotifications',
+      onClick: async e => {
+        e.preventDefault();
+        setIsSystemNotificationVisible(true);
+      },
+      title: 'systemNotifications'
+    };
+    return <LeftSideBarButton {...manageSystemNotificationsProps} />;
+  };
 
   const renderHelp = () => {
     const userHelpProps = {
@@ -203,7 +203,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
               {renderUserProfile()}
               {renderHelp()}
               {renderUserNotifications()}
-              {/* {renderManageSystemNotifications()} */}
+              {renderManageSystemNotifications()}
             </div>
             {!isEmpty(renderSectionButtons()) && (
               <Fragment>

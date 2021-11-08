@@ -34,12 +34,10 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
   const userContext = useContext(UserContext);
 
   const [systemNotificationState, dispatchSystemNotification] = useReducer(systemNotificationReducer, {
-    isVisibleCreateSysNotification: false,
-    editNotification: {},
-    formType: ''
+    isVisibleCreateSysNotification: false
   });
 
-  const { isVisibleCreateSysNotification, editNotification, formType } = systemNotificationState;
+  const { isVisibleCreateSysNotification } = systemNotificationState;
 
   const [columns, setColumns] = useState([]);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -100,10 +98,10 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
     return (
       <div className={styles.actionsColumnButtons}>
         <ActionsColumn
+          hideEdition={true}
           isDeletingDocument={isDeleting}
           // isUpdating={isUpdating}
           onDeleteClick={() => setIsDeleteDialogVisible(true)}
-          onEditClick={() => onEditClick(rowData)}
           rowDataId={rowData.key}
           rowDeletingId={rowData.key}
           rowUpdatingId={rowData.key}
@@ -179,10 +177,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       setIsDeleteDialogVisible(false);
       setIsDeleting(false);
     }
-  };
-
-  const onEditClick = rowData => {
-    dispatchSystemNotification({ type: 'ON_EDIT', payload: rowData });
   };
 
   const onLoadSystemNotifications = async () => {
@@ -295,9 +289,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       )}
       {isVisibleCreateSysNotification && (
         <SystemNotificationsCreateForm
-          formType={formType}
           isVisible={isVisibleCreateSysNotification}
-          notification={editNotification}
           onCreateSystemNotification={onCreateSystemNotification}
           onToggleVisibility={onToggleCreateFormVisibility}
         />
