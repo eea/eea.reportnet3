@@ -790,7 +790,9 @@
         { "key": "EXPORT_DATASET_FAILED_EVENT" },
         { "key": "DOWNLOAD_VALIDATIONS_FAILED_EVENT" },
         { "key": "EXPORT_QC_FAILED_EVENT" },
-        { "key": "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT" }
+        { "key": "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT" },
+        { "key": "DISABLE_RULES_ERROR_EVENT" },
+        { "key": "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT" }
       ]
     },
     {
@@ -1029,7 +1031,14 @@
         { "key": "EXPORT_QC_COMPLETED_EVENT" },
         { "key": "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT" },
         { "key": "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT" },
-        { "key": "EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT" }
+        { "key": "EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT" },
+        {
+          "key": "DELETE_DATASET_SCHEMA_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        }
       ]
     },
     {
@@ -1037,16 +1046,9 @@
       "lifeTime": 5000,
       "fixed": false,
       "types": [
-        {
-          "key": "DATASET_DATA_LOADING_INIT",
-          "messageKeys": {}
-        },
-        {
-          "key": "DOCUMENT_UPLOADING_INIT_INFO"
-        },
-        {
-          "key": "DELETE_DOCUMENT_INIT_INFO"
-        },
+        { "key": "DATASET_DATA_LOADING_INIT", "messageKeys": {} },
+        { "key": "DOCUMENT_UPLOADING_INIT_INFO" },
+        { "key": "DELETE_DOCUMENT_INIT_INFO" },
         {
           "key": "VALIDATE_DATA_INIT",
           "navigateTo": {
@@ -1056,62 +1058,25 @@
           }
         },
 
-        {
-          "key": "CREATE_DATA_COLLECTION_INIT"
-        },
-        {
-          "key": "CREATE_REFERENCE_DATASETS_INIT"
-        },
-        {
-          "key": "CLONE_DATASET_SCHEMAS_INIT"
-        },
-        {
-          "key": "COPY_TO_EU_DATASET_INIT"
-        },
-        {
-          "key": "EXPORT_EU_DATASET_INIT"
-        },
-        {
-          "key": "EXPORT_DATASET_DATA"
-        },
-        {
-          "key": "DOWNLOAD_VALIDATIONS_START"
-        },
-        {
-          "key": "DOWNLOAD_QC_RULES_START"
-        },
-        {
-          "key": "DATASET_IMPORT_INIT"
-        },
-        {
-          "key": "DATAFLOW_PINNED_INIT",
-          "lifeTime": 1500
-        },
-        {
-          "key": "DATAFLOW_UNPINNED_INIT",
-          "lifeTime": 1500
-        },
-        {
-          "key": "IMPORT_DATASET_SCHEMA_INIT"
-        },
-        {
-          "key": "DELETE_DATASET_DATA_INIT"
-        },
-        {
-          "key": "RESTORE_DATASET_SNAPSHOT_INIT_INFO"
-        },
-        {
-          "key": "DATAFLOW_LOADING_LEAD_REPORTERS_INIT"
-        },
-        {
-          "key": "DELETE_TABLE_DATA_INIT"
-        },
-        {
-          "key": "RELEASE_START_EVENT"
-        },
-        {
-          "key": "IMPORT_TABLE_SCHEMA_INIT"
-        }
+        { "key": "CREATE_DATA_COLLECTION_INIT" },
+        { "key": "CREATE_REFERENCE_DATASETS_INIT" },
+        { "key": "CLONE_DATASET_SCHEMAS_INIT" },
+        { "key": "COPY_TO_EU_DATASET_INIT" },
+        { "key": "EXPORT_EU_DATASET_INIT" },
+        { "key": "EXPORT_DATASET_DATA" },
+        { "key": "DOWNLOAD_VALIDATIONS_START" },
+        { "key": "DOWNLOAD_QC_RULES_START" },
+        { "key": "DATASET_IMPORT_INIT" },
+        { "key": "DATAFLOW_PINNED_INIT", "lifeTime": 1500 },
+        { "key": "DATAFLOW_UNPINNED_INIT", "lifeTime": 1500 },
+        { "key": "IMPORT_DATASET_SCHEMA_INIT" },
+        { "key": "DELETE_DATASET_DATA_INIT" },
+        { "key": "RESTORE_DATASET_SNAPSHOT_INIT_INFO" },
+        { "key": "DATAFLOW_LOADING_LEAD_REPORTERS_INIT" },
+        { "key": "DELETE_TABLE_DATA_INIT" },
+        { "key": "RELEASE_START_EVENT" },
+        { "key": "IMPORT_TABLE_SCHEMA_INIT" },
+        { "key": "RECEIVED_MESSAGE" }
       ]
     }
   ],

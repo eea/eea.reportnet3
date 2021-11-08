@@ -59,7 +59,7 @@ public class ReleaseProviderFinishEvent implements NotificableEventHandler {
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", dataflowId);
     notification.put("dataflowName", notificationVO.getDataflowName());
-    notification.put("dataProvider", dataProviderLabel);
+    notification.put("dataProviderName", dataProviderLabel);
     notification.put("representativeId", notificationVO.getProviderId());
     return notification;
   }

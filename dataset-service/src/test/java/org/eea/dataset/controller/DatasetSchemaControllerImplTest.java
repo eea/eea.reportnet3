@@ -1617,11 +1617,8 @@ public class DatasetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  // @Test
+  @Test
   public void testCopyDesignsFromDataflow() throws EEAException {
-    Mockito.doNothing().when(notificationControllerZuul)
-        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
-
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     dataSchemaControllerImpl.copyDesignsFromDataflow(1L, 1L);
@@ -1633,11 +1630,8 @@ public class DatasetSchemaControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  // @Test(expected = ResponseStatusException.class)
+  @Test(expected = ResponseStatusException.class)
   public void testCopyDesignsFromDataflowException() throws EEAException {
-    Mockito.doNothing().when(notificationControllerZuul)
-        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
-
     try {
       doThrow(EEAException.class).when(designDatasetService).copyDesignDatasets(Mockito.anyLong(),
           Mockito.anyLong());

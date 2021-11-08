@@ -112,6 +112,10 @@ public enum EventType {
   DELETE_DATASET_DATA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "delete_dataset_data_completed_event", true),
 
+  /** The delete dataset schema completed event. */
+  DELETE_DATASET_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "delete_dataset_schema_completed_event", true),
+
   /** The delete table schema completed event. */
   DELETE_TABLE_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "delete_table_schema_completed_event", true),
