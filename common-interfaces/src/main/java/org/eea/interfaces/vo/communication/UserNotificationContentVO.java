@@ -2,6 +2,7 @@ package org.eea.interfaces.vo.communication;
 
 import java.util.Map;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -34,6 +35,15 @@ public class UserNotificationContentVO {
 
   /** The type status. */
   private TypeStatusEnum typeStatus;
+
+  /** The type. */
+  private DatasetTypeEnum type;
+
+  /** The table schema name. */
+  private String tableSchemaName;
+
+  /** The file name. */
+  private String fileName;
 
   /** The custom content. */
   private Map<String, String> customContent;
