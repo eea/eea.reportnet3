@@ -9,6 +9,7 @@ import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { LevelError } from 'views/_components/LevelError';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -23,11 +24,14 @@ export const SystemNotificationsCreateForm = ({ isVisible, onCreateSystemNotific
     setSystemNotification(inmSystemNotification);
   };
 
-  const notificationLevelTemplate = rowData => (
-    <div className={styles.notificationLevelTemplateWrapper}>
-      <LevelError type={rowData.levelError?.toLowerCase()} />
-    </div>
-  );
+  const notificationLevelTemplate = rowData => {
+    console.log(rowData);
+    return (
+      <div className={styles.notificationLevelTemplateWrapper}>
+        <LevelError type={rowData.label.toLowerCase()} />
+      </div>
+    );
+  };
 
   const systemNotificationsCreateFormFooter = (
     <div>
@@ -64,6 +68,10 @@ export const SystemNotificationsCreateForm = ({ isVisible, onCreateSystemNotific
         <div>
           <div>
             <label>{`${resourcesContext.messages['type']} (${resourcesContext.messages['key']})`}</label>
+            <TooltipButton
+              message={resourcesContext.messages['systemNotificationsKey']}
+              uniqueIdentifier="systemNotificationKey"
+            />
           </div>
           <div>
             <InputText
@@ -71,7 +79,7 @@ export const SystemNotificationsCreateForm = ({ isVisible, onCreateSystemNotific
               // keyfilter={RecordUtils.getFilter(type)}
               // maxLength={getMaxCharactersByType(type)}
               name="systemNotificationKey"
-              onChange={e => onChange('key', e.target.value.replaceAll(' ', '_'))}
+              onChange={e => onChange('key', e.target.value.replaceAll(' ', '_').toUpperCase())}
               type="text"
               value={systemNotification.key}
             />
