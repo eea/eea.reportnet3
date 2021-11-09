@@ -92,7 +92,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isDataSchemaCorrect: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
-    isDownloadingUsersList: false,
+    isDownloadingUsers: false,
     isExportDialogVisible: false,
     isExportEUDatasetLoading: false,
     isExporting: false,
@@ -243,8 +243,8 @@ const Dataflow = withRouter(({ history, match }) => {
   }, [userContext, dataflowState]);
 
   useEffect(() => {
-    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_USERS_LIST_FAILED_EVENT')) {
-      setIsDownloadingUsersList(false);
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_USERS_FAILED_EVENT')) {
+      setIsDownloadingUsers(false);
     }
   }, [notificationContext.hidden]);
 
@@ -507,33 +507,33 @@ const Dataflow = withRouter(({ history, match }) => {
     />
   );
 
-  const onDownloadUsersListByCountry = async () => {
-    setIsDownloadingUsersList(true);
+  const onDownloadUsersByCountry = async () => {
+    setIsDownloadingUsers(true);
     notificationContext.add({ type: 'DOWNLOAD_USERS_START' });
 
     try {
-      await DataflowService.generateUsersListFile(dataflowId);
+      await DataflowService.generateUsersFile(dataflowId);
     } catch (error) {
-      console.error('Dataflow - onDownloadUsersListByCountry.', error);
+      console.error('Dataflow - onDownloadUsersByCountry.', error);
       notificationContext.add({ type: 'GENERATE_USERS_LIST_FILE_ERROR' });
-      setIsDownloadingUsersList(false);
+      setIsDownloadingUsers(false);
     }
   };
 
-  useCheckNotifications(['AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE'], setIsDownloadingUsersList, false);
+  useCheckNotifications(['AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE'], setIsDownloadingUsers, false);
 
-  function setIsDownloadingUsersList(isDownloadingUsersList) {
-    dataflowDispatch({ type: 'SET_IS_DOWNLOADING_USERS_LIST', payload: isDownloadingUsersList });
+  function setIsDownloadingUsers(isDownloadingUsers) {
+    dataflowDispatch({ type: 'SET_IS_DOWNLOADING_USERS', payload: isDownloadingUsers });
   }
 
   const renderUserListDialogFooter = () => (
     <div className={styles.buttonsRolesFooter}>
       <Button
         className="p-button-secondary p-button-animated-blink"
-        disabled={dataflowState.isDownloadingUsersList}
-        icon={dataflowState.isDownloadingUsersList ? 'spinnerAnimate' : 'export'}
+        disabled={dataflowState.isDownloadingUsers}
+        icon={dataflowState.isDownloadingUsers ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadUsersListButtonLabel']}
-        onClick={() => onDownloadUsersListByCountry()}
+        onClick={() => onDownloadUsersByCountry()}
       />
       <Button
         className={`p-button-secondary p-button-animated-blink ${styles.closeButton}`}
