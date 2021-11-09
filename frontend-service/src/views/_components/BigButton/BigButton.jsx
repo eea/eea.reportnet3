@@ -217,7 +217,7 @@ export const BigButton = ({
           ))}
         {restrictFromPublicInfo && (
           <FontAwesomeIcon
-            className={`${!restrictFromPublicStatus && styles.notClickableIcon} ${
+            className={`${!restrictFromPublicAccess && styles.notClickableIcon} ${
               isRestrictFromPublicUpdating && 'fa-spin'
             }`}
             icon={getRestrictFromPublicIcon()}
