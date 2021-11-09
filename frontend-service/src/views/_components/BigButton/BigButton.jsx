@@ -198,7 +198,7 @@ export const BigButton = ({
           (infoStatusIcon ? (
             <Icon
               className={styles.notClickableIcon}
-              icon="cloudUpload"
+              icon="checkCircle"
               style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }}
             />
           ) : (
