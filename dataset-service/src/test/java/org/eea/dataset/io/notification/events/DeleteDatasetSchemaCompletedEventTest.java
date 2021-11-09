@@ -17,11 +17,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-public class DeleteDatasetValueCompletedEventTest {
+public class DeleteDatasetSchemaCompletedEventTest {
 
   /** The copy dataset schema completed event. */
   @InjectMocks
-  private DeleteDatasetValueCompletedEvent deleteDatasetValueCompletedEvent;
+  private DeleteDatasetSchemaCompletedEvent deleteDatasetSchemaCompletedEvent;
 
   /** The dataset metabase service. */
   @Mock
@@ -48,8 +48,8 @@ public class DeleteDatasetValueCompletedEventTest {
    */
   @Test
   public void testGetEventType() {
-    Assert.assertEquals(EventType.DELETE_DATASET_DATA_COMPLETED_EVENT,
-        deleteDatasetValueCompletedEvent.getEventType());
+    Assert.assertEquals(EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT,
+        deleteDatasetSchemaCompletedEvent.getEventType());
   }
 
   /**
@@ -64,7 +64,7 @@ public class DeleteDatasetValueCompletedEventTest {
     dataFlowVO.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     Assert.assertEquals("datasetName",
-        deleteDatasetValueCompletedEvent
+        deleteDatasetSchemaCompletedEvent
             .getMap(NotificationVO.builder().user("user").datasetId(1L).dataflowId(1L)
                 .datasetName("datasetName").error("error").dataflowName("dataflowName").build())
             .get("datasetName"));
@@ -83,7 +83,7 @@ public class DeleteDatasetValueCompletedEventTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
-    Assert.assertNull(deleteDatasetValueCompletedEvent
+    Assert.assertNull(deleteDatasetSchemaCompletedEvent
         .getMap(NotificationVO.builder().user("user").datasetId(1L).error("error").build())
         .get("datasetName"));
   }
