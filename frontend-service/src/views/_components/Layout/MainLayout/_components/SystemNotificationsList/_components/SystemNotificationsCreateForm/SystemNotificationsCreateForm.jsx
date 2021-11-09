@@ -10,7 +10,6 @@ import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { LevelError } from 'views/_components/LevelError';
-import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -31,10 +30,10 @@ export const SystemNotificationsCreateForm = ({
     setSystemNotification(inmSystemNotification);
   };
 
-  const notificationLevelTemplate = rowData => {
+  const notificationTypeTemplate = rowData => {
     console.log(rowData);
     return (
-      <div className={styles.notificationLevelTemplateWrapper}>
+      <div>
         <LevelError type={rowData.label.toLowerCase()} />
       </div>
     );
@@ -72,7 +71,7 @@ export const SystemNotificationsCreateForm = ({
       visible={isVisible}
       zIndex={3200}>
       <div className={styles.systemNotificationFormWrapper}>
-        <div>
+        {/* <div>
           <div>
             <label>{`${resourcesContext.messages['type']} (${resourcesContext.messages['key']})`}</label>
             <TooltipButton
@@ -91,7 +90,7 @@ export const SystemNotificationsCreateForm = ({
               value={systemNotification.key}
             />
           </div>
-        </div>
+        </div> */}
         <div>
           <div>
             <label>{resourcesContext.messages['message']}</label>
@@ -110,26 +109,29 @@ export const SystemNotificationsCreateForm = ({
         </div>
         <div>
           <div>
-            <label>{resourcesContext.messages['levelError']}</label>
+            <label>{resourcesContext.messages['type']}</label>
           </div>
           <div>
             <Dropdown
               appendTo={document.body}
-              filterPlaceholder={resourcesContext.messages['errorTypePlaceholder']}
+              filterPlaceholder={resourcesContext.messages['systemNotificationType']}
               id="errorType"
-              itemTemplate={rowData => notificationLevelTemplate(rowData, true)}
-              onChange={e => onChange('levelError', e.target.value.value)}
+              itemTemplate={rowData => notificationTypeTemplate(rowData, true)}
+              onChange={e => onChange('type', e.target.value.value)}
               optionLabel="label"
               optionValue="value"
               options={config.validations.errorLevels}
-              placeholder={resourcesContext.messages['errorTypePlaceholder']}
+              placeholder={resourcesContext.messages['systemNotificationType']}
               style={{ width: '15vw' }}
-              value={{ label: systemNotification.levelError, value: systemNotification.levelError }}
+              value={{ label: systemNotification.type, value: systemNotification.type }}
             />
           </div>
         </div>
         <div>
-          <div>
+          <div className={styles.enabledCheckbox}>
+            <label onClick={e => onChange('enabled', !systemNotification.enabled)}>
+              {resourcesContext.messages['ruleEnabled']}
+            </label>
             <Checkbox
               checked={systemNotification.enabled}
               id="systemNotification_Enabled"
@@ -137,11 +139,6 @@ export const SystemNotificationsCreateForm = ({
               onChange={e => onChange('enabled', e.checked)}
               role="checkbox"
             />
-            <label
-              onClick={e => onChange('enabled', !systemNotification.enabled)}
-              style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
-              {resourcesContext.messages['enabled']}
-            </label>
           </div>
         </div>
       </div>

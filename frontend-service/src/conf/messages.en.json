@@ -1342,6 +1342,7 @@
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "The URL is not valid",
     "yes": "Yes",
-    "systemNotificationsKey": "Notification name will be stored in uppercase and separated by _"
+    "systemNotificationsKey": "Notification name will be stored in uppercase and separated by _",
+    "systemNotificationType": "Select a notification level type"
   }
 }

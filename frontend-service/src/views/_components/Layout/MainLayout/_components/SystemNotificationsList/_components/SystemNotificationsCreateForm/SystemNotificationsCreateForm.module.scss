@@ -4,4 +4,13 @@
   > div > div {
     padding: 0.75em;
   }
+  .enabledCheckbox {
+    display: flex;
+    align-items: center;
+    label {
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 0.5rem;
+    }
+  }
 }

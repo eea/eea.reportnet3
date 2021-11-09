@@ -22,7 +22,7 @@ import { LevelError } from 'views/_components/LevelError';
 import { Spinner } from 'views/_components/Spinner';
 import { SystemNotificationsCreateForm } from './_components/SystemNotificationsCreateForm';
 
-import { NotificationService } from 'services/NotificationService';
+import { SystemNotificationService } from 'services/SystemNotificationService';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
@@ -164,17 +164,20 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
   );
 
   const onCreateSystemNotification = async systemNotification => {
-    // console.log('', systemNotification);
+    console.log(systemNotification);
+    // try{
+
+    // }
   };
 
   const onEditClick = rowData => {
     dispatchSystemNotification({ type: 'ON_EDIT', payload: rowData });
   };
 
-  const onDelete = async () => {
+  const onDelete = async id => {
     setIsDeleting(true);
     try {
-      // await NotificationService.delete();
+      // await systemNotificationType.delete(id);
       // onLoadSystemNotifications();
     } catch (error) {
       console.error('SystemNotificationsList - onDelete.', error);
@@ -188,9 +191,9 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
   const onLoadSystemNotifications = async () => {
     try {
       setIsLoading(true);
-      const unparsedNotifications = await NotificationService.all();
+      const unparsedNotifications = await SystemNotificationService.all();
       const parsedNotifications = unparsedNotifications.map(notification => {
-        return NotificationService.parse({
+        return SystemNotificationService.parse({
           config: config.notifications.notificationSchema,
           content: notification.content,
           date: notification.date,
