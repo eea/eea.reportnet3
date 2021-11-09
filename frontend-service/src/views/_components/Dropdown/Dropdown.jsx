@@ -188,14 +188,17 @@ export class Dropdown extends Component {
 
   onUpKey(event) {
     if (this.props.options) {
-      let selectedItemIndex = this.findOptionIndex(this.props.value);
-      let prevItem = this.findPrevVisibleItem(selectedItemIndex);
+      const selectedItemIndex = this.findOptionIndex(this.props.value);
 
-      if (prevItem) {
-        this.selectItem({
-          originalEvent: event,
-          option: prevItem
-        });
+      if (selectedItemIndex !== -1) {
+        const prevItem = this.findPrevVisibleItem(selectedItemIndex);
+
+        if (prevItem) {
+          this.selectItem({
+            originalEvent: event,
+            option: prevItem
+          });
+        }
       }
     }
 
