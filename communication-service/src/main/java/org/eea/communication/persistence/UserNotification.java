@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
@@ -68,4 +69,16 @@ public class UserNotification {
   /** The custom content. */
   @Field(value = "customContent")
   private Map<String, String> customContent;
+
+  /** The type. */
+  @Field(value = "type")
+  private DatasetTypeEnum type;
+
+  /** The table schema name. */
+  @Field(value = "tableSchemaName")
+  private String tableSchemaName;
+
+  /** The file name. */
+  @Field(value = "fileName")
+  private String fileName;
 }
