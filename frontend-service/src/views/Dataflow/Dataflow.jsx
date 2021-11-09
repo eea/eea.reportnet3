@@ -812,7 +812,7 @@ const Dataflow = withRouter(({ history, match }) => {
     try {
       const selectedDataProviderId = dataProviderId || dataflowState.representative.dataProviderId;
       dataflowDispatch({
-        type: 'IS_RESTRICT_FROM_PUBLIC_LOADING',
+        type: 'IS_RESTRICT_FROM_PUBLIC_UPDATING',
         payload: { value: true, dataProviderId: selectedDataProviderId }
       });
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: true } });
@@ -920,8 +920,8 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
     dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: restrictFromPublic });
     dataflowDispatch({
-      type: 'IS_RESTRICT_FROM_PUBLIC_LOADING',
       payload: { value: false, dataProviderId: dataflowState.representative.dataProviderId }
+      type: 'IS_RESTRICT_FROM_PUBLIC_UPDATING',
     });
   };
 
