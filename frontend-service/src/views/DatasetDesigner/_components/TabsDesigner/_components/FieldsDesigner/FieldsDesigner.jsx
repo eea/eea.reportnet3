@@ -85,6 +85,7 @@ export const FieldsDesigner = ({
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
   const [markedForDeletion, setMarkedForDeletion] = useState([]);
   const [notEmpty, setNotEmpty] = useState(true);
+  const [refElement, setRefElement] = useState();
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
   const [toPrefill, setToPrefill] = useState(false);
 
@@ -102,6 +103,12 @@ export const FieldsDesigner = ({
       setFixedNumber(table.fixedNumber || false);
     }
   }, [table]);
+
+  useEffect(() => {
+    if (!isLoading && !isNil(refElement)) {
+      refElement.focus();
+    }
+  }, [isLoading]);
 
   useEffect(() => {
     if (!isUndefined(fields)) {
@@ -326,7 +333,7 @@ export const FieldsDesigner = ({
     } catch (error) {
       console.error('FieldsDesigner - deleteField.', error);
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       }
     } finally {
       setIsLoading(false);
@@ -368,7 +375,7 @@ export const FieldsDesigner = ({
     } catch (error) {
       console.error('FieldsDesigner - deleteFields.', error);
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       }
       setIsLoading(false);
     }
@@ -605,7 +612,10 @@ export const FieldsDesigner = ({
           onNewFieldAdd={onFieldAdd}
           onShowDialogError={onShowDialogError}
           recordSchemaId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
-          setIsLoading={loading => setIsLoading(loading)}
+          setIsLoading={(loading, ref) => {
+            setRefElement(ref.element);
+            setIsLoading(loading);
+          }}
           tableSchemaId={table.tableSchemaId}
           totalFields={!isNil(fields) ? fields.length : undefined}
         />
@@ -672,7 +682,6 @@ export const FieldsDesigner = ({
                 onNewFieldAdd={onFieldAdd}
                 onShowDialogError={onShowDialogError}
                 recordSchemaId={field.recordId}
-                setIsLoading={loading => setIsLoading(loading)}
                 tableSchemaId={table.tableSchemaId}
                 totalFields={!isNil(fields) ? fields.length : undefined}
               />
@@ -734,9 +743,7 @@ export const FieldsDesigner = ({
   };
 
   const onUpload = async () => {
-    notificationContext.add({
-      type: 'IMPORT_TABLE_SCHEMA_INIT'
-    });
+    notificationContext.add({ type: 'IMPORT_TABLE_SCHEMA_INIT' });
     manageDialogs('isImportTableSchemaDialogVisible', false);
   };
 
@@ -758,22 +765,25 @@ export const FieldsDesigner = ({
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
-        content: {
-          dataflowId,
-          datasetId,
-          dataflowName,
-          datasetName,
-          tableName: designerState.tableName
-        }
-      });
+      notificationContext.add(
+        {
+          type: 'EXPORT_TABLE_DATA_BY_ID_ERROR',
+          content: {
+            dataflowId,
+            datasetId,
+            dataflowName,
+            datasetName,
+            customContent: { tableName: designerState.tableName }
+          }
+        },
+        true
+      );
     }
   };
 
   const onImportTableSchemaError = async ({ xhr }) => {
     if (xhr.status === 423) {
-      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
     }
   };
 

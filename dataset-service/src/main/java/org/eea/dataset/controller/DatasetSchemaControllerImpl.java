@@ -16,12 +16,14 @@ import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -126,6 +128,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   /** The integration controller zuul. */
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
+
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
 
 
   /**
@@ -1117,6 +1123,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       @ApiParam(type = "Long", value = "Dataflow Id destination",
           example = "0") @RequestParam("targetDataflow") @LockCriteria(
               name = "dataflowIdDestination") final Long dataflowIdDestination) {
+
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
@@ -1171,7 +1178,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the table schemas ids
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @GetMapping(value = "/getTableSchemasIds/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get list of table Schema ids")
@@ -1245,6 +1252,13 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
           name = "dataflowId") @RequestParam(value = "dataflowId") Long dataflowId,
       @ApiParam(value = "File") @RequestParam("file") MultipartFile file) {
+
+    DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    userNotificationContentVO.setDataflowName(dataflowVO.getName());
+    notificationControllerZuul.createUserNotificationPrivate("IMPORT_DATASET_SCHEMA_INIT",
+        userNotificationContentVO);
 
     if (!TypeStatusEnum.DESIGN
         .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
@@ -1328,6 +1342,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       @ApiParam(value = "File") @RequestParam("file") MultipartFile file,
       @ApiParam(type = "Boolean", value = "Replace",
           example = "true") @RequestParam(value = "replace", required = false) Boolean replace) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDatasetId(datasetId);
+    notificationControllerZuul.createUserNotificationPrivate("IMPORT_TABLE_SCHEMA_INIT",
+        userNotificationContentVO);
 
     try {
       // Set the user name on the thread

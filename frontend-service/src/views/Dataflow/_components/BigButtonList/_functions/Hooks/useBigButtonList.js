@@ -12,6 +12,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const useBigButtonList = ({
   dataflowId,
@@ -52,6 +53,8 @@ const useBigButtonList = ({
     config.permissions.roles.CUSTODIAN.key,
     config.permissions.roles.STEWARD.key
   ]);
+
+  const restrictFromPublicAccess = isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business');
 
   const getButtonsVisibility = useCallback(() => {
     const isDesigner =
@@ -260,7 +263,7 @@ const useBigButtonList = ({
         datasetId: dataset.datasetId,
         datasetName: dataset.name,
         dataProviderId: dataset.dataProviderId,
-        isReleased: dataset.isReleased,
+        isReleased: isNil(dataset.isReleased) ? false : dataset.isReleased,
         name: dataset.datasetSchemaName
       };
     });
@@ -269,9 +272,6 @@ const useBigButtonList = ({
 
     if (!buttonsVisibility.groupByRepresentative && isUniqRepresentative) {
       return allDatasets.map(dataset => {
-        const datasetRepresentative = dataflowState.data.representatives.find(
-          representative => representative.dataProviderId === dataset.dataProviderId
-        );
         return {
           buttonClass: 'dataset',
           buttonIcon: 'dataset',
@@ -293,8 +293,6 @@ const useBigButtonList = ({
             }
           ],
           onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
-          restrictFromPublicInfo: true,
-          restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
           visibility: true
         };
       });
@@ -327,7 +325,8 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true),
-        restrictFromPublicInfo: true,
+        restrictFromPublicAccess: restrictFromPublicAccess,
+        restrictFromPublicInfo: dataflowState.showPublicInfo && dataset.isReleased,
         restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
         visibility: true
       };
@@ -484,6 +483,10 @@ const useBigButtonList = ({
     ];
   };
 
+  const isReleased = dataflowState.data.datasets
+    .filter(dataset => dataset.dataProviderId === dataProviderId)
+    .some(dataset => dataset.isReleased);
+
   const onBuildReleaseButton = () => {
     return [
       {
@@ -491,11 +494,14 @@ const useBigButtonList = ({
         buttonIcon: isReleasing ? 'spinner' : 'released',
         buttonIconClass: isReleasing ? 'spinner' : 'released',
         caption: resourcesContext.messages['releaseDataCollection'],
-        enabled: dataflowState.isReleasable,
+        enabled: dataflowState.isReleasable && !isReleasing,
         handleRedirect: dataflowState.isReleasable && !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         layout: 'defaultBigButton',
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
+        restrictFromPublicAccess: restrictFromPublicAccess && !isReleasing,
+        restrictFromPublicInfo: dataflowState.showPublicInfo && isReleased,
+        restrictFromPublicStatus: dataflowState.restrictFromPublic,
         visibility: buttonsVisibility.release
       }
     ];

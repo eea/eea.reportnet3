@@ -260,6 +260,7 @@ const DatasetSchema = ({
 
   const renderProperties = () => (
     <div>
+      {renderProperty(resourcesContext.messages['datasetSchemaDescription'], designDataset.datasetSchemaDescription)}
       {renderIconProperty(resourcesContext.messages['availableInPublic'], designDataset.availableInPublic)}
       {renderIconProperty(resourcesContext.messages['referenceDataset'], designDataset.referenceDataset)}
     </div>
@@ -288,10 +289,7 @@ const DatasetSchema = ({
   };
 
   const renderTables = () => (
-    <TabPanel
-      header={resourcesContext.messages['tablesAndFields']}
-      rightIcon={config.icons['table']}
-      rightIconClass={styles.tabs}>
+    <TabPanel header={resourcesContext.messages['tablesAndFields']} rightIcon={config.icons['table']}>
       <Toolbar className={styles.datasetSchemaToolbar}>
         <div className="p-toolbar-group-left">
           <Button
@@ -316,10 +314,7 @@ const DatasetSchema = ({
   );
 
   const renderUniques = () => (
-    <TabPanel
-      header={resourcesContext.messages['uniques']}
-      rightIcon={config.icons['key']}
-      rightIconClass={styles.tabs}>
+    <TabPanel header={resourcesContext.messages['uniques']} rightIcon={config.icons['key']}>
       <DatasetSchemaTable
         columnOptions={columnOptions}
         fields={!isNil(parsedDesignDataset.uniques) ? parsedDesignDataset.uniques : []}
@@ -329,10 +324,7 @@ const DatasetSchema = ({
   );
 
   const renderQCs = () => (
-    <TabPanel
-      header={resourcesContext.messages['qcRules']}
-      rightIcon={config.icons['horizontalSliders']}
-      rightIconClass={styles.tabs}>
+    <TabPanel header={resourcesContext.messages['qcRules']} rightIcon={config.icons['horizontalSliders']}>
       <Button
         className={`p-button-rounded p-button-secondary-transparent ${
           !isDownloadingQCs ? 'p-button-animated-blink' : ''
@@ -506,7 +498,7 @@ const DatasetSchema = ({
       await ValidationService.generateQCRulesFile(datasetId);
     } catch (error) {
       console.error('DatasetSchema - onDownloadQCRules.', error);
-      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' });
+      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
       setIsDownloadingQCs(false);
     }
   };
@@ -521,7 +513,7 @@ const DatasetSchema = ({
       }
     } catch (error) {
       console.error('DatasetSchema - onDownloadTableDefinitions.', error);
-      notificationContext.add({ type: 'DOWNLOAD_TABLE_DEFINITIONS_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_TABLE_DEFINITIONS_ERROR' }, true);
     } finally {
       setIsDownloadingTableDefinition(false);
     }
@@ -542,7 +534,7 @@ const DatasetSchema = ({
 
         {renderProperties()}
       </div>
-      <TabView activeIndex={0} hasQueryString={false} name="DatasetSchemas">
+      <TabView activeIndex={0} className="sameColor" hasQueryString={false} name="DatasetSchemas">
         {renderTables()}
         {renderQCs()}
         {renderUniques()}

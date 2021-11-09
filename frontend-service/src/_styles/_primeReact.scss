@@ -54,6 +54,10 @@ body .p-checkbox .p-checkbox-box:not(.p-disabled).p-focus {
   -moz-box-shadow: var(--checkbox-box-box-shadow-focus);
   box-shadow: var(--checkbox-box-box-shadow-focus);
   border-color: var(--checkbox-box-bg-focus);
+  &:not(:focus) {
+    box-shadow: none;
+    border: var(--checkbox-box-border);
+  }
 }
 body .p-checkbox .p-checkbox-box.p-highlight {
   border-color: var(--checkbox-box-highlight-border-color);
@@ -2336,7 +2340,6 @@ body .p-dialog .p-dialog-content {
   padding: 1em;
   max-height: 90vh;
   overflow: auto;
-  border-width: var(--dialog-content-border-width);
 }
 
 body .p-dialog .p-dialog-footer {
@@ -2640,8 +2643,8 @@ body .p-menu.p-menu-overlay {
 body .p-menu .p-submenu-header {
   margin: 0;
   padding: 0.714em 0.857em;
-  color: #404040;
-  background-color: #f4f4f4;
+  color: var(--main-font-color);
+  background-color: var(--submenu-header-bg);
   font-weight: 700;
   border: 0 none;
   -moz-border-radius-topleft: 3px;
@@ -2650,6 +2653,9 @@ body .p-menu .p-submenu-header {
   -moz-border-radius-topright: 3px;
   -webkit-border-top-right-radius: 3px;
   border-top-right-radius: 3px;
+}
+body .p-menu .p-submenu-header:hover {
+  background-color: var(--submenu-header-bg);
 }
 body .p-menu .p-menu-separator {
   border: 1px solid #c8c8c8;

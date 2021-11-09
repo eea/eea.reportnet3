@@ -575,13 +575,14 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * @param restrictFromPublic the restrict from public
    */
   @Override
-  @PutMapping(value = "/update/restrictFromPublic")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
+  @PutMapping(
+      value = "/update/restrictFromPublic/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER')")
   @ApiOperation(value = "Update representative visibility", hidden = true)
   public void updateRestrictFromPublic(
       @ApiParam(value = "Dataflow Id", example = "0",
-          required = true) @RequestParam(value = "dataflowId", required = true) Long dataflowId,
-      @ApiParam(value = "Dataprovider Id", required = true) @RequestParam(value = "dataProviderId",
+          required = true) @PathVariable(value = "dataflowId", required = true) Long dataflowId,
+      @ApiParam(value = "Dataprovider Id", required = true) @PathVariable(value = "dataProviderId",
           required = true) Long dataProviderId,
       @ApiParam(value = "Should the representative be restricted to public view?", required = true,
           defaultValue = "false") @RequestParam(value = "restrictFromPublic", required = true,

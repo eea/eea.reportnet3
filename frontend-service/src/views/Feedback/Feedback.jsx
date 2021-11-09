@@ -188,10 +188,13 @@ export const Feedback = withRouter(({ match, history }) => {
       dispatchFeedback({ type: 'SET_DATAFLOW_DATA', payload: dataflow });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);
-      notificationContext.add({
-        type: 'DATAFLOW_DETAILS_ERROR',
-        content: {}
-      });
+      notificationContext.add(
+        {
+          type: 'DATAFLOW_DETAILS_ERROR',
+          content: {}
+        },
+        true
+      );
     } finally {
       dispatchFeedback({ type: 'SET_IS_LOADING', payload: false });
     }
@@ -210,10 +213,13 @@ export const Feedback = withRouter(({ match, history }) => {
       dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data.messages });
     } catch (error) {
       console.error('Feedback - onGetMoreMessages.', error);
-      notificationContext.add({
-        type: 'LOAD_DATASET_FEEDBACK_MESSAGES_ERROR',
-        content: {}
-      });
+      notificationContext.add(
+        {
+          type: 'LOAD_DATASET_FEEDBACK_MESSAGES_ERROR',
+          content: {}
+        },
+        true
+      );
     }
   };
 
@@ -232,10 +238,10 @@ export const Feedback = withRouter(({ match, history }) => {
       if (files[0].size <= config.MAX_ATTACHMENT_SIZE) {
         dispatchFeedback({ type: 'SET_DRAGGED_FILES', payload: files });
       } else {
-        notificationContext.add({ type: 'FEEDBACK_MAX_FILE_SIZE_ERROR' });
+        notificationContext.add({ type: 'FEEDBACK_MAX_FILE_SIZE_ERROR' }, true);
       }
     } else {
-      notificationContext.add({ type: 'FEEDBACK_INVALID_FILE_ERROR' });
+      notificationContext.add({ type: 'FEEDBACK_INVALID_FILE_ERROR' }, true);
     }
     dispatchFeedback({ type: 'TOGGLE_IS_DRAGGING', payload: false });
 
@@ -260,9 +266,9 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onImportFileError = async ({ xhr }) => {
     if (xhr.status === 423) {
-      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
     } else {
-      notificationContext.add({ type: 'UPLOAD_FILE_ERROR' });
+      notificationContext.add({ type: 'UPLOAD_FILE_ERROR' }, true);
     }
   };
 

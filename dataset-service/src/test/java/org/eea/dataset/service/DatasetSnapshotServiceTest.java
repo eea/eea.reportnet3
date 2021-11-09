@@ -1076,4 +1076,38 @@ public class DatasetSnapshotServiceTest {
     Mockito.verify(lockService, times(10)).removeLockByCriteria(Mockito.any());
   }
 
+  @Test
+  public void addSnapshot4Test() throws EEAException {
+    List<RepresentativeVO> representatives = new ArrayList<>();
+    RepresentativeVO representative = new RepresentativeVO();
+    representative.setId(1L);
+    representative.setRestrictFromPublic(false);
+    representative.setDataProviderId(1L);
+    representatives.add(representative);
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setId(1L);
+    datasetMetabase.setDatasetSchema("SCHEMA");
+    datasetMetabase.setDataProviderId(1L);
+    DataCollection dataCollection = new DataCollection();
+    dataCollection.setId(1L);
+    dataCollection.setDatasetSchema("SCHEMA");
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.empty());
+    Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+        .thenReturn(DatasetTypeEnum.REPORTING);
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(datasetMetabase));
+    Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.anyString()))
+        .thenReturn(Optional.of(dataCollection));
+    Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.anyLong())).thenReturn(1L);
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(representatives);
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), null, new Date().toString());
+    Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
+  }
 }

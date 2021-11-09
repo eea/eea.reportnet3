@@ -35,10 +35,12 @@ export const BigButton = ({
   infoStatus,
   infoStatusIcon,
   layout,
+  manageDialogs = () => {},
   model,
   onSaveName,
   onWheel,
   placeholder,
+  restrictFromPublicAccess,
   restrictFromPublicInfo,
   restrictFromPublicStatus,
   setErrorDialogData,
@@ -200,6 +202,7 @@ export const BigButton = ({
         {restrictFromPublicInfo && (
           <FontAwesomeIcon
             icon={AwesomeIcons(restrictFromPublicStatus ? 'eyeSlash' : 'eye')}
+            onClick={() => restrictFromPublicAccess && manageDialogs('isRestrictFromPublicDialogVisible', true)}
             style={{ position: 'absolute', top: '4px', left: '2px', fontSize: '1.2rem' }}
           />
         )}

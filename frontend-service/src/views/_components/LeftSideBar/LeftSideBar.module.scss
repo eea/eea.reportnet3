@@ -40,21 +40,12 @@ h2 {
       padding: 8px;
       text-decoration: none;
       font-size: 1.2rem;
-      color: var(--white);
+      color: var(--left-sidebar-text-color);
       cursor: pointer;
       display: block;
 
       &:first-of-type {
         top: 1rem;
-        color: var(--white);
-      }
-
-      &:nth-of-type(2) {
-        color: var(--white);
-      }
-
-      &:nth-of-type(3) {
-        color: var(--white);
       }
 
       &:last-of-type {

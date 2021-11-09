@@ -42,7 +42,7 @@ export const Webforms = ({
     } catch (error) {
       console.error('Webforms - getWebformConfiguration.', error);
       setLoadingStatus('failed');
-      notificationContext.add({ type: 'LOADING_WEBFORM_ERROR' });
+      notificationContext.add({ type: 'LOADING_WEBFORM_ERROR' }, true);
     }
   };
 

@@ -54,7 +54,7 @@
   cursor: -webkit-grabbing;
 }
 
-.draggableFieldDiv * {
+.disablePointerEvent * {
   pointer-events: none;
 }
 
@@ -138,29 +138,29 @@
   }
 }
 
-.fieldSeparator {
-  box-shadow: var(--field-designer-separator-box-shadow);
-  width: 74.5vw;
-  height: 30px;
-  background-color: var(--field-designer-separator-bg);
-  margin: 5px 0 5px 2rem;
-  padding: 5px;
-  order: 2;
-  display: none;
-}
 .fieldSeparator:first-child {
   order: 1;
 }
 
 .fieldSeparatorDragging {
-  display: block;
-  animation-name: fadeInBorder;
-  animation-iteration-count: 1;
-  animation-timing-function: ease-in;
-  animation-duration: 100ms;
-  border: 2px dashed var(--field-designer-separator-border-color);
-  opacity: 0.7;
-  border-radius: 3px;
+  &:before {
+    content: '';
+    pointer-events: none;
+    animation-duration: 100ms;
+    animation-iteration-count: 1;
+    animation-name: fadeInBorder;
+    animation-timing-function: ease-in;
+    background-color: var(--field-designer-separator-bg);
+    border-radius: 3px;
+    border: 2px dashed var(--field-designer-separator-border-color) !important;
+    box-shadow: var(--field-designer-separator-box-shadow) !important;
+    display: block;
+    height: 30px;
+    margin: 5px 0;
+    opacity: 0.7;
+    padding: 5px;
+    width: 94%;
+  }
 }
 
 .fadeIn {

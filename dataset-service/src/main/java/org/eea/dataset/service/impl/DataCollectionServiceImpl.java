@@ -39,6 +39,7 @@ import org.eea.dataset.service.model.IntegrityDataCollection;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -248,6 +249,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   /** The reference dataset repository. */
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;
+
+  /** The integration controller zuul. */
+  @Autowired
+  private IntegrationControllerZuul integrationControllerZuul;
 
 
   /**
@@ -475,6 +480,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         if (isCreation) {
           datasetSchemaService.updateReferenceDataset(dataset.getId(), dataset.getDatasetSchema(),
               true);
+          LOG.info("There are reference datasets. Deleting its export eu dataset integrations");
+          integrationControllerZuul.deleteExportEuDatasetIntegration(dataset.getDatasetSchema());
         }
       }
     });
@@ -672,6 +679,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       List<FKDataCollection> newDCsRegistry = new ArrayList<>();
       List<FKDataCollection> newEUsRegistry = new ArrayList<>();
       List<FKDataCollection> newTESTsRegistry = new ArrayList<>();
+      List<FKDataCollection> newReferencesRegistry = new ArrayList<>();
+
 
       List<IntegrityDataCollection> lIntegrityDataCollections = new ArrayList<>();
       if (!referenceDataflow) {
@@ -729,6 +738,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               referenceDatasetIdsEmails.put(referenceDatasetId, emails);
             }
           }
+          RulesSchemaVO rulesSchemaVO = rulesControllerZuul
+              .findRuleSchemaByDatasetId(referenceDataset.getDatasetSchema(), dataflowId);
+          List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
+          prepareFKAndIntegrityForEUandDC(referenceDatasetId, newReferencesRegistry,
+              lIntegrityDataCollections, referenceDataset, integritieVOs);
         }
       }
 
@@ -766,6 +780,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       addForeignRelationsFromNewDCandEUs(newDCsRegistry);
       addForeignRelationsFromNewDCandEUs(newEUsRegistry);
       addForeignRelationsFromNewDCandEUs(newTESTsRegistry);
+      addForeignRelationsFromNewDCandEUs(newReferencesRegistry);
       if (lIntegrityDataCollections != null) {
         addDatasetForeignRelations(lIntegrityDataCollections);
       }

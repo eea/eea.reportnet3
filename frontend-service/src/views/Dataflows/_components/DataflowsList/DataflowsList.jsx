@@ -82,7 +82,7 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
       return await UserService.updateConfiguration(userProperties);
     } catch (error) {
       console.error('DataflowsList - changeUserProperties.', error);
-      notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' });
+      notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' }, true);
     }
   };
 
@@ -119,9 +119,15 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
     });
 
     if (isPinned) {
-      notificationContext.add({ type: 'DATAFLOW_PINNED_INIT' });
+      notificationContext.add(
+        { type: 'DATAFLOW_PINNED_INIT', content: { customContent: { dataflowName: pinnedItem.name } } },
+        true
+      );
     } else {
-      notificationContext.add({ type: 'DATAFLOW_UNPINNED_INIT' });
+      notificationContext.add(
+        { type: 'DATAFLOW_UNPINNED_INIT', content: { customContent: { dataflowName: pinnedItem.name } } },
+        true
+      );
     }
 
     const orderedFilteredData = orderBy(

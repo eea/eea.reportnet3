@@ -1,3 +1,5 @@
+@import '_styles/mixins';
+
 .infoTablePaste {
   border-style: dashed;
   border-color: var(--gray-75);
@@ -18,8 +20,6 @@
   flex-basis: 100%;
   height: 0;
 }
-.infoTableData {
-}
 
 .infoTableData tr td {
   padding: 0px !important;
@@ -28,7 +28,17 @@
 .infoTableCellCorrect {
   display: flex;
   align-items: center;
+  justify-content: center;
   margin: 0.429em 0.857em;
+}
+
+.deleteRowButton {
+  border: 1px solid var(--general-border-color) !important;
+  color: var(--errors) !important;
+  @include shadow-0em;
+  &:hover:enabled {
+    border-color: var(--button-secondary-border-color-hover) !important;
+  }
 }
 
 .infoTableCellError {

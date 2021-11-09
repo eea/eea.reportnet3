@@ -12,6 +12,7 @@ import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.integration.executor.service.IntegrationExecutorService;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -54,6 +55,9 @@ public class IntegrationControllerImplTest {
   @Mock
   private IntegrationExecutorService integrationExecutorService;
 
+  /** The notification controller zuul. */
+  @Mock
+  private NotificationControllerZuul notificationControllerZuul;
 
 
   /**
@@ -303,6 +307,9 @@ public class IntegrationControllerImplTest {
    */
   @Test
   public void executeEUDatasetExportTest() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.doNothing().when(integrationService).addPopulateEUDatasetLock(Mockito.anyLong());
     Mockito.when(integrationService.executeEUDatasetExport(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
@@ -318,6 +325,9 @@ public class IntegrationControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void executeEUDatasetExportExceptionTest() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     Mockito.doNothing().when(integrationService).addPopulateEUDatasetLock(Mockito.anyLong());
     Mockito.when(integrationService.executeEUDatasetExport(Mockito.anyLong()))
         .thenThrow(EEAException.class);
@@ -360,6 +370,9 @@ public class IntegrationControllerImplTest {
   @Test
   public void executeExternalIntegrationTest() throws EEAException {
 
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     integrationControllerImpl.executeExternalIntegration(1L, 1L, false);
     Mockito.verify(integrationService, times(1)).executeExternalIntegration(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
@@ -372,6 +385,8 @@ public class IntegrationControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void executeExternalIntegrationExceptionTest() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
     Mockito.doThrow(EEAException.class).when(integrationService).executeExternalIntegration(
         Mockito.anyLong(), Mockito.anyLong(), Mockito.any(), Mockito.any());
@@ -429,6 +444,26 @@ public class IntegrationControllerImplTest {
         .thenReturn(integrationExecutorService);
     assertNull("assertion error",
         integrationControllerImpl.executeIntegrationProcess(null, null, null, null, null));
+  }
+
+
+  @Test
+  public void testDeleteExportEuDatasetIntegration() throws EEAException {
+    Mockito.doNothing().when(integrationService).deleteExportEuDataset(Mockito.anyString());
+    integrationControllerImpl.deleteExportEuDatasetIntegration("5ce524fad31fc52540abae73");
+    Mockito.verify(integrationService, times(1)).deleteExportEuDataset(Mockito.anyString());
+  }
+
+  @Test
+  public void testDeleteExportEuDatasetIntegrationException() throws EEAException {
+    try {
+      Mockito.doThrow(EEAException.class).when(integrationService)
+          .deleteExportEuDataset(Mockito.anyString());
+      integrationControllerImpl.deleteExportEuDatasetIntegration("5ce524fad31fc52540abae73");
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
   }
 
 }
