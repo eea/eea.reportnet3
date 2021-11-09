@@ -312,6 +312,8 @@ const useBigButtonList = ({
           );
         },
         helpClassName: 'dataflow-dataset-container-help-step',
+        infoStatus: dataset.isReleased,
+        infoStatusIcon: true,
         layout: 'defaultBigButton',
         model: [
           {
