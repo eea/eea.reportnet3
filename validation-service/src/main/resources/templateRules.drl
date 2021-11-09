@@ -189,27 +189,7 @@ function boolean isGeometry(FieldValue fieldValue){
 
 ///////////////////////////////////////VALIDATION GEOMETRY TYPES CHECK EPSG AND SRID///////////////////////////////////////////////////////
 function boolean checkEPSGSRID(FieldValue fieldValue){
-	if(fieldValue.getValue().length() < 1) {
-		return true;
-	}
-	//Obtain the SRID code removing all other characters from geojson
-	String[] sridstring = fieldValue.getValue().split("srid");
-	
-	if(sridstring.length < 2){
-		return false;
-	}
-	
-	String srid = sridstring[1].replace("\"","").replace(":","").replace("}","");
-
-	//The cases are the SRID supported in reportnet
-    switch(srid) {
-		case "4326":
-		case "4258":
-		case "3035":
-        	return true;
-		default:
-			return false;
-    }
+	return GeometryValidationUtils.checkEPSGSRID(fieldValue);
 }
  
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////
