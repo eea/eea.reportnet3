@@ -509,7 +509,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onDownloadUsersListByCountry = async () => {
     setIsDownloadingUsersList(true);
-    notificationContext.add({ type: 'DOWNLOAD_USERS_LIST_START' });
+    notificationContext.add({ type: 'DOWNLOAD_USERS_START' });
 
     try {
       await DataflowService.generateUsersListFile(dataflowId);

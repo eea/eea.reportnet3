@@ -1345,7 +1345,7 @@
     "yes": "Yes",
     "downloadUsersListButtonLabel": "Download users list",
     "generateUsersListFileError": "Failed generating users list file",
-    "downloadUsersListStart": "Generating users list file",
+    "downloadUsersStart": "Generating users list file",
     "automaticallyDownloadUsersListFile": "Users list file generated successfully",
     "downloadUsersListFileError": "Failed downloading users list file"
   }

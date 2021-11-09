@@ -1065,7 +1065,6 @@
             "hasQueryString": true
           }
         },
-
         { "key": "CREATE_DATA_COLLECTION_INIT" },
         { "key": "CREATE_REFERENCE_DATASETS_INIT" },
         { "key": "CLONE_DATASET_SCHEMAS_INIT" },
@@ -1084,7 +1083,8 @@
         { "key": "DELETE_TABLE_DATA_INIT" },
         { "key": "RELEASE_START_EVENT" },
         { "key": "IMPORT_TABLE_SCHEMA_INIT" },
-        { "key": "RECEIVED_MESSAGE" }
+        { "key": "RECEIVED_MESSAGE" },
+        { "key": "DOWNLOAD_USERS_START" }
       ]
     }
   ],
