@@ -5,6 +5,7 @@ import { config } from 'conf';
 import styles from './SystemNotificationsCreateForm.module.scss';
 
 import { Button } from 'views/_components/Button';
+import { Checkbox } from 'views/_components/Checkbox';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
@@ -13,10 +14,16 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const SystemNotificationsCreateForm = ({ isVisible, onCreateSystemNotification, onToggleVisibility }) => {
+export const SystemNotificationsCreateForm = ({
+  formType = '',
+  isVisible,
+  notification = {},
+  onCreateSystemNotification,
+  onToggleVisibility
+}) => {
   const resourcesContext = useContext(ResourcesContext);
 
-  const [systemNotification, setSystemNotification] = useState({});
+  const [systemNotification, setSystemNotification] = useState(formType === 'EDIT' ? notification : {});
 
   const onChange = (property, value) => {
     const inmSystemNotification = { ...systemNotification };
@@ -116,8 +123,25 @@ export const SystemNotificationsCreateForm = ({ isVisible, onCreateSystemNotific
               optionValue="value"
               options={config.validations.errorLevels}
               placeholder={resourcesContext.messages['errorTypePlaceholder']}
+              style={{ width: '15vw' }}
               value={{ label: systemNotification.levelError, value: systemNotification.levelError }}
             />
+          </div>
+        </div>
+        <div>
+          <div>
+            <Checkbox
+              checked={systemNotification.enabled}
+              id="systemNotification_Enabled"
+              inputId="systemNotification_Enabled"
+              onChange={e => onChange('enabled', e.checked)}
+              role="checkbox"
+            />
+            <label
+              onClick={e => onChange('enabled', !systemNotification.enabled)}
+              style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+              {resourcesContext.messages['enabled']}
+            </label>
           </div>
         </div>
       </div>
