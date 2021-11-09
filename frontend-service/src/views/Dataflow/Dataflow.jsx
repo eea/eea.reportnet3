@@ -920,8 +920,8 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
     dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: restrictFromPublic });
     dataflowDispatch({
-      payload: { value: false, dataProviderId: dataflowState.representative.dataProviderId }
       type: 'IS_RESTRICT_FROM_PUBLIC_UPDATING',
+      payload: { value: false, dataProviderId: representative.dataProviderId }
     });
   };
 
