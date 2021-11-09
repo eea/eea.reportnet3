@@ -15,7 +15,7 @@ export const DataflowConfig = {
   getCloneableDataflows: '/dataflow/cloneableDataflows',
   getAllDataflowsUserList: '/dataflow/getUserRolesAllDataflows',
   generateAllSchemasInfoFile: '/dataflow/exportSchemaInformation/{:dataflowId}',
-  generateUsersListFile: '/user/exportUsers/{:dataflowId}',
+  generateUsersFile: '/users/exportUsersByCountry/dataflow/{:dataflowId}',
   getApiKey: '/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   getApiKeyCustodian: '/user/getApiKey?dataflowId={:dataflowId}',
   getDetails: '/dataflow/{:dataflowId}/getmetabase',
