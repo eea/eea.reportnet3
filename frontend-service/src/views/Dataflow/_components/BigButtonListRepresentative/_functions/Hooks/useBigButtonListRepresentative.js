@@ -188,6 +188,10 @@ const useBigButtonListRepresentative = ({
     .filter(dataset => dataset.dataProviderId === parseInt(match.params.representativeId))
     .some(dataset => dataset.isReleased);
 
+  const representative = dataflowState.data.representatives.find(
+    representative => representative.dataProviderId === dataProviderId
+  );
+
   const onBuildReleaseButton = () => {
     return [
       {
@@ -200,11 +204,12 @@ const useBigButtonListRepresentative = ({
         helpClassName: 'dataflow-big-buttons-release-help-step',
         infoStatus: isReleased,
         infoStatusIcon: isReleased,
+        isRestrictFromPublicUpdating: dataflowState.isRestrictFromPublicUpdating.value,
         layout: 'defaultBigButton',
         restrictFromPublicAccess:
           isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business') && !getIsReleasing(),
         restrictFromPublicInfo: dataflowState.showPublicInfo && isReleased,
-        restrictFromPublicStatus: dataflowState.restrictFromPublic,
+        restrictFromPublicStatus: representative.restrictFromPublic,
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }

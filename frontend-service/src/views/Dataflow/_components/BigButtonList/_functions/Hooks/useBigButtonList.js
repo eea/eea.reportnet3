@@ -314,6 +314,9 @@ const useBigButtonList = ({
         helpClassName: 'dataflow-dataset-container-help-step',
         infoStatus: dataset.isReleased,
         infoStatusIcon: true,
+        isRestrictFromPublicUpdating:
+          datasetRepresentative.dataProviderId === dataflowState.isRestrictFromPublicUpdating.dataProviderId &&
+          dataflowState.isRestrictFromPublicUpdating.value,
         layout: 'defaultBigButton',
         model: [
           {
@@ -325,9 +328,6 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true),
-        isRestrictFromPublicUpdating:
-          datasetRepresentative.dataProviderId === dataflowState.isRestrictFromPublicUpdating.dataProviderId &&
-          dataflowState.isRestrictFromPublicUpdating.value,
         restrictFromPublicAccess: restrictFromPublicAccess,
         restrictFromPublicInfo: dataflowState.showPublicInfo && dataset.isReleased,
         restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
@@ -486,6 +486,10 @@ const useBigButtonList = ({
     ];
   };
 
+  const representative = dataflowState.data.representatives.find(
+    representative => representative.dataProviderId === dataProviderId
+  );
+
   const isReleased = dataflowState.data.datasets
     .filter(dataset => dataset.dataProviderId === dataProviderId)
     .some(dataset => dataset.isReleased);
@@ -502,11 +506,12 @@ const useBigButtonList = ({
         helpClassName: 'dataflow-big-buttons-release-help-step',
         infoStatus: isReleased,
         infoStatusIcon: true,
+        isRestrictFromPublicUpdating: dataflowState.isRestrictFromPublicUpdating.value,
         layout: 'defaultBigButton',
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
         restrictFromPublicAccess: restrictFromPublicAccess && !isReleasing,
         restrictFromPublicInfo: dataflowState.showPublicInfo && isReleased,
-        restrictFromPublicStatus: dataflowState.restrictFromPublic,
+        restrictFromPublicStatus: representative?.restrictFromPublic,
         visibility: buttonsVisibility.release
       }
     ];
