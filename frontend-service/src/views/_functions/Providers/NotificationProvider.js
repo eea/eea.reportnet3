@@ -26,28 +26,47 @@ const NotificationProvider = ({ children }) => {
     <NotificationContext.Provider
       value={{
         ...state,
-        add: (notificationDTO, save = false) => {
-          const { content, onClick, type } = notificationDTO;
-          if (save) {
-            NotificationService.create(notificationDTO.type, new Date(), notificationDTO.content);
-          }
-          const notification = NotificationService.parse({
-            config: config.notifications.notificationSchema,
-            content,
-            date: new Date(),
-            message: resourcesContext.messages[camelCase(type)],
-            onClick,
-            routes,
-            type
-          });
+        add: (notificationDTO, save = false, isSystemNotification = false) => {
+          if (!isSystemNotification) {
+            const { content, onClick, type } = notificationDTO;
+            if (save) {
+              NotificationService.create(notificationDTO.type, new Date(), notificationDTO.content);
+            }
+            const notification = NotificationService.parse({
+              config: config.notifications.notificationSchema,
+              content,
+              date: new Date(),
+              message: resourcesContext.messages[camelCase(type)],
+              onClick,
+              routes,
+              type
+            });
+            console.log(notification);
 
-          dispatch({
-            type: 'ADD',
-            payload: notification
-          });
-          dispatch({
-            type: 'NEW_NOTIFICATION_ADDED'
-          });
+            dispatch({
+              type: 'ADD',
+              payload: notification
+            });
+            dispatch({
+              type: 'NEW_NOTIFICATION_ADDED'
+            });
+          } else {
+            const systemNotification = {
+              message: notificationDTO.message,
+              lifeTime: notificationDTO.lifeTime,
+              type: notificationDTO.level.toLowerCase(),
+              fixed: true
+            };
+            if (notificationDTO.enabled) {
+              dispatch({
+                type: 'ADD',
+                payload: systemNotification
+              });
+              dispatch({
+                type: 'NEW_NOTIFICATION_ADDED'
+              });
+            }
+          }
         },
 
         read: notificationId => {

@@ -8,6 +8,8 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { userReducer } from 'views/_functions/Reducers/userReducer';
 
+import { SystemNotificationService } from 'services/SystemNotificationService';
+
 const userSettingsDefaultState = {
   currentDataflowType: undefined,
   userProps: {
@@ -29,6 +31,14 @@ const userSettingsDefaultState = {
 export const UserProvider = ({ children }) => {
   const notificationContext = useContext(NotificationContext);
   const [userState, userDispatcher] = useReducer(userReducer, userSettingsDefaultState);
+
+  const onLoadSystemNotifications = async () => {
+    const unparsedNotifications = await SystemNotificationService.all();
+    unparsedNotifications.forEach(notification => {
+      console.log(notification);
+      notificationContext.add(notification, false, true);
+    });
+  };
 
   return (
     <UserContext.Provider
@@ -72,7 +82,10 @@ export const UserProvider = ({ children }) => {
           userDispatcher({ type: 'USER_PINNED_DATAFLOWS', payload: pinnedDataflows }),
         onChangeRowsPerPage: rowNumber => userDispatcher({ type: 'DEFAULT_ROW_SELECTED', payload: rowNumber }),
 
-        onLogin: user => userDispatcher({ type: 'LOGIN', payload: user }),
+        onLogin: user => {
+          onLoadSystemNotifications();
+          userDispatcher({ type: 'LOGIN', payload: user });
+        },
 
         onLogout: () => {
           notificationContext.deleteAll();

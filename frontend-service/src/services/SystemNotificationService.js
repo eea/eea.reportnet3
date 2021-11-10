@@ -8,8 +8,8 @@ export const SystemNotificationService = {
     let systemNotificationsDTO = {};
     systemNotificationsDTO.data = [
       { id: 1, message: 'System temporaly shutdown', level: 'ERROR', enabled: true },
-      { id: 2, message: 'System temporaly shutdown 2', level: 'WARNING', enabled: true },
-      { id: 3, message: 'System temporaly shutdown 3', level: 'ERROR', enabled: false }
+      { id: 2, message: 'System temporaly shutdown 2', level: 'INFO', enabled: true },
+      { id: 3, message: 'System temporaly shutdown 3', level: 'ERROR', enabled: true }
     ];
 
     return systemNotificationsDTO?.data?.map(systemNotificationDTO => {
