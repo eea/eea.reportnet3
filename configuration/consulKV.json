@@ -1463,26 +1463,6 @@
     "key": "config/ums/eea.keycloak.listUsersMax",
     "value": "MTAwMA=="
   },
-    {
-    "key": "config/recordstore/management.metrics.export.elastic.index",
-    "value": "JHtFTEFTVElDX0lOREVYOkxvY2FsLVJlY29yZHN0b3JlLU1ldHJpY3N9"
-  },
-  {
-    "key": "config/recordstore/management.metrics.export.elastic.indexDateFormat",
-    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU0tZGR9"
-  },
-  {
-    "key": "config/recordstore/management.metrics.export.elastic.host",
-    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
-  },
-  {
-    "key": "config/recordstore/management.metrics.export.elastic.userName",
-    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
-  },
-  {
-    "key": "config/recordstore/management.metrics.export.elastic.password",
-    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
-  },
   {
     "key": "config/dataflow/exportDataflowSchemaInformationPath",
     "value": "JHtEQVRBRkxPV19FWFBPUlRfU0NIRU1BX0lORk9STUFUSU9OX1BBVEg6QzpcZXhwb3J0RGF0YWZsb3dTY2hlbWFJbmZvcm1hdGlvblx9"
@@ -1510,5 +1490,245 @@
   {
     "key": "config/apiGateway/zuul.routes.notification.stripPrefix",
     "value": "ZmFsc2U="
+  }
+  {
+    "key": "config/apiGateway/management.metrics.export.elastic.index",
+    "value": "JHtFTEFTVElDX0lOREVYOmRldi1hcGlnYXRld2F5LW1ldHJpY3N9"
+  },
+  {
+    "key": "config/apiGateway/management.metrics.export.elastic.indexDateFormat",
+    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU19"
+  },
+  {
+    "key": "config/apiGateway/management.metrics.export.elastic.host",
+    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
+  },
+  {
+    "key": "config/apiGateway/management.metrics.export.elastic.userName",
+    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
+  },
+  {
+    "key": "config/apiGateway/management.metrics.export.elastic.password",
+    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
+  },
+  {
+    "key": "config/apiGateway/management.metrics.export.elastic.enabled",
+    "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
+  },
+  {
+    "key": "config/collaboration/management.metrics.export.elastic.index",
+    "value": "JHtFTEFTVElDX0lOREVYOmRldi1hcGlnYXRld2F5LW1ldHJpY3N9"
+  },
+  {
+    "key": "config/collaboration/management.metrics.export.elastic.indexDateFormat",
+    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU19"
+  },
+  {
+    "key": "config/collaboration/management.metrics.export.elastic.host",
+    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
+  },
+  {
+    "key": "config/collaboration/management.metrics.export.elastic.userName",
+    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
+  },
+  {
+    "key": "config/collaboration/management.metrics.export.elastic.password",
+    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
+  },
+  {
+    "key": "config/collaboration/management.metrics.export.elastic.enabled",
+    "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
+  },
+  {
+    "key": "config/communication/management.metrics.export.elastic.index",
+    "value": "JHtFTEFTVElDX0lOREVYOmRldi1jb21tdW5pY2F0aW9uLW1ldHJpY3N9"
+  },
+  {
+    "key": "config/communication/management.metrics.export.elastic.indexDateFormat",
+    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU19"
+  },
+  {
+    "key": "config/communication/management.metrics.export.elastic.host",
+    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
+  },
+  {
+    "key": "config/communication/management.metrics.export.elastic.userName",
+    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
+  },
+  {
+    "key": "config/communication/management.metrics.export.elastic.password",
+    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
+  },
+  {
+    "key": "config/communication/management.metrics.export.elastic.enabled",
+    "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
+  },
+  {
+    "key": "config/dataflow/management.metrics.export.elastic.index",
+    "value": "JHtFTEFTVElDX0lOREVYOmRldi1kYXRhZmxvdy1tZXRyaWNzfQ=="
+  },
+  {
+    "key": "config/dataflow/management.metrics.export.elastic.indexDateFormat",
+    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU19"
+  },
+  {
+    "key": "config/dataflow/management.metrics.export.elastic.host",
+    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
+  },
+  {
+    "key": "config/dataflow/management.metrics.export.elastic.userName",
+    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
+  },
+  {
+    "key": "config/dataflow/management.metrics.export.elastic.password",
+    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
+  },
+  {
+    "key": "config/dataflow/management.metrics.export.elastic.enabled",
+    "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
+  },
+  {
+    "key": "config/dataset/management.metrics.export.elastic.index",
+    "value": "JHtFTEFTVElDX0lOREVYOmRldi1kYXRhc2V0LW1ldHJpY3N9"
+  },
+  {
+    "key": "config/dataset/management.metrics.export.elastic.indexDateFormat",
+    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU19"
+  },
+  {
+    "key": "config/dataset/management.metrics.export.elastic.host",
+    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
+  },
+  {
+    "key": "config/dataset/management.metrics.export.elastic.userName",
+    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
+  },
+  {
+    "key": "config/dataset/management.metrics.export.elastic.password",
+    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
+  },
+  {
+    "key": "config/dataset/management.metrics.export.elastic.enabled",
+    "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
+  },
+  {
+    "key": "config/document/management.metrics.export.elastic.index",
+    "value": "JHtFTEFTVElDX0lOREVYOmRldi1kb2N1bWVudC1tZXRyaWNzfQ=="
+  },
+  {
+    "key": "config/document/management.metrics.export.elastic.indexDateFormat",
+    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU19"
+  },
+  {
+    "key": "config/document/management.metrics.export.elastic.host",
+    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
+  },
+  {
+    "key": "config/document/management.metrics.export.elastic.userName",
+    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
+  },
+  {
+    "key": "config/document/management.metrics.export.elastic.password",
+    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
+  },
+  {
+    "key": "config/document/management.metrics.export.elastic.enabled",
+    "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
+  },
+  {
+    "key": "config/recordstore/management.metrics.export.elastic.index",
+    "value": "JHtFTEFTVElDX0lOREVYOmRldi1yZWNvcmRzdG9yZS1tZXRyaWNzfQ=="
+  },
+  {
+    "key": "config/recordstore/management.metrics.export.elastic.indexDateFormat",
+    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU19"
+  },
+  {
+    "key": "config/recordstore/management.metrics.export.elastic.host",
+    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
+  },
+  {
+    "key": "config/recordstore/management.metrics.export.elastic.userName",
+    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
+  },
+  {
+    "key": "config/recordstore/management.metrics.export.elastic.password",
+    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
+  },
+  {
+    "key": "config/recordstore/management.metrics.export.elastic.enabled",
+    "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
+  },
+  {
+    "key": "config/rod/management.metrics.export.elastic.index",
+    "value": "JHtFTEFTVElDX0lOREVYOmRldi1yb2QtbWV0cmljc30="
+  },
+  {
+    "key": "config/rod/management.metrics.export.elastic.indexDateFormat",
+    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU19"
+  },
+  {
+    "key": "config/rod/management.metrics.export.elastic.host",
+    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
+  },
+  {
+    "key": "config/rod/management.metrics.export.elastic.userName",
+    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
+  },
+  {
+    "key": "config/rod/management.metrics.export.elastic.password",
+    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
+  },
+  {
+    "key": "config/rod/management.metrics.export.elastic.enabled",
+    "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
+  },
+    {
+    "key": "config/ums/management.metrics.export.elastic.index",
+    "value": "JHtFTEFTVElDX0lOREVYOmRldi11bXMtbWV0cmljc30="
+  },
+  {
+    "key": "config/ums/management.metrics.export.elastic.indexDateFormat",
+    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU19"
+  },
+  {
+    "key": "config/ums/management.metrics.export.elastic.host",
+    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
+  },
+  {
+    "key": "config/ums/management.metrics.export.elastic.userName",
+    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
+  },
+  {
+    "key": "config/ums/management.metrics.export.elastic.password",
+    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
+  },
+  {
+    "key": "config/ums/management.metrics.export.elastic.enabled",
+    "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
+  },
+  {
+    "key": "config/validation/management.metrics.export.elastic.index",
+    "value": "JHtFTEFTVElDX0lOREVYOmRldi12YWxpZGF0aW9uLW1ldHJpY3N9"
+  },
+  {
+    "key": "config/validation/management.metrics.export.elastic.indexDateFormat",
+    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU19"
+  },
+  {
+    "key": "config/validation/management.metrics.export.elastic.host",
+    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
+  },
+  {
+    "key": "config/validation/management.metrics.export.elastic.userName",
+    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
+  },
+  {
+    "key": "config/validation/management.metrics.export.elastic.password",
+    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
+  },
+  {
+    "key": "config/validation/management.metrics.export.elastic.enabled",
+    "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
   }
 ]
