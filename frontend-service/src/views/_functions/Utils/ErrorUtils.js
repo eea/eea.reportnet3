@@ -117,10 +117,10 @@ const getLevelErrorPriorityByLevelError = levelError => {
 const orderLevelErrors = levelErrors => {
   const levelErrorsWithPriority = [
     { id: 'CORRECT', index: 0 },
-    { id: 'BLOCKER', index: 1 },
-    { id: 'ERROR', index: 2 },
-    { id: 'WARNING', index: 3 },
-    { id: 'INFO', index: 4 }
+    { id: 'INFO', index: 1 },
+    { id: 'WARNING', index: 2 },
+    { id: 'ERROR', index: 3 },
+    { id: 'BLOCKER', index: 4 }
   ];
 
   return levelErrors
