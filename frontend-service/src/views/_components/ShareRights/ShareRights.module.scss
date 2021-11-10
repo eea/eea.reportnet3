@@ -22,6 +22,15 @@
   }
 }
 
+.accountWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .isValidUserIcon {
+    cursor: pointer;
+  }
+}
+
 .manageDialog {
   display: flex;
   flex-direction: column;

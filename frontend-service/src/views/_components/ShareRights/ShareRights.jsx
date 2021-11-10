@@ -8,6 +8,7 @@ import isNil from 'lodash/isNil';
 import styles from './ShareRights.module.scss';
 
 import { config } from 'conf';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
@@ -15,8 +16,10 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dropdown } from 'views/_components/Dropdown';
 import { Filters } from 'views/_components/Filters';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
+import ReactTooltip from 'react-tooltip';
 
 import { UserRightService } from 'services/UserRightService';
 
@@ -383,7 +386,26 @@ export const ShareRights = ({
     );
   };
 
-  const renderAccountTemplate = userRight => <div>{userRight.account}</div>;
+  const renderAccountTemplate = userRight => (
+    <div className={styles.accountWrapper}>
+      {userRight.account}
+      <FontAwesomeIcon
+        className={styles.isValidUserIcon}
+        data-for={userRight.account}
+        data-tip
+        icon={userRight.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
+        style={{
+          color: 'var(--isValid-user-icon-color)',
+          fontSize: '1.1rem'
+        }}
+      />
+      <ReactTooltip border={true} effect="solid" id={userRight.account} place="top">
+        {userRight.isValid
+          ? resourcesContext.messages['validUserTooltip']
+          : resourcesContext.messages['invalidUserTooltip']}
+      </ReactTooltip>
+    </div>
+  );
 
   const renderDialogLayout = children => (
     <Fragment>
