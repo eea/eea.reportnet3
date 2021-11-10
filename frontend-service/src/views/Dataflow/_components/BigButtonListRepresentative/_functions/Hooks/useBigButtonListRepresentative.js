@@ -204,12 +204,12 @@ const useBigButtonListRepresentative = ({
         helpClassName: 'dataflow-big-buttons-release-help-step',
         infoStatus: isReleased,
         infoStatusIcon: isReleased,
-        restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
         layout: 'defaultBigButton',
         restrictFromPublicAccess:
           isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business') && !getIsReleasing(),
         restrictFromPublicInfo: dataflowState.data.showPublicInfo && isReleased,
-        restrictFromPublicStatus: representative.restrictFromPublic,
+        restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
+        restrictFromPublicStatus: representative?.restrictFromPublic,
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
       }

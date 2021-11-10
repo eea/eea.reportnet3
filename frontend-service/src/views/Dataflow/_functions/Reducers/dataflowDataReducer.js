@@ -109,6 +109,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
         }
       };
 
+    case 'SHOW_PUBLIC_INFO_IS_UPDATING':
+      return { ...state, isShowPublicInfoUpdating: payload.isShowPublicInfoUpdating };
+
     case 'ON_CLEAN_UP_RECEIPT':
       return { ...state, ...payload };
 

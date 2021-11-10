@@ -111,8 +111,8 @@ const Dataflow = withRouter(({ history, match }) => {
     isReleaseableDialogVisible: false,
     isReleaseDialogVisible: false,
     isReportingDataflowDialogVisible: false,
-    restrictFromPublicIsUpdating: {},
     isShowPublicInfoDialogVisible: false,
+    isShowPublicInfoUpdating: false,
     isSnapshotDialogVisible: false,
     isUserListVisible: false,
     isUserRightManagementDialogVisible: false,
@@ -121,6 +121,7 @@ const Dataflow = withRouter(({ history, match }) => {
     representative: {},
     representativesImport: false,
     restrictFromPublic: false,
+    restrictFromPublicIsUpdating: {},
     showPublicInfo: false,
     status: '',
     updatedDatasetSchema: [],
@@ -401,6 +402,9 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_IS_RECEIPT_OUTDATED', payload: { isReceiptOutdated } });
   };
 
+  const setIsShowPublicInfoUpdating = isShowPublicInfoUpdating =>
+    dataflowDispatch({ type: 'SHOW_PUBLIC_INFO_IS_UPDATING', payload: { isShowPublicInfoUpdating } });
+
   const onCleanUpReceipt = () => {
     dataflowDispatch({ type: 'ON_CLEAN_UP_RECEIPT', payload: { isReceiptLoading: false, isReceiptOutdated: false } });
   };
@@ -627,6 +631,7 @@ const Dataflow = withRouter(({ history, match }) => {
       history.push(getUrl(routes.DATAFLOWS));
     } finally {
       setIsPageLoading(false);
+      setIsShowPublicInfoUpdating(false);
     }
   };
 
@@ -854,6 +859,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmUpdateShowPublicInfo = async () => {
     manageDialogs('isShowPublicInfoDialogVisible', false);
     try {
+      setIsShowPublicInfoUpdating(true);
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: true } });
       await DataflowService.update(
         dataflowId,
