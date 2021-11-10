@@ -192,56 +192,57 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
     try {
       setIsLoading(true);
       const unparsedNotifications = await SystemNotificationService.all();
-      const parsedNotifications = unparsedNotifications.map(notification => {
-        return SystemNotificationService.parse({
-          config: config.notifications.notificationSchema,
-          content: notification.content,
-          date: notification.date,
-          message: resourcesContext.messages[camelCase(notification.type)],
-          routes,
-          type: notification.type
-        });
-      });
-      const notificationsArray = parsedNotifications.map(notification => {
-        const message = DOMPurify.sanitize(notification.message, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+      console.log(unparsedNotifications);
+      // const parsedNotifications = unparsedNotifications.map(notification => {
+      //   return SystemNotificationService.parse({
+      //     config: config.notifications.notificationSchema,
+      //     content: notification.content,
+      //     date: notification.date,
+      //     message: resourcesContext.messages[camelCase(notification.type)],
+      //     routes,
+      //     type: notification.type
+      //   });
+      // });
+      // const notificationsArray = parsedNotifications.map(notification => {
+      //   const message = DOMPurify.sanitize(notification.message, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 
-        const capitalizedLevelError = !isUndefined(notification.type)
-          ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
-          : notification.type;
+      //   const capitalizedLevelError = !isUndefined(notification.type)
+      //     ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
+      //     : notification.type;
 
-        return {
-          key: notification.key,
-          message: message,
-          levelError: capitalizedLevelError,
-          date: dayjs(notification.date).format(
-            `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-              userContext.userProps.amPm24h ? '' : ' A'
-            }`
-          ),
+      //   return {
+      //     key: notification.key,
+      //     message: message,
+      //     levelError: capitalizedLevelError,
+      //     date: dayjs(notification.date).format(
+      //       `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
+      //         userContext.userProps.amPm24h ? '' : ' A'
+      //       }`
+      //     ),
 
-          downloadButton: notification.onClick ? (
-            <span className={styles.center}>
-              <Button
-                className={`${styles.columnActionButton}`}
-                icon="export"
-                label={resourcesContext.messages['downloadFile']}
-                onClick={() => notification.onClick()}
-              />
-            </span>
-          ) : (
-            ''
-          ),
-          redirectionUrl: !isNil(notification.redirectionUrl)
-            ? `${window.location.protocol}//${window.location.hostname}${
-                window.location.port !== '' && window.location.port.toString() !== '80'
-                  ? `:${window.location.port}`
-                  : ''
-              }${notification.redirectionUrl}`
-            : ''
-        };
-      });
+      //     downloadButton: notification.onClick ? (
+      //       <span className={styles.center}>
+      //         <Button
+      //           className={`${styles.columnActionButton}`}
+      //           icon="export"
+      //           label={resourcesContext.messages['downloadFile']}
+      //           onClick={() => notification.onClick()}
+      //         />
+      //       </span>
+      //     ) : (
+      //       ''
+      //     ),
+      //     redirectionUrl: !isNil(notification.redirectionUrl)
+      //       ? `${window.location.protocol}//${window.location.hostname}${
+      //           window.location.port !== '' && window.location.port.toString() !== '80'
+      //             ? `:${window.location.port}`
+      //             : ''
+      //         }${notification.redirectionUrl}`
+      //       : ''
+      //   };
+      // });
 
-      setSystemNotifications(notificationsArray);
+      setSystemNotifications(unparsedNotifications);
     } catch (error) {
       console.error('SystemNotificationsList - onLoadSystemNotifications.', error);
     } finally {
