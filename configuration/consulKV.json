@@ -1490,7 +1490,7 @@
   {
     "key": "config/apiGateway/zuul.routes.notification.stripPrefix",
     "value": "ZmFsc2U="
-  }
+  },
   {
     "key": "config/apiGateway/management.metrics.export.elastic.index",
     "value": "JHtFTEFTVElDX0lOREVYOmRldi1hcGlnYXRld2F5LW1ldHJpY3N9"
@@ -1683,7 +1683,7 @@
     "key": "config/rod/management.metrics.export.elastic.enabled",
     "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
   },
-    {
+  {
     "key": "config/ums/management.metrics.export.elastic.index",
     "value": "JHtFTEFTVElDX0lOREVYOmRldi11bXMtbWV0cmljc30="
   },
