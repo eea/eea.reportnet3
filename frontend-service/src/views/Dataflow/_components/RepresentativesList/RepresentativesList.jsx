@@ -9,6 +9,7 @@ import uniq from 'lodash/uniq';
 
 import styles from './RepresentativesList.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { config } from 'conf';
 
 import { ActionsColumn } from 'views/_components/ActionsColumn';
@@ -17,8 +18,10 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dropdown } from 'views/_components/Dropdown';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
+import ReactTooltip from 'react-tooltip';
 
 import { RepresentativeService } from 'services/RepresentativeService';
 
@@ -345,6 +348,31 @@ const RepresentativesList = ({
             placeholder={resourcesContext.messages['manageRolesDialogInputPlaceholder']}
             value={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
           />
+
+          {!isNewLeadReporter && (
+            <Fragment>
+              <FontAwesomeIcon
+                data-for={reporters[leadReporter.id]?.account}
+                data-tip
+                icon={reporters[leadReporter.id]?.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
+                style={{
+                  color: 'var(--isValid-user-icon-color)',
+                  fontSize: '1.1rem',
+                  left: '2px',
+                  marginLeft: '2px',
+                  marginRight: '2px',
+                  position: 'relative',
+                  top: '10px',
+                  cursor: 'pointer'
+                }}
+              />
+              <ReactTooltip border={true} effect="solid" id={reporters[leadReporter.id]?.account} place="top">
+                {reporters[leadReporter.id]?.isValid
+                  ? resourcesContext.messages['validUserTooltip']
+                  : resourcesContext.messages['invalidUserTooltip']}
+              </ReactTooltip>
+            </Fragment>
+          )}
 
           {!isNewLeadReporter && (
             <Button
