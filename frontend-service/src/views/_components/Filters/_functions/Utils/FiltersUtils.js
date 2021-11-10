@@ -112,14 +112,14 @@ const getOptionsTemplate = (filteredOptions, property) => {
         template.push({ type: getUserRoleLabel(option), value: option });
         break;
       case 'restrictFromPublic':
-        template.push({ type: option, value: !option });
+        template.push({ type: option?.toString().toUpperCase(), value: !option });
         break;
       default:
         template.push({ type: option?.toString().toUpperCase(), value: option?.toString().toUpperCase() });
     }
   });
 
-  return sortBy(template, 'type');
+  return template;
 };
 
 const getOptionsTypes = (data, property, list, sortErrors) => {
