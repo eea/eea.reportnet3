@@ -429,7 +429,11 @@ public enum EventType {
 
   /** The no pk reference dataflow error event. */
   NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "no_pk_reference_dataflow_error_event", true);
+      "no_pk_reference_dataflow_error_event", true),
+
+  /** The continue fme process event. */
+  CONTINUE_FME_PROCESS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "continue_fme_process_event",
+      true);
 
 
   /** The topic. */
