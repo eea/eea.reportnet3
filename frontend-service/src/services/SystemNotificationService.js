@@ -3,8 +3,8 @@ import { SystemNotification } from 'entities/SystemNotification';
 import { SystemNotificationRepository } from 'repositories/SystemNotificationRepository';
 
 export const SystemNotificationService = {
-  all: async ({ pageNum, pageSize }) => {
-    const systemNotificationsDTO = await SystemNotificationRepository.all(pageNum, pageSize);
+  all: async () => {
+    const systemNotificationsDTO = await SystemNotificationRepository.all();
     const notifications = {};
 
     notifications.userNotifications = systemNotificationsDTO?.data?.map(systemNotificationDTO => {
@@ -16,7 +16,7 @@ export const SystemNotificationService = {
     return notifications;
   },
 
-  create: async (message, type, enabled) => await SystemNotificationRepository.create(message, type, enabled),
+  create: async ({ message, level, enabled }) => await SystemNotificationRepository.create(message, level, enabled),
 
   deleteById: async id => await SystemNotificationRepository.deleteById(id)
 

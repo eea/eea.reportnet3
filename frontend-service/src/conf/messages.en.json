@@ -1343,6 +1343,6 @@
     "wrongWebLinkError": "The URL is not valid",
     "yes": "Yes",
     "systemNotificationsKey": "Notification name will be stored in uppercase and separated by _",
-    "systemNotificationType": "Select a notification level type"
+    "systemNotificationLevel": "Select the notification level"
   }
 }

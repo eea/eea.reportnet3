@@ -30,7 +30,7 @@ export const SystemNotificationsCreateForm = ({
     setSystemNotification(inmSystemNotification);
   };
 
-  const notificationTypeTemplate = rowData => {
+  const notificationLevelTemplate = rowData => {
     console.log(rowData);
     return (
       <div>
@@ -109,21 +109,21 @@ export const SystemNotificationsCreateForm = ({
         </div>
         <div>
           <div>
-            <label>{resourcesContext.messages['type']}</label>
+            <label>{resourcesContext.messages['notificationLevel']}</label>
           </div>
           <div>
             <Dropdown
               appendTo={document.body}
-              filterPlaceholder={resourcesContext.messages['systemNotificationType']}
-              id="errorType"
-              itemTemplate={rowData => notificationTypeTemplate(rowData, true)}
-              onChange={e => onChange('type', e.target.value.value)}
+              filterPlaceholder={resourcesContext.messages['systemNotificationLevel']}
+              id="errorLevel"
+              itemTemplate={rowData => notificationLevelTemplate(rowData, true)}
+              onChange={e => onChange('level', e.target.value.value)}
               optionLabel="label"
               optionValue="value"
-              options={config.validations.errorLevels}
-              placeholder={resourcesContext.messages['systemNotificationType']}
+              options={config.systemNotifications.levels}
+              placeholder={resourcesContext.messages['systemNotificationLevel']}
               style={{ width: '15vw' }}
-              value={{ label: systemNotification.type, value: systemNotification.type }}
+              value={{ label: systemNotification.level, value: systemNotification.level }}
             />
           </div>
         </div>
