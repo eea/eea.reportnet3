@@ -1817,7 +1817,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           <Dialog
             className={styles.Dialog}
             footer={renderImportOtherSystemsFooter}
-            header={"Integration: " + '"'+importFromOtherSystemSelectedIntegration.name + '"'}
+            header={TextUtils.parseText(resourcesContext.messages['importPreviousDataHeader'], {
+              importName: importFromOtherSystemSelectedIntegration.name
+            })}
             onHide={cleanImportOtherSystemsDialog}
             visible={isImportOtherSystemsDialogVisible}>
             <div
