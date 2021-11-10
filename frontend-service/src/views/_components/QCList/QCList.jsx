@@ -295,12 +295,6 @@ export const QCList = withRouter(
         case 'levelError':
           header = resourcesContext.messages['ruleLevelError'];
           break;
-        case 'automatic':
-          header = resourcesContext.messages['automaticQcHeader'];
-          break;
-        case 'enabled':
-          header = resourcesContext.messages['enabledQcHeader'];
-          break;
         case 'shortCode':
           header = resourcesContext.messages['ruleCode'];
           break;
