@@ -457,13 +457,12 @@ public class SQLValidationUtils {
       String sql = rule.getSqlSentence();
       LOG.info("SQL Rule for check: {}", sql);
       LOG.info("Message Rule for check: {}", errorMessage);
-      if (validateMessage(errorMessage)) {
-        // get the fields from ruleMessage to replace later
-        ArrayList<String> fieldsToReplace = getFieldsToReplace(errorMessage);
-        errorMessage = rewriteMessage(object, errorMessage, fieldsToReplace, tableToEvaluate);
-      }
+      // get the fields from ruleMessage to replace later
+      ArrayList<String> fieldsToReplace = getFieldsToReplace(errorMessage);
+      errorMessage = rewriteMessage(object, errorMessage, fieldsToReplace, tableToEvaluate);
     }
-    return errorMessage;
+  }return errorMessage;
+
   }
 
   /**
