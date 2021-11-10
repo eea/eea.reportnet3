@@ -314,9 +314,9 @@ const useBigButtonList = ({
         helpClassName: 'dataflow-dataset-container-help-step',
         infoStatus: dataset.isReleased,
         infoStatusIcon: true,
-        isRestrictFromPublicUpdating:
-          datasetRepresentative.dataProviderId === dataflowState.isRestrictFromPublicUpdating.dataProviderId &&
-          dataflowState.isRestrictFromPublicUpdating.value,
+        restrictFromPublicIsUpdating:
+          datasetRepresentative.dataProviderId === dataflowState.restrictFromPublicIsUpdating.dataProviderId &&
+          dataflowState.restrictFromPublicIsUpdating.value,
         layout: 'defaultBigButton',
         model: [
           {
@@ -328,8 +328,8 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true),
-        restrictFromPublicAccess: restrictFromPublicAccess && !dataflowState.isRestrictFromPublicUpdating.value,
         restrictFromPublicInfo: dataflowState.showPublicInfo && dataset.isReleased,
+        restrictFromPublicAccess: restrictFromPublicAccess && !dataflowState.restrictFromPublicIsUpdating.value,
         restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
         visibility: true
       };
@@ -501,20 +501,16 @@ const useBigButtonList = ({
         buttonIcon: isReleasing ? 'spinner' : 'released',
         buttonIconClass: isReleasing ? 'spinner' : 'released',
         caption: resourcesContext.messages['releaseDataCollection'],
-        enabled: dataflowState.isReleasable && !isReleasing && !dataflowState.isRestrictFromPublicUpdating.value,
-        handleRedirect:
-          dataflowState.isReleasable && !isReleasing && !dataflowState.isRestrictFromPublicUpdating.value
-            ? () => onOpenReleaseConfirmDialog()
-            : () => {},
+        enabled: dataflowState.isReleasable && !isReleasing,
+        handleRedirect: dataflowState.isReleasable && !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         infoStatus: isReleased,
         infoStatusIcon: true,
-        isRestrictFromPublicUpdating: dataflowState.isRestrictFromPublicUpdating.value,
+        restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
         layout: 'defaultBigButton',
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
-        restrictFromPublicAccess:
-          restrictFromPublicAccess && !isReleasing && !dataflowState.isRestrictFromPublicUpdating.value,
         restrictFromPublicInfo: dataflowState.showPublicInfo && isReleased,
+        restrictFromPublicAccess: restrictFromPublicAccess && !isReleasing,
         restrictFromPublicStatus: representative?.restrictFromPublic,
         visibility: buttonsVisibility.release
       }

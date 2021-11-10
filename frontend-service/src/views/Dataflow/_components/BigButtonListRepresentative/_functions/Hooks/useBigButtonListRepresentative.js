@@ -199,22 +199,16 @@ const useBigButtonListRepresentative = ({
         buttonIcon: getIsReleasing() ? 'spinner' : 'released',
         buttonIconClass: getIsReleasing() ? 'spinner' : 'released',
         caption: resourcesContext.messages['releaseDataCollection'],
-        enabled: dataflowState.isReleasable && !getIsReleasing() && !dataflowState.isRestrictFromPublicUpdating.value,
-        handleRedirect:
-          dataflowState.isReleasable && !getIsReleasing() && !dataflowState.isRestrictFromPublicUpdating.value
-            ? () => onOpenReleaseConfirmDialog()
-            : () => {},
+        enabled: dataflowState.isReleasable && !getIsReleasing(),
+        handleRedirect: dataflowState.isReleasable && !getIsReleasing() ? () => onOpenReleaseConfirmDialog() : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         infoStatus: isReleased,
         infoStatusIcon: isReleased,
-        isRestrictFromPublicUpdating: dataflowState.isRestrictFromPublicUpdating.value,
+        restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
         layout: 'defaultBigButton',
         restrictFromPublicAccess:
-          isLeadReporterOfCountry &&
-          !TextUtils.areEquals(dataflowState.status, 'business') &&
-          !getIsReleasing() &&
-          !dataflowState.isRestrictFromPublicUpdating.value,
         restrictFromPublicInfo: dataflowState.showPublicInfo && isReleased,
+          isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business') && !getIsReleasing(),
         restrictFromPublicStatus: representative.restrictFromPublic,
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release

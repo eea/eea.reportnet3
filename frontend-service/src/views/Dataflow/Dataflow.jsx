@@ -111,7 +111,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isReleaseableDialogVisible: false,
     isReleaseDialogVisible: false,
     isReportingDataflowDialogVisible: false,
-    isRestrictFromPublicUpdating: {},
+    restrictFromPublicIsUpdating: {},
     isShowPublicInfoDialogVisible: false,
     isSnapshotDialogVisible: false,
     isUserListVisible: false,
@@ -812,7 +812,7 @@ const Dataflow = withRouter(({ history, match }) => {
     try {
       const selectedDataProviderId = dataProviderId || dataflowState.representative.dataProviderId;
       dataflowDispatch({
-        type: 'IS_RESTRICT_FROM_PUBLIC_UPDATING',
+        type: 'RESTRICT_FROM_PUBLIC_IS_UPDATING',
         payload: { value: true, dataProviderId: selectedDataProviderId }
       });
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: true } });
@@ -920,7 +920,7 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
     dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: restrictFromPublicValue });
     dataflowDispatch({
-      type: 'IS_RESTRICT_FROM_PUBLIC_UPDATING',
+      type: 'RESTRICT_FROM_PUBLIC_IS_UPDATING',
       payload: { value: false, dataProviderId: representative.dataProviderId }
     });
   };

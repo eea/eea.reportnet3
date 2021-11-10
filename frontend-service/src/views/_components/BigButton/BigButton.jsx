@@ -35,7 +35,7 @@ export const BigButton = ({
   index,
   infoStatus,
   infoStatusIcon,
-  isRestrictFromPublicUpdating,
+  restrictFromPublicIsUpdating,
   layout,
   manageDialogs = () => {},
   model,
@@ -170,7 +170,7 @@ export const BigButton = ({
   };
 
   const getRestrictFromPublicIcon = () => {
-    if (isRestrictFromPublicUpdating) {
+    if (restrictFromPublicIsUpdating) {
       return AwesomeIcons('spinner');
     } else {
       return AwesomeIcons(restrictFromPublicStatus ? 'eyeSlash' : 'eye');
@@ -218,7 +218,7 @@ export const BigButton = ({
         {restrictFromPublicInfo && (
           <FontAwesomeIcon
             className={`${!restrictFromPublicAccess && styles.notClickableIcon} ${
-              isRestrictFromPublicUpdating && 'fa-spin'
+              restrictFromPublicIsUpdating && 'fa-spin'
             }`}
             icon={getRestrictFromPublicIcon()}
             onClick={() => {
