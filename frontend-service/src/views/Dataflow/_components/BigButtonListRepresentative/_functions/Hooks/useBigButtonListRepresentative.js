@@ -207,8 +207,8 @@ const useBigButtonListRepresentative = ({
         restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
         layout: 'defaultBigButton',
         restrictFromPublicAccess:
-        restrictFromPublicInfo: dataflowState.showPublicInfo && isReleased,
           isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business') && !getIsReleasing(),
+        restrictFromPublicInfo: dataflowState.data.showPublicInfo && isReleased,
         restrictFromPublicStatus: representative.restrictFromPublic,
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
         visibility: buttonsVisibility.release
