@@ -243,7 +243,7 @@ const Dataflow = withRouter(({ history, match }) => {
   }, [userContext, dataflowState]);
 
   useEffect(() => {
-    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_USERS_FAILED_EVENT')) {
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_USERS_BY_COUNTRY_FAILED_EVENT')) {
       setIsDownloadingUsers(false);
     }
   }, [notificationContext.hidden]);

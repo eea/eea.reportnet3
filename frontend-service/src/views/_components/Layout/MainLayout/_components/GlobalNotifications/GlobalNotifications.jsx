@@ -80,7 +80,7 @@ const GlobalNotifications = () => {
   };
 
   const downloadUsersListFile = async () => {
-    const notification = findHiddenNotification('EXPORT_USERS_COMPLETED_EVENT');
+    const notification = findHiddenNotification('EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT');
 
     if (isNil(notification)) {
       return;
