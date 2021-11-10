@@ -130,9 +130,7 @@ const getOptionsTypes = (data, property, list, sortErrors) => {
   }
 
   const options = uniq(data.map(item => item[property])).filter(onFilterBooleanOptions);
-  const sortedOptions = options.includes('INFO' || 'WARNING' || 'ERROR' || 'BLOCKER')
-    ? sortErrors(options).reverse()
-    : options;
+  const sortedOptions = options.includes('INFO' || 'WARNING' || 'ERROR' || 'BLOCKER') ? sortErrors(options) : options;
   const filteredOptions = sortedOptions.some(item => typeof item === 'boolean') ? [true, false] : sortedOptions;
 
   return getOptionsTemplate(filteredOptions, property);
