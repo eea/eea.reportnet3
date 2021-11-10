@@ -51,26 +51,22 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
   useEffect(() => {
     const headers = [
       {
-        id: 'key',
-        header: `${resourcesContext.messages['type']} (${resourcesContext.messages['key']})`
+        id: 'id',
+        header: `${resourcesContext.messages['type']} (${resourcesContext.messages['key']})`,
+        visible: false
       },
       {
         id: 'message',
         header: resourcesContext.messages['message']
       },
       {
-        id: 'levelError',
+        id: 'level',
         header: resourcesContext.messages['notificationLevel'],
         template: notificationLevelTemplate
       },
       {
-        id: 'date',
-        header: resourcesContext.messages['date']
-      },
-      {
-        id: 'redirectionUrl',
-        header: resourcesContext.messages['action'],
-        template: linkTemplate
+        id: 'enabled',
+        header: resourcesContext.messages['ruleEnabled']
       }
     ];
 
@@ -81,8 +77,8 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
     columnsArray.push(
       <Column
         body={actionsColumnButtons}
-        // className={styles.crudColumn}
         header={resourcesContext.messages['actions']}
+        // className={styles.crudColumn}
         key="buttonsUniqueId"
       />
     );
@@ -112,34 +108,9 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
     );
   };
 
-  const getValidUrl = (url = '') => {
-    let newUrl = window.decodeURIComponent(url);
-    newUrl = newUrl.trim().replace(/\s/g, '');
-
-    if (/^(:\/\/)/.test(newUrl)) return `http${newUrl}`;
-
-    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) return `//${newUrl}`;
-
-    return newUrl;
-  };
-
-  const linkTemplate = rowData => {
-    if (rowData.downloadButton) {
-      return rowData.downloadButton;
-    }
-
-    return (
-      rowData.redirectionUrl !== '' && (
-        <a href={getValidUrl(rowData.redirectionUrl)} rel="noopener noreferrer" target="_self">
-          {rowData.redirectionUrl}
-        </a>
-      )
-    );
-  };
-
   const notificationLevelTemplate = rowData => (
     <div className={styles.notificationLevelTemplateWrapper}>
-      <LevelError type={rowData.levelError?.toLowerCase()} />
+      <LevelError type={rowData.level?.toLowerCase()} />
     </div>
   );
 
@@ -254,6 +225,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
     dispatchSystemNotification({ type: 'ON_TOGGLE_CREATE_FORM_VISIBILITY', payload: visible });
 
   const renderSystemNotifications = () => {
+    console.log(systemNotifications);
     if (isLoading) {
       return <Spinner />;
     } else if (systemNotifications.length > 0) {

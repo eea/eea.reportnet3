@@ -5,21 +5,17 @@ import { SystemNotificationRepository } from 'repositories/SystemNotificationRep
 export const SystemNotificationService = {
   all: async () => {
     // const systemNotificationsDTO = await SystemNotificationRepository.all();
-    const systemNotificationsDTO = {};
+    let systemNotificationsDTO = {};
     systemNotificationsDTO.data = [
       { id: 1, message: 'System temporaly shutdown', level: 'ERROR', enabled: true },
       { id: 2, message: 'System temporaly shutdown 2', level: 'WARNING', enabled: true },
       { id: 3, message: 'System temporaly shutdown 3', level: 'ERROR', enabled: false }
     ];
 
-    const notifications = {};
-
-    notifications.userNotifications = systemNotificationsDTO?.data?.map(systemNotificationDTO => {
+    return systemNotificationsDTO?.data?.map(systemNotificationDTO => {
       const { id, message, enabled, level } = systemNotificationDTO;
       return new SystemNotification({ id, message, enabled, level, lifeTime: 5000 });
     });
-
-    return notifications;
   },
 
   create: async ({ message, level, enabled }) => await SystemNotificationRepository.create(message, level, enabled),
