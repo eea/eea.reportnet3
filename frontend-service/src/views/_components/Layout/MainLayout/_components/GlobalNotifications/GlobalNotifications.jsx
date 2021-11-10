@@ -88,7 +88,7 @@ const GlobalNotifications = () => {
 
     try {
       const { data } = await DataflowService.downloadUsersListFile(
-        notification.content.datasetId,
+        notification.content.dataflowId,
         notification.content.fileName
       );
       notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE' });
