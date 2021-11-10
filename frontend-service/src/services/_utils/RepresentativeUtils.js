@@ -20,6 +20,7 @@ const parseLeadReporters = leadReporters =>
   leadReporters?.map(leadReporter => ({
     account: leadReporter.email,
     id: leadReporter.id,
+    isValid: leadReporter.isValid,
     representativeId: leadReporter.representativeId
   }));
 
