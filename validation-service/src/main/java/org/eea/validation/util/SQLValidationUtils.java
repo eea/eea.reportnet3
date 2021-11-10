@@ -455,14 +455,15 @@ public class SQLValidationUtils {
     String errorMessage = rule.getThenCondition().get(0);
     if (dataSetSchema.isPresent()) {
       String sql = rule.getSqlSentence();
-      LOG.info("SQL Rule for check: {}", sql);
-      LOG.info("Message Rule for check: {}", errorMessage);
-      // get the fields from ruleMessage to replace later
-      ArrayList<String> fieldsToReplace = getFieldsToReplace(errorMessage);
-      errorMessage = rewriteMessage(object, errorMessage, fieldsToReplace, tableToEvaluate);
+      if (validateMessage(errorMessage)) {
+        LOG.info("SQL Rule for check: {}", sql);
+        LOG.info("Message Rule for check: {}", errorMessage);
+        // get the fields from ruleMessage to replace later
+        ArrayList<String> fieldsToReplace = getFieldsToReplace(errorMessage);
+        errorMessage = rewriteMessage(object, errorMessage, fieldsToReplace, tableToEvaluate);
+      }
     }
-  }return errorMessage;
-
+    return errorMessage;
   }
 
   /**
