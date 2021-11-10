@@ -742,8 +742,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               }
             }
           }
-          RulesSchemaVO rulesSchemaVO = rulesControllerZuul
-              .findRuleSchemaByDatasetId(referenceDataset.getDatasetSchema(), dataflowId);
+          RulesSchemaVO rulesSchemaVO =
+              rulesControllerZuul.findRuleSchemaByDatasetId(referenceDataset.getDatasetSchema());
           List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
           prepareFKAndIntegrityForEUandDC(referenceDatasetId, newReferencesRegistry,
               lIntegrityDataCollections, referenceDataset, integritieVOs);
