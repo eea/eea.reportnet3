@@ -112,6 +112,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isReleaseDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isShowPublicInfoDialogVisible: false,
+    isShowPublicInfoUpdating: false,
     isSnapshotDialogVisible: false,
     isUserListVisible: false,
     isUserRightManagementDialogVisible: false,
@@ -120,6 +121,7 @@ const Dataflow = withRouter(({ history, match }) => {
     representative: {},
     representativesImport: false,
     restrictFromPublic: false,
+    restrictFromPublicIsUpdating: {},
     showPublicInfo: false,
     status: '',
     updatedDatasetSchema: [],
@@ -306,16 +308,12 @@ const Dataflow = withRouter(({ history, match }) => {
         checked={dataflowState.restrictFromPublic}
         id="restrict_from_public_checkbox"
         inputId="restrict_from_public_checkbox"
-        onChange={e =>
-          dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
-        }
+        onChange={() => setRestrictFromPublic(!dataflowState.restrictFromPublic)}
         role="checkbox"
       />
       <label
         className={styles.restrictFromPublic}
-        onClick={() =>
-          dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
-        }
+        onClick={() => setRestrictFromPublic(!dataflowState.restrictFromPublic)}
         style={{ cursor: 'pointer', fontWeight: 'bold' }}>
         {resourcesContext.messages['restrictFromPublicCheckboxLabel']}
       </label>
@@ -398,6 +396,21 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const setIsReceiptOutdated = isReceiptOutdated => {
     dataflowDispatch({ type: 'SET_IS_RECEIPT_OUTDATED', payload: { isReceiptOutdated } });
+  };
+
+  const setIsShowPublicInfoUpdating = isShowPublicInfoUpdating =>
+    dataflowDispatch({ type: 'SHOW_PUBLIC_INFO_IS_UPDATING', payload: { isShowPublicInfoUpdating } });
+
+  const setRepresentative = representative => dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
+
+  const setRestrictFromPublic = restrictFromPublicValue =>
+    dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: restrictFromPublicValue });
+
+  const setRestrictFromPublicIsUpdating = (value, dataProviderId) => {
+    dataflowDispatch({
+      type: 'RESTRICT_FROM_PUBLIC_IS_UPDATING',
+      payload: { value: value, dataProviderId: dataProviderId }
+    });
   };
 
   const onCleanUpReceipt = () => {
@@ -601,8 +614,7 @@ const Dataflow = withRouter(({ history, match }) => {
           );
 
           if (!isEmpty(representative)) {
-            dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
-            dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: representative.restrictFromPublic });
+            setRepresentativeAndRestrictFromPublic(representative, representative.restrictFromPublic);
           }
         }
       } else {
@@ -616,8 +628,7 @@ const Dataflow = withRouter(({ history, match }) => {
           if (isLeadReporter) {
             const representative = dataflow.representatives[0];
             if (!isEmpty(representative)) {
-              dataflowDispatch({ type: 'SET_REPRESENTATIVE', payload: representative });
-              dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: representative.restrictFromPublic });
+              setRepresentativeAndRestrictFromPublic(representative, representative.restrictFromPublic);
             }
           }
         }
@@ -628,6 +639,7 @@ const Dataflow = withRouter(({ history, match }) => {
       history.push(getUrl(routes.DATAFLOWS));
     } finally {
       setIsPageLoading(false);
+      setIsShowPublicInfoUpdating(false);
     }
   };
 
@@ -811,17 +823,19 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmRestrictFromPublic = async () => {
     manageDialogs('isRestrictFromPublicDialogVisible', false);
     try {
+      const selectedDataProviderId = dataProviderId || dataflowState.representative.dataProviderId;
+      setRestrictFromPublicIsUpdating(true, selectedDataProviderId);
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: true } });
       await RepresentativeService.updateRestrictFromPublic(
         dataflowId,
-        dataProviderId,
+        selectedDataProviderId,
         dataflowState.restrictFromPublic
       );
       onLoadReportingDataflow();
     } catch (error) {
       console.error('Dataflow - onConfirmRestrictFromPublic.', error);
       notificationContext.add({ type: 'UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT', content: { dataflowId } }, true);
-      dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: dataflowState.representative.restrictFromPublic });
+      setRestrictFromPublic(!dataflowState.restrictFromPublic);
     }
   };
 
@@ -850,6 +864,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const onConfirmUpdateShowPublicInfo = async () => {
     manageDialogs('isShowPublicInfoDialogVisible', false);
     try {
+      setIsShowPublicInfoUpdating(true);
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: true } });
       await DataflowService.update(
         dataflowId,
@@ -900,6 +915,24 @@ const Dataflow = withRouter(({ history, match }) => {
     { label: config.permissions.roles.EDITOR_READ.label, role: config.permissions.roles.EDITOR_READ.key }
   ];
 
+  const setSelectedRepresentative = dataProviderId => {
+    if (isEmpty(dataflowState.representative) || dataProviderId !== dataflowState.representative.dataProviderId) {
+      const representative = dataflowState.data.representatives.find(
+        representative => representative.dataProviderId === dataProviderId
+      );
+
+      if (!isEmpty(representative)) {
+        setRepresentativeAndRestrictFromPublic(representative, representative.restrictFromPublic);
+      }
+    }
+  };
+
+  const setRepresentativeAndRestrictFromPublic = (representative, restrictFromPublicValue) => {
+    setRepresentative(representative);
+    setRestrictFromPublic(restrictFromPublicValue);
+    setRestrictFromPublicIsUpdating(false, representative.dataProviderId);
+  };
+
   const getBigButtonList = () => {
     if (isNil(representativeId)) {
       return (
@@ -909,6 +942,7 @@ const Dataflow = withRouter(({ history, match }) => {
           dataflowState={dataflowState}
           dataflowType={dataflowState.dataflowType}
           handleRedirect={handleRedirect}
+          isLeadReporter={isLeadReporter}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           manageDialogs={manageDialogs}
           onCleanUpReceipt={onCleanUpReceipt}
@@ -919,6 +953,7 @@ const Dataflow = withRouter(({ history, match }) => {
           setIsCopyDataCollectionToEUDatasetLoading={setIsCopyDataCollectionToEUDatasetLoading}
           setIsExportEUDatasetLoading={setIsExportEUDatasetLoading}
           setIsReceiptLoading={setIsReceiptLoading}
+          setSelectedRepresentative={setSelectedRepresentative}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
         />
       );
@@ -973,10 +1008,7 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => {
               manageDialogs('isReleaseDialogVisible', false);
               if (dataflowState.representative.restrictFromPublic !== dataflowState.restrictFromPublic) {
-                dataflowDispatch({
-                  type: 'SET_RESTRICT_FROM_PUBLIC',
-                  payload: dataflowState.representative.restrictFromPublic
-                });
+                setRestrictFromPublic(dataflowState.representative.restrictFromPublic);
               }
             }}
             visible={dataflowState.isReleaseDialogVisible}>
@@ -1131,10 +1163,7 @@ const Dataflow = withRouter(({ history, match }) => {
             onHide={() => {
               manageDialogs('isRestrictFromPublicDialogVisible', false);
               if (dataflowState.representative.restrictFromPublic !== dataflowState.restrictFromPublic) {
-                dataflowDispatch({
-                  type: 'SET_RESTRICT_FROM_PUBLIC',
-                  payload: dataflowState.representative.restrictFromPublic
-                });
+                setRestrictFromPublic(dataflowState.representative.restrictFromPublic);
               }
             }}
             visible={dataflowState.isRestrictFromPublicDialogVisible}>
@@ -1142,17 +1171,11 @@ const Dataflow = withRouter(({ history, match }) => {
               checked={dataflowState.restrictFromPublic}
               id="restrictFromPublicCheckbox"
               inputId="restrictFromPublicCheckbox"
-              onChange={() =>
-                dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
-              }
+              onChange={() => setRestrictFromPublic(!dataflowState.restrictFromPublic)}
               role="checkbox"
             />
             <label className={styles.restrictFromPublic} htmlFor="restrictFromPublicCheckbox">
-              <span
-                className={styles.pointer}
-                onClick={() =>
-                  dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: !dataflowState.restrictFromPublic })
-                }>
+              <span className={styles.pointer} onClick={() => setRestrictFromPublic(!dataflowState.restrictFromPublic)}>
                 {resourcesContext.messages['restrictFromPublicCheckboxLabel']}
               </span>
             </label>
