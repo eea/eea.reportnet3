@@ -51,6 +51,7 @@ export const BigButtonList = ({
   dataflowType,
   dataProviderId,
   handleRedirect,
+  isLeadReporter,
   isLeadReporterOfCountry,
   manageDialogs,
   onCleanUpReceipt,
@@ -61,6 +62,7 @@ export const BigButtonList = ({
   setIsCopyDataCollectionToEUDatasetLoading,
   setIsExportEUDatasetLoading,
   setIsReceiptLoading,
+  setSelectedRepresentative,
   setUpdatedDatasetSchema
 }) => {
   const { showLoading, hideLoading } = useContext(LoadingContext);
@@ -548,6 +550,7 @@ export const BigButtonList = ({
     isActiveButton,
     isCloningDataflow,
     isImportingDataflow,
+    isLeadReporter,
     isLeadReporterOfCountry,
     onCloneDataflow,
     onImportSchema,
@@ -566,7 +569,14 @@ export const BigButtonList = ({
     setErrorDialogData
   })
     .filter(button => button.visibility)
-    .map(button => <BigButton key={button.caption} manageDialogs={manageDialogs} {...button} />);
+    .map(button => (
+      <BigButton
+        key={button.caption}
+        manageDialogs={manageDialogs}
+        setSelectedRepresentative={setSelectedRepresentative}
+        {...button}
+      />
+    ));
 
   const getManageAcceptanceDataset = data => setDatasetFeedbackStatusToEdit(data);
 
