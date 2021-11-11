@@ -97,6 +97,16 @@
   }
 }
 
+.p-growl-message-system-notification {
+  border-width: 2px 2px 2px 5px;
+}
+
+.p-growl-message-system-notification-icon {
+  transform: scaleX(-1);
+  font-size: 0.9em;
+  opacity: 0.6;
+}
+
 .p-growl-icon-close {
   color: var(--growl-close-icon-color);
 }

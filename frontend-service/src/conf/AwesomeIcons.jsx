@@ -14,6 +14,7 @@ import {
   faBars,
   faBookOpen,
   faBroom,
+  faBullhorn,
   faCaretDown,
   faCaretRight,
   faChartBar,
@@ -438,6 +439,8 @@ export const AwesomeIcons = icon => {
       return faStaylinked;
     case 'meteor':
       return faMeteor;
+    case 'bullhorn':
+      return faBullhorn;
     default:
       return faFileAlt;
   }

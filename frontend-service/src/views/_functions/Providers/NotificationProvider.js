@@ -27,6 +27,7 @@ const NotificationProvider = ({ children }) => {
       value={{
         ...state,
         add: (notificationDTO, save = false, isSystemNotification = false) => {
+          console.log(isSystemNotification);
           if (!isSystemNotification) {
             const { content, onClick, type } = notificationDTO;
             if (save) {
@@ -41,7 +42,6 @@ const NotificationProvider = ({ children }) => {
               routes,
               type
             });
-            console.log(notification);
 
             dispatch({
               type: 'ADD',
@@ -55,7 +55,8 @@ const NotificationProvider = ({ children }) => {
               message: notificationDTO.message,
               lifeTime: notificationDTO.lifeTime,
               type: notificationDTO.level.toLowerCase(),
-              fixed: true
+              fixed: true,
+              isSystem: true
             };
             if (notificationDTO.enabled) {
               dispatch({
