@@ -2,12 +2,16 @@ package org.eea.communication.service.impl;
 
 import java.util.List;
 import java.util.Map;
+import org.eea.communication.mapper.SystemNotificationMapper;
 import org.eea.communication.mapper.UserNotificationMapper;
+import org.eea.communication.persistence.SystemNotification;
 import org.eea.communication.persistence.UserNotification;
+import org.eea.communication.persistence.repository.SystemNotificationRepository;
 import org.eea.communication.persistence.repository.UserNotificationRepository;
 import org.eea.communication.service.NotificationService;
 import org.eea.communication.service.model.Notification;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.communication.SystemNotificationVO;
 import org.eea.interfaces.vo.communication.UserNotificationListVO;
 import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.kafka.domain.EventType;
@@ -17,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -48,6 +53,14 @@ public class NotificationServiceImpl implements NotificationService {
   /** The user notification mapper. */
   @Autowired
   private UserNotificationMapper userNotificationMapper;
+
+  /** The system notification repository. */
+  @Autowired
+  private SystemNotificationRepository systemNotificationRepository;
+
+  /** The system notification mapper. */
+  @Autowired
+  SystemNotificationMapper systemNotificationMapper;
 
   /**
    * Send.
@@ -89,6 +102,68 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   /**
+   * Creates the system notification.
+   *
+   * @param systemNotificationVO the system notification VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void createSystemNotification(SystemNotificationVO systemNotificationVO)
+      throws EEAException {
+    try {
+      SystemNotification systemNotification = new SystemNotification();
+      systemNotification.setMessage(systemNotificationVO.getMessage());
+      systemNotification.setEnabled(systemNotificationVO.isEnabled());
+      systemNotification.setLevel(systemNotificationVO.getLevel());
+      systemNotificationRepository.save(systemNotification);
+      LOG.info("System Notification created succesfully in mongo");
+    } catch (IllegalArgumentException e) {
+      LOG_ERROR.error("Error creating a System Notification");
+      throw new EEAException(e.getMessage());
+    }
+  }
+
+  /**
+   * Delete system notification.
+   *
+   * @param systemNotificationId the system notification id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Modifying
+  public void deleteSystemNotification(String systemNotificationId) throws EEAException {
+    try {
+      systemNotificationRepository.deleteSystemNotficationById(systemNotificationId);
+      LOG.info("System Notification deleted succesfully in mongo");
+    } catch (IllegalArgumentException e) {
+      LOG_ERROR.error("Error deleting a System Notification");
+      throw new EEAException(e.getMessage());
+    }
+  }
+
+  /**
+   * Update system notification.
+   *
+   * @param systemNotificationVO the system notification VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateSystemNotification(SystemNotificationVO systemNotificationVO)
+      throws EEAException {
+    try {
+      SystemNotification systemNotification =
+          systemNotificationMapper.classToEntity(systemNotificationVO);
+
+      systemNotificationRepository.updateSystemNotficationById(systemNotification);
+      LOG.info("System Notification updated succesfully in mongo");
+
+    } catch (IllegalArgumentException e) {
+      LOG_ERROR.error("Error updating a System Notification");
+      throw new EEAException(e.getMessage());
+    }
+  }
+
+  /**
    * Find user notifications by user.
    *
    * @param pageNum the page num
@@ -110,5 +185,17 @@ public class NotificationServiceImpl implements NotificationService {
     userNotificationListVO.setTotalRecords(
         !CollectionUtils.isEmpty(totalRecords) ? Long.valueOf(totalRecords.size()) : 0);
     return userNotificationListVO;
+  }
+
+  /**
+   * Find system notifications.
+   *
+   * @return the list
+   */
+  @Override
+  public List<SystemNotificationVO> findSystemNotifications() {
+
+    List<SystemNotification> listSystemNotification = systemNotificationRepository.findAll();
+    return systemNotificationMapper.entityListToClass(listSystemNotification);
   }
 }
