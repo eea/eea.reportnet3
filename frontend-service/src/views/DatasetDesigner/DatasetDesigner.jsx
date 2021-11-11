@@ -74,7 +74,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
 
-  const [importFromOtherSystemSelectedIntegrationId, setImportFromOtherSystemSelectedIntegrationId] = useState();
+  const [importFromOtherSystemSelectedIntegration, setImportFromOtherSystemSelectedIntegration] = useState({
+    id: null,
+    name: ''
+  });
   const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
@@ -404,7 +407,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               label: importOtherSystem.name,
               icon: 'upload',
               command: () => {
-                setImportFromOtherSystemSelectedIntegrationId(importOtherSystem.id);
+                setImportFromOtherSystemSelectedIntegration({ id: importOtherSystem.id, name: importOtherSystem.name });
                 manageDialogs('isImportOtherSystemsDialogVisible', true);
               }
             }))
@@ -951,7 +954,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     try {
       cleanImportOtherSystemsDialog();
       await IntegrationService.runIntegration(
-        importFromOtherSystemSelectedIntegrationId,
+        importFromOtherSystemSelectedIntegration.id,
         datasetId,
         designerState.replaceData
       );
@@ -1814,10 +1817,18 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           <Dialog
             className={styles.Dialog}
             footer={renderImportOtherSystemsFooter}
-            header={resourcesContext.messages['importPreviousDataHeader']}
+            header={TextUtils.parseText(resourcesContext.messages['importPreviousDataHeader'], {
+              importName: importFromOtherSystemSelectedIntegration.name
+            })}
             onHide={cleanImportOtherSystemsDialog}
             visible={isImportOtherSystemsDialogVisible}>
-            <div className={styles.text}>{resourcesContext.messages['importPreviousDataConfirm']}</div>
+            <div
+              className={styles.text}
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['importPreviousDataConfirm'], {
+                  importName: importFromOtherSystemSelectedIntegration.name
+                })
+              }}></div>
             <div className={styles.checkboxWrapper}>
               <Checkbox
                 checked={designerState.replaceData}
