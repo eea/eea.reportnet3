@@ -769,4 +769,46 @@ public class DatasetMetabaseServiceTest {
         .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong());
   }
 
+  @Test
+  public void getDatasetTypeEnumReturnEuDatasetTest() {
+    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(euDatasetRepository.existsById(Mockito.any())).thenReturn(true);
+    Assert.assertEquals(DatasetTypeEnum.EUDATASET, datasetMetabaseService.getDatasetType(1L));
+  }
+
+  @Test
+  public void getDatasetTypeEnumReturnTestDatasetTest() {
+    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(euDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(testDatasetRepository.existsById(Mockito.any())).thenReturn(true);
+    Assert.assertEquals(DatasetTypeEnum.TEST, datasetMetabaseService.getDatasetType(1L));
+  }
+
+  @Test
+  public void getDatasetTypeEnumReturnReferenceDatasetTest() {
+    Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(dataCollectionRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(euDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(testDatasetRepository.existsById(Mockito.any())).thenReturn(false);
+    Mockito.when(referenceDatasetRepository.existsById(Mockito.any())).thenReturn(true);
+    Assert.assertEquals(DatasetTypeEnum.REFERENCE, datasetMetabaseService.getDatasetType(1L));;
+  }
+
+  @Test
+  public void createEmptyTestDatasetTest() throws EEAException {
+    DataProviderVO dataProvider = new DataProviderVO();
+    dataProvider.setLabel("test");
+    doNothing().when(recordStoreControllerZuul).createEmptyDataset(Mockito.any(), Mockito.any());
+    datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.TEST, "testName",
+        "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new ArrayList<>(), 0);
+    Mockito.verify(recordStoreControllerZuul, times(1)).createEmptyDataset(Mockito.any(),
+        Mockito.any());
+
+  }
+
 }

@@ -347,5 +347,12 @@ public interface UserManagementController {
   List<UserRoleVO> getUserRolesByDataflow(Long dataflowId);
 
 
+  /**
+   * Export users by country.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @PostMapping("/exportUsersByCountry/dataflow/{dataflowId}")
+  void exportUsersByCountry(@PathVariable("dataflowId") Long dataflowId);
 
 }
