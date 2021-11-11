@@ -219,6 +219,7 @@ const RepresentativesList = ({
       } catch (error) {
         console.error('RepresentativesList - onAddRepresentative.', error);
         notificationContext.add({ type: 'ADD_DATA_PROVIDER_ERROR' }, true);
+        formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
       }
     }
   };
@@ -248,6 +249,7 @@ const RepresentativesList = ({
       } catch (error) {
         console.error('RepresentativesList - onDataProviderIdChange.', error);
         notificationContext.add({ type: 'UPDATE_DATA_PROVIDER_ERROR' }, true);
+        formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
       }
     } else {
       const { representatives } = formState;
