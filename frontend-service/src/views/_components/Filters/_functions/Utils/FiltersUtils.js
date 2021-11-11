@@ -93,7 +93,6 @@ const getOptionsNames = options => {
 
 const getOptionsTemplate = (filteredOptions, property) => {
   const template = [];
-
   filteredOptions.forEach(option => {
     switch (property) {
       case 'automatic':
@@ -112,14 +111,14 @@ const getOptionsTemplate = (filteredOptions, property) => {
         template.push({ type: getUserRoleLabel(option), value: option });
         break;
       case 'restrictFromPublic':
-        template.push({ type: option, value: !option });
+        template.push({ type: option?.toString().toUpperCase(), value: !option });
         break;
       default:
         template.push({ type: option?.toString().toUpperCase(), value: option?.toString().toUpperCase() });
     }
   });
 
-  return sortBy(template, 'type');
+  return template;
 };
 
 const getOptionsTypes = (data, property, list, sortErrors) => {
@@ -130,7 +129,9 @@ const getOptionsTypes = (data, property, list, sortErrors) => {
   }
 
   const options = uniq(data.map(item => item[property])).filter(onFilterBooleanOptions);
-  const sortedOptions = options.includes('INFO' || 'WARNING' || 'ERROR' || 'BLOCKER') ? sortErrors(options) : options;
+  const sortedOptions = options.includes('INFO' || 'WARNING' || 'ERROR' || 'BLOCKER')
+    ? sortErrors(options).reverse()
+    : options;
   const filteredOptions = sortedOptions.some(item => typeof item === 'boolean') ? [true, false] : sortedOptions;
 
   return getOptionsTemplate(filteredOptions, property);
