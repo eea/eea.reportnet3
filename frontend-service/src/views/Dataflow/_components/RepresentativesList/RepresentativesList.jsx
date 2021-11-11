@@ -335,6 +335,7 @@ const RepresentativesList = ({
           key={`${leadReporter.id}-${representativeId}`}>
           <InputText
             autoFocus={isNewLeadReporter}
+            autocomplete={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             id={`${leadReporter.id}-${representativeId}`}
             onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
