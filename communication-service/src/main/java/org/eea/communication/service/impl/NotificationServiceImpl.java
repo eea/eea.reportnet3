@@ -111,14 +111,12 @@ public class NotificationServiceImpl implements NotificationService {
   public void createSystemNotification(SystemNotificationVO systemNotificationVO)
       throws EEAException {
     try {
-      SystemNotification systemNotification = new SystemNotification();
-      systemNotification.setMessage(systemNotificationVO.getMessage());
-      systemNotification.setEnabled(systemNotificationVO.isEnabled());
-      systemNotification.setLevel(systemNotificationVO.getLevel());
+      SystemNotification systemNotification =
+          systemNotificationMapper.classToEntity(systemNotificationVO);
       systemNotificationRepository.save(systemNotification);
       LOG.info("System Notification created succesfully in mongo");
     } catch (IllegalArgumentException e) {
-      LOG_ERROR.error("Error creating a System Notification");
+      LOG_ERROR.error("Error creating a System Notification. {}", e);
       throw new EEAException(e.getMessage());
     }
   }
@@ -194,8 +192,6 @@ public class NotificationServiceImpl implements NotificationService {
    */
   @Override
   public List<SystemNotificationVO> findSystemNotifications() {
-
-    List<SystemNotification> listSystemNotification = systemNotificationRepository.findAll();
-    return systemNotificationMapper.entityListToClass(listSystemNotification);
+    return systemNotificationMapper.entityListToClass(systemNotificationRepository.findAll());
   }
 }

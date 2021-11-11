@@ -30,6 +30,6 @@ public interface SystemNotificationMapper
    * @return the object id
    */
   default ObjectId map(String value) {
-    return new ObjectId(value);
+    return value == null ? new ObjectId() : new ObjectId(value);
   }
 }
