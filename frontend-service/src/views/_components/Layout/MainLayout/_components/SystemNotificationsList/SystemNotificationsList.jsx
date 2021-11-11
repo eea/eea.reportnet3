@@ -23,12 +23,14 @@ import { SystemNotificationFieldEditor } from './_components/SystemNotificationF
 
 import { SystemNotificationService } from 'services/SystemNotificationService';
 
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { systemNotificationReducer } from './_functions/Reducers/systemNotificationReducer';
 
 const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotificationVisible }) => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -194,6 +196,14 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
     </div>
   );
 
+  const newSystemNotificationsClassName = rowData => {
+    return {
+      'p-highlight':
+        notificationContext.all.filter(notification => notification.isSystem && notification.id === rowData.id).length >
+        0
+    };
+  };
+
   const systemNotificationsFooter = (
     <div>
       <Button
@@ -209,7 +219,10 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         icon="cancel"
         id="cancelCreateSystemNotification"
         label={resourcesContext.messages['cancel']}
-        onClick={() => setIsSystemNotificationVisible(false)}
+        onClick={() => {
+          setIsSystemNotificationVisible(false);
+          notificationContext.deleteAll(true);
+        }}
       />
     </div>
   );
@@ -233,9 +246,11 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
 
   const onCreateSystemNotification = async systemNotification => {
     console.log(systemNotification);
-    // try{
-
-    // }
+    try {
+      SystemNotificationService.create({ ...systemNotification });
+    } catch (error) {
+      console.error('SystemNotificationsList - onCreateSystemNotification', error);
+    }
   };
 
   const onEditClick = rowData => {
@@ -341,6 +356,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
             condition: isLoading,
             requiredFields: ['message', 'level']
           }}
+          rowClassName={newSystemNotificationsClassName}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary="notificationsList"
@@ -368,7 +384,10 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
           footer={systemNotificationsFooter}
           header={resourcesContext.messages['systemNotifications']}
           modal={true}
-          onHide={() => setIsSystemNotificationVisible(false)}
+          onHide={() => {
+            setIsSystemNotificationVisible(false);
+            notificationContext.deleteAll(true);
+          }}
           style={{ width: '80%' }}
           visible={isSystemNotificationVisible}
           zIndex={3100}>

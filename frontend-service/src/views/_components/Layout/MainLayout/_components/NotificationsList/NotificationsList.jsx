@@ -223,7 +223,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   const newNotificationsClassName = rowData => {
     return {
-      'p-highlight': rowData.index < notificationContext.all.length
+      'p-highlight': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
     };
   };
 

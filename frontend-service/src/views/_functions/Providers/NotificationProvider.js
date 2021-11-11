@@ -42,16 +42,16 @@ const NotificationProvider = ({ children }) => {
               routes,
               type
             });
-
             dispatch({
               type: 'ADD',
-              payload: notification
+              payload: { notification, isSystemNotification: false }
             });
             dispatch({
               type: 'NEW_NOTIFICATION_ADDED'
             });
           } else {
             const systemNotification = {
+              id: notificationDTO.id,
               message: notificationDTO.message,
               lifeTime: notificationDTO.lifeTime,
               type: notificationDTO.level.toLowerCase(),
@@ -61,10 +61,10 @@ const NotificationProvider = ({ children }) => {
             if (notificationDTO.enabled) {
               dispatch({
                 type: 'ADD',
-                payload: systemNotification
+                payload: { notification: systemNotification, isSystemNotification: true }
               });
               dispatch({
-                type: 'NEW_NOTIFICATION_ADDED'
+                type: 'NEW_SYSTEM_NOTIFICATION_ADDED'
               });
             }
           }
@@ -94,9 +94,10 @@ const NotificationProvider = ({ children }) => {
           });
         },
 
-        deleteAll: () => {
+        deleteAll: (isSystemNotification = false) => {
           dispatch({
-            type: 'DESTROY'
+            type: 'DESTROY',
+            payload: isSystemNotification
           });
         },
 

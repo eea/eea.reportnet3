@@ -22,7 +22,9 @@ export const SystemNotificationsCreateForm = ({
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
-  const [systemNotification, setSystemNotification] = useState(formType === 'EDIT' ? notification : {});
+  const [systemNotification, setSystemNotification] = useState(
+    formType === 'EDIT' ? notification : { message: '', enabled: true }
+  );
 
   const onChange = (property, value) => {
     const inmSystemNotification = { ...systemNotification };

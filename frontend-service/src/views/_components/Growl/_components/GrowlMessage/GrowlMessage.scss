@@ -98,13 +98,14 @@
 }
 
 .p-growl-message-system-notification {
+  background-color: var(--growl-system-notification-bg);
   border-width: 2px 2px 2px 5px;
 }
 
 .p-growl-message-system-notification-icon {
   transform: scaleX(-1);
   font-size: 0.9em;
-  opacity: 0.6;
+  opacity: 0.8;
 }
 
 .p-growl-icon-close {
