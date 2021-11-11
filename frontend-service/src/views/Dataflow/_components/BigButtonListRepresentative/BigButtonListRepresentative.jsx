@@ -17,7 +17,7 @@ import { ConfirmationReceiptService } from 'services/ConfirmationReceiptService'
 
 import { bigButtonListRepresentativeReducer } from './_functions/Reducers/bigButtonListRepresentativeReducer';
 
-import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
+import { useBigButtonListRepresentative } from './_functions/Hooks/useBigButtonListRepresentative';
 
 export const BigButtonListRepresentative = ({
   dataflowState,
@@ -103,7 +103,7 @@ export const BigButtonListRepresentative = ({
       <div className={styles.buttonsWrapper}>
         <div className={styles.splitButtonWrapper}>
           <div className={styles.datasetItem}>
-            {useBigButtonList({
+            {useBigButtonListRepresentative({
               dataflowState,
               dataProviderId,
               getDataHistoricReleases,
