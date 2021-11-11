@@ -28,12 +28,14 @@ export const BigButton = ({
   caption,
   dataflowStatus,
   datasetSchemaInfo,
+  dataProviderId,
   enabled = true,
   handleRedirect = () => {},
   helpClassName,
   index,
   infoStatus,
   infoStatusIcon,
+  restrictFromPublicIsUpdating,
   layout,
   manageDialogs = () => {},
   model,
@@ -43,6 +45,7 @@ export const BigButton = ({
   restrictFromPublicAccess,
   restrictFromPublicInfo,
   restrictFromPublicStatus,
+  setSelectedRepresentative = () => {},
   setErrorDialogData,
   tooltip
 }) => {
@@ -166,6 +169,14 @@ export const BigButton = ({
     }
   };
 
+  const getRestrictFromPublicIcon = () => {
+    if (restrictFromPublicIsUpdating) {
+      return AwesomeIcons('spinner');
+    } else {
+      return AwesomeIcons(restrictFromPublicStatus ? 'eyeSlash' : 'eye');
+    }
+  };
+
   const defaultBigButton = (
     <Fragment>
       <div
@@ -185,9 +196,14 @@ export const BigButton = ({
         )}
         {infoStatus &&
           (infoStatusIcon ? (
-            <Icon icon="cloudUpload" style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }} />
+            <Icon
+              className={styles.notClickableIcon}
+              icon="checkCircle"
+              style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }}
+            />
           ) : (
             <p
+              className={styles.notClickableIcon}
               style={{
                 position: 'absolute',
                 top: '0',
@@ -201,8 +217,14 @@ export const BigButton = ({
           ))}
         {restrictFromPublicInfo && (
           <FontAwesomeIcon
-            icon={AwesomeIcons(restrictFromPublicStatus ? 'eyeSlash' : 'eye')}
-            onClick={() => restrictFromPublicAccess && manageDialogs('isRestrictFromPublicDialogVisible', true)}
+            className={`${!restrictFromPublicAccess && styles.notClickableIcon} ${
+              restrictFromPublicIsUpdating && 'fa-spin'
+            }`}
+            icon={getRestrictFromPublicIcon()}
+            onClick={() => {
+              restrictFromPublicAccess && manageDialogs('isRestrictFromPublicDialogVisible', true);
+              setSelectedRepresentative(dataProviderId);
+            }}
             style={{ position: 'absolute', top: '4px', left: '2px', fontSize: '1.2rem' }}
           />
         )}
