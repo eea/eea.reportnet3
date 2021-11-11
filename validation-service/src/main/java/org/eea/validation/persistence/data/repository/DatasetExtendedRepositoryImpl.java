@@ -92,6 +92,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
           conn -> executeQuery(conn, entityName, query, entityTypeEnum, datasetId, idTable));
     } catch (HibernateException e) {
       throw new EEAInvalidSQLException("SQL can't be executed: " + query, e);
+    } finally {
+      System.gc();
     }
   }
 
@@ -197,6 +199,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             fieldValidations.add(fieldValidation);
           }
           return fieldValidations;
+        } finally {
+          System.gc();
         }
       }
     });
