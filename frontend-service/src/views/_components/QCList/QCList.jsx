@@ -654,8 +654,8 @@ export const QCList = withRouter(
           { name: 'field', showInput: true },
           { name: 'entityType' },
           { name: 'levelError' },
-          { name: 'automatic' },
-          { name: 'enabled' },
+          { name: 'automatic', label: resourcesContext.messages['creationMode'] },
+          { name: 'enabled', label: resourcesContext.messages['statusQC'] },
           { name: 'isCorrect' }
         ]
       }
