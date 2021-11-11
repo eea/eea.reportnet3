@@ -138,19 +138,26 @@ const RepresentativesList = ({
     formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: selectedDataProviderGroup });
 
   const getInitialData = async () => {
-    switch (dataflowType) {
-      case config.dataflowType.BUSINESS.value:
-        await getDataProviderGroup();
-        break;
-      case config.dataflowType.CITIZEN_SCIENCE.value:
-        await getGroupOrganizations();
-        break;
-      default:
-        await getGroupCountries();
-        break;
-    }
+    try {
+      formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
+      switch (dataflowType) {
+        case config.dataflowType.BUSINESS.value:
+          await getDataProviderGroup();
+          break;
+        case config.dataflowType.CITIZEN_SCIENCE.value:
+          await getGroupOrganizations();
+          break;
+        default:
+          await getGroupCountries();
+          break;
+      }
 
-    await getRepresentatives();
+      await getRepresentatives();
+    } catch (error) {
+      console.error('RepresentativesList - getInitialData.', error);
+    } finally {
+      formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
+    }
 
     if (!isEmpty(formState.representatives)) {
       await getAllDataProviders();
@@ -212,8 +219,6 @@ const RepresentativesList = ({
       } catch (error) {
         console.error('RepresentativesList - onAddRepresentative.', error);
         notificationContext.add({ type: 'ADD_DATA_PROVIDER_ERROR' }, true);
-      } finally {
-        formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
       }
     }
   };
@@ -243,8 +248,6 @@ const RepresentativesList = ({
       } catch (error) {
         console.error('RepresentativesList - onDataProviderIdChange.', error);
         notificationContext.add({ type: 'UPDATE_DATA_PROVIDER_ERROR' }, true);
-      } finally {
-        formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
       }
     } else {
       const { representatives } = formState;
