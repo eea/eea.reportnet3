@@ -236,37 +236,15 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
           header={resourcesContext.messages['notifications']}
           modal={true}
-          onHide={() => setIsNotificationVisible(false)}
-          style={{ width: '60%' }}
+          onHide={() => {
+            setIsNotificationVisible(false);
+            notificationContext.deleteAll();
+          }}
+          style={{ width: '80%' }}
           visible={isNotificationVisible}
           zIndex={3100}>
-          {renderNotificationsListTable()}
+          {renderNotifications()}
         </Dialog>
-      );
-    }
-  };
-
-  const renderNotificationsListTable = () => {
-    if (notificationContext.all.length > 0) {
-      return (
-        <DataTable
-          autoLayout={true}
-          loading={false}
-          paginator={true}
-          paginatorRight={<span>{`${resourcesContext.messages['totalRecords']}  ${notifications.length}`}</span>}
-          rows={10}
-          rowsPerPageOptions={[5, 10, 15]}
-          summary={resourcesContext.messages['titleValidations']}
-          totalRecords={notifications.length}
-          value={notifications}>
-          {columns}
-        </DataTable>
-      );
-    } else {
-      return (
-        <div className={styles.notificationsWithoutTable}>
-          <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
-        </div>
       );
     }
   };
