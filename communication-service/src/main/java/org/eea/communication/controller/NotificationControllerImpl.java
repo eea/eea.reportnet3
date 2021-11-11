@@ -20,12 +20,14 @@ import org.springframework.web.server.ResponseStatusException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The Class NotificationControllerImpl.
  */
 @RestController
 @RequestMapping("/notification")
+@ApiIgnore
 @Api(tags = "Notification : Notification Manager")
 public class NotificationControllerImpl implements NotificationController {
 
