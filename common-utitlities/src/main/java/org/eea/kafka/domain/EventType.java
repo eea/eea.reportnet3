@@ -441,7 +441,15 @@ public enum EventType {
 
   /** The export schema information failed event. */
   EXPORT_SCHEMA_INFORMATION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "export_schema_information_failed_event", true);
+      "export_schema_information_failed_event", true),
+
+  /** The export users by country completed event. */
+  EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_users_by_country_completed_event", true),
+
+  /** The export users by country failed event. */
+  EXPORT_USERS_BY_COUNTRY_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_users_by_country_failed_event", true);
 
   /** The topic. */
   private String topic;

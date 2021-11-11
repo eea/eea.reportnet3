@@ -9,7 +9,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -85,10 +87,15 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Autowired
   private UserRoleService userRoleService;
 
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
+
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  private static final Logger LOG = LoggerFactory.getLogger(UserManagementControllerImpl.class);
 
   /**
    * The Constant ERROR_ADDING_CONTRIBUTOR.
@@ -807,6 +814,31 @@ public class UserManagementControllerImpl implements UserManagementController {
       LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+    }
+  }
+
+  /**
+   * Export users by country.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @PostMapping("/exportUsersByCountry/dataflow/{dataflowId}")
+  @ApiOperation(value = "Export all users by country into a CSV file", hidden = true)
+  public void exportUsersByCountry(@ApiParam(
+      value = "Dataflow id used in the export process.") @PathVariable("dataflowId") Long dataflowId) {
+    LOG.info("Export users by country from dataflow {}, with type csv.", dataflowId);
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_USERS_BY_COUNTRY_START",
+        userNotificationContentVO);
+    try {
+      userRoleService.exportUsersByCountry(dataflowId);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error("Error exporting users by country from dataflow {}. Message: {}", dataflowId,
+          e.getMessage());
     }
   }
 }
