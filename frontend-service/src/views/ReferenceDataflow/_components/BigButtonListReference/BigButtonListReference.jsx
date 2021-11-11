@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
-import { withRouter } from 'react-router';
+import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
