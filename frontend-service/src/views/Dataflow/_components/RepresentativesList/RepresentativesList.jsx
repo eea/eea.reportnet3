@@ -349,7 +349,7 @@ const RepresentativesList = ({
             value={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
           />
 
-          {!isNewLeadReporter && !errors?.[leadReporter.id] && (
+          {!isNewLeadReporter && isValidEmail(reporters[leadReporter.id]?.account || reporters[leadReporter.id]) && (
             <Fragment>
               <FontAwesomeIcon
                 data-for={reporters[leadReporter.id]?.account}
