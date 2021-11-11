@@ -1490,5 +1490,9 @@
   {
     "key": "config/apiGateway/zuul.routes.notification.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+	"key": "config/ums/umsExportPathFile",
+	"value":"JHtVTVNfRVhQT1JUX0ZJTEVTX1BBVEg6QzpcdW1zRXhwb3J0RmlsZXNcfQ=="
   }
 ]

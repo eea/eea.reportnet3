@@ -1,6 +1,8 @@
 package org.eea.ums.service;
 
+import java.io.IOException;
 import java.util.List;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.UserRoleVO;
 
 /**
@@ -25,5 +27,13 @@ public interface UserRoleService {
    */
   List<UserRoleVO> getUserRolesByDataflow(Long dataflowId);
 
+  /**
+   * Export users by country.
+   *
+   * @param dataflowId the dataflow id
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  void exportUsersByCountry(Long dataflowId) throws IOException, EEAException;
 
 }
