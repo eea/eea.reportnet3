@@ -41,8 +41,8 @@ export const DataflowRepository = {
   generateAllSchemasInfoFile: async dataflowId =>
     await HTTPRequester.post({ url: getUrl(DataflowConfig.generateAllSchemasInfoFile, { dataflowId }) }),
 
-  generateUsersFile: async dataflowId =>
-    await HTTPRequester.post({ url: getUrl(DataflowConfig.generateUsersFile, { dataflowId }) }),
+  generateUsersByCountryFile: async dataflowId =>
+    await HTTPRequester.post({ url: getUrl(DataflowConfig.generateUsersByCountryFile, { dataflowId }) }),
 
   getDetails: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDetails, { dataflowId }) }),
 
