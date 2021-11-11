@@ -5,7 +5,6 @@ import org.eea.communication.persistence.SystemNotification;
 import org.eea.interfaces.vo.communication.SystemNotificationVO;
 import org.eea.mapper.IMapper;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 /**
  * The Interface SystemNotificationMapper.
@@ -13,32 +12,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface SystemNotificationMapper
     extends IMapper<SystemNotification, SystemNotificationVO> {
-
-  /**
-   * Entity to class.
-   *
-   * @param entity the entity
-   * @return the system notification VO
-   */
-  @Override
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "message", target = "message")
-  @Mapping(source = "enabled", target = "enabled")
-  @Mapping(source = "level", target = "level")
-  SystemNotificationVO entityToClass(SystemNotification entity);
-
-
-  /**
-   * Class to entity.
-   *
-   * @param entity the entity
-   * @return the system notification
-   */
-  @Override
-  @Mapping(source = "message", target = "message")
-  @Mapping(source = "enabled", target = "enabled")
-  @Mapping(source = "level", target = "level")
-  SystemNotification classToEntity(SystemNotificationVO entity);
 
   /**
    * Map.
