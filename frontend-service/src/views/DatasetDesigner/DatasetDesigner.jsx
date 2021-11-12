@@ -78,7 +78,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     id: null,
     name: ''
   });
-  const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
+  const [importSelectedIntegration, setImportSelectedIntegration] = useState({
+    id: null,
+    name: ''
+  });
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
@@ -388,7 +391,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     type: 'GET_SELECTED_IMPORT_EXTENSION',
                     payload: { selectedImportExtension: type.fileExtension }
                   });
-                  setImportSelectedIntegrationId(type.id);
+                  setImportSelectedIntegration({ id: type.id, name: type.name });
                 },
                 icon: type.fileExtension,
                 label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
@@ -882,7 +885,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
   const onUpload = async () => {
     manageDialogs('isImportDatasetDialogVisible', false);
-    setImportSelectedIntegrationId(null);
+    setImportSelectedIntegration({ id: null });
     try {
       const {
         dataflow: { name: dataflowName },
@@ -1781,10 +1784,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
-            dialogHeader={`${resourcesContext.messages['uploadDataset']}${designerState.datasetSchemaName}`}
+            dialogHeader={importSelectedIntegration.name.toUpperCase()}
             dialogOnHide={() => {
               manageDialogs('isImportDatasetDialogVisible', false);
-              setImportSelectedIntegrationId(null);
+              setImportSelectedIntegration({ id: null });
             }}
             dialogVisible={designerState.isImportDatasetDialogVisible}
             infoTooltip={`${
@@ -1800,14 +1803,14 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             onUpload={onUpload}
             replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${
-              isNil(importSelectedIntegrationId)
+              isNil(importSelectedIntegration.id)
                 ? getUrl(DatasetConfig.importFileDataset, {
                     datasetId: datasetId,
                     delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
                   })
                 : getUrl(DatasetConfig.importFileDatasetExternal, {
                     datasetId: datasetId,
-                    integrationId: importSelectedIntegrationId
+                    integrationId: importSelectedIntegration.id
                   })
             }`}
           />
@@ -1817,9 +1820,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           <Dialog
             className={styles.Dialog}
             footer={renderImportOtherSystemsFooter}
-            header={TextUtils.parseText(resourcesContext.messages['importPreviousDataHeader'], {
-              importName: importFromOtherSystemSelectedIntegration.name
-            })}
+            header={importFromOtherSystemSelectedIntegration.name}
             onHide={cleanImportOtherSystemsDialog}
             visible={isImportOtherSystemsDialogVisible}>
             <div
