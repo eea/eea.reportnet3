@@ -25,4 +25,7 @@ public class LeadReporterVO implements Serializable {
   /** The representative id. */
   private Long representativeId;
 
+  /** The invalid. */
+  private Boolean invalid;
+
 }
