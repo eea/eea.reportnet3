@@ -58,6 +58,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The Class UserManagementControllerImpl.
@@ -65,6 +66,7 @@ import io.swagger.annotations.ApiResponse;
 @RestController
 @RequestMapping("/user")
 @Api(tags = "Users Management : Users Management  Manager")
+@ApiIgnore
 public class UserManagementControllerImpl implements UserManagementController {
 
   /**
