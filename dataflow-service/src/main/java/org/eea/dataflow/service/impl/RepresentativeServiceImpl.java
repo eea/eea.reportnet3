@@ -584,10 +584,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (representative == null) {
       throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
-    UserRepresentationVO user = userManagementControllerZull.getUserByEmail(email);
-    if (user == null) {
-      throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
-    }
     if (representative.getLeadReporters().stream()
         .anyMatch(reporter -> email.equals(reporter.getEmail()))) {
       throw new EEAException(EEAErrorMessage.USER_AND_COUNTRY_EXIST);
@@ -595,7 +591,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     LeadReporter leadReporter = leadReporterMapper.classToEntity(leadReporterVO);
     leadReporter.setRepresentative(representative);
     LOG.info("Insert new lead reporter relation to representative: {}", representativeId);
-    modifyLeadReporterPermissions(email, representative, false);
+
+    UserRepresentationVO user = userManagementControllerZull.getUserByEmail(email);
+    if (user == null) {
+      leadReporter.setInvalid(true);
+    } else {
+      modifyLeadReporterPermissions(email, representative, false);
+    }
     return leadReporterRepository.save(leadReporter).getId();
 
   }
@@ -628,7 +630,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         UserRepresentationVO newUser =
             userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail().toLowerCase());
         if (newUser == null) {
-          throw new EEAException(EEAErrorMessage.USER_NOTFOUND);
+          leadReporter.setInvalid(true);
         }
         if (null != representative.getLeadReporters() && representative.getLeadReporters().stream()
             .filter(reporter -> leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
