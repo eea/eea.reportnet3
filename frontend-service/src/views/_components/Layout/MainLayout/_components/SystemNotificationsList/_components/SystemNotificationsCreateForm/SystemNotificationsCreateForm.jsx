@@ -1,10 +1,13 @@
 import { useContext, useState } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
+
 import { config } from 'conf';
 
 import styles from './SystemNotificationsCreateForm.module.scss';
 
 import { Button } from 'views/_components/Button';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
@@ -18,7 +21,8 @@ export const SystemNotificationsCreateForm = ({
   isVisible,
   notification = {},
   onCreateSystemNotification,
-  onToggleVisibility
+  onToggleVisibility,
+  onUpdateSystemNotification
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
@@ -26,29 +30,33 @@ export const SystemNotificationsCreateForm = ({
     formType === 'EDIT' ? notification : { message: '', enabled: true }
   );
 
+  const hasErrors = () => isEmpty(systemNotification.message) || isEmpty(systemNotification.level);
+
   const onChange = (property, value) => {
     const inmSystemNotification = { ...systemNotification };
     inmSystemNotification[property] = value;
     setSystemNotification(inmSystemNotification);
   };
 
-  const notificationLevelTemplate = rowData => {
-    console.log(rowData);
-    return (
-      <div>
-        <LevelError type={rowData.label.toLowerCase()} />
-      </div>
-    );
-  };
+  const notificationLevelTemplate = rowData => (
+    <div>
+      <LevelError type={rowData.label.toLowerCase()} />
+    </div>
+  );
 
   const systemNotificationsCreateFormFooter = (
     <div>
       <Button
-        // className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
+        className={!hasErrors() && 'p-button-animated-blink'}
+        disabled={hasErrors()}
         icon="add"
         id="createSystemNotificationCreateForm"
-        label={resourcesContext.messages['save']}
-        onClick={() => onCreateSystemNotification(systemNotification)}
+        label={resourcesContext.messages[formType === 'EDIT' ? 'update' : 'save']}
+        onClick={() =>
+          formType === 'EDIT'
+            ? onUpdateSystemNotification(systemNotification)
+            : onCreateSystemNotification(systemNotification)
+        }
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -101,11 +109,16 @@ export const SystemNotificationsCreateForm = ({
             <InputText
               id="systemNotificationMessage"
               // keyfilter={RecordUtils.getFilter(type)}
-              // maxLength={getMaxCharactersByType(type)}
+              maxLength={config.INPUT_MAX_LENGTH}
               name="systemNotificationMessage"
               onChange={e => onChange('message', e.target.value)}
               type="text"
               value={systemNotification.message}
+            />
+            <CharacterCounter
+              currentLength={systemNotification.message.length}
+              maxLength={config.INPUT_MAX_LENGTH}
+              style={{ position: 'relative', top: '0.25rem' }}
             />
           </div>
         </div>

@@ -2,6 +2,7 @@ import { Fragment, useContext, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+
 import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
 
 import styles from './LeftSideBar.module.scss';

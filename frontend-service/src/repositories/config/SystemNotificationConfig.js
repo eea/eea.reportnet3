@@ -1,5 +1,6 @@
 export const SystemNotificationConfig = {
   all: '/notification/findSystemNotifications',
   create: '/notification/createSystemNotification',
-  delete: '/notification/delete/{:id}'
+  delete: '/notification/deleteSystemNotification/{:systemNotificationId}',
+  update: '/notification/updateSystemNotification'
 };

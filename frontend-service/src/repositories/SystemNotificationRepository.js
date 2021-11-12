@@ -11,5 +11,12 @@ export const SystemNotificationRepository = {
       data: { message, level, enabled }
     }),
 
-  deleteById: async id => await HTTPRequester.delete({ url: getUrl(SystemNotificationConfig.deleteById, { id }) })
+  delete: async systemNotificationId =>
+    await HTTPRequester.delete({ url: getUrl(SystemNotificationConfig.delete, { systemNotificationId }) }),
+
+  update: async (id, message, level, enabled) =>
+    await HTTPRequester.update({
+      url: getUrl(SystemNotificationConfig.update),
+      data: { id, message, level, enabled }
+    })
 };

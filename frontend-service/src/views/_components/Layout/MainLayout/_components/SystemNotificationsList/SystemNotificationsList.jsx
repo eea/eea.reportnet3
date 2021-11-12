@@ -34,6 +34,8 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+
   const [systemNotificationState, dispatchSystemNotification] = useReducer(systemNotificationReducer, {
     editNotification: {},
     editingRows: [],
@@ -213,6 +215,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         // className={`${styles.columnActionButton}`}
         label={resourcesContext.messages['add']}
         onClick={() => onToggleCreateFormVisibility(true)}
+        visible={isAdmin}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -250,6 +253,9 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       SystemNotificationService.create({ ...systemNotification });
     } catch (error) {
       console.error('SystemNotificationsList - onCreateSystemNotification', error);
+    } finally {
+      onToggleCreateFormVisibility(false);
+      onLoadSystemNotifications();
     }
   };
 
@@ -257,17 +263,29 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
     dispatchSystemNotification({ type: 'ON_EDIT', payload: rowData });
   };
 
-  const onDelete = async id => {
+  const onUpdateSystemNotification = async systemNotification => {
+    try {
+      SystemNotificationService.update({ ...systemNotification });
+    } catch (error) {
+      console.error('SystemNotificationsList - onUpdateSystemNotification', error);
+    } finally {
+      onToggleCreateFormVisibility(false);
+      onLoadSystemNotifications();
+    }
+  };
+
+  const onDelete = async () => {
     setIsDeleting(true);
     try {
-      // await systemNotificationType.delete(id);
-      // onLoadSystemNotifications();
+      console.log(selectedRow.id);
+      await SystemNotificationService.delete(selectedRow.id);
     } catch (error) {
       console.error('SystemNotificationsList - onDelete.', error);
       // notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
     } finally {
       setIsDeleteDialogVisible(false);
       setIsDeleting(false);
+      onLoadSystemNotifications();
     }
   };
 
@@ -275,54 +293,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
     try {
       setIsLoading(true);
       const unparsedNotifications = await SystemNotificationService.all();
-      // const parsedNotifications = unparsedNotifications.map(notification => {
-      //   return SystemNotificationService.parse({
-      //     config: config.notifications.notificationSchema,
-      //     content: notification.content,
-      //     date: notification.date,
-      //     message: resourcesContext.messages[camelCase(notification.type)],
-      //     routes,
-      //     type: notification.type
-      //   });
-      // });
-      // const notificationsArray = parsedNotifications.map(notification => {
-      //   const message = DOMPurify.sanitize(notification.message, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
-
-      //   const capitalizedLevelError = !isUndefined(notification.type)
-      //     ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
-      //     : notification.type;
-
-      //   return {
-      //     key: notification.key,
-      //     message: message,
-      //     levelError: capitalizedLevelError,
-      //     date: dayjs(notification.date).format(
-      //       `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-      //         userContext.userProps.amPm24h ? '' : ' A'
-      //       }`
-      //     ),
-
-      //     downloadButton: notification.onClick ? (
-      //       <span className={styles.center}>
-      //         <Button
-      //           className={`${styles.columnActionButton}`}
-      //           icon="export"
-      //           label={resourcesContext.messages['downloadFile']}
-      //           onClick={() => notification.onClick()}
-      //         />
-      //       </span>
-      //     ) : (
-      //       ''
-      //     ),
-      //     redirectionUrl: !isNil(notification.redirectionUrl)
-      //       ? `${window.location.protocol}//${window.location.hostname}${
-      //           window.location.port !== '' && window.location.port.toString() !== '80'
-      //             ? `:${window.location.port}`
-      //             : ''
-      //         }${notification.redirectionUrl}`
-      //       : ''
-      //   };
-      // });
       dispatchSystemNotification({ type: 'SET_SYSTEM_NOTIFICATIONS', payload: unparsedNotifications });
     } catch (error) {
       console.error('SystemNotificationsList - onLoadSystemNotifications.', error);
@@ -343,7 +313,8 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         <DataTable
           autoLayout={true}
           editMode="row"
-          loading={false}
+          lazy={true}
+          loading={isLoading}
           onRowClick={event => {
             console.log(event.data);
             setSelectedRow(event.data);
@@ -401,6 +372,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
           notification={editNotification}
           onCreateSystemNotification={onCreateSystemNotification}
           onToggleVisibility={onToggleCreateFormVisibility}
+          onUpdateSystemNotification={onUpdateSystemNotification}
         />
       )}
       {isDeleteDialogVisible && (

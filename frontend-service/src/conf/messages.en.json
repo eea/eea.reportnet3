@@ -1151,7 +1151,7 @@
     "supportedFileExtensionsTooltip": "Supported file extensions: ",
     "supportingDocuments": "Supporting documents",
     "supportsMultipleValues": "Supports multiple values?",
-    "systemNotifications": "Manage system notifications",
+    "systemNotifications": "System notifications",
     "table": "Table",
     "tableDataByIdError": "Failed loading data",
     "tableIsNotCreated": "The table {:tableName} is not created in the design, please check it",
