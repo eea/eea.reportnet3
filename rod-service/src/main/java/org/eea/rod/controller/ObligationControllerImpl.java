@@ -15,11 +15,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The type Obligation controller.
  */
 @RestController
+@ApiIgnore
 @RequestMapping("/obligation")
 public class ObligationControllerImpl implements ObligationController {
 
