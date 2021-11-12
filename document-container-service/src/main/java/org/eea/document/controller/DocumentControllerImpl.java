@@ -427,7 +427,7 @@ public class DocumentControllerImpl implements DocumentController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/v1/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Find list of all documents by dataflow Id",
+  @ApiOperation(value = "Get the list of all documents by dataflow Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class,
       responseContainer = "List", hidden = false,
       notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD_REPORTER, REPORTER_WRITE, REPORTER_READ, EDITOR_READ, EDITOR_WRITE, NATIONAL_COORDINATOR, ADMIN")
@@ -448,7 +448,7 @@ public class DocumentControllerImpl implements DocumentController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Find list of all documents by dataflow Id",
+  @ApiOperation(value = "Get the list of all documents by dataflow Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class,
       responseContainer = "List", hidden = true,
       notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD_REPORTER, REPORTER_WRITE, REPORTER_READ, EDITOR_READ, EDITOR_WRITE, NATIONAL_COORDINATOR, ADMIN")
