@@ -2,6 +2,7 @@ package org.eea.interfaces.controller.ums;
 
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -354,5 +355,9 @@ public interface UserManagementController {
    */
   @PostMapping("/exportUsersByCountry/dataflow/{dataflowId}")
   void exportUsersByCountry(@PathVariable("dataflowId") Long dataflowId);
+
+  @GetMapping("/downloadUsersByCountry/{dataflowId}")
+  void downloadUsersByCountry(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam String fileName, HttpServletResponse response);
 
 }

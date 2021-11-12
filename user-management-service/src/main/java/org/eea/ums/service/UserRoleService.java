@@ -1,5 +1,6 @@
 package org.eea.ums.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import org.eea.exception.EEAException;
@@ -35,5 +36,7 @@ public interface UserRoleService {
    * @throws EEAException the EEA exception
    */
   void exportUsersByCountry(Long dataflowId) throws IOException, EEAException;
+
+  File downloadUsersByCountry(Long dataflowId, String fileName);
 
 }
