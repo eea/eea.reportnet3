@@ -833,7 +833,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
   @PostMapping("/exportUsersByCountry/dataflow/{dataflowId}")
-  @ApiOperation(value = "Export all users by country into a CSV file", hidden = true)
+  @ApiOperation(value = "Export all users by country into a CSV file", hidden = false)
   public void exportUsersByCountry(@ApiParam(
       value = "Dataflow id used in the export process.") @PathVariable("dataflowId") Long dataflowId) {
     LOG.info("Export users by country from dataflow {}, with type csv.", dataflowId);
