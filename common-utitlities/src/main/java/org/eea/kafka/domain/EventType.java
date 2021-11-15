@@ -457,7 +457,11 @@ public enum EventType {
 
   /** The restore prefilling reference snapshot completed event. */
   RESTORE_PREFILLING_REFERENCE_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "restore_prefilling_reference_snapshot_completed_event", true);
+      "restore_prefilling_reference_snapshot_completed_event", true),
+
+  /** The continue fme process event. */
+  CONTINUE_FME_PROCESS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "continue_fme_process_event",
+      true);
 
 
 

@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -56,7 +55,6 @@ import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationC
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
-import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
@@ -208,6 +206,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param file the file
    * @param replace the replace
    * @param integrationId the integration id
+   * @param delimiter the delimiter
    * @throws EEAException the EEA exception
    */
   public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
@@ -268,7 +267,7 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    */
-  private void releaseLockReleasingProcess(Long datasetId) {
+  public void releaseLockReleasingProcess(Long datasetId) {
     // Release lock to the releasing process
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
     if (datasetMetabaseVO.getDataProviderId() != null) {
@@ -289,6 +288,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param multipartFile the multipart file
    * @param replace the replace
    * @param integrationId the integration id
+   * @param delimiter the delimiter
    * @throws EEAException the EEA exception
    */
   private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
@@ -418,6 +418,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param originalFileName the original file name
    * @param integrationVO the integration VO
    * @param replace the replace
+   * @param delimiter the delimiter
    * @param mimeType the mime type
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
@@ -427,7 +428,8 @@ public class FileTreatmentHelper implements DisposableBean {
       List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
       String delimiter, String mimeType) throws IOException, EEAException {
     if (null != integrationVO) {
-      fmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId, replace);
+      prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
+          replace);
     } else {
       importExecutorService.submit(() -> {
         try {
@@ -453,63 +455,34 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
-  private void fmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO,
+  private void prepareFmeFileProcess(Long datasetId, File file, IntegrationVO integrationVO,
       String mimeType, String tableSchemaId, boolean replace) throws IOException, EEAException {
 
     LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
-    boolean error = false;
+    Map<String, String> internalParameters = integrationVO.getInternalParameters();
 
-    try (InputStream inputStream = new FileInputStream(file)) {
-      // TODO. Encode and copy the file content into the IntegrationVO. This method load the entire
-      // file in memory. To solve it, the FME connector should be redesigned.
-      byte[] byteArray = IOUtils.toByteArray(inputStream);
-      String encodedString = Base64.getEncoder().encodeToString(byteArray);
-      Map<String, String> internalParameters = integrationVO.getInternalParameters();
-      Map<String, String> externalParameters = new HashMap<>();
-      externalParameters.put("fileIS", encodedString);
-      integrationVO.setExternalParameters(externalParameters);
-
-      // Remove the lock so FME will not encounter it while calling back importFileData
-      if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))
-          || IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM
-              .equals(integrationVO.getOperation())
-          || "zip".equalsIgnoreCase(mimeType)) {
-        Map<String, Object> importFileData = new HashMap<>();
-        importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
-        importFileData.put(LiteralConstants.DATASETID, datasetId);
-        lockService.removeLockByCriteria(importFileData);
-        releaseLockReleasingProcess(datasetId);
-      }
-
-      // delete precious data if necessary
-      wipeData(datasetId, tableSchemaId, replace);
-
-      // Wait a second before continue to avoid duplicated insertions
-      Thread.sleep(1000);
-
-      if ((Integer) integrationController
-          .executeIntegrationProcess(IntegrationToolTypeEnum.FME,
-              IntegrationOperationTypeEnum.IMPORT, file.getName(), datasetId, integrationVO)
-          .getExecutionResultParams().get("id") == 0) {
-        error = true;
-      }
-    } catch (InterruptedException e) {
-      LOG_ERROR.error("Error sleeping after wiping data");
-      Thread.currentThread().interrupt();
-    }
-
-    FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
-
-
-    if (error) {
-      LOG_ERROR.error("Error executing integration: datasetId={}, fileName={}, IntegrationVO={}",
-          datasetId, file.getName(), integrationVO);
+    // Remove the lock so FME will not encounter it while calling back importFileData
+    if (!"true".equals(internalParameters.get(IntegrationParams.NOTIFICATION_REQUIRED))
+        || IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM
+            .equals(integrationVO.getOperation())
+        || "zip".equalsIgnoreCase(mimeType)) {
       Map<String, Object> importFileData = new HashMap<>();
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
       lockService.removeLockByCriteria(importFileData);
       releaseLockReleasingProcess(datasetId);
-      throw new EEAException("Error executing integration");
+    }
+
+    // delete precious data if necessary
+    if (replace) {
+      LOG.info("Replacing data checked");
+      wipeDataAsync(datasetId, tableSchemaId, file, integrationVO);
+    } else {
+      Map<String, Object> valuesFME = new HashMap<>();
+      valuesFME.put("datasetId", datasetId);
+      valuesFME.put("fileName", file);
+      valuesFME.put("integrationId", integrationVO.getId());
+      kafkaSenderUtils.releaseKafkaEvent(EventType.CONTINUE_FME_PROCESS_EVENT, valuesFME);
     }
   }
 
@@ -522,7 +495,8 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param files the files
    * @param originalFileName the original file name
    * @param replace the replace
-   * @throws InterruptedException
+   * @param delimiter the delimiter
+   * @throws InterruptedException the interrupted exception
    */
   private void rn3FileProcess(Long datasetId, String tableSchemaId, DataSetSchema datasetSchema,
       List<File> files, String originalFileName, boolean replace, String delimiter)
@@ -661,6 +635,31 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
   /**
+   * Wipe data async.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param integrationVO the integration VO
+   */
+  @Async
+  private void wipeDataAsync(Long datasetId, String tableSchemaId, File file,
+      IntegrationVO integrationVO) {
+    if (null != tableSchemaId) {
+      datasetService.deleteTableBySchema(tableSchemaId, datasetId);
+    } else {
+      datasetService.deleteImportData(datasetId, true);
+    }
+
+    Map<String, Object> valuesFME = new HashMap<>();
+    valuesFME.put("datasetId", datasetId);
+    valuesFME.put("fileName", file);
+    valuesFME.put("integrationId", integrationVO.getId());
+    kafkaSenderUtils.releaseKafkaEvent(EventType.CONTINUE_FME_PROCESS_EVENT, valuesFME);
+  }
+
+
+  /**
    * Fill table id.
    *
    * @param idTableSchema the id table schema
@@ -683,6 +682,9 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param fileName the file name
    * @param is the is
    * @param idTableSchema the id table schema
+   * @param replace the replace
+   * @param schema the schema
+   * @param delimiter the delimiter
    * @return the data set VO
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
