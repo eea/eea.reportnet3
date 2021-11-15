@@ -394,7 +394,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   setImportSelectedIntegration({ id: type.id, name: type.name });
                 },
                 icon: type.fileExtension,
-                label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+                label: `${type.name} (.${type.fileExtension})`
               };
             })
           }
@@ -885,7 +885,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
   const onUpload = async () => {
     manageDialogs('isImportDatasetDialogVisible', false);
-    setImportSelectedIntegration({ id: null });
+    setImportSelectedIntegration({ id: null, name: null });
     try {
       const {
         dataflow: { name: dataflowName },
@@ -1784,10 +1784,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
-            dialogHeader={importSelectedIntegration.name.toUpperCase()}
+            dialogHeader={importSelectedIntegration.name}
             dialogOnHide={() => {
               manageDialogs('isImportDatasetDialogVisible', false);
-              setImportSelectedIntegration({ id: null });
+              setImportSelectedIntegration({ id: null, name: null });
             }}
             dialogVisible={designerState.isImportDatasetDialogVisible}
             infoTooltip={`${
