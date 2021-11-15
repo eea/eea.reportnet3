@@ -15,6 +15,7 @@ import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * The Class GeoJsonValidationUtils.
@@ -26,6 +27,9 @@ public class GeoJsonValidationUtils {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(GeoJsonValidationUtils.class);
+
   /**
    * Check geo json.
    *
@@ -36,7 +40,7 @@ public class GeoJsonValidationUtils {
     String result = "";
     try {
       String aux = fieldValue.getValue();
-      if (!aux.isEmpty()) {
+      if (!aux.isEmpty() && !locateSpecialChar(aux)) {
         JSONObject jsonObject = new JSONObject(aux);
         String auxGEometry = jsonObject.get("geometry").toString();
         switch (fieldValue.getType()) {
@@ -96,12 +100,48 @@ public class GeoJsonValidationUtils {
             result = "";
         }
       }
-    } catch (JsonProcessingException | JSONException e) {
-      LOG_ERROR.error("This field: {} is not a valid geometry. Reason: {}", fieldValue.getId(),
+    } catch (JsonProcessingException | JSONException | JsonSyntaxException e) {
+      LOG.info("This field: {} is not a valid geometry. Reason: {}", fieldValue.getId(),
           e.getMessage());
       result = e.getMessage();
     }
     return result;
+  }
+
+
+
+  /**
+   * Locate special char.
+   *
+   * @param geoJson the geo json
+   * @return true, if successful
+   * @throws JSONException the JSON exception
+   */
+  private static boolean locateSpecialChar(String geoJson) throws JSONException {
+    boolean rtn = false;
+    char c = 0;
+    int i;
+    int len = geoJson.length();
+    StringBuilder sb = new StringBuilder(len + 4);
+    for (i = 0; i < len; i += 1) {
+      c = geoJson.charAt(i);
+      switch (c) {
+        case '\b':
+        case '\t':
+        case '\n':
+        case '\f':
+        case '\r':
+          throw new JSONException(
+              "This GeoJson contains forbidden characters: '\\b', '\\t', '\\n', '\\f', '\\r'.");
+        default:
+          sb.append(c);
+          break;
+      }
+    }
+    if (sb.length() == 0) {
+      rtn = true;
+    }
+    return rtn;
   }
 
 }
