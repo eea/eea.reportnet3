@@ -10,7 +10,7 @@ export const RepresentativeConfig = {
   getGroupCompanies: '/representative/dataProvider/companyGroups',
   getGroupCountries: '/representative/dataProvider/countryGroups',
   getGroupOrganizations: '/representative/dataProvider/organizationGroups',
-  getRepresentatives: '/representative/v1/dataflow/{:dataflowId}',
+  getRepresentatives: '/representative/dataflow/{:dataflowId}',
   importFile: '/representative/import/{:dataflowId}/group/{:dataProviderGroupId}',
   updateDataProviderId: '/representative/update',
   updateLeadReporter: '/representative/leadReporter/update/dataflow/{:dataflowId}',
