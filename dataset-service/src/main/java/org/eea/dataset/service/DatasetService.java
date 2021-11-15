@@ -606,6 +606,12 @@ public interface DatasetService {
   FailedValidationsDatasetVO getTotalFailedValidationsByIdDataset(Long datasetId,
       String idTableSchema);
 
+  /**
+   * Creates the reference dataset files.
+   *
+   * @param dataset the dataset
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException;
 
 }

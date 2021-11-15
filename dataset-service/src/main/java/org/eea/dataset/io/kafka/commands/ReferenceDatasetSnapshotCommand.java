@@ -15,15 +15,17 @@ import org.eea.thread.ThreadPropertiesManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class ReferenceDatasetSnapshotCommand.
+ */
 @Component
 public class ReferenceDatasetSnapshotCommand extends AbstractEEAEventHandlerCommand {
 
-
-
+  /** The reference dataset repository. */
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;
 
-
+  /** The design dataset repository. */
   @Autowired
   private DesignDatasetRepository designDatasetRepository;
 

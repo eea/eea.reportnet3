@@ -228,8 +228,8 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void testCreateSnapshot() throws SQLException, IOException, EEAException {
     List<String> datasets = new ArrayList<>();
-    Mockito.when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
-        .thenReturn(new byte[5]);
+    // Mockito.when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
+    // .thenReturn(new byte[5]);
     Mockito.doReturn(new SnapshotVO()).when(dataSetSnapshotControllerZuul)
         .getSchemaById(Mockito.any());
     datasets.add("dataset_1");
@@ -268,8 +268,8 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void testCreateSnapshot2() throws SQLException, IOException, EEAException {
     List<String> datasets = new ArrayList<>();
-    Mockito.when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
-        .thenReturn(new byte[5]);
+    // Mockito.when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
+    // .thenReturn(new byte[5]);
     datasets.add("dataset_1");
     Mockito.when(datasetControllerZuul.getDatasetType(Mockito.any()))
         .thenReturn(DatasetTypeEnum.COLLECTION);

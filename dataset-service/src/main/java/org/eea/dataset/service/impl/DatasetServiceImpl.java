@@ -313,6 +313,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private ValidationRepository validationRepository;
 
+  /** The dataset snapshot service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
@@ -3284,12 +3285,6 @@ public class DatasetServiceImpl implements DatasetService {
           // target dataset
           LOG.info("Prefilling data into the datasetId {}.", datasetId);
           spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
-
-          // create zip to the reference
-          // if (DatasetTypeEnum.REFERENCE.equals(type)) {
-          // createReferenceDatasetFiles(datasetMb);
-          // }
-
         }
       } else if (DatasetTypeEnum.REFERENCE.equals(type)) {
         DesignDataset originDatasetDesign =
@@ -3301,13 +3296,6 @@ public class DatasetServiceImpl implements DatasetService {
           createSnapshotVO.setReleased(false);
           datasetSnapshotService.addSnapshot(originDatasetDesign.getId(), createSnapshotVO,
               datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true);
-
-
-
-          // create zip to the reference
-          // if (DatasetTypeEnum.REFERENCE.equals(type)) {
-          // createReferenceDatasetFiles(datasetMb);
-          // }
         }
       }
     } catch (Exception e) {

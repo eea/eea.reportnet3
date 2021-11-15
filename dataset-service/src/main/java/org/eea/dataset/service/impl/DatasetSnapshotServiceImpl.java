@@ -282,6 +282,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param createSnapshotVO the create snapshot VO
    * @param partitionIdDestination the partition id destination
    * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    */
   @Override
   @Async
@@ -438,6 +439,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @param deleteData the delete data
    * @param datasetType the dataset type
+   * @param prefillingReference the prefilling reference
    * @throws EEAException the EEA exception
    */
   @Override

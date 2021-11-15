@@ -62,6 +62,7 @@ public interface RecordStoreController {
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
    * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    */
   @PostMapping(value = "/dataset/{datasetId}/snapshot/create")
   void createSnapshotData(@PathVariable("datasetId") Long datasetId,
@@ -82,6 +83,7 @@ public interface RecordStoreController {
    * @param datasetType the dataset type
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
+   * @param prefillingReference the prefilling reference
    */
   @PostMapping(value = "/dataset/{datasetId}/snapshot/restore")
   void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,

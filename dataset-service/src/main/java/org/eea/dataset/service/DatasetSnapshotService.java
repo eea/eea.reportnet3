@@ -83,6 +83,7 @@ public interface DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @param deleteData the delete data
    * @param datasetType the dataset type
+   * @param prefillingReference the prefilling reference
    * @throws EEAException the EEA exception
    */
   void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination, Long idSnapshot,
@@ -223,6 +224,14 @@ public interface DatasetSnapshotService {
    */
   void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId) throws EEAException;
 
+  /**
+   * Obtain partition.
+   *
+   * @param datasetId the dataset id
+   * @param user the user
+   * @return the partition data set metabase
+   * @throws EEAException the EEA exception
+   */
   PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
       throws EEAException;
 }

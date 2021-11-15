@@ -80,6 +80,7 @@ public class SnapshotHelper implements DisposableBean {
    * @param datasetType the dataset type
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
+   * @param prefillingReference the prefilling reference
    * @throws EEAException the eea exception
    */
   public void processRestoration(Long datasetId, Long idSnapshot, Long idPartition,
@@ -131,6 +132,7 @@ public class SnapshotHelper implements DisposableBean {
     /** The delete data. */
     Boolean deleteData;
 
+    /** The prefilling reference. */
     Boolean prefillingReference;
   }
 

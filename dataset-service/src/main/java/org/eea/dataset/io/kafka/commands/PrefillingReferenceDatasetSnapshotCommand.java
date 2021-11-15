@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * The Class PrefillingReferenceDatasetSnapshotCommand.
+ */
 @Component
 public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventHandlerCommand {
 
@@ -26,6 +29,7 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
   @Autowired
   private DatasetService datasetService;
 
+  /** The dataset metabase repository. */
   @Autowired
   private DataSetMetabaseRepository datasetMetabaseRepository;
 

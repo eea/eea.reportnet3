@@ -56,7 +56,8 @@ public class SnapshotHelperTest {
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(recordStoreService, Mockito.times(1)).restoreDataSnapshot(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
     Thread.currentThread().interrupt();
   }
 
@@ -67,12 +68,14 @@ public class SnapshotHelperTest {
         new EEADelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2)));
     ReflectionTestUtils.setField(snapshotHelper, "maxRunningTasks", 2);
     doThrow(new SQLException()).when(recordStoreService).restoreDataSnapshot(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
     snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, true, false);
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(recordStoreService, Mockito.times(1)).restoreDataSnapshot(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
     Thread.currentThread().interrupt();
   }
 
