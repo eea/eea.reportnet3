@@ -6,8 +6,8 @@
   font-size: 20px;
   border: none;
   outline: none;
-  background-color: #006699;
-  color: white;
+  background-color: var(--c-corporate-blue);
+  color: var(--white);
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
@@ -15,6 +15,5 @@
 }
 
 .goTopButton:hover {
-  color: #ffd902;
-  background-color: #1f5069;
+  color: var(--c-corporate-yellow);
 }
