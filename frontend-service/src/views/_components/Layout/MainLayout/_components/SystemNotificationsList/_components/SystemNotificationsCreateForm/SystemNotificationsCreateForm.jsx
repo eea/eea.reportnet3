@@ -11,6 +11,7 @@ import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
+import { GrowlMessage } from 'views/_components/Growl/_components/GrowlMessage';
 import { InputText } from 'views/_components/InputText';
 import { LevelError } from 'views/_components/LevelError';
 
@@ -67,6 +68,23 @@ export const SystemNotificationsCreateForm = ({
       />
     </div>
   );
+
+  const renderSystemNotificationPreview = () => {
+    return (
+      <GrowlMessage
+        closableOnClick={false}
+        message={{
+          detail: systemNotification.message,
+          preview: true,
+          severity: systemNotification.level.toLowerCase(),
+          summary: systemNotification.level.toUpperCase(),
+          system: true
+        }}
+        onClick={() => {}}
+        onClose={() => {}}
+      />
+    );
+  };
 
   return (
     <Dialog
@@ -155,6 +173,12 @@ export const SystemNotificationsCreateForm = ({
               role="checkbox"
             />
           </div>
+        </div>
+        <div>
+          <div>
+            <h3>{resourcesContext.messages['previewNotification']}</h3>
+          </div>
+          {renderSystemNotificationPreview()}
         </div>
       </div>
     </Dialog>

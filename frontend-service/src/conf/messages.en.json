@@ -1346,6 +1346,7 @@
     "statusQC": "Status",
     "systemNotificationsKey": "Notification name will be stored in uppercase and separated by _",
     "systemNotificationLevel": "Select the notification level",
-    "systemNotification": "System notification"
+    "systemNotification": "System notification",
+    "previewNotification": "Preview"
   }
 }

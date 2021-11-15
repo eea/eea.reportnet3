@@ -9,17 +9,14 @@ import styles from './SystemNotificationsList.module.scss';
 import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
-import { Checkbox } from 'views/_components/Checkbox';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { DataTable } from 'views/_components/DataTable';
-import { Dropdown } from 'views/_components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
 import { Spinner } from 'views/_components/Spinner';
 import { SystemNotificationsCreateForm } from './_components/SystemNotificationsCreateForm';
-import { SystemNotificationFieldEditor } from './_components/SystemNotificationFieldEditor';
 
 import { SystemNotificationService } from 'services/SystemNotificationService';
 
@@ -38,21 +35,12 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
 
   const [systemNotificationState, dispatchSystemNotification] = useReducer(systemNotificationReducer, {
     editNotification: {},
-    editingRows: [],
     formType: '',
     isVisibleCreateSysNotification: false,
-    quickEditedNotification: {},
     systemNotifications: []
   });
 
-  const {
-    isVisibleCreateSysNotification,
-    editingRows,
-    editNotification,
-    formType,
-    quickEditedNotification,
-    systemNotifications
-  } = systemNotificationState;
+  const { isVisibleCreateSysNotification, editNotification, formType, systemNotifications } = systemNotificationState;
 
   const [columns, setColumns] = useState([]);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -88,7 +76,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       <Column
         body={col.template}
         className={col.className}
-        editor={getEditor(col.id)}
         field={col.id}
         header={col.header}
         key={col.id}
@@ -102,7 +89,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         header={resourcesContext.messages['actions']}
         // className={styles.crudColumn}
         key="buttonsUniqueId"
-        rowEditor={true}
       />
     );
 
@@ -130,61 +116,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       </div>
     );
   };
-
-  const getEditor = field => {
-    switch (field) {
-      case 'enabled':
-        return row => checkboxEditor(row, 'enabled');
-      case 'message':
-        return row => textEditor(row, 'message');
-      case 'level':
-        return row => dropdownEditor(row, 'level');
-      default:
-        break;
-    }
-  };
-
-  const checkboxEditor = (props, field) => {
-    return (
-      <div className={styles.checkboxEditorWrapper}>
-        <Checkbox
-          checked={props.rowData[field]}
-          className={styles.checkboxEditor}
-          id={props.rowData[field]?.toString()}
-          inputId={props.rowData[field]?.toString()}
-          onChange={e => onChange(props, e.checked)}
-          role="checkbox"
-        />
-      </div>
-    );
-  };
-
-  const dropdownEditor = (props, field) => {
-    return (
-      <Dropdown
-        appendTo={document.body}
-        filterPlaceholder={resourcesContext.messages['errorTypePlaceholder']}
-        id="errorType"
-        itemTemplate={rowData => notificationLevelTemplate(rowData, true)}
-        onChange={e => onChange(props, e.target.value.value)}
-        optionLabel="label"
-        optionValue="value"
-        options={config.validations.errorLevels}
-        placeholder={resourcesContext.messages['errorTypePlaceholder']}
-        value={{ label: props.rowData[field], value: props.rowData[field] }}
-      />
-    );
-  };
-
-  const textEditor = (props, field) => (
-    <SystemNotificationFieldEditor
-      initialValue={props.rowData[field]}
-      keyfilter={['message'].includes(field) ? 'noDoubleQuote' : ''}
-      onSaveField={onChange}
-      required={['message'].includes(field)}
-      systemNotifications={props}
-    />
-  );
 
   const enabledTemplate = rowData => (
     <div className={styles.enabledColumnWrapper}>
@@ -229,23 +160,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       />
     </div>
   );
-
-  const onChange = (props, value, isText = false) => {
-    const inmSystemNotifications = [...systemNotifications];
-    const inmEditingRows = [...editingRows];
-    console.log({ inmSystemNotifications }, props);
-    const sysNotifIdx = inmSystemNotifications.findIndex(sysNotif => sysNotif.id === props.rowData.id);
-    const editIdx = inmEditingRows.findIndex(sysNotif => sysNotif.id === props.rowData.id);
-    if (inmSystemNotifications[sysNotifIdx][props.field] !== value && editIdx !== -1) {
-      inmSystemNotifications[sysNotifIdx][props.field] = isText ? value.trim() : value;
-      inmEditingRows[editIdx][props.field] = isText ? value.trim() : value;
-
-      dispatchSystemNotification({
-        type: 'ON_QUICK_EDIT',
-        payload: { sysNotif: inmSystemNotifications, editRows: inmEditingRows }
-      });
-    }
-  };
 
   const onCreateSystemNotification = async systemNotification => {
     console.log(systemNotification);
@@ -312,21 +226,10 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       return (
         <DataTable
           autoLayout={true}
-          editMode="row"
-          lazy={true}
           loading={isLoading}
-          onRowClick={event => {
-            console.log(event.data);
-            setSelectedRow(event.data);
-          }}
+          onRowClick={event => setSelectedRow(event.data)}
           paginator={true}
           paginatorRight={<span>{`${resourcesContext.messages['totalRecords']}  ${systemNotifications.length}`}</span>}
-          quickEditRowInfo={{
-            updatedRow: selectedRow.id,
-            property: 'id',
-            condition: isLoading,
-            requiredFields: ['message', 'level']
-          }}
           rowClassName={newSystemNotificationsClassName}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}

@@ -76,9 +76,13 @@ export class GrowlMessage extends Component {
   }
 
   renderCloseIcon() {
+    const closeIconClassName = classNames('p-growl-icon-close p-link', {
+      'p-growl-message-disabled-icons': this.props.message.preview
+    });
+
     if (this.props.message.closable !== false) {
       return (
-        <button className="p-growl-icon-close p-link" onClick={this.onClose} type="button">
+        <button className={closeIconClassName} onClick={this.onClose} type="button">
           <span className="p-growl-icon-close-icon pi pi-times"></span>
         </button>
       );
@@ -101,7 +105,8 @@ export class GrowlMessage extends Component {
       'pi-exclamation-triangle': this.props.message.severity === 'warn',
       'pi-times-circle': this.props.message.severity === 'error',
       'pi-check': this.props.message.severity === 'success',
-      'p-growl-message-system-notification-icon': this.props.message.system
+      'p-growl-message-system-notification-icon': this.props.message.system,
+      'p-growl-message-disabled-icons': this.props.message.preview
     });
 
     let titleClassName = classNames('p-growl-title', {
