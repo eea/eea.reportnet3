@@ -282,7 +282,8 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset,
-      String dateRelease) throws SQLException, IOException, RecordStoreAccessException {
+      String dateRelease, boolean prefillingReference)
+      throws SQLException, IOException, RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
@@ -302,8 +303,8 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
-      throws SQLException, IOException, RecordStoreAccessException {
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
+      boolean prefillingReference) throws SQLException, IOException, RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 

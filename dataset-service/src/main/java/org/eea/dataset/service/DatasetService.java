@@ -10,6 +10,7 @@ import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
@@ -604,5 +605,7 @@ public interface DatasetService {
    */
   FailedValidationsDatasetVO getTotalFailedValidationsByIdDataset(Long datasetId,
       String idTableSchema);
+
+  void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException;
 
 }

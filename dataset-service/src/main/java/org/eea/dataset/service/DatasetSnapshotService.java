@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -52,7 +53,7 @@ public interface DatasetSnapshotService {
    * @param dateRelease the date release
    */
   void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO, Long partitionIdDestination,
-      String dateRelease);
+      String dateRelease, boolean prefillingReference);
 
   /**
    * Removes the snapshot.
@@ -85,7 +86,8 @@ public interface DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination, Long idSnapshot,
-      Boolean deleteData, DatasetTypeEnum datasetType) throws EEAException;
+      Boolean deleteData, DatasetTypeEnum datasetType, boolean prefillingReference)
+      throws EEAException;
 
   /**
    * Release snapshot.
@@ -220,4 +222,7 @@ public interface DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId) throws EEAException;
+
+  PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
+      throws EEAException;
 }

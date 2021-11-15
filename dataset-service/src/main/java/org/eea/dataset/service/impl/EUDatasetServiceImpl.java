@@ -114,7 +114,8 @@ public class EUDatasetServiceImpl implements EUDatasetService {
       createSnapshotVO.setDescription(dataCollection.getDatasetSchema());
       createSnapshotVO.setReleased(false);
       datasetSnapshotService.addSnapshot(dataCollection.getId(), createSnapshotVO,
-          obtainPartition(relatedDatasetsByIds.get(dataCollection.getId()), "root").getId(), null);
+          obtainPartition(relatedDatasetsByIds.get(dataCollection.getId()), "root").getId(), null,
+          false);
     }
     LOG.info("EU dataset populated with dataflowId {}", dataflowId);
 

@@ -3224,60 +3224,63 @@ public class DatasetServiceTest {
     dataset.setDataflowId(1L);
     dataset.setId(1L);
     dataset.setDatasetSchema("5cf0e9b3b793310e9ceca193");
-    when(tableRepository.findByIdTableSchema(Mockito.anyString())).thenReturn(table);
+    // when(tableRepository.findByIdTableSchema(Mockito.anyString())).thenReturn(table);
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     when(referenceDatasetRepository.existsById(Mockito.any())).thenReturn(true);
     when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataset));
     when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(desingDataset));
-    when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
-        .thenReturn(new ArrayList<DesignDataset>());
-    when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
+    // when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
+    // .thenReturn(new ArrayList<DesignDataset>());
+    // when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
     List<FieldValue> fieldValues = new ArrayList<>();
     FieldValue field = new FieldValue();
     field.setType(DataType.ATTACHMENT);
     field.setId("0A07FD45F1CD7965A2B0F13E57948A13");
     field.setRecord(record);
     fieldValues.add(field);
-    when(fieldRepository.findByRecord_IdRecordSchema(Mockito.anyString(),
-        Mockito.any(Pageable.class))).then(new Answer<List<FieldValue>>() {
-
-          @Override
-          public List<FieldValue> answer(InvocationOnMock invocation) throws Throwable {
-            List<FieldValue> result;
-            if (((Pageable) invocation.getArgument(1)).getPageNumber() == 0) {
-              result = fieldValues;
-            } else {
-              result = new ArrayList<>();
-            }
-            return result;
-          }
-        });
+    // when(fieldRepository.findByRecord_IdRecordSchema(Mockito.anyString(),
+    // Mockito.any(Pageable.class))).then(new Answer<List<FieldValue>>() {
+    //
+    // @Override
+    // public List<FieldValue> answer(InvocationOnMock invocation) throws Throwable {
+    // List<FieldValue> result;
+    // if (((Pageable) invocation.getArgument(1)).getPageNumber() == 0) {
+    // result = fieldValues;
+    // } else {
+    // result = new ArrayList<>();
+    // }
+    // return result;
+    // }
+    // });
     AttachmentValue attachment = new AttachmentValue();
     attachment.setFieldValue(field);
-    when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));
-    "".getBytes();
-    when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
+    // when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));
+    // "".getBytes();
+    // when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     byte[] expectedResult = "".getBytes();
-    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-        Mockito.anyBoolean())).thenReturn(expectedResult);
+    // when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(),
+    // Mockito.anyBoolean(),
+    // Mockito.anyBoolean())).thenReturn(expectedResult);
     attachment.setContent(expectedResult);
-    when(attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(Mockito.anyString()))
-        .thenReturn(Arrays.asList(attachment));
+    // when(attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(Mockito.anyString()))
+    // .thenReturn(Arrays.asList(attachment));
 
-    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
-        .thenReturn(new ConnectionDataVO());
-    Mockito
-        .when(recordValueIdGenerator
-            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
-        .thenReturn("recordId");
-    Mockito
-        .when(fieldValueIdGenerator
-            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
-        .thenReturn("fieldId");
+    // Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
+    // .thenReturn(new ConnectionDataVO());
+    // Mockito
+    // .when(recordValueIdGenerator
+    // .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+    // .thenReturn("recordId");
+    // Mockito
+    // .when(fieldValueIdGenerator
+    // .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
+    // .thenReturn("fieldId");
 
     datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
-    Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
+    // Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
+    Mockito.verify(statisticsRepository, times(1)).saveAll(Mockito.any());
+
   }
 
 

@@ -449,7 +449,15 @@ public enum EventType {
 
   /** The export users by country failed event. */
   EXPORT_USERS_BY_COUNTRY_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "export_users_by_country_failed_event", true);
+      "export_users_by_country_failed_event", true),
+
+  COPY_REFERENCE_DATASET_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "copy_reference_dataset_snapshot_completed_event", true),
+
+  RESTORE_PREFILLING_REFERENCE_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "restore_prefilling_reference_snapshot_completed_event", true);
+
+
 
   /** The topic. */
   private String topic;

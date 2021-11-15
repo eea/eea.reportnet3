@@ -179,7 +179,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
-    datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null, null);
+    datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null, null, false);
   }
 
   /**
@@ -191,7 +191,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
   @ApiOperation(value = "Delete snapshot")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete snapshot"),
       @ApiResponse(code = 400, message = "Dataset id incorrect or user request not found")})
@@ -590,9 +590,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   public void createReleaseSnapshots(
       @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
           name = "dataflowId") @PathVariable(value = "dataflowId", required = true) Long dataflowId,
-      @ApiParam(type = "Long", value = "Provider Id", example = "0") @LockCriteria(
-          name = "dataProviderId") @PathVariable(value = "dataProviderId",
-              required = true) Long dataProviderId,
+      @ApiParam(type = "Long", value = "Provider Id",
+          example = "0") @LockCriteria(name = "dataProviderId") @PathVariable(
+              value = "dataProviderId", required = true) Long dataProviderId,
       @ApiParam(type = "boolean", value = "Restric from public", example = "true") @RequestParam(
           name = "restrictFromPublic", required = true,
           defaultValue = "false") boolean restrictFromPublic) {
