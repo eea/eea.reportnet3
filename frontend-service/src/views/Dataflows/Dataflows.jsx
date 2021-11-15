@@ -19,6 +19,7 @@ import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
+import { GoTopButton } from '../_components/GoTopButton';
 
 import { DataflowService } from 'services/DataflowService';
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
@@ -401,6 +402,9 @@ const Dataflows = withRouter(({ history, match }) => {
           visibleTab={tabId}
         />
       </div>
+
+
+      <GoTopButton visibleSinceHeight={180} />
 
       {dataflowsState.isUserListVisible && (
         <Dialog
