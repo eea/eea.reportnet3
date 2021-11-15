@@ -89,6 +89,7 @@ public class UserRoleServiceImpl implements UserRoleService {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant DOWNLOAD_USERS_BY_COUNTRY_EXCEPTION: {@value}. */
   private static final String DOWNLOAD_USERS_BY_COUNTRY_EXCEPTION =
       "Download exported users by country found a file with the followings parameters:, dataflowId: %s + filename: %s";
 
@@ -433,6 +434,14 @@ public class UserRoleServiceImpl implements UserRoleService {
     }
   }
 
+  /**
+   * Download users by country.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @return the file
+   * @throws ResponseStatusException the response status exception
+   */
   @Override
   public File downloadUsersByCountry(Long dataflowId, String fileName)
       throws ResponseStatusException {

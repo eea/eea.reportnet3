@@ -851,6 +851,13 @@ public class UserManagementControllerImpl implements UserManagementController {
     }
   }
 
+  /**
+   * Download users by country.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param response the response
+   */
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
   @GetMapping("/downloadUsersByCountry/{dataflowId}")
@@ -880,7 +887,7 @@ public class UserManagementControllerImpl implements UserManagementController {
 
       FileUtils.forceDelete(file);
 
-    } catch (IOException e) {
+    } catch (IOException | ResponseStatusException e) {
       LOG_ERROR.error(
           "Downloading file generated when exporting Users by country. Dataflow Id {}. Filename {}. Error message: {}",
           dataflowId, fileName, e.getMessage());
