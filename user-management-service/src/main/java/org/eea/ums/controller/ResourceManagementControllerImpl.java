@@ -29,6 +29,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The type Resource management controller implementation.
@@ -36,6 +37,7 @@ import io.swagger.annotations.ApiResponse;
 @RestController
 @RequestMapping(value = "/resource")
 @Api(tags = "Resources : Resources Manager")
+@ApiIgnore
 public class ResourceManagementControllerImpl implements ResourceManagementController {
 
   /**

@@ -36,12 +36,14 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The Class RecordStoreControllerImpl.
  */
 @RestController
 @RequestMapping("/recordstore")
+@ApiIgnore
 public class RecordStoreControllerImpl implements RecordStoreController {
 
   /**
