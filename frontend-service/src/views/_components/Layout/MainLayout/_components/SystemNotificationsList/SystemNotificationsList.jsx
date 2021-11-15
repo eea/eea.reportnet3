@@ -83,14 +83,16 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       />
     ));
 
-    columnsArray.push(
-      <Column
-        body={actionsColumnButtons}
-        header={resourcesContext.messages['actions']}
-        // className={styles.crudColumn}
-        key="buttonsUniqueId"
-      />
-    );
+    if (isAdmin) {
+      columnsArray.push(
+        <Column
+          body={actionsColumnButtons}
+          header={resourcesContext.messages['actions']}
+          // className={styles.crudColumn}
+          key="buttonsUniqueId"
+        />
+      );
+    }
 
     setColumns(columnsArray);
   }, [userContext]);
@@ -128,14 +130,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       <LevelError type={isDropdown ? rowData.value.toLowerCase() : rowData.level?.toLowerCase()} />
     </div>
   );
-
-  const newSystemNotificationsClassName = rowData => {
-    return {
-      'p-highlight':
-        notificationContext.all.filter(notification => notification.isSystem && notification.id === rowData.id).length >
-        0
-    };
-  };
 
   const systemNotificationsFooter = (
     <div>
@@ -230,7 +224,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
           onRowClick={event => setSelectedRow(event.data)}
           paginator={true}
           paginatorRight={<span>{`${resourcesContext.messages['totalRecords']}  ${systemNotifications.length}`}</span>}
-          rowClassName={newSystemNotificationsClassName}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary="notificationsList"

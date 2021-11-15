@@ -4,7 +4,7 @@ export const systemNotificationReducer = (state, { type, payload }) => {
       return { ...state, isVisibleCreateSysNotification: true, editNotification: payload, formType: 'EDIT' };
 
     case 'ON_TOGGLE_CREATE_FORM_VISIBILITY':
-      return { ...state, isVisibleCreateSysNotification: payload };
+      return { ...state, isVisibleCreateSysNotification: payload, formType: payload ? 'CREATE' : '' };
 
     case 'SET_SYSTEM_NOTIFICATIONS':
       return { ...state, systemNotifications: payload };

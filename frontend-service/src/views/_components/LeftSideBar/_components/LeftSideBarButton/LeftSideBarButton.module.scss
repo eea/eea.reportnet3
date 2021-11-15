@@ -41,7 +41,17 @@
   align-items: center;
   justify-content: center;
   position: relative;
-
+}
+.systemNotificationMark {
+  position: absolute;
+  top: -8px;
+  right: 16px;
+  background-color: var(--errors);
+  color: var(--white);
+  border-radius: 3px;
+  padding: 1px 3px;
+  font: 8pt Verdana;
+  font-weight: bold;
 }
 
 .tooltipClass {

@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -11,6 +11,7 @@ import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
+import { Growl } from 'views/_components/Growl';
 import { GrowlMessage } from 'views/_components/Growl/_components/GrowlMessage';
 import { InputText } from 'views/_components/InputText';
 import { LevelError } from 'views/_components/LevelError';
@@ -26,9 +27,11 @@ export const SystemNotificationsCreateForm = ({
   onUpdateSystemNotification
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+  const growlRef = useRef();
 
+  console.log({ formType });
   const [systemNotification, setSystemNotification] = useState(
-    formType === 'EDIT' ? notification : { message: '', enabled: true }
+    formType === 'EDIT' ? notification : { message: '', enabled: true, level: 'INFO' }
   );
 
   const hasErrors = () => isEmpty(systemNotification.message) || isEmpty(systemNotification.level);
@@ -71,18 +74,18 @@ export const SystemNotificationsCreateForm = ({
 
   const renderSystemNotificationPreview = () => {
     return (
-      <GrowlMessage
-        closableOnClick={false}
-        message={{
-          detail: systemNotification.message,
-          preview: true,
-          severity: systemNotification.level.toLowerCase(),
-          summary: systemNotification.level.toUpperCase(),
-          system: true
-        }}
-        onClick={() => {}}
-        onClose={() => {}}
-      />
+      <div className={styles.previewSystemNotification}>
+        <GrowlMessage
+          closableOnClick={false}
+          message={{
+            detail: systemNotification.message,
+            preview: true,
+            severity: systemNotification.level.toLowerCase(),
+            summary: systemNotification.level.toUpperCase(),
+            system: true
+          }}
+        />
+      </div>
     );
   };
 
@@ -99,26 +102,6 @@ export const SystemNotificationsCreateForm = ({
       visible={isVisible}
       zIndex={3200}>
       <div className={styles.systemNotificationFormWrapper}>
-        {/* <div>
-          <div>
-            <label>{`${resourcesContext.messages['type']} (${resourcesContext.messages['key']})`}</label>
-            <TooltipButton
-              message={resourcesContext.messages['systemNotificationsKey']}
-              uniqueIdentifier="systemNotificationKey"
-            />
-          </div>
-          <div>
-            <InputText
-              id="systemNotificationKey"
-              // keyfilter={RecordUtils.getFilter(type)}
-              // maxLength={getMaxCharactersByType(type)}
-              name="systemNotificationKey"
-              onChange={e => onChange('key', e.target.value.replaceAll(' ', '_').toUpperCase())}
-              type="text"
-              value={systemNotification.key}
-            />
-          </div>
-        </div> */}
         <div>
           <div>
             <label>{resourcesContext.messages['message']}</label>
@@ -145,6 +128,7 @@ export const SystemNotificationsCreateForm = ({
             <label>{resourcesContext.messages['notificationLevel']}</label>
           </div>
           <div>
+            {console.log({ label: systemNotification.level, value: systemNotification.level })}
             <Dropdown
               appendTo={document.body}
               filterPlaceholder={resourcesContext.messages['systemNotificationLevel']}
@@ -177,8 +161,27 @@ export const SystemNotificationsCreateForm = ({
         <div>
           <div>
             <h3>{resourcesContext.messages['previewNotification']}</h3>
+            <Growl ref={growlRef} />
           </div>
           {renderSystemNotificationPreview()}
+          <div className={styles.previewButtonWrapper}>
+            <Button
+              className="p-button-animated-blink"
+              icon="bell"
+              id="previewSystemNotification"
+              label={resourcesContext.messages['previewNotification']}
+              onClick={() =>
+                growlRef.current.show({
+                  detail: systemNotification.message,
+                  severity: systemNotification.level.toLowerCase(),
+                  summary: systemNotification.level.toUpperCase(),
+                  system: true
+                })
+              }
+              tooltip={resourcesContext.messages['previewNotificationMessage']}
+              tooltipOptions={{ position: 'top' }}
+            />
+          </div>
         </div>
       </div>
     </Dialog>

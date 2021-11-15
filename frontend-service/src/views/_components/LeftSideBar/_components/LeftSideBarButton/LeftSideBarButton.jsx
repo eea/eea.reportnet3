@@ -87,9 +87,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
           role="button"
         />
         {notificationContext.all.filter(notification => notification.isSystem === true).length > 0 && (
-          <span className={styles.notificationCounter}>
-            {notificationContext.all.filter(notification => notification.isSystem === true).length || 0}
-          </span>
+          <span className={styles.systemNotificationMark}>!</span>
         )}
       </div>
       <span className={styles.leftSideBarUserText}>{resourcesContext.messages[label]}</span>

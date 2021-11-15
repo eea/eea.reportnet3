@@ -1043,7 +1043,7 @@
     },
     {
       "key": "info",
-      "lifeTime": 5000,
+      "lifeTime": 50000,
       "fixed": false,
       "types": [
         { "key": "DATASET_DATA_LOADING_INIT", "messageKeys": {} },
