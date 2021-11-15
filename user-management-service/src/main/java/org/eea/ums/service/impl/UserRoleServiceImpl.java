@@ -377,8 +377,9 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     fileFolder.mkdirs();
 
-    NotificationVO notificationVO = NotificationVO.builder().dataflowId(dataflowId)
-        .fileName(fileNameWithExtension).error(creatingFileError).build();
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+        .dataflowId(dataflowId).fileName(fileNameWithExtension).error(creatingFileError).build();
 
     StringWriter stringWriter = new StringWriter();
 

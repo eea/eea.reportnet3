@@ -37,6 +37,7 @@ public class ExportUsersByCountryCompletedEvent implements NotificableEventHandl
     String nameFile = notificationVO.getFileName();
 
     Map<String, Object> notification = new HashMap<>();
+    notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", dataflowId);
     notification.put("nameFile", nameFile);
     return notification;

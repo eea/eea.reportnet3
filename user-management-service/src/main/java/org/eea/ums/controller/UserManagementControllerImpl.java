@@ -124,7 +124,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PostMapping("/generateToken")
   @ApiOperation(value = "Generate an Access Token (valid only for 5 minutes)",
-      response = TokenVO.class, hidden = false)
+      response = TokenVO.class, hidden = true)
   public TokenVO generateToken(
       @ApiParam(value = "User Name") @RequestParam("username") String username,
       @ApiParam(value = "User Password") @RequestParam("password") String password) {
@@ -835,7 +835,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
   @PostMapping("/exportUsersByCountry/dataflow/{dataflowId}")
-  @ApiOperation(value = "Export all users by country into a CSV file", hidden = false)
+  @ApiOperation(value = "Export all users by country into a CSV file", hidden = true)
   public void exportUsersByCountry(@ApiParam(
       value = "Dataflow id used in the export process.") @PathVariable("dataflowId") Long dataflowId) {
     LOG.info("Export users by country from dataflow {}, with type csv.", dataflowId);
@@ -855,7 +855,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
   @GetMapping("/downloadUsersByCountry/{dataflowId}")
   @ApiOperation(value = "Download the generated CSV file containing the users by country",
-      hidden = false)
+      hidden = true)
   @ApiResponse(code = 404, message = "Couldn't find a file with the specified name")
   public void downloadUsersByCountry(
       @ApiParam(value = "Dataflow id used in the export process.",
