@@ -5,7 +5,8 @@ import styles from './GoTopButton.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-const GoTopButton = ({ scrollMinVisible }) => {
+
+const GoTopButton = ({ visibleSinceHeight }) => {
 
     const [scrollPosition, setScrollPosition] = useState(0)
 
@@ -23,7 +24,7 @@ const GoTopButton = ({ scrollMinVisible }) => {
     }, [scrollPosition])
 
     return (
-        scrollPosition > scrollMinVisible &&
+        scrollPosition > visibleSinceHeight  && 
         <div className={`${styles.goTopButton}`} onClick={() => window.scrollTo(0, 0)}>
             <FontAwesomeIcon icon={AwesomeIcons('angleUp')} />
         </div>
