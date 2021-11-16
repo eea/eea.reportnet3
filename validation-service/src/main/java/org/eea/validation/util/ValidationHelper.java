@@ -206,6 +206,7 @@ public class ValidationHelper implements DisposableBean {
   public void finishProcess(String processId) {
     LOG.info("Process {} finished ", processId);
     processesMap.remove(processId);
+    System.gc();
   }
 
   /**

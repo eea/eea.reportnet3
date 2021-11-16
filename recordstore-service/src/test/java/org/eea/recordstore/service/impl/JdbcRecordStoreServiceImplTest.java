@@ -190,7 +190,7 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void createEmptyDataSet() throws RecordStoreAccessException {
     jdbcRecordStoreService.createEmptyDataSet("", "");
-    Mockito.verify(jdbcTemplate, Mockito.times(93)).execute(Mockito.anyString());
+    Mockito.verify(jdbcTemplate, Mockito.times(90)).execute(Mockito.anyString());
   }
 
   @Test(expected = UnsupportedOperationException.class)
@@ -228,8 +228,8 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void testCreateSnapshot() throws SQLException, IOException, EEAException {
     List<String> datasets = new ArrayList<>();
-    Mockito.when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
-        .thenReturn(new byte[5]);
+    // Mockito.when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
+    // .thenReturn(new byte[5]);
     Mockito.doReturn(new SnapshotVO()).when(dataSetSnapshotControllerZuul)
         .getSchemaById(Mockito.any());
     datasets.add("dataset_1");
@@ -260,7 +260,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString());
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
@@ -268,8 +268,8 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void testCreateSnapshot2() throws SQLException, IOException, EEAException {
     List<String> datasets = new ArrayList<>();
-    Mockito.when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
-        .thenReturn(new byte[5]);
+    // Mockito.when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any()))
+    // .thenReturn(new byte[5]);
     datasets.add("dataset_1");
     Mockito.when(datasetControllerZuul.getDatasetType(Mockito.any()))
         .thenReturn(DatasetTypeEnum.COLLECTION);
@@ -294,7 +294,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString());
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
@@ -337,7 +337,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString());
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
@@ -377,7 +377,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString());
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
@@ -420,7 +420,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString());
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
@@ -457,7 +457,8 @@ public class JdbcRecordStoreServiceImplTest {
     DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
     datasetMetabase.setDataflowId(1L);
     datasetMetabase.setDataProviderId(1L);
-    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false);
+    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false,
+        false);
     Mockito.verify(kafkaSender, Mockito.times(0)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -492,7 +493,8 @@ public class JdbcRecordStoreServiceImplTest {
     dfVO.setName("dfName");
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
-    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.EUDATASET, false, true);
+    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.EUDATASET, false, true,
+        false);
     Mockito.verify(lockService, Mockito.times(2)).removeLockByCriteria(Mockito.any());
   }
 

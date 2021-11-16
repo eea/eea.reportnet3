@@ -44,4 +44,8 @@ public class LeadReporter {
   @JoinColumn(name = "representative_id")
   private Representative representative;
 
+  /** The invalid lead reporter. */
+  @Column(name = "invalid")
+  private Boolean invalid;
+
 }
