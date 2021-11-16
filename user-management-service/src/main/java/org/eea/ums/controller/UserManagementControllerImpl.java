@@ -1,12 +1,18 @@
 package org.eea.ums.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -32,6 +38,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -843,4 +850,52 @@ public class UserManagementControllerImpl implements UserManagementController {
           e.getMessage());
     }
   }
+
+  /**
+   * Download users by country.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @GetMapping("/downloadUsersByCountry/{dataflowId}")
+  @ApiOperation(value = "Download the generated CSV file containing the users by country",
+      hidden = true)
+  @ApiResponse(code = 404, message = "Couldn't find a file with the specified name")
+  public void downloadUsersByCountry(
+      @ApiParam(value = "Dataflow id used in the export process.",
+          example = "10") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(
+          value = "The filename the export process asigned to the Users by country export file.",
+          example = "dataflow-10-UsersByCountry.csv") @RequestParam String fileName,
+      HttpServletResponse response) {
+    try {
+      LOG.info(
+          "Downloading file generared when exporting users by country. Dataflow Id {}. Filename {}.",
+          dataflowId, fileName);
+      File file = userRoleService.downloadUsersByCountry(dataflowId, fileName);
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
+      OutputStream out = response.getOutputStream();
+      FileInputStream in = new FileInputStream(file);
+
+      IOUtils.copyLarge(in, out);
+      out.close();
+      in.close();
+
+      FileUtils.forceDelete(file);
+
+    } catch (IOException | ResponseStatusException e) {
+      LOG_ERROR.error(
+          "Downloading file generated when exporting Users by country. Dataflow Id {}. Filename {}. Error message: {}",
+          dataflowId, fileName, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
+          "Trying to download a file generated during the export users by country process but the file is not found, dataflowId: %s + filename: %s + message: %s ",
+          dataflowId, fileName, e.getMessage()), e);
+    }
+  }
+
+
 }
