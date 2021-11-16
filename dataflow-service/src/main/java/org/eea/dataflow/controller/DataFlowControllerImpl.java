@@ -116,7 +116,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping(value = "/v1/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get Dataflow by Id", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataFlowVO.class,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD_REPORTER, REPORTER_WRITE, REPORTER_READ, EDITOR_READ, EDITOR_WRITE, NATIONAL_COORDINATOR, ADMIN")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public DataFlowVO findById(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
@@ -152,7 +152,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get Dataflow by Id", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataFlowVO.class, hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD_REPORTER, REPORTER_WRITE, REPORTER_READ, EDITOR_READ, EDITOR_WRITE, NATIONAL_COORDINATOR, ADMIN")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public DataFlowVO findByIdLegacy(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
@@ -546,7 +546,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping(value = "/v1/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get meta information from a Dataflow based on its Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD_REPORTER, REPORTER_WRITE, REPORTER_READ, EDITOR_READ, EDITOR_WRITE, NATIONAL_COORDINATOR, ADMIN")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public DataFlowVO getMetabaseById(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
@@ -576,7 +576,7 @@ public class DataFlowControllerImpl implements DataFlowController {
   @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get meta information from a Dataflow based on its Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class, hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD_REPORTER, REPORTER_WRITE, REPORTER_READ, EDITOR_READ, EDITOR_WRITE, NATIONAL_COORDINATOR, ADMIN")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public DataFlowVO getMetabaseByIdLegacy(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
