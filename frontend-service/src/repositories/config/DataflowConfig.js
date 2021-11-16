@@ -18,7 +18,7 @@ export const DataflowConfig = {
   generateUsersByCountryFile: '/user/exportUsersByCountry/dataflow/{:dataflowId}',
   getApiKey: '/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   getApiKeyCustodian: '/user/getApiKey?dataflowId={:dataflowId}',
-  getDetails: '/dataflow/{:dataflowId}/getmetabase',
+  getDetails: '/dataflow/v1/{:dataflowId}/getmetabase',
   getDatasetsFinalFeedbackAndReleasedStatus: '/datasetmetabase/dataflow/{:dataflowId}',
   getDatasetsInfo: '/dataflow/{:dataflowId}/datasetsSummary',
   getDatasetsValidationStatistics:
@@ -27,7 +27,7 @@ export const DataflowConfig = {
   getPublicDataflowData: '/dataflow/getPublicDataflow/{:dataflowId}',
   getPublicDataflowsByCountryCode:
     '/dataflow/public/country/{:country}?asc={:asc}&pageNum={:pageNum}&pageSize={:pageSize}&sortField={:sortField}',
-  get: '/dataflow/{:dataflowId}',
+  get: '/dataflow/v1/{:dataflowId}',
   getRepresentativesUsersList: '/user/userRoles/dataflow/{:dataflowId}',
   getSchemas: '/dataschema/getSchemas/dataflow/{:dataflowId}',
   getSchemasValidation: '/dataschema/validate/dataflow/{:dataflowId}',
