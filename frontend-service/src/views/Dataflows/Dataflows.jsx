@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
@@ -79,6 +79,8 @@ const Dataflows = withRouter(({ history, match }) => {
     useReportingObligations();
 
   const { activeIndex, dataflowsCount, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
+
+  const containerRef = useRef(null);
 
   const tabMenuItems =
     isCustodian || isAdmin
@@ -381,13 +383,15 @@ const Dataflows = withRouter(({ history, match }) => {
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
-        <TabMenu
-          activeIndex={activeIndex}
-          headerLabelChildrenCount={dataflowsCount}
-          headerLabelLoading={loadingStatus}
-          model={tabMenuItems}
-          onTabChange={event => onChangeTab(event.index, event.value)}
-        />
+        <div ref={containerRef}>
+          <TabMenu
+            activeIndex={activeIndex}
+            headerLabelChildrenCount={dataflowsCount}
+            headerLabelLoading={loadingStatus}
+            model={tabMenuItems}
+            onTabChange={event => onChangeTab(event.index, event.value)}
+          />
+        </div>
         <DataflowsList
           className="dataflowList-accepted-help-step"
           content={{
