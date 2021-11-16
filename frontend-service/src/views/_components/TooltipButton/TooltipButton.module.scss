@@ -24,6 +24,10 @@
 .maxWidth {
   max-width: 60vw;
 
+  @media (min-width: 700px) {
+    max-width: calc(60vw - 3%);
+  }
+
   @media (min-width: 800px) {
     max-width: calc(60vw - 5%);
   }
