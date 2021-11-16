@@ -77,10 +77,19 @@ public interface DatasetSnapshotController {
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
    */
-  @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
+  @DeleteMapping(value = "/v1/{idSnapshot}/dataset/{idDataset}/delete")
   void deleteSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot);
 
+  /**
+   * Delete snapshot legacy.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   */
+  @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
+  void deleteSnapshotLegacy(@PathVariable("idDataset") Long datasetId,
+      @PathVariable("idSnapshot") Long idSnapshot);
 
   /**
    * Restore snapshot.
@@ -178,8 +187,19 @@ public interface DatasetSnapshotController {
    * @param dataflowId the dataflow id
    * @return the list
    */
-  @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/v1/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReleaseVO> historicReleases(@RequestParam("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId);
+
+  /**
+   * Historic releases legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ReleaseVO> historicReleasesLegacy(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId);
 
   /**

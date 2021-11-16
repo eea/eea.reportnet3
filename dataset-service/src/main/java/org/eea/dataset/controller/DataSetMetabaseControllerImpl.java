@@ -44,10 +44,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import springfox.documentation.annotations.ApiIgnore;
 
 /** The Class DataSetMetabaseControllerImpl. */
 @RestController
 @RequestMapping("/datasetmetabase")
+@ApiIgnore
 public class DataSetMetabaseControllerImpl implements DatasetMetabaseController {
 
 
