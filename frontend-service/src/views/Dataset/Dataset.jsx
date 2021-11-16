@@ -89,15 +89,11 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
-  const [importFromOtherSystemSelectedIntegration, setImportFromOtherSystemSelectedIntegration] = useState({
+  const [importCustomIntegration, setImportCustomIntegration] = useState({
     id: null,
     name: ''
   });
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
-  const [importSelectedIntegration, setImportSelectedIntegration] = useState({
-    id: null,
-    name: ''
-  });
   const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
@@ -330,7 +326,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             return {
               command: () => {
                 setIsImportDatasetDialogVisible(true);
-                setImportSelectedIntegration({ id: type.id, name: type.name });
+                setImportCustomIntegration({ id: type.id, name: type.name });
                 setImportSelectedIntegrationExtension(type.fileExtension);
               },
               icon: type.fileExtension,
@@ -349,7 +345,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             label: importOtherSystem.name,
             icon: 'upload',
             command: () => {
-              setImportFromOtherSystemSelectedIntegration(importOtherSystem.id, importOtherSystem.name);
+              setImportCustomIntegration(importOtherSystem.id, importOtherSystem.name);
               setIsImportOtherSystemsDialogVisible(true);
             }
           }))
@@ -510,7 +506,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const onImportOtherSystems = async () => {
     try {
       cleanImportOtherSystemsDialog();
-      await IntegrationService.runIntegration(importFromOtherSystemSelectedIntegration.id, datasetId, replaceData);
+      await IntegrationService.runIntegration(importCustomIntegration.id, datasetId, replaceData);
       setIsDataLoaded(true);
       const {
         dataflow: { name: dataflowName },
@@ -870,7 +866,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onUpload = async () => {
     setIsImportDatasetDialogVisible(false);
-    setImportSelectedIntegration({ id: null, name: null });
+    setImportCustomIntegration({ id: null, name: null });
     const {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
@@ -1203,10 +1199,14 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogClassName={styles.Dialog}
-          dialogHeader={importSelectedIntegration.name}
+          dialogHeader={
+            isNil(importCustomIntegration.id)
+              ? resourcesContext.messages['importZIPdata']
+              : importCustomIntegration.name
+          }
           dialogOnHide={() => {
             setIsImportDatasetDialogVisible(false);
-            setImportSelectedIntegration({ id: null, mame: null });
+            setImportCustomIntegration({ id: null, mame: null });
           }}
           dialogVisible={isImportDatasetDialogVisible}
           infoTooltip={`${
@@ -1222,14 +1222,14 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           onUpload={onUpload}
           replaceCheck={true}
           url={`${window.env.REACT_APP_BACKEND}${
-            isNil(importSelectedIntegration.id)
+            isNil(importCustomIntegration.id)
               ? getUrl(DatasetConfig.importFileDataset, {
                   datasetId: datasetId,
                   delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
                 })
               : getUrl(DatasetConfig.importFileDatasetExternal, {
                   datasetId: datasetId,
-                  integrationId: importSelectedIntegration.id
+                  integrationId: importCustomIntegration.id
                 })
           }`}
         />
@@ -1239,14 +1239,17 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         <Dialog
           className={styles.Dialog}
           footer={renderImportOtherSystemsFooter}
-          header={importFromOtherSystemSelectedIntegration.name}
-          onHide={cleanImportOtherSystemsDialog}
+          header={importCustomIntegration.name}
+          onHide={() => {
+            cleanImportOtherSystemsDialog();
+            setImportCustomIntegration({ id: null, name: null });
+          }}
           visible={isImportOtherSystemsDialogVisible}>
           <div className={styles.text}>
             dangerouslySetInnerHTML=
             {{
               __html: TextUtils.parseText(resourcesContext.messages['importPreviousDataConfirm'], {
-                importName: importFromOtherSystemSelectedIntegration.name
+                importName: importCustomIntegration.name
               })
             }}
           </div>

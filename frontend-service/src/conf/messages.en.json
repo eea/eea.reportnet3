@@ -1343,6 +1343,7 @@
     "wrongWebLinkError": "The URL is not valid",
     "yes": "Yes",
     "creationMode": "Creation mode",
-    "statusQC": "Status"
+    "statusQC": "Status",
+    "importZIPdata": "Import CSV for each table"
   }
 }
