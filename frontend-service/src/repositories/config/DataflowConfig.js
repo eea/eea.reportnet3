@@ -9,7 +9,7 @@ export const DataflowConfig = {
   delete: '/dataflow/{:dataflowId}',
   downloadAllSchemasInfo: '/dataflow/downloadSchemaInformation/{:dataflowId}?fileName={:fileName}',
   downloadPublicAllSchemasInfoFile: '/dataflow/downloadPublicSchemaInformation/{:dataflowId}',
-  downloadUsersListFile: '/user/downloadUsersByCountry/{:dataflowId}?fileName={:fileName}',
+  downloadUsersListFile: '/user/downloadUsersByCountry/{:dataflowId}/?fileName={:fileName}',
   exportSchemas: '/dataschema/export?dataflowId={:dataflowId}',
   getAll: '/dataflow/getDataflows',
   getCloneableDataflows: '/dataflow/cloneableDataflows',
