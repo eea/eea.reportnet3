@@ -172,7 +172,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @ApiOperation(value = "Get Representatives by Dataflow Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = RepresentativeVO.class,
       responseContainer = "List",
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR_READ, EDITOR_WRITE, OBSERVER, LEAD_REPORTER, REPORTER_WRITE")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR READ, EDITOR WRITE, OBSERVER, LEAD REPORTER, REPORTER WRITE")
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_NOTFOUND),
       @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)})
   public List<RepresentativeVO> findRepresentativesByIdDataFlow(
@@ -197,7 +197,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @ApiOperation(value = "Get Representatives by Dataflow Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = RepresentativeVO.class,
       responseContainer = "List", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR_READ, EDITOR_WRITE, OBSERVER, LEAD_REPORTER, REPORTER_WRITE")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR READ, EDITOR WRITE, OBSERVER, LEAD REPORTER, REPORTER WRITE")
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_NOTFOUND),
       @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)})
   public List<RepresentativeVO> findRepresentativesByIdDataFlowLegacy(
