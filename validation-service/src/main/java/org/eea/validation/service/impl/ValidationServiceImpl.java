@@ -399,6 +399,7 @@ public class ValidationServiceImpl implements ValidationService {
         tableValidationRepository.saveAll(validations);
       }
     } finally {
+      table = null;
       session.destroy();
     }
   }
@@ -429,6 +430,7 @@ public class ValidationServiceImpl implements ValidationService {
         recordValidationRepository.saveAll(recordValidations);
       }
     } finally {
+      records = null;
       session.destroy();
     }
   }
@@ -462,6 +464,7 @@ public class ValidationServiceImpl implements ValidationService {
         validationFieldRepository.saveAll(fieldValidations);
       }
     } finally {
+      fields = null;
       session.destroy();
     }
   }

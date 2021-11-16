@@ -1492,6 +1492,10 @@
     "value": "ZmFsc2U="
   },
   {
+	"key": "config/ums/umsExportPathFile",
+	"value":"JHtVTVNfRVhQT1JUX0ZJTEVTX1BBVEg6QzpcdW1zRXhwb3J0RmlsZXNcfQ=="
+  },
+  {
     "key": "config/apiGateway/management.metrics.export.elastic.index",
     "value": "JHtFTEFTVElDX0lOREVYOmRldi1hcGlnYXRld2F5LW1ldHJpY3N9"
   },

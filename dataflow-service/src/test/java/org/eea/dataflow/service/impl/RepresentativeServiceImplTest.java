@@ -145,7 +145,7 @@ public class RepresentativeServiceImplTest {
     representativeVO.setLeadReporters(leadReportersVO);
     arrayId = new ArrayList<>();
     arrayId.add(new Representative());
-    leadReporter = new LeadReporter(1L, "email@host.com", representative);
+    leadReporter = new LeadReporter(1L, "email@host.com", representative, null);
     leadReporters = new ArrayList<>();
     leadReporters.add(leadReporter);
     MockitoAnnotations.openMocks(this);
@@ -474,28 +474,8 @@ public class RepresentativeServiceImplTest {
   }
 
   @Test(expected = EEAException.class)
-  public void createLeadReporterNotFoundUserExceptionTest() throws EEAException {
-    Representative representative = new Representative();
-    representative.setId(1L);
-    representative.setLeadReporters(leadReporters);
-    RepresentativeVO representativeVO = new RepresentativeVO();
-    representativeVO.setLeadReporters(leadReportersVO);
-    representativeVO.setDataProviderId(1L);
-
-    Mockito.when(representativeRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(representative));
-    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
-    try {
-      representativeServiceImpl.createLeadReporter(1L, leadReporterVO);
-    } catch (EEAException e) {
-      Assert.assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getMessage());
-      throw e;
-    }
-  }
-
-  @Test(expected = EEAException.class)
   public void createLeadReporterDuplicatedUserExceptionTest() throws EEAException {
-    LeadReporter leadReporter2 = new LeadReporter(1L, "email@user.com", representative);
+    LeadReporter leadReporter2 = new LeadReporter(1L, "email@user.com", representative, null);
     leadReporters.add(leadReporter2);
     Representative representative = new Representative();
     representative.setId(1L);
@@ -587,29 +567,6 @@ public class RepresentativeServiceImplTest {
       representativeServiceImpl.updateLeadReporter(leadReporterVO);
     } catch (EEAException e) {
       Assert.assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getMessage());
-      throw e;
-    }
-  }
-
-  @Test(expected = EEAException.class)
-  public void updateLeadReporterUserNotFoundExceptionTest() throws EEAException {
-    Representative representative = new Representative();
-    representative.setId(1L);
-    representative.setLeadReporters(leadReporters);
-    representative.setHasDatasets(true);
-    representative.setDataflow(new Dataflow());
-    representative.setDataProvider(new DataProvider());
-    leadReporterVO.setRepresentativeId(1L);
-
-    Mockito.when(leadReporterRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(leadReporter));
-    Mockito.when(representativeRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(representative));
-    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
-    try {
-      representativeServiceImpl.updateLeadReporter(leadReporterVO);
-    } catch (EEAException e) {
-      Assert.assertEquals(EEAErrorMessage.USER_NOTFOUND, e.getMessage());
       throw e;
     }
   }

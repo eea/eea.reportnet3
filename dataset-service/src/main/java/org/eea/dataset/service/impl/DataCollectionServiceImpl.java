@@ -731,11 +731,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           datasetIdsAndSchemaIds.put(referenceDatasetId, referenceDataset.getDatasetSchema());
           for (RepresentativeVO representative : representatives) {
             List<String> emails = representative.getLeadReporters().stream()
+                .filter(leadReporter -> !Boolean.TRUE.equals(leadReporter.getInvalid()))
                 .map(LeadReporterVO::getEmail).collect(Collectors.toList());
-            if (emails.isEmpty()) {
-              referenceDatasetIdsEmails.put(referenceDatasetId, null);
+            if (!emails.isEmpty()) {
+              if (referenceDatasetIdsEmails.containsKey(referenceDatasetId)) {
+                referenceDatasetIdsEmails.get(referenceDatasetId).addAll(emails);
+              } else {
+                referenceDatasetIdsEmails.put(referenceDatasetId, emails);
+              }
             } else {
-              referenceDatasetIdsEmails.put(referenceDatasetId, emails);
+              if (!referenceDatasetIdsEmails.containsKey(referenceDatasetId)) {
+                referenceDatasetIdsEmails.put(referenceDatasetId, null);
+              }
             }
           }
           RulesSchemaVO rulesSchemaVO = rulesControllerZuul

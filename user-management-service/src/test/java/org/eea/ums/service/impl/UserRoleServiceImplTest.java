@@ -1,5 +1,6 @@
 package org.eea.ums.service.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,9 +23,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class UserRoleServiceImplTest.
@@ -105,5 +108,16 @@ public class UserRoleServiceImplTest {
     Mockito.when(keycloakConnectorService.getUsersByGroupId(Mockito.any())).thenReturn(users);
     assertNotNull(userRoleService.getUserRolesByDataflow(0L));
   }
+
+  @Test(expected = ResponseStatusException.class)
+  public void downloadUsersByCountryTest() {
+    try {
+      userRoleService.downloadUsersByCountry(1L, "fileName");
+    } catch (ResponseStatusException e) {
+      assertEquals(e.getStatus(), HttpStatus.NOT_FOUND);
+      throw e;
+    }
+  }
+
 
 }

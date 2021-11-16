@@ -41,11 +41,13 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The Class CollaborationControllerImpl.
  */
 @RestController
+@ApiIgnore
 @RequestMapping("/collaboration")
 public class CollaborationControllerImpl implements CollaborationController {
 
