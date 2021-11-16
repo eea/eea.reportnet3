@@ -24,31 +24,20 @@
 .maxWidth {
   max-width: 60vw;
 
-  @include for-phone-landscape-up {
-    max-width: calc(60vw - 15%);
-  }
-
-  @media (min-width: 500px) {
-    max-width: calc(60vw - 12%);
-  }
-
-  @media (min-width: 700px) {
-    max-width: calc(60vw - 15%);
-  }
-
   @media (min-width: 800px) {
-    max-width: calc(60vw - 18%);
+    max-width: calc(60vw - 5%);
   }
+
   @media (min-width: 850px) {
-    max-width: calc(60vw - 20%);
+    max-width: calc(60vw - 8%);
   }
 
   @include for-tablet-landscape-up {
-    max-width: calc(60vw - 20%);
+    max-width: calc(60vw - 10%);
   }
 
   @media (min-width: 950px) {
-    max-width: calc(60vw - 20%);
+    max-width: calc(60vw - 12%);
   }
 
   @include for-desktop-up {
