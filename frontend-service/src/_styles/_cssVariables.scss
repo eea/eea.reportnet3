@@ -598,4 +598,16 @@
 
   /* Cookies*/
   --cookies-content-color: var(--white);
+
+  /* GoTopButton*/
+  --gotopbutton-bg-color: var(--c-corporate-blue);
+  --gotopbutton-color: var(--white);
+  --gotopbutton-bg-color-hover: var(--c-corporate-blue);
+  --gotopbutton-color-hover: var(--c-corporate-yellow);
+  --gotopbutton-bg-color-darker: var(--c-corporate-blue);
+  --gotopbutton-color-darker: var(--white);
+  --gotopbutton-bg-color-darker-hover: var(--c-corporate-blue);
+  --gotopbutton-color-darker-hover: var(--c-corporate-yellow);
+  --gotopbutton-shadow-light: none; //0px 0px 3px 0px #000000;
+  --gotopbutton-shadow-darker: none; //0px 0px 3px 0px #ffffff;
 }
