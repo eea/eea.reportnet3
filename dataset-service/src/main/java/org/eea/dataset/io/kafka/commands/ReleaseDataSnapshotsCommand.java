@@ -103,7 +103,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
       createSnapshotVO.setDescription("Release " + dateRelease + " CET");
 
-      datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease);
+      datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease, false);
     } else {
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
 
