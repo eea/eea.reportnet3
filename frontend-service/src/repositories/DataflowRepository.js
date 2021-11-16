@@ -33,9 +33,9 @@ export const DataflowRepository = {
       url: getUrl(DataflowConfig.downloadQCRulesFile, { datasetId, fileName })
     }),
 
-  downloadUsersListFile: async (datasetId, fileName) =>
+  downloadUsersListFile: async (dataflowId, fileName) =>
     await HTTPRequester.download({
-      url: getUrl(DataflowConfig.downloadUsersListFile, { datasetId, fileName })
+      url: getUrl(DataflowConfig.downloadUsersListFile, { dataflowId, fileName })
     }),
 
   generateAllSchemasInfoFile: async dataflowId =>
