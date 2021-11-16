@@ -64,6 +64,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.netty.util.internal.StringUtil;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -74,6 +75,7 @@ import io.swagger.annotations.ApiResponses;
  */
 @RestController
 @RequestMapping("/dataschema")
+@Api(tags = "Dataset Schema : Dataset Schema Manager")
 public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
   /** The Constant REGEX_NAME: {@value}. */

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
@@ -30,6 +31,7 @@ import io.swagger.annotations.ApiParam;
  */
 @RestController
 @RequestMapping("/euDataset")
+@Api(tags = "EU datasets : EU Dataset Manager")
 public class EUDatasetControllerImpl implements EUDatasetController {
 
 

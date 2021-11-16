@@ -29,14 +29,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * The Class DataSetMetabaseControllerImplTest.
+ * The Class DatasetMetabaseControllerImplTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class DataSetMetabaseControllerImplTest {
+public class DatasetMetabaseControllerImplTest {
 
   /** The data set metabase controller impl. */
   @InjectMocks
-  private DataSetMetabaseControllerImpl dataSetMetabaseControllerImpl;
+  private DatasetMetabaseControllerImpl datasetMetabaseControllerImpl;
 
   /** The dataset metabase service. */
   @Mock
@@ -72,7 +72,7 @@ public class DataSetMetabaseControllerImplTest {
   public void testFindDataSetIdByDataflowId() {
     when(reportingDatasetService.getDataSetIdByDataflowId(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
-    dataSetMetabaseControllerImpl.findReportingDataSetIdByDataflowId(Mockito.anyLong());
+    datasetMetabaseControllerImpl.findReportingDataSetIdByDataflowId(Mockito.anyLong());
     Mockito.verify(reportingDatasetService, times(1)).getDataSetIdByDataflowId(Mockito.any());
   }
 
@@ -84,7 +84,7 @@ public class DataSetMetabaseControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void createEmptyDataSetTestException1() throws Exception {
-    dataSetMetabaseControllerImpl.createEmptyDataSet(DatasetTypeEnum.REPORTING, null, null, 1L);
+    datasetMetabaseControllerImpl.createEmptyDataSet(DatasetTypeEnum.REPORTING, null, null, 1L);
   }
 
 
@@ -93,7 +93,7 @@ public class DataSetMetabaseControllerImplTest {
     Mockito.doThrow(EEAException.class).when(datasetMetabaseService).createEmptyDataset(
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any());
-    dataSetMetabaseControllerImpl.createEmptyDataSet(null, "notBlank", "", 1L);
+    datasetMetabaseControllerImpl.createEmptyDataSet(null, "notBlank", "", 1L);
   }
 
   /**
@@ -107,7 +107,7 @@ public class DataSetMetabaseControllerImplTest {
         .when(datasetMetabaseService.createEmptyDataset(Mockito.any(), Mockito.any(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(CompletableFuture.completedFuture(1L));
-    dataSetMetabaseControllerImpl.createEmptyDataSet(DatasetTypeEnum.REPORTING, "datasetName", null,
+    datasetMetabaseControllerImpl.createEmptyDataSet(DatasetTypeEnum.REPORTING, "datasetName", null,
         1L);
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
@@ -117,7 +117,7 @@ public class DataSetMetabaseControllerImplTest {
   public void findDatasetMetabaseByIdTest() throws Exception {
     when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
-    dataSetMetabaseControllerImpl.findDatasetMetabaseById(Mockito.anyLong());
+    datasetMetabaseControllerImpl.findDatasetMetabaseById(Mockito.anyLong());
     Mockito.verify(datasetMetabaseService, times(1)).findDatasetMetabase(Mockito.anyLong());
   }
 
@@ -125,7 +125,7 @@ public class DataSetMetabaseControllerImplTest {
   public void testFindDesignDataSetIdByDataflowId() {
     when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
-    dataSetMetabaseControllerImpl.findDesignDataSetIdByDataflowId(Mockito.anyLong());
+    datasetMetabaseControllerImpl.findDesignDataSetIdByDataflowId(Mockito.anyLong());
     Mockito.verify(designDatasetService, times(1)).getDesignDataSetIdByDataflowId(Mockito.any());
   }
 
@@ -133,14 +133,14 @@ public class DataSetMetabaseControllerImplTest {
   public void updateDatasetNameTest1() {
     Mockito.when(datasetMetabaseService.updateDatasetName(Mockito.any(), Mockito.any()))
         .thenReturn(false);
-    dataSetMetabaseControllerImpl.updateDatasetName(1L, "datasetName");
+    datasetMetabaseControllerImpl.updateDatasetName(1L, "datasetName");
   }
 
   @Test
   public void updateDatasetNameTest2() {
     Mockito.when(datasetMetabaseService.updateDatasetName(Mockito.any(), Mockito.any()))
         .thenReturn(true);
-    dataSetMetabaseControllerImpl.updateDatasetName(1L, "datasetName");
+    datasetMetabaseControllerImpl.updateDatasetName(1L, "datasetName");
     Mockito.verify(datasetMetabaseService, times(1)).updateDatasetName(Mockito.any(),
         Mockito.any());
   }
@@ -154,7 +154,7 @@ public class DataSetMetabaseControllerImplTest {
   @Test
   public void testLoadStatistics() throws Exception {
     when(datasetMetabaseService.getStatistics(Mockito.any())).thenReturn(new StatisticsVO());
-    dataSetMetabaseControllerImpl.getStatisticsById(1L);
+    datasetMetabaseControllerImpl.getStatisticsById(1L);
 
     Mockito.verify(datasetMetabaseService, times(1)).getStatistics(Mockito.any());
   }
@@ -168,7 +168,7 @@ public class DataSetMetabaseControllerImplTest {
   @Test
   public void testLoadStatisticsException() throws Exception {
     doThrow(new EEAException()).when(datasetMetabaseService).getStatistics(Mockito.any());
-    dataSetMetabaseControllerImpl.getStatisticsById(null);
+    datasetMetabaseControllerImpl.getStatisticsById(null);
 
     Mockito.verify(datasetMetabaseService, times(1)).getStatistics(Mockito.any());
   }
@@ -177,7 +177,7 @@ public class DataSetMetabaseControllerImplTest {
   @Test
   public void testGlobalStatistics() throws Exception {
     when(datasetMetabaseService.getGlobalStatistics(Mockito.any())).thenReturn(new ArrayList<>());
-    dataSetMetabaseControllerImpl.getGlobalStatisticsByDataschemaId("5ce524fad31fc52540abae73", 0L);
+    datasetMetabaseControllerImpl.getGlobalStatisticsByDataschemaId("5ce524fad31fc52540abae73", 0L);
 
     Mockito.verify(datasetMetabaseService, times(1)).getGlobalStatistics(Mockito.any());
   }
@@ -185,7 +185,7 @@ public class DataSetMetabaseControllerImplTest {
   @Test
   public void testGlobalStatisticsException() throws Exception {
     doThrow(new EEAException()).when(datasetMetabaseService).getGlobalStatistics(Mockito.any());
-    dataSetMetabaseControllerImpl.getGlobalStatisticsByDataschemaId(null, null);
+    datasetMetabaseControllerImpl.getGlobalStatisticsByDataschemaId(null, null);
 
     Mockito.verify(datasetMetabaseService, times(1)).getGlobalStatistics(Mockito.any());
   }
@@ -193,7 +193,7 @@ public class DataSetMetabaseControllerImplTest {
   @Test
   public void getReportingsIdBySchemaIdTest() {
     Mockito.when(reportingDatasetService.getDataSetIdBySchemaId(Mockito.any())).thenReturn(null);
-    Assert.assertNull(dataSetMetabaseControllerImpl.getReportingsIdBySchemaId(""));
+    Assert.assertNull(datasetMetabaseControllerImpl.getReportingsIdBySchemaId(""));
   }
 
   @Test
@@ -201,7 +201,7 @@ public class DataSetMetabaseControllerImplTest {
     Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5ce524fad31fc52540abae73");
     Assert.assertEquals("5ce524fad31fc52540abae73",
-        dataSetMetabaseControllerImpl.findDatasetSchemaIdById(1L));
+        datasetMetabaseControllerImpl.findDatasetSchemaIdById(1L));
   }
 
   @Test
@@ -210,19 +210,19 @@ public class DataSetMetabaseControllerImplTest {
         datasetMetabaseService.getIntegrityDatasetId(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(1L);
     Assert.assertEquals((Long) 1L,
-        dataSetMetabaseControllerImpl.getIntegrityDatasetId(1L, "1L", "1L"));
+        datasetMetabaseControllerImpl.getIntegrityDatasetId(1L, "1L", "1L"));
   }
 
   @Test
   public void createDatasetForeignRelationshipTest() {
-    dataSetMetabaseControllerImpl.createDatasetForeignRelationship(1L, 1L, "1", "1");
+    datasetMetabaseControllerImpl.createDatasetForeignRelationship(1L, 1L, "1", "1");
     Mockito.verify(datasetMetabaseService, times(1)).createForeignRelationship(Mockito.anyLong(),
         Mockito.anyLong(), Mockito.any(), Mockito.any());
   }
 
   @Test
   public void updateDatasetForeignRelationshipTest() {
-    dataSetMetabaseControllerImpl.updateDatasetForeignRelationship(1L, 1L, "1", "1");
+    datasetMetabaseControllerImpl.updateDatasetForeignRelationship(1L, 1L, "1", "1");
     Mockito.verify(datasetMetabaseService, times(1)).updateForeignRelationship(Mockito.anyLong(),
         Mockito.anyLong(), Mockito.any(), Mockito.any());
   }
@@ -233,7 +233,7 @@ public class DataSetMetabaseControllerImplTest {
         .getDatasetIdByDatasetSchemaIdAndDataProviderId(Mockito.any(), Mockito.any()))
         .thenReturn(1L);
     Assert.assertEquals((Long) 1L,
-        dataSetMetabaseControllerImpl.getDesignDatasetIdByDatasetSchemaId("1L"));
+        datasetMetabaseControllerImpl.getDesignDatasetIdByDatasetSchemaId("1L"));
   }
 
   @Test
@@ -241,23 +241,23 @@ public class DataSetMetabaseControllerImplTest {
     Mockito.when(
         datasetMetabaseService.getIntegrityDatasetId(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(1L);
-    dataSetMetabaseControllerImpl.deleteForeignRelationship(1L, 1L, "1", "1");
+    datasetMetabaseControllerImpl.deleteForeignRelationship(1L, 1L, "1", "1");
     Mockito.verify(datasetMetabaseService, times(1)).deleteForeignRelation(Mockito.anyLong(),
         Mockito.anyLong(), Mockito.any(), Mockito.any());
   }
 
   @Test
   public void getLastDatasetValidationForRelease() {
-    dataSetMetabaseControllerImpl.getLastDatasetValidationForRelease(1L);
+    datasetMetabaseControllerImpl.getLastDatasetValidationForRelease(1L);
     Mockito.when(datasetMetabaseService.getLastDatasetValidationForRelease(Mockito.any()))
         .thenReturn(1L);
     Assert.assertEquals((Long) 1L,
-        dataSetMetabaseControllerImpl.getLastDatasetValidationForRelease(1L));
+        datasetMetabaseControllerImpl.getLastDatasetValidationForRelease(1L));
   }
 
   @Test
   public void updateDatasetStatusTest() throws EEAException {
-    dataSetMetabaseControllerImpl.updateDatasetStatus(new DatasetStatusMessageVO());
+    datasetMetabaseControllerImpl.updateDatasetStatus(new DatasetStatusMessageVO());
     Mockito.verify(datasetMetabaseService, times(1)).updateDatasetStatus(Mockito.any());
   }
 
@@ -266,7 +266,7 @@ public class DataSetMetabaseControllerImplTest {
   public void updateDatasetStatusException() throws EEAException {
     doThrow(new EEAException()).when(datasetMetabaseService).updateDatasetStatus(Mockito.any());
     try {
-      dataSetMetabaseControllerImpl.updateDatasetStatus(new DatasetStatusMessageVO());
+      datasetMetabaseControllerImpl.updateDatasetStatus(new DatasetStatusMessageVO());
     } catch (ResponseStatusException e) {
       assertEquals(e.getStatus(), HttpStatus.INTERNAL_SERVER_ERROR);
       throw e;
@@ -275,27 +275,27 @@ public class DataSetMetabaseControllerImplTest {
 
   @Test
   public void findReportingDataSetPublicByDataflowIdTest() throws EEAException {
-    dataSetMetabaseControllerImpl.findReportingDataSetPublicByDataflowId(1L);
+    datasetMetabaseControllerImpl.findReportingDataSetPublicByDataflowId(1L);
     Mockito.verify(reportingDatasetService, times(1)).getDataSetPublicByDataflow(Mockito.any());
   }
 
   @Test
   public void findReportingDataSetIdByDataflowIdAndProviderIdTest() {
-    dataSetMetabaseControllerImpl.findReportingDataSetIdByDataflowIdAndProviderId(1L, 1L);
+    datasetMetabaseControllerImpl.findReportingDataSetIdByDataflowIdAndProviderId(1L, 1L);
     Mockito.verify(reportingDatasetService, times(1))
         .getDataSetIdByDataflowIdAndDataProviderId(Mockito.any(), Mockito.any());
   }
 
   @Test
   public void findReportingDataSetPublicByDataflowIdAndProviderId() {
-    dataSetMetabaseControllerImpl.findReportingDataSetPublicByDataflowIdAndProviderId(1L, 1L);
+    datasetMetabaseControllerImpl.findReportingDataSetPublicByDataflowIdAndProviderId(1L, 1L);
     Mockito.verify(reportingDatasetService, times(1))
         .getDataSetPublicByDataflowAndProviderId(Mockito.any(), Mockito.any());
   }
 
   @Test
   public void getDatasetsSummaryListTest() {
-    dataSetMetabaseControllerImpl.getDatasetsSummaryList(1L);
+    datasetMetabaseControllerImpl.getDatasetsSummaryList(1L);
     Mockito.verify(datasetMetabaseService, times(1)).getDatasetsSummaryList(1L);
   }
 
@@ -303,26 +303,26 @@ public class DataSetMetabaseControllerImplTest {
   public void findReportingDataSetByDataflowIdsTest() {
     List<Long> dataflowIds = new ArrayList<>();
     dataflowIds.add(1L);
-    dataSetMetabaseControllerImpl.findReportingDataSetByDataflowIds(dataflowIds);
+    datasetMetabaseControllerImpl.findReportingDataSetByDataflowIds(dataflowIds);
     Mockito.verify(reportingDatasetService, times(1)).getReportingsByDataflowIds(dataflowIds);
   }
 
   @Test
   public void getUserProviderIdsByDataflowIdTest() {
-    dataSetMetabaseControllerImpl.getUserProviderIdsByDataflowId(1L);
+    datasetMetabaseControllerImpl.getUserProviderIdsByDataflowId(1L);
     Mockito.verify(datasetMetabaseService, times(1)).getUserProviderIdsByDataflowId(1L);
   }
 
   @Test
   public void getDatasetIdsByDataflowIdAndDataProviderIdTest() {
-    dataSetMetabaseControllerImpl.getDatasetIdsByDataflowIdAndDataProviderId(1L, 1L);
+    datasetMetabaseControllerImpl.getDatasetIdsByDataflowIdAndDataProviderId(1L, 1L);
     Mockito.verify(datasetMetabaseService, times(1)).getDatasetIdsByDataflowIdAndDataProviderId(1L,
         1L);
   }
 
   @Test
   public void getTypeTest() {
-    dataSetMetabaseControllerImpl.getType(1L);
+    datasetMetabaseControllerImpl.getType(1L);
     Mockito.verify(datasetMetabaseService, times(1)).getDatasetType(1L);
   }
 

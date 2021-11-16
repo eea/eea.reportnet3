@@ -67,23 +67,25 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 /**
- * The Class DataSetControllerImpl.
+ * The Class DatasetControllerImpl.
  */
 @RestController
 @RequestMapping("/dataset")
-public class DataSetControllerImpl implements DatasetController {
+@Api(tags = "Datasets : Dataset Manager")
+public class DatasetControllerImpl implements DatasetController {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DataSetControllerImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetControllerImpl.class);
 
   /** The dataset service. */
   @Autowired

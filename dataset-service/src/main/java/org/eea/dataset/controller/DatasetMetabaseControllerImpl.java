@@ -46,11 +46,11 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import springfox.documentation.annotations.ApiIgnore;
 
-/** The Class DataSetMetabaseControllerImpl. */
+/** The Class DatasetMetabaseControllerImpl. */
 @RestController
 @RequestMapping("/datasetmetabase")
 @ApiIgnore
-public class DataSetMetabaseControllerImpl implements DatasetMetabaseController {
+public class DatasetMetabaseControllerImpl implements DatasetMetabaseController {
 
 
   /** The Constant REGEX_NAME_SCHEMA: {@value}. */

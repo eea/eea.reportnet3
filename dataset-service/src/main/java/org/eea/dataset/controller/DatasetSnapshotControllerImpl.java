@@ -47,23 +47,25 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 /**
- * The Class DataSetSnapshotControllerImpl.
+ * The Class DatasetSnapshotControllerImpl.
  */
 @RestController
 @RequestMapping("/snapshot")
-public class DataSetSnapshotControllerImpl implements DatasetSnapshotController {
+@Api(tags = "Dataset Snapshot : Dataset Snapshot Manager")
+public class DatasetSnapshotControllerImpl implements DatasetSnapshotController {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DataSetSnapshotControllerImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetSnapshotControllerImpl.class);
 
   /** The dataset metabase service. */
   @Autowired
