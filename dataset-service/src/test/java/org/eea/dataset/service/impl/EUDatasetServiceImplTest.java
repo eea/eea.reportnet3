@@ -148,10 +148,10 @@ public class EUDatasetServiceImplTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.any(),
         Mockito.any())).thenReturn(Optional.of(partitionDataset));
     doNothing().when(datasetSnapshotService).addSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
     euDatasetService.populateEUDatasetWithDataCollection(1L);
     Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
   /**

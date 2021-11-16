@@ -76,7 +76,9 @@ public interface RecordStoreController {
   void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset,
-      @RequestParam(value = "dateRelease", required = false) String dateRelease);
+      @RequestParam(value = "dateRelease", required = false) String dateRelease,
+      @RequestParam(value = "prefillingReference", required = false,
+          defaultValue = "false") Boolean prefillingReference);
 
 
 
@@ -96,7 +98,9 @@ public interface RecordStoreController {
       @RequestParam(value = "partitionId", required = true) Long partitionId,
       @RequestParam(value = "typeDataset", required = true) DatasetTypeEnum datasetType,
       @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
-      @RequestParam(value = "deleteData", defaultValue = "false") Boolean deleteData);
+      @RequestParam(value = "deleteData", defaultValue = "false") Boolean deleteData,
+      @RequestParam(value = "prefillingReference", required = false,
+          defaultValue = "false") Boolean prefillingReference);
 
   /**
    * Delete snapshot data.

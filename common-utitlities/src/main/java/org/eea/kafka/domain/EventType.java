@@ -431,6 +431,14 @@ public enum EventType {
   NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "no_pk_reference_dataflow_error_event", true),
 
+  /** The copy reference dataset snapshot completed event. */
+  COPY_REFERENCE_DATASET_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "copy_reference_dataset_snapshot_completed_event", true),
+
+  /** The restore prefilling reference snapshot completed event. */
+  RESTORE_PREFILLING_REFERENCE_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "restore_prefilling_reference_snapshot_completed_event", true),
+
   /** The continue fme process event. */
   CONTINUE_FME_PROCESS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "continue_fme_process_event",
       true);

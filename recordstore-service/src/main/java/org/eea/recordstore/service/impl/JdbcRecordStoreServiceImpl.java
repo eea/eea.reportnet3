@@ -1,6 +1,7 @@
 package org.eea.recordstore.service.impl;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
@@ -99,6 +101,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
   /** The Constant SNAPSHOT: {@value}. */
   private static final String SNAPSHOT = "snapshot";
+
+  /** The Constant REFERENCE: {@value}. */
+  private static final String REFERENCE = "reference";
 
   /** The Constant FILE_PATTERN_NAME: {@value}. */
   private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
@@ -389,6 +394,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
    * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
@@ -396,7 +402,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   @Async
   public void createDataSnapshot(Long idDataset, Long idSnapshot, Long idPartitionDataset,
-      String dateRelease) throws SQLException, IOException, EEAException {
+      String dateRelease, boolean prefillingReference)
+      throws SQLException, IOException, EEAException {
 
     ConnectionDataVO connectionDataVO =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idDataset);
@@ -428,7 +435,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Special case to make the snapshot to copy from DataCollection to EUDataset. The sql copy
       // all the values from the DC, no matter what partitionId has the origin, but we need to put
       // in the file the partitionId of the EUDataset destination
-      if (DatasetTypeEnum.COLLECTION.equals(typeDataset)) {
+      if (DatasetTypeEnum.COLLECTION.equals(typeDataset)
+          || Boolean.TRUE.equals(prefillingReference)) {
         copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
             + ",data_provider_code FROM dataset_" + idDataset + ".record_value) to STDOUT";
         copyQueryField =
@@ -468,24 +476,40 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       LOG.info("Snapshot {} data files created", idSnapshot);
 
-      // Until document is not created, wait for it to finish or 30 seconds
+      // Check if the snapshot is completed. If it is an schema snapshot, check the rules file.
+      // Otherwise check the attachment file
       long startTime = System.currentTimeMillis();
-      while ((System.currentTimeMillis() - startTime) < 30000) {
-        try {
-          String nameFileRules =
-              String.format("rulesSnapshot_%s-DesignDataset_%s", idSnapshot, idDataset)
-                  + LiteralConstants.SNAPSHOT_EXTENSION;
-          documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
-          break;
-        } catch (FeignException e) {
-          LOG.info(
-              "Document: {} still not created from dataset: {} and snpashot: {}, wait {} milliseconds",
-              nameFileRecordValue, idDataset, idSnapshot, timeToWaitBeforeReleasingNotification);
-          Thread.sleep(timeToWaitBeforeReleasingNotification);
+      String nameFileRules =
+          String.format("rulesSnapshot_%s-DesignDataset_%s", idSnapshot, idDataset)
+              + LiteralConstants.SNAPSHOT_EXTENSION;
+      if (DatasetTypeEnum.DESIGN.equals(typeDataset) && Boolean.FALSE.equals(prefillingReference)) {
+        while ((System.currentTimeMillis() - startTime) < 30000) {
+          try {
+            documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
+            break;
+          } catch (FeignException e) {
+            LOG.info(
+                "Document: {} still not created from dataset: {} and snapshot: {}, wait {} milliseconds",
+                nameFileRules, idDataset, idSnapshot, timeToWaitBeforeReleasingNotification);
+            Thread.sleep(timeToWaitBeforeReleasingNotification);
+          }
+        }
+      } else {
+        while ((System.currentTimeMillis() - startTime) < 30000) {
+          try {
+            FileUtils.touch(new File(nameFileAttachmentValue));
+            break;
+          } catch (IOException e) {
+            LOG.info(
+                "Waiting to finish the snapshot {} from dataset {} to complete before sending the notification",
+                idSnapshot, idDataset);
+            Thread.sleep(timeToWaitBeforeReleasingNotification);
+          }
         }
       }
 
-      notificationCreateAndCheckRelease(idDataset, idSnapshot, type, dateRelease);
+      notificationCreateAndCheckRelease(idDataset, idSnapshot, type, dateRelease,
+          prefillingReference);
 
       // release snapshot when the user press create+release
     } catch (Exception e) {
@@ -585,17 +609,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    * @param type the type
-   *
+   * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    * @return the event type
    */
   private void notificationCreateAndCheckRelease(Long idDataset, Long idSnapshot, String type,
-      String dateRelease) {
+      String dateRelease, boolean prefillingReference) {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
     LOG.info("The user on notificationCreateAndCheckRelease is {} and the datasetId {}",
         SecurityContextHolder.getContext().getAuthentication().getName(), idDataset);
     LOG.info("The user set on threadPropertiesManager is {}",
         SecurityContextHolder.getContext().getAuthentication().getName());
+    if (Boolean.TRUE.equals(prefillingReference)) {
+      type = REFERENCE;
+    }
     switch (type) {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
@@ -613,6 +641,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         valueEU.put("snapshot_id", idSnapshot);
         kafkaSenderUtils.releaseKafkaEvent(EventType.ADD_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT,
             valueEU);
+        break;
+      case REFERENCE:
+        Map<String, Object> valueReference = new HashMap<>();
+        valueReference.put("user",
+            SecurityContextHolder.getContext().getAuthentication().getName());
+        valueReference.put("dataset_id", idDataset);
+        valueReference.put("snapshot_id", idSnapshot);
+        kafkaSenderUtils.releaseKafkaEvent(
+            EventType.COPY_REFERENCE_DATASET_SNAPSHOT_COMPLETED_EVENT, valueReference);
         break;
       case SCHEMA:
         releaseNotificableKafkaEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT, value,
@@ -632,14 +669,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param datasetType the dataset type
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
-   *
+   * @param prefillingReference the prefilling reference
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
-      throws SQLException, IOException {
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
+      boolean prefillingReference) throws SQLException, IOException {
 
     EventType successEventType = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot)
@@ -654,7 +691,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             : EventType.RELEASE_FAILED_EVENT;
 
     restoreSnapshot(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
-        deleteData, successEventType, failEventType);
+        deleteData, successEventType, failEventType, prefillingReference);
 
   }
 
@@ -736,10 +773,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param deleteData the delete data
    * @param successEventType the success event type
    * @param failEventType the fail event type
+   * @param prefillingReference the prefilling reference
    */
   private void restoreSnapshot(Long datasetId, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
-      EventType successEventType, EventType failEventType) {
+      EventType successEventType, EventType failEventType, boolean prefillingReference) {
 
     String signature = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot) ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
@@ -774,10 +812,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       copyProcess(datasetId, idSnapshot, datasetType, cm);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
-          && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT)) {
+          && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
         // Send kafka event to launch Validation
         kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
         releaseNotificableKafkaEvent(successEventType, value, datasetId, null);
+      }
+      if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
+        dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
+        Map<String, Object> createXls = new HashMap<>();
+        createXls.put(LiteralConstants.DATASET_ID, datasetId);
+        kafkaSenderUtils.releaseKafkaEvent(
+            EventType.RESTORE_PREFILLING_REFERENCE_SNAPSHOT_COMPLETED_EVENT, createXls);
       }
       if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
@@ -790,23 +835,25 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
       LOG.info("Snapshot {} restored", idSnapshot);
     } catch (Exception e) {
-      if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
-        failEventType = EventType.COPY_DATA_TO_EUDATASET_FAILED_EVENT;
-        removeLocksRelatedToPopulateEU(
-            dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId());
-      }
-      LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
-      releaseNotificableKafkaEvent(failEventType, value, datasetId,
-          "Error restoring the snapshot data");
-      if (EventType.RELEASE_FAILED_EVENT.equals(failEventType)) {
-        LOG_ERROR.error(
-            "Release datasets operation failed during the restoring snapshot with the message: {}",
-            e.getMessage(), e);
-        dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(
-            dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId(),
-            datasetId);
+      if (!prefillingReference) {
+        if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
+          failEventType = EventType.COPY_DATA_TO_EUDATASET_FAILED_EVENT;
+          removeLocksRelatedToPopulateEU(
+              dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId());
+        }
+        LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
         releaseNotificableKafkaEvent(failEventType, value, datasetId,
             "Error restoring the snapshot data");
+        if (EventType.RELEASE_FAILED_EVENT.equals(failEventType)) {
+          LOG_ERROR.error(
+              "Release datasets operation failed during the restoring snapshot with the message: {}",
+              e.getMessage(), e);
+          dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(
+              dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId(),
+              datasetId);
+          releaseNotificableKafkaEvent(failEventType, value, datasetId,
+              "Error restoring the snapshot data");
+        }
       }
     } finally {
       // Release the lock manually

@@ -1,10 +1,10 @@
 package org.eea.dataset.io.kafka.commands;
 
 import java.util.List;
-import org.eea.dataset.persistence.metabase.domain.DataCollection;
-import org.eea.dataset.persistence.metabase.domain.EUDataset;
-import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
-import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -16,20 +16,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class PropagateNewFieldCommand.
+ * The Class ReferenceDatasetSnapshotCommand.
  */
 @Component
-public class DataCollectionSnapshotCommand extends AbstractEEAEventHandlerCommand {
+public class ReferenceDatasetSnapshotCommand extends AbstractEEAEventHandlerCommand {
 
-
-
-  /** The eu dataset repository. */
+  /** The reference dataset repository. */
   @Autowired
-  private EUDatasetRepository euDatasetRepository;
+  private ReferenceDatasetRepository referenceDatasetRepository;
 
-  /** The data collection repository. */
+  /** The design dataset repository. */
   @Autowired
-  private DataCollectionRepository dataCollectionRepository;
+  private DesignDatasetRepository designDatasetRepository;
 
   /** The dataset snapshot service. */
   @Autowired
@@ -42,7 +40,7 @@ public class DataCollectionSnapshotCommand extends AbstractEEAEventHandlerComman
    */
   @Override
   public EventType getEventType() {
-    return EventType.ADD_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT;
+    return EventType.COPY_REFERENCE_DATASET_SNAPSHOT_COMPLETED_EVENT;
   }
 
   /**
@@ -57,15 +55,18 @@ public class DataCollectionSnapshotCommand extends AbstractEEAEventHandlerComman
     Long snapshotId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("snapshot_id")));
     ThreadPropertiesManager.setVariable("user", String.valueOf(eeaEventVO.getData().get("user")));
 
-    DataCollection dataCollection = dataCollectionRepository.findById(datasetId).orElse(null);
-    if (dataCollection != null) {
-      List<EUDataset> euDatasetList = euDatasetRepository.findByDataflowIdAndDatasetSchema(
-          dataCollection.getDataflowId(), dataCollection.getDatasetSchema());
-      if (!euDatasetList.isEmpty()) {
-        datasetSnapshotService.restoreSnapshotToCloneData(dataCollection.getId(),
-            euDatasetList.get(0).getId(), snapshotId, true, DatasetTypeEnum.EUDATASET, false);
+    DesignDataset designDataset = designDatasetRepository.findById(datasetId).orElse(null);
+
+    if (designDataset != null) {
+      List<ReferenceDataset> referenceDatasets =
+          referenceDatasetRepository.findByDataflowIdAndDatasetSchema(designDataset.getDataflowId(),
+              designDataset.getDatasetSchema());
+      if (!referenceDatasets.isEmpty()) {
+        datasetSnapshotService.restoreSnapshotToCloneData(designDataset.getId(),
+            referenceDatasets.get(0).getId(), snapshotId, true, DatasetTypeEnum.REFERENCE, true);
       }
     }
+
   }
 
 }
