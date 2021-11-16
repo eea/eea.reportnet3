@@ -407,7 +407,7 @@ const Dataflows = withRouter(({ history, match }) => {
         />
       </div>
 
-      <GoTopButton visibleSinceHeight={180} />
+      <GoTopButton parentRef={containerRef} referenceMargin={-110} />
 
       {dataflowsState.isUserListVisible && (
         <Dialog
