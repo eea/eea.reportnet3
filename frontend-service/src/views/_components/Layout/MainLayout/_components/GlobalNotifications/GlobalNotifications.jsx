@@ -89,12 +89,12 @@ const GlobalNotifications = () => {
     try {
       const { data } = await DataflowService.downloadUsersListFile(
         notification.content.dataflowId,
-        notification.content.fileName
+        notification.content.nameFile
       );
       notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE' });
 
       if (data.size !== 0) {
-        DownloadFile(data, notification.content.fileName);
+        DownloadFile(data, notification.content.nameFile);
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadUsersListFile.', error);
