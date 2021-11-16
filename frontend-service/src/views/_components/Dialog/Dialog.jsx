@@ -66,6 +66,9 @@ export const Dialog = ({
   useEffect(() => {
     const body = document.querySelector('body');
     visible && (body.style.overflow = 'hidden');
+    return () => {
+      body.style.overflow = 'auto';
+    };
   }, [visible]);
 
   useEffect(() => {
