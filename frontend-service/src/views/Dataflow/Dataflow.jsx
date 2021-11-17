@@ -533,7 +533,11 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  useCheckNotifications(['AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE'], setIsDownloadingUsers, false);
+  useCheckNotifications(
+    ['AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE', 'DOWNLOAD_USERS_LIST_FILE_ERROR'],
+    setIsDownloadingUsers,
+    false
+  );
 
   function setIsDownloadingUsers(isDownloadingUsers) {
     dataflowDispatch({ type: 'SET_IS_DOWNLOADING_USERS', payload: isDownloadingUsers });
