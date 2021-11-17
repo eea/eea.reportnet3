@@ -203,6 +203,7 @@ const BigButtonListReference = withRouter(
         setIsCreatingReferenceDatasets(false);
       } finally {
         handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });
+        notificationContext.removeHiddenByKey('NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT');
       }
     };
 
@@ -231,6 +232,7 @@ const BigButtonListReference = withRouter(
         setIsCreatingReferenceDatasets(false);
       } finally {
         handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });
+        notificationContext.removeHiddenByKey('NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT');
       }
     };
 
@@ -436,7 +438,10 @@ const BigButtonListReference = withRouter(
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
             onConfirm={() => onCreateReferenceDatasetsWithNoPKs()}
-            onHide={() => handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false })}
+            onHide={() => {
+              handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });
+              notificationContext.removeHiddenByKey('NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT');
+            }}
             visible={dialogVisibility.isTableWithNoPK}>
             {resourcesContext.messages['tableWithNoPKWarningBody']}
           </ConfirmDialog>

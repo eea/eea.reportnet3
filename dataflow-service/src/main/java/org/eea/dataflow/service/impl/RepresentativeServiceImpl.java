@@ -629,9 +629,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         leadReporterVO.setEmail(leadReporterVO.getEmail().toLowerCase());
         UserRepresentationVO newUser =
             userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail().toLowerCase());
-        if (newUser == null) {
-          leadReporter.setInvalid(true);
-        }
+        leadReporter.setInvalid(newUser == null ? true : null);
         if (null != representative.getLeadReporters() && representative.getLeadReporters().stream()
             .filter(reporter -> leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
             .collect(Collectors.counting()) == 0) {
