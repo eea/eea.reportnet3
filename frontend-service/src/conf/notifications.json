@@ -798,7 +798,8 @@
         { "key": "EXPORT_QC_FAILED_EVENT" },
         { "key": "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT" },
         { "key": "DISABLE_RULES_ERROR_EVENT" },
-        { "key": "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT" }
+        { "key": "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT" },
+        { "key": "EXPORT_USERS_BY_COUNTRY_FAILED_EVENT" }
       ]
     },
     {
@@ -1027,6 +1028,7 @@
         { "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE" },
         { "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD" },
         { "key": "AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE" },
+        { "key": "EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT" },
         {
           "key": "IMPORT_FIELD_SCHEMA_COMPLETED_EVENT",
           "navigateTo": {
