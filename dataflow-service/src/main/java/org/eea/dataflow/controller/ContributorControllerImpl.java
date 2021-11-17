@@ -102,10 +102,13 @@ public class ContributorControllerImpl implements ContributorController {
     checkIsBussinesCustodian(dataflowId);
     // we can only remove role of editor, reporter or reporter partition type
     try {
-      checkAccount(dataflowId, contributorVO.getAccount());
-      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(),
-          contributorVO.getRole(), null);
-      LOG.info("requester {} Deleted", contributorVO.getAccount());
+      if (checkAccount(dataflowId, contributorVO.getAccount())) {
+        contributorService.deleteContributor(dataflowId, contributorVO.getAccount(),
+            contributorVO.getRole(), null);
+        LOG.info("requester {} Deleted", contributorVO.getAccount());
+      } else
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount()));
     } catch (EEAException e) {
       if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -151,7 +154,9 @@ public class ContributorControllerImpl implements ContributorController {
         contributorService.deleteTemporaryUser(dataflowId, contributorVO.getAccount(),
             contributorVO.getRole(), dataProviderId);
         LOG.info("Temporary Reporter {} Deleted", contributorVO.getAccount());
-      }
+      } else
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount()));
     } catch (EEAException e) {
       if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -249,9 +254,12 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
-      checkAccount(dataflowId, contributorVO.getAccount());
-      contributorService.updateContributor(dataflowId, contributorVO, null);
-      LOG.info("requester {} Updated", contributorVO.getAccount());
+      if (checkAccount(dataflowId, contributorVO.getAccount())) {
+        contributorService.updateContributor(dataflowId, contributorVO, null);
+        LOG.info("requester {} Updated", contributorVO.getAccount());
+      } else
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount()));
     } catch (EEAException e) {
       if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
         message = String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount());
