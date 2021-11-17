@@ -15,8 +15,8 @@ const GoTopButton = ({ parentRef, referenceMargin }) => {
 
   const options = {
     root: null,
-    rootMargin: `${referenceMargin}px`
-    // threshold: 1.0
+    rootMargin: `${referenceMargin}px`,
+    threshold: 0
   };
 
   useEffect(() => {
