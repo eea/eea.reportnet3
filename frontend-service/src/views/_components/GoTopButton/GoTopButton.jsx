@@ -25,6 +25,7 @@ const GoTopButton = ({ parentRef, referenceMargin }) => {
 
     return () => {
       if (parentRef?.current) observer.unobserve(parentRef.current);
+      observer.disconnect();
     };
   }, [parentRef, options]);
 
