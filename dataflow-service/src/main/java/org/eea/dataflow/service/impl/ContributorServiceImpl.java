@@ -4,6 +4,8 @@ package org.eea.dataflow.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.eea.dataflow.persistence.domain.TempUser;
+import org.eea.dataflow.persistence.repository.TempUserRepository;
 import org.eea.dataflow.service.ContributorService;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
@@ -29,6 +31,7 @@ import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.utils.LiteralConstants;
+import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +89,9 @@ public class ContributorServiceImpl implements ContributorService {
   @Lazy
   private DataflowService dataflowService;
 
+  @Autowired
+  private TempUserRepository tempUserRepository;
+
 
   /**
    * Find contributors by id dataflow.
@@ -127,6 +133,56 @@ public class ContributorServiceImpl implements ContributorService {
     }
 
     return contributorVOList;
+  }
+
+  /**
+   * Find temp user by account and dataflow.
+   *
+   * @param account the account
+   * @param dataflowId the dataflow id
+   * @return the contributor VO
+   */
+  @Override
+  public ContributorVO findTempUserByAccountAndDataflow(String account, Long dataflowId) {
+
+    TempUser foundUser = tempUserRepository.findTempUserByAccountAndDataflow(account, dataflowId);
+    ContributorVO contributor;
+
+    if (foundUser != null) {
+      contributor = new ContributorVO();
+      contributor.setAccount(foundUser.getEmail());
+      contributor.setRole(foundUser.getRole());
+      contributor.setDataProviderId(foundUser.getDataProviderId());
+    } else
+      contributor = null;
+
+    return contributor;
+
+  }
+
+  /**
+   * Find temp user by role and dataflow.
+   *
+   * @param role the role
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  public List<ContributorVO> findTempUserByRoleAndDataflow(String role, Long dataflowId) {
+
+    List<TempUser> foundUsers = tempUserRepository.findTempUserByRoleAndDataflow(role, dataflowId);
+    List<ContributorVO> contributors = new ArrayList<>();
+
+    for (TempUser tempuser : foundUsers) {
+      ContributorVO newContributor = new ContributorVO();
+      newContributor.setAccount(tempuser.getEmail());
+      newContributor.setRole(tempuser.getRole());
+      newContributor.setDataProviderId(tempuser.getDataProviderId());
+      newContributor.setInvalid(true);
+      contributors.add(newContributor);
+    }
+
+    return contributors;
   }
 
   /**
@@ -765,6 +821,37 @@ public class ContributorServiceImpl implements ContributorService {
   }
 
   /**
+   * Update temporal user.
+   *
+   * @param dataflowId the dataflow id
+   * @param contributorVO the contributor VO
+   * @param dataProviderId the data provider id
+   */
+  @Override
+  public void updateTemporaryUser(Long dataflowId, ContributorVO contributorVO,
+      Long dataProviderId) {
+
+    TempUser userToUpdate =
+        tempUserRepository.findTempUserByAccountAndDataflow(contributorVO.getAccount(), dataflowId);
+    LOG.info("Updated temporary user:{} in Dataflow {} and Role:{} to Role:{}",
+        contributorVO.getAccount(), dataflowId, userToUpdate.getRole(), contributorVO.getRole());
+
+    userToUpdate.setRole(contributorVO.getRole());
+
+    tempUserRepository.save(userToUpdate);
+  }
+
+  @Override
+  public void deleteTemporaryUser(Long dataflowId, String email, String role, Long dataProviderId) {
+
+    TempUser userToUpdate = tempUserRepository.findTempUserByAccountAndDataflow(email, dataflowId);
+    LOG.info("Deleting temporary user:{} in Dataflow {} with dataproviderId {} and role {}.", email,
+        dataflowId, dataProviderId, role);
+
+    tempUserRepository.delete(userToUpdate);
+  }
+
+  /**
    * Delete contributor.
    *
    * @param dataflowId the dataflow id
@@ -896,6 +983,27 @@ public class ContributorServiceImpl implements ContributorService {
     }
     // we add all contributors to all users
     userManagementControllerZull.addContributorsToResources(resources);
+  }
+
+
+  /**
+   * Creates the temp user.
+   *
+   * @param dataflowId the dataflow id
+   * @param contributorVO the contributor VO
+   * @param dataproviderId the dataprovider id
+   */
+  @Override
+  public void createTempUser(Long dataflowId, ContributorVO contributorVO, Long dataproviderId) {
+    TempUser tempUser = new TempUser();
+
+    tempUser.setDataflowId(dataflowId);
+    tempUser.setEmail(contributorVO.getAccount());
+    tempUser.setRole(contributorVO.getRole());
+    tempUser.setRegisteredDate(LocalDateTime.now().toDate());
+    tempUser.setDataProviderId(dataproviderId);
+
+    tempUserRepository.save(tempUser);
   }
 
   /**
