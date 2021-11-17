@@ -30,6 +30,7 @@ const ManageDataflowForm = forwardRef(
       isEditForm,
       onCreate,
       onEdit,
+      onHide,
       onResetData,
       onSearch,
       onSubmit,
@@ -138,6 +139,7 @@ const ManageDataflowForm = forwardRef(
           }
         } finally {
           onSubmit(false);
+          onHide();
         }
       }
     };
