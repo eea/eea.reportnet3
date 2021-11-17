@@ -1201,7 +1201,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           dialogClassName={styles.Dialog}
           dialogHeader={
             isNil(selectedCustomImportIntegration.id)
-              ? resourcesContext.messages['importZIPdata']
+              ? resourcesContext.messages[config.importTypes.importDatasetTypes[0].key]
               : selectedCustomImportIntegration.name
           }
           dialogOnHide={() => {
