@@ -1344,6 +1344,10 @@
     "yes": "Yes",
     "creationMode": "Creation mode",
     "statusQC": "Status",
-    "importZIPdata": "Import CSV for each table"
+    "zipCsvTable": "ZIP (CSV for each table)",
+    "exportXlsx": "XLSX (.xlsx)",
+    "exportCsv": "CSV (.csv)",
+    "exportXlsxValidations": "XLSX (.xlsx with validations)",
+    "exportZipAttachments": "ZIP (XLSX + attachments)"
   }
 }

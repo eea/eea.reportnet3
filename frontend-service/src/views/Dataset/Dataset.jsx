@@ -314,7 +314,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         setImportSelectedIntegrationExtension(type.code);
       },
       icon: extensionsTypes[0],
-      label: type.text
+      label: resourcesContext.messages[type.key]
     };
   });
 
@@ -356,7 +356,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   const internalExtensions = config.exportTypes.exportDatasetTypes.map(type => {
     const extensionsTypes = !isNil(type.code) && type.code.split('+');
     return {
-      label: type.text,
+      label: resourcesContext.messages[type.key],
       icon: extensionsTypes[0],
       command: () => onExportDataInternalExtension(type.code)
     };
@@ -1206,7 +1206,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           }
           dialogOnHide={() => {
             setIsImportDatasetDialogVisible(false);
-            setSelectedCustomImportIntegration({ id: null, mame: null });
+            setSelectedCustomImportIntegration({ id: null, name: null });
           }}
           dialogVisible={isImportDatasetDialogVisible}
           infoTooltip={`${

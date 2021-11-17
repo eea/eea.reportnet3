@@ -331,7 +331,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       return {
         command: () => onExportDataInternalExtension(type.code),
         icon: extensionsTypes[0],
-        label: type.text
+        label: resourcesContext.messages[type.key]
       };
     });
 
@@ -368,7 +368,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           });
         },
         icon: extensionsTypes[0],
-        label: type.text
+        label: resourcesContext.messages[type.key]
       };
     });
 
@@ -1777,7 +1777,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             dialogClassName={styles.Dialog}
             dialogHeader={
               isNil(selectedCustomImportIntegration.id)
-                ? resourcesContext.messages['importZIPdata']
+                ? resourcesContext.messages[config.importTypes.importDatasetTypes[0].key]
                 : selectedCustomImportIntegration.name
             }
             dialogOnHide={() => {
