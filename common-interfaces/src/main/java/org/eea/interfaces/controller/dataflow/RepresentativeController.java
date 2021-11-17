@@ -78,8 +78,18 @@ public interface RepresentativeController {
    * @param dataflowId the dataflow id
    * @return the list
    */
-  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/v1/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<RepresentativeVO> findRepresentativesByIdDataFlow(
+      @PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Find representatives by id data flow legacy.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<RepresentativeVO> findRepresentativesByIdDataFlowLegacy(
       @PathVariable("dataflowId") Long dataflowId);
 
   /**
