@@ -127,7 +127,6 @@ export const ManageDataflow = ({
 
   const onSave = () => {
     if (formRef.current) formRef.current.handleSubmit(reportingDataflowState.pinDataflow);
-    onHideDataflowDialog();
   };
 
   const renderCancelButton = action => (
@@ -233,6 +232,7 @@ export const ManageDataflow = ({
             obligation={reportingDataflowState.obligation}
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
+            onHide={onHideDataflowDialog}
             onResetData={onResetData}
             onSearch={() => manageDialogs('isReportingObligationsDialogVisible', true)}
             onSubmit={onSubmit}
