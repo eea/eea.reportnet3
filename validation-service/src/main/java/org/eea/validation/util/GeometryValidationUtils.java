@@ -104,13 +104,17 @@ public class GeometryValidationUtils {
     if (fieldValue.getValue().isEmpty()) {
       rtn = true;
     }
-    if (!rtn) {
+    if (!rtn && existRSID(fieldValue.getValue())) {
       // Obtain the SRID code removing all other characters from geojson
       // The cases are the SRID supported in reportnet
-      String[] sridstring = fieldValue.getValue().split("srid");
-      if (sridstring.length == 2 && existRSID(fieldValue.getValue())) {
-        String srid = sridstring[1].replaceAll("\\D+", "");
-        switch (srid) {
+      Pattern p = Pattern.compile("\"srid\"+:\"+[0-9]+\"");
+      Matcher m = p.matcher(fieldValue.getValue());
+      List<String> srids = new ArrayList<>();
+      while (m.find()) {
+        srids.add(m.group().replaceAll("\\D+", ""));
+      }
+      for (String rsidAux : srids) {
+        switch (rsidAux.trim()) {
           case "4326":
           case "4258":
           case "3035":
