@@ -111,11 +111,15 @@ function boolean isDateYYYYMMDD( String value ){
     return true;
 }
 
-//////////////////////////////////////////VALIDATION DATE////////////////////////////////////////////////////////////
+//////////////////////////////////////////VALIDATION DATETIME////////////////////////////////////////////////////////////
 function boolean isDateTime( String value ){
 	if(!isBlank(value)){
 		return true;
-	}	
+	}
+    
+	if(!value.matches(".+[zZ0-9]$")){
+        return false;
+    }
 	
  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
  	if(!isBlank(value)){
