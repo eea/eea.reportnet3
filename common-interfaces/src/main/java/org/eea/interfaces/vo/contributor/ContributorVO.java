@@ -28,4 +28,7 @@ public class ContributorVO implements Serializable {
   /** The data provider id. */
   private Long dataProviderId;
 
+  /** Is the contributor temporary?. */
+  private boolean invalid;
+
 }
