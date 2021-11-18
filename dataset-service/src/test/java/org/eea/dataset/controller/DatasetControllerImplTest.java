@@ -686,7 +686,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchemaVO);
-    datasetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+    datasetControllerImpl.updateAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     Mockito.verify(datasetService, times(1)).updateAttachment(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -710,7 +710,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchemaVO);
     // Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn("csv");
-    datasetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+    datasetControllerImpl.updateAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     Mockito.verify(datasetService, times(1)).updateAttachment(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -725,7 +725,7 @@ public class DatasetControllerImplTest {
     MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn(null);
     try {
-      datasetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+      datasetControllerImpl.updateAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, e.getReason());
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
@@ -748,7 +748,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(null);
     try {
-      datasetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+      datasetControllerImpl.updateAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e.getReason());
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
@@ -777,7 +777,7 @@ public class DatasetControllerImplTest {
         .thenReturn(fieldSchemaVO);
     Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn(FileTypeEnum.CSV.getValue());
     try {
-      datasetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+      datasetControllerImpl.updateAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.FILE_FORMAT, e.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -806,7 +806,7 @@ public class DatasetControllerImplTest {
     Mockito.doThrow(new EEAException()).when(datasetService).updateAttachment(Mockito.anyLong(),
         Mockito.any(), Mockito.any(), Mockito.any());
     try {
-      datasetControllerImpl.updateAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+      datasetControllerImpl.updateAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
@@ -821,7 +821,7 @@ public class DatasetControllerImplTest {
   @Test
   public void testDeleteAttachment() throws Exception {
 
-    datasetControllerImpl.deleteAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
+    datasetControllerImpl.deleteAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F");
     Mockito.verify(datasetService, times(1)).deleteAttachment(Mockito.any(), Mockito.any());
   }
 
@@ -835,7 +835,7 @@ public class DatasetControllerImplTest {
     Mockito.doThrow(new EEAException()).when(datasetService).deleteAttachment(Mockito.anyLong(),
         Mockito.any());
     try {
-      datasetControllerImpl.deleteAttachment(1L, "600B66C6483EA7C8B55891DA171A3E7F");
+      datasetControllerImpl.deleteAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F");
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       throw e;

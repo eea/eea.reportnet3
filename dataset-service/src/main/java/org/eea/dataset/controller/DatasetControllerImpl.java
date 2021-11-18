@@ -231,9 +231,10 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
-  @PostMapping("/{datasetId}/importFileData")
-  @ApiOperation(value = "Import file whith data")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PostMapping("/v1/{datasetId}/importFileData")
+  @ApiOperation(value = "Import file whith data",
+      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
       @ApiResponse(code = 400, message = "Error importing file"),
       @ApiResponse(code = 500, message = "Error importing file")})
@@ -268,6 +269,49 @@ public class DatasetControllerImpl implements DatasetController {
       lockService.removeLockByCriteria(importFileData);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
     }
+  }
+
+  /**
+   * Import file data legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   * @param integrationId the integration id
+   * @param delimiter the delimiter
+   */
+  @Override
+  @HystrixCommand
+  @LockMethod(removeWhenFinish = false)
+  @PostMapping("/{datasetId}/importFileData")
+  @ApiOperation(value = "Import file whith data", hidden = true,
+      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
+      @ApiResponse(code = 400, message = "Error importing file"),
+      @ApiResponse(code = 500, message = "Error importing file")})
+  public void importFileDataLegacy(
+      @ApiParam(type = "Long", value = "dataset Id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "String", value = "table Schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+              required = false) String tableSchemaId,
+      @ApiParam(value = "the file") @RequestParam("file") MultipartFile file,
+      @ApiParam(type = "boolean", value = "replace data",
+          example = "true") @RequestParam(value = "replace", required = false) boolean replace,
+      @ApiParam(type = "Long", value = "integration Id", example = "0") @RequestParam(
+          value = "integrationId", required = false) Long integrationId,
+      @ApiParam(type = "String", value = "delimiter of file",
+          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
+    this.importFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
+        integrationId, delimiter);
   }
 
   /**
@@ -459,9 +503,10 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
-  @DeleteMapping("/{datasetId}/deleteImportData")
-  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
-  @ApiOperation(value = "Delete Data")
+  @DeleteMapping("/v1/{datasetId}/deleteImportData")
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiOperation(value = "Delete dataset data",
+      notes = "Allowed roles: \n\n Reporting dataset: REPORTER WRITE, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
       @ApiResponse(code = 403, message = "dataset not belong dataflow"),
       @ApiResponse(code = 401, message = "Unauthorize"),
@@ -496,6 +541,38 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
   /**
+   * Delete import data legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param deletePrefilledTables the delete prefilled tables
+   */
+  @Override
+  @HystrixCommand
+  @LockMethod(removeWhenFinish = false)
+  @DeleteMapping("/{datasetId}/deleteImportData")
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiOperation(value = "Delete dataset data", hidden = true,
+      notes = "Allowed roles: \n\n Reporting dataset: REPORTER WRITE, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
+      @ApiResponse(code = 403, message = "dataset not belong dataflow"),
+      @ApiResponse(code = 401, message = "Unauthorize"),
+      @ApiResponse(code = 500, message = "error deleting data")})
+  public void deleteImportDataLegacy(
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "boolean", value = "delete prefilled tables",
+          example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
+              required = false) Boolean deletePrefilledTables) {
+    this.deleteImportData(datasetId, dataflowId, providerId, deletePrefilledTables);
+  }
+
+  /**
    * Delete import table.
    *
    * @param datasetId the dataset id
@@ -506,9 +583,10 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
-  @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
-  @ApiOperation(value = "Delete table data")
+  @DeleteMapping("/v1/{datasetId}/deleteImportTable/{tableSchemaId}")
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiOperation(value = "Delete table data",
+      notes = "Allowed roles: \n\n Reporting dataset: REPORTER WRITE, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
       @ApiResponse(code = 403, message = "dataset not belong dataflow"),
       @ApiResponse(code = 401, message = "Unauthorize"),
@@ -541,6 +619,39 @@ public class DatasetControllerImpl implements DatasetController {
     }
     // This method will release the lock
     deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
+  }
+
+
+  /**
+   * Delete import table legacy.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   */
+  @Override
+  @HystrixCommand
+  @LockMethod(removeWhenFinish = false)
+  @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiOperation(value = "Delete table data", hidden = true,
+      notes = "Allowed roles: \n\n Reporting dataset: REPORTER WRITE, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
+      @ApiResponse(code = 403, message = "dataset not belong dataflow"),
+      @ApiResponse(code = 401, message = "Unauthorize"),
+      @ApiResponse(code = 500, message = "error deleting data")})
+  public void deleteImportTableLegacy(
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "table schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @LockCriteria(
+              name = "tableSchemaId") @PathVariable("tableSchemaId") String tableSchemaId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
+    this.deleteImportTable(datasetId, tableSchemaId, dataflowId, providerId);
   }
 
   /**
@@ -722,11 +833,12 @@ public class DatasetControllerImpl implements DatasetController {
    * @return the ETL dataset VO
    */
   @Override
-  @GetMapping("/{datasetId}/etlExport")
+  @GetMapping("/v1/{datasetId}/etlExport")
   @HystrixCommand(commandProperties = {@HystrixProperty(
       name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','DATASET_OBSERVER','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER','REFERENCEDATASET_OBSERVER')")
-  @ApiOperation(value = "ETL Export data")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD''EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','DATASET_OBSERVER','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER','REFERENCEDATASET_OBSERVER')")
+  @ApiOperation(value = "ETL Export data by dataset Id",
+      notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD, OBSERVER, REPORTER WRITE, REPORTER READ, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE, EDITOR READ\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER\n\n Data collection: CUSTODIAN, STEWARD, OBSERVER")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully exported"),
       @ApiResponse(code = 500, message = "Error exporting data"),
       @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
@@ -764,6 +876,51 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
   /**
+   * Etl export dataset legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @return the response entity
+   */
+  @Override
+  @GetMapping("/{datasetId}/etlExport")
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+      name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD''EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','DATASET_OBSERVER','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER','REFERENCEDATASET_OBSERVER')")
+  @ApiOperation(value = "ETL Export data by dataset Id", hidden = true,
+      notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD, OBSERVER, REPORTER WRITE, REPORTER READ, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE, EDITOR READ\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER\n\n Data collection: CUSTODIAN, STEWARD, OBSERVER")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully exported"),
+      @ApiResponse(code = 500, message = "Error exporting data"),
+      @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
+  public ResponseEntity<StreamingResponseBody> etlExportDatasetLegacy(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "String", value = "Table Schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+              required = false) String tableSchemaId,
+      @ApiParam(type = "Integer", value = "offset,Number of data",
+          example = "0") @RequestParam(value = "limit", required = false) Integer limit,
+      @ApiParam(type = "Integer", value = "offset, Page number",
+          example = "0") @RequestParam(value = "offset", required = false) Integer offset,
+      @ApiParam(type = "String", value = "Filter value", example = "value") @RequestParam(
+          value = "filterValue", required = false) String filterValue,
+      @ApiParam(type = "String", value = "Column Name", example = "column") @RequestParam(
+          value = "columnName", required = false) String columnName) {
+    return this.etlExportDataset(datasetId, dataflowId, providerId, tableSchemaId, limit, offset,
+        filterValue, columnName);
+  }
+
+  /**
    * Etl import dataset.
    *
    * @param datasetId the dataset id
@@ -772,9 +929,10 @@ public class DatasetControllerImpl implements DatasetController {
    * @param providerId the provider id
    */
   @Override
-  @PostMapping("/{datasetId}/etlImport")
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
-  @ApiOperation(value = "ETL import data")
+  @PostMapping("/v1/{datasetId}/etlImport")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiOperation(value = "ETL import data by dataset Id",
+      notes = "Allowed roles: \n\n Reporting dataset: REPORTER WRITE, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported"),
       @ApiResponse(code = 500, message = "Error importing data"),
       @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
@@ -811,6 +969,33 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
   /**
+   * Etl import dataset legacy.
+   *
+   * @param datasetId the dataset id
+   * @param etlDatasetVO the etl dataset VO
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   */
+  @Override
+  @PostMapping("/{datasetId}/etlImport")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiOperation(value = "ETL import data by dataset Id", hidden = true,
+      notes = "Allowed roles: \n\n Reporting dataset: REPORTER WRITE, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported"),
+      @ApiResponse(code = 500, message = "Error importing data"),
+      @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
+  public void etlImportDatasetLegacy(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "Etl Dataset Object") @RequestBody ETLDatasetVO etlDatasetVO,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
+    this.etlImportDataset(datasetId, etlDatasetVO, dataflowId, providerId);
+  }
+
+  /**
    * Gets the attachment.
    *
    * @param datasetId the dataset id
@@ -821,9 +1006,10 @@ public class DatasetControllerImpl implements DatasetController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
+  @GetMapping(value = "/v1/{datasetId}/field/{fieldId}/attachment",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @ApiOperation(value = "get Attachments")
+  @ApiOperation(value = "get Attachments",
+      notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD, OBSERVER, REPORTER WRITE, REPORTER READ, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE, EDITOR READ\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER\n\n Data collection: CUSTODIAN, STEWARD, OBSERVER")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully getted"),
       @ApiResponse(code = 500, message = "Error getting attachments"),
       @ApiResponse(code = 404, message = "Error downloading attachment from dataset")})
@@ -854,22 +1040,61 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
   /**
+   * Gets the attachment legacy.
+   *
+   * @param datasetId the dataset id
+   * @param idField the id field
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return the attachment legacy
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @ApiOperation(value = "get Attachments", hidden = true,
+      notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD, OBSERVER, REPORTER WRITE, REPORTER READ, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE, EDITOR READ\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER\n\n Data collection: CUSTODIAN, STEWARD, OBSERVER")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully getted"),
+      @ApiResponse(code = 500, message = "Error getting attachments"),
+      @ApiResponse(code = 404, message = "Error downloading attachment from dataset")})
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  public ResponseEntity<byte[]> getAttachmentLegacy(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "Field Id",
+          example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
+    return this.getAttachmentLegacy(datasetId, idField, dataflowId, providerId);
+  }
+
+  /**
    * Update attachment.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param idField the id field
    * @param file the file
    */
   @Override
   @HystrixCommand
-  @PutMapping("/{datasetId}/field/{fieldId}/attachment")
-  @PreAuthorize("isAuthenticated()")
+  @PutMapping("/v1/{datasetId}/field/{fieldId}/attachment")
+  @ApiOperation(value = " Update attachment",
+      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully getted"),
       @ApiResponse(code = 500, message = "Error updating attachment"),
       @ApiResponse(code = 400, message = "table is read only or file format is invalid ")})
   public void updateAttachment(
       @ApiParam(type = "Long", value = "Dataset Id",
           example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
       @ApiParam(type = "String", value = "Field Id",
           example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField,
       @ApiParam(value = "file") @RequestParam("file") MultipartFile file) {
@@ -897,22 +1122,62 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
+
+  /**
+   * Update attachment legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param idField the id field
+   * @param file the file
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/{datasetId}/field/{fieldId}/attachment")
+  @ApiOperation(value = " Update attachment", hidden = true,
+      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully getted"),
+      @ApiResponse(code = 500, message = "Error updating attachment"),
+      @ApiResponse(code = 400, message = "table is read only or file format is invalid ")})
+  public void updateAttachmentLegacy(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "String", value = "Field Id",
+          example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField,
+      @ApiParam(value = "file") @RequestParam("file") MultipartFile file) {
+    this.updateAttachment(datasetId, dataflowId, providerId, idField, file);
+  }
+
   /**
    * Delete attachment.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param idField the id field
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("isAuthenticated()")
-  @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
+  @ApiOperation(value = " Delete attachment",
+      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @DeleteMapping("/v1/{datasetId}/field/{fieldId}/attachment")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
       @ApiResponse(code = 404, message = "Error deleting attachment from dataset"),
       @ApiResponse(code = 400, message = "Table is read only")})
   public void deleteAttachment(
       @ApiParam(type = "Long", value = "Dataset Id",
           example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
       @ApiParam(type = "String", value = "Field Id",
           example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField) {
     if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
@@ -928,6 +1193,36 @@ public class DatasetControllerImpl implements DatasetController {
           datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
+  }
+
+
+  /**
+   * Delete attachment legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param idField the id field
+   */
+  @Override
+  @HystrixCommand
+  @ApiOperation(value = " Delete attachment", hidden = true,
+      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
+      @ApiResponse(code = 404, message = "Error deleting attachment from dataset"),
+      @ApiResponse(code = 400, message = "Table is read only")})
+  public void deleteAttachmentLegacy(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "provider Id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "String", value = "Field Id",
+          example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField) {
+    this.deleteAttachment(datasetId, dataflowId, providerId, idField);
   }
 
   /**
