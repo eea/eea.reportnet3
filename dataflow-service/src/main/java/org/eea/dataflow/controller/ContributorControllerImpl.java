@@ -345,7 +345,7 @@ public class ContributorControllerImpl implements ContributorController {
    * @return the response entity
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN', 'DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER') OR hasAnyRole('ADMIN')")
   @PutMapping(value = "/validateReporters/dataflow/{dataflowId}/provider/{dataProviderId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(
