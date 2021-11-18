@@ -142,4 +142,13 @@ public interface RecordStoreController {
   @PutMapping("/private/createUpdateQueryView")
   void createUpdateQueryView(@RequestParam("datasetId") Long datasetId,
       @RequestParam("isMaterialized") boolean isMaterialized);
+
+
+  /**
+   * Refresh materialized view.
+   *
+   * @param datasetId the dataset id
+   */
+  @PutMapping("/private/refreshMaterializedView")
+  void refreshMaterializedView(@RequestParam("datasetId") Long datasetId);
 }

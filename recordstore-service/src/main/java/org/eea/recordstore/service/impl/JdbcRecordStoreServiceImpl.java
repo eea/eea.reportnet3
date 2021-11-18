@@ -1232,6 +1232,30 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     LOG.info("These views: {} have been refreshed.", viewList);
   }
 
+  /**
+   * Refresh materialized query.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @Async
+  public void refreshMaterializedQuery(Long datasetId) {
+    String viewToUpdate =
+        "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
+    List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
+
+    String updateQuery = "refresh materialized view concurrently dataset_";
+
+    for (String view : viewList) {
+      try {
+        executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
+      } catch (RecordStoreAccessException e) {
+        LOG_ERROR.error("Error refreshing materialized view from dataset {}", datasetId);
+      }
+    }
+    LOG.info("These materialized views: {} have been refreshed.", viewList);
+  }
+
 
   /**
    * Creates the index materialized view.
