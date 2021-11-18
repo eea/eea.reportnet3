@@ -44,6 +44,10 @@ import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.persistence.schemas.FieldSchema;
+import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.ValidationService;
@@ -58,6 +62,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 
 /**
@@ -132,9 +138,14 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
+  @Autowired
+  private SchemasRepository schemasRepository;
+
 
   /** The Constant DATASET_: {@value}. */
   private static final String DATASET = "dataset_";
+
+  private static final String Rule = null;
 
   /**
    * Instantiates a new file loader helper.
@@ -168,16 +179,22 @@ public class ValidationHelper implements DisposableBean {
    *
    * @throws EEAException the eea exception
    */
-  public KieBase getKieBase(String processId, Long datasetId) throws EEAException {
+  public KieBase getKieBase(String processId, Long datasetId, Rule rule) throws EEAException {
     KieBase kieBase = null;
     synchronized (processesMap) {
       if (!processesMap.containsKey(processId)) {
         initializeProcess(processId, false, false);
       }
-      if (null == processesMap.get(processId).getKieBase()) {
-        processesMap.get(processId).setKieBase(validationService.loadRulesKnowledgeBase(datasetId));
+      if (null == rule) {
+        if (null == processesMap.get(processId).getKieBase()) {
+          processesMap.get(processId)
+              .setKieBase(validationService.loadRulesKnowledgeBase(datasetId, null));
+        } else {
+          kieBase = processesMap.get(processId).getKieBase();
+        }
+      } else {
+        kieBase = validationService.loadRulesKnowledgeBase(datasetId, rule);
       }
-      kieBase = processesMap.get(processId).getKieBase();
     }
     return kieBase;
   }
@@ -375,15 +392,14 @@ public class ValidationHelper implements DisposableBean {
     validationService.deleteAllValidation(datasetId);
     LOG.info("Collecting Dataset Validation tasks");
     releaseDatasetValidation(dataset, processId);
-    LOG.info("Collecting Table Validation tasks");
-    releaseTableValidation(dataset, processId);
     LOG.info("Collecting Record Validation tasks");
     if (rules.getRules().stream().anyMatch(rule -> EntityTypeEnum.RECORD.equals(rule.getType()))) {
       releaseRecordsValidation(dataset, processId);
     }
     LOG.info("Collecting Field Validation tasks");
-
     releaseFieldsValidation(dataset, processId, !filterEmptyFields(rules.getRules()));
+    LOG.info("Collecting Table Validation tasks");
+    // releaseTableValidation(dataset, processId);
     startProcess(processId);
   }
 
@@ -480,8 +496,14 @@ public class ValidationHelper implements DisposableBean {
    */
   public void processValidation(EEAEventVO eeaEventVO, String processId, Long datasetId,
       Validator validator, EventType notificationEventType) throws EEAException {
+    Rule rule = null;
+    if (eeaEventVO.getData().get("sqlRule") != null) {
+      ObjectMapper mapper =
+          new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      rule = mapper.convertValue(eeaEventVO.getData().get("sqlRule"), Rule.class);
+    }
     ValidationTask validationTask = new ValidationTask(eeaEventVO, validator, datasetId,
-        this.getKieBase(processId, datasetId), processId, notificationEventType);
+        getKieBase(processId, datasetId, rule), processId, notificationEventType);
 
     // first every task is always queued up to ensure the order
 
@@ -653,12 +675,43 @@ public class ValidationHelper implements DisposableBean {
 
     List<TableValue> tableList = tableRepository.findAll();
     int i = 0;
+    List<Rule> rules = rulesRepository.findSqlRules(new ObjectId(dataset.getDatasetSchema()));
+    DataSetSchema datasetSchema =
+        schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
     for (Integer totalTables = tableList.size(); totalTables > 0; totalTables = totalTables - 1) {
       Long idTable = tableList.get(i++).getId();
-      releaseTableValidation(dataset, uuId, idTable);
+      for (Rule rule : rules) {
+        String idTableSchema = tableList.get(i - 1).getIdTableSchema();
+        if (EntityTypeEnum.TABLE.equals(rule.getType())
+            && rule.getReferenceId().equals(new ObjectId(idTableSchema))
+            || checkSubTable(rule.getReferenceId(),
+                datasetSchema.getTableSchemas().stream()
+                    .filter(table -> table.getIdTableSchema().equals(new ObjectId(idTableSchema)))
+                    .findFirst().orElse(null))) {
+          releaseTableValidation(dataset, uuId, idTable, rule);
+        }
+      }
+      releaseTableValidation(dataset, uuId, idTable, null);
+
     }
   }
 
+
+  private boolean checkSubTable(ObjectId referenceId, TableSchema table) {
+    boolean found = false;
+    if (table != null) {
+      if (table.getRecordSchema().getIdRecordSchema().equals(referenceId)) {
+        found = true;
+      }
+      for (FieldSchema fieldSchema : table.getRecordSchema().getFieldSchema()) {
+        if (found || fieldSchema.getIdFieldSchema().equals(referenceId)) {
+          found = true;
+          break;
+        }
+      }
+    }
+    return found;
+  }
 
   /**
    * Release dataset validation.
@@ -682,7 +735,7 @@ public class ValidationHelper implements DisposableBean {
    * @param idTable the idTable
    */
   private void releaseTableValidation(final DataSetMetabaseVO dataset, final String processId,
-      Long idTable) {
+      Long idTable, Rule sqlRule) {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, dataset.getId());
     value.put("uuid", processId);
@@ -690,6 +743,7 @@ public class ValidationHelper implements DisposableBean {
     value.put("user", processesMap.get(processId).getRequestingUser());
     value.put("dataProviderId", dataset.getDataProviderId());
     value.put("datasetSchema", dataset.getDatasetSchema());
+    value.put("sqlRule", sqlRule);
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
   }
 
@@ -825,6 +879,7 @@ public class ValidationHelper implements DisposableBean {
         processesMap.get(processId).setPendingOks(++pendingOk);
         EEAEventVO eeaEventVO = new EEAEventVO();
         eeaEventVO.setEventType(eventType);
+        value.put("processId", processId);
         eeaEventVO.setData(value);
 
         processesMap.get(processId).getPendingValidations().add(eeaEventVO);
@@ -924,7 +979,6 @@ public class ValidationHelper implements DisposableBean {
             validationTask.datasetId, e.getMessage(), e);
         validationTask.eeaEventVO.getData().put("error", e);
       } finally {
-
         // if this is the coordinator validation instance, then no need to send message, just to
         // update
         // expected pending ok's and verify if process is finished

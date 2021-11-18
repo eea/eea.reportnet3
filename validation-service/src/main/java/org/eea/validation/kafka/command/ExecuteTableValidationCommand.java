@@ -32,7 +32,8 @@ public class ExecuteTableValidationCommand extends ExecuteValidationCommand {
   public Validator getValidationAction() {
     return (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
       final Long idTable = Long.parseLong(String.valueOf(eeaEventVO.getData().get("idTable")));
-      validationService.validateTable(datasetId, idTable, kieBase);
+      final String processId = String.valueOf(eeaEventVO.getData().get("processId"));
+      validationService.validateTable(datasetId, idTable, kieBase, processId);
     };
   }
 }

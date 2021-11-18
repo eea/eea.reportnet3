@@ -337,11 +337,11 @@ public class ValidationServiceImpl implements ValidationService {
    * @throws IllegalArgumentException the illegal argument exception
    */
   @Override
-  public KieBase loadRulesKnowledgeBase(Long datasetId) throws EEAException {
+  public KieBase loadRulesKnowledgeBase(Long datasetId, Rule rule) throws EEAException {
     KieBase kieBase;
     try {
       kieBase = kieBaseManager.reloadRules(datasetId,
-          datasetSchemaController.getDatasetSchemaId(datasetId));
+          datasetSchemaController.getDatasetSchemaId(datasetId), rule);
     } catch (FileNotFoundException e) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND, e);
     } catch (Exception e) {
@@ -387,7 +387,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  public void validateTable(Long datasetId, Long idTable, KieBase kieBase) {
+  public void validateTable(Long datasetId, Long idTable, KieBase kieBase, String processId) {
     // Validating tables
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     TableValue table = tableRepository.findById(idTable).orElse(null);
@@ -401,6 +401,7 @@ public class ValidationServiceImpl implements ValidationService {
     } finally {
       table = null;
       session.destroy();
+      System.gc();
     }
   }
 
