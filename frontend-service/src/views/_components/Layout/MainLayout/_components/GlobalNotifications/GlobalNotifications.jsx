@@ -98,7 +98,7 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadUsersListFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_USERS_LIST_FILE_ERROR' });
+      notificationContext.add({ type: 'DOWNLOAD_USERS_LIST_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }
