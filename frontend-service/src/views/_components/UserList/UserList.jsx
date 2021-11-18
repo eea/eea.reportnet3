@@ -75,10 +75,7 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   const onLoadFilteredData = value => setFilteredData(value);
 
   const filterOptionsWithDataflowIdRepresentativeId = [
-    {
-      type: 'multiselect',
-      properties: [{ name: 'role' }]
-    },
+    { type: 'multiselect', properties: [{ name: 'role' }] },
     { type: 'input', properties: [{ name: 'email' }] },
     {
       type: 'multiselect',
@@ -126,7 +123,7 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
     }
   };
 
-  const renderUserListContent = () => {
+  const renderUsersListContent = () => {
     if (isLoading) {
       return <Spinner />;
     }
@@ -179,5 +176,5 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
     }
   };
 
-  return <div className={styles.container}>{renderUserListContent()}</div>;
+  return <div className={styles.container}>{renderUsersListContent()} </div>;
 };
