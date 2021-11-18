@@ -97,6 +97,18 @@ public interface ContributorController {
       @RequestBody ContributorVO contributorVO);
 
   /**
+   * Updates the reporters permissions checking if they are registered in the system.
+   *
+   * @param dataflowId the dataflow ID
+   * @param dataProviderId the data provider ID
+   * @return the response entity
+   */
+  @PutMapping(value = "/validateReporters/dataflow/{dataflowId}/provider/{dataProviderId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity validateReporters(@PathVariable("dataflowId") Long dataflowId,
+      @PathVariable("dataProviderId") Long dataProviderId);
+
+  /**
    * Creates the associated permissions.
    *
    * @param dataflowId the dataflow id

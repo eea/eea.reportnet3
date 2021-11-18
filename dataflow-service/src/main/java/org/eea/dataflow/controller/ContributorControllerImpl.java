@@ -150,7 +150,7 @@ public class ContributorControllerImpl implements ContributorController {
             contributorVO.getRole(), dataProviderId);
         LOG.info("Reporter {} Deleted", contributorVO.getAccount());
       } else if (contributorService.findTempUserByAccountAndDataflow(contributorVO.getAccount(),
-          dataflowId) != null) {
+          dataflowId, dataProviderId) != null) {
         contributorService.deleteTemporaryUser(dataflowId, contributorVO.getAccount(),
             contributorVO.getRole(), dataProviderId);
         LOG.info("Temporary Reporter {} Deleted", contributorVO.getAccount());
@@ -208,14 +208,14 @@ public class ContributorControllerImpl implements ContributorController {
       @ApiParam(type = "Long", value = "Dataflow Id",
           example = "0") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(type = "Long", value = "Dataprovider Id",
-          example = "0") @PathVariable("dataproviderId") Long dataproviderId) {
+          example = "0") @PathVariable("dataproviderId") Long dataProviderId) {
     // find reporters or reporter partition roles based on the dataflow state
-    List<ContributorVO> tempReporterWrite = contributorService
-        .findTempUserByRoleAndDataflow(SecurityRoleEnum.REPORTER_WRITE.toString(), dataflowId);
-    List<ContributorVO> tempReporterRead = contributorService
-        .findTempUserByRoleAndDataflow(SecurityRoleEnum.REPORTER_READ.toString(), dataflowId);
+    List<ContributorVO> tempReporterWrite = contributorService.findTempUserByRoleAndDataflow(
+        SecurityRoleEnum.REPORTER_WRITE.toString(), dataflowId, dataProviderId);
+    List<ContributorVO> tempReporterRead = contributorService.findTempUserByRoleAndDataflow(
+        SecurityRoleEnum.REPORTER_READ.toString(), dataflowId, dataProviderId);
     List<ContributorVO> reportersList = contributorService.findContributorsByResourceId(dataflowId,
-        dataproviderId, LiteralConstants.REPORTER);
+        dataProviderId, LiteralConstants.REPORTER);
     reportersList.addAll(tempReporterWrite);
     reportersList.addAll(tempReporterRead);
 
@@ -312,10 +312,10 @@ public class ContributorControllerImpl implements ContributorController {
         contributorService.updateContributor(dataflowId, contributorVO, dataProviderId);
         LOG.info("Reporter {} Updated", contributorVO.getAccount());
       } else if (contributorService.findTempUserByAccountAndDataflow(contributorVO.getAccount(),
-          dataflowId) != null) {
+          dataflowId, dataProviderId) != null) {
         contributorService.updateTemporaryUser(dataflowId, contributorVO, dataProviderId);
       } else if (contributorService.findTempUserByAccountAndDataflow(contributorVO.getAccount(),
-          dataflowId) == null) {
+          dataflowId, dataProviderId) == null) {
         contributorService.createTempUser(dataflowId, contributorVO, dataProviderId);
         LOG.info("Inserting user {} into temp user table", contributorVO.getAccount());
       } else {
@@ -333,6 +333,43 @@ public class ContributorControllerImpl implements ContributorController {
       LOG_ERROR.error("Error update the reporter {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
     }
+    return new ResponseEntity<>(message, status);
+  }
+
+  /**
+   * Updates the reporters permissions checking if they are now registered in the system.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param contributorVO the contributor VO
+   * @return the response entity
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER') OR hasAnyRole('ADMIN')")
+  @PutMapping(value = "/validateReporters/dataflow/{dataflowId}/provider/{dataProviderId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(
+      value = "Validates reporters, checking if they are already registered in the system and gives them permissions",
+      hidden = true)
+  @ApiResponse(code = 500,
+      message = "Error creating the associated permissions for requested reporter in the dataflow")
+  public ResponseEntity validateReporters(
+      @ApiParam(value = "Dataflow ID the reporter is assigned to", required = true,
+          example = "1") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Data Provider ID the reporter is assigned to", required = true,
+          example = "1") @PathVariable("dataProviderId") Long dataProviderId) {
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
+    try {
+      contributorService.validateReporters(dataflowId, dataProviderId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(
+          "Error creating the associated permissions for requested reporter in the dataflow: {} with data provider ID {}",
+          dataflowId, dataProviderId);
+      message = e.getMessage();
+      status = HttpStatus.BAD_REQUEST;
+    }
+
     return new ResponseEntity<>(message, status);
   }
 
