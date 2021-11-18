@@ -1,0 +1,67 @@
+.titleWrap {
+  width: 60%;
+  align-content: center;
+  align-items: center;
+  display: flex;
+  padding-left: 5px;
+}
+
+.iconWrap {
+  align-content: center;
+}
+
+.infoTooltipWrapper {
+  display: flex;
+  flex-direction: column;
+}
+.infoTooltipWrapper span {
+  margin-bottom: 1rem;
+}
+
+.infoTooltip {
+  opacity: 1 !important;
+}
+
+.title {
+  display: table-cell;
+  font-size: 1.1rem;
+  color: var(--title-color);
+  margin: 0px;
+  font-weight: bold;
+}
+
+.tooltip {
+  opacity: 1 !important;
+  width: fit-content;
+  z-index: 3004;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: var(--subtitle-color);
+  margin: 0px;
+  font-weight: 400;
+}
+
+.icon {
+  color: var(--title-icon-color);
+  opacity: var(--title-icon-opacity);
+  margin-right: 0.5rem !important;
+}
+
+.itemsContainer {
+  display: flex !important;
+  align-content: center !important;
+  flex-direction: column;
+}
+
+.itemContainer {
+  display: flex;
+  align-items: center;
+}
+
+.rowContainer {
+  display: flex;
+  margin: 2rem;
+  align-items: center;
+}

@@ -2,6 +2,8 @@ package org.eea.document.controller;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.ws.rs.Produces;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.document.service.DocumentService;
@@ -35,6 +37,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import feign.FeignException;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
 
 /**
  * The type Document controller.
@@ -109,13 +113,16 @@ public class DocumentControllerImpl implements DocumentController {
    * Gets the document.
    *
    * @param documentId the document id
-   *
+   * @param dataflowId the dataflow id
    * @return the document
    */
   @Override
-  @GetMapping(value = "/{documentId}", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @GetMapping(value = "/{documentId}/dataflow/{dataflowId}",
+      produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   @HystrixCommand
-  public Resource getDocument(@PathVariable("documentId") final Long documentId) {
+  public Resource getDocument(@PathVariable("documentId") final Long documentId,
+      @PathVariable("dataflowId") final Long dataflowId) {
     try {
       DocumentVO document = dataflowController.getDocumentInfoById(documentId);
       if (document == null) {
@@ -131,22 +138,54 @@ public class DocumentControllerImpl implements DocumentController {
     }
   }
 
+  /**
+   * Gets the document.
+   *
+   * @param documentId the document id
+   *
+   * @return the document
+   */
+  @Override
+  @GetMapping(value = "/public/{documentId}", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  @HystrixCommand
+  public Resource getPublicDocument(@PathVariable("documentId") final Long documentId) {
+    try {
+      DocumentVO document = dataflowController.getDocumentInfoById(documentId);
+      if (document == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      }
+      if (document.getIsPublic()) {
+        FileResponse file = documentService.getDocument(documentId, document.getDataflowId());
+        return new ByteArrayResource(file.getBytes());
+      } else {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.DOCUMENT_NOT_PUBLIC);
+      }
+    } catch (final EEAException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
 
   /**
    * Delete document. You can delete metabase if you want , the boolean is to delete metabase by
    * your own
    *
    * @param documentId the document id
+   * @param dataflowId the dataflow id
    * @param deleteMetabase the delete metabase
-   *
    * @throws Exception the exception
    */
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "/{documentId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @DeleteMapping(value = "/{documentId}/dataflow/{dataflowId}")
   public void deleteDocument(@PathVariable("documentId") final Long documentId,
-      @RequestParam(value = "deleteMetabase", required = false,
-          defaultValue = "true") final Boolean deleteMetabase)
+      @PathVariable("dataflowId") final Long dataflowId, @RequestParam(value = "deleteMetabase",
+          required = false, defaultValue = "true") final Boolean deleteMetabase)
       throws Exception {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
@@ -171,7 +210,7 @@ public class DocumentControllerImpl implements DocumentController {
    * Update document.
    *
    * @param file the file
-   * @param dataFlowId the data flow id
+   * @param dataflowId the data flow id
    * @param description the description
    * @param language the language
    * @param idDocument the id document
@@ -179,9 +218,10 @@ public class DocumentControllerImpl implements DocumentController {
    */
   @Override
   @HystrixCommand
-  @PutMapping(value = "/update/{idDocument}/dataflow/{dataFlowId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @PutMapping(value = "/update/{idDocument}/dataflow/{dataflowId}")
   public void updateDocument(@RequestPart(name = "file", required = false) final MultipartFile file,
-      @PathVariable("dataFlowId") final Long dataFlowId,
+      @PathVariable("dataflowId") final Long dataflowId,
       @RequestParam(name = "description", required = false) final String description,
       @RequestParam(name = "language", required = false) final String language,
       @PathVariable("idDocument") final Long idDocument,
@@ -190,13 +230,13 @@ public class DocumentControllerImpl implements DocumentController {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
     LOG.info("updateDocument");
-    if (dataFlowId == null) {
+    if (dataflowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
     }
     try {
       DocumentVO documentVO = dataflowController.getDocumentInfoById(idDocument);
-      documentVO.setDataflowId(dataFlowId);
+      documentVO.setDataflowId(dataflowId);
       if (StringUtils.isNotBlank(description)) {
         documentVO.setDescription(description);
       }
@@ -318,4 +358,130 @@ public class DocumentControllerImpl implements DocumentController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
   }
+
+  /**
+   * Gets the all documents by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find list of all documents by id of a Dataflow",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class,
+      responseContainer = "List")
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
+  public List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId) {
+    List<DocumentVO> documents = new ArrayList<>();
+    documents = dataflowController.getAllDocumentsByDataflowId(dataflowId);
+    return documents;
+  }
+
+  /**
+   * Upload collaboration document.
+   *
+   * @param file the file
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param extension the extension
+   * @param messageId the message id
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/private/upload/{dataflowId}/collaborationattachment")
+  public void uploadCollaborationDocument(@RequestBody final byte[] file,
+      @PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("fileName") final String fileName,
+      @RequestParam("extension") final String extension,
+      @RequestParam("messageId") final Long messageId) {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    if (file == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+    }
+    if (dataflowId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    try {
+      ByteArrayInputStream inStream = new ByteArrayInputStream(file);
+      documentService.uploadCollaborationDocument(inStream, extension, fileName, dataflowId,
+          messageId);
+    } catch (EEAException | IOException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
+  /**
+   * Delete collaboration document.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param messageId the message id
+   * @throws Exception the exception
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/private/{dataflowId}/collaborationattachment")
+  public void deleteCollaborationDocument(@PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("fileName") final String fileName,
+      @RequestParam("messageId") final Long messageId) throws Exception {
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    try {
+      if (dataflowId == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+      }
+      documentService.deleteCollaborationDocument(fileName, dataflowId, messageId);
+    } catch (final EEAException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
+  /**
+   * Gets the collaboration document.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param messageId the message id
+   * @return the collaboration document
+   */
+  @Override
+  @GetMapping(value = "/private/{dataflowId}/collaborationattachment")
+  @HystrixCommand
+  @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  public byte[] getCollaborationDocument(@PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("fileName") final String fileName,
+      @RequestParam("messageId") final Long messageId) {
+    try {
+
+      if (dataflowId == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
+      }
+      FileResponse file = documentService.getCollaborationDocument(fileName, dataflowId, messageId);
+
+      ByteArrayResource resource = new ByteArrayResource(file.getBytes());
+      return resource.getByteArray();
+    } catch (final EEAException e) {
+      if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    }
+  }
+
+
 }

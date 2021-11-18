@@ -44,6 +44,7 @@ import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.domain.Validation;
 import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.FieldRepository;
@@ -52,12 +53,14 @@ import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository.IDError;
 import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
 import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
@@ -76,6 +79,7 @@ import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
@@ -92,8 +96,11 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -303,6 +310,15 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
+  /** The validation repository. */
+  @Autowired
+  private ValidationRepository validationRepository;
+
+  /** The dataset snapshot service. */
+  @Autowired
+  private DatasetSnapshotService datasetSnapshotService;
+
+
   /** The import path. */
   @Value("${importPath}")
   private String importPath;
@@ -376,7 +392,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteTableBySchema(final String tableSchemaId, final Long datasetId) {
-    deleteRecords(datasetId, tableSchemaId);
+    deleteRecords(datasetId, tableSchemaId, true);
   }
 
   /**
@@ -384,14 +400,18 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
+   * @param deletePrefilledTables the delete prefilled tables
    */
-  private void deleteRecords(Long datasetId, String tableSchemaId) {
+  private void deleteRecords(Long datasetId, String tableSchemaId, Boolean deletePrefilledTables) {
 
     boolean singleTable = null != tableSchemaId;
     Long dataflowId = getDataFlowIdById(datasetId);
     TypeStatusEnum dataflowStatus = dataflowControllerZuul.getMetabaseById(dataflowId).getStatus();
     DataSetSchema schema = schemasRepository.findByIdDataSetSchema(
         new ObjectId(datasetMetabaseService.findDatasetSchemaIdById(datasetId)));
+    DatasetTypeEnum datasetType = getDatasetType(datasetId);
+    Boolean referenceUpdateable = Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
+        .orElse(new ReferenceDataset()).getUpdatable());
 
     for (TableSchema tableSchema : schema.getTableSchemas()) {
 
@@ -402,8 +422,13 @@ public class DatasetServiceImpl implements DatasetService {
       }
 
       if (TypeStatusEnum.DESIGN.equals(dataflowStatus)) {
-        deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
-      } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())) {
+        if (Boolean.TRUE.equals(deletePrefilledTables) || (Boolean.FALSE
+            .equals(tableSchema.getToPrefill() && Boolean.FALSE.equals(deletePrefilledTables)))) {
+          deleteRecordsFromIdTableSchema(datasetId, loopTableSchemaId);
+        }
+      } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())
+          && !(DatasetTypeEnum.REFERENCE.equals(datasetType)
+              && Boolean.TRUE.equals(referenceUpdateable))) {
         LOG.info("Skipped deleteRecords: datasetId={}, tableSchemaId={}, tableSchema.readOnly={}",
             datasetId, loopTableSchemaId, tableSchema.getReadOnly());
       } else if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
@@ -440,11 +465,12 @@ public class DatasetServiceImpl implements DatasetService {
    * Delete import data.
    *
    * @param datasetId the data set id
+   * @param deletePrefilledTables the delete prefilled tables
    */
   @Override
   @Transactional
-  public void deleteImportData(final Long datasetId) {
-    deleteRecords(datasetId, null);
+  public void deleteImportData(final Long datasetId, Boolean deletePrefilledTables) {
+    deleteRecords(datasetId, null, deletePrefilledTables);
   }
 
   /**
@@ -490,7 +516,7 @@ public class DatasetServiceImpl implements DatasetService {
       // Table with out values
       if (null == result.getRecords() || result.getRecords().isEmpty()) {
         result.setRecords(new ArrayList<>());
-        LOG.info("No records founded in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
+        LOG.info("No records found in datasetId {}, idTableSchema {}", datasetId, idTableSchema);
 
       } else {
         List<RecordVO> recordVOs = result.getRecords();
@@ -707,6 +733,7 @@ public class DatasetServiceImpl implements DatasetService {
     List<RecordValue> recordValues = recordMapper.classListToEntity(records);
     List<FieldValue> fieldValues = new ArrayList<>();
 
+
     if (updateCascadePK) {
       // we update the ids in cascade for any pk value changed
       for (RecordValue recordValue : recordValues) {
@@ -719,6 +746,7 @@ public class DatasetServiceImpl implements DatasetService {
       fieldValueUpdateRecordFor(fieldValues, datasetSchemaId, recordValue, datasetType);
     }
     fieldRepository.saveAll(fieldValues);
+
   }
 
 
@@ -805,7 +833,8 @@ public class DatasetServiceImpl implements DatasetService {
             .getCode()
         : null;
 
-    if (!DatasetTypeEnum.DESIGN.equals(datasetType)) {
+    if (!DatasetTypeEnum.DESIGN.equals(datasetType)
+        && !DatasetTypeEnum.REFERENCE.equals(datasetType)) {
 
       // Deny insert if the table is marked as read only. Not applies for DESIGN.
       if (Boolean.TRUE.equals(tableSchema.getReadOnly())) {
@@ -1391,6 +1420,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @return the referenced dataset id
    */
   @Override
+  @Cacheable(value = "referencedDatasetId")
   public Long getReferencedDatasetId(Long datasetId, String idPk) {
     return datasetMetabaseService.getDatasetDestinationForeignRelation(datasetId, idPk);
   }
@@ -1475,14 +1505,39 @@ public class DatasetServiceImpl implements DatasetService {
     DataFlowVO dataflow = getDataflow(idDataset);
     if (DatasetTypeEnum.DESIGN.equals(type) && TypeStatusEnum.DESIGN.equals(dataflow.getStatus())) {
       result = true;
-    } else if (DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.REFERENCE.equals(type)
-        || DatasetTypeEnum.TEST.equals(type)) {
+    } else if (DatasetTypeEnum.REPORTING.equals(type)
+        || (DatasetTypeEnum.REFERENCE.equals(type)
+            && !Boolean.TRUE.equals(referenceDatasetRepository.findById(idDataset)
+                .orElse(new ReferenceDataset()).getUpdatable())
+            || DatasetTypeEnum.TEST.equals(type))) {
       result = true;
     } else {
       LOG.info("Dataset {} is not reportable because are in dataflow {} and the dataset type is {}",
           idDataset, dataflow.getId(), type);
     }
     return result;
+  }
+
+
+
+  /**
+   * Check if dataset locked or read only.
+   *
+   * @param datasetId the dataset id
+   * @param idRecordSchema the id record schema
+   * @param entityType the entity type
+   * @return true, if successful
+   */
+  @Override
+  public boolean checkIfDatasetLockedOrReadOnly(Long datasetId, String idRecordSchema,
+      EntityTypeEnum entityType) {
+    DatasetTypeEnum datasetType = getDatasetType(datasetId);
+    Boolean updatable = Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
+        .orElse(new ReferenceDataset()).getUpdatable());
+    return (DatasetTypeEnum.REFERENCE.equals(datasetType) && Boolean.FALSE.equals(updatable))
+        || (!DatasetTypeEnum.DESIGN.equals(datasetType)
+            && !(DatasetTypeEnum.REFERENCE.equals(datasetType) && Boolean.TRUE.equals(updatable))
+            && Boolean.TRUE.equals(getTableReadOnly(datasetId, idRecordSchema, entityType)));
   }
 
   /**
@@ -1520,7 +1575,14 @@ public class DatasetServiceImpl implements DatasetService {
             // save values
             TenantResolver
                 .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
-            recordRepository.saveAll(recordDesignValuesList);
+            try {
+              storeRecords(targetDataset, recordDesignValuesList);
+            } catch (IOException | SQLException e) {
+              LOG_ERROR.error(
+                  "Error saving the list of records into the dataset {} when copying data",
+                  targetDataset);
+            }
+
             // copy attachments too
             if (!attachments.isEmpty()) {
               attachmentRepository.saveAll(attachments);
@@ -1741,7 +1803,13 @@ public class DatasetServiceImpl implements DatasetService {
       if (!targetRecords.isEmpty()) {
         // save values
         TenantResolver.setTenantName(String.format(DATASET_ID, targetDataset.getId()));
-        recordRepository.saveAll(targetRecords);
+        try {
+          storeRecords(targetDataset.getId(), targetRecords);
+        } catch (IOException | SQLException e) {
+          LOG_ERROR.error(
+              "Error saving the list of records into the dataset {} when executing a prefill data",
+              targetDataset.getId());
+        }
         // copy attachments too
         if (!attachments.isEmpty()) {
           attachmentRepository.saveAll(attachments);
@@ -2138,6 +2206,7 @@ public class DatasetServiceImpl implements DatasetService {
   private List<Statistics> processTableStats(final TableValue tableValue, final Long datasetId,
       final Map<String, String> mapIdNameDatasetSchema) {
     // Find record ids with errors
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     List<IDError> recordIdsFromRecordWithValidationBlocker =
         recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
             tableValue.getIdTableSchema());
@@ -2540,7 +2609,8 @@ public class DatasetServiceImpl implements DatasetService {
           recordAux.setDataProviderCode(dataproviderVO.getCode());
         }
         List<FieldValue> fields = new ArrayList<>();
-        for (FieldValue field : record.getFields()) {
+        for (FieldValue field : record.getFields() != null ? record.getFields()
+            : new ArrayList<FieldValue>()) {
           FieldValue fieldAux = new FieldValue();
           BeanUtils.copyProperties(fieldAux, field);
           if (dictionaryOriginTargetObjectId != null) {
@@ -2891,35 +2961,57 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public DataSetSchema getSchemaIfReportable(Long datasetId, String tableSchemaId) {
 
-    DataSetMetabase dataset = null;
+    DataSetMetabase dataset = dataSetMetabaseRepository.findById(datasetId).orElse(null);
     DataSetSchema schema = null;
+    if (dataset != null) {
+      DatasetTypeEnum datasetType = getDatasetType(datasetId);
+      TypeStatusEnum dataflowStatus =
+          dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus();
 
-    // Dataset: DESIGN
-    dataset = designDatasetRepository.findById(datasetId).orElse(null);
-    if (null != dataset) {
-      if (TypeStatusEnum.DESIGN
-          .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
-        schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-      }
-    } else {
-      // Dataset: TEST
-      dataset = testDatasetRepository.findById(datasetId).orElse(null);
-      if (null == dataset) {
-        // Dataset: REPORTING
-        dataset = reportingDatasetRepository.findById(datasetId).orElse(null);
-      }
-      if (null != dataset && TypeStatusEnum.DRAFT
-          .equals(dataflowControllerZuul.getMetabaseById(dataset.getDataflowId()).getStatus())) {
-        schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-        if (null != tableSchemaId) {
-          TableSchema tableSchema = schema.getTableSchemas().stream()
-              .filter(t -> tableSchemaId.equals(t.getIdTableSchema().toString())).findFirst()
-              .orElse(null);
-          if (null == tableSchema || Boolean.TRUE.equals(tableSchema.getReadOnly())
-              || Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
-            schema = null;
+      switch (datasetType) {
+        case DESIGN:
+          if (TypeStatusEnum.DESIGN.equals(dataflowStatus)) {
+            schema =
+                schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
           }
-        }
+          break;
+        case TEST:
+        case REPORTING:
+          if (TypeStatusEnum.DRAFT.equals(dataflowStatus)) {
+            schema = filterSchemaByTable(tableSchemaId, dataset);
+          }
+          break;
+        case REFERENCE:
+          if (Boolean.TRUE.equals(referenceDatasetRepository.findById(datasetId)
+              .orElse(new ReferenceDataset()).getUpdatable())) {
+            schema =
+                schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+          }
+          break;
+        default:
+          break;
+      }
+    }
+    return schema;
+  }
+
+  /**
+   * Filter schema by table.
+   *
+   * @param tableSchemaId the table schema id
+   * @param dataset the dataset
+   * @return the data set schema
+   */
+  private DataSetSchema filterSchemaByTable(String tableSchemaId, DataSetMetabase dataset) {
+    DataSetSchema schema;
+    schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+    if (null != tableSchemaId) {
+      TableSchema tableSchema = schema.getTableSchemas().stream()
+          .filter(t -> tableSchemaId.equals(t.getIdTableSchema().toString())).findFirst()
+          .orElse(null);
+      if (null == tableSchema || Boolean.TRUE.equals(tableSchema.getReadOnly())
+          || Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
+        schema = null;
       }
     }
     return schema;
@@ -3290,21 +3382,26 @@ public class DatasetServiceImpl implements DatasetService {
 
       LOG.info("Statistics save to datasetId {}.", datasetId);
       DatasetTypeEnum type = getDatasetType(datasetId);
-      if (DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
-          || DatasetTypeEnum.REFERENCE.equals(type)) {
+      if (DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)) {
         DesignDataset originDatasetDesign =
             designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
         if (null != originDatasetDesign) {
           // and we have found the design dataset
           // with data to be copied into the
           // target dataset
+          LOG.info("Prefilling data into the datasetId {}.", datasetId);
           spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
-
-          // create zip to the reference
-          if (DatasetTypeEnum.REFERENCE.equals(type)) {
-            createReferenceDatasetFiles(datasetMb);
-          }
-
+        }
+      } else if (DatasetTypeEnum.REFERENCE.equals(type)) {
+        DesignDataset originDatasetDesign =
+            designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
+        if (null != originDatasetDesign) {
+          LOG.info("Prefilling data into the reference datasetId {}.", datasetId);
+          CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
+          createSnapshotVO.setDescription(originDatasetDesign.getDatasetSchema());
+          createSnapshotVO.setReleased(false);
+          datasetSnapshotService.addSnapshot(originDatasetDesign.getId(), createSnapshotVO,
+              datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true);
         }
       }
     } catch (Exception e) {
@@ -3379,7 +3476,8 @@ public class DatasetServiceImpl implements DatasetService {
    * @param dataset the dataset
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
+  @Override
+  public void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
 
     List<DesignDataset> desingDataset =
         designDatasetRepository.findByDataflowId(dataset.getDataflowId());
@@ -3582,5 +3680,79 @@ public class DatasetServiceImpl implements DatasetService {
       refillFields(oldRecord, recordToUpdate.getFields());
     }
 
+  }
+
+  /**
+   * Gets the total failed validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the total failed validations by id dataset
+   */
+  @Override
+  public FailedValidationsDatasetVO getTotalFailedValidationsByIdDataset(Long datasetId,
+      String idTableSchema) {
+    DataSetMetabase dataset =
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+    FailedValidationsDatasetVO validation = new FailedValidationsDatasetVO();
+    validation.setErrors(new ArrayList<>());
+    validation.setIdDatasetSchema(dataset.getDatasetSchema());
+    validation.setIdDataset(datasetId);
+    Long countValidations = validationRepository.count();
+    validation.setErrors(getFieldAndRecordErrors(datasetId, idTableSchema));
+    validation.setTotalFilteredRecords(countValidations);
+    return validation;
+  }
+
+  /**
+   * Gets the field and record errors.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the field and record errors
+   */
+  private List<ErrorsValidationVO> getFieldAndRecordErrors(Long datasetId, String idTableSchema) {
+    List<ErrorsValidationVO> errors = new ArrayList<>();
+
+    for (FieldValidation fieldValidation : fieldValidationRepository
+        .findFieldValidationsByIdDatasetAndIdTableSchema(datasetId, idTableSchema)) {
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      error.setIdObject(fieldValidation.getFieldValue().getId());
+      error.setIdTableSchema(
+          fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema());
+      error.setNameFieldSchema(fieldValidation.getValidation().getFieldName());
+      refillErrorValidation(fieldValidation.getValidation(), error);
+      errors.add(error);
+    }
+
+    for (RecordValidation recordValidation : recordValidationRepository
+        .findRecordValidationsByIdDatasetAndIdTableSchema(datasetId, idTableSchema)) {
+      ErrorsValidationVO error = new ErrorsValidationVO();
+      if (recordValidation.getRecordValue() != null) {
+        error.setIdObject(recordValidation.getRecordValue().getId());
+        error
+            .setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
+      }
+      refillErrorValidation(recordValidation.getValidation(), error);
+      errors.add(error);
+    }
+    LOG.info("Found all errors for field and records for dataset: {}", datasetId);
+    return errors;
+  }
+
+  /**
+   * Refill error validation.
+   *
+   * @param validation the validation
+   * @param error the error
+   */
+  private void refillErrorValidation(Validation validation, ErrorsValidationVO error) {
+    error.setIdValidation(validation.getId());
+    error.setLevelError(validation.getLevelError().name());
+    error.setMessage(validation.getMessage());
+    error.setNameTableSchema(validation.getTableName());
+    error.setTypeEntity(validation.getTypeEntity().name());
+    error.setValidationDate(validation.getValidationDate());
+    error.setShortCode(validation.getShortCode());
   }
 }

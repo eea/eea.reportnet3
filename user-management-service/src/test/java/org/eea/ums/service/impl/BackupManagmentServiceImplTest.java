@@ -51,7 +51,7 @@ public class BackupManagmentServiceImplTest {
 
   @Before
   public void setUp() throws Exception {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
 
     List<CredentialRepresentation> credentials = new ArrayList<>();
     CredentialRepresentation credential = new CredentialRepresentation();

@@ -1,0 +1,129 @@
+.actionsToolbar {
+  border-top: var(--datatable-toolbar-border) !important;
+  border-left: var(--datatable-toolbar-border) !important;
+  border-right: var(--datatable-toolbar-border) !important;
+  border-bottom: 0px !important;
+  border-top-left-radius: 3px !important;
+  border-top-right-radius: 3px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  padding: 11px 14px !important;
+}
+.toolbarLeftContent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.chipButton {
+  margin-bottom: 0px !important;
+}
+.filterInactive {
+  font-size: 1.5rem !important;
+  margin-top: -0.7rem !important;
+  left: 0.3rem !important;
+  left: 0rem;
+
+  &::after {
+    opacity: 0.8;
+    display: block;
+    top: 7px;
+    left: 9px;
+    height: 16px;
+    content: ' ';
+    position: absolute;
+    padding: 2px 6px;
+    border-left: 2px solid var(--main-font-color);
+    transform: rotate(60deg);
+  }
+}
+.filterActive {
+  font-size: 1.5rem !important;
+  margin-top: -0.7rem !important;
+  left: 0.4rem !important;
+  opacity: 1;
+  color: var(--dropdownFilter-icon-color);
+}
+.groupFilter {
+  max-width: 50% !important;
+}
+.menu {
+  max-height: 27.5vh;
+  user-select: none;
+}
+
+.valueFilterWrapper {
+  display: flex;
+  .input {
+    color: var(--font-filters) !important;
+    height: 1.5em;
+
+    > span {
+      border-bottom: var(--inputtext-border) !important;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .inputFilter {
+      background: transparent !important;
+      border-bottom: 0 !important;
+      border-left: 0 !important;
+      border-radius: 0 !important;
+      border-right: 0 !important;
+      border-top: 0 !important;
+      width: 100% !important;
+      ::placeholder {
+        font-style: normal;
+        font-size: 10pt;
+      }
+      &:focus,
+      &:enabled:focus {
+        box-shadow: 0 0 0 0 var(--blue-120) !important;
+      }
+      &:focus ~ label {
+        top: -1px !important;
+      }
+
+      .cancelIcon {
+        font-size: 12pt !important;
+        height: 2.1rem !important;
+      }
+
+      .icon {
+        background-color: transparent;
+        border: none;
+        color: var(--button-secondary-transparent-color-hover);
+        cursor: pointer;
+        font-size: 16pt !important;
+        height: 1.6em !important;
+        opacity: 0.7;
+
+        &:hover {
+          opacity: 1 !important;
+        }
+
+        &:enabled:focus {
+          box-shadow: 0 0 0 0 var(--white) !important;
+          outline: none;
+        }
+
+        &:enabled:active,
+        &:enabled:hover {
+          background-color: transparent !important;
+          border-color: transparent !important;
+        }
+      }
+    }
+
+    .label {
+      clip: auto;
+      height: auto;
+      overflow: visible;
+      width: 15rem;
+    }
+
+    .labelFilled {
+      top: -1px !important;
+    }
+  }
+}

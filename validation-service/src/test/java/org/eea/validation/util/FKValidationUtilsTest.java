@@ -1,11 +1,13 @@
 package org.eea.validation.util;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValue;
@@ -73,7 +75,7 @@ public class FKValidationUtilsTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     ReflectionTestUtils.setField(fKValidationUtils, "dataSetControllerZuul", dataSetControllerZuul);
     ReflectionTestUtils.setField(fKValidationUtils, "datasetMetabaseControllerZuul",
         datasetMetabaseControllerZuul);
@@ -291,5 +293,66 @@ public class FKValidationUtilsTest {
     assertTrue(fKValidationUtils.isfieldFK(dataset, id.toString(), id.toString(), Boolean.FALSE));
   }
 
+  @Test
+  public void isGeometryFalseTest() {
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setType(DataType.EMAIL);
+    assertFalse("not true", fKValidationUtils.isGeometry(fieldValue));
+  }
 
+  @Test
+  public void isGeometryPointTest() {
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setType(DataType.POINT);
+    fieldValue.setValue("");
+    assertTrue("not true", fKValidationUtils.isGeometry(fieldValue));
+  }
+
+  @Test
+  public void isGeometryLinestringTest() {
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setType(DataType.LINESTRING);
+    fieldValue.setValue("");
+    assertTrue("not true", fKValidationUtils.isGeometry(fieldValue));
+  }
+
+  @Test
+  public void isGeometryPolygonTest() {
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setType(DataType.POLYGON);
+    fieldValue.setValue("");
+    assertTrue("not true", fKValidationUtils.isGeometry(fieldValue));
+  }
+
+  @Test
+  public void isGeometryMultiPointTest() {
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setType(DataType.MULTIPOINT);
+    fieldValue.setValue("");
+    assertTrue("not true", fKValidationUtils.isGeometry(fieldValue));
+  }
+
+  @Test
+  public void isGeometryMultilinestringTest() {
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setType(DataType.MULTILINESTRING);
+    fieldValue.setValue("");
+    assertTrue("not true", fKValidationUtils.isGeometry(fieldValue));
+  }
+
+  @Test
+  public void isGeometryMultipolygongTest() {
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setType(DataType.MULTIPOLYGON);
+    fieldValue.setValue("");
+    assertTrue("not true", fKValidationUtils.isGeometry(fieldValue));
+  }
+
+  @Test
+  public void isGeometryCollectionTest() {
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setType(DataType.GEOMETRYCOLLECTION);
+    fieldValue.setValue("");
+    assertTrue("not true", fKValidationUtils.isGeometry(fieldValue));
+  }
 }

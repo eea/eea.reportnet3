@@ -81,7 +81,7 @@ public class RecordStoreControllerImplTest {
     details.put("", "");
     authenticationToken.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
 
@@ -200,18 +200,19 @@ public class RecordStoreControllerImplTest {
   public void testCreateSnapshot()
       throws SQLException, IOException, RecordStoreAccessException, EEAException {
     recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L,
-        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString());
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), false);
 
     Mockito.verify(recordStoreService, times(1)).createDataSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
   @Test
   public void testRestoreSnapshot()
       throws SQLException, IOException, RecordStoreAccessException, EEAException {
-    recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, false);
+    recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, false,
+        false);
     Mockito.verify(restoreSnapshotHelper, times(1)).processRestoration(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
   @Test

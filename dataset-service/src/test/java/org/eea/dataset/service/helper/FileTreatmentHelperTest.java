@@ -202,7 +202,7 @@ public class FileTreatmentHelperTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     SecurityContextHolder.clearContext();
     SecurityContextHolder.getContext()
         .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
@@ -366,7 +366,8 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetService.getMimetype(Mockito.anyString())).thenReturn("zip")
         .thenReturn(FileTypeEnum.CSV.getValue()).thenReturn("txt")
         .thenReturn(FileTypeEnum.CSV.getValue());
-    Mockito.doNothing().when(datasetService).deleteImportData(Mockito.anyLong());
+    Mockito.doNothing().when(datasetService).deleteImportData(Mockito.anyLong(),
+        Mockito.anyBoolean());
     Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.REPORTING);
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
@@ -438,16 +439,15 @@ public class FileTreatmentHelperTest {
     // Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(integrationController.findIntegrationById(Mockito.anyLong()))
         .thenReturn(integrationVO);
-    Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(executionResultVO);
+    // Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
+    // Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(executionResultVO);
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false, 1L,
         null);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
-    Mockito.verify(integrationController, times(1)).executeIntegrationProcess(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -482,42 +482,7 @@ public class FileTreatmentHelperTest {
     }
   }
 
-  /**
-   * Import file data folder exception test.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void importFileDataFolderExceptionTest() throws EEAException {
-    TableSchema tableSchema = new TableSchema();
-    tableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
-    tableSchema.setFixedNumber(Boolean.FALSE);
 
-    List<TableSchema> tableSchemas = new ArrayList<>();
-    tableSchemas.add(tableSchema);
-
-    DataSetSchema datasetSchema = new DataSetSchema();
-    datasetSchema.setTableSchemas(tableSchemas);
-
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-
-    Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.anyString()))
-        .thenReturn(datasetSchema);
-    MultipartFile multipartFile =
-        new MockMultipartFile("file", "file.xls", "application/vnd.ms-excel", "".getBytes());
-    File folder = new File(this.getClass().getClassLoader().getResource("").getPath(), "1");
-    folder.mkdirs();
-    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
-        .thenReturn(new DataSetMetabaseVO());
-    try {
-      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, true, 1L,
-          null);
-    } catch (EEAException e) {
-      Assert.assertEquals("Folder for dataset 1 already exists", e.getCause().getMessage());
-      throw e;
-    }
-  }
 
   /**
    * Import file data IO exception test.

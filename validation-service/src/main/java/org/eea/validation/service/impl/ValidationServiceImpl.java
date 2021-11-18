@@ -44,6 +44,7 @@ import org.eea.validation.persistence.data.domain.RecordValidation;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.data.domain.Validation;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.data.repository.FieldRepository;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
@@ -53,8 +54,11 @@ import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.data.repository.TableValidationRepository;
 import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
 import org.eea.validation.persistence.data.repository.ValidationRepository;
+import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.persistence.schemas.rule.Rule;
+import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
 import org.eea.validation.util.RulesErrorUtils;
@@ -113,7 +117,8 @@ public class ValidationServiceImpl implements ValidationService {
   /** The Constant NUMBEROFRECORDS: {@value}. */
   private static final String NUMBEROFRECORDS = "Number of records";
 
-  /** The Constant NUMBEROFRECORDS: {@value}. */
+
+  /** The Constant EXCEPTIONERRORSTRING: {@value}. */
   private static final String EXCEPTIONERRORSTRING =
       "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s";
 
@@ -191,6 +196,10 @@ public class ValidationServiceImpl implements ValidationService {
   /** The validation repository. */
   @Autowired
   private ValidationRepository validationRepository;
+
+  /** The rules repository. */
+  @Autowired
+  private RulesRepository rulesRepository;
 
   /**
    * The kafka sender utils.
@@ -509,17 +518,11 @@ public class ValidationServiceImpl implements ValidationService {
 
       ErrorsValidationVO error = new ErrorsValidationVO();
       error.setIdObject(fieldValidation.getFieldValue().getId());
-      error.setIdValidation(fieldValidation.getValidation().getId());
-      error.setLevelError(fieldValidation.getValidation().getLevelError().name());
-      error.setMessage(fieldValidation.getValidation().getMessage());
-      error.setNameTableSchema(fieldValidation.getValidation().getTableName());
       error.setIdTableSchema(
           fieldValidation.getFieldValue().getRecord().getTableValue().getIdTableSchema());
-      error.setTypeEntity(fieldValidation.getValidation().getTypeEntity().name());
-      error.setValidationDate(fieldValidation.getValidation().getValidationDate());
-      error.setShortCode(fieldValidation.getValidation().getShortCode());
       error.setNameFieldSchema(fieldValidation.getValidation().getFieldName());
 
+      refillErrorValidation(fieldValidation.getValidation(), error);
       errors.put(fieldValidation.getValidation().getId(), error);
     }
 
@@ -549,14 +552,7 @@ public class ValidationServiceImpl implements ValidationService {
         error
             .setIdTableSchema(recordValidation.getRecordValue().getTableValue().getIdTableSchema());
       }
-      error.setIdValidation(recordValidation.getValidation().getId());
-      error.setLevelError(recordValidation.getValidation().getLevelError().name());
-      error.setMessage(recordValidation.getValidation().getMessage());
-      error.setNameTableSchema(recordValidation.getValidation().getTableName());
-      error.setTypeEntity(recordValidation.getValidation().getTypeEntity().name());
-      error.setValidationDate(recordValidation.getValidation().getValidationDate());
-      error.setShortCode(recordValidation.getValidation().getShortCode());
-
+      refillErrorValidation(recordValidation.getValidation(), error);
       errors.put(recordValidation.getValidation().getId(), error);
     }
 
@@ -582,14 +578,8 @@ public class ValidationServiceImpl implements ValidationService {
 
       ErrorsValidationVO error = new ErrorsValidationVO();
       error.setIdObject(tableValidation.getTableValue().getId().toString());
-      error.setIdValidation(tableValidation.getValidation().getId());
-      error.setLevelError(tableValidation.getValidation().getLevelError().name());
-      error.setMessage(tableValidation.getValidation().getMessage());
-      error.setNameTableSchema(tableValidation.getValidation().getTableName());
       error.setIdTableSchema(tableValidation.getTableValue().getIdTableSchema());
-      error.setTypeEntity(tableValidation.getValidation().getTypeEntity().name());
-      error.setValidationDate(tableValidation.getValidation().getValidationDate());
-      error.setShortCode((tableValidation.getValidation().getShortCode()));
+      refillErrorValidation(tableValidation.getValidation(), error);
 
       errors.put(tableValidation.getValidation().getId(), error);
     }
@@ -616,14 +606,8 @@ public class ValidationServiceImpl implements ValidationService {
     for (DatasetValidation datasetValidation : datasetValidations) {
       ErrorsValidationVO error = new ErrorsValidationVO();
       error.setIdObject(datasetValidation.getDatasetValue().getId().toString());
-      error.setIdValidation(datasetValidation.getValidation().getId());
-      error.setLevelError(datasetValidation.getValidation().getLevelError().name());
-      error.setMessage(datasetValidation.getValidation().getMessage());
-      error.setNameTableSchema(datasetValidation.getValidation().getTableName());
       error.setIdTableSchema(dataset.getIdDatasetSchema());
-      error.setTypeEntity(datasetValidation.getValidation().getTypeEntity().name());
-      error.setValidationDate(datasetValidation.getValidation().getValidationDate());
-      error.setShortCode(datasetValidation.getValidation().getShortCode());
+      refillErrorValidation(datasetValidation.getValidation(), error);
 
       errors.put(datasetValidation.getValidation().getId(), error);
     }
@@ -764,10 +748,9 @@ public class ValidationServiceImpl implements ValidationService {
       // only writes at most the number of columns as variables per row
       csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
       int nHeaders = 9;
-      String[] fieldsToWrite = new String[nHeaders];
 
       if (getDatasetValuebyId(datasetId) != null)
-        fillValidationDataCSV(datasetId, nHeaders, fieldsToWrite, csvWriter, notificationVO);
+        fillValidationDataCSV(datasetId, nHeaders, csvWriter, notificationVO);
       else
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, creatingFileError);
 
@@ -838,8 +821,11 @@ public class ValidationServiceImpl implements ValidationService {
     validations.setIdDatasetSchema(dataset.getIdDatasetSchema());
     validations.setIdDataset(datasetId);
 
-    validations.setErrors(validationRepository.findGroupRecordsByFilter(datasetId,
-        new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false));
+    List<GroupValidationVO> errors = validationRepository.findGroupRecordsByFilter(datasetId,
+        new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false);
+
+    getRuleMessage(dataset, errors);
+    validations.setErrors(errors);
 
     validations
         .setTotalRecords(Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId,
@@ -847,6 +833,39 @@ public class ValidationServiceImpl implements ValidationService {
 
     return validations;
   }
+
+  /**
+   * Gets the rule message.
+   *
+   * @param dataset the dataset
+   * @param errors the errors
+   * @return the rule message
+   */
+  private void getRuleMessage(DatasetValue dataset, List<GroupValidationVO> errors) {
+    RulesSchema rules =
+        rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getIdDatasetSchema()));
+    for (GroupValidationVO validation : errors) {
+      if (null != rules && null != rules.getRules()) {
+        for (Rule rule : rules.getRules()) {
+          if (validation.getIdRule().equals(rule.getRuleId().toString())) {
+            validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Replace place holders.
+   *
+   * @param message the message
+   * @return the string
+   */
+  private String replacePlaceHolders(String message) {
+    return message.replace("{%", "<").replace("%}", ">");
+  }
+
+
 
   /**
    * Fill validation error data.
@@ -894,8 +913,8 @@ public class ValidationServiceImpl implements ValidationService {
    * @param notificationVO the notification VO
    * @throws EEAException the EEA exception
    */
-  private void fillValidationDataCSV(Long datasetId, int nHeaders, String[] fieldsToWrite,
-      CSVWriter csvWriter, NotificationVO notificationVO) throws EEAException {
+  private void fillValidationDataCSV(Long datasetId, int nHeaders, CSVWriter csvWriter,
+      NotificationVO notificationVO) throws EEAException {
     try {
       DatasetValue dataset = getDatasetValuebyId(datasetId);
       FailedValidationsDatasetVO validations = getValidationsByDatasetValue(dataset, datasetId);
@@ -913,9 +932,7 @@ public class ValidationServiceImpl implements ValidationService {
 
           GroupValidationVO castedError = (GroupValidationVO) error;
 
-          fieldsToWrite = fillValidationErrorData(castedError, dataset, nHeaders);
-
-          csvWriter.writeNext(fieldsToWrite, false);
+          csvWriter.writeNext(fillValidationErrorData(castedError, dataset, nHeaders), false);
         }
       }
     }
@@ -929,4 +946,19 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
+  /**
+   * Refill error validation.
+   *
+   * @param validation the validation
+   * @param error the error
+   */
+  private void refillErrorValidation(Validation validation, ErrorsValidationVO error) {
+    error.setIdValidation(validation.getId());
+    error.setLevelError(validation.getLevelError().name());
+    error.setMessage(validation.getMessage());
+    error.setNameTableSchema(validation.getTableName());
+    error.setTypeEntity(validation.getTypeEntity().name());
+    error.setValidationDate(validation.getValidationDate());
+    error.setShortCode(validation.getShortCode());
+  }
 }

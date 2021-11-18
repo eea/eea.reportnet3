@@ -1,0 +1,44 @@
+.titleBar {
+  display: flex;
+  border-bottom: 1px solid var(--gray-25);
+  margin: 20px 0;
+  justify-content: space-between;
+  .title_wrapper {
+    .title {
+      margin: 0;
+      color: var(--main-font-color);
+    }
+  }
+}
+.manageLeadReportersButton {
+  float: left;
+}
+
+.exportTemplate {
+  float: left;
+}
+
+.dialog :global .p-dialog-content {
+  padding-bottom: 0 !important;
+}
+
+.isReleasableLabel,
+.showPublicInfo {
+  padding-left: 0.5rem;
+  a {
+    color: var(--main-font-color);
+    &:hover {
+      color: var(--main-font-color);
+      cursor: pointer;
+    }
+  }
+}
+
+.buttonsRolesFooter {
+  display: flex;
+  justify-content: space-between;
+}
+
+.pointer {
+  cursor: pointer;
+}

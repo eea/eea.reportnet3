@@ -69,7 +69,7 @@ public class DocumentControllerImplTest {
     SecurityContextHolder.setContext(securityContext);
     fileMock = new MockMultipartFile("file", "fileOriginal", "cvs", "content".getBytes());
     emptyFileMock = new MockMultipartFile("file", "fileOriginal", "cvs", (byte[]) null);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**
@@ -189,7 +189,7 @@ public class DocumentControllerImplTest {
   public void getDocumentExceptionNullTest() throws EEAException {
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(null);
     try {
-      documentController.getDocument(1L);
+      documentController.getDocument(1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       assertEquals(EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
@@ -208,7 +208,7 @@ public class DocumentControllerImplTest {
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .getDocument(Mockito.any(), Mockito.any());
     try {
-      documentController.getDocument(1L);
+      documentController.getDocument(1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       assertEquals(EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
@@ -227,7 +227,7 @@ public class DocumentControllerImplTest {
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
         .getDocument(Mockito.any(), Mockito.any());
     try {
-      documentController.getDocument(1L);
+      documentController.getDocument(1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       assertEquals(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e.getReason());
@@ -247,7 +247,7 @@ public class DocumentControllerImplTest {
     content.setBytes(fileMock.getBytes());
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     when(documentService.getDocument(Mockito.any(), Mockito.any())).thenReturn(content);
-    documentController.getDocument(1L);
+    documentController.getDocument(1L, 1L);
     Mockito.verify(documentService, times(1)).getDocument(Mockito.any(), Mockito.any());
   }
 
@@ -261,7 +261,7 @@ public class DocumentControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(null);
-    documentController.deleteDocument(1L, null);
+    documentController.deleteDocument(1L, 1L, null);
   }
 
   /**
@@ -276,7 +276,7 @@ public class DocumentControllerImplTest {
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
-    documentController.deleteDocument(1L, null);
+    documentController.deleteDocument(1L, 1L, null);
   }
 
   /**
@@ -291,7 +291,7 @@ public class DocumentControllerImplTest {
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
         .deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
-    documentController.deleteDocument(1L, null);
+    documentController.deleteDocument(1L, 1L, null);
   }
 
   /**
@@ -304,7 +304,7 @@ public class DocumentControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(FeignException.class).when(dataflowController).getDocumentInfoById(Mockito.any());
-    documentController.deleteDocument(1L, null);
+    documentController.deleteDocument(1L, 1L, null);
   }
 
   /**
@@ -320,7 +320,7 @@ public class DocumentControllerImplTest {
     content.setBytes(fileMock.getBytes());
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     doNothing().when(documentService).deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
-    documentController.deleteDocument(1L, null);
+    documentController.deleteDocument(1L, 1L, null);
     Mockito.verify(documentService, times(1)).deleteDocument(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
@@ -625,5 +625,125 @@ public class DocumentControllerImplTest {
         .deleteSnapshotDocument(Mockito.any(), Mockito.any());
     documentController.deleteSnapshotSchemaDocument(1L, "test");
   }
+
+  @Test
+  public void testUploadCollaborationSuccess() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doNothing().when(documentService).uploadCollaborationDocument(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.uploadCollaborationDocument(fileMock.getBytes(), 1L, "desc.json", "json",
+        1L);
+    Mockito.verify(documentService, times(1)).uploadCollaborationDocument(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void testGetCollaborationDocumentSuccess() throws EEAException, IOException {
+    FileResponse content = new FileResponse();
+    content.setBytes(fileMock.getBytes());
+
+    when(documentService.getCollaborationDocument(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(content);
+    documentController.getCollaborationDocument(1L, "test", 1L);
+    Mockito.verify(documentService, times(1)).getCollaborationDocument(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test
+  public void testDeleteCollaborationDocumentSuccess() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    FileResponse content = new FileResponse();
+    content.setBytes(fileMock.getBytes());
+    doNothing().when(documentService).deleteCollaborationDocument(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    documentController.deleteCollaborationDocument(1L, "test", 1L);
+    Mockito.verify(documentService, times(1)).deleteCollaborationDocument(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUploadCollaborationDocumentException() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    documentController.uploadCollaborationDocument(null, 1L, "desc.json", "json", 1L);
+  }
+
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUploadCollaborationException2() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    documentController.uploadCollaborationDocument(fileMock.getBytes(), null, "desc.json", "json",
+        1L);
+  }
+
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUploadCollaborationException3() throws EEAException, IOException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doThrow(new EEAException()).when(documentService).uploadCollaborationDocument(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.uploadCollaborationDocument(fileMock.getBytes(), 1L, "desc", "json", 1L);
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testGetCollaborationDocumentExceptionNull() throws EEAException {
+
+    documentController.getCollaborationDocument(null, "test", 1L);
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testGetCollaborationDocumentException() throws EEAException {
+
+    doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
+        .getCollaborationDocument(Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.getCollaborationDocument(1L, "test", 1L);
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testGetCollaborationDocumentException2() throws EEAException {
+
+    doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
+        .getCollaborationDocument(Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.getCollaborationDocument(1L, "test", 1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteCollaborationDocumentExceptionNull() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    documentController.deleteCollaborationDocument(null, "test", 1L);
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void tetsDeleteCollaborationDocumentException() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
+        .deleteCollaborationDocument(Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.deleteCollaborationDocument(1L, "test", 1L);
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteCollaborationDocumentException2() throws Exception {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
+        .deleteCollaborationDocument(Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.deleteCollaborationDocument(1L, "test", 1L);
+  }
+
 
 }

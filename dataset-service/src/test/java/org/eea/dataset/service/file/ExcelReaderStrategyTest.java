@@ -59,7 +59,7 @@ public class ExcelReaderStrategyTest {
    */
   @Before
   public void initMocks() throws IOException {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     XSSFWorkbook workbook = new XSSFWorkbook();
     XSSFSheet sheet = workbook.createSheet("BWQ_2006_SPAIN_2018_V1_shortter");
 

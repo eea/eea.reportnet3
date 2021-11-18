@@ -1,0 +1,56 @@
+.container {
+  flex: 1 auto;
+  height: 100%;
+  padding-bottom: 4rem;
+  &.isLoading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.checkedValueColumn {
+  text-align: center;
+}
+
+.filesContainer {
+  display: flex;
+  justify-content: center !important;
+
+  .filesIcon {
+    font-size: 1.4rem;
+    color: var(--documenticon-color);
+
+    .cursorPointer {
+      cursor: pointer;
+    }
+  }
+
+  .restrictFromPublicIcon {
+    font-size: 1.3rem;
+    color: var(--gray-75);
+    cursor: pointer;
+  }
+}
+
+.noDataflows {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+  font-size: 1.4rem;
+  font-weight: bold;
+  height: 40vh;
+}
+
+.cellWrapper {
+  display: flex;
+  align-items: center;
+
+  .link {
+    color: var(--hyperlink-color);
+    cursor: pointer;
+    text-decoration: none;
+  }
+}

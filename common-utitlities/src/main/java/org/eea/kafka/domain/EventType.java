@@ -232,6 +232,14 @@ public enum EventType {
   DELETE_DOCUMENT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "delete_document_failed_event", true),
 
+  /** The delete dataflow completed event. */
+  DELETE_DATAFLOW_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "delete_dataflow_completed_event", true),
+
+  /** The delete dataflow failed event. */
+  DELETE_DATAFLOW_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "delete_dataflow_failed_event", true),
+
   /** The command execute new design field propagation. */
   COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION(LiteralConstants.COMMAND_TOPIC,
       "execute_new_field_propagation", false),
@@ -381,14 +389,23 @@ public enum EventType {
   /** The export dataset completed event. */
   EXPORT_DATASET_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "export_dataset_completed_event", true),
-  
+
   /** The download dataset validations completed event. */
   DOWNLOAD_VALIDATIONS_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "download_validations_completed_event", true),
-  
+
   /** The download dataset validations failed event. */
   DOWNLOAD_VALIDATIONS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "download_validations_failed_event", true),
+
+
+  /** The export qc completed event. */
+  EXPORT_QC_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_completed_event",
+      true),
+
+
+  /** The export qc failed event. */
+  EXPORT_QC_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_failed_event", true),
 
   /** The export dataset failed event. */
   EXPORT_DATASET_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_dataset_failed_event",
@@ -400,7 +417,32 @@ public enum EventType {
 
   /** The reference dataflow process failed event. */
   REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "reference_dataflow_process_failed_event", true);
+      "reference_dataflow_process_failed_event", true),
+
+  /** The import field schema completed event. */
+  IMPORT_FIELD_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_field_schema_completed_event", true),
+
+  /** The import field schema failed event. */
+  IMPORT_FIELD_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_field_schema_failed_event", true),
+
+  /** The no pk reference dataflow error event. */
+  NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "no_pk_reference_dataflow_error_event", true),
+
+  /** The copy reference dataset snapshot completed event. */
+  COPY_REFERENCE_DATASET_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "copy_reference_dataset_snapshot_completed_event", true),
+
+  /** The restore prefilling reference snapshot completed event. */
+  RESTORE_PREFILLING_REFERENCE_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "restore_prefilling_reference_snapshot_completed_event", true),
+
+  /** The continue fme process event. */
+  CONTINUE_FME_PROCESS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "continue_fme_process_event",
+      true);
+
 
   /** The topic. */
   private String topic;

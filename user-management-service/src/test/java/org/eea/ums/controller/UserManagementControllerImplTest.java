@@ -66,9 +66,11 @@ public class UserManagementControllerImplTest {
   @Mock
   private UserRoleService userRoleService;
 
+
   @Before
   public void setUp() throws Exception {
-    MockitoAnnotations.initMocks(this);
+
+    MockitoAnnotations.openMocks(this);
   }
 
 
@@ -702,5 +704,9 @@ public class UserManagementControllerImplTest {
     assertNotNull(userManagementController.getUserRolesByDataflowAndCountry(1L, 1L));
   }
 
+  @Test
+  public void getUserRolesByDataflowTest() {
+    assertNotNull(userManagementController.getUserRolesByDataflow(0L));
+  }
 
 }

@@ -70,7 +70,10 @@ public enum LockSignature {
   DELETE_FIELD_SCHEMA("DatasetSchemaControllerImpl.deleteFieldSchema(..)"),
 
   /** IntegrationControllerImpl.executeExternalIntegration(..) */
-  EXECUTE_EXTERNAL_INTEGRATION("IntegrationControllerImpl.executeExternalIntegration(..)");
+  EXECUTE_EXTERNAL_INTEGRATION("IntegrationControllerImpl.executeExternalIntegration(..)"),
+
+  /** DatasetSchemaControllerImpl.importSchemas(..) */
+  IMPORT_SCHEMAS("DatasetSchemaControllerImpl.importSchemas(..)");
 
   /** The value. */
   private final String value;

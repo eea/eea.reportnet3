@@ -314,13 +314,15 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
    * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
    */
   @Override
   public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset,
-      String dateRelease) throws SQLException, IOException, RecordStoreAccessException {
+      String dateRelease, boolean prefillingReference)
+      throws SQLException, IOException, RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
@@ -333,15 +335,15 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param datasetType the dataset type
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
-   *
+   * @param prefillingReference the prefilling reference
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
    */
   @Override
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
-      throws SQLException, IOException, RecordStoreAccessException {
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
+      boolean prefillingReference) throws SQLException, IOException, RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
@@ -433,5 +435,17 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   public void createUpdateQueryView(Long datasetId, boolean isMaterialized) {
     LOG.info("Create or Update Query-Materialized View");
   }
+
+  /**
+   * Launch update materialized query view.
+   *
+   * @param datasetId the dataset id
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  @Override
+  public void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException {
+    LOG.info("Refresh Query-Materialized View");
+  }
+
 
 }

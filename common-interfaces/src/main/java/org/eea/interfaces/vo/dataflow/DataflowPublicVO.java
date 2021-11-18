@@ -1,13 +1,10 @@
 package org.eea.interfaces.vo.dataflow;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
-import org.eea.interfaces.vo.rod.ObligationVO;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -15,17 +12,13 @@ import lombok.ToString;
 /**
  * The type Data flow vo.
  */
-
 @Getter
 @Setter
 @ToString
-public class DataflowPublicVO implements Serializable {
+public class DataflowPublicVO extends GenericDataflowVO implements Serializable {
 
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = -8073212422480973637L;
-
-  /** The id. */
-  private Long id;
 
   /** The datasets. */
   private List<ReportingDatasetPublicVO> reportingDatasets;
@@ -33,23 +26,6 @@ public class DataflowPublicVO implements Serializable {
   /** The reference datasets. */
   private List<ReferenceDatasetPublicVO> referenceDatasets;
 
-  /** The description. */
-  private String description;
-
-  /** The name. */
-  private String name;
-
-  /** The deadline date. */
-  private Date deadlineDate;
-
-  /** The obligation. */
-  private ObligationVO obligation;
-
-  /** The status. */
-  private TypeStatusEnum status;
-
-  /** The releasable. */
-  private boolean releasable;
 
 
   /**

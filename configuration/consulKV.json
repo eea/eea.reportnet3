@@ -1132,6 +1132,10 @@
     "value": "JHtWQUxJREFUSU9OX0ZJRUxEX0JBVENIX1NJWkU6NTAwMH0="
   },
   {
+    "key": "config/validation/query.message.geometry.error",
+    "value": "JHtRVUVSWV9NRVNTQUdFX0dFT01FVFJZX0VSUk9SOkludmFsaWQgZ2VvbWV0cnl9"
+  },
+  {
     "key": "config/application/eea.keycloak.redirect_uri",
     "value": "JHtLRVlDTE9BS19SRURJUkVDVF9VUkk6aHR0cDovL2s4cy1ub2RlMDAxLmRldm9hbWkuYWx0aWEuZXM6MzA0NDUvZGF0YS1mbG93LXRhc2svfQ=="
   },
@@ -1245,7 +1249,7 @@
   },
   {
     "key": "config/rod/rod.url",
-    "value": "JHtST0RfVVJMOnJvZDMuZGV2ZWwxZHViLmVpb25ldC5ldXJvcGEuZXV9"
+    "value": "JHtST0RfVVJMOnJvZDMuZGV2ZWw2Y3BoLmVlYS5ldXJvcGEuZXV9"
   },
   {
     "key": "config/rod/kafka.bootstrapAddress",
@@ -1446,5 +1450,17 @@
   {
     "key": "config/apiGateway/zuul.routes.referencedataset.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/collaboration/spring.servlet.multipart.max-file-size",
+    "value": "JHtUT01DQVRfTUFYX0ZJTEVfU0laRToxMDQ4NTc2MDB9"
+  },
+  {
+    "key": "config/collaboration/spring.servlet.multipart.max-request-size",
+    "value": "JHtUT01DQVRfTUFYX1JFUVVFU1RfU0laRToyMDk3MTUyMDB9"
+  },
+  {
+    "key": "config/ums/eea.keycloak.listUsersMax",
+    "value": "MTAwMA=="
   }
 ]

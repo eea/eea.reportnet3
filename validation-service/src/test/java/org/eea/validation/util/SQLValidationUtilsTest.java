@@ -67,7 +67,7 @@ public class SQLValidationUtilsTest {
 
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     ReflectionTestUtils.setField(sqlValidationUtils, "datasetMetabaseControllerZuul",
         dataSetMetabaseControllerZuul);
     ReflectionTestUtils.setField(sqlValidationUtils, "datasetRepository", datasetRepository);
@@ -132,7 +132,7 @@ public class SQLValidationUtilsTest {
     Mockito.when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.anyLong(),
         Mockito.any(), Mockito.any())).thenReturn(table);
 
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, null);
 
     Mockito.verify(tableRepository, times(1)).save(Mockito.any());
   }
@@ -172,7 +172,7 @@ public class SQLValidationUtilsTest {
     Mockito.when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.anyLong(),
         Mockito.any(), Mockito.any())).thenReturn(table);
 
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
 
     Mockito.verify(tableRepository, times(1)).save(Mockito.any());
   }
@@ -212,7 +212,7 @@ public class SQLValidationUtilsTest {
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
 
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
 
     Mockito.verify(tableRepository, times(1)).save(Mockito.any());
   }
@@ -249,7 +249,7 @@ public class SQLValidationUtilsTest {
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
 
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
 
     Mockito.verify(tableRepository, times(1)).save(Mockito.any());
 
@@ -294,7 +294,7 @@ public class SQLValidationUtilsTest {
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
 
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
 
     Mockito.verify(tableRepository, times(1)).save(Mockito.any());
   }
@@ -341,7 +341,7 @@ public class SQLValidationUtilsTest {
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
 
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
 
     Mockito.verify(tableRepository, times(1)).save(Mockito.any());
   }
@@ -402,7 +402,7 @@ public class SQLValidationUtilsTest {
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
 
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
 
     Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
   }
@@ -461,7 +461,7 @@ public class SQLValidationUtilsTest {
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
 
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
 
     Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
   }

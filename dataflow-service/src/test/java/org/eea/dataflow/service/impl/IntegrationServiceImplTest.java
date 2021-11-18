@@ -96,7 +96,7 @@ public class IntegrationServiceImplTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**
@@ -491,5 +491,17 @@ public class IntegrationServiceImplTest {
         .thenReturn(Optional.of(integration));
     Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(integrationVO);
     Assert.assertEquals(integrationVO, integrationService.getIntegration(1L));
+  }
+
+
+  @Test
+  public void testDeleteExportEuDataset() throws EEAException {
+    IntegrationVO expected = new IntegrationVO();
+    Mockito.when(integrationRepository.findFirstByOperationAndParameterAndValue(Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(new Integration());
+    Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(expected);
+    Mockito.when(crudManagerFactory.getManager(Mockito.any())).thenReturn(crudManager);
+    integrationService.deleteExportEuDataset("5ce524fad31fc52540abae73");
+    Mockito.verify(crudManager, times(1)).delete(Mockito.any());
   }
 }

@@ -7,12 +7,19 @@ package org.eea.interfaces.vo.dataflow.enums;
 public enum TypeDataflowEnum {
 
 
-  /** The regular. */
-  REGULAR("REGULAR"),
+
+  /** The reporting. */
+  REPORTING("REPORTING"),
 
 
   /** The reference. */
-  REFERENCE("REFERENCE");
+  REFERENCE("REFERENCE"),
+
+  /** The business. */
+  BUSINESS("BUSINESS"),
+
+  /** The citizen science. */
+  CITIZEN_SCIENCE("CITIZEN_SCIENCE");
 
   /** The value. */
   private final String value;

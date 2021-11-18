@@ -1,5 +1,7 @@
 package org.eea.collaboration.service.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,16 +10,23 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.eea.collaboration.mapper.MessageMapper;
 import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.persistence.repository.MessageRepository;
 import org.eea.collaboration.service.CollaborationService;
 import org.eea.collaboration.service.helper.CollaborationServiceHelper;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
+import org.eea.interfaces.vo.dataflow.MessageAttachmentVO;
+import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
+import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.slf4j.Logger;
@@ -59,9 +68,15 @@ public class CollaborationServiceImpl implements CollaborationService {
   @Autowired
   private MessageRepository messageRepository;
 
+
   /** The message mapper. */
   @Autowired
   private MessageMapper messageMapper;
+
+
+  /** The document controller zuul. */
+  @Autowired
+  private DocumentControllerZuul documentControllerZuul;
 
   /**
    * Creates the message.
@@ -98,6 +113,9 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setRead(false);
     message.setUserName(userName);
     message.setDirection(direction);
+    message.setType(MessageTypeEnum.TEXT);
+    message.setAutomatic(messageVO.isAutomatic());
+    message.setFileSize("0");
     message = messageRepository.save(message);
 
     String eventType = EventType.RECEIVED_MESSAGE.toString();
@@ -106,6 +124,69 @@ public class CollaborationServiceImpl implements CollaborationService {
 
     LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);
+  }
+
+
+  /**
+   * Creates the message attachment.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param is the is
+   * @param fileName the file name
+   * @param fileSize the file size
+   * @param contentType the content type
+   * @return the message VO
+   * @throws EEAForbiddenException the EEA forbidden exception
+   * @throws EEAIllegalArgumentException the EEA illegal argument exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  @Transactional
+  public MessageVO createMessageAttachment(Long dataflowId, Long providerId, InputStream is,
+      String fileName, String fileSize, String contentType)
+      throws EEAForbiddenException, EEAIllegalArgumentException, IOException {
+
+    String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+    boolean direction = authorizeAndGetDirection(dataflowId, providerId);
+    MessageVO messageVO = new MessageVO();
+
+    try {
+      Message message = new Message();
+      message.setContent(fileName);
+      message.setDataflowId(dataflowId);
+      message.setProviderId(providerId);
+      message.setDate(new Date());
+      message.setRead(false);
+      message.setUserName(userName);
+      message.setDirection(direction);
+      message.setType(MessageTypeEnum.ATTACHMENT);
+      message.setFileSize(fileSize);
+      message = messageRepository.save(message);
+
+      String extension = FilenameUtils.getExtension(fileName);
+
+      MessageAttachmentVO messageAttachmentVO = new MessageAttachmentVO();
+      messageAttachmentVO.setName(fileName);
+      messageAttachmentVO.setSize(fileSize);
+      messageAttachmentVO.setExtension(extension);
+
+      messageVO = messageMapper.entityToClass(message);
+      messageVO.setMessageAttachment(messageAttachmentVO);
+
+      documentControllerZuul.uploadCollaborationDocument(IOUtils.toByteArray(is), dataflowId,
+          fileName, contentType, message.getId());
+
+      String eventType = EventType.RECEIVED_MESSAGE.toString();
+      collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null,
+          eventType);
+
+      LOG.info("Message created: message={}", message);
+    } finally {
+      is.close();
+    }
+
+    return messageVO;
   }
 
   /**
@@ -160,28 +241,85 @@ public class CollaborationServiceImpl implements CollaborationService {
   }
 
   /**
+   * Delete message.
+   *
+   * @param messageId the message id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void deleteMessage(Long messageId) throws EEAException {
+    try {
+      Message message = messageRepository.findById(messageId).orElseThrow(EEAException::new);
+      if (message != null) {
+        if (MessageTypeEnum.ATTACHMENT.equals(message.getType())) {
+          documentControllerZuul.deleteCollaborationDocument(message.getDataflowId(),
+              message.getContent(), messageId);
+        }
+        messageRepository.delete(message);
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Error deleting message {}", e.getMessage());
+      throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGE_INCORRECT_ID);
+    }
+    LOG.info("Message {} deleted", messageId);
+  }
+
+  /**
    * Find messages.
    *
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param read the read
    * @param page the page
-   * @return the list
+   * @return the message paginated VO
    * @throws EEAForbiddenException the EEA forbidden exception
    */
   @Override
-  public List<MessageVO> findMessages(Long dataflowId, Long providerId, Boolean read, int page)
+  public MessagePaginatedVO findMessages(Long dataflowId, Long providerId, Boolean read, int page)
       throws EEAForbiddenException {
 
     authorizeAndGetDirection(dataflowId, providerId);
     PageRequest pageRequest = PageRequest.of(page, 50, Sort.by("date").descending());
 
-    return null != read
+    MessagePaginatedVO messagePaginatedVO = new MessagePaginatedVO();
+    messagePaginatedVO.setListMessage(null != read
         ? messageMapper.entityListToClass(messageRepository
             .findByDataflowIdAndProviderIdAndRead(dataflowId, providerId, read, pageRequest)
             .getContent())
         : messageMapper.entityListToClass(messageRepository
-            .findByDataflowIdAndProviderId(dataflowId, providerId, pageRequest).getContent());
+            .findByDataflowIdAndProviderId(dataflowId, providerId, pageRequest).getContent()));
+
+    messagePaginatedVO
+        .setTotalMessages(messageRepository.countByDataflowIdAndProviderId(dataflowId, providerId));
+
+    return messagePaginatedVO;
+  }
+
+  /**
+   * Gets the message attachment.
+   *
+   * @param messageId the message id
+   * @return the message attachment
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public Message getMessage(Long messageId) throws EEAException {
+    return messageRepository.findById(messageId).orElseThrow(EEAException::new);
+  }
+
+
+  /**
+   * Gets the message attachment.
+   *
+   * @param messageId the message id
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @return the message attachment
+   */
+  @Override
+  public byte[] getMessageAttachment(Long messageId, Long dataflowId, String fileName) {
+    return documentControllerZuul.getCollaborationDocument(dataflowId, fileName, messageId);
   }
 
   /**

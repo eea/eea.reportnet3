@@ -123,11 +123,13 @@ public interface IntegrationController {
    * Find export EU dataset integration.
    *
    * @param datasetSchemaId the dataset schema id
+   * @param dataflowId the dataflow id
    * @return the integration VO
    */
   @GetMapping("/findExportEUDatasetIntegration")
   IntegrationVO findExportEUDatasetIntegration(
-      @RequestParam("datasetSchemaId") String datasetSchemaId);
+      @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @RequestParam("dataflowId") Long dataflowId);
 
 
   /**
@@ -179,4 +181,13 @@ public interface IntegrationController {
    */
   @GetMapping("/private/findIntegration/{integrationId}")
   IntegrationVO findIntegrationById(@RequestParam("integrationId") Long integrationId);
+
+
+  /**
+   * Delete export eu dataset integration.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @DeleteMapping("/private/deleteExportEuDataset")
+  void deleteExportEuDatasetIntegration(@RequestParam("datasetSchemaId") String datasetSchemaId);
 }

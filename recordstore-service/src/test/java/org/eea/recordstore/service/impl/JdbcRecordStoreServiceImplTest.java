@@ -16,7 +16,9 @@ import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollec
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
+import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -25,25 +27,26 @@ import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.thread.ThreadPropertiesManager;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.postgresql.copy.CopyIn;
 import org.postgresql.copy.CopyOperation;
 import org.postgresql.copy.CopyOut;
 import org.postgresql.core.BaseConnection;
 import org.postgresql.core.Encoding;
 import org.postgresql.core.QueryExecutor;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -52,9 +55,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
-// @RunWith(MockitoJUnitRunner.class)
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({DriverManager.class, JdbcRecordStoreServiceImpl.class})
+
+@RunWith(MockitoJUnitRunner.class)
 public class JdbcRecordStoreServiceImplTest {
 
   @InjectMocks
@@ -80,6 +82,23 @@ public class JdbcRecordStoreServiceImplTest {
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  @Mock
+  private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
+
+
+
+  private static MockedStatic<DriverManager> driverManager;
+
+  @BeforeClass
+  public static void init() {
+    driverManager = Mockito.mockStatic(DriverManager.class);
+  }
+
+  @AfterClass
+  public static void close() {
+    driverManager.close();
+  }
+
   @Before
   public void initMocks() {
 
@@ -87,8 +106,9 @@ public class JdbcRecordStoreServiceImplTest {
     SecurityContextHolder.getContext()
         .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
     ThreadPropertiesManager.setVariable("user", "user");
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
 
+    ReflectionTestUtils.setField(jdbcRecordStoreService, "bufferFile", 1024);
     ReflectionTestUtils.setField(jdbcRecordStoreService, "resourceFile",
         new ClassPathResource("datasetInitCommands.txt"));
     ReflectionTestUtils.setField(jdbcRecordStoreService, "userPostgreDb", "root");
@@ -149,10 +169,11 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void testCreateSnapshot() throws SQLException, IOException, EEAException {
     List<String> datasets = new ArrayList<>();
-    Mockito.when(dataSetSnapshotControllerZuul.getSchemaById(Mockito.any()))
-        .thenReturn(new SnapshotVO());
+    // Mockito.when(dataSetSnapshotControllerZuul.getSchemaById(Mockito.any()))
+    // .thenReturn(new SnapshotVO());
+    Mockito.doReturn(new SnapshotVO()).when(dataSetSnapshotControllerZuul)
+        .getSchemaById(Mockito.any());
     datasets.add("dataset_1");
-    PowerMockito.mockStatic(DriverManager.class);
 
     final Connection connection = Mockito.mock(BaseConnection.class);
 
@@ -165,16 +186,14 @@ public class JdbcRecordStoreServiceImplTest {
         .thenReturn(copyOut);
     Mockito.when(((BaseConnection) connection).getQueryExecutor()).thenReturn(queryExector);
 
-    PowerMockito.mockStatic(DriverManager.class);
 
-    Mockito.when(
-        DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(connection);
+    driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
+        Mockito.anyString())).thenReturn(connection);
 
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString());
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
@@ -182,9 +201,10 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void testRestoreSnapshot()
       throws SQLException, IOException, URISyntaxException, EEAException {
-    PowerMockito.mockStatic(DriverManager.class);
 
     final Connection connection = Mockito.mock(BaseConnection.class);
+
+
 
     Mockito.when(((BaseConnection) connection).getEncoding())
         .thenReturn(Encoding.defaultEncoding());
@@ -195,34 +215,52 @@ public class JdbcRecordStoreServiceImplTest {
         .thenReturn(copyOut);
     Mockito.when(((BaseConnection) connection).getQueryExecutor()).thenReturn(queryExector);
 
-    PowerMockito.mockStatic(DriverManager.class);
-
-    Mockito.when(
-        DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-        .thenReturn(connection);
+    driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
+        Mockito.anyString())).thenReturn(connection);
 
     List<String> datasets = new ArrayList<>();
     datasets.add("dataset_1");
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    // Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     ReflectionTestUtils.setField(jdbcRecordStoreService, "pathSnapshot", "./src/test/resources/");
-    Mockito.doNothing().when(kafkaSender).releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(),
-        Mockito.any());
-    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    // Mockito.doNothing().when(kafkaSender).releaseNotificableKafkaEvent(Mockito.any(),
+    // Mockito.any(),
+    // Mockito.any());
+    // Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
     SnapshotVO snap = new SnapshotVO();
     snap.setDatasetId(1L);
     Mockito.when(dataSetSnapshotControllerZuul.getById(Mockito.any())).thenReturn(snap);
     DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
     datasetMetabase.setDataflowId(1L);
     datasetMetabase.setDataProviderId(1L);
-    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
-        .thenReturn(datasetMetabase);
-    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false);
-    Mockito.verify(kafkaSender, Mockito.times(2)).releaseNotificableKafkaEvent(Mockito.any(),
+    // Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
+    // .thenReturn(datasetMetabase);
+    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false,
+        false);
+    Mockito.verify(kafkaSender, Mockito.times(0)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
+
+  @Test
+  public void updateMaterializedQueryViewReferenceTest() {
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.REFERENCE);
+    datasetMetabaseVO.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
+        .thenReturn(datasetMetabaseVO);
+    ReferenceDatasetVO reportingDatasetVO = new ReferenceDatasetVO();
+    reportingDatasetVO.setId(1L);
+    List<ReferenceDatasetVO> reportings = new ArrayList<>();
+    reportings.add(reportingDatasetVO);
+    Mockito.when(referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(Mockito.any()))
+        .thenReturn(reportings);
+    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true);
+    Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
+  }
+
 
 
   @Test

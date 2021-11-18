@@ -2,7 +2,9 @@ package org.eea.dataset.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
@@ -13,12 +15,17 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.lock.service.LockService;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +71,10 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The dataflow controller zull. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZull;
+
+  /** The lock service. */
+  @Autowired
+  private LockService lockService;
 
   /**
    * Gets the by id.
@@ -113,7 +124,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   public List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId) {
 
     if (datasetId == null) {
@@ -139,7 +150,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @HystrixCommand
   @PostMapping(value = "/dataset/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   public void createSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @LockCriteria(name = "released",
@@ -149,7 +160,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
-    datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null, null);
+    datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null, null, false);
   }
 
   /**
@@ -161,7 +172,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
   public void deleteSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
 
@@ -189,7 +200,7 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   public void restoreSnapshot(
       @LockCriteria(name = "datasetId") @PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot) {
@@ -202,8 +213,19 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      // This method will release the lock
-      datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, true);
+      // Check if the snapshot creation process is running and locked
+      Map<String, Object> createSchemaSnapshot = new HashMap<>();
+      createSchemaSnapshot.put(LiteralConstants.SIGNATURE,
+          LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
+      createSchemaSnapshot.put(LiteralConstants.DATASETID, datasetId);
+      LockVO importLockVO = lockService.findByCriteria(createSchemaSnapshot);
+      if (importLockVO != null) {
+        throw new ResponseStatusException(HttpStatus.LOCKED,
+            "Snapshot restoration is locked because creation is in progress.");
+      } else {
+        // This method will release the lock
+        datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, true);
+      }
     } catch (EEAException e) {
       LOG_ERROR.error("Error restoring a snapshot. Error Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -354,7 +376,18 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      datasetSnapshotService.removeSchemaSnapshot(datasetId, idSnapshot);
+      Map<String, Object> createSchemaSnapshot = new HashMap<>();
+      createSchemaSnapshot.put(LiteralConstants.SIGNATURE,
+          LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
+      createSchemaSnapshot.put(LiteralConstants.DATASETID, datasetId);
+      LockVO importLockVO = lockService.findByCriteria(createSchemaSnapshot);
+      if (importLockVO != null) {
+        throw new ResponseStatusException(HttpStatus.LOCKED,
+            "Snapshot remove is locked because creation is in progress.");
+      } else {
+        // This method will release the lock
+        datasetSnapshotService.removeSchemaSnapshot(datasetId, idSnapshot);
+      }
     } catch (EEAException | IOException e) {
       LOG_ERROR.error("Error deleting a schema snapshot. Error message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -484,6 +517,9 @@ public class DataSetSnapshotControllerImpl implements DatasetSnapshotController 
     DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
     if (null != dataflow && dataflow.isReleasable()) {
       try {
+        if (TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
+          restrictFromPublic = true;
+        }
         datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId,
             restrictFromPublic);
       } catch (EEAException e) {

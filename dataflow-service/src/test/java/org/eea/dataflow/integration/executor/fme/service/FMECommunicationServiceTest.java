@@ -75,7 +75,7 @@ public class FMECommunicationServiceTest {
   @Before
   public void initMocks() {
     ThreadPropertiesManager.setVariable("user", "user");
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   @Test
@@ -92,7 +92,7 @@ public class FMECommunicationServiceTest {
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
         Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(checkResult);
 
-    Integer result = fmeCommunicationService.submitAsyncJob("test", "test", fmeAsyncJob);
+    Integer result = fmeCommunicationService.submitAsyncJob("test", "test", fmeAsyncJob, null);
     Assert.assertEquals(preResult.getId(), result);
   }
 
@@ -109,6 +109,9 @@ public class FMECommunicationServiceTest {
 
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
         Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(checkResult);
+
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
 
     FileSubmitResult result = fmeCommunicationService.sendFile(file, 1L, "1", "test");
     Assert.assertEquals(fileSubmitResult.getName(), result.getName());
@@ -129,6 +132,10 @@ public class FMECommunicationServiceTest {
 
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
         Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(checkResult);
+
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+
 
     byte[] lacastania = new byte[50];
     InputStream result = fmeCommunicationService.receiveFile(1L, 1L, "test");
@@ -151,8 +158,10 @@ public class FMECommunicationServiceTest {
         Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(checkResult);
 
     when(fmeCollectionMapper.entityToClass(Mockito.any())).thenReturn(fmeCollectionVO);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
 
-    FMECollectionVO result = fmeCommunicationService.findRepository();
+    FMECollectionVO result = fmeCommunicationService.findRepository(1L);
     Assert.assertEquals(fmeCollectionVO, result);
   }
 
@@ -169,9 +178,12 @@ public class FMECommunicationServiceTest {
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
         Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(checkResult);
 
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
+
     when(fmeCollectionMapper.entityToClass(Mockito.any())).thenReturn(fmeCollectionVO);
 
-    FMECollectionVO result = fmeCommunicationService.findItems("test");
+    FMECollectionVO result = fmeCommunicationService.findItems("test", 1L);
     Assert.assertEquals(fmeCollectionVO, result);
   }
 
@@ -186,7 +198,8 @@ public class FMECommunicationServiceTest {
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
         Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(checkResult);
 
-
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(new DataSetMetabaseVO());
 
     HttpStatus result = fmeCommunicationService.createDirectory(1L, "test");
     Assert.assertEquals(HttpStatus.OK, result);

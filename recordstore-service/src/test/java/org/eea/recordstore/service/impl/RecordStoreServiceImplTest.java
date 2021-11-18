@@ -89,7 +89,7 @@ public class RecordStoreServiceImplTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
 
     ReflectionTestUtils.setField(recordStoreServiceImpl, "containerName", "crunchy-postgres");
     ReflectionTestUtils.setField(recordStoreServiceImpl, "ipPostgreDb", "localhost");
@@ -229,7 +229,7 @@ public class RecordStoreServiceImplTest {
   @Test(expected = UnsupportedOperationException.class)
   public void createDataSnapshotTest()
       throws RecordStoreAccessException, SQLException, IOException {
-    recordStoreServiceImpl.createDataSnapshot(1L, 1L, 1L, new Date().toString());
+    recordStoreServiceImpl.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
   }
 
   /**
@@ -242,7 +242,8 @@ public class RecordStoreServiceImplTest {
   @Test(expected = UnsupportedOperationException.class)
   public void restoreDataSnapshotTest()
       throws RecordStoreAccessException, SQLException, IOException {
-    recordStoreServiceImpl.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false);
+    recordStoreServiceImpl.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false,
+        false);
   }
 
   /**

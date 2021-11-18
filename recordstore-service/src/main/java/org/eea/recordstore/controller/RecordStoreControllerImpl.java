@@ -152,7 +152,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   public void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset,
-      @RequestParam(value = "dateRelease", required = false) String dateRelease) {
+      @RequestParam(value = "dateRelease", required = false) String dateRelease,
+      @RequestParam(value = "prefillingReference", required = false,
+          defaultValue = "false") Boolean prefillingReference) {
     try {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
@@ -164,7 +166,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       if (StringUtils.isNotBlank(dateRelease)) {
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateRelease);
       }
-      recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset, dateRelease);
+      recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset, dateRelease,
+          prefillingReference);
       LOG.info("Snapshot created");
     } catch (SQLException | IOException | RecordStoreAccessException | EEAException
         | ParseException e) {
@@ -194,11 +197,13 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @RequestParam(value = "partitionId", required = true) Long idPartition,
       @RequestParam(value = "typeDataset", required = true) DatasetTypeEnum datasetType,
       @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
-      @RequestParam(value = "deleteData", defaultValue = "true") Boolean deleteData) {
+      @RequestParam(value = "deleteData", defaultValue = "true") Boolean deleteData,
+      @RequestParam(value = "prefillingReference", required = false,
+          defaultValue = "false") Boolean prefillingReference) {
 
     try {
       restoreSnapshotHelper.processRestoration(datasetId, idSnapshot, idPartition, datasetType,
-          isSchemaSnapshot, deleteData);
+          isSchemaSnapshot, deleteData, prefillingReference);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);

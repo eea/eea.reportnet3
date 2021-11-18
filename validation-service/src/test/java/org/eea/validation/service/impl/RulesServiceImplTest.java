@@ -128,7 +128,7 @@ public class RulesServiceImplTest {
     securityContext = Mockito.mock(SecurityContext.class);
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**
@@ -1053,11 +1053,12 @@ public class RulesServiceImplTest {
     rule.setDescription("");
     rule.setRuleName("");
     rule.setThenCondition(Arrays.asList("success", "error"));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(integrityMapper.classToEntity(Mockito.any())).thenReturn(integritySchema);
-
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
     rulesServiceImpl.updateRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());

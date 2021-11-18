@@ -17,6 +17,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.junit.Assert;
@@ -84,7 +85,7 @@ public class RepresentativeControllerImplTest {
     representativeVO.setLeadReporters(leadReporters);
     representativeVOs = new ArrayList<>();
     representativeVOs.add(representativeVO);
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**
@@ -114,10 +115,10 @@ public class RepresentativeControllerImplTest {
    * Find all data provider types success test.
    */
   @Test
-  public void findAllDataProviderTypesSuccessTest() {
-    when(representativeService.getAllDataProviderTypes())
+  public void getDataProviderGroupByCountryTypeSuccessTest() {
+    when(representativeService.getDataProviderGroupByType(TypeDataProviderEnum.COUNTRY))
         .thenReturn(new ArrayList<DataProviderCodeVO>());
-    assertEquals(0, representativeControllerImpl.findAllDataProviderTypes().size());
+    assertEquals(0, representativeControllerImpl.findAllDataProviderCountryType().size());
   }
 
   /**

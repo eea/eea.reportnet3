@@ -187,6 +187,9 @@ public class IntegrationServiceImpl implements IntegrationService {
       integrationCriteria.getInternalParameters().put(IntegrationParams.DATASET_SCHEMA_ID,
           originDatasetSchemaId);
       List<IntegrationVO> integrations = getAllIntegrationsByCriteria(integrationCriteria);
+      Boolean existsExportEuDataset = integrations.stream()
+          .anyMatch(integration -> IntegrationOperationTypeEnum.EXPORT_EU_DATASET
+              .equals(integration.getOperation()));
       for (IntegrationVO integration : integrations) {
         // we've got the origin integrations. We intend to change the dataflow and the
         // datasetSchemaId
@@ -200,7 +203,14 @@ public class IntegrationServiceImpl implements IntegrationService {
         integration.setId(null);
         CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
         crudManager.create(integration);
-
+      }
+      // create the automatic export eu dataset integration in case not existing
+      if (Boolean.FALSE.equals(existsExportEuDataset)) {
+        LOG.info(
+            "There are no export eu dataset integration in the datasetSchemaId {}, dataflowId {}. Proceed to create it",
+            dictionaryOriginTargetObjectId.get(originDatasetSchemaId), dataflowIdDestination);
+        createDefaultIntegration(dataflowIdDestination,
+            dictionaryOriginTargetObjectId.get(originDatasetSchemaId));
       }
     }
   }
@@ -285,6 +295,22 @@ public class IntegrationServiceImpl implements IntegrationService {
 
     CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
     crudManager.create(integrationVO);
+  }
+
+  /**
+   * Delete export eu dataset.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @throws EEAException the EEA exception
+   */
+  @Transactional
+  @Override
+  public void deleteExportEuDataset(String datasetSchemaId) throws EEAException {
+    IntegrationVO integration = getExportEUDatasetIntegration(datasetSchemaId);
+    if (null != integration) {
+      CrudManager crudManager = crudManagerFactory.getManager(IntegrationToolTypeEnum.FME);
+      crudManager.delete(integration.getId());
+    }
   }
 
   /**

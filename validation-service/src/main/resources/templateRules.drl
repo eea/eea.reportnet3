@@ -189,6 +189,9 @@ function boolean isGeometry(FieldValue fieldValue){
 
 ///////////////////////////////////////VALIDATION GEOMETRY TYPES CHECK EPSG AND SRID///////////////////////////////////////////////////////
 function boolean checkEPSGSRID(FieldValue fieldValue){
+	if(fieldValue.getValue().length() < 1) {
+		return true;
+	}
 	//Obtain the SRID code removing all other characters from geojson
 	String[] sridstring = fieldValue.getValue().split("srid");
 	
@@ -237,6 +240,12 @@ function boolean isTableEmpty(TableValue tableValue){
 }
 //////////////////////////////////////////SQL SENTENCE////////////////////////////////////////////////////////////
 function boolean isSQLSentence(Long datasetId, String ruleId){	
-	SQLValidationUtils.executeValidationSQLRule(datasetId,ruleId);
+	SQLValidationUtils.executeValidationSQLRule(datasetId,ruleId, "XX");
+	return true;
+}
+
+//////////////////////////////////////////SQL SENTENCE WITH DATA PROVIDER CODE////////////////////////////////////////////////////////////
+function boolean isSQLSentenceWithCode(Long datasetId, String ruleId, String dataProviderCode){	
+	SQLValidationUtils.executeValidationSQLRule(datasetId,ruleId, dataProviderCode);
 	return true;
 }

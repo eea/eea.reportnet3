@@ -82,7 +82,7 @@ public class DataCollectionNationalCoordinatorCommandTest {
     SecurityContextHolder.clearContext();
     SecurityContextHolder.getContext()
         .setAuthentication(new UsernamePasswordAuthenticationToken("user", "password"));
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
 

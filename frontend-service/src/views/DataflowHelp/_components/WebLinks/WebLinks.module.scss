@@ -1,0 +1,73 @@
+@import '_styles/mixins';
+
+.buttonWrap {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+.cancelButton {
+  margin-left: 0.5rem !important;
+}
+.crudColumn {
+  text-align: center;
+  width: 7em;
+}
+.deleteRowButton {
+  border: 1px solid var(--c-custom-gray) !important;
+  @include shadow-0em;
+  color: var(--errors) !important;
+  margin-left: 3px !important;
+}
+.dialog {
+  height: auto !important;
+}
+.editRowButton {
+  border: 1px solid var(--c-custom-gray) !important;
+  @include shadow-0em;
+  margin-left: 3px !important;
+}
+.iconStyle {
+  text-align: center;
+}
+.noDataWrapper {
+  display: flex;
+  justify-content: center;
+  h4 {
+    font-style: italic;
+  }
+}
+.webLinkEditButtons {
+  display: flex;
+  justify-content: center;
+}
+
+.webLinksToolbar {
+  border: 0px !important;
+}
+
+.checkboxIsPublic {
+  display: flex;
+  align-items: center;
+  input {
+    width: auto;
+    border: var(--checkbox-box-border);
+    background-color: var(--checkbox-box-bg);
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    border-radius: 3px;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  input:checked {
+    border-radius: 3px;
+  }
+  input:focus {
+    border-radius: 3px;
+  }
+  label {
+    margin-left: 0.5rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+}

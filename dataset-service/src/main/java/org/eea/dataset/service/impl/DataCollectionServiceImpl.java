@@ -39,6 +39,7 @@ import org.eea.dataset.service.model.IntegrityDataCollection;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -152,7 +153,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The Constant INSERT_REFERENCE_INTO_REFERENCE_DATASET: {@value}. */
   private static final String INSERT_REFERENCE_INTO_REFERENCE_DATASET =
-      "insert into reference_dataset (id) values (%d)";
+      "insert into reference_dataset (id, updatable) values (%d, false)";
 
   /** The Constant INSERT_RD_INTO_DATASET: {@value}. */
   private static final String INSERT_RD_INTO_DATASET =
@@ -249,6 +250,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;
 
+  /** The integration controller zuul. */
+  @Autowired
+  private IntegrationControllerZuul integrationControllerZuul;
+
   /**
    * Gets the dataflow status.
    *
@@ -306,7 +311,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   public void undoDataCollectionCreation(List<Long> datasetIds, Long dataflowId,
       boolean isCreation) {
 
-    releaseLockAndNotification(dataflowId, "Error creating schemas", isCreation);
+    releaseLockAndNotification(dataflowId, "Error creating schemas", isCreation, true);
 
     int size = datasetIds.size();
     for (int i = 0; i < size; i += CHUNK_SIZE) {
@@ -323,9 +328,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param dataflowId the dataflow id
    * @param errorMessage the error message
    * @param isCreation the is creation
+   * @param hasPk the has pk
    */
-  private void releaseLockAndNotification(Long dataflowId, String errorMessage,
-      boolean isCreation) {
+  private void releaseLockAndNotification(Long dataflowId, String errorMessage, boolean isCreation,
+      boolean hasPk) {
     String methodSignature = isCreation ? LockSignature.CREATE_DATA_COLLECTION.getValue()
         : LockSignature.UPDATE_DATA_COLLECTION.getValue();
     DataFlowVO dataflow = getDataflowMetabase(dataflowId);
@@ -337,8 +343,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     if (!referenceDataflow) {
       failEvent = isCreation ? EventType.ADD_DATACOLLECTION_FAILED_EVENT
           : EventType.UPDATE_DATACOLLECTION_FAILED_EVENT;
+    } else if (!hasPk && isCreation) {
+      failEvent = EventType.NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT;
     }
-
 
     // Release the lock
     Map<String, Object> lockCriteria = new HashMap<>();
@@ -366,7 +373,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void updateDataCollection(Long dataflowId, boolean referenceDataflow) {
-    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow);
+    manageDataCollection(dataflowId, null, false, false, false, referenceDataflow, false);
   }
 
   /**
@@ -378,15 +385,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param manualCheck the manual check
    * @param showPublicInfo the show public info
    * @param referenceDataflow the reference dataflow
+   * @param stopAndNotifyPKError the stop and notify PK error
    */
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, Date dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
-      boolean referenceDataflow) {
+      boolean referenceDataflow, boolean stopAndNotifyPKError) {
 
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck,
-        referenceDataflow);
+        referenceDataflow, stopAndNotifyPKError);
 
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
 
@@ -414,18 +422,33 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
    * @param manualCheck the manual check
    * @param referenceDataflow the reference dataflow
+   * @param stopAndNotifyPKError the stop and notify PK error
    */
   private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
-      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow) {
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow,
+      boolean stopAndNotifyPKError) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
 
     boolean rulesOk = true;
+    boolean hasPk = true;
 
     // 1. Get the design datasets
     List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(dataflowId);
 
     // we look if all SQL QC's are working correctly, if not we disable it before do a dc
     if (isCreation) {
+      if (referenceDataflow && stopAndNotifyPKError) {
+        hasPk = checkIfSchemasHavePk(designs);
+        if (!hasPk) {
+          LOG_ERROR.error(
+              "No primary key in any schemas in the dataflow {}. So stop the process to create the reference dataset",
+              dataflowId);
+          releaseLockAndNotification(dataflowId, "No primary key in any schemas in the dataflow",
+              isCreation, hasPk);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.NO_PK_REFERENCE_DATAFLOW);
+        }
+      }
       LOG.info("Validate SQL Rules in Dataflow {}, Data Collection creation proccess.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       designs.stream().forEach(dataset -> {
@@ -455,7 +478,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         referenceSchemasId.add(dataset.getDatasetSchema());
         if (isCreation) {
           datasetSchemaService.updateReferenceDataset(dataset.getId(), dataset.getDatasetSchema(),
-              true, true);
+              true);
+          LOG.info("There are reference datasets. Deleting its export eu dataset integrations");
+          integrationControllerZuul.deleteExportEuDatasetIntegration(dataset.getDatasetSchema());
         }
       }
     });
@@ -494,7 +519,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           .filter(representative -> !representative.getHasDatasets()).collect(Collectors.toList());
 
       if (representatives.isEmpty() && !referenceDataflow) {
-        releaseLockAndNotification(dataflowId, "No representatives without datasets", isCreation);
+        releaseLockAndNotification(dataflowId, "No representatives without datasets", isCreation,
+            hasPk);
         return;
       }
 
@@ -652,6 +678,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       List<FKDataCollection> newDCsRegistry = new ArrayList<>();
       List<FKDataCollection> newEUsRegistry = new ArrayList<>();
       List<FKDataCollection> newTESTsRegistry = new ArrayList<>();
+      List<FKDataCollection> newReferencesRegistry = new ArrayList<>();
 
       List<IntegrityDataCollection> lIntegrityDataCollections = new ArrayList<>();
       if (!referenceDataflow) {
@@ -703,12 +730,23 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           for (RepresentativeVO representative : representatives) {
             List<String> emails = representative.getLeadReporters().stream()
                 .map(LeadReporterVO::getEmail).collect(Collectors.toList());
-            if (emails.isEmpty()) {
-              referenceDatasetIdsEmails.put(referenceDatasetId, null);
+            if (!emails.isEmpty()) {
+              if (referenceDatasetIdsEmails.containsKey(referenceDatasetId)) {
+                referenceDatasetIdsEmails.get(referenceDatasetId).addAll(emails);
+              } else {
+                referenceDatasetIdsEmails.put(referenceDatasetId, emails);
+              }
             } else {
-              referenceDatasetIdsEmails.put(referenceDatasetId, emails);
+              if (!referenceDatasetIdsEmails.containsKey(referenceDatasetId)) {
+                referenceDatasetIdsEmails.put(referenceDatasetId, null);
+              }
             }
           }
+          RulesSchemaVO rulesSchemaVO =
+              rulesControllerZuul.findRuleSchemaByDatasetId(referenceDataset.getDatasetSchema());
+          List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
+          prepareFKAndIntegrityForEUandDC(referenceDatasetId, newReferencesRegistry,
+              lIntegrityDataCollections, referenceDataset, integritieVOs);
         }
       }
 
@@ -746,6 +784,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       addForeignRelationsFromNewDCandEUs(newDCsRegistry);
       addForeignRelationsFromNewDCandEUs(newEUsRegistry);
       addForeignRelationsFromNewDCandEUs(newTESTsRegistry);
+      addForeignRelationsFromNewDCandEUs(newReferencesRegistry);
       if (lIntegrityDataCollections != null) {
         addDatasetForeignRelations(lIntegrityDataCollections);
       }
@@ -1038,7 +1077,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private void releaseLockAndRollback(Connection connection, Long dataflowId, boolean isCreation)
       throws SQLException {
 
-    releaseLockAndNotification(dataflowId, "Error creating datasets on the metabase", isCreation);
+    releaseLockAndNotification(dataflowId, "Error creating datasets on the metabase", isCreation,
+        true);
     connection.rollback();
   }
 
@@ -1104,9 +1144,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   private Long persistRD(Statement metabaseStatement, DesignDatasetVO design,
       RepresentativeVO representative, String time, Long dataflowId, String dataProviderLabel)
       throws SQLException {
-    try (ResultSet rs =
-        metabaseStatement.executeQuery(String.format(INSERT_RD_INTO_DATASET, time, dataflowId,
-            dataProviderLabel, design.getDatasetSchema(), representative.getDataProviderId()))) {
+    try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_RD_INTO_DATASET, time,
+        dataflowId, dataProviderLabel.replace("'", "''"), design.getDatasetSchema(),
+        representative.getDataProviderId()))) {
       rs.next();
       Long datasetId = rs.getLong(1);
       metabaseStatement.addBatch(String.format(INSERT_RD_INTO_REPORTING_DATASET, datasetId));
@@ -1377,9 +1417,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       for (Map.Entry<Long, List<String>> entry : referenceDatasetIdsEmails.entrySet()) {
         if (null != entry.getValue()) {
           for (String email : entry.getValue()) {
-            LOG.info("Se asigna al usuario {} el reference {}", email, referenceDatasetId);
+            LOG.info("Assign to the user {} reference dataset {}", email, referenceDatasetId);
             assignments.add(createAssignments(referenceDatasetId, email,
-                ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+                ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
 
             // Assign Dataflow-%s-LEAD_REPORTER
             assignments.add(
@@ -1595,6 +1635,20 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     } catch (EEAException e) {
       LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
     }
+  }
+
+  /**
+   * Check if schemas have pk.
+   *
+   * @param designs the designs
+   * @return true, if successful
+   */
+  public boolean checkIfSchemasHavePk(List<DesignDatasetVO> designs) {
+    return designs.stream()
+        .allMatch(design -> datasetSchemaService.getDataSchemaById(design.getDatasetSchema())
+            .getTableSchemas().stream()
+            .allMatch(tableSchema -> tableSchema.getRecordSchema().getFieldSchema().stream()
+                .anyMatch(fieldSchema -> Boolean.TRUE.equals(fieldSchema.getPk()))));
   }
 
 }

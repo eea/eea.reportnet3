@@ -99,6 +99,9 @@ public final class EEAErrorMessage {
   /** The Constant DOCUMENT_DOWNLOAD_ERROR: {@value}. */
   public static final String DOCUMENT_DOWNLOAD_ERROR = "Document download error";
 
+  /** The Constant DOCUMENT_NOT_PUBLIC: {@value}. */
+  public static final String DOCUMENT_NOT_PUBLIC = "Document is not public";
+
   /** The Constant TABLE_NOT_FOUND: {@value}. */
   public static final String TABLE_NOT_FOUND =
       "Table with schema %s from the datasetId %s not found";
@@ -338,6 +341,23 @@ public final class EEAErrorMessage {
   /** The Constant NOT_REFERENCE_TO_PROCESS: {@value}. */
   public static final String NOT_REFERENCE_TO_PROCESS =
       "There aren't reference datasets to process";
+
+  /** The Constant NO_PK_REFERENCE_DATAFLOW: {@value}. */
+  public static final String NO_PK_REFERENCE_DATAFLOW =
+      "There aren't primary keys in the reference dataflow";
+
+  /** The Constant COMPANY_GROUP_NOTFOUND: {@value}. */
+  public static final String COMPANY_GROUP_NOTFOUND = "The company group selected is not found";
+
+  /** The Constant USERFME_NOTFOUND: {@value}. */
+  public static final String USERFME_NOTFOUND = "The user for fme access is not found";
+
+  /** The Constant EXISTING_REPRESENTATIVES: {@value}. */
+  public static final String EXISTING_REPRESENTATIVES =
+      "There are existing representatives selected right now";
+
+  /** The Constant MESSAGE_INCORRECT_ID: {@value}. */
+  public static final String MESSAGE_INCORRECT_ID = "Message Id incorrect";
 
   /**
    * Instantiates a new EEA error message.

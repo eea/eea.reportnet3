@@ -1,0 +1,50 @@
+.lazyLoadingWrapper {
+  position: absolute;
+  left: 45%;
+  top: 45%;
+  display: block;
+  .lazyLoadingSpinner {
+    top: 0 !important;
+  }
+}
+
+.messagesWrapper {
+  border: var(--inputtext-border);
+  height: 40vh;
+  border-radius: 3px;
+  margin-left: 0;
+  overflow-y: scroll;
+  width: 100%;
+  .emptyMessageWrapper {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 40vh;
+    padding-top: 10rem;
+    span {
+      color: var(--main-font-color);
+      font-style: italic;
+    }
+  }
+  .scrollMessagesWrapper {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem 0;
+    height: 101%;
+    .messageCounter {
+      user-select: none;
+      font-size: 10pt;
+      font-weight: bold;
+      position: absolute;
+      top: 4.5rem;
+      background-color: var(--statusBox-info-bg);
+      color: var(--statusBox-info-color);
+      border-radius: 3px;
+      padding: 4px;
+    }
+  }
+}
+.messagesWrapperDisabled {
+  pointer-events: none;
+  opacity: 0.4;
+}

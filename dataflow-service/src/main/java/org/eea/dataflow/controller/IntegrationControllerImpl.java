@@ -78,7 +78,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_STEWARD')")
   @PutMapping(value = "/listIntegrations", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find all Integrations by Integration Criteria",
       produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class,
@@ -98,16 +98,17 @@ public class IntegrationControllerImpl implements IntegrationController {
    * Find expor EU dataset integration by dataset id.
    *
    * @param datasetSchemaId the dataset schema id
-   *
+   * @param dataflowId the dataflow id
    * @return the integration VO
    */
   @Override
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_CUSTODIAN')")
   @GetMapping("/findExportEUDatasetIntegration")
   @ApiOperation(value = "Find EU Dataset Export Integration by its Schema Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class)
   public IntegrationVO findExportEUDatasetIntegration(
-      @ApiParam(value = "Schema Id") @RequestParam("datasetSchemaId") String datasetSchemaId) {
+      @ApiParam(value = "Schema Id") @RequestParam("datasetSchemaId") String datasetSchemaId,
+      @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId) {
     return integrationService.getExportEUDatasetIntegration(datasetSchemaId);
   }
 
@@ -338,6 +339,24 @@ public class IntegrationControllerImpl implements IntegrationController {
     integrationService.deleteSchemaIntegrations(datasetSchemaId);
   }
 
+  /**
+   * Delete export eu dataset integration.
+   *
+   * @param datasetSchemaId the dataset schema id
+   */
+  @Override
+  @DeleteMapping("/private/deleteExportEuDataset")
+  @ApiOperation(value = "Delete an export EU Dataset Integration", hidden = true)
+  public void deleteExportEuDatasetIntegration(
+      @RequestParam("datasetSchemaId") String datasetSchemaId) {
+    try {
+      integrationService.deleteExportEuDataset(datasetSchemaId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(
+          "Error deleting and export eu dataset integration with the datasetSchemaId {}, with message: {}",
+          datasetSchemaId, e.getMessage());
+    }
+  }
 
 
   /**

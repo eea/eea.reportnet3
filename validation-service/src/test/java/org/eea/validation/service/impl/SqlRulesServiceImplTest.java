@@ -16,6 +16,7 @@ import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollec
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
@@ -95,6 +96,10 @@ public class SqlRulesServiceImplTest {
   /** The eu dataset controller. */
   @Mock
   private EUDatasetControllerZuul euDatasetController;
+
+  @Mock
+  private ReferenceDatasetControllerZuul referenceDatasetController;
+
 
   /** The sql rules service impl. */
   @InjectMocks

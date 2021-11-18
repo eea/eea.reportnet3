@@ -96,7 +96,9 @@ import {
   faUpload,
   faFile,
   faClock,
-  faMeteor
+  faMeteor,
+  faSearch,
+  faTimesCircle
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -113,7 +115,8 @@ import {
   faQuestionCircle as farQuestionCircle,
   faSave,
   faSquare as farSquareRegular,
-  faFilePdf as farFilePdf
+  faFilePdf as farFilePdf,
+  faTimesCircle as farTimesCircle
 } from '@fortawesome/free-regular-svg-icons';
 import { faBuffer, faConnectdevelop, faStaylinked } from '@fortawesome/free-brands-svg-icons';
 
@@ -191,6 +194,10 @@ export const AwesomeIcons = icon => {
       return faDatabase;
     case 'delete':
       return faTrashAlt;
+    case 'solidDeleteCircle':
+      return faTimesCircle;
+    case 'deleteCircle':
+      return farTimesCircle;
     case 'disk':
       return faSave;
     case 'doc':
@@ -355,6 +362,8 @@ export const AwesomeIcons = icon => {
       return faReply;
     case 'representative':
       return faCoins;
+    case 'search':
+      return faSearch;
     case 'settings':
       return faCog;
     case 'share':

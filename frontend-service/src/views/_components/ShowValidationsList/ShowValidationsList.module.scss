@@ -1,0 +1,147 @@
+.validations {
+  height: 75vh;
+}
+
+.validationsWithoutTable {
+  height: 75vh;
+}
+
+.emptyFilteredData,
+.noValidations {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.emptyFilteredData {
+  $root: &;
+  height: 50vh;
+  @at-root {
+    .validationsWrapper {
+      @at-root {
+        #{$root} #{&} {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+    }
+  }
+}
+
+.noValidations {
+  height: 100%;
+}
+
+.tableWebform {
+  tbody {
+    tr {
+      cursor: pointer;
+    }
+  }
+}
+
+.emptyValidationsWrapper {
+  min-height: 76.2vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  h3 {
+    font-size: 1.2rem;
+  }
+}
+
+.invisibleHeader {
+  display: none;
+}
+
+.validationToolbar {
+  border: none !important;
+  padding: 0 !important;
+}
+
+.filterActive {
+  opacity: 1;
+}
+
+.filterInactive {
+  opacity: 0.25 !important;
+}
+
+.loading {
+  height: 20px !important;
+  left: 0 !important;
+  margin-top: 6px !important;
+  top: 0 !important;
+  width: 300px !important;
+  svg circle {
+    animation: p-progress-spinner-dash 1.5s ease-in-out infinite, var(--white) 6s ease-in-out infinite !important;
+    stroke: var(--white) !important;
+  }
+}
+
+.switchDivInput {
+  float: left;
+  margin-bottom: 0.5em !important;
+}
+.switchDiv {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+.searchInput {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  margin: 0 0 1rem 0;
+
+  > span {
+    margin-right: 2rem;
+  }
+}
+
+.switchTextInput {
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  padding: 5px;
+  color: var(--main-font-color);
+}
+
+.validationCol {
+  width: 15px;
+}
+
+.loadingSpinner {
+  height: 95%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+}
+
+.ruleCodeTemplateWrapper {
+  display: flex;
+  justify-content: flex-start;
+  .tooltipInfoLabel {
+    font-weight: bold;
+  }
+  .tooltipValueLabel {
+    color: var(--success-color-lighter);
+    font-weight: 600;
+  }
+}
+.levelErrorTemplateWrapper {
+  display: flex;
+  justify-content: center;
+}

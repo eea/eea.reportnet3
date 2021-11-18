@@ -31,6 +31,7 @@ import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
@@ -166,6 +167,9 @@ public class DataCollectionServiceImplTest {
   @Mock
   private TestDatasetRepository testDatasetRepository;
 
+  @Mock
+  private IntegrationControllerZuul integrationControllerZuul;
+
   /** The lead reporters VO. */
   private List<LeadReporterVO> leadReportersVO;
 
@@ -184,7 +188,7 @@ public class DataCollectionServiceImplTest {
     SecurityContextHolder.setContext(securityContext);
     leadReportersVO = new ArrayList<>();
     leadReportersVO.add(new LeadReporterVO());
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**
@@ -306,8 +310,16 @@ public class DataCollectionServiceImplTest {
     representative.setId(1L);
     representative.setLeadReporters(leadReportersVO);
     representative.setHasDatasets(false);
+    representative.setDataProviderId(1L);
     designs.add(design);
     representatives.add(representative);
+    DataProviderVO dataProvider = new DataProviderVO();
+    dataProvider.setId(1L);
+    dataProvider.setLabel("label");
+    List<DataProviderVO> dataProvidersVO = new ArrayList<>();
+    dataProvidersVO.add(dataProvider);
+    Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
+        .thenReturn(dataProvidersVO);
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(designs);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
@@ -421,7 +433,8 @@ public class DataCollectionServiceImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
 
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false,
+        true);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
@@ -514,7 +527,8 @@ public class DataCollectionServiceImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
 
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), false, false, false, false);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), false, false, false, false,
+        true);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
@@ -539,7 +553,8 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false,
+        true);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
 
@@ -556,7 +571,8 @@ public class DataCollectionServiceImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false,
+        true);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
 
@@ -595,7 +611,8 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false,
+        true);
     Mockito.verify(connection, times(1)).rollback();
   }
 
@@ -615,10 +632,18 @@ public class DataCollectionServiceImplTest {
     representative.setId(1L);
     representative.setLeadReporters(leadReportersVO);
     representative.setHasDatasets(false);
+    representative.setDataProviderId(1L);
     designs.add(design);
     representatives.add(representative);
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(designs);
+    DataProviderVO dataProvider = new DataProviderVO();
+    dataProvider.setId(1L);
+    dataProvider.setLabel("label");
+    List<DataProviderVO> dataProvidersVO = new ArrayList<>();
+    dataProvidersVO.add(dataProvider);
+    Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
+        .thenReturn(dataProvidersVO);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(representatives);
     Mockito.when(metabaseDataSource.getConnection()).thenReturn(connection);
@@ -639,7 +664,8 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false);
+    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false,
+        true);
     Mockito.verify(connection, times(1)).rollback();
   }
 

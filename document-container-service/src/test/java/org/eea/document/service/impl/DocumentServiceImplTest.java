@@ -67,7 +67,7 @@ public class DocumentServiceImplTest {
     ThreadPropertiesManager.setVariable("user", "user");
     fileMock = new MockMultipartFile("file", "fileOriginal.cvs", "cvs", "content".getBytes());
     documentVO = new DocumentVO();
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**
@@ -486,5 +486,146 @@ public class DocumentServiceImplTest {
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     documentService.deleteSnapshotDocument("filename", 1L);
   }
+
+
+  @Test
+  public void testUploadCollaborationDocumentSuccess()
+      throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.addFileNode(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn("name-ES");
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadCollaborationDocument(fileMock.getInputStream(),
+        fileMock.getContentType(), fileMock.getOriginalFilename(), 1L, 1L);
+    Mockito.verify(oakRepositoryUtils, times(1)).cleanUp(Mockito.any(), Mockito.any());
+  }
+
+
+
+  @Test(expected = EEAException.class)
+  public void testUploadCollaborationDocumentException() throws EEAException, IOException {
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadCollaborationDocument(fileMock.getInputStream(), null, null, 1L, 1L);
+  }
+
+
+  @Test(expected = EEAException.class)
+  public void testUploadCollaborationDocumentException2Test() throws EEAException, IOException {
+    fileMock = new MockMultipartFile("file", "fileOriginal", null, (byte[]) null);
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadCollaborationDocument(fileMock.getInputStream(),
+        fileMock.getContentType(), fileMock.getOriginalFilename(), 1L, 1L);
+  }
+
+  @Test(expected = EEAException.class)
+  public void testUploadCollaborationDocumentException3()
+      throws EEAException, RepositoryException, IOException {
+
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadCollaborationDocument(fileMock.getInputStream(),
+        fileMock.getContentType(), fileMock.getOriginalFilename(), 1L, 1L);
+
+  }
+
+  @Test(expected = EEAException.class)
+  public void testUploadCollaborationDocumentException5Test()
+      throws EEAException, IOException, RepositoryException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.addFileNode(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn("");
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadCollaborationDocument(fileMock.getInputStream(),
+        fileMock.getContentType(), fileMock.getOriginalFilename(), 1L, 1L);
+  }
+
+
+
+  @Test
+  public void testGetCollaborationDocumentSuccess()
+      throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.getFileContents(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(new FileResponse());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    assertNotNull("null result", documentService.getCollaborationDocument("test", 1L, 1L));
+  }
+
+
+
+  @Test(expected = EEAException.class)
+  public void testGetCollaborationDocumentException()
+      throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    doThrow(new RepositoryException()).when(oakRepositoryUtils).getFileContents(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.getCollaborationDocument("test", 1L, 1L);
+  }
+
+
+  @Test(expected = EEAException.class)
+  public void testGetCollaborationDocumentException2Test()
+      throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    doThrow(new PathNotFoundException()).when(oakRepositoryUtils).getFileContents(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.getCollaborationDocument("test", 1L, 1L);
+  }
+
+
+
+  @Test
+  public void testDeleteCollaborationDocumentSuccessTest() throws Exception {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+
+    doNothing().when(oakRepositoryUtils).deleteFileNode(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    doNothing().when(oakRepositoryUtils).deleteBlobsFromRepository(Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.deleteCollaborationDocument("filename", 1L, 1L);
+    Mockito.verify(oakRepositoryUtils, times(1)).cleanUp(Mockito.any(), Mockito.any());
+
+  }
+
+
+  @Test(expected = EEAException.class)
+  public void testDeleteCollaborationDocumentExceptionTest()
+      throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    doThrow(new RepositoryException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.deleteCollaborationDocument("filename", 1L, 1L);
+  }
+
+
+
+  @Test(expected = EEAException.class)
+  public void testDeleteCollaborationDocumentException2()
+      throws EEAException, RepositoryException, IOException {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    doThrow(new PathNotFoundException()).when(oakRepositoryUtils).deleteFileNode(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.deleteCollaborationDocument("filename", 1L, 1L);
+  }
+
 
 }

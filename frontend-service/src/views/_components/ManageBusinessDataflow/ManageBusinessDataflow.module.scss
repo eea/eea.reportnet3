@@ -1,0 +1,77 @@
+.inputTextArea {
+  height: auto !important;
+  margin-top: 1rem !important;
+}
+.checkboxWrapper {
+  margin-top: 0.2rem;
+  user-select: none;
+  :global .p-checkbox {
+    margin-left: 0 !important;
+  }
+  label {
+    margin-left: 0.5rem !important;
+    span {
+      cursor: pointer;
+      font-weight: bold;
+      color: var(--main-font-color);
+    }
+  }
+}
+
+.search {
+  --searchButtonWidth: 170px;
+
+  cursor: pointer !important;
+  display: flex;
+  justify-content: space-between;
+
+  .searchInput {
+    background-color: var(--form-field-bg);
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none;
+    color: var(--main-font-color);
+    cursor: default !important;
+    outline: none;
+    padding: 10px;
+    text-overflow: ellipsis;
+    width: calc(100% - var(--searchButtonWidth));
+
+    &:focus {
+      border: none;
+      box-shadow: none !important;
+    }
+  }
+
+  .searchErrors {
+    &::placeholder {
+      color: var(--errors);
+      opacity: 1;
+    }
+  }
+}
+.cancelButton {
+  margin-right: 0px !important;
+}
+.errorAndCounterWrapper {
+  height: 40px;
+}
+.dropdownsWrapper {
+  display: flex;
+  margin: 1rem 0;
+}
+.groupOfCompaniesWrapper,
+.fmeUsersWrapper {
+  width: 50%;
+}
+.fmeUsersWrapper {
+  margin-left: 1rem;
+}
+
+.spinnerCenter {
+  top: calc(20vh - calc(var(--spinner-width) / 2)) !important;
+}
+
+.dialogContent {
+  min-height: 360px;
+}

@@ -1,0 +1,19 @@
+.checkboxWrapper {
+  margin-top: 0.2rem;
+  user-select: none;
+  :global .p-checkbox {
+    margin-left: 0 !important;
+  }
+  label {
+    margin-left: 0.5rem !important;
+    span {
+      cursor: pointer;
+      font-weight: bold;
+      color: var(--main-font-color);
+    }
+  }
+}
+
+.cancelButton {
+  margin-right: 0px !important;
+}

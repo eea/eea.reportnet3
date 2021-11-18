@@ -49,6 +49,7 @@ import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
@@ -58,6 +59,7 @@ import org.eea.interfaces.controller.validation.RulesController.RulesControllerZ
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -224,6 +226,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private ValidationControllerZuul validationControllerZuul;
 
+  /** The collaboration controller zuul. */
+  @Autowired
+  private CollaborationControllerZuul collaborationControllerZuul;
+
   /**
    * Gets the by id.
    *
@@ -276,11 +282,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param createSnapshotVO the create snapshot VO
    * @param partitionIdDestination the partition id destination
    * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    */
   @Override
   @Async
   public void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO,
-      Long partitionIdDestination, String dateRelease) {
+      Long partitionIdDestination, String dateRelease, boolean prefillingReference) {
 
 
     try {
@@ -327,7 +334,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
 
       recordStoreControllerZuul.createSnapshotData(idDataset, snap.getId(), idPartition,
-          dateRelease);
+          dateRelease, prefillingReference);
 
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for dataset {}", idDataset, e);
@@ -409,7 +416,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, idPartition,
-        DatasetTypeEnum.REPORTING, false, deleteData);
+        DatasetTypeEnum.REPORTING, false, deleteData, false);
   }
 
   /**
@@ -420,18 +427,20 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @param deleteData the delete data
    * @param datasetType the dataset type
+   * @param prefillingReference the prefilling reference
    * @throws EEAException the EEA exception
    */
   @Override
   @Async
   public void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination,
-      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType) throws EEAException {
+      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType, boolean prefillingReference)
+      throws EEAException {
 
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(datasetOrigin, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDatasetDestination, idSnapshot, idPartition,
-        datasetType, false, deleteData);
+        datasetType, false, deleteData, prefillingReference);
   }
 
   /**
@@ -653,7 +662,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // 3. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
-      recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition, null);
+      recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition, null, false);
       LOG.info("Snapshot schema {} data files created", idSnapshot);
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for dataset schema {}", idDataset, e);
@@ -829,7 +838,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    *
    * @throws EEAException the EEA exception
    */
-  private PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
+  @Override
+  public PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
       throws EEAException {
     final PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(datasetId, user).orElse(null);
@@ -1041,6 +1051,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         dataProviderId, restrictFromPublic);
 
     validationControllerZuul.validateDataSetData(dataset.getId(), true);
+
+    String country = dataset.getDataSetName();
+    DataFlowVO dataflowVO = dataflowControllerZuul.findById(dataflowId, dataProviderId);
+    String dataflowName = dataflowVO.getName();
+
+    MessageVO messageVO = new MessageVO();
+    messageVO.setProviderId(dataProviderId);
+    messageVO.setContent(country + " released " + dataflowName + " successfully");
+    messageVO.setAutomatic(true);
+    collaborationControllerZuul.createMessage(dataflowId, messageVO);
+    LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowId,
+        messageVO.getContent());
   }
 
 

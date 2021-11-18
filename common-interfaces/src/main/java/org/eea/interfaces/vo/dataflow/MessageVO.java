@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.dataflow;
 
 import java.util.Date;
+import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
 import lombok.Data;
 
 /**
@@ -26,4 +27,16 @@ public class MessageVO {
 
   /** The direction. */
   private boolean direction;
+
+  /** The type. */
+  private MessageTypeEnum type;
+
+  /** The automatic. */
+  private boolean automatic;
+
+  /** The file size. */
+  private String fileSize;
+
+  /** The message attachment VO. */
+  private MessageAttachmentVO messageAttachment;
 }

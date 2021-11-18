@@ -1,0 +1,79 @@
+.container {
+  flex: 1 auto;
+  height: 100%;
+  padding-bottom: 4rem;
+  &.isLoading {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  td {
+    height: 45px;
+  }
+}
+
+.cellWrapper {
+  display: flex;
+  align-items: center;
+
+  .link {
+    color: var(--hyperlink-color);
+    cursor: pointer;
+    text-decoration: none;
+  }
+}
+.noDatasets {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+  font-size: 1.4rem;
+  font-weight: bold;
+  height: 40vh;
+}
+
+.downloadFile {
+  max-width: 35rem;
+}
+
+.downloadIcon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--documenticon-color);
+}
+
+.downloadReferenceDatasetFile {
+  width: 12.8% !important;
+  text-align: center;
+}
+
+.filesContainer {
+  display: flex;
+  justify-content: center !important;
+
+  .filesIcon {
+    font-size: 1.4rem;
+    color: var(--documenticon-color);
+
+    .cursorPointer {
+      cursor: pointer;
+    }
+  }
+
+  .restrictFromPublicIcon {
+    font-size: 1.3rem;
+    color: var(--gray-75);
+    cursor: pointer;
+  }
+}
+
+.dataTableWrapper {
+  margin: 3rem 0rem 2rem 0rem;
+
+  .dataTableTitle {
+    margin-bottom: 1rem;
+    font-weight: bold;
+  }
+}

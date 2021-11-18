@@ -1,0 +1,7 @@
+.allAttachmentMessage {
+  font-weight: bold;
+}
+
+.dialogDropdown {
+  z-index: 1060 !important;
+}

@@ -1,6 +1,7 @@
 package org.eea.security.jwt.utils;
 
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,7 +28,7 @@ public class EntityAccessServiceTest {
    */
   @Before
   public void initMocks() {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /**
@@ -36,6 +37,13 @@ public class EntityAccessServiceTest {
   @Test
   public void isReferenceDataflowDraftTest() {
     Assert.assertFalse(entityAccessService.isReferenceDataflowDraft(EntityClassEnum.DATAFLOW, 1L));
+  }
+
+
+  @Test
+  public void isDataflowTypeTest() {
+    Assert.assertFalse(entityAccessService.isDataflowType(TypeDataflowEnum.BUSINESS,
+        EntityClassEnum.DATAFLOW, 1L));
   }
 
 

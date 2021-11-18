@@ -4,8 +4,10 @@ import java.util.Date;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
@@ -20,10 +22,11 @@ public interface DataflowService {
    * Gets the by id.
    *
    * @param id the id
+   * @param removeWeblinksAndDocuments the remove weblinks and documents
    * @return the by id
    * @throws EEAException the EEA exception
    */
-  DataFlowVO getById(Long id) throws EEAException;
+  DataFlowVO getById(Long id, boolean removeWeblinksAndDocuments) throws EEAException;
 
   /**
    * Get the dataflow by its id filtering representatives by the user email.
@@ -46,25 +49,25 @@ public interface DataflowService {
   List<DataFlowVO> getByStatus(TypeStatusEnum status) throws EEAException;
 
 
+
   /**
    * Gets the dataflows.
    *
    * @param userId the user id
+   * @param dataflowType the dataflow type
    * @return the dataflows
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getDataflows(String userId) throws EEAException;
-
+  List<DataFlowVO> getDataflows(String userId, TypeDataflowEnum dataflowType) throws EEAException;
 
   /**
-   * Gets the reference dataflows.
+   * Gets the cloneable dataflows.
    *
    * @param userId the user id
-   * @return the reference dataflows
+   * @return the cloneable dataflows
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getReferenceDataflows(String userId) throws EEAException;
-
+  List<DataFlowVO> getCloneableDataflows(String userId) throws EEAException;
 
   /**
    * Gets the completed.
@@ -104,6 +107,7 @@ public interface DataflowService {
    * Creates the data flow.
    *
    * @param dataflowVO the dataflow VO
+   * @return the long
    * @throws EEAException the EEA exception
    */
   Long createDataFlow(DataFlowVO dataflowVO) throws EEAException;
@@ -113,9 +117,8 @@ public interface DataflowService {
    * Delete data flow.
    *
    * @param idDataflow the id dataflow
-   * @throws Exception the exception
    */
-  void deleteDataFlow(Long idDataflow) throws Exception;
+  void deleteDataFlow(Long idDataflow);
 
   /**
    * Update data flow.
@@ -216,4 +219,34 @@ public interface DataflowService {
    * @return true, if is reference dataflow draft
    */
   boolean isReferenceDataflowDraft(EntityClassEnum entity, Long entityId);
+
+
+  /**
+   * Checks if is dataflow type.
+   *
+   * @param dataflowType the dataflow type
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if is dataflow type
+   */
+  boolean isDataflowType(TypeDataflowEnum dataflowType, EntityClassEnum entity, Long entityId);
+
+  /**
+   * Checks if user is admin.
+   *
+   * @return true, if is admin
+   */
+  boolean isAdmin();
+
+  /**
+   * Gets the private dataflow by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the private dataflow by id
+   * @throws EEAException the EEA exception
+   */
+  DataflowPrivateVO getPrivateDataflowById(Long dataflowId) throws EEAException;
+
+
+
 }

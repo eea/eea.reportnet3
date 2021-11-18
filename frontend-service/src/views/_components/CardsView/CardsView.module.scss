@@ -1,0 +1,49 @@
+@import '_styles/mixins';
+
+.noObligations {
+  color: var(--button-secondary-transparent-color-hover);
+  font-weight: 450;
+  margin: 2rem 1rem;
+}
+
+.currentPageWrapper {
+  color: var(--white);
+  margin-left: 1.5rem;
+  user-select: none;
+  .currentPageInput {
+    display: inline;
+    height: 1.75rem;
+    width: 2.5rem;
+  }
+  .currentPageLabel {
+    margin: 0 0.5rem;
+  }
+  .currentPageOf {
+    margin: 0 0 0 0.5rem;
+  }
+}
+
+.cardWrap {
+  display: grid;
+  gap: 1em;
+  margin-bottom: 2rem;
+  @include for-phone-only {
+    grid-auto-flow: row;
+  }
+
+  @media (min-width: 650px) {
+    grid-template-columns: 48% 48%;
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: 32% 32% 32%;
+  }
+
+  @media (min-width: 1280px) {
+    grid-template-columns: 24% 24% 24% 24%;
+  }
+
+  @media (min-width: 1500px) {
+    grid-template-columns: 19% 19% 19% 19% 19%;
+  }
+}

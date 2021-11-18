@@ -3,6 +3,7 @@ package org.eea.dataflow.controller;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import org.eea.dataflow.exception.EntityNotFoundException;
@@ -123,7 +124,7 @@ public class DataFlowWebLinkControllerImplTest {
     badResources.add(badResource);
 
 
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
   }
 
   /** The dataflow web link mapper. */
@@ -269,7 +270,7 @@ public class DataFlowWebLinkControllerImplTest {
     doThrow(new EntityNotFoundException()).when(dataflowWebLinkService)
         .removeWebLink(Mockito.any());
     try {
-      dataFlowWebLinkControllerImpl.removeLink(Mockito.anyLong());
+      dataFlowWebLinkControllerImpl.removeLink(0L, 0L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       throw e;
@@ -286,7 +287,7 @@ public class DataFlowWebLinkControllerImplTest {
     doThrow(new ResourceNoFoundException()).when(dataflowWebLinkService)
         .removeWebLink(Mockito.any());
     try {
-      dataFlowWebLinkControllerImpl.removeLink(Mockito.anyLong());
+      dataFlowWebLinkControllerImpl.removeLink(0L, 0L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
@@ -303,7 +304,7 @@ public class DataFlowWebLinkControllerImplTest {
   public void removeLinkthrowsInternalError() throws EEAException {
     doThrow(new EEAException()).when(dataflowWebLinkService).removeWebLink(Mockito.anyLong());
     try {
-      dataFlowWebLinkControllerImpl.removeLink(Mockito.anyLong());
+      dataFlowWebLinkControllerImpl.removeLink(0L, 0L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
@@ -318,7 +319,7 @@ public class DataFlowWebLinkControllerImplTest {
    */
   @Test
   public void removeLink() throws EEAException {
-    dataFlowWebLinkControllerImpl.removeLink(Mockito.anyLong());
+    dataFlowWebLinkControllerImpl.removeLink(0L, 0L);
     Mockito.verify(dataflowWebLinkService, times(1)).removeWebLink(Mockito.anyLong());
   }
 
@@ -332,7 +333,7 @@ public class DataFlowWebLinkControllerImplTest {
   public void updateLinkThrowsEEAException() throws EEAException {
     doThrow(EEAException.class).when(dataflowWebLinkService).updateWebLink(Mockito.any());
     try {
-      dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
+      dataFlowWebLinkControllerImpl.updateLink(weblinkVO, Mockito.anyLong());
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
@@ -348,31 +349,41 @@ public class DataFlowWebLinkControllerImplTest {
   public void updateLinkBadRequestException() throws EEAException {
     doThrow(WrongDataExceptions.class).when(dataflowWebLinkService).updateWebLink(Mockito.any());
     try {
-      dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
+      dataFlowWebLinkControllerImpl.updateLink(weblinkVO, Mockito.anyLong());
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
     }
   }
 
+  /**
+   * Update link forbidden exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void updateLinkForbiddenException() throws EEAException {
     doThrow(ResourceNoFoundException.class).when(dataflowWebLinkService)
         .updateWebLink(Mockito.any());
     try {
-      dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
+      dataFlowWebLinkControllerImpl.updateLink(weblinkVO, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
     }
   }
 
+  /**
+   * Update link not found exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void updateLinkNotFoundException() throws EEAException {
     doThrow(EntityNotFoundException.class).when(dataflowWebLinkService)
         .updateWebLink(Mockito.any());
     try {
-      dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
+      dataFlowWebLinkControllerImpl.updateLink(weblinkVO, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       throw e;
@@ -386,8 +397,26 @@ public class DataFlowWebLinkControllerImplTest {
    */
   @Test
   public void updateLink() throws EEAException {
-    dataFlowWebLinkControllerImpl.updateLink(weblinkVO);
+    dataFlowWebLinkControllerImpl.updateLink(weblinkVO, 1L);
 
     Mockito.verify(dataflowWebLinkService, times(1)).updateWebLink(weblinkVO);
   }
+
+  /**
+   * Gets the all weblinks by dataflow success test.
+   *
+   * @return the all weblinks by dataflow success test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllWeblinksByDataflowSuccessTest() throws EEAException {
+    List<WeblinkVO> weblinksExpected = new ArrayList<>();
+    WeblinkVO weblinkVO = new WeblinkVO();
+    weblinkVO.setId(1L);
+    weblinksExpected.add(weblinkVO);
+    when(dataflowWebLinkService.getAllWeblinksByDataflowId(Mockito.anyLong()))
+        .thenReturn(weblinksExpected);
+    assertEquals(weblinksExpected, dataFlowWebLinkControllerImpl.getAllWeblinksByDataflow(1L));
+  }
+
 }

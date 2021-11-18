@@ -1,0 +1,83 @@
+.p-sidebar-close {
+  margin-right: 15px !important;
+}
+.createForm {
+  width: 100%;
+}
+.errors {
+  color: var(--errors);
+  padding-bottom: 0;
+}
+.title {
+  composes: heading-3 from global;
+  margin-top: 0.8rem;
+  margin-bottom: 1.8rem;
+}
+.title h3 {
+  color: var(--sidebar-title-color);
+  margin: 0px;
+}
+
+.sidebar {
+  overflow-x: hidden;
+  overflow-y: auto;
+  width: 30em !important;
+  height: auto;
+}
+.spinner {
+  top: 0 !important;
+}
+.newContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.newContainer button {
+  font-size: 1.25em;
+  width: 1.9rem;
+  height: 1.9rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-left: 0.5rem !important;
+}
+
+.listContainer ul {
+  padding: 0 0.5rem;
+}
+
+.createSnapshotButton {
+  border-radius: 5px !important;
+  padding: 0 !important;
+  width: 30px !important;
+  height: 32px !important;
+  &:focus {
+    box-shadow: none !important;
+  }
+}
+
+.formField {
+  background-color: var(--form-field-bg);
+  color: var(--form-field-color);
+}
+
+.createInputAndButtonWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  .descriptionWrapper {
+    width: 100%;
+  }
+  .createButtonWrapper {
+    align-self: center;
+    margin-bottom: 2.5rem;
+  }
+}
+
+.snapshotForm {
+  margin-bottom: 0px !important;
+}

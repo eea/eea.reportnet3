@@ -37,16 +37,21 @@ public class FieldValueIdGenerator implements IdentifierGenerator {
       throws HibernateException {
 
     FieldValue field = (FieldValue) object;
-    String prefix = null;
-    String datasetId = field.getRecord().getTableValue().getDatasetId().getId().toString();
-    // Set the provider code to create Hash
-    if (null == field.getRecord().getDataProviderCode()) {
-      Double aux = Math.random();
-      prefix = "FIELD" + aux.toString() + "DS";
+    String prefix = Double.toString(Math.random());
+    String datasetId = "";
+    if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null
+        && field.getRecord().getTableValue().getDatasetId() != null) {
+      datasetId = field.getRecord().getTableValue().getDatasetId().getId().toString();
+      // Set the provider code to create Hash
+      if (null == field.getRecord().getDataProviderCode()) {
+        Double aux = Math.random();
+        prefix = "FIELD" + aux.toString() + "DS";
+      } else {
+        prefix = "FIELD" + field.getRecord().getDataProviderCode();
+      }
     } else {
-      prefix = "FIELD" + field.getRecord().getDataProviderCode();
+      LOG_ERROR.error("Error generating field serial id number. Field {}", field);
     }
-
     String idcompose = datasetId + prefix + UUID.randomUUID();
     return DigestUtils.md5Hex(idcompose).toUpperCase();
 

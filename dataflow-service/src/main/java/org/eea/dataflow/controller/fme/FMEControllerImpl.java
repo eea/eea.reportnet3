@@ -77,7 +77,7 @@ public class FMEControllerImpl implements FMEController {
       response = FMECollectionVO.class)
   public FMECollectionVO findRepositories(
       @ApiParam(value = "Dataset id", example = "0") @RequestParam("datasetId") Long datasetId) {
-    return fmeCommunicationService.findRepository();
+    return fmeCommunicationService.findRepository(datasetId);
   }
 
   /**
@@ -97,7 +97,7 @@ public class FMEControllerImpl implements FMEController {
   public FMECollectionVO findItems(
       @ApiParam(value = "Dataset id", example = "0") @RequestParam("datasetId") Long datasetId,
       @ApiParam(value = "Repository name") @RequestParam("repository") String repository) {
-    return fmeCommunicationService.findItems(repository);
+    return fmeCommunicationService.findItems(repository, datasetId);
   }
 
   /**
@@ -152,7 +152,7 @@ public class FMEControllerImpl implements FMEController {
    */
   @Override
   @GetMapping(value = "/downloadExportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASCHEMA_CUSTODIAN', 'DATASET_CUSTODIAN', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER', 'DATASET_REPORTER_READ', 'DATASET_REPORTER_WRITE','DATASET_NATIONAL_COORDINATOR')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASCHEMA_CUSTODIAN', 'DATASET_CUSTODIAN', 'DATASET_STEWARD', 'DATASET_LEAD_REPORTER', 'DATASET_REPORTER_READ', 'DATASET_REPORTER_WRITE','DATASET_NATIONAL_COORDINATOR','DATASET_OBSERVER')")
   @ApiOperation(value = "Download an exported data file from FME")
   public ResponseEntity<StreamingResponseBody> downloadExportFile(
       @RequestParam("datasetId") Long datasetId,

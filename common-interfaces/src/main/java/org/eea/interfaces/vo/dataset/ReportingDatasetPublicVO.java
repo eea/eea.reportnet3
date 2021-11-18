@@ -2,6 +2,7 @@ package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
 import java.util.Date;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -39,6 +40,9 @@ public class ReportingDatasetPublicVO implements Serializable {
 
   /** The restrict from public. */
   private boolean restrictFromPublic;
+
+  /** The status. */
+  private DatasetStatusEnum status;
 
 
 }

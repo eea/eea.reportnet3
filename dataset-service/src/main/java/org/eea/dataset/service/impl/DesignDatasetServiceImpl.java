@@ -196,7 +196,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       Map<String, Object> copyDatasetSchema = new HashMap<>();
       copyDatasetSchema.put(LiteralConstants.SIGNATURE,
           LockSignature.COPY_DATASET_SCHEMA.getValue());
-      copyDatasetSchema.put(LiteralConstants.DATAFLOWIDORIGIN, idDataflowOrigin);
       copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, idDataflowDestination);
       lockService.removeLockByCriteria(copyDatasetSchema);
 
@@ -292,7 +291,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       Map<String, Object> copyDatasetSchema = new HashMap<>();
       copyDatasetSchema.put(LiteralConstants.SIGNATURE,
           LockSignature.COPY_DATASET_SCHEMA.getValue());
-      copyDatasetSchema.put(LiteralConstants.DATAFLOWIDORIGIN, idDataflowOrigin);
       copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, idDataflowDestination);
       lockService.removeLockByCriteria(copyDatasetSchema);
 
@@ -307,7 +305,6 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       Map<String, Object> copyDatasetSchema = new HashMap<>();
       copyDatasetSchema.put(LiteralConstants.SIGNATURE,
           LockSignature.COPY_DATASET_SCHEMA.getValue());
-      copyDatasetSchema.put(LiteralConstants.DATAFLOWIDORIGIN, idDataflowOrigin);
       copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, idDataflowDestination);
       lockService.removeLockByCriteria(copyDatasetSchema);
       throw new EEAException(String.format(EEAErrorMessage.ERROR_COPYING_SCHEMAS, idDataflowOrigin,

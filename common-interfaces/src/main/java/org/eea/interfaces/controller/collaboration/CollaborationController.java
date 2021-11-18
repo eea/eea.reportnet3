@@ -1,15 +1,20 @@
 package org.eea.interfaces.controller.collaboration;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The Interface CollaborationController.
@@ -36,6 +41,19 @@ public interface CollaborationController {
       @RequestBody MessageVO messageVO);
 
   /**
+   * Creates the message attachment.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param fileAttachment the file attachment
+   * @return the message VO
+   */
+  @PostMapping("/createMessage/dataflow/{dataflowId}/attachment")
+  MessageVO createMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId,
+      @RequestPart("fileAttachment") MultipartFile fileAttachment);
+
+  /**
    * Update message read status.
    *
    * @param dataflowId the dataflow id
@@ -46,18 +64,42 @@ public interface CollaborationController {
       @RequestBody List<MessageVO> messageVOs);
 
   /**
+   * Delete message.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param messageId the message id
+   */
+  @DeleteMapping("/deleteMessage/dataflow/{dataflowId}")
+  void deleteMessage(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId, @RequestParam("messageId") Long messageId);
+
+  /**
    * Find messages.
    *
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param read the read
    * @param page the page
-   * @return the list
+   * @return the message paginated VO
    */
   @GetMapping("/findMessages/dataflow/{dataflowId}")
-  List<MessageVO> findMessages(@PathVariable("dataflowId") Long dataflowId,
+  MessagePaginatedVO findMessages(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
       @RequestParam(value = "read", required = false) Boolean read, @RequestParam("page") int page);
+
+  /**
+   * Gets the message attachment.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param messageAttachmentId the message attachment id
+   * @return the message attachment
+   */
+  @GetMapping("/findMessages/dataflow/{dataflowId}/getMessageAttachment")
+  ResponseEntity<byte[]> getMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("providerId") Long providerId,
+      @RequestParam("messageAttachmentId") Long messageAttachmentId);
 
   /**
    * Notify new messages.

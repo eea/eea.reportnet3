@@ -1,7 +1,10 @@
 package org.eea.interfaces.controller.document;
 
+import java.util.List;
+import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,21 +46,25 @@ public interface DocumentController {
    * Download document .
    *
    * @param documentId the document id
+   * @param dataflowId the dataflow id
    * @return the document
    */
-  @GetMapping(value = "/{documentId}")
-  Resource getDocument(@PathVariable("documentId") Long documentId);
+  @GetMapping(value = "/{documentId}/dataflow/{dataflowId}")
+  Resource getDocument(@PathVariable("documentId") Long documentId,
+      @PathVariable("dataflowId") final Long dataflowId);
 
   /**
    * Delete document. You can delete metabase if you want , the boolean is to delete metabase by
    * your own
    *
    * @param documentId the document id
+   * @param dataflowId the dataflow id
    * @param deleteMetabase the delete metabase
    * @throws Exception the exception
    */
-  @DeleteMapping(value = "/{documentId}")
+  @DeleteMapping(value = "/{documentId}/dataflow/{dataflowId}")
   void deleteDocument(@PathVariable("documentId") Long documentId,
+      @PathVariable("dataflowId") final Long dataflowId,
       @RequestParam("deleteMetabase") Boolean deleteMetabase) throws Exception;
 
 
@@ -65,15 +72,15 @@ public interface DocumentController {
    * Update document.
    *
    * @param file the file
-   * @param dataFlowId the data flow id
+   * @param dataflowId the dataflow id
    * @param description the description
    * @param language the language
    * @param idDocument the id document
    * @param isPublic the is public
    */
-  @PutMapping(value = "/update/{idDocument}/dataflow/{dataFlowId}")
+  @PutMapping(value = "/update/{idDocument}/dataflow/{dataflowId}")
   void updateDocument(@RequestPart(name = "file", required = false) MultipartFile file,
-      @PathVariable("dataFlowId") Long dataFlowId,
+      @PathVariable("dataflowId") Long dataflowId,
       @RequestParam(name = "description", required = false) String description,
       @RequestParam(name = "language", required = false) String language,
       @PathVariable("idDocument") Long idDocument, @RequestParam("isPublic") Boolean isPublic);
@@ -112,5 +119,68 @@ public interface DocumentController {
   @DeleteMapping(value = "/{idDesignDataset}/snapshot")
   void deleteSnapshotSchemaDocument(@PathVariable("idDesignDataset") Long idDesignDataset,
       @RequestParam("fileName") String fileName) throws Exception;
+
+  /**
+   * Gets the all documents by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow
+   */
+  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Gets the document.
+   *
+   * @param documentId the document id
+   *
+   * @return the document
+   */
+  @GetMapping(value = "/public/{documentId}", produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
+  Resource getPublicDocument(Long documentId);
+
+
+  /**
+   * Upload collaboration document.
+   *
+   * @param file the file
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param extension the extension
+   * @param messageId the message id
+   */
+  @PostMapping(value = "/private/upload/{dataflowId}/collaborationattachment")
+  void uploadCollaborationDocument(@RequestBody final byte[] file,
+      @PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("fileName") final String fileName,
+      @RequestParam("extension") final String extension,
+      @RequestParam("messageId") final Long messageId);
+
+
+  /**
+   * Delete collaboration document.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param messageId the message id
+   * @throws Exception the exception
+   */
+  @DeleteMapping(value = "/private/{dataflowId}/collaborationattachment")
+  void deleteCollaborationDocument(@PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("fileName") final String fileName,
+      @RequestParam("messageId") final Long messageId) throws Exception;
+
+  /**
+   * Gets the collaboration document.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param messageId the message id
+   * @return the collaboration document
+   */
+  @GetMapping(value = "/private/{dataflowId}/collaborationattachment")
+  byte[] getCollaborationDocument(@PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("fileName") final String fileName,
+      @RequestParam("messageId") final Long messageId);
 
 }

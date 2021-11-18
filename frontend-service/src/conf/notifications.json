@@ -66,6 +66,13 @@
           }
         },
         {
+          "key": "ADD_RECORDS_PASTING_ERROR",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "ADD_RECORDS_ERROR"
         },
         {
@@ -79,6 +86,12 @@
         },
         {
           "key": "REFERENCE_DATAFLOW_CREATION_ERROR"
+        },
+        {
+          "key": "BUSINESS_DATAFLOW_CREATION_ERROR"
+        },
+        {
+          "key": "DELETE_DATAFLOW_FAILED_EVENT"
         },
         {
           "key": "SNAPSHOT_CREATION_ERROR",
@@ -227,6 +240,13 @@
           }
         },
         {
+          "key": "BUSINESS_DATAFLOW_UPDATING_ERROR",
+          "navigateTo": {
+            "section": "DATAFLOWS",
+            "parameters": ["dataflowName"]
+          }
+        },
+        {
           "key": "CREATE_BY_ID_DESIGNER_ERROR",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
@@ -272,7 +292,14 @@
           }
         },
         {
-          "key": "VALIDATE_DATA_BY_ID_ERROR",
+          "key": "VALIDATE_DESIGN_DATA_ERROR",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "VALIDATE_REPORTING_DATA_ERROR",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
@@ -287,6 +314,9 @@
         },
         {
           "key": "DOWNLOAD_VALIDATIONS_ERROR"
+        },
+        {
+          "key": "GENERATE_QC_RULES_FILE_ERROR"
         },
         {
           "key": "CREATE_DATA_COLLECTION_ERROR"
@@ -559,7 +589,20 @@
         {
           "key": "LOAD_DATASETS_RELEASES_ERROR"
         },
+        {
+          "key": "FEEDBACK_DELETE_MESSAGE_ERROR"
+        },
+        {
+          "key": "FEEDBACK_DOWNLOAD_MESSAGE_ATTACHMENT_ERROR"
+        },
+        {
+          "key": "FEEDBACK_MAX_FILE_SIZE_ERROR"
+        },
+        { "key": "FEEDBACK_INVALID_FILE_ERROR" },
         { "key": "UPDATE_DATASET_FEEDBACK_STATUS_ERROR" },
+        {
+          "key": "LOAD_DATASET_FEEDBACK_MESSAGES_ERROR"
+        },
         {
           "key": "VALIDATE_RULES_ERROR_EVENT",
           "navigateTo": {
@@ -655,6 +698,9 @@
           "key": "DOWNLOAD_EXPORT_DATASET_FILE_ERROR"
         },
         {
+          "key": "DOWNLOAD_QC_RULES_FILE_ERROR"
+        },
+        {
           "key": "DOWNLOAD_VALIDATIONS_FILE_ERROR"
         },
         {
@@ -703,6 +749,16 @@
         },
         {
           "key": "DATASET_SCHEMA_FIELD_INVALID_NAME"
+        },
+        {
+          "key": "IMPORT_FIELD_SCHEMA_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId", "datasetName"]
+          }
+        },
+        {
+          "key": "UNLOCK_DATASET_ERROR"
         }
       ]
     },
@@ -866,7 +922,7 @@
           "key": "REFERENCE_DATAFLOW_PROCESSED_EVENT"
         },
         {
-          "key": "DATAFLOW_DELETE_SUCCESS"
+          "key": "DELETE_DATAFLOW_COMPLETED_EVENT"
         },
         {
           "key": "COPY_TO_CLIPBOARD_SUCCESS"
@@ -930,7 +986,17 @@
           "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD"
         },
         {
+          "key": "AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE"
+        },
+        {
           "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE"
+        },
+        {
+          "key": "IMPORT_FIELD_SCHEMA_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },
@@ -979,6 +1045,9 @@
           "key": "DOWNLOAD_VALIDATIONS_START"
         },
         {
+          "key": "DOWNLOAD_QC_RULES_START"
+        },
+        {
           "key": "DATASET_IMPORT_INIT"
         },
         {
@@ -1006,6 +1075,9 @@
         },
         {
           "key": "RELEASE_START_EVENT"
+        },
+        {
+          "key": "IMPORT_TABLE_SCHEMA_INIT"
         }
       ]
     }
@@ -1015,9 +1087,12 @@
     "EXPORT_DATASET_FAILED_EVENT",
     "DOWNLOAD_VALIDATIONS_COMPLETED_EVENT",
     "DOWNLOAD_VALIDATIONS_FAILED_EVENT",
+    "EXPORT_QC_COMPLETED_EVENT",
+    "EXPORT_QC_FAILED_EVENT",
     "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT",
     "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
     "DISABLE_RULES_ERROR_EVENT",
-    "RECEIVED_MESSAGE"
+    "RECEIVED_MESSAGE",
+    "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT"
   ]
 }

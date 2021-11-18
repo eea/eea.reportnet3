@@ -1,0 +1,56 @@
+.chipButton {
+  align-items: center;
+  background: var(--chipbutton-secondary-transparent-bg);
+  border-radius: 15px;
+  color: var(--main-font-color);
+  display: inline-flex;
+  font-size: 14px;
+  justify-content: space-between;
+  margin: 0 0.286em 0.286em 0;
+  max-width: 250px;
+  padding: 5px 10px 5px 5px;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  white-space: normal;
+  &:hover {
+    background: var(--chipbutton-secondary-transparent-bg-hover);
+  }
+}
+.chipButtonIcon {
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: 6px;
+  opacity: 0.7;
+  top: 33%;
+}
+.chipButtonErrorIcon {
+  font-size: 1rem;
+  cursor: default !important;
+}
+.chipButtonHidden {
+  display: none;
+}
+.chipButtonLabel {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-decoration: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  margin: 0 5px;
+}
+
+.info {
+  color: var(--c-growl-info-darker-blue);
+}
+.warning {
+  color: var(--c-growl-warning-darker-yellow);
+}
+.error {
+  color: var(--errors);
+}
+.blocker {
+  color: var(--blockers);
+}

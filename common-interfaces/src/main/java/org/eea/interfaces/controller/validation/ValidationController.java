@@ -92,11 +92,11 @@ public interface ValidationController {
       @RequestParam(value = "tableFilter", required = false) String tableFilter,
       @RequestParam(value = "fieldValueFilter", required = false) String fieldValueFilter);
 
+
   /**
-   * Export CSV file of grouped validations.
+   * Export validation data CSV.
    *
    * @param datasetId the dataset id
-   * @return the response entity
    */
   @PostMapping(value = "/export/{datasetId}")
   void exportValidationDataCSV(@PathVariable("datasetId") Long datasetId);
@@ -111,5 +111,4 @@ public interface ValidationController {
   @GetMapping("/downloadFile/{datasetId}")
   void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
       HttpServletResponse response);
-
 }

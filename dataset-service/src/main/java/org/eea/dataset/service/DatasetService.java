@@ -10,10 +10,12 @@ import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -44,8 +46,9 @@ public interface DatasetService {
    * Delete import data.
    *
    * @param datasetId the data set id
+   * @param deletePrefilledTables the delete prefilled tables
    */
-  void deleteImportData(@DatasetId Long datasetId);
+  void deleteImportData(@DatasetId Long datasetId, Boolean deletePrefilledTables);
 
   /**
    * Gets the table values by id.
@@ -375,6 +378,19 @@ public interface DatasetService {
    */
   boolean isDatasetReportable(Long idDataset);
 
+
+
+  /**
+   * Check if dataset locked or read only.
+   *
+   * @param datasetId the dataset id
+   * @param idRecordSchema the id record schema
+   * @param entityType the entity type
+   * @return true, if successful
+   */
+  boolean checkIfDatasetLockedOrReadOnly(Long datasetId, String idRecordSchema,
+      EntityTypeEnum entityType);
+
   /**
    * Gets the mimetype.
    *
@@ -606,5 +622,24 @@ public interface DatasetService {
    * @throws SQLException the SQL exception
    */
   void storeRecords(Long datasetId, List<RecordValue> recordList) throws IOException, SQLException;
+
+  /**
+   * Gets the total failed validations by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @return the total failed validations by id dataset
+   */
+  FailedValidationsDatasetVO getTotalFailedValidationsByIdDataset(Long datasetId,
+      String idTableSchema);
+
+  /**
+   * Creates the reference dataset files.
+   *
+   * @param dataset the dataset
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException;
+
 
 }

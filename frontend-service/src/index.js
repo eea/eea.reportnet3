@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import './interceptors.js';
+import './interceptors';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import './index.scss';

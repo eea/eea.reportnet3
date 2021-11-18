@@ -53,6 +53,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -69,6 +70,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
@@ -169,6 +171,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant STATUS_TECHNICALLY_ACCEPTED: {@value}. */
+  private static final String STATUS_TECHNICALLY_ACCEPTED =
+      "Feedback status changed: Technically Accepted, Message: ";
+
+  /** The Constant STATUS_CORRECTION_REQUESTED: {@value}. */
+  private static final String STATUS_CORRECTION_REQUESTED =
+      "Feedback status changed: Correction Requested, Message: ";
+
+  /** The Constant STATUS_CHANGED: {@value}. */
+  private static final String STATUS_CHANGED = "Feedback status changed, Message: ";
+
   /**
    * Gets the data set id by dataflow id.
    *
@@ -234,7 +247,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   @Override
   @Transactional
-  @CacheEvict(value = "dataFlowId", key = "#datasetId")
+  @Caching(evict = {@CacheEvict(value = "dataFlowId", key = "#datasetId"),
+      @CacheEvict(value = "datasetSchemaByDatasetId", key = "#datasetId")})
   public void deleteDesignDataset(Long datasetId) {
     dataSetMetabaseRepository.deleteNativeDataset(datasetId);
   }
@@ -277,8 +291,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     }
 
     MessageVO message = new MessageVO();
-    message.setContent(datasetStatusMessageVO.getMessage());
+    String messageStatus = "";
+    if (DatasetStatusEnum.TECHNICALLY_ACCEPTED.equals(datasetStatusMessageVO.getStatus())) {
+      messageStatus = STATUS_TECHNICALLY_ACCEPTED;
+    } else if (DatasetStatusEnum.CORRECTION_REQUESTED.equals(datasetStatusMessageVO.getStatus())) {
+      messageStatus = STATUS_CORRECTION_REQUESTED;
+    } else {
+      messageStatus = STATUS_CHANGED;
+    }
+    message.setContent(messageStatus + datasetStatusMessageVO.getMessage());
     message.setProviderId(datasetMetabase.getDataProviderId());
+    message.setAutomatic(true);
 
     // Send message to provider
     Optional<DesignDataset> designDataset =
@@ -288,6 +311,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         datasetMetabase.getDataProviderId(), datasetMetabase.getId(), datasetMetabase.getStatus(),
         designDataset.isPresent() ? designDataset.get().getDataSetName() : null,
         EventType.UPDATED_DATASET_STATUS.toString());
+    LOG.info("Automatic feedback message created of dataflow {}. Message: {}",
+        datasetStatusMessageVO.getDataflowId(), message.getContent());
   }
 
 
@@ -705,6 +730,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   @Override
   @CheckForNull
+  @Cacheable(value = "datasetSchemaByDatasetId", key = "#datasetId")
   public String findDatasetSchemaIdById(long datasetId) {
     return dataSetMetabaseRepository.findDatasetSchemaIdById(datasetId);
   }
@@ -974,6 +1000,5 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return nextIdValidation;
 
   }
-
 
 }
