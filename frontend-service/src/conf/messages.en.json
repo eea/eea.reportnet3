@@ -54,7 +54,7 @@
     "attachmentEditorItemsMessage": "Press <strong>enter</strong>, <strong>tab</strong> or <strong>paste the list</strong> (separated by commas) <u><strong>to add</strong></u> valid file extensions. Leave <strong>empty</strong> to allow any file extension.",
     "attachmentEditorSizeMessage": "Enter the maximum file size <strong>in megabytes</strong> (with decimals). <strong>Remember</strong>, <u><strong>the overall maximum value is 20 MB</strong></u> (value 0 is considered as default limit).",
     "attachmentPaste": "Attachment fields will not be pasted",
-    "automatic": "Creation mode",
+    "automatic": "Automatic",
     "automaticallyDownloadQcRulesFile": "QC rules file generated successfully",
     "automaticallyDownloadSchemasInfoFile": "Schemas info file generated successfully",
     "automaticallyDownloadValidationsFile": "Validations file generated successfully",
@@ -479,7 +479,7 @@
     "emptyTitleValidationError": "Empty table name, please enter one",
     "emptyWebformTable": "This table has no fields or do not match with the webform model.",
     "emptyWebformTables": "Created tables do not match with the webform model, please check it.",
-    "enabled": "Status",
+    "enabled": "Enabled",
     "entity": "Entity",
     "entityType": "Type of QC",
     "epsg": "EPSG: ",
@@ -1342,6 +1342,13 @@
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "The URL is not valid",
-    "yes": "Yes"
+    "yes": "Yes",
+    "creationMode": "Creation mode",
+    "statusQC": "Status",
+    "downloadUsersListButtonLabel": "Download users list",
+    "generateUsersListFileError": "Failed generating users list file",
+    "downloadUsersStart": "Generating users list file",
+    "automaticallyDownloadUsersListFile": "Users list file generated successfully",
+    "downloadUsersListFileError": "Failed downloading users list file"
   }
 }

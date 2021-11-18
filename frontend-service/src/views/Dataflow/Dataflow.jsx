@@ -92,6 +92,7 @@ const Dataflow = withRouter(({ history, match }) => {
     isDataSchemaCorrect: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
+    isDownloadingUsers: false,
     isExportDialogVisible: false,
     isExportEUDatasetLoading: false,
     isExporting: false,
@@ -242,6 +243,12 @@ const Dataflow = withRouter(({ history, match }) => {
       leftSideBarContext.addHelpSteps(DataflowReporterHelpConfig, 'dataflowReporterHelp');
     }
   }, [userContext, dataflowState]);
+
+  useEffect(() => {
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_USERS_BY_COUNTRY_FAILED_EVENT')) {
+      setIsDownloadingUsers(false);
+    }
+  }, [notificationContext.hidden]);
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) =>
     dataflowDispatch({
@@ -511,6 +518,47 @@ const Dataflow = withRouter(({ history, match }) => {
       label={resourcesContext.messages['close']}
       onClick={() => manageDialogs(modalType, false)}
     />
+  );
+
+  const onDownloadUsersByCountry = async () => {
+    setIsDownloadingUsers(true);
+    notificationContext.add({ type: 'DOWNLOAD_USERS_START' });
+
+    try {
+      await DataflowService.generateUsersByCountryFile(dataflowId);
+    } catch (error) {
+      console.error('Dataflow - onDownloadUsersByCountry.', error);
+      notificationContext.add({ type: 'GENERATE_USERS_LIST_FILE_ERROR' });
+      setIsDownloadingUsers(false);
+    }
+  };
+
+  useCheckNotifications(
+    ['AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE', 'DOWNLOAD_USERS_LIST_FILE_ERROR'],
+    setIsDownloadingUsers,
+    false
+  );
+
+  function setIsDownloadingUsers(isDownloadingUsers) {
+    dataflowDispatch({ type: 'SET_IS_DOWNLOADING_USERS', payload: isDownloadingUsers });
+  }
+
+  const renderUserListDialogFooter = () => (
+    <div className={styles.buttonsRolesFooter}>
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        disabled={dataflowState.isDownloadingUsers}
+        icon={dataflowState.isDownloadingUsers ? 'spinnerAnimate' : 'export'}
+        label={resourcesContext.messages['downloadUsersListButtonLabel']}
+        onClick={() => onDownloadUsersByCountry()}
+      />
+      <Button
+        className={`p-button-secondary p-button-animated-blink ${styles.closeButton}`}
+        icon={'cancel'}
+        label={resourcesContext.messages['close']}
+        onClick={() => manageDialogs('isUserListVisible', false)}
+      />
+    </div>
   );
 
   const getCurrentDatasetId = () => {
@@ -1242,7 +1290,12 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isUserListVisible && (
           <Dialog
-            footer={renderDialogFooterCloseBtn('isUserListVisible')}
+            footer={
+              ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
+              dataflowState.status === config.dataflowStatus.OPEN
+                ? renderUserListDialogFooter()
+                : renderDialogFooterCloseBtn('isUserListVisible')
+            }
             header={
               ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
