@@ -1,5 +1,3 @@
-import dayjs from 'dayjs';
-
 import { config } from 'conf/index';
 
 import { UserRepository } from 'repositories/UserRepository';
@@ -13,77 +11,64 @@ const refreshToken = async () => {
   try {
     const currentTokens = LocalUserStorageUtils.getTokens();
     const userDTO = await UserRepository.refreshToken(currentTokens.refreshToken);
-    const { accessToken, refreshToken } = userDTO.data;
-    const user = new User({
-      accessRole: userDTO.data.roles,
-      contextRoles: userDTO.data.groups,
-      id: userDTO.data.userId,
-      name: userDTO.data.preferredUsername,
-      preferredUsername: userDTO.data.preferredUsername,
-      tokenExpireTime: userDTO.data.accessTokenExpiration
-    });
-    LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
-    const userInfoDTO = await UserRepository.getUserInfo(userDTO.data.userId);
-    user.email = userInfoDTO.data.email;
-    user.firstName = userInfoDTO.data.firstName;
-    user.lastName = userInfoDTO.data.lastName;
-    //calculate difference between now and expiration
-    const remain = userDTO.data.accessTokenExpiration - dayjs().unix();
-    timeOut((remain - 10) * 1000);
-    return user;
+    return calculateUser(userDTO);
   } catch (error) {
     LocalUserStorageUtils.remove();
   }
 };
 
-const timeOut = time => {
+const setRefreshTokenTimeout = time => {
   setTimeout(() => {
     refreshToken();
   }, time);
 };
 
+const calculateUser = async userDTO => {
+  const { accessToken, refreshToken } = userDTO.data;
+  const user = new User({
+    accessRole: userDTO.data.roles,
+    contextRoles: userDTO.data.groups,
+    id: userDTO.data.userId,
+    name: userDTO.data.preferredUsername,
+    preferredUsername: userDTO.data.preferredUsername,
+    tokenExpireTime: userDTO.data.accessTokenExpiration
+  });
+
+  LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
+  const userInfoDTO = await UserRepository.getUserInfo(userDTO.data.userId);
+  user.email = userInfoDTO.data.email;
+  user.firstName = userInfoDTO.data.firstName;
+  user.lastName = userInfoDTO.data.lastName;
+
+  setRefreshTokenTimeout(userDTO.data.accessTokenExpiration);
+
+  return user;
+};
+
 export const UserService = {
   login: async code => {
     const userDTO = await UserRepository.login(code);
-    const { accessToken, refreshToken } = userDTO.data;
-    const user = new User({
-      accessRole: userDTO.data.roles,
-      contextRoles: userDTO.data.groups,
-      id: userDTO.data.userId,
-      name: userDTO.data.preferredUsername,
-      preferredUsername: userDTO.data.preferredUsername,
-      tokenExpireTime: userDTO.data.accessTokenExpiration
-    });
-    LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
-    const userInfoDTO = await UserRepository.getUserInfo(userDTO.data.userId);
-    user.email = userInfoDTO.data.email;
-    user.firstName = userInfoDTO.data.firstName;
-    user.lastName = userInfoDTO.data.lastName;
-    //calculate difference between now and expiration
-    const remain = userDTO.data.accessTokenExpiration - dayjs().unix();
-    timeOut((remain - 10) * 1000);
-    return user;
+    return calculateUser(userDTO);
   },
 
   logout: async () => {
     const currentTokens = LocalUserStorageUtils.getTokens();
     LocalUserStorageUtils.remove();
-    if (currentTokens) {
-      const response = await UserRepository.logout(currentTokens.refreshToken);
-      return response;
+
+    if (!currentTokens) {
+      return;
     }
-    return;
+
+    return await UserRepository.logout(currentTokens.refreshToken);
   },
 
   getUserInfo: async userId => {
     const userDTO = await UserRepository.getUserInfo(userId);
-    const user = new User({
+    return new User({
       email: userDTO.email,
       firstName: userDTO.firstName,
       lastName: userDTO.lastName
     });
-
-    return user;
   },
 
   getConfiguration: async () => {
@@ -95,35 +80,17 @@ export const UserService = {
 
   oldLogin: async (userName, password) => {
     const userDTO = await UserRepository.oldLogin(userName, password);
-
-    const { accessToken, refreshToken } = userDTO.data;
-    const user = new User({
-      accessRole: userDTO.data.roles,
-      contextRoles: userDTO.data.groups,
-      id: userDTO.data.userId,
-      name: userDTO.data.preferredUsername,
-      preferredUsername: userDTO.data.preferredUsername,
-      tokenExpireTime: userDTO.data.accessTokenExpiration
-    });
-    LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
-    const userInfoDTO = await UserRepository.getUserInfo(userDTO.data.userId);
-    user.email = userInfoDTO.data.email;
-    user.firstName = userInfoDTO.data.firstName;
-    user.lastName = userInfoDTO.data.lastName;
-    //calculate difference between now and expiration
-    const remain = userDTO.data.accessTokenExpiration - dayjs().unix();
-    timeOut((remain - 10) * 1000);
-    return user;
+    return calculateUser(userDTO);
   },
 
   refreshToken,
 
   getUserRole: (user, entity) => {
     const roleDTO = user.contextRoles.filter(role => role.includes(entity));
-    if (roleDTO.length) {
-      const [roleName] = roleDTO[0].split('-').reverse();
-      return config.permissions.roles[roleName];
+    if (roleDTO.length === 0) {
+      return;
     }
-    return;
+    const [roleName] = roleDTO[0].split('-').reverse();
+    return config.permissions.roles[roleName];
   }
 };
