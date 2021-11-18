@@ -79,6 +79,7 @@ import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
@@ -95,6 +96,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
@@ -311,6 +313,11 @@ public class DatasetServiceImpl implements DatasetService {
   /** The validation repository. */
   @Autowired
   private ValidationRepository validationRepository;
+
+  /** The dataset snapshot service. */
+  @Autowired
+  private DatasetSnapshotService datasetSnapshotService;
+
 
   /** The import path. */
   @Value("${importPath}")
@@ -3375,8 +3382,7 @@ public class DatasetServiceImpl implements DatasetService {
 
       LOG.info("Statistics save to datasetId {}.", datasetId);
       DatasetTypeEnum type = getDatasetType(datasetId);
-      if (DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
-          || DatasetTypeEnum.REFERENCE.equals(type)) {
+      if (DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)) {
         DesignDataset originDatasetDesign =
             designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
         if (null != originDatasetDesign) {
@@ -3385,12 +3391,17 @@ public class DatasetServiceImpl implements DatasetService {
           // target dataset
           LOG.info("Prefilling data into the datasetId {}.", datasetId);
           spreadDataPrefill(schema, originDatasetDesign.getId(), datasetMb);
-
-          // create zip to the reference
-          if (DatasetTypeEnum.REFERENCE.equals(type)) {
-            createReferenceDatasetFiles(datasetMb);
-          }
-
+        }
+      } else if (DatasetTypeEnum.REFERENCE.equals(type)) {
+        DesignDataset originDatasetDesign =
+            designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
+        if (null != originDatasetDesign) {
+          LOG.info("Prefilling data into the reference datasetId {}.", datasetId);
+          CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
+          createSnapshotVO.setDescription(originDatasetDesign.getDatasetSchema());
+          createSnapshotVO.setReleased(false);
+          datasetSnapshotService.addSnapshot(originDatasetDesign.getId(), createSnapshotVO,
+              datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true);
         }
       }
     } catch (Exception e) {
@@ -3465,7 +3476,8 @@ public class DatasetServiceImpl implements DatasetService {
    * @param dataset the dataset
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
+  @Override
+  public void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
 
     List<DesignDataset> desingDataset =
         designDatasetRepository.findByDataflowId(dataset.getDataflowId());

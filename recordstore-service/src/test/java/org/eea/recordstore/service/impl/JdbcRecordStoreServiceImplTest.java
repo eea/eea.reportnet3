@@ -193,7 +193,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString());
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
@@ -237,7 +237,8 @@ public class JdbcRecordStoreServiceImplTest {
     datasetMetabase.setDataProviderId(1L);
     // Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
     // .thenReturn(datasetMetabase);
-    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false);
+    jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false,
+        false);
     Mockito.verify(kafkaSender, Mockito.times(0)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }

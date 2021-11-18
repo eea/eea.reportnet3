@@ -304,7 +304,8 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.empty());
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), null, new Date().toString());
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), null, new Date().toString(),
+        false);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -319,8 +320,9 @@ public class DatasetSnapshotServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZuul).createSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L, new Date().toString());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L, new Date().toString(),
+        false);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -338,7 +340,8 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(Optional.empty());
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
         .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
-    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L, new Date().toString());
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L, new Date().toString(),
+        false);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
   }
 
@@ -399,9 +402,11 @@ public class DatasetSnapshotServiceTest {
 
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    datasetSnapshotService.restoreSnapshotToCloneData(1L, 1L, 1L, true, DatasetTypeEnum.EUDATASET);
+    datasetSnapshotService.restoreSnapshotToCloneData(1L, 1L, 1L, true, DatasetTypeEnum.EUDATASET,
+        false);
     Mockito.verify(recordStoreControllerZuul, times(1)).restoreSnapshotData(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean());
   }
 
   /**
@@ -611,7 +616,7 @@ public class DatasetSnapshotServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZuul).createSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
     doNothing().when(documentControllerZuul).uploadSchemaSnapshotDocument(Mockito.any(),
         Mockito.any(), Mockito.any());
     when(schemaRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(new DataSetSchema());
