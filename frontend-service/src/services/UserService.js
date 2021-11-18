@@ -7,6 +7,16 @@ import { User } from 'entities/User';
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { UserUtils } from 'services/_utils/UserUtils';
 
+const refreshToken = async () => {
+  try {
+    const currentTokens = LocalUserStorageUtils.getTokens();
+    const userDTO = await UserRepository.refreshToken(currentTokens.refreshToken);
+    return calculateUser(userDTO);
+  } catch (error) {
+    LocalUserStorageUtils.remove();
+  }
+};
+
 const calculateUser = async userDTO => {
   const { accessToken, refreshToken } = userDTO.data;
   const user = new User({
@@ -29,16 +39,6 @@ const calculateUser = async userDTO => {
   }, userDTO.data.accessTokenExpiration);
 
   return user;
-};
-
-const refreshToken = async () => {
-  try {
-    const currentTokens = LocalUserStorageUtils.getTokens();
-    const userDTO = await UserRepository.refreshToken(currentTokens.refreshToken);
-    return calculateUser(userDTO);
-  } catch (error) {
-    LocalUserStorageUtils.remove();
-  }
 };
 
 export const UserService = {
