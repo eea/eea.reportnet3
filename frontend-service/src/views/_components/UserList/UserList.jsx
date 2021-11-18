@@ -59,6 +59,17 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
 
   const getFilteredState = value => setIsDataFiltered(value);
 
+  const getFilters = filterOptions => {
+    return (
+      <Filters
+        data={userListData}
+        getFilteredData={onLoadFilteredData}
+        getFilteredSearched={getFilteredState}
+        options={filterOptions}
+      />
+    );
+  };
+
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {isDataFiltered && userListData.length !== filteredData.length
@@ -75,10 +86,7 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   const onLoadFilteredData = value => setFilteredData(value);
 
   const filterOptionsWithDataflowIdRepresentativeId = [
-    {
-      type: 'multiselect',
-      properties: [{ name: 'role' }]
-    },
+    { type: 'multiselect', properties: [{ name: 'role' }] },
     { type: 'input', properties: [{ name: 'email' }] },
     {
       type: 'multiselect',
@@ -109,75 +117,66 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
 
   const renderFilters = () => {
     if (isNil(representativeId) && isNil(dataflowId)) {
-      return (
-        <Filters
-          data={userListData}
-          getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFilteredState}
-          options={filterOptionsNoRepresentative}
-        />
-      );
+      return getFilters(filterOptionsNoRepresentative);
     } else if (isNil(representativeId) && !isNil(dataflowId)) {
+      return getFilters(filterOptionsWithDataflowIdRepresentativeId);
+    } else {
+      return getFilters(filterOptionsHasRepresentativeId);
+    }
+  };
+
+  const renderUsersListContent = () => {
+    if (isLoading) {
+      return <Spinner />;
+    }
+
+    if (isEmpty(userListData)) {
+      return <div className={styles.noUsers}>{resourcesContext.messages['noUsers']}</div>;
+    }
+
+    return (
+      <div className={styles.users}>
+        {renderFilters()}
+        {renderUsersListTable()}
+      </div>
+    );
+  };
+
+  const renderUsersListTable = () => {
+    if (isEmpty(filteredData)) {
       return (
-        <Filters
-          data={userListData}
-          getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFilteredState}
-          options={filterOptionsWithDataflowIdRepresentativeId}
-        />
+        <div className={styles.emptyFilteredData}>{resourcesContext.messages['noUsersWithSelectedParameters']}</div>
       );
     } else {
       return (
-        <Filters
-          data={userListData}
-          getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFilteredState}
-          options={filterOptionsHasRepresentativeId}
-        />
+        <DataTable
+          paginator={true}
+          paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
+          rows={10}
+          rowsPerPageOptions={[5, 10, 15]}
+          summary="usersList"
+          totalRecords={userListData.length}
+          value={filteredData}>
+          {isNil(representativeId) && isNil(dataflowId) && (
+            <Column field="dataflowName" header={resourcesContext.messages['dataflowName']} sortable={true} />
+          )}
+          <Column field="role" header={resourcesContext.messages['role']} sortable={true} />
+          <Column field="email" header={resourcesContext.messages['user']} sortable={true} />
+          {isNil(representativeId) && !isNil(dataflowId) && (
+            <Column
+              field="dataProviderName"
+              header={TextByDataflowTypeUtils.getLabelByDataflowType(
+                resourcesContext.messages,
+                dataflowType,
+                'userListDataProviderColumnHeader'
+              )}
+              sortable={true}
+            />
+          )}
+        </DataTable>
       );
     }
   };
 
-  return (
-    <div className={styles.container}>
-      {isLoading ? (
-        <Spinner />
-      ) : isEmpty(userListData) ? (
-        <div className={styles.noUsers}>{resourcesContext.messages['noUsers']}</div>
-      ) : (
-        <div className={styles.users}>
-          {renderFilters()}
-          {!isEmpty(filteredData) ? (
-            <DataTable
-              paginator={true}
-              paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
-              rows={10}
-              rowsPerPageOptions={[5, 10, 15]}
-              summary="usersList"
-              totalRecords={userListData.length}
-              value={filteredData}>
-              {isNil(representativeId) && isNil(dataflowId) && (
-                <Column field="dataflowName" header={resourcesContext.messages['dataflowName']} sortable={true} />
-              )}
-              <Column field="role" header={resourcesContext.messages['role']} sortable={true} />
-              <Column field="email" header={resourcesContext.messages['user']} sortable={true} />
-              {isNil(representativeId) && !isNil(dataflowId) && (
-                <Column
-                  field="dataProviderName"
-                  header={TextByDataflowTypeUtils.getLabelByDataflowType(
-                    resourcesContext.messages,
-                    dataflowType,
-                    'userListDataProviderColumnHeader'
-                  )}
-                  sortable={true}
-                />
-              )}
-            </DataTable>
-          ) : (
-            <div className={styles.emptyFilteredData}>{resourcesContext.messages['noUsersWithSelectedParameters']}</div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+  return <div className={styles.container}>{renderUsersListContent()} </div>;
 };
