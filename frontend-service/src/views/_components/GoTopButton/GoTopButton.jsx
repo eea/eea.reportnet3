@@ -29,16 +29,15 @@ const GoTopButton = ({ parentRef, referenceMargin }) => {
     };
   }, [parentRef, options]);
 
-  let component = <div></div>;
-
-  if (isVisible) {
-    component = (
-      <div className={`${styles.goTopButton}`} onClick={() => window.scrollTo(0, 0)}>
-        <FontAwesomeIcon icon={AwesomeIcons('angleUp')} />
-      </div>
-    );
+  if (!isVisible) {
+    return null;
   }
-  return component;
+
+  return (
+    <div className={`${styles.goTopButton}`} onClick={() => window.scrollTo(0, 0)}>
+      <FontAwesomeIcon icon={AwesomeIcons('angleUp')} />
+    </div>
+  );
 };
 
 export { GoTopButton };
