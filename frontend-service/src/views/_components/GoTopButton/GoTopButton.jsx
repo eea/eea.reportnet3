@@ -15,7 +15,7 @@ const GoTopButton = ({ parentRef, referenceMargin }) => {
 
   const options = {
     root: null,
-    rootMargin: `${-referenceMargin}px`,
+    rootMargin: `-${referenceMargin}px`,
     threshold: 0
   };
 
