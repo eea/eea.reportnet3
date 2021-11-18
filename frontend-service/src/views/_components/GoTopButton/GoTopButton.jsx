@@ -34,7 +34,7 @@ const GoTopButton = ({ parentRef, referenceMargin }) => {
   }
 
   return (
-    <div className={`${styles.goTopButton}`} onClick={() => window.scrollTo(0, 0)}>
+    <div className={styles.goTopButton} onClick={() => window.scrollTo(0, 0)}>
       <FontAwesomeIcon icon={AwesomeIcons('angleUp')} />
     </div>
   );
