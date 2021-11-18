@@ -411,4 +411,14 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     LOG.info("Refresh Query-Materialized View");
   }
 
+
+  /**
+   * Refresh materialized query.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void refreshMaterializedQuery(Long datasetId) {
+    LOG.info("Refresh async materialized view");
+  }
 }
