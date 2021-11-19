@@ -275,7 +275,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   const loadLogin = () => (
     <div className={styles.loginWrapper}>
       <Button
-        className={`p-button-primary p-button-text-icon-left p-button-animated-blink ${styles.loginButton}`}
+        className={`p-button-animated-blink ${styles.loginButton}`}
         icon={'lock'}
         label={resourcesContext.messages['login']}
         onClick={() => {
