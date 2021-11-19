@@ -311,6 +311,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     return {
       command: () => {
         setIsImportDatasetDialogVisible(true);
+        setSelectedCustomImportIntegration({ id: null, name: resourcesContext.messages[type.key] });
         setImportSelectedIntegrationExtension(type.code);
       },
       icon: extensionsTypes[0],
@@ -1200,11 +1201,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogClassName={styles.Dialog}
-          dialogHeader={
-            isNil(selectedCustomImportIntegration.id)
-              ? resourcesContext.messages[config.importTypes.importDatasetTypes[0].key]
-              : selectedCustomImportIntegration.name
-          }
+          dialogHeader={selectedCustomImportIntegration.name}
           dialogOnHide={() => {
             setIsImportDatasetDialogVisible(false);
             setSelectedCustomImportIntegration({ id: null, name: null });
