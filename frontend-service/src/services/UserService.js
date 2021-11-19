@@ -17,6 +17,12 @@ const refreshToken = async () => {
   }
 };
 
+const setRefreshTokenTimeout = time => {
+  setTimeout(() => {
+    refreshToken();
+  }, time);
+};
+
 const calculateUser = async userDTO => {
   const { accessToken, refreshToken } = userDTO.data;
   const user = new User({
@@ -34,9 +40,7 @@ const calculateUser = async userDTO => {
   user.firstName = userInfoDTO.data.firstName;
   user.lastName = userInfoDTO.data.lastName;
 
-  setTimeout(() => {
-    refreshToken();
-  }, userDTO.data.accessTokenExpiration);
+  setRefreshTokenTimeout(userDTO.data.accessTokenExpiration);
 
   return user;
 };
