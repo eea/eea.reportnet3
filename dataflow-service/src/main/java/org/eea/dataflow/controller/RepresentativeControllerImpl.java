@@ -527,7 +527,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @ApiOperation(
       value = "Validates all lead reporters, checking wether they are registered in the system or not",
-      hidden = false)
+      hidden = true)
   @ApiResponse(code = 400, message = "Could not validate lead reporters in the requested dataflow.")
   public void validateLeadReporters(@ApiParam(value = "Dataflow ID", required = true,
       example = "1") @PathVariable("dataflowId") Long dataflowId) {
