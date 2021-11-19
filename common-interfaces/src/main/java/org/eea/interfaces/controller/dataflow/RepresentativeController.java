@@ -215,6 +215,14 @@ public interface RepresentativeController {
       @PathVariable("dataflowId") Long dataflowId);
 
   /**
+   * Validate lead reporters checking if they are already registered in the system.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @PutMapping("/validateLeadReporters/dataflow/{dataflowId}")
+  void validateLeadReporters(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
    * Find fme users.
    *
    * @return the list
