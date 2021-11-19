@@ -174,11 +174,12 @@ public class ValidationHelperTest {
    */
   @Test
   public void getKieBase() throws EEAException {
-    Mockito.when(validationService.loadRulesKnowledgeBase(Mockito.eq(1l))).thenReturn(kieBase);
+    Mockito.when(validationService.loadRulesKnowledgeBase(Mockito.eq(1l), null))
+        .thenReturn(kieBase);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
-    KieBase result = validationHelper.getKieBase("", 1l);
+    KieBase result = validationHelper.getKieBase("", 1l, null);
     Assert.assertNotNull(result);
   }
 
@@ -195,8 +196,8 @@ public class ValidationHelperTest {
     Mockito.when(authentication.getName()).thenReturn("user");
 
     Mockito.doThrow(new EEAException("error")).when(validationService)
-        .loadRulesKnowledgeBase(Mockito.eq(1l));
-    validationHelper.getKieBase("", 1l);
+        .loadRulesKnowledgeBase(Mockito.eq(1l), null);
+    validationHelper.getKieBase("", 1l, null);
   }
 
   /**

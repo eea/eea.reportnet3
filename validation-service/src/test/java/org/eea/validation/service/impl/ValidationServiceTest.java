@@ -463,9 +463,9 @@ public class ValidationServiceTest {
   @Test(expected = EEAException.class)
   public void testLoadRulesKnowledgeBaseThrow() throws FileNotFoundException, EEAException {
     doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(Mockito.any(),
-        Mockito.any());
+        Mockito.any(), null);
     try {
-      validationServiceImpl.loadRulesKnowledgeBase(1L);
+      validationServiceImpl.loadRulesKnowledgeBase(1L, null);
     } catch (EEAException e) {
       assertEquals("Error, cause is not FileNotFoundException", e.getCause().getClass(),
           FileNotFoundException.class);
@@ -551,8 +551,9 @@ public class ValidationServiceTest {
     KieHelper kieHelper = new KieHelper();
     KieBase kiebase = kieHelper.build();
     when(datasetSchemaControllerZuul.getDatasetSchemaId(Mockito.any())).thenReturn("");
-    when(kieBaseManager.reloadRules(Mockito.any(), Mockito.any())).thenReturn(kiebase);
-    assertEquals("assertion error", kiebase, validationServiceImpl.loadRulesKnowledgeBase(1L));
+    when(kieBaseManager.reloadRules(Mockito.any(), Mockito.any(), null)).thenReturn(kiebase);
+    assertEquals("assertion error", kiebase,
+        validationServiceImpl.loadRulesKnowledgeBase(1L, null));
   }
 
 
@@ -568,9 +569,9 @@ public class ValidationServiceTest {
     KieHelper kieHelper = new KieHelper();
     kieHelper.build();
     Mockito.doThrow(new FileNotFoundException()).when(kieBaseManager).reloadRules(Mockito.anyLong(),
-        Mockito.any());
+        Mockito.any(), null);
 
-    validationServiceImpl.loadRulesKnowledgeBase(1L);
+    validationServiceImpl.loadRulesKnowledgeBase(1L, null);
   }
 
   /**
@@ -899,7 +900,7 @@ public class ValidationServiceTest {
   public void validateTable() throws EEAException {
     when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(tableValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
-    validationServiceImpl.validateTable(1L, Mockito.any(), kieBase);
+    validationServiceImpl.validateTable(1L, Mockito.any(), kieBase, null);
     Mockito.verify(tableValidationRepository, times(1)).saveAll(Mockito.any());
   }
 
@@ -1045,7 +1046,7 @@ public class ValidationServiceTest {
     doThrow(new NullPointerException()).when(datasetSchemaControllerZuul)
         .getDatasetSchemaId(Mockito.any());
     try {
-      validationServiceImpl.loadRulesKnowledgeBase(1L);
+      validationServiceImpl.loadRulesKnowledgeBase(1L, null);
     } catch (Exception e) {
       assertEquals(EEAErrorMessage.VALIDATION_SESSION_ERROR, e.getLocalizedMessage());
       throw e;
