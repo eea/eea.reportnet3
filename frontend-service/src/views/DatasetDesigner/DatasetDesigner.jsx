@@ -73,12 +73,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
-
-  const [importFromOtherSystemSelectedIntegration, setImportFromOtherSystemSelectedIntegration] = useState({
+  const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
     name: ''
   });
-  const [importSelectedIntegrationId, setImportSelectedIntegrationId] = useState(null);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
@@ -333,7 +331,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       return {
         command: () => onExportDataInternalExtension(type.code),
         icon: extensionsTypes[0],
-        label: type.text
+        label: resourcesContext.messages[type.key]
       };
     });
 
@@ -368,9 +366,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             type: 'GET_SELECTED_IMPORT_EXTENSION',
             payload: { selectedImportExtension: type.code }
           });
+          setSelectedCustomImportIntegration({ id: null, name: resourcesContext.messages[type.key] });
         },
         icon: extensionsTypes[0],
-        label: type.text
+        label: resourcesContext.messages[type.key]
       };
     });
 
@@ -388,10 +387,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     type: 'GET_SELECTED_IMPORT_EXTENSION',
                     payload: { selectedImportExtension: type.fileExtension }
                   });
-                  setImportSelectedIntegrationId(type.id);
+                  setSelectedCustomImportIntegration({ id: type.id, name: type.name });
                 },
                 icon: type.fileExtension,
-                label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+                label: `${type.name} (.${type.fileExtension})`
               };
             })
           }
@@ -407,7 +406,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               label: importOtherSystem.name,
               icon: 'upload',
               command: () => {
-                setImportFromOtherSystemSelectedIntegration({ id: importOtherSystem.id, name: importOtherSystem.name });
+                setSelectedCustomImportIntegration({ id: importOtherSystem.id, name: importOtherSystem.name });
                 manageDialogs('isImportOtherSystemsDialogVisible', true);
               }
             }))
@@ -882,7 +881,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
   const onUpload = async () => {
     manageDialogs('isImportDatasetDialogVisible', false);
-    setImportSelectedIntegrationId(null);
+    setSelectedCustomImportIntegration({ id: null, name: null });
     try {
       const {
         dataflow: { name: dataflowName },
@@ -953,11 +952,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const onImportOtherSystems = async () => {
     try {
       cleanImportOtherSystemsDialog();
-      await IntegrationService.runIntegration(
-        importFromOtherSystemSelectedIntegration.id,
-        datasetId,
-        designerState.replaceData
-      );
+      await IntegrationService.runIntegration(selectedCustomImportIntegration.id, datasetId, designerState.replaceData);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -1783,10 +1778,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dialogClassName={styles.Dialog}
-            dialogHeader={`${resourcesContext.messages['uploadDataset']}${designerState.datasetSchemaName}`}
+            dialogHeader={selectedCustomImportIntegration.name}
             dialogOnHide={() => {
               manageDialogs('isImportDatasetDialogVisible', false);
-              setImportSelectedIntegrationId(null);
+              setSelectedCustomImportIntegration({ id: null, name: null });
             }}
             dialogVisible={designerState.isImportDatasetDialogVisible}
             infoTooltip={`${
@@ -1802,14 +1797,14 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             onUpload={onUpload}
             replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${
-              isNil(importSelectedIntegrationId)
+              isNil(selectedCustomImportIntegration.id)
                 ? getUrl(DatasetConfig.importFileDataset, {
                     datasetId: datasetId,
                     delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
                   })
                 : getUrl(DatasetConfig.importFileDatasetExternal, {
                     datasetId: datasetId,
-                    integrationId: importSelectedIntegrationId
+                    integrationId: selectedCustomImportIntegration.id
                   })
             }`}
           />
@@ -1819,16 +1814,17 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           <Dialog
             className={styles.Dialog}
             footer={renderImportOtherSystemsFooter}
-            header={TextUtils.parseText(resourcesContext.messages['importPreviousDataHeader'], {
-              importName: importFromOtherSystemSelectedIntegration.name
-            })}
-            onHide={cleanImportOtherSystemsDialog}
+            header={selectedCustomImportIntegration.name}
+            onHide={() => {
+              cleanImportOtherSystemsDialog();
+              setSelectedCustomImportIntegration({ id: null, name: null });
+            }}
             visible={isImportOtherSystemsDialogVisible}>
             <div
               className={styles.text}
               dangerouslySetInnerHTML={{
                 __html: TextUtils.parseText(resourcesContext.messages['importPreviousDataConfirm'], {
-                  importName: importFromOtherSystemSelectedIntegration.name
+                  importName: selectedCustomImportIntegration.name
                 })
               }}></div>
             <div className={styles.checkboxWrapper}>

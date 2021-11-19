@@ -186,7 +186,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
             </div>
             <div className={styles.otherPortals}>
               <div className={styles.title}>
-                <h3>External portals</h3>
+                <h3 style={{ marginTop: '3.2rem' }}>External portals</h3>
               </div>
               <div className={styles.portalList}>
                 <a
