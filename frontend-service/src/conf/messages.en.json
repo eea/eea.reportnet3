@@ -1351,6 +1351,7 @@
     "automaticallyDownloadUsersListFile": "Users list file generated successfully",
     "downloadUsersListFileError": "Failed downloading users list file",
     "exportUsersByCountryFailedEvent": "Failed generating validations file",
-    "exportUsersByCountryCompletedEvent": "Users list file generated successfully"
+    "exportUsersByCountryCompletedEvent": "Users list file generated successfully",
+    "downloadSchemasInfoStart": "Generating schemas info file"
   }
 }

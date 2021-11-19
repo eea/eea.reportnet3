@@ -1086,7 +1086,8 @@
         { "key": "RELEASE_START_EVENT" },
         { "key": "IMPORT_TABLE_SCHEMA_INIT" },
         { "key": "RECEIVED_MESSAGE" },
-        { "key": "DOWNLOAD_USERS_BY_COUNTRY_START" }
+        { "key": "DOWNLOAD_USERS_BY_COUNTRY_START" },
+        { "key": "DOWNLOAD_SCHEMAS_INFO_START" }
       ]
     }
   ],

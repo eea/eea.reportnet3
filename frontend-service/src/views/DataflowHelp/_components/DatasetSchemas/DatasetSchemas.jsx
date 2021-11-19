@@ -61,6 +61,7 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
 
   const onDownloadAllSchemasInfo = async dataflowId => {
     try {
+      notificationContext.add({ type: 'DOWNLOAD_SCHEMAS_INFO_START' });
       setIsDownloading(true);
       await DataflowService.generateAllSchemasInfoFile(dataflowId);
     } catch (error) {
