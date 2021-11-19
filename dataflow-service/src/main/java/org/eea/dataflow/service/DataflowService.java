@@ -266,6 +266,13 @@ public interface DataflowService {
    */
   List<DatasetsSummaryVO> getDatasetSummary(Long dataflowId) throws EEAException;
 
+  /**
+   * Validate all reporters.
+   *
+   * @throws EEAException the EEA exception
+   */
+  void validateAllReporters(String user) throws EEAException;
+
 
 
 }

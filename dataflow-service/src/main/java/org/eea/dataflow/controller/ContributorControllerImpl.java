@@ -361,7 +361,7 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
-      contributorService.validateReporters(dataflowId, dataProviderId);
+      contributorService.validateReporters(dataflowId, dataProviderId, true);
     } catch (EEAException e) {
       LOG_ERROR.error(
           "Error creating the associated permissions for requested reporter in the dataflow: {} with data provider ID {}",

@@ -27,6 +27,7 @@ import org.eea.dataflow.persistence.repository.DataflowRepository.IDataflowCount
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
+import org.eea.dataflow.service.ContributorService;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
@@ -162,6 +163,10 @@ public class DataflowServiceImpl implements DataflowService {
   /** The representative service. */
   @Autowired
   private RepresentativeService representativeService;
+
+  /** The contributor service. */
+  @Autowired
+  private ContributorService contributorService;
 
   /** The dataset controller zuul. */
   @Autowired
@@ -1477,16 +1482,6 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
-   * Removes the web links and documents.
-   *
-   * @param result the result
-   */
-  private void removeWebLinksAndDocuments(DataFlowVO result) {
-    result.setWeblinks(null);
-    result.setDocuments(null);
-  }
-
-  /**
    * Gets the dataset summary.
    *
    * @param dataflowId the dataflow id
@@ -1569,4 +1564,58 @@ public class DataflowServiceImpl implements DataflowService {
 
     return dataflowCountVOList;
   }
+
+  /**
+   * Validate all reporters.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Async
+  @Transactional
+  public void validateAllReporters(String userId) throws EEAException {
+
+    List<DataFlowVO> dataflowsList = getDataflows(userId, TypeDataflowEnum.REPORTING);
+    dataflowsList.addAll(getDataflows(userId, TypeDataflowEnum.BUSINESS));
+    dataflowsList.addAll(getDataflows(userId, TypeDataflowEnum.CITIZEN_SCIENCE));
+
+    try {
+      for (DataFlowVO dataflow : dataflowsList) {
+        dataflow = getByIdWithCondition(dataflow.getId(), true);
+        representativeService.validateLeadReporters(dataflow.getId(), false);
+
+        if (dataflow.getRepresentatives() != null) {
+          for (RepresentativeVO representatives : dataflow.getRepresentatives()) {
+            contributorService.validateReporters(dataflow.getId(),
+                representatives.getDataProviderId(), false);
+          }
+        }
+      }
+    } catch (EEAException e) {
+      LOG.error(
+          "An error was produced while validating reporters and lead reporters for all dataflows");
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_ALL_REPORTERS_FAILED_EVENT,
+          null, notificationVO);
+    }
+
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+
+    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_ALL_REPORTERS_COMPLETED_EVENT,
+        null, notificationVO);
+  }
+
+  /**
+   * Removes the web links and documents.
+   *
+   * @param result the result
+   */
+  private void removeWebLinksAndDocuments(DataFlowVO result) {
+    result.setWeblinks(null);
+    result.setDocuments(null);
+  }
+
 }

@@ -859,28 +859,6 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflowTypesCount;
   }
 
-  /**
-   * Checks if is user requester.
-   *
-   * @param dataflowId the dataflow id
-   * @return true, if is user requester
-   */
-  private boolean isUserRequester(Long dataflowId) {
-    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
-    for (GrantedAuthority role : SecurityContextHolder.getContext().getAuthentication()
-        .getAuthorities()) {
-      if (ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)
-          .equals(role.getAuthority())
-          || ObjectAccessRoleEnum.DATAFLOW_OBSERVER.getAccessRole(dataflowId)
-              .equals(role.getAuthority())
-          || ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)
-              .equals(role.getAuthority())
-          || roleAdmin.equals(role.getAuthority())) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   /**
    * Gets the dataset summary by dataflow id.
@@ -1002,7 +980,61 @@ public class DataFlowControllerImpl implements DataFlowController {
           dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
+  }
 
+  /**
+   * Validate all reporters.
+   *
+   * @return the response entity
+   */
+  @Override
+  @PutMapping("/validateAllReporters")
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(
+      value = "Validates lead reporters and reporters from all the dataflows in the system.",
+      hidden = true)
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Reporters and Lead Reporters validated successfully."),
+      @ApiResponse(code = 400,
+          message = "There was an error validating Reporters and Lead Reporters.")})
+  public ResponseEntity validateAllReporters() {
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
 
+    try {
+      dataflowService.validateAllReporters(userId);
+    } catch (Exception e) {
+      message =
+          "Couldn't validate all reporters and lead reporters, an error was produced during the process.";
+      status = HttpStatus.BAD_REQUEST;
+    }
+
+    return new ResponseEntity<>(message, status);
+  }
+
+  /**
+   * Checks if is user requester.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if is user requester
+   */
+  private boolean isUserRequester(Long dataflowId) {
+    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
+    for (GrantedAuthority role : SecurityContextHolder.getContext().getAuthentication()
+        .getAuthorities()) {
+      if (ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)
+          .equals(role.getAuthority())
+          || ObjectAccessRoleEnum.DATAFLOW_OBSERVER.getAccessRole(dataflowId)
+              .equals(role.getAuthority())
+          || ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)
+              .equals(role.getAuthority())
+          || roleAdmin.equals(role.getAuthority())) {
+        return true;
+      }
+    }
+    return false;
   }
 }
