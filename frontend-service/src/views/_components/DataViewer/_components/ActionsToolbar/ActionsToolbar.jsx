@@ -106,7 +106,7 @@ const ActionsToolbar = ({
   }, [exportTableData]);
 
   const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
-    label: type.text,
+    label: resourcesContext.messages[type.key],
     icon: type.code,
     command: () => onExportTableData(type.code)
   }));
