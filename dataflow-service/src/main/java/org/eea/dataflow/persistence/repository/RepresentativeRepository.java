@@ -92,4 +92,12 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
   List<Representative> findByDataflowIdAndDataProviderIdIn(Long dataflowId,
       List<Long> dataProviderIdList);
 
+  /**
+   * Find all by invalid.
+   *
+   * @param invalid the invalid boolean
+   * @return the list
+   */
+  @Query("SELECT distinct r from Representative r left JOIN FETCH r.leadReporters rep WHERE rep.invalid= :invalid")
+  List<Representative> findAllByInvalid(@Param("invalid") boolean invalid);
 }

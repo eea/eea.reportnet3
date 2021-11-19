@@ -15,11 +15,14 @@ import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPrivateMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
+import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
 import org.eea.dataflow.persistence.domain.FMEUser;
+import org.eea.dataflow.persistence.domain.Representative;
+import org.eea.dataflow.persistence.domain.TempUser;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
@@ -27,6 +30,7 @@ import org.eea.dataflow.persistence.repository.DataflowRepository.IDataflowCount
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
+import org.eea.dataflow.persistence.repository.TempUserRepository;
 import org.eea.dataflow.service.ContributorService;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
@@ -135,6 +139,10 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private RepresentativeRepository representativeRepository;
 
+  /** The temp user repository. */
+  @Autowired
+  private TempUserRepository tempUserRepository;
+
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
@@ -191,6 +199,10 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataflow private mapper. */
   @Autowired
   private DataflowPrivateMapper dataflowPrivateMapper;
+
+  /** The representative mapper. */
+  @Autowired
+  private RepresentativeMapper representativeMapper;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -1568,6 +1580,7 @@ public class DataflowServiceImpl implements DataflowService {
   /**
    * Validate all reporters.
    *
+   * @param userId the user id
    * @throws EEAException the EEA exception
    */
   @Override
@@ -1575,21 +1588,17 @@ public class DataflowServiceImpl implements DataflowService {
   @Transactional
   public void validateAllReporters(String userId) throws EEAException {
 
-    List<DataFlowVO> dataflowsList = getDataflows(userId, TypeDataflowEnum.REPORTING);
-    dataflowsList.addAll(getDataflows(userId, TypeDataflowEnum.BUSINESS));
-    dataflowsList.addAll(getDataflows(userId, TypeDataflowEnum.CITIZEN_SCIENCE));
-
     try {
-      for (DataFlowVO dataflow : dataflowsList) {
-        dataflow = getByIdWithCondition(dataflow.getId(), true);
-        representativeService.validateLeadReporters(dataflow.getId(), false);
+      List<Representative> representativeList = representativeRepository.findAllByInvalid(true);
+      List<TempUser> tempUserList = tempUserRepository.findAll();
 
-        if (dataflow.getRepresentatives() != null) {
-          for (RepresentativeVO representatives : dataflow.getRepresentatives()) {
-            contributorService.validateReporters(dataflow.getId(),
-                representatives.getDataProviderId(), false);
-          }
-        }
+      for (Representative representative : representativeList) {
+        representativeService.validateLeadReporters(representative.getDataflow().getId(), false);
+      }
+
+      for (TempUser tempuser : tempUserList) {
+        contributorService.validateReporters(tempuser.getDataflowId(), tempuser.getDataProviderId(),
+            false);
       }
     } catch (EEAException e) {
       LOG.error(

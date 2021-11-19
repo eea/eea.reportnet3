@@ -269,9 +269,10 @@ public interface DataflowService {
   /**
    * Validate all reporters.
    *
+   * @param user the user
    * @throws EEAException the EEA exception
    */
-  void validateAllReporters(String user) throws EEAException;
+  void validateAllReporters(String userId) throws EEAException;
 
 
 
