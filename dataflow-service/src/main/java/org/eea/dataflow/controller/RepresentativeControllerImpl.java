@@ -519,6 +519,27 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
   /**
+   * Validate lead reporters checking if they are already registered in the system.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @ApiOperation(
+      value = "Validates all lead reporters, checking wether they are registered in the system or not",
+      hidden = false)
+  @ApiResponse(code = 400, message = "Could not validate lead reporters in the requested dataflow.")
+  public void validateLeadReporters(@ApiParam(value = "Dataflow ID", required = true,
+      example = "1") @PathVariable("dataflowId") Long dataflowId) {
+    try {
+      representativeService.validateLeadReporters(dataflowId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.ERROR_VALIDATING_LEAD_REPORTERS, e);
+    }
+  }
+
+  /**
    * Find fme users.
    *
    * @return the list
