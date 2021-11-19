@@ -1348,6 +1348,11 @@
     "exportXlsx": "XLSX (.xlsx)",
     "exportCsv": "CSV (.csv)",
     "exportXlsxValidations": "XLSX (.xlsx with validations)",
-    "exportZipAttachments": "ZIP (XLSX + attachments)"
+    "exportZipAttachments": "ZIP (XLSX + attachments)",
+    "downloadUsersListButtonLabel": "Download users list",
+    "generateUsersListFileError": "Failed generating users list file",
+    "downloadUsersStart": "Generating users list file",
+    "automaticallyDownloadUsersListFile": "Users list file generated successfully",
+    "downloadUsersListFileError": "Failed downloading users list file"
   }
 }

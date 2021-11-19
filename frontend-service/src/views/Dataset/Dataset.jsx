@@ -846,6 +846,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
         icon={isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadQCsButtonLabel']}
         onClick={() => onDownloadQCRules()}
+        style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
