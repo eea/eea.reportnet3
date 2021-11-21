@@ -54,6 +54,9 @@
         color: var(--public-custom-header-bg);
         padding: 0.25rem 1rem;
         font-weight: bold;
+        span:last-child {
+          padding: 0.429em 0.8em 0.429em 2em;
+        }
       }
     }
 
