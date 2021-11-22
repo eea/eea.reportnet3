@@ -416,6 +416,12 @@ export const ShareRights = ({
     </div>
   );
 
+  const renderDisclaimer = () => {
+    if (userType === userTypes.REPORTER) {
+      return <span className={styles.shareRightsDisclaimer}>{resourcesContext.messages['shareRightsDisclaimer']}</span>;
+    }
+  };
+
   const renderDialogLayout = children => (
     <Fragment>
       <div
@@ -423,9 +429,7 @@ export const ShareRights = ({
         style={{ height: isEmpty(shareRightsState.userRightList) ? 0 : 'inherit' }}>
         {children}
       </div>
-      {userType === userTypes.REPORTER && (
-        <span className={styles.shareRightsDisclaimer}>{resourcesContext.messages['shareRightsDisclaimer']}</span>
-      )}
+      {renderDisclaimer()}
     </Fragment>
   );
 
