@@ -205,4 +205,11 @@ public class RecordStoreControllerImplTest {
 
     Mockito.verify(recordStoreService, times(1)).deleteDataset(Mockito.any());
   }
+
+
+  @Test
+  public void testRefreshMaterializedView() {
+    recordStoreControllerImpl.refreshMaterializedView(1L);
+    Mockito.verify(recordStoreService, times(1)).refreshMaterializedQuery(Mockito.any());
+  }
 }

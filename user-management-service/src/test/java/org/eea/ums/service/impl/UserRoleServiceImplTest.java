@@ -2,20 +2,28 @@ package org.eea.ums.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.times;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -53,7 +61,8 @@ public class UserRoleServiceImplTest {
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
-
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Sets the up.
@@ -119,5 +128,22 @@ public class UserRoleServiceImplTest {
     }
   }
 
+  @Test
+  public void exportUsersByCountryTest() throws IOException, EEAException {
+    NotificationVO notification = new NotificationVO();
+    notification.setDataflowId(1L);
+    notification.setUser("user");
+    notification.setFileName("dataflow-" + 1L + "-UsersByCountry.csv");
+    notification.setError("Failed generating CSV file with name dataflow-" + 1L
+        + "-UsersByCountry.csv, using dataflowId " + 1L);
+    userRoleService.exportUsersByCountry(1L);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(
+        EventType.EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT, null, notification);
+  }
 
+  @After
+  public void afterTests() {
+    File file = new File("./dataflow-1-UsersByCountry/dataflow-1-UsersByCountry.csv");
+    file.delete();
+  }
 }

@@ -46,6 +46,35 @@ public interface ContributorService {
       String role);
 
   /**
+   * Find temp user by email and dataflow id.
+   *
+   * @param account the email
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  ContributorVO findTempUserByAccountAndDataflow(String account, Long dataflowId,
+      Long dataProviderId);
+
+  /**
+   * Find temp user by role and dataflow id.
+   *
+   * @param role the role
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  List<ContributorVO> findTempUserByRoleAndDataflow(String role, Long dataflowId,
+      Long dataProviderId);
+
+  /**
+   * Creates the temp user.
+   *
+   * @param dataflowId the dataflow id
+   * @param contributorVO the contributor VO
+   * @param dataproviderId the dataprovider id
+   */
+  void createTempUser(Long dataflowId, ContributorVO contributorVO, Long dataProviderId);
+
+  /**
    * Update role user.
    *
    * @param dataflowId the dataflow id
@@ -55,6 +84,34 @@ public interface ContributorService {
    */
   void updateContributor(Long dataflowId, ContributorVO contributorVO, Long dataProviderId)
       throws EEAException;
+
+  /**
+   * Update temporal user.
+   *
+   * @param dataflowId the dataflow id
+   * @param contributorVO the contributor VO
+   * @param dataProviderId the data provider id
+   */
+  void updateTemporaryUser(Long dataflowId, ContributorVO contributorVO, Long dataProviderId);
+
+  /**
+   * Delete temp user.
+   *
+   * @param dataflowId the dataflow id
+   * @param email the email
+   * @param role the role
+   * @param dataProviderId the data provider id
+   */
+  void deleteTemporaryUser(Long dataflowId, String email, String role, Long dataProviderId);
+
+  /**
+   * Validate reporters.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @throws EEAException the EEA exception
+   */
+  void validateReporters(Long dataflowId, Long dataProviderId) throws EEAException;
 
   /**
    * Creates the associated permissions.

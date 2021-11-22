@@ -45,6 +45,9 @@ import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.expression.EeaSecurityExpressionRoot;
 import org.eea.security.jwt.utils.EntityAccessService;
@@ -52,6 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -128,6 +132,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The FME user mapper. */
   @Autowired
   private FMEUserMapper fmeUserMapper;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * The delimiter.
@@ -629,9 +637,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         leadReporterVO.setEmail(leadReporterVO.getEmail().toLowerCase());
         UserRepresentationVO newUser =
             userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail().toLowerCase());
-        if (newUser == null) {
-          leadReporter.setInvalid(true);
-        }
         if (null != representative.getLeadReporters() && representative.getLeadReporters().stream()
             .filter(reporter -> leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
             .collect(Collectors.counting()) == 0) {
@@ -641,6 +646,11 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             modifyLeadReporterPermissions(leadReporterVO.getEmail(), representative, false);
           }
           leadReporter.setEmail(leadReporterVO.getEmail());
+        } else if (leadReporter.getInvalid() != null && leadReporter.getInvalid()
+            && newUser != null) {
+          leadReporter.setInvalid(null);
+          modifyLeadReporterPermissions(leadReporter.getEmail().toLowerCase(), representative,
+              false);
         }
         leadReporter.setRepresentative(representative);
       }
@@ -667,6 +677,49 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     }
     LOG.info("Deleting the lead reporter relation");
     leadReporterRepository.deleteById(leadReporterId);
+  }
+
+  /**
+   * Validate lead reporters.
+   *
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
+  @Transactional
+  @Async
+  @Override
+  public void validateLeadReporters(Long dataflowId) throws EEAException {
+    List<RepresentativeVO> representativeList = getRepresetativesByIdDataFlow(dataflowId);
+
+    try {
+      for (RepresentativeVO representative : representativeList) {
+        List<LeadReporterVO> leadReporterList = representative.getLeadReporters().stream()
+            .filter(leadReporterVO -> leadReporterVO.getInvalid() != null)
+            .collect(Collectors.toList());
+
+        for (LeadReporterVO leadReporter : leadReporterList) {
+          updateLeadReporter(leadReporter);
+        }
+      }
+
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .dataflowId(dataflowId).build();
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+          EventType.VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT, null, notificationVO);
+
+    } catch (Exception e) {
+      LOG.error("An error was produced while validating lead reporters for dataflow {}",
+          dataflowId);
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .dataflowId(dataflowId).build();
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_LEAD_REPORTERS_FAILED_EVENT,
+          null, notificationVO);
+    }
+
   }
 
 

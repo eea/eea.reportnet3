@@ -3370,6 +3370,8 @@ public class DatasetServiceImpl implements DatasetService {
    * @param dataset the dataset
    * @throws IOException Signals that an I/O exception has occurred.
    */
+  @Override
+  @Transactional
   public void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
 
     List<DesignDataset> desingDataset =

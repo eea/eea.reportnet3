@@ -402,14 +402,28 @@ public enum EventType {
   DOWNLOAD_VALIDATIONS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "download_validations_failed_event", true),
 
-
   /** The export qc completed event. */
   EXPORT_QC_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_completed_event",
       true),
 
-
   /** The export qc failed event. */
   EXPORT_QC_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_failed_event", true),
+
+  /** The validate reporters completed event. */
+  VALIDATE_REPORTERS_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_reporters_completed_event", true),
+
+  /** The validate reporters failed event. */
+  VALIDATE_REPORTERS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_reporters_failed_event", true),
+
+  /** The validate reporters completed event. */
+  VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_lead_reporters_completed_event", true),
+
+  /** The validate reporters failed event. */
+  VALIDATE_LEAD_REPORTERS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_lead_reporters_failed_event", true),
 
   /** The export dataset failed event. */
   EXPORT_DATASET_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_dataset_failed_event",

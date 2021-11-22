@@ -317,4 +317,21 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
   }
 
+  /**
+   * Refresh materialized view.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @PutMapping("/private/refreshMaterializedView")
+  @ApiOperation(value = "Refreshes a materialized view", hidden = true)
+  public void refreshMaterializedView(
+      @ApiParam(value = "Dataset Id", example = "0") @RequestParam("datasetId") Long datasetId) {
+
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    recordStoreService.refreshMaterializedQuery(datasetId);
+
+  }
+
 }

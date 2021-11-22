@@ -1,17 +1,18 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { config } from 'conf';
-
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
+
+import { config } from 'conf';
+
+import styles from './Header.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import defaultAvatar from 'views/_assets/images/avatars/defaultAvatar.png';
 import logo from 'views/_assets/images/logos/logo.png';
 import logoDarkMode from 'views/_assets/images/logos/logo-dark-mode.png';
-import styles from './Header.module.scss';
 import ReportnetPublicLogo from 'views/_assets/images/logos/reportnet_public_logo.svg';
 
 import { AccessPointConfig } from 'repositories/config/AccessPointConfig';
@@ -274,16 +275,16 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   const loadLogin = () => (
     <div className={styles.loginWrapper}>
       <Button
-        className="p-button-primary"
-        label={resourcesContext.messages.login}
+        className={`p-button-primary p-button-text-icon-left p-button-animated-blink ${styles.loginButton}`}
+        icon={'lock'}
+        label={resourcesContext.messages['login']}
         onClick={() => {
           if (window.env.REACT_APP_EULOGIN.toString() === 'true') {
             window.location.href = AccessPointConfig.euloginUrl;
           } else {
             history.push(getUrl(routes.LOGIN));
           }
-        }}
-        style={{ padding: '0.25rem 2rem', borderRadius: '25px', fontWeight: 'bold' }}></Button>
+        }}></Button>
     </div>
   );
 
