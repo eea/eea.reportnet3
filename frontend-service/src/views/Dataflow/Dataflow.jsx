@@ -135,6 +135,8 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
+  const usersTypes = { REPORTERS: 'Reporters', REQUESTERS: 'Requesters' };
+
   const {
     obligation,
     setCheckedObligation,
@@ -345,7 +347,7 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   const renderValidateReportersButton = usersType => {
-    if (usersType === 'Reporters') {
+    if (usersType === usersTypes.REPORTERS) {
       return (
         <Button
           className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink ${
@@ -1166,7 +1168,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isManageRequestersDialogVisible && (
           <Dialog
-            footer={shareRightsFooterDialogFooter('Requesters')}
+            footer={shareRightsFooterDialogFooter(usersTypes.REQUESTERS)}
             header={resourcesContext.messages['manageRequestersRights']}
             onHide={() => {
               manageDialogs('isManageRequestersDialogVisible', false);
@@ -1203,7 +1205,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isManageReportersDialogVisible && (
           <Dialog
-            footer={shareRightsFooterDialogFooter('Reporters')}
+            footer={shareRightsFooterDialogFooter(usersTypes.REPORTERS)}
             header={resourcesContext.messages['manageReportersRights']}
             onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
             visible={dataflowState.isManageReportersDialogVisible}>
