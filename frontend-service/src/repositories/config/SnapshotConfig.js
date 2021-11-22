@@ -2,7 +2,7 @@ export const SnapshotConfig = {
   createDesigner: '/snapshot/dataschema/{:datasetSchemaId}/dataset/{:datasetId}/create?description={:description}',
   createReporter: '/snapshot/dataset/{:datasetId}/create',
   deleteDesigner: '/snapshot/{:snapshotId}/dataschema/{:datasetSchemaId}/delete',
-  deleteReporter: '/snapshot/{:snapshotId}/dataset/{:datasetId}/delete',
+  deleteReporter: '/snapshot/v1/{:snapshotId}/dataset/{:datasetId}/delete',
   getAllDesigner: '/snapshot/dataschema/{:datasetSchemaId}/listSnapshots',
   getAllReporter: '/snapshot/dataset/{:datasetId}/listSnapshots',
   release:

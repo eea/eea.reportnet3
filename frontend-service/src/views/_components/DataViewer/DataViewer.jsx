@@ -550,7 +550,7 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteAttachment = async () => {
       try {
-        await DatasetService.deleteAttachment(datasetId, records.selectedFieldId);
+        await DatasetService.deleteAttachment(dataflowId, datasetId, records.selectedFieldId, dataProviderId);
         RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
         setIsDeleteAttachmentVisible(false);
       } catch (error) {
@@ -1254,8 +1254,10 @@ const DataViewer = withRouter(
             onUpload={onAttach}
             operation="PUT"
             url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
+              dataflowId,
               datasetId,
-              fieldId: records.selectedFieldId
+              fieldId: records.selectedFieldId,
+              dataProviderId
             })}`}
           />
         )}
