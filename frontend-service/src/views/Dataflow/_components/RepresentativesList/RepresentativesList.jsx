@@ -473,7 +473,7 @@ const RepresentativesList = ({
   };
 
   const renderTable = () => {
-    if (isNil(formState.selectedDataProviderGroup) && isEmpty(formState.allPossibleDataProviders)) {
+    if (isNil(formState.selectedDataProviderGroup) || isEmpty(formState.allPossibleDataProviders)) {
       return (
         <p className={styles.chooseRepresentative}>
           {resourcesContext.messages['manageRolesDialogNoRepresentativesMessage']}
