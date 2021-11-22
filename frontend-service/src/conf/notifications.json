@@ -800,7 +800,9 @@
         { "key": "DISABLE_RULES_ERROR_EVENT" },
         { "key": "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT" },
         { "key": "EXPORT_USERS_BY_COUNTRY_FAILED_EVENT" },
-        { "key": "VALIDATE_ALL_REPORTERS_FAILED_EVENT" }
+        { "key": "VALIDATE_ALL_REPORTERS_FAILED_EVENT" },
+        { "key": "VALIDATE_LEAD_REPORTERS_FAILED_EVENT" },
+        { "key": "VALIDATE_REPORTERS_FAILED_EVENT" }
       ]
     },
     {
@@ -1050,7 +1052,9 @@
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]
           }
-        }
+        },
+        { "key": "VALIDATE_REPORTERS_COMPLETED_EVENT" },
+        { "key": "VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT" }
       ]
     },
     {
