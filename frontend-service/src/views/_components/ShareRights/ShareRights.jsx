@@ -66,6 +66,9 @@ export const ShareRights = ({
     { type: 'multiselect', properties: [{ name: 'role' }] }
   ];
 
+  const isReporterManagement = userType === userTypes.REPORTER;
+  const isRequesterManagement = userType === userTypes.REQUESTER;
+
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -196,7 +199,7 @@ export const ShareRights = ({
   const setUserRightId = id => shareRightsDispatch({ type: 'SET_USER_RIGHT_ID', payload: { id } });
 
   const callEndPoint = async (method, userRight) => {
-    if (userType === userTypes.REPORTER) {
+    if (isReporterManagement) {
       switch (method) {
         case methodTypes.DELETE:
           return await UserRightService.deleteReporter(shareRightsState.userRightToDelete, dataflowId, dataProvider);
@@ -209,7 +212,7 @@ export const ShareRights = ({
       }
     }
 
-    if (userType === userTypes.REQUESTER) {
+    if (isRequesterManagement) {
       switch (method) {
         case methodTypes.DELETE:
           return await UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
@@ -390,7 +393,7 @@ export const ShareRights = ({
   };
 
   const renderIsValidUserIcon = userRight => {
-    if (userType === userTypes.REPORTER) {
+    if (isReporterManagement) {
       return (
         <Fragment>
           <FontAwesomeIcon
@@ -417,7 +420,7 @@ export const ShareRights = ({
   );
 
   const renderDisclaimer = () => {
-    if (userType === userTypes.REPORTER) {
+    if (isReporterManagement) {
       return <span className={styles.shareRightsDisclaimer}>{resourcesContext.messages['shareRightsDisclaimer']}</span>;
     }
   };
