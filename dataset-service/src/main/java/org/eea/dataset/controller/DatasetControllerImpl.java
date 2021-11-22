@@ -2,7 +2,6 @@ package org.eea.dataset.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -661,14 +660,10 @@ public class DatasetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param mimeType the mime type
-   * @return the response entity
-   * @throws IOException
-   * @throws FileNotFoundException
-   * @throws EEAException
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @GetMapping(value = "/exportFile")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @ApiOperation(value = "Export file with data", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully export"),
@@ -682,11 +677,6 @@ public class DatasetControllerImpl implements DatasetController {
               required = false) String tableSchemaId,
       @ApiParam(type = "String", value = "mimeType (file extension)",
           example = "csv") @RequestParam("mimeType") String mimeType) {
-    if (null == datasetId) {
-      LOG_ERROR.error("datasetId not found: {}", datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
     String tableName =
         null != tableSchemaId ? datasetSchemaService.getTableSchemaName(null, tableSchemaId)
             : datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();

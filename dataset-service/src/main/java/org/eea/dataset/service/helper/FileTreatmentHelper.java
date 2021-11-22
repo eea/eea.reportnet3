@@ -1299,7 +1299,6 @@ public class FileTreatmentHelper implements DisposableBean {
           tableSchemaId);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_FAILED_EVENT, null,
           notificationVO);
-      return;
     }
   }
 }

@@ -39,7 +39,7 @@ public class ExportTableDataFailedEvent implements NotificableEventHandler {
     notification.put("datasetSchemaId", notificationVO.getDatasetSchemaId());
     notification.put("fileName", notificationVO.getFileName());
     notification.put("error", notificationVO.getError());
-    return null;
+    return notification;
   }
 
 }
