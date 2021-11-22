@@ -352,6 +352,7 @@ const RepresentativesList = ({
             autoComplete={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
             autoFocus={isNewLeadReporter}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
+            disabled={representative.hasDatasets && reporters[leadReporter.id]?.isValid}
             id={`${leadReporter.id}-${representativeId}`}
             onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
