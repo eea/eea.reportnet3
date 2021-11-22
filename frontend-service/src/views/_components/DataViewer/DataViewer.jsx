@@ -1295,12 +1295,20 @@ const DataViewer = withRouter(
             name="file"
             onUpload={onAttach}
             operation="PUT"
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
-              dataflowId,
-              datasetId,
-              fieldId: records.selectedFieldId,
-              dataProviderId
-            })}`}
+            url={`${window.env.REACT_APP_BACKEND}${
+              isNil(dataProviderId)
+                ? getUrl(DatasetConfig.uploadAttachment, {
+                    dataflowId,
+                    datasetId,
+                    fieldId: records.selectedFieldId
+                  })
+                : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
+                    dataflowId,
+                    datasetId,
+                    fieldId: records.selectedFieldId,
+                    dataProviderId
+                  })
+            }`}
           />
         )}
 
