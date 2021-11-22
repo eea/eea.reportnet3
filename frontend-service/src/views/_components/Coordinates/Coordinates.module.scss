@@ -1,0 +1,32 @@
+.coordinatesWrapper {
+  display: flex;
+  align-items: center;
+  .longitude {
+    margin-left: 10px;
+  }
+  .isCellEditor {
+    width: 30% !important;
+  }
+}
+
+.errorMessage {
+  display: block;
+  height: 1rem;
+  margin: 0;
+  .pointError {
+    color: var(--errors);
+    font-weight: bold;
+    font-size: 0.7rem;
+  }
+}
+.error {
+  border: var(--inputtext-border-error) !important;
+  box-shadow: var(--inputtext-box-shadow-focus-error) !important;
+}
+.epsg {
+  color: var(--main-font-color);
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-right: 0.25rem;
+  width: fit-content;
+}
