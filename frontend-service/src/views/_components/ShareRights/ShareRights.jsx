@@ -33,6 +33,7 @@ import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 export const ShareRights = ({
   addConfirmHeader,
@@ -50,8 +51,8 @@ export const ShareRights = ({
   placeholder,
   representativeId,
   roleOptions,
-  setRightPermissionsChange = () => {},
   setIsUserRightManagementDialogVisible,
+  setRightPermissionsChange = () => {},
   updateErrorNotificationKey,
   userType
 }) => {
@@ -137,6 +138,8 @@ export const ShareRights = ({
         TextUtils.areEquals(shareRightsState.userRightToDelete.account, userContext.email)
     );
   };
+
+  useCheckNotifications(['VALIDATE_REPORTERS_COMPLETED_EVENT'], onDataChange);
 
   const onEditUserRight = userRight => {
     shareRightsDispatch({ type: 'ON_EDIT_USER_RIGHT', payload: { isEditingModal: true, userRight } });

@@ -33,6 +33,7 @@ import { reducer } from './_functions/Reducers/representativeReducer';
 import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 const RepresentativesList = ({
   dataflowId,
@@ -112,6 +113,12 @@ const RepresentativesList = ({
       );
     }
   }, [formState.representatives]);
+
+  const refreshData = () => {
+    formDispatcher({ type: 'REFRESH' });
+  };
+
+  useCheckNotifications(['VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT'], refreshData);
 
   const createUnusedOptionsList = () => formDispatcher({ type: 'CREATE_UNUSED_OPTIONS_LIST' });
 
@@ -342,8 +349,8 @@ const RepresentativesList = ({
           }`}
           key={`${leadReporter.id}-${representativeId}`}>
           <InputText
+            autoComplete={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
             autoFocus={isNewLeadReporter}
-            autocomplete={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             id={`${leadReporter.id}-${representativeId}`}
             onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
@@ -494,8 +501,8 @@ const RepresentativesList = ({
       </div>
 
       {!isNil(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders) ? (
-        <div className={styles.table}>
-          {formState.isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
+        <Fragment>
+          {formState.isLoading && <Spinner className={styles.spinner} />}
           <DataTable
             value={
               formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
@@ -518,7 +525,7 @@ const RepresentativesList = ({
               header={resourcesContext.messages['manageRolesDialogAccountColumn']}
             />
           </DataTable>
-        </div>
+        </Fragment>
       ) : (
         <p className={styles.chooseRepresentative}>
           {resourcesContext.messages['manageRolesDialogNoRepresentativesMessage']}
