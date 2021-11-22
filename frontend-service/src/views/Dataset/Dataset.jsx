@@ -327,7 +327,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             return {
               command: () => {
                 setIsImportDatasetDialogVisible(true);
-                setSelectedCustomImportIntegration({ id: type.id, name: type.name });
+                setSelectedCustomImportIntegration({ id: type.id, name: `${type.name} (.${type.fileExtension})` });
                 setImportSelectedIntegrationExtension(type.fileExtension);
               },
               icon: type.fileExtension,
