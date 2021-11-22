@@ -1269,26 +1269,18 @@ public class FileTreatmentHelper implements DisposableBean {
   @Async
   public void exportFile(Long datasetId, String mimeType, String tableSchemaId, String tableName)
       throws EEAException, FileNotFoundException, IOException {
-    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
-    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
-        || DatasetTypeEnum.COLLECTION.equals(datasetType);
     NotificationVO notificationVO = NotificationVO.builder()
-        .user(SecurityContextHolder.getContext().getAuthentication().getName())
-        .dataflowId(dataflowId).datasetId(datasetId).fileName(tableName).datasetType(datasetType)
-        .datasetSchemaId(tableSchemaId).error("Error exporting table data").build();
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+        .fileName(tableName).datasetSchemaId(tableSchemaId).error("Error exporting table data")
+        .build();
     File fileFolder = new File(pathPublicFile, "dataset-" + datasetId);
     String creatingFileError = String.format(
         "Failed generating file from datasetId {} with schema {}.", datasetId, tableSchemaId);
     fileFolder.mkdirs();
     try {
-      IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
-      contextExport.fileWriter(dataflowId, datasetId, tableSchemaId, includeCountryCode, false);
-      byte[] file =
-          contextExport.fileWriter(dataflowId, datasetId, tableSchemaId, includeCountryCode, false);
+      byte[] file = datasetService.exportFile(datasetId, mimeType, tableSchemaId);
       File fileWrite =
           new File(new File(pathPublicFile, "dataset-" + datasetId), tableName + "." + mimeType);
-
       try (OutputStream out = new FileOutputStream(fileWrite.toString());) {
         out.write(file);
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT,
