@@ -1360,6 +1360,15 @@
     "adminNewCreatePermissions": "Creation of permissions for new users",
     "confirmCreateNewPermissions": "Are you sure you want to create permissions for new users?",
     "validateAllReportersCompletedEvent": "New permissions created successfully",
-    "validateAllReportersFailedEvent": "Failed creating new permissions"
+    "validateAllReportersFailedEvent": "Failed creating new permissions",
+    "validUserTooltip": "The user is valid",
+    "invalidUserTooltip": "The user is not created",
+    "updateUsersPermissionsButton": "Update permissions",
+    "updateUsersPermissionsDialogHeader": "Update users permissions",
+    "updateUsersPermissionsDialogMessage": "Are you sure you want to update users permissions?",
+    "validateReportersCompletedEvent": "All reporters validated successfully",
+    "validateLeadReportersCompletedEvent": "All lead reporters validated successfully",
+    "validateLeadReportersFailedEvent": "Error validating lead reporters",
+    "validateReportersFailedEvent": "Error validating reporters"
   }
 }
