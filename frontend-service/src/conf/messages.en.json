@@ -815,7 +815,7 @@
     "noMessagesCustodian": "Please select a data provider",
     "noMessagesScroll": "Scroll up to the top to load read messages.",
     "noneCodelist": "-- None --",
-    "nonEditableData": "This field is not editable",
+    "nonEditableData": "This field is not editable and has errors",
     "nonEditableDataDifferentTypes": "This field is not editable and the imported and designed types are not the same",
     "noNotifications": "There are no notifications yet",
     "noObligationsWithSelectedParameters": "There are no obligations with the selected parameters",
@@ -1355,6 +1355,17 @@
     "automaticallyDownloadUsersListFile": "Users list file generated successfully",
     "downloadUsersListFileError": "Failed downloading users list file",
     "exportUsersByCountryFailedEvent": "Failed generating validations file",
-    "exportUsersByCountryCompletedEvent": "Users list file generated successfully"
+    "exportUsersByCountryCompletedEvent": "Users list file generated successfully",
+    "longitude": "Longitude",
+    "x": "X",
+    "y": "Y",
+    "projectedCoordinates": "Projected coordinates",
+    "coordinatesMoreInfo": "Click to show detailed GeoJSON info",
+    "line": "Line",
+    "geospatialDataMoreInfo": "Geospatial data - More info",
+    "geoJSONHelpCopy": "Copy GeoJSON",
+    "geoJSONHelpCopyTooltip": "Copy complete GeoJSON text",
+    "nonEditableDataAndCantParse": "The field is not editable and can't be parsed",
+    "nonEditableDataAndEmpty": "The field is not editable and is empty"
   }
 }

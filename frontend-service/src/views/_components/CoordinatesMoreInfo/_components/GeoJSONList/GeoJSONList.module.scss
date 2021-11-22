@@ -1,0 +1,19 @@
+.geoJSONTitle {
+  font-weight: bold;
+}
+.geoJSON {
+  overflow: scroll;
+  max-height: 95vh;
+  width: 12vw;
+  span {
+    counter-increment: line;
+    display: block;
+    &:before {
+      content: counter(line);
+      border-right: 1px solid var(--gray-25);
+      padding: 0 0.5em;
+      margin-right: 0.5em;
+      color: var(--gray-50);
+    }
+  }
+}
