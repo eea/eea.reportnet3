@@ -1374,7 +1374,7 @@
     "nonEditableDataAndCantParse": "The field is not editable and can't be parsed",
     "nonEditableDataAndEmpty": "The field is not editable and is empty",
     "geoJSON": "GeoJSON",
-    "geoJSONErrors": "GeoJSON errors",
+    "geoJSONErrors": "GeoJSON errors (click on each error to scroll)",
     "selectCRS": "Select a CRS"
   }
 }

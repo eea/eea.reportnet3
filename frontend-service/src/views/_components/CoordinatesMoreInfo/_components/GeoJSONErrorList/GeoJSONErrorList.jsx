@@ -11,19 +11,26 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const GeoJSONErrorList = ({ geoJSON }) => {
   const resourcesContext = useContext(ResourcesContext);
-  const errors = geojsonhint.hint(geoJSON);
-  return (
-    errors.length > 0 && (
-      <div>
-        <label className={styles.geoJSONErrorsTitle}>{resourcesContext.messages['geoJSONErrors']}</label>
-        <pre>
-          <ul>
-            {errors.map(error => (
-              <GeoJSONError key={uniqueId('geoJSONError_')} line={error.line} message={error.message} />
-            ))}
-          </ul>
-        </pre>
-      </div>
-    )
-  );
+
+  const renderErrors = () => {
+    const errors = geojsonhint.hint(geoJSON);
+    if (errors.length > 0) {
+      return (
+        <div>
+          <label className={styles.geoJSONErrorsTitle}>{resourcesContext.messages['geoJSONErrors']}</label>
+          <pre>
+            <ul>
+              {errors.map(error => (
+                <GeoJSONError key={uniqueId('geoJSONError_')} line={error.line} message={error.message} />
+              ))}
+            </ul>
+          </pre>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  };
+
+  return renderErrors();
 };

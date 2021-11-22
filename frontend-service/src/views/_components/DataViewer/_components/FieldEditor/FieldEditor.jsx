@@ -789,18 +789,24 @@ const FieldEditor = ({
       }
     };
 
+    const renderMoreInfo = () => {
+      if (value !== '') {
+        return (
+          <TooltipButton
+            message={resourcesContext.messages['coordinatesMoreInfo']}
+            onClick={() => onCoordinatesMoreInfoClick(RecordUtils.getCellValue(cells, cells.field))}
+            uniqueIdentifier={`coordinates_${cells.field}`}></TooltipButton>
+        );
+      }
+    };
+
     const completeCoordinates = getInfoLabelContent();
 
     return (
       <div>
         {isNil(infoLabelClass) && <label className={styles.epsg}>{resourcesContext.messages['coords']}</label>}
         <label className={infoLabelClass}>{completeCoordinates}</label>
-        {value !== '' && (
-          <TooltipButton
-            message={resourcesContext.messages['coordinatesMoreInfo']}
-            onClick={() => onCoordinatesMoreInfoClick(RecordUtils.getCellValue(cells, cells.field))}
-            uniqueIdentifier={`coordinates_${cells.field}`}></TooltipButton>
-        )}
+        {renderMoreInfo()}
       </div>
     );
   };
