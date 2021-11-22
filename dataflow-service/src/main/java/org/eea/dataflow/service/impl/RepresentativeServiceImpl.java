@@ -688,7 +688,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Transactional
   @Async
   @Override
-  public void validateLeadReporters(Long dataflowId) throws EEAException {
+  public void validateLeadReporters(Long dataflowId, boolean sendNotification) throws EEAException {
     List<RepresentativeVO> representativeList = getRepresetativesByIdDataFlow(dataflowId);
 
     try {
@@ -702,22 +702,26 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         }
       }
 
-      NotificationVO notificationVO = NotificationVO.builder()
-          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .dataflowId(dataflowId).build();
+      if (sendNotification) {
+        NotificationVO notificationVO = NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .dataflowId(dataflowId).build();
 
-      kafkaSenderUtils.releaseNotificableKafkaEvent(
-          EventType.VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT, null, notificationVO);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(
+            EventType.VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT, null, notificationVO);
+      }
 
     } catch (Exception e) {
       LOG.error("An error was produced while validating lead reporters for dataflow {}",
           dataflowId);
-      NotificationVO notificationVO = NotificationVO.builder()
-          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .dataflowId(dataflowId).build();
+      if (sendNotification) {
+        NotificationVO notificationVO = NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .dataflowId(dataflowId).build();
 
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_LEAD_REPORTERS_FAILED_EVENT,
-          null, notificationVO);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(
+            EventType.VALIDATE_LEAD_REPORTERS_FAILED_EVENT, null, notificationVO);
+      }
     }
 
   }

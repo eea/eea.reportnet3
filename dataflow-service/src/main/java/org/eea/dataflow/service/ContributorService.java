@@ -111,7 +111,8 @@ public interface ContributorService {
    * @param dataProviderId the data provider id
    * @throws EEAException the EEA exception
    */
-  void validateReporters(Long dataflowId, Long dataProviderId) throws EEAException;
+  void validateReporters(Long dataflowId, Long dataProviderId, boolean sendNotification)
+      throws EEAException;
 
   /**
    * Creates the associated permissions.

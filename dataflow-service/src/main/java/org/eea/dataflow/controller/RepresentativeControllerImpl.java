@@ -538,7 +538,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   public void validateLeadReporters(@ApiParam(value = "Dataflow ID", required = true,
       example = "1") @PathVariable("dataflowId") Long dataflowId) {
     try {
-      representativeService.validateLeadReporters(dataflowId);
+      representativeService.validateLeadReporters(dataflowId, true);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.ERROR_VALIDATING_LEAD_REPORTERS, e);
