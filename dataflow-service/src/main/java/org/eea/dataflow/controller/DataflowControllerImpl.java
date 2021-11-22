@@ -74,18 +74,18 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 /**
- * The Class DataFlowControllerImpl.
+ * The Class DataflowControllerImpl.
  */
 @RestController
 @RequestMapping(value = "/dataflow")
 @Api(tags = "Dataflows : Dataflows Manager")
-public class DataFlowControllerImpl implements DataFlowController {
+public class DataflowControllerImpl implements DataFlowController {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DataFlowControllerImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DataflowControllerImpl.class);
 
   /** The dataflow service. */
   @Autowired

@@ -24,14 +24,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * The Class DataFlowDocumentControllerImplTest.
+ * The Class DataflowDocumentControllerImplTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class DataFlowDocumentControllerImplTest {
+public class DataflowDocumentControllerImplTest {
 
   /** The data flow document controller impl. */
   @InjectMocks
-  DataFlowDocumentControllerImpl dataFlowDocumentControllerImpl;
+  DataflowDocumentControllerImpl dataflowDocumentControllerImpl;
 
   /** The dataflow service. */
   @Mock
@@ -61,7 +61,7 @@ public class DataFlowDocumentControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void getDocumentByIdExceptionTest() throws EEAException {
-    dataFlowDocumentControllerImpl.getDocumentInfoById(null);
+    dataflowDocumentControllerImpl.getDocumentInfoById(null);
   }
 
   /**
@@ -73,7 +73,7 @@ public class DataFlowDocumentControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void getDocumentByIdException2Test() throws EEAException {
     doThrow(new EEAException()).when(dataflowService).getDocumentInfoById(Mockito.any());
-    dataFlowDocumentControllerImpl.getDocumentInfoById(1L);
+    dataflowDocumentControllerImpl.getDocumentInfoById(1L);
   }
 
   /**
@@ -87,7 +87,7 @@ public class DataFlowDocumentControllerImplTest {
     DocumentVO document = new DocumentVO();
     document.setId(1L);
     when(dataflowService.getDocumentInfoById(Mockito.any())).thenReturn(document);
-    assertEquals("fail", document, dataFlowDocumentControllerImpl.getDocumentInfoById(1L));
+    assertEquals("fail", document, dataflowDocumentControllerImpl.getDocumentInfoById(1L));
   }
 
   /**
@@ -99,7 +99,7 @@ public class DataFlowDocumentControllerImplTest {
   public void updateDocumentExceptionTest() throws EEAException {
     doThrow(new EEAException()).when(dataflowService).updateDocument(Mockito.any());
     try {
-      dataFlowDocumentControllerImpl.updateDocument(document);
+      dataflowDocumentControllerImpl.updateDocument(document);
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
@@ -113,7 +113,7 @@ public class DataFlowDocumentControllerImplTest {
    */
   @Test
   public void updateDocumentSuccessTest() throws EEAException {
-    dataFlowDocumentControllerImpl.updateDocument(document);
+    dataflowDocumentControllerImpl.updateDocument(document);
     verify(dataflowService, times(1)).updateDocument(Mockito.any());
   }
 
@@ -126,7 +126,7 @@ public class DataFlowDocumentControllerImplTest {
   public void insertDocumentExceptionTest() throws EEAException {
     doThrow(new EEAException()).when(dataflowService).insertDocument(Mockito.any());
     try {
-      dataFlowDocumentControllerImpl.insertDocument(document);
+      dataflowDocumentControllerImpl.insertDocument(document);
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
@@ -140,7 +140,7 @@ public class DataFlowDocumentControllerImplTest {
    */
   @Test
   public void insertDocumentSuccessTest() throws EEAException {
-    dataFlowDocumentControllerImpl.insertDocument(document);
+    dataflowDocumentControllerImpl.insertDocument(document);
     verify(dataflowService, times(1)).insertDocument(Mockito.any());
   }
 
@@ -153,7 +153,7 @@ public class DataFlowDocumentControllerImplTest {
   public void deleteDocumentExceptionTest() throws EEAException {
     doThrow(new EEAException()).when(dataflowService).deleteDocument(Mockito.any());
     try {
-      dataFlowDocumentControllerImpl.deleteDocument(document.getId());
+      dataflowDocumentControllerImpl.deleteDocument(document.getId());
     } catch (ResponseStatusException e) {
       assertEquals("bad status", HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
@@ -167,7 +167,7 @@ public class DataFlowDocumentControllerImplTest {
    */
   @Test
   public void deleteDocumentSuccessTest() throws EEAException {
-    dataFlowDocumentControllerImpl.deleteDocument(document.getId());
+    dataflowDocumentControllerImpl.deleteDocument(document.getId());
     verify(dataflowService, times(1)).deleteDocument(Mockito.any());
   }
 
@@ -181,7 +181,7 @@ public class DataFlowDocumentControllerImplTest {
   public void getAllDocumentsByDataflowIdExceptionTest() throws EEAException {
     doThrow(new EEAException()).when(dataflowService).getAllDocumentsByDataflowId(Mockito.any());
     try {
-      dataFlowDocumentControllerImpl.getAllDocumentsByDataflowId(null);
+      dataflowDocumentControllerImpl.getAllDocumentsByDataflowId(null);
     } catch (ResponseStatusException exception) {
       assertEquals("bad status", HttpStatus.BAD_REQUEST, exception.getStatus());
       assertEquals("bad message", EEAErrorMessage.DOCUMENT_NOT_FOUND, exception.getReason());
@@ -203,7 +203,7 @@ public class DataFlowDocumentControllerImplTest {
     dataflowVO.setDocuments(documentsExpected);
     when(dataflowService.getAllDocumentsByDataflowId(Mockito.anyLong()))
         .thenReturn(documentsExpected);
-    assertEquals(documentsExpected, dataFlowDocumentControllerImpl.getAllDocumentsByDataflowId(1L));
+    assertEquals(documentsExpected, dataflowDocumentControllerImpl.getAllDocumentsByDataflowId(1L));
   }
 
 }

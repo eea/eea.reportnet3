@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
@@ -30,6 +31,7 @@ import io.swagger.annotations.ApiParam;
  */
 @RestController
 @RequestMapping("/euDataset")
+@Api(tags = "EU datasets : EU Dataset Manager")
 public class EUDatasetControllerImpl implements EUDatasetController {
 
 
@@ -76,10 +78,11 @@ public class EUDatasetControllerImpl implements EUDatasetController {
    */
   @Override
   @HystrixCommand
-  @PostMapping("/populateData/dataflow/{dataflowId}")
+  @PostMapping("/v1/populateData/dataflow/{dataflowId}")
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')  OR (checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN'))")
-  @ApiOperation(value = "Populate data from Datacollection")
+  @ApiOperation(value = "Populate data from Datacollection",
+      notes = "Allowed roles: CUSTODIAN, STEWARD")
   public void populateDataFromDataCollection(
       @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
           name = "dataflowId") @PathVariable("dataflowId") Long dataflowId) {
@@ -98,6 +101,24 @@ public class EUDatasetControllerImpl implements EUDatasetController {
     } catch (EEAException e) {
       LOG_ERROR.error("Error populating the EU Dataset because: {}", e.getMessage());
     }
+  }
+
+  /**
+   * Populate data from data collection legacy.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping("/populateData/dataflow/{dataflowId}")
+  @LockMethod(removeWhenFinish = false)
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')  OR (checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN'))")
+  @ApiOperation(value = "Populate data from Datacollection", hidden = true,
+      notes = "Allowed roles: CUSTODIAN, STEWARD")
+  public void populateDataFromDataCollectionLegacy(
+      @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
+          name = "dataflowId") @PathVariable("dataflowId") Long dataflowId) {
+    this.populateDataFromDataCollection(dataflowId);
   }
 
 }
