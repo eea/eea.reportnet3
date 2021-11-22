@@ -436,17 +436,16 @@ export const Map = ({
       )}
       <div style={{ display: 'inline-flex', width: '80%' }}>
         <Dropdown
-          ariaLabel={'themes'}
+          ariaLabel="themes"
           className={styles.themeSwitcherSplitButton}
           onChange={e => onThemeChange(e.target.value)}
           optionLabel="label"
           options={themes}
           placeholder="Select a theme"
-          style={{ width: '20%' }}
           value={currentTheme}
         />
         <Dropdown
-          ariaLabel={'crs'}
+          ariaLabel="crs"
           className={styles.crsSwitcherSplitButton}
           disabled={!MapUtils.checkValidJSONCoordinates(geoJson) && !isNewPositionMarkerVisible}
           onChange={e => {
@@ -464,7 +463,6 @@ export const Map = ({
           optionLabel="label"
           options={crs}
           placeholder={resourcesContext.messages['selectCRS']}
-          style={{ width: '20%' }}
           value={currentCRS}
         />
       </div>

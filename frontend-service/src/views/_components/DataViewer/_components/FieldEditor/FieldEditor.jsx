@@ -795,7 +795,7 @@ const FieldEditor = ({
       <div>
         {isNil(infoLabelClass) && <label className={styles.epsg}>{resourcesContext.messages['coords']}</label>}
         <label className={infoLabelClass}>{completeCoordinates}</label>
-        {!isValidJSON && value !== '' && (
+        {value !== '' && (
           <TooltipButton
             message={resourcesContext.messages['coordinatesMoreInfo']}
             onClick={() => onCoordinatesMoreInfoClick(RecordUtils.getCellValue(cells, cells.field))}
