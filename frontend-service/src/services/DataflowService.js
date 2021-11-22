@@ -382,5 +382,7 @@ export const DataflowService = {
     const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
     const parsedDatasetsInfoDTO = DataflowUtils.parseDatasetsInfoDTO(datasetsInfoDTO.data);
     return sortBy(parsedDatasetsInfoDTO, 'id');
-  }
+  },
+
+  validateAllDataflowsUsers: async () => await DataflowRepository.validateAllDataflowsUsers()
 };
