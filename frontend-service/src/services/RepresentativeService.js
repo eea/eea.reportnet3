@@ -66,5 +66,7 @@ export const RepresentativeService = {
     ),
 
   updateRestrictFromPublic: async (dataflowId, dataProviderId, restrictFromPublic) =>
-    await RepresentativeRepository.updateRestrictFromPublic(dataflowId, dataProviderId, restrictFromPublic)
+    await RepresentativeRepository.updateRestrictFromPublic(dataflowId, dataProviderId, restrictFromPublic),
+
+  validateLeadReporters: async dataflowId => await RepresentativeRepository.validateLeadReporters(dataflowId)
 };

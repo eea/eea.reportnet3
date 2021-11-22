@@ -113,6 +113,12 @@ export const recordReducer = (state, { type, payload }) => {
         return { ...state, newRecord: payload };
       }
 
+    case 'CLOSE_COORDINATES_MORE_INFO':
+      return { ...state, isCoordinatesMoreInfoVisible: false, coordinatesMoreInfo: '' };
+
+    case 'OPEN_COORDINATES_MORE_INFO':
+      return { ...state, isCoordinatesMoreInfoVisible: true, coordinatesMoreInfo: payload };
+
     case 'OPEN_MAP':
       const inmDrawElements = { ...state.drawElements };
       switch (payload.fieldType.toLowerCase()) {

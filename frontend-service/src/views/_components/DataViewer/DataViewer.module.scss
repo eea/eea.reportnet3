@@ -33,6 +33,19 @@
   display: flex !important;
   justify-content: center;
 }
+.coordinatesMoreInfo {
+  @include for-phone-landscape-up {
+    width: 90vw;
+  }
+
+  @include for-tablet-landscape-up {
+    width: 80vw;
+  }
+
+  @include for-desktop-up {
+    width: 70vw;
+  }
+}
 .currentPageWrapper {
   label {
     margin: 0 0.5rem;
