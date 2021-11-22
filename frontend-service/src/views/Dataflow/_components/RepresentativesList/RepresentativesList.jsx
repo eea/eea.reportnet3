@@ -456,6 +456,7 @@ const RepresentativesList = ({
         />
       );
     }
+
     return (
       <Dropdown
         ariaLabel={'dataProviders'}
