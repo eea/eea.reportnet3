@@ -224,8 +224,19 @@ public class DatasetSchemaControllerImplTest {
   public void findDataSchemaByDatasetIdTest() throws EEAException {
     when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.TRUE), Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
-    DataSetSchemaVO result = dataSchemaControllerImpl.findDataSchemaByDatasetId(1L);
-    Assert.assertNotNull(result);
+    Assert.assertNotNull(dataSchemaControllerImpl.findDataSchemaByDatasetId(1L));
+  }
+
+  /**
+   * Find data schema by dataset id legacy test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void findDataSchemaByDatasetIdLegacyTest() throws EEAException {
+    when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.TRUE), Mockito.any()))
+        .thenReturn(new DataSetSchemaVO());
+    Assert.assertNotNull(dataSchemaControllerImpl.findDataSchemaByDatasetIdLegacy(1L));
   }
 
   /**
@@ -1654,6 +1665,17 @@ public class DatasetSchemaControllerImplTest {
     assertNull(dataSchemaControllerImpl.getSimpleSchema(1L, 1L, 1L));
   }
 
+
+  /**
+   * Gets the simple schema legacy test.
+   *
+   * @return the simple schema legacy test
+   */
+  @Test
+  public void getSimpleSchemaLegacyTest() {
+    assertNull(dataSchemaControllerImpl.getSimpleSchemaLegacy(1L, 1L, 1L));
+  }
+
   /**
    * Gets the simple schema null test.
    *
@@ -1801,6 +1823,21 @@ public class DatasetSchemaControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Export field schemas legacy test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void exportFieldSchemasLegacyTest() throws EEAException, IOException {
+
+    dataSchemaControllerImpl.exportFieldSchemasLegacy(new ObjectId().toString(), 1L,
+        new ObjectId().toString());
+    Mockito.verify(dataschemaService, times(1)).exportFieldsSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
 
   @Test(expected = ResponseStatusException.class)
   public void testExportFieldSchemasException() throws EEAException, IOException {
@@ -1845,11 +1882,57 @@ public class DatasetSchemaControllerImplTest {
         Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
+  /**
+   * Import field schemas legacy test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void importFieldSchemasLegacyTest() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ZipOutputStream zip = new ZipOutputStream(baos);
+    ZipEntry entry1 = new ZipEntry("Table.schema");
+    ZipEntry entry2 = new ZipEntry("Table.qcrules");
+    zip.putNextEntry(entry1);
+    zip.putNextEntry(entry2);
+    zip.close();
+    MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
+        "application/x-zip-compressed", baos.toByteArray());
+
+    dataSchemaControllerImpl.importFieldSchemasLegacy(new ObjectId().toString(), 1L,
+        new ObjectId().toString(), multipartFile, true);
+    Mockito.verify(dataschemaService, times(1)).importFieldsSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+  }
+
 
   @Test
   public void testExportFieldSchemasFromDataset() throws EEAException, IOException {
 
     dataSchemaControllerImpl.exportFieldSchemasFromDataset(1L);
+    Mockito.verify(dataschemaService, times(1)).exportZipFieldSchemas(Mockito.anyLong());
+  }
+
+
+  /**
+   * Export field schemas from dataset legacy test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void exportFieldSchemasFromDatasetLegacyTest() throws EEAException, IOException {
+    dataSchemaControllerImpl.exportFieldSchemasFromDatasetLegacy(1L);
     Mockito.verify(dataschemaService, times(1)).exportZipFieldSchemas(Mockito.anyLong());
   }
 
@@ -1892,6 +1975,18 @@ public class DatasetSchemaControllerImplTest {
   @Test
   public void getTableSchemasIdsTest() throws EEAException {
     dataSchemaControllerImpl.getTableSchemasIds(1L, 1L, 1L);
+    Mockito.verify(dataschemaService, times(1)).getTableSchemasIds(Mockito.anyLong());
+  }
+
+  /**
+   * Gets the table schemas ids legacy test.
+   *
+   * @return the table schemas ids legacy test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getTableSchemasIdsLegacyTest() throws EEAException {
+    dataSchemaControllerImpl.getTableSchemasIdsLegacy(1L, 1L, 1L);
     Mockito.verify(dataschemaService, times(1)).getTableSchemasIds(Mockito.anyLong());
   }
 

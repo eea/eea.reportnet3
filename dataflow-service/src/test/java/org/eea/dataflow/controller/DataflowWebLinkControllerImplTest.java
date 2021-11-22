@@ -254,8 +254,20 @@ public class DataflowWebLinkControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void saveLink() throws EEAException {
+  public void saveLinkTest() throws EEAException {
     dataflowWebLinkControllerImpl.saveLink(dataflow.getId(), weblinkVO);
+    Mockito.verify(dataflowWebLinkService, times(1)).saveWebLink(weblink.getDataflow().getId(),
+        weblinkVO);
+  }
+
+  /**
+   * Save link legacy test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void saveLinkLegacyTest() throws EEAException {
+    dataflowWebLinkControllerImpl.saveLinkLegacy(dataflow.getId(), weblinkVO);
     Mockito.verify(dataflowWebLinkService, times(1)).saveWebLink(weblink.getDataflow().getId(),
         weblinkVO);
   }
@@ -318,10 +330,22 @@ public class DataflowWebLinkControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void removeLink() throws EEAException {
+  public void removeLinkTest() throws EEAException {
     dataflowWebLinkControllerImpl.removeLink(0L, 0L);
     Mockito.verify(dataflowWebLinkService, times(1)).removeWebLink(Mockito.anyLong());
   }
+
+  /**
+   * Removes the link legacy test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void removeLinkLegacyTest() throws EEAException {
+    dataflowWebLinkControllerImpl.removeLinkLegacy(0L, 0L);
+    Mockito.verify(dataflowWebLinkService, times(1)).removeWebLink(Mockito.anyLong());
+  }
+
 
 
   /**
@@ -396,8 +420,21 @@ public class DataflowWebLinkControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void updateLink() throws EEAException {
+  public void updateLinkTest() throws EEAException {
     dataflowWebLinkControllerImpl.updateLink(weblinkVO, 1L);
+
+    Mockito.verify(dataflowWebLinkService, times(1)).updateWebLink(weblinkVO);
+  }
+
+
+  /**
+   * Update link legacy test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateLinkLegacyTest() throws EEAException {
+    dataflowWebLinkControllerImpl.updateLinkLegacy(weblinkVO, 1L);
 
     Mockito.verify(dataflowWebLinkService, times(1)).updateWebLink(weblinkVO);
   }
@@ -417,6 +454,24 @@ public class DataflowWebLinkControllerImplTest {
     when(dataflowWebLinkService.getAllWeblinksByDataflowId(Mockito.anyLong()))
         .thenReturn(weblinksExpected);
     assertEquals(weblinksExpected, dataflowWebLinkControllerImpl.getAllWeblinksByDataflow(1L));
+  }
+
+  /**
+   * Gets the all weblinks by dataflow legacy test.
+   *
+   * @return the all weblinks by dataflow legacy test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getAllWeblinksByDataflowLegacyTest() throws EEAException {
+    List<WeblinkVO> weblinksExpected = new ArrayList<>();
+    WeblinkVO weblinkVO = new WeblinkVO();
+    weblinkVO.setId(1L);
+    weblinksExpected.add(weblinkVO);
+    when(dataflowWebLinkService.getAllWeblinksByDataflowId(Mockito.anyLong()))
+        .thenReturn(weblinksExpected);
+    assertEquals(weblinksExpected,
+        dataflowWebLinkControllerImpl.getAllWeblinksByDataflowLegacy(1L));
   }
 
 }
