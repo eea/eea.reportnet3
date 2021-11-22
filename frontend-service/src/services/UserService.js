@@ -17,9 +17,12 @@ const refreshToken = async () => {
   }
 };
 
+let timeoutFunctionId;
+
 const setRefreshTokenTimeout = time => {
-  setTimeout(() => {
-    refreshToken();
+  clearTimeout(timeoutFunctionId);
+  timeoutFunctionId = setTimeout(() => {
+    refreshToken(true);
   }, time);
 };
 
@@ -52,6 +55,8 @@ export const UserService = {
   },
 
   logout: async () => {
+    clearTimeout(timeoutFunctionId);
+
     const currentTokens = LocalUserStorageUtils.getTokens();
     LocalUserStorageUtils.remove();
 
