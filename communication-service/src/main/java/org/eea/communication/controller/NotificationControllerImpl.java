@@ -169,4 +169,18 @@ public class NotificationControllerImpl implements NotificationController {
 
     return notificationService.findSystemNotifications();
   }
+
+  /**
+   * Check any system notification enabled.
+   *
+   * @return true, if successful
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/checkAnySystemNotificationEnabled")
+  @ApiOperation(value = "Check any system notifications is enabled", hidden = true)
+  public boolean checkAnySystemNotificationEnabled() {
+
+    return notificationService.checkAnySystemNotificationEnabled();
+  }
 }

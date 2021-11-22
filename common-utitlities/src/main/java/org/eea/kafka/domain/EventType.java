@@ -465,6 +465,10 @@ public enum EventType {
   EXPORT_SCHEMA_INFORMATION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "export_schema_information_failed_event", true),
 
+  /** The no enabled system notifications. */
+  NO_ENABLED_SYSTEM_NOTIFICATIONS(LiteralConstants.DATA_REPORTING_TOPIC,
+      "no_enabled_system_notifications", true),
+
   /** The export users by country completed event. */
   EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "export_users_by_country_completed_event", true),

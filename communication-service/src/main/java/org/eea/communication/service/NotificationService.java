@@ -72,4 +72,11 @@ public interface NotificationService {
    * @return the list
    */
   public List<SystemNotificationVO> findSystemNotifications();
+
+  /**
+   * Check any system notification enabled.
+   *
+   * @return true, if successful
+   */
+  public boolean checkAnySystemNotificationEnabled();
 }
