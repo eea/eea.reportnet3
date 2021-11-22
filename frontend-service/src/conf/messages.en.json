@@ -1355,6 +1355,9 @@
     "automaticallyDownloadUsersListFile": "Users list file generated successfully",
     "downloadUsersListFileError": "Failed downloading users list file",
     "exportUsersByCountryFailedEvent": "Failed generating validations file",
-    "exportUsersByCountryCompletedEvent": "Users list file generated successfully"
+    "exportUsersByCountryCompletedEvent": "Users list file generated successfully",
+    "adminCreatePermissions": "Create permissions",
+    "adminNewCreatePermissions": "Creation of permissions for new users",
+    "confirmCreateNewPermissions": "Creation of permissions for new users"
   }
 }

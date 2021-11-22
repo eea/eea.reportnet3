@@ -10,21 +10,22 @@ import { DataflowsReporterHelpConfig } from 'conf/help/dataflows/reporter';
 import { DataflowsRequesterHelpConfig } from 'conf/help/dataflows/requester';
 
 import { Button } from 'views/_components/Button';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'views/_components/Dialog';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
-import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
+import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
 import { GoTopButton } from 'views/_components/GoTopButton';
 
-import { DataflowService } from 'services/DataflowService';
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
-import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { CitizenScienceDataflowService } from 'services/CitizenScienceDataflowService';
+import { DataflowService } from 'services/DataflowService';
+import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { UserService } from 'services/UserService';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
@@ -61,18 +62,19 @@ const Dataflows = withRouter(({ history, match }) => {
     citizenScience: [],
     dataflowsCount: {},
     dataflowsCountFirstLoad: false,
-    reporting: [],
     isAdmin: null,
+    isAdminDataflowDialogVisible: false,
     isBusinessDataflowDialogVisible: false,
-    isReportingDataflowDialogVisible: false,
+    isCitizenScienceDataflowDialogVisible: false,
     isCustodian: null,
     isNationalCoordinator: false,
     isReferencedDataflowDialogVisible: false,
-    isCitizenScienceDataflowDialogVisible: false,
+    isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
-    reference: []
+    reference: [],
+    reporting: []
   });
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
@@ -177,8 +179,18 @@ const Dataflows = withRouter(({ history, match }) => {
       title: 'allDataflowsUserList'
     };
 
+    const adminReportingDataflowBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'userShield',
+      isVisible: isAdmin,
+      label: 'adminCreatePermissions',
+      onClick: () => manageDialogs('isAdminDataflowDialogVisible', true),
+      title: 'adminCreatePermissions'
+    };
+
     leftSideBarContext.addModels(
       [
+        adminReportingDataflowBtn,
         createBusinessDataflowBtn,
         createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
@@ -436,6 +448,18 @@ const Dataflows = withRouter(({ history, match }) => {
           onCreateDataflow={onCreateDataflow}
           resetObligations={resetObligations}
         />
+      )}
+
+      {dataflowsState.isAdminDataflowDialogVisible && (
+        <ConfirmDialog
+          header={resourcesContext.messages['adminNewCreatePermissions']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onHide={() => manageDialogs('isAdminDataflowDialogVisible', false)}
+          style={{ width: '95%' }}
+          visible={dataflowsState.isAdminDataflowDialogVisible}>
+          {resourcesContext.messages['confirmCreateNewPermissions']}
+        </ConfirmDialog>
       )}
 
       {dataflowsState.isCitizenScienceDataflowDialogVisible && (
