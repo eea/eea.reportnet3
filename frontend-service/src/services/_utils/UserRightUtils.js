@@ -9,7 +9,7 @@ const parseUserRightListDTO = userRightListDTO => {
 
     return new UserRight({
       account: userRightDTO.account,
-      id: userRightDTO?.id,
+      id: userRightDTO.id,
       isNew: userRightDTO.isNew,
       isValid: !userRightDTO.invalid,
       role: userRightDTO.role
