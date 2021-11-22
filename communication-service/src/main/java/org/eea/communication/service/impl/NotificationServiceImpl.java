@@ -36,6 +36,7 @@ import org.springframework.util.CollectionUtils;
 public class NotificationServiceImpl implements NotificationService {
 
 
+  /** The Constant MAX_LENGTH_MESSAGE. */
   private static final int MAX_LENGTH_MESSAGE = 300;
 
   /** The Constant LOG. */
