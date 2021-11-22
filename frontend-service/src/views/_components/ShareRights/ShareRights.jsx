@@ -67,7 +67,6 @@ export const ShareRights = ({
   ];
 
   const isReporterManagement = userType === userTypes.REPORTER;
-  const isRequesterManagement = userType === userTypes.REQUESTER;
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -210,9 +209,7 @@ export const ShareRights = ({
         default:
           break;
       }
-    }
-
-    if (isRequesterManagement) {
+    } else {
       switch (method) {
         case methodTypes.DELETE:
           return await UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
@@ -316,7 +313,7 @@ export const ShareRights = ({
   };
 
   const renderButtonsColumnTemplate = userRight => {
-    if (userType === userTypes.REQUESTER && notDeletableRolesRequester.includes(userRight?.role) && !isAdmin) {
+    if (!isReporterManagement && notDeletableRolesRequester.includes(userRight?.role) && !isAdmin) {
       return null;
     }
 
@@ -356,9 +353,9 @@ export const ShareRights = ({
       <div className={styles.manageDialog}>
         <div className={styles.inputWrapper}>
           <label className={styles.label} htmlFor="accountInput">
-            {userType === userTypes.REQUESTER
-              ? resourcesContext.messages['userRolesRequesterInputLabel']
-              : resourcesContext.messages['userRolesReporterInputLabel']}
+            {isReporterManagement
+              ? resourcesContext.messages['userRolesReporterInputLabel']
+              : resourcesContext.messages['userRolesRequesterInputLabel']}
           </label>
           <InputText
             className={hasError ? styles.error : ''}
