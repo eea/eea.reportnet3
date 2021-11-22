@@ -441,7 +441,11 @@ public enum EventType {
 
   /** The export schema information failed event. */
   EXPORT_SCHEMA_INFORMATION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "export_schema_information_failed_event", true);
+      "export_schema_information_failed_event", true),
+
+
+  NO_ENABLED_SYSTEM_NOTIFICATIONS(LiteralConstants.DATA_REPORTING_TOPIC,
+      "no_enabled_system_notifications", true);
 
   /** The topic. */
   private String topic;
