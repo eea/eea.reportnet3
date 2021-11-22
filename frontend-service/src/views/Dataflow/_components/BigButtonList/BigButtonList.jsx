@@ -736,15 +736,11 @@ export const BigButtonList = ({
           )}
           <Calendar
             className={styles.calendar}
-            disabledDates={[new Date()]}
             inline={true}
-            minDate={new Date()}
             monthNavigator={true}
             onChange={event => setDataCollectionDueDate(event.target.value)}
-            showWeek={true}
             value={dataCollectionDueDate}
             yearNavigator={true}
-            yearRange="2020:2030"
           />
         </ConfirmDialog>
       )}
