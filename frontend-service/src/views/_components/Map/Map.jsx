@@ -165,12 +165,12 @@ export const Map = ({
       results.clearLayers();
       if (TextUtils.areEquals(geometryType, 'POINT')) {
         for (let i = data.results.length - 1; i >= 0; i--) {
-          setNewPositionMarker(`${data.results[i].latlng.lat}, ${data.results[i].latlng.lng}, EPSG:4326`);
+          setNewPositionMarker([data.results[i].latlng.lat, data.results[i].latlng.lng]);
           onSelectPoint(
-            proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [
-              data.results[i].latlng.lat,
-              data.results[i].latlng.lng
-            ]),
+            projectPointCoordinates({
+              coordinates: [data.results[i].latlng.lat, data.results[i].latlng.lng],
+              newCRS: currentCRS.value
+            }),
             currentCRS.value
           );
         }
@@ -227,6 +227,8 @@ export const Map = ({
     esri.basemapLayer(currentTheme.value).addTo(map);
   }, [currentTheme]);
 
+  const checkCoordsToLatLng = coords => new L.LatLng(coords[0], coords[1], coords[2]);
+
   const getCenter = () => {
     const defaultCenter = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
     if (TextUtils.areEquals(geometryType, 'POINT')) {
@@ -257,7 +259,7 @@ export const Map = ({
         if (MapUtils.checkValidJSONCoordinates(mapGeoJson)) {
           return (
             <GeoJSON
-              coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
+              coordsToLatLng={coords => checkCoordsToLatLng(coords)}
               data={JSON.parse(mapGeoJson)}
               onEachFeature={onEachFeature}
             />
@@ -272,7 +274,7 @@ export const Map = ({
         if (MapUtils.checkValidJSONMultipleCoordinates(mapGeoJson)) {
           return (
             <GeoJSON
-              coordsToLatLng={coords => new L.LatLng(coords[0], coords[1], coords[2])}
+              coordsToLatLng={coords => checkCoordsToLatLng(coords)}
               data={JSON.parse(mapGeoJson)}
               onEachFeature={onEachFeature}
             />
@@ -291,7 +293,7 @@ export const Map = ({
 
   const onEachFeature = (feature, layer) => {
     if (TextUtils.areEquals(geometryType, 'POINT')) {
-      layer.bindPopup(onPrintCoordinates(feature.geometry.coordinates.join(', ')));
+      layer.bindPopup(renderCoordinates({ data: feature.geometry.coordinates, isGeoJson: false }));
       layer.on({
         click: () =>
           mapRef.current.leafletElement.setView(feature.geometry.coordinates, mapRef.current.leafletElement.zoom)
@@ -303,7 +305,7 @@ export const Map = ({
     }
   };
 
-  const onPrintCoordinates = coordinates => `{Lat: ${coordinates.split(', ')[0]}, Lng: ${coordinates.split(', ')[1]}}`;
+  const onPrintCoordinates = coordinates => `{Lat: ${coordinates[0]}, Lng: ${coordinates[1]}}`;
 
   const onThemeChange = item => {
     const selectedTheme = themes.filter(t => t.value === item.value)[0];
@@ -315,13 +317,20 @@ export const Map = ({
   const projectGeoJsonCoordinates = (geoJsonData, isCenter = false) => {
     const parsedGeoJsonData = typeof geoJsonData === 'object' ? geoJsonData : JSON.parse(geoJsonData);
     const projectPoint = coordinate => {
-      return MapUtils.checkValidCoordinates(coordinate)
-        ? proj4(
-            proj4(!isNil(parsedGeoJsonData) ? getSRID(parsedGeoJsonData.properties.srid) : currentCRS.value),
-            proj4('EPSG:4326'),
-            coordinate
-          )
-        : coordinate;
+      if (MapUtils.checkValidCoordinates(coordinate)) {
+        const projectedCoordinates = proj4(
+          proj4(!isNil(parsedGeoJsonData) ? getSRID(parsedGeoJsonData.properties.srid) : currentCRS.value),
+          proj4('EPSG:4326'),
+          coordinate
+        );
+        if (MapUtils.getSrid(mapGeoJson) === 'EPSG:3035') {
+          return [projectedCoordinates[1], projectedCoordinates[0]];
+        } else {
+          return projectedCoordinates;
+        }
+      } else {
+        return coordinate;
+      }
     };
     if (isCenter) {
       return projectPoint(parsedGeoJsonData.geometry.coordinates);
@@ -346,12 +355,45 @@ export const Map = ({
     }
   };
 
-  const projectPointCoordinates = coordinates => {
-    return proj4(
-      proj4(!isNil(coordinates.split(', ')[2]) ? coordinates.split(', ')[2] : currentCRS.value),
-      proj4('EPSG:4326'),
-      MapUtils.parseCoordinates(coordinates.split(', '))
-    );
+  const projectPointCoordinates = ({ coordinates, CRS = currentCRS.value, newCRS = 'EPSG:4326' }) => {
+    if (TextUtils.areEquals(geometryType, 'POINT')) {
+      if (newCRS === 'EPSG:3035') {
+        return proj4(proj4(CRS), proj4(newCRS), [coordinates[1], coordinates[0]]);
+      } else {
+        return coordinates;
+      }
+    }
+  };
+
+  const renderCoordinates = ({ data, isGeoJson = false }) => {
+    let popupContent = MapUtils.printCoordinates({
+      data,
+      isGeoJson,
+      geometryType,
+      firstCoordinateText: resourcesContext.messages['latitude'],
+      secondCoordinateText: resourcesContext.messages['longitude']
+    });
+
+    if (!isNil(data) && currentCRS.value !== 'EPSG:4326') {
+      popupContent = `${popupContent}             
+      ${resourcesContext.messages['projectedCoordinates']}      
+      ${
+        TextUtils.areEquals(geometryType, 'POINT')
+          ? MapUtils.printCoordinates({
+              data: projectPointCoordinates({
+                coordinates: isGeoJson ? JSON.parse(data).geometry.coordinates : data,
+                CRS: 'EPSG:4326',
+                newCRS: currentCRS.value
+              }),
+              isGeoJson,
+              geometryType,
+              firstCoordinateText: resourcesContext.messages[currentCRS.value === 'EPSG:3035' ? 'x' : 'latitude'],
+              secondCoordinateText: resourcesContext.messages[currentCRS.value === 'EPSG:3035' ? 'y' : 'longitude']
+            })
+          : ''
+      }`;
+    }
+    return popupContent;
   };
 
   return (
@@ -367,22 +409,11 @@ export const Map = ({
                   : resourcesContext.messages['geometryCoordinates']}
                 :{' '}
               </label>
-              <label data-for="coordinatesTooltip" data-tip>
+              <span data-for="coordinatesTooltip" data-tip>
                 {MapUtils.checkValidJSONCoordinates(geoJson) || MapUtils.checkValidJSONMultipleCoordinates(geoJson)
-                  ? MapUtils.printCoordinates(mapGeoJson, true, geometryType)
-                  : `{Latitude: , Longitude: }`}
-              </label>
-              {/* {(MapUtils.checkValidJSONCoordinates(geoJson) || MapUtils.checkValidJSONMultipleCoordinates(geoJson)) && (
-                <ReactTooltip
-                  border={true}
-                  className={styles.tooltip}
-                  effect="float"
-                  id="coordinatesTooltip"
-                  multiline={true}
-                  place="top">
-                  {MapUtils.printCoordinates(mapGeoJson, true, geometryType)}
-                </ReactTooltip>
-              )} */}
+                  ? renderCoordinates({ data: mapGeoJson, isGeoJson: true })
+                  : `{${resourcesContext.messages['latitude']}: , ${resourcesContext.messages['longitude']}: }`}
+              </span>
             </div>
           </div>
           {TextUtils.areEquals(geometryType, 'POINT') && (
@@ -391,7 +422,7 @@ export const Map = ({
                 <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />
                 <div className={styles.pointLegendItemLabel}>
                   <label>{resourcesContext.messages['newPoint']}: </label>
-                  <label>{MapUtils.printCoordinates(newPositionMarker, false, geometryType)}</label>
+                  <label>{renderCoordinates({ data: newPositionMarker })}</label>
                 </div>
               </div>
               <div className={styles.pointLegendItem}>
@@ -405,36 +436,33 @@ export const Map = ({
       )}
       <div style={{ display: 'inline-flex', width: '80%' }}>
         <Dropdown
-          ariaLabel={'themes'}
+          ariaLabel="themes"
           className={styles.themeSwitcherSplitButton}
           onChange={e => onThemeChange(e.target.value)}
           optionLabel="label"
           options={themes}
           placeholder="Select a theme"
-          style={{ width: '20%' }}
           value={currentTheme}
         />
         <Dropdown
-          ariaLabel={'crs'}
+          ariaLabel="crs"
           className={styles.crsSwitcherSplitButton}
           disabled={!MapUtils.checkValidJSONCoordinates(geoJson) && !isNewPositionMarkerVisible}
           onChange={e => {
             onCRSChange(e.target.value);
             onSelectPoint(
-              proj4(
-                proj4('EPSG:4326'),
-                proj4(e.target.value.value),
-                isNewPositionMarkerVisible
-                  ? MapUtils.parseCoordinates(newPositionMarker.split(', '))
-                  : JSON.parse(mapGeoJson).geometry.coordinates
-              ),
+              projectPointCoordinates({
+                coordinates: isNewPositionMarkerVisible
+                  ? newPositionMarker
+                  : JSON.parse(mapGeoJson).geometry.coordinates,
+                newCRS: e.target.value.value
+              }),
               e.target.value.value
             );
           }}
           optionLabel="label"
           options={crs}
-          placeholder="Select a CRS"
-          style={{ width: '20%' }}
+          placeholder={resourcesContext.messages['selectCRS']}
           value={currentCRS}
         />
       </div>
@@ -445,9 +473,13 @@ export const Map = ({
           onDblclick={
             TextUtils.areEquals(geometryType, 'POINT')
               ? e => {
-                  setNewPositionMarker(`${e.latlng.lat}, ${e.latlng.lng}, EPSG:4326`);
+                  setNewPositionMarker([e.latlng.lat, e.latlng.lng]);
                   onSelectPoint(
-                    proj4(proj4('EPSG:4326'), proj4(currentCRS.value), [e.latlng.lat, e.latlng.lng]),
+                    projectPointCoordinates({
+                      coordinates: [e.latlng.lat, e.latlng.lng],
+                      CRS: 'EPSG:4326',
+                      newCRS: currentCRS.value
+                    }),
                     currentCRS.value
                   );
                   mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
@@ -468,7 +500,7 @@ export const Map = ({
                 }
                 mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
               }}
-              position={projectPointCoordinates(newPositionMarker)}>
+              position={projectPointCoordinates({ coordinates: newPositionMarker })}>
               <Popup>{onPrintCoordinates(newPositionMarker)}</Popup>
             </Marker>
           )}

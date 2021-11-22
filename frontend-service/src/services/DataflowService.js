@@ -55,10 +55,15 @@ export const DataflowService = {
   downloadAllSchemasInfo: async (dataflowId, fileName) =>
     await DataflowRepository.downloadAllSchemasInfo(dataflowId, fileName),
 
-  generateAllSchemasInfoFile: async dataflowId => await DataflowRepository.generateAllSchemasInfoFile(dataflowId),
-
   downloadPublicAllSchemasInfoFile: async dataflowId =>
     await DataflowRepository.downloadPublicAllSchemasInfoFile(dataflowId),
+
+  downloadUsersListFile: async (dataflowId, fileName) =>
+    await DataflowRepository.downloadUsersListFile(dataflowId, fileName),
+
+  generateAllSchemasInfoFile: async dataflowId => await DataflowRepository.generateAllSchemasInfoFile(dataflowId),
+
+  generateUsersByCountryFile: async dataflowId => await DataflowRepository.generateUsersByCountryFile(dataflowId),
 
   getDatasetsValidationStatistics: async (dataflowId, datasetSchemaId) => {
     const datasetsDashboardsDataDTO = await DataflowRepository.getDatasetsValidationStatistics(
@@ -377,5 +382,7 @@ export const DataflowService = {
     const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
     const parsedDatasetsInfoDTO = DataflowUtils.parseDatasetsInfoDTO(datasetsInfoDTO.data);
     return sortBy(parsedDatasetsInfoDTO, 'id');
-  }
+  },
+
+  validateAllDataflowsUsers: async () => await DataflowRepository.validateAllDataflowsUsers()
 };

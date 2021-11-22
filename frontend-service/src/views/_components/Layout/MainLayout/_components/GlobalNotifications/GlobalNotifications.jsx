@@ -20,6 +20,7 @@ const GlobalNotifications = () => {
   useEffect(() => {
     downloadAllSchemasInfoFile();
     downloadQCRulesFile();
+    downloadUsersListFile();
     downloadValidationsFile();
     downloadExportFMEFile();
     downloadExportDatasetFile();
@@ -73,6 +74,31 @@ const GlobalNotifications = () => {
     } catch (error) {
       console.error('GlobalNotifications - downloadQCRulesFile.', error);
       notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' }, true);
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
+  };
+
+  const downloadUsersListFile = async () => {
+    const notification = findHiddenNotification('EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT');
+
+    if (isNil(notification)) {
+      return;
+    }
+
+    try {
+      const { data } = await DataflowService.downloadUsersListFile(
+        notification.content.dataflowId,
+        notification.content.nameFile
+      );
+      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE' });
+
+      if (data.size !== 0) {
+        DownloadFile(data, notification.content.nameFile);
+      }
+    } catch (error) {
+      console.error('GlobalNotifications - downloadUsersListFile.', error);
+      notificationContext.add({ type: 'DOWNLOAD_USERS_LIST_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }

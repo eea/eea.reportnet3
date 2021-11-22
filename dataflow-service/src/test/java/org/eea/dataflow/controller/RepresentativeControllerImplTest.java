@@ -167,6 +167,19 @@ public class RepresentativeControllerImplTest {
   }
 
   /**
+   * Find represetatives by id data flow success legacy test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void findRepresetativesByIdDataFlowSuccessLegacyTest() throws EEAException {
+    when(representativeService.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(representativeVOs);
+    assertEquals("error in the message", representativeVOs,
+        representativeControllerImpl.findRepresentativesByIdDataFlowLegacy(1L));
+  }
+
+  /**
    * Update representative success test.
    *
    * @throws EEAException the EEA exception

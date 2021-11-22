@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 
 /**
@@ -27,6 +28,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping("/webform")
+@ApiIgnore
 public class WebformControllerImpl implements WebformController {
 
 

@@ -25,11 +25,24 @@ export const DataflowRepository = {
       url: getUrl(DataflowConfig.downloadAllSchemasInfo, { dataflowId, fileName })
     }),
 
+  downloadPublicAllSchemasInfoFile: async dataflowId =>
+    await HTTPRequester.download({ url: getUrl(DataflowConfig.downloadPublicAllSchemasInfoFile, { dataflowId }) }),
+
+  downloadQCRulesFile: async (datasetId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(DataflowConfig.downloadQCRulesFile, { datasetId, fileName })
+    }),
+
+  downloadUsersListFile: async (dataflowId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(DataflowConfig.downloadUsersListFile, { dataflowId, fileName })
+    }),
+
   generateAllSchemasInfoFile: async dataflowId =>
     await HTTPRequester.post({ url: getUrl(DataflowConfig.generateAllSchemasInfoFile, { dataflowId }) }),
 
-  downloadPublicAllSchemasInfoFile: async dataflowId =>
-    await HTTPRequester.download({ url: getUrl(DataflowConfig.downloadPublicAllSchemasInfoFile, { dataflowId }) }),
+  generateUsersByCountryFile: async dataflowId =>
+    await HTTPRequester.post({ url: getUrl(DataflowConfig.generateUsersByCountryFile, { dataflowId }) }),
 
   getDetails: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDetails, { dataflowId }) }),
 
@@ -110,5 +123,8 @@ export const DataflowRepository = {
     }),
 
   getDatasetsInfo: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsInfo, { dataflowId }) })
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsInfo, { dataflowId }) }),
+
+  validateAllDataflowsUsers: async () =>
+    await HTTPRequester.update({ url: getUrl(DataflowConfig.validateAllDataflowsUsers) })
 };

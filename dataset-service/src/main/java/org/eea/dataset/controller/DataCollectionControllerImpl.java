@@ -41,6 +41,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The Class DataCollectionControllerImpl.
@@ -48,6 +49,7 @@ import io.swagger.annotations.ApiResponses;
 @RestController
 @RequestMapping("/datacollection")
 @Api(tags = "Dataset: Data Collection Manager")
+@ApiIgnore
 public class DataCollectionControllerImpl implements DataCollectionController {
 
   /** The Constant LOG. */
@@ -66,7 +68,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
   /** The notification controller zuul. */
   @Autowired
-  NotificationControllerZuul notificationControllerZuul;
+  private NotificationControllerZuul notificationControllerZuul;
 
   /**
    * Undo data collection creation.

@@ -127,7 +127,7 @@ public class NotificationServiceImpl implements NotificationService {
       template.convertAndSend("/user/queue/systemnotifications", sysNotiVO);
       LOG.info("System Notification created succesfully in mongo");
     } catch (IllegalArgumentException e) {
-      LOG_ERROR.error("Error creating a System Notification. {}", e);
+      LOG_ERROR.error("Error creating a System Notification. {}", e.getMessage(), e);
       throw new EEAException(e.getMessage());
     }
   }
