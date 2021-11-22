@@ -10,13 +10,6 @@
     }
   }
 }
-.manageLeadReportersButton {
-  float: left;
-}
-
-.exportTemplate {
-  float: left;
-}
 
 .dialog :global .p-dialog-content {
   padding-bottom: 0 !important;
@@ -35,11 +28,10 @@
   }
 }
 
-.buttonsRolesFooter {
-  display: flex;
-  justify-content: space-between;
-}
-
 .pointer {
   cursor: pointer;
+}
+
+.buttonLeft {
+  float: left;
 }

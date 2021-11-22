@@ -110,7 +110,7 @@ export const SystemNotificationsCreateForm = ({
             <InputText
               id="systemNotificationMessage"
               // keyfilter={RecordUtils.getFilter(type)}
-              maxLength={config.INPUT_MAX_LENGTH}
+              maxLength={config.SYSTEM_NOTIFICATION_MAX_LENGTH}
               name="systemNotificationMessage"
               onChange={e => onChange('message', e.target.value)}
               type="text"
@@ -118,7 +118,7 @@ export const SystemNotificationsCreateForm = ({
             />
             <CharacterCounter
               currentLength={systemNotification.message.length}
-              maxLength={config.INPUT_MAX_LENGTH}
+              maxLength={config.SYSTEM_NOTIFICATION_MAX_LENGTH}
               style={{ position: 'relative', top: '0.25rem' }}
             />
           </div>

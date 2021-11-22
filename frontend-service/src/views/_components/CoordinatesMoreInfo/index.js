@@ -1,0 +1,1 @@
+export { CoordinatesMoreInfo } from './CoordinatesMoreInfo';

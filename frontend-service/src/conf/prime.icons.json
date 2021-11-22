@@ -38,6 +38,7 @@
   "import": "pi pi-upload",
   "info": "pi pi-info",
   "infoCircle": "pi pi-info-circle",
+  "lock": "pi pi-lock",
   "logout": "pi pi-power-off",
   "list": "pi pi-list",
   "minus": "pi pi-minus",
