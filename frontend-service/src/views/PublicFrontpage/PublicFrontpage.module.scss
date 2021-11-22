@@ -248,6 +248,7 @@
       justify-content: flex-start;
       flex-wrap: wrap;
       width: 100%;
+      padding-top: 0.5rem;
       .portalBox {
         display: flex;
         flex-direction: column;
@@ -284,6 +285,7 @@
   .showPublicBox {
     margin-top: 2rem;
     margin-right: 2rem;
+    margin-bottom: 2rem;
 
     .showPublicData {
       display: flex;
