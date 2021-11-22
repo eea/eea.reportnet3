@@ -10,21 +10,22 @@ import { DataflowsReporterHelpConfig } from 'conf/help/dataflows/reporter';
 import { DataflowsRequesterHelpConfig } from 'conf/help/dataflows/requester';
 
 import { Button } from 'views/_components/Button';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'views/_components/Dialog';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
-import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
+import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
 import { GoTopButton } from 'views/_components/GoTopButton';
 
-import { DataflowService } from 'services/DataflowService';
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
-import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { CitizenScienceDataflowService } from 'services/CitizenScienceDataflowService';
+import { DataflowService } from 'services/DataflowService';
+import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { UserService } from 'services/UserService';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
@@ -61,18 +62,19 @@ const Dataflows = withRouter(({ history, match }) => {
     citizenScience: [],
     dataflowsCount: {},
     dataflowsCountFirstLoad: false,
-    reporting: [],
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
-    isReportingDataflowDialogVisible: false,
+    isCitizenScienceDataflowDialogVisible: false,
     isCustodian: null,
     isNationalCoordinator: false,
+    isRecreatePermissionsDialogVisible: false,
     isReferencedDataflowDialogVisible: false,
-    isCitizenScienceDataflowDialogVisible: false,
+    isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
-    reference: []
+    reference: [],
+    reporting: []
   });
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
@@ -177,8 +179,18 @@ const Dataflows = withRouter(({ history, match }) => {
       title: 'allDataflowsUserList'
     };
 
+    const adminCreateNewPermissionsBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'userShield',
+      isVisible: isAdmin,
+      label: 'adminCreatePermissions',
+      onClick: () => manageDialogs('isRecreatePermissionsDialogVisible', true),
+      title: 'adminCreatePermissions'
+    };
+
     leftSideBarContext.addModels(
       [
+        adminCreateNewPermissionsBtn,
         createBusinessDataflowBtn,
         createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
@@ -295,6 +307,16 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const manageDialogs = (dialog, value) => {
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
+  };
+
+  const onConfirmValidateAllDataflowsUsers = async () => {
+    manageDialogs('isRecreatePermissionsDialogVisible', false);
+    try {
+      await DataflowService.validateAllDataflowsUsers();
+    } catch (error) {
+      console.error('Dataflows -  onConfirmValidateAllDataflowsUsers.', error);
+      notificationContext.add({ type: 'VALIDATE_ALL_REPORTERS_FAILED_EVENT' }, true);
+    }
   };
 
   const onCreateDataflow = dialog => {
@@ -436,6 +458,18 @@ const Dataflows = withRouter(({ history, match }) => {
           onCreateDataflow={onCreateDataflow}
           resetObligations={resetObligations}
         />
+      )}
+
+      {dataflowsState.isRecreatePermissionsDialogVisible && (
+        <ConfirmDialog
+          header={resourcesContext.messages['adminNewCreatePermissions']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onConfirmValidateAllDataflowsUsers}
+          onHide={() => manageDialogs('isRecreatePermissionsDialogVisible', false)}
+          visible={dataflowsState.isRecreatePermissionsDialogVisible}>
+          {resourcesContext.messages['confirmCreateNewPermissions']}
+        </ConfirmDialog>
       )}
 
       {dataflowsState.isCitizenScienceDataflowDialogVisible && (
