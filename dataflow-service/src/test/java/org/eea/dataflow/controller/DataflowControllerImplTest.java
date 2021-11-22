@@ -985,7 +985,7 @@ public class DataflowControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void exportSchemaInformationTestError() throws EEAException, IOException {
-    dataFlowControllerImpl.exportSchemaInformation(null);
+    dataflowControllerImpl.exportSchemaInformation(null);
     try {
 
     } catch (ResponseStatusException e) {
