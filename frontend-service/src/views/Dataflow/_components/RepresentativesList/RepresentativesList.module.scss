@@ -19,6 +19,16 @@
     }
   }
 }
+.isValidUserIcon {
+  left: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
+  position: relative;
+  top: 10px;
+  cursor: pointer;
+  color: var(--isValid-user-icon-color);
+  font-size: 1.1rem;
+}
 .listContainer {
   padding-left: 0px;
   list-style: none;

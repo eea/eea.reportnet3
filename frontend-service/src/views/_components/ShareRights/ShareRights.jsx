@@ -399,10 +399,6 @@ export const ShareRights = ({
             data-for={userRight.account}
             data-tip
             icon={userRight.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
-            style={{
-              color: 'var(--isValid-user-icon-color)',
-              fontSize: '1.1rem'
-            }}
           />
           <ReactTooltip border={true} effect="solid" id={userRight.account} place="top">
             {userRight.isValid

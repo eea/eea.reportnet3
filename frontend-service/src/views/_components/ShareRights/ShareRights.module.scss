@@ -26,9 +26,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  .isValidUserIcon {
-    cursor: pointer;
-  }
+}
+
+.isValidUserIcon {
+  cursor: pointer;
+  color: var(--isValid-user-icon-color);
+  font-size: 1.1rem;
 }
 
 .manageDialog {

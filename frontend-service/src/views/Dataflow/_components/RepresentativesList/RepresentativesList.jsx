@@ -365,19 +365,10 @@ const RepresentativesList = ({
           {!isNewLeadReporter && isValidEmail(reporters[leadReporter.id]?.account || reporters[leadReporter.id]) && (
             <Fragment>
               <FontAwesomeIcon
+                className={styles.validUserIcon}
                 data-for={reporters[leadReporter.id]?.account}
                 data-tip
                 icon={reporters[leadReporter.id]?.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
-                style={{
-                  color: 'var(--isValid-user-icon-color)',
-                  fontSize: '1.1rem',
-                  left: '2px',
-                  marginLeft: '2px',
-                  marginRight: '2px',
-                  position: 'relative',
-                  top: '10px',
-                  cursor: 'pointer'
-                }}
               />
               <ReactTooltip border={true} effect="solid" id={reporters[leadReporter.id]?.account} place="top">
                 {reporters[leadReporter.id]?.isValid
