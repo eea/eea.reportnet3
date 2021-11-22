@@ -12,6 +12,7 @@ import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.junit.Before;
@@ -45,6 +46,10 @@ public class PrefillingReferenceDatasetSnapshotCommandTest {
 
   @Mock
   private DatasetService datasetService;
+
+  @Mock
+  private RecordStoreControllerZuul recordStoreControllerZuul;
+
 
 
   /** The eea event VO. */

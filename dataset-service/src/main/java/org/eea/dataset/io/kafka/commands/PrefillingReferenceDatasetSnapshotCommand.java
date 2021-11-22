@@ -5,6 +5,7 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -33,6 +34,11 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
   @Autowired
   private DataSetMetabaseRepository datasetMetabaseRepository;
 
+  /** The record store controller zuul. */
+  @Autowired
+  private RecordStoreControllerZuul recordStoreControllerZuul;
+
+
   /**
    * Gets the event type.
    *
@@ -55,6 +61,7 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
     DataSetMetabase dataset = datasetMetabaseRepository.findById(datasetId).orElse(null);
     if (null != dataset) {
       try {
+        recordStoreControllerZuul.refreshMaterializedView(datasetId);
         datasetService.createReferenceDatasetFiles(dataset);
       } catch (IOException e) {
         LOG_ERROR.error(

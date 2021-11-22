@@ -168,5 +168,10 @@ public interface RecordStoreService {
    */
   void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException;
 
-
+  /**
+   * Refresh materialized query.
+   *
+   * @param datasetId the dataset id
+   */
+  void refreshMaterializedQuery(Long datasetId);
 }

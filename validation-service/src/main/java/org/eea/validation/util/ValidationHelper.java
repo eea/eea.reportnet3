@@ -273,6 +273,10 @@ public class ValidationHelper implements DisposableBean {
     Map<Long, Long> datasetIdOldNew = new HashMap<>();
     List<ReferenceDatasetVO> referenceDatasets =
         referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId);
+    // remove the reference datasets that aren't open for modifying. We asume that these
+    // materialized views are refreshed
+    referenceDatasets.removeIf(r -> !Boolean.TRUE.equals(r.getUpdatable()));
+
 
     for (Rule rule : rules) {
       String query = rule.getSqlSentence();
