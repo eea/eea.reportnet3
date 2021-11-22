@@ -365,7 +365,7 @@ const RepresentativesList = ({
           {!isNewLeadReporter && isValidEmail(reporters[leadReporter.id]?.account || reporters[leadReporter.id]) && (
             <Fragment>
               <FontAwesomeIcon
-                className={styles.validUserIcon}
+                className={styles.isValidUserIcon}
                 data-for={reporters[leadReporter.id]?.account}
                 data-tip
                 icon={reporters[leadReporter.id]?.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
