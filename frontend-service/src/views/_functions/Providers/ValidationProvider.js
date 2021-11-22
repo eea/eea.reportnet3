@@ -14,7 +14,8 @@ const validationReducer = (state, { type, payload }) => {
         reOpenOpener: !isNil(state.opener),
         ruleEdit: false,
         ruleToEdit: {},
-        tableSchemaId: null
+        tableSchemaId: null,
+        updatedRuleId: null
       };
 
     case 'ON_OPEN_QC_CREATION_MODAL_FROM_FIELD':
