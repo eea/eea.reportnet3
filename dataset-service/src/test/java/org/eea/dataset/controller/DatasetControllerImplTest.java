@@ -925,11 +925,11 @@ public class DatasetControllerImplTest {
   public void exportFileTest() throws EEAException, IOException {
     Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
         .thenReturn("tableName");
-    Mockito.when(datasetService.exportFile(Mockito.anyLong(), Mockito.any(), Mockito.any()))
-        .thenReturn(new byte[1]);
-    ResponseEntity<byte[]> result = datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190",
-        FileTypeEnum.CSV.getValue());
-    Assert.assertEquals(1, result.getBody().length);
+    Mockito.doNothing().when(fileTreatmentHelper).exportFile(Mockito.anyLong(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+    datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue());
+    Mockito.verify(fileTreatmentHelper, times(1)).exportFile(1L, FileTypeEnum.CSV.getValue(),
+        "5cf0e9b3b793310e9ceca190", "tableName");
   }
 
   /**
@@ -960,8 +960,8 @@ public class DatasetControllerImplTest {
   public void exportFileExceptionExportingTest() throws EEAException, IOException {
     Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
         .thenReturn("tableName");
-    Mockito.when(datasetService.exportFile(Mockito.anyLong(), Mockito.any(), Mockito.any()))
-        .thenThrow(EEAException.class);
+    Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).exportFile(Mockito.anyLong(),
+        Mockito.any(), Mockito.any(), Mockito.any());
     try {
       datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue());
     } catch (ResponseStatusException e) {

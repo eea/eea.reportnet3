@@ -483,9 +483,15 @@ public enum EventType {
 
   /** The continue fme process event. */
   CONTINUE_FME_PROCESS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "continue_fme_process_event",
-      true);
+      true),
 
+  /** The export table data completed event. */
+  EXPORT_TABLE_DATA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_table_data_completed_event", true),
 
+  /** The export table data failed event. */
+  EXPORT_TABLE_DATA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_table_data_failed_event", true);
 
   /** The topic. */
   private String topic;

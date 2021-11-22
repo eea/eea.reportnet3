@@ -660,17 +660,16 @@ public class DatasetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param mimeType the mime type
-   * @return the response entity
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @GetMapping(value = "/exportFile")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @ApiOperation(value = "Export file with data", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully export"),
       @ApiResponse(code = 400, message = "Id table schema is incorrect"),
       @ApiResponse(code = 500, message = "Error exporting file")})
-  public ResponseEntity<byte[]> exportFile(
+  public void exportFile(
       @ApiParam(type = "Long", value = "Dataset Id",
           example = "0") @RequestParam("datasetId") Long datasetId,
       @ApiParam(type = "String", value = "table schema Id",
@@ -678,7 +677,6 @@ public class DatasetControllerImpl implements DatasetController {
               required = false) String tableSchemaId,
       @ApiParam(type = "String", value = "mimeType (file extension)",
           example = "csv") @RequestParam("mimeType") String mimeType) {
-
     String tableName =
         null != tableSchemaId ? datasetSchemaService.getTableSchemaName(null, tableSchemaId)
             : datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
@@ -687,15 +685,16 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
-
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDatasetId(datasetId);
+    notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_TABLE_DATA_START",
+        userNotificationContentVO);
     try {
-      byte[] file = datasetService.exportFile(datasetId, mimeType, tableSchemaId);
-      String fileName = tableName + "." + mimeType;
-      HttpHeaders httpHeaders = new HttpHeaders();
-      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-      return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
+      fileTreatmentHelper.exportFile(datasetId, mimeType, tableSchemaId, tableName);
     } catch (EEAException | IOException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.info("Error exporting table data from dataset id {}.", datasetId);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXECUTION_ERROR);
     }
   }
 
@@ -1483,6 +1482,5 @@ public class DatasetControllerImpl implements DatasetController {
     }
     return result;
   }
-
 
 }
