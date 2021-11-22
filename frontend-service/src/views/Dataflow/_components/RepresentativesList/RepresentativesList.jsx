@@ -472,39 +472,40 @@ const RepresentativesList = ({
   };
 
   const renderTable = () => {
-    if (!isNil(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders)) {
+    if (isNil(formState.selectedDataProviderGroup) && isEmpty(formState.allPossibleDataProviders)) {
       return (
-        <Fragment>
-          {formState.isLoading && <Spinner className={styles.spinner} />}
-          <DataTable
-            value={
-              formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
-                ? formState.representatives.filter(representative => !isNil(representative.representativeId))
-                : formState.representatives
-            }>
-            <Column
-              body={renderDeleteBtnColumnTemplate}
-              className={styles.emptyTableHeader}
-              header={resourcesContext.messages['deleteRepresentativeButtonTableHeader']}
-              style={{ width: '60px' }}
-            />
-            <Column
-              body={renderDropdownColumnTemplate}
-              header={resourcesContext.messages['manageRolesDialogDataProviderColumn']}
-              style={{ width: '16rem' }}
-            />
-            <Column
-              body={renderLeadReporterColumnTemplate}
-              header={resourcesContext.messages['manageRolesDialogAccountColumn']}
-            />
-          </DataTable>
-        </Fragment>
+        <p className={styles.chooseRepresentative}>
+          {resourcesContext.messages['manageRolesDialogNoRepresentativesMessage']}
+        </p>
       );
     }
+
     return (
-      <p className={styles.chooseRepresentative}>
-        {resourcesContext.messages['manageRolesDialogNoRepresentativesMessage']}
-      </p>
+      <Fragment>
+        {formState.isLoading && <Spinner className={styles.spinner} />}
+        <DataTable
+          value={
+            formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
+              ? formState.representatives.filter(representative => !isNil(representative.representativeId))
+              : formState.representatives
+          }>
+          <Column
+            body={renderDeleteBtnColumnTemplate}
+            className={styles.emptyTableHeader}
+            header={resourcesContext.messages['deleteRepresentativeButtonTableHeader']}
+            style={{ width: '60px' }}
+          />
+          <Column
+            body={renderDropdownColumnTemplate}
+            header={resourcesContext.messages['manageRolesDialogDataProviderColumn']}
+            style={{ width: '16rem' }}
+          />
+          <Column
+            body={renderLeadReporterColumnTemplate}
+            header={resourcesContext.messages['manageRolesDialogAccountColumn']}
+          />
+        </DataTable>
+      </Fragment>
     );
   };
 
