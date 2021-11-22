@@ -149,6 +149,18 @@ public class DatasetSnapshotControllerImplTest {
   }
 
   /**
+   * Test delete snapshots legacy.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testDeleteSnapshotsLegacy() throws Exception {
+
+    datasetSnapshotControllerImpl.deleteSnapshotLegacy(1L, 1L);
+    Mockito.verify(datasetSnapshotService, times(1)).removeSnapshot(Mockito.any(), Mockito.any());
+  }
+
+  /**
    * Test get snapshots exception.
    *
    * @throws Exception the exception
@@ -485,6 +497,14 @@ public class DatasetSnapshotControllerImplTest {
   public void historicReleasesReportingSuccessTest() throws Exception {
     when(datasetSnapshotService.getReleases(Mockito.anyLong())).thenReturn(new ArrayList<>());
     assertEquals("not equals", datasetSnapshotControllerImpl.historicReleases(1L, null),
+        new ArrayList<>());
+  }
+
+
+  @Test
+  public void historicReleasesReportingLegacyTest() throws Exception {
+    when(datasetSnapshotService.getReleases(Mockito.anyLong())).thenReturn(new ArrayList<>());
+    assertEquals("not equals", datasetSnapshotControllerImpl.historicReleasesLegacy(1L, null),
         new ArrayList<>());
   }
 

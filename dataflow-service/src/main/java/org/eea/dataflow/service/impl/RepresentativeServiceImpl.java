@@ -637,6 +637,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         leadReporterVO.setEmail(leadReporterVO.getEmail().toLowerCase());
         UserRepresentationVO newUser =
             userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail().toLowerCase());
+        leadReporter.setInvalid(newUser == null ? true : null);
         if (null != representative.getLeadReporters() && representative.getLeadReporters().stream()
             .filter(reporter -> leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
             .collect(Collectors.counting()) == 0) {
@@ -646,11 +647,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             modifyLeadReporterPermissions(leadReporterVO.getEmail(), representative, false);
           }
           leadReporter.setEmail(leadReporterVO.getEmail());
-        } else if (leadReporter.getInvalid() != null && leadReporter.getInvalid()
-            && newUser != null) {
-          leadReporter.setInvalid(null);
-          modifyLeadReporterPermissions(leadReporter.getEmail().toLowerCase(), representative,
-              false);
         }
         leadReporter.setRepresentative(representative);
       }
@@ -693,8 +689,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
     try {
       for (RepresentativeVO representative : representativeList) {
-        List<LeadReporterVO> leadReporterList = representative.getLeadReporters().stream()
-            .filter(leadReporterVO -> leadReporterVO.getInvalid() != null)
+        List<LeadReporterVO> leadReporterList = representative.getLeadReporters().stream().filter(
+            leadReporterVO -> leadReporterVO.getInvalid() != null && leadReporterVO.getInvalid())
             .collect(Collectors.toList());
 
         for (LeadReporterVO leadReporter : leadReporterList) {

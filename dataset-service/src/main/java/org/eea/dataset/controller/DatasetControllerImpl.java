@@ -1066,7 +1066,7 @@ public class DatasetControllerImpl implements DatasetController {
           example = "0") @RequestParam(value = "dataflowId") Long dataflowId,
       @ApiParam(type = "Long", value = "Provider Id",
           example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
-    return this.getAttachmentLegacy(datasetId, idField, dataflowId, providerId);
+    return this.getAttachment(datasetId, idField, dataflowId, providerId);
   }
 
   /**
