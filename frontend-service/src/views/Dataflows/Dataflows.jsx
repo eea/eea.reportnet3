@@ -309,6 +309,16 @@ const Dataflows = withRouter(({ history, match }) => {
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
   };
 
+  const onConfirmValidateAllReporters = async () => {
+    manageDialogs('isAdminDataflowDialogVisible', false);
+    try {
+      await DataflowService.validateAllReporters();
+    } catch (error) {
+      console.error('Dataflows -  onConfirmCreateNewPermissions.', error);
+      notificationContext.add({ type: 'VALIDATE_ALL_REPORTERS_FAILED_EVENT' }, true);
+    }
+  };
+
   const onCreateDataflow = dialog => {
     manageDialogs(dialog, false);
     onRefreshToken();
@@ -455,6 +465,7 @@ const Dataflows = withRouter(({ history, match }) => {
           header={resourcesContext.messages['adminNewCreatePermissions']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onConfirmValidateAllReporters}
           onHide={() => manageDialogs('isAdminDataflowDialogVisible', false)}
           style={{ width: '95%' }}
           visible={dataflowsState.isAdminDataflowDialogVisible}>

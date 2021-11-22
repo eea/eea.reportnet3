@@ -1358,6 +1358,8 @@
     "exportUsersByCountryCompletedEvent": "Users list file generated successfully",
     "adminCreatePermissions": "Create permissions",
     "adminNewCreatePermissions": "Creation of permissions for new users",
-    "confirmCreateNewPermissions": "Creation of permissions for new users"
+    "confirmCreateNewPermissions": "Are you sure you want to create permissions for new users?",
+    "validateAllReportersCompletedEven": "New permissions created successfully",
+    "validateAllReportersFailedEvent": "Failed creating new permissions"
   }
 }
