@@ -276,7 +276,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
     <div className={styles.loginWrapper}>
       <Button
         className={`p-button-animated-blink ${styles.loginButton}`}
-        icon={'lock'}
+        icon="lock"
         label={resourcesContext.messages['login']}
         onClick={() => {
           if (window.env.REACT_APP_EULOGIN.toString() === 'true') {
