@@ -703,6 +703,8 @@ public class DatasetControllerImpl implements DatasetController {
       fileTreatmentHelper.exportFile(datasetId, mimeType, tableSchemaId, tableName);
     } catch (EEAException | IOException e) {
       LOG_ERROR.info("Error exporting table data from dataset id {}.", datasetId);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXECUTION_ERROR);
     }
   }
 

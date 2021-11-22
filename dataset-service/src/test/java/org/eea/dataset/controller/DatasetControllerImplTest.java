@@ -887,8 +887,8 @@ public class DatasetControllerImplTest {
   public void exportFileExceptionExportingTest() throws EEAException, IOException {
     Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
         .thenReturn("tableName");
-    Mockito.when(datasetService.exportFile(Mockito.anyLong(), Mockito.any(), Mockito.any()))
-        .thenThrow(EEAException.class);
+    Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).exportFile(Mockito.anyLong(),
+        Mockito.any(), Mockito.any(), Mockito.any());
     try {
       datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue());
     } catch (ResponseStatusException e) {
