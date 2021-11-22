@@ -26,6 +26,7 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.dataflow.service.file.DataflowHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -97,6 +98,10 @@ public class DataFlowControllerImplTest {
 
   @Mock
   HttpServletResponse httpServletResponse;
+
+  /** The notification controller zuul. */
+  @Mock
+  private NotificationControllerZuul notificationControllerZuul;
 
   /**
    * Inits the mocks.
@@ -938,13 +943,28 @@ public class DataFlowControllerImplTest {
 
   @Test
   public void exportSchemaInformationTest() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
     Mockito.doNothing().when(dataflowHelper).exportSchemaInformation(1L);
     dataFlowControllerImpl.exportSchemaInformation(1L);
     Mockito.verify(dataflowHelper, times(1)).exportSchemaInformation(Mockito.anyLong());
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void exportSchemaInformationTestError() throws EEAException, IOException {
+    dataFlowControllerImpl.exportSchemaInformation(null);
+    try {
+
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
+  }
+
   @Test
   public void exportSchemaInformationEEAExceptionTest() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
     Mockito.doThrow(EEAException.class).when(dataflowHelper).exportSchemaInformation(1L);
     dataFlowControllerImpl.exportSchemaInformation(1L);
     Mockito.verify(dataflowHelper, times(1)).exportSchemaInformation(Mockito.anyLong());

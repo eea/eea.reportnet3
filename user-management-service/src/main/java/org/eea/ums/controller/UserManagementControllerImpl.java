@@ -839,6 +839,10 @@ public class UserManagementControllerImpl implements UserManagementController {
   public void exportUsersByCountry(@ApiParam(
       value = "Dataflow id used in the export process.") @PathVariable("dataflowId") Long dataflowId) {
     LOG.info("Export users by country from dataflow {}, with type csv.", dataflowId);
+    if (null == dataflowId) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataflowId);
     notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_USERS_BY_COUNTRY_START",
