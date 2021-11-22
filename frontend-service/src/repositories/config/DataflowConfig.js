@@ -33,5 +33,5 @@ export const DataflowConfig = {
   getSchemasValidation: '/dataschema/validate/dataflow/{:dataflowId}',
   getUserList: '/user/getUserRolesByDataflow/{:dataflowId}/dataProviderId/{:representativeId}',
   importSchema: '/dataschema/import?dataflowId={:dataflowId}',
-  validateAllReporters: '/dataflow/validateAllReporters'
+  validateAllDataflowsUsers: '/dataflow/validateAllReporters'
 };

@@ -383,5 +383,6 @@ export const DataflowService = {
     const parsedDatasetsInfoDTO = DataflowUtils.parseDatasetsInfoDTO(datasetsInfoDTO.data);
     return sortBy(parsedDatasetsInfoDTO, 'id');
   },
-  validateAllReporters: async () => await DataflowRepository.validateAllReporters()
+
+  validateAllDataflowsUsers: async () => await DataflowRepository.validateAllDataflowsUsers()
 };

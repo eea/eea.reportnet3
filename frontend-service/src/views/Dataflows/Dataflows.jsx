@@ -63,11 +63,11 @@ const Dataflows = withRouter(({ history, match }) => {
     dataflowsCount: {},
     dataflowsCountFirstLoad: false,
     isAdmin: null,
-    isAdminDataflowDialogVisible: false,
     isBusinessDataflowDialogVisible: false,
     isCitizenScienceDataflowDialogVisible: false,
     isCustodian: null,
     isNationalCoordinator: false,
+    isRecreatePermissionsDialogVisible: false,
     isReferencedDataflowDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
@@ -179,18 +179,18 @@ const Dataflows = withRouter(({ history, match }) => {
       title: 'allDataflowsUserList'
     };
 
-    const adminReportingDataflowBtn = {
+    const adminCreateNewPermissionsBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'userShield',
       isVisible: isAdmin,
       label: 'adminCreatePermissions',
-      onClick: () => manageDialogs('isAdminDataflowDialogVisible', true),
+      onClick: () => manageDialogs('isRecreatePermissionsDialogVisible', true),
       title: 'adminCreatePermissions'
     };
 
     leftSideBarContext.addModels(
       [
-        adminReportingDataflowBtn,
+        adminCreateNewPermissionsBtn,
         createBusinessDataflowBtn,
         createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
@@ -309,12 +309,12 @@ const Dataflows = withRouter(({ history, match }) => {
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
   };
 
-  const onConfirmValidateAllReporters = async () => {
-    manageDialogs('isAdminDataflowDialogVisible', false);
+  const onConfirmValidateAllDataflowsUsers = async () => {
+    manageDialogs('isRecreatePermissionsDialogVisible', false);
     try {
-      await DataflowService.validateAllReporters();
+      await DataflowService.validateAllDataflowsUsers();
     } catch (error) {
-      console.error('Dataflows -  onConfirmCreateNewPermissions.', error);
+      console.error('Dataflows -  onConfirmValidateAllDataflowsUsers.', error);
       notificationContext.add({ type: 'VALIDATE_ALL_REPORTERS_FAILED_EVENT' }, true);
     }
   };
@@ -460,15 +460,14 @@ const Dataflows = withRouter(({ history, match }) => {
         />
       )}
 
-      {dataflowsState.isAdminDataflowDialogVisible && (
+      {dataflowsState.isRecreatePermissionsDialogVisible && (
         <ConfirmDialog
           header={resourcesContext.messages['adminNewCreatePermissions']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={onConfirmValidateAllReporters}
-          onHide={() => manageDialogs('isAdminDataflowDialogVisible', false)}
-          style={{ width: '95%' }}
-          visible={dataflowsState.isAdminDataflowDialogVisible}>
+          onConfirm={onConfirmValidateAllDataflowsUsers}
+          onHide={() => manageDialogs('isRecreatePermissionsDialogVisible', false)}
+          visible={dataflowsState.isRecreatePermissionsDialogVisible}>
           {resourcesContext.messages['confirmCreateNewPermissions']}
         </ConfirmDialog>
       )}
