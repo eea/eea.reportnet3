@@ -170,6 +170,26 @@ public class DataflowControllerImplTest {
 
 
   /**
+   * Test find by id legacy.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void testFindByIdLegacy() throws EEAException {
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities
+        .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(1L)));
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    doReturn(authorities).when(authentication).getAuthorities();
+    when(dataflowService.getById(Mockito.anyLong(), Mockito.anyBoolean())).thenReturn(dataflowVO);
+    assertEquals("fail", dataflowVO, dataflowControllerImpl.findByIdLegacy(1L, null));
+  }
+
+  /**
    * Testfind by status throws.
    *
    * @throws EEAException the EEA exception
@@ -637,6 +657,19 @@ public class DataflowControllerImplTest {
     dataflowControllerImpl.getMetabaseById(1L);
     Mockito.verify(dataflowService, times(1)).getMetabaseById(Mockito.anyLong());
   }
+
+  /**
+   * Test get metabase by id legacy.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void testGetMetabaseByIdLegacy() throws EEAException {
+    when(dataflowService.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    dataflowControllerImpl.getMetabaseByIdLegacy(1L);
+    Mockito.verify(dataflowService, times(1)).getMetabaseById(Mockito.anyLong());
+  }
+
 
   /**
    * Test get metabase by id exception.

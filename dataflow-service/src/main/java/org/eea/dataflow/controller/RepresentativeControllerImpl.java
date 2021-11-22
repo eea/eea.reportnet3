@@ -190,6 +190,12 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     return representativeVOs;
   }
 
+  /**
+   * Find representatives by id data flow legacy.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
