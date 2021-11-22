@@ -106,7 +106,6 @@ const Dataflow = withRouter(({ history, match }) => {
     isObserver: false,
     isPageLoading: true,
     isPropertiesDialogVisible: false,
-    isReassignDialogVisible: false,
     isReceiptLoading: false,
     isReceiptOutdated: false,
     isReleasable: false,
@@ -120,6 +119,8 @@ const Dataflow = withRouter(({ history, match }) => {
     isUpdatingPermissions: false,
     isUserListVisible: false,
     isUserRightManagementDialogVisible: false,
+    isValidateLeadReportersDialogVisible: false,
+    isValidateReportersDialogVisible: false,
     name: '',
     obligations: {},
     representative: {},
@@ -365,7 +366,7 @@ const Dataflow = withRouter(({ history, match }) => {
             disabled={dataflowState.isUpdatingPermissions}
             icon={dataflowState.isUpdatingPermissions ? 'spinnerAnimate' : 'refresh'}
             label={resourcesContext.messages['updateUsersPermissionsButton']}
-            onClick={() => manageDialogs('isReassignDialogVisible', true)}
+            onClick={() => manageDialogs('isValidateReportersDialogVisible', true)}
           />
         )}
 
@@ -503,19 +504,28 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   };
 
-  const onConfirmReassign = async () => {
-    manageDialogs('isReassignDialogVisible', false);
+  const onConfirmValidateReporters = async () => {
+    manageDialogs('isValidateReportersDialogVisible', false);
     setIsUpdatingPermissions(true);
 
     try {
-      dataflowState.isManageReportersDialogVisible
-        ? await UserRightService.validateReporters(dataflowId, dataProviderId)
-        : await RepresentativeService.validateLeadReporters(dataflowId);
+      await UserRightService.validateReporters(dataflowId, dataProviderId);
     } catch (error) {
       console.error('Dataflow - onConfirmReassign.', error);
-      dataflowState.isManageReportersDialogVisible
-        ? notificationContext.add({ type: 'VALIDATE_REPORTERS_FAILED_EVENT' }, true)
-        : notificationContext.add({ type: 'VALIDATE_LEAD_REPORTERS_FAILED_EVENT' }, true);
+      notificationContext.add({ type: 'VALIDATE_REPORTERS_FAILED_EVENT' }, true);
+      setIsUpdatingPermissions(false);
+    }
+  };
+
+  const onConfirmValidateLeadReporters = async () => {
+    manageDialogs('isValidateLeadReportersDialogVisible', false);
+    setIsUpdatingPermissions(true);
+
+    try {
+      await RepresentativeService.validateLeadReporters(dataflowId);
+    } catch (error) {
+      console.error('Dataflow - onConfirmValidateLeadReporters.', error);
+      notificationContext.add({ type: 'VALIDATE_LEAD_REPORTERS_FAILED_EVENT' }, true);
       setIsUpdatingPermissions(false);
     }
   };
@@ -557,7 +567,7 @@ const Dataflow = withRouter(({ history, match }) => {
         disabled={dataflowState.isUpdatingPermissions}
         icon={dataflowState.isUpdatingPermissions ? 'spinnerAnimate' : 'refresh'}
         label={resourcesContext.messages['updateUsersPermissionsButton']}
-        onClick={() => manageDialogs('isReassignDialogVisible', true)}
+        onClick={() => manageDialogs('isValidateLeadReportersDialogVisible', true)}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -1228,14 +1238,26 @@ const Dataflow = withRouter(({ history, match }) => {
           </ConfirmDialog>
         )}
 
-        {dataflowState.isReassignDialogVisible && (
+        {dataflowState.isValidateLeadReportersDialogVisible && (
           <ConfirmDialog
             header={resourcesContext.messages['updateUsersPermissionsDialogHeader']}
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={onConfirmReassign}
-            onHide={() => manageDialogs('isReassignDialogVisible', false)}
-            visible={dataflowState.isReassignDialogVisible}>
+            onConfirm={onConfirmValidateLeadReporters}
+            onHide={() => manageDialogs('isValidateLeadReportersDialogVisible', false)}
+            visible={dataflowState.isValidateLeadReportersDialogVisible}>
+            {resourcesContext.messages['updateUsersPermissionsDialogMessage']}
+          </ConfirmDialog>
+        )}
+
+        {dataflowState.isValidateReportersDialogVisible && (
+          <ConfirmDialog
+            header={resourcesContext.messages['updateUsersPermissionsDialogHeader']}
+            labelCancel={resourcesContext.messages['no']}
+            labelConfirm={resourcesContext.messages['yes']}
+            onConfirm={onConfirmValidateReporters}
+            onHide={() => manageDialogs('isValidateReportersDialogVisible', false)}
+            visible={dataflowState.isValidateReportersDialogVisible}>
             {resourcesContext.messages['updateUsersPermissionsDialogMessage']}
           </ConfirmDialog>
         )}
