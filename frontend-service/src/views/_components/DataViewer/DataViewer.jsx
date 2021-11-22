@@ -1451,10 +1451,12 @@ const DataViewer = withRouter(
         {records.isCoordinatesMoreInfoVisible && (
           <Dialog
             blockScroll={false}
+            className={styles.coordinatesMoreInfo}
             footer={coordinatesMoreInfoDialogFooter}
             header={resourcesContext.messages['geospatialDataMoreInfo']}
             modal={true}
             onHide={onHideCoordinatesMoreInfo}
+            style={{}}
             visible={records.isCoordinatesMoreInfoVisible}>
             <div className="p-grid p-fluid">{renderCoordinatesMoreInfo()}</div>
           </Dialog>

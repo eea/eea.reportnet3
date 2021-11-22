@@ -620,7 +620,7 @@
     "listbox-item-pk-indicator-color": "var(--black)",
     "main-font-color-reverse": "var(--gray-110)",
     "main-font-color": "var(--white-font)",
-    "map-marker-color": "var(--white)",
+    "map-marker-color": "var(--c-corporate-blue-lighter)",
     "map-new-marker-color": "var(--c-green)",
     "multiselect-bg-hover": "var(--gray-15)",
     "multiselect-bg": "var(--bg-dark-00dp)",

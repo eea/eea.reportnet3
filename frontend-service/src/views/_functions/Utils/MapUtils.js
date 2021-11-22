@@ -180,7 +180,13 @@ const parseGeometryData = records => {
   return records;
 };
 
-const printCoordinates = (data, isGeoJson = true, geometryType) => {
+const printCoordinates = ({
+  data,
+  isGeoJson = true,
+  geometryType,
+  firstCoordinateText = 'Latitude',
+  secondCoordinateText = 'Longitude'
+}) => {
   if (isGeoJson) {
     let parsedJSON = data;
     if (typeof parsedJSON === 'string') {
@@ -199,22 +205,22 @@ const printCoordinates = (data, isGeoJson = true, geometryType) => {
     }
 
     if (!Array.isArray(data) && checkValidJSONCoordinates(data)) {
-      return `{Latitude: ${parsedJSON.geometry.coordinates[0]}, Longitude: ${parsedJSON.geometry.coordinates[1]}}`;
+      return `{${firstCoordinateText}: ${parsedJSON.geometry.coordinates[0]}, ${secondCoordinateText}: ${parsedJSON.geometry.coordinates[1]}}`;
     } else {
       if (Array.isArray(data)) {
-        return `{Latitude: ${data[0]}, Longitude: ${data[1]}}`;
+        return `{${firstCoordinateText}: ${data[0]}, ${secondCoordinateText}: ${data[1]}}`;
       } else {
-        return `{Latitude: , Longitude: }`;
+        return `{${firstCoordinateText}: , ${secondCoordinateText}: }`;
       }
     }
   } else {
     if (!isNil(data)) {
       const splittedCoordinate = Array.isArray(data) ? data : TextUtils.splitByChar(data);
-      return `{Latitude: ${isNil(splittedCoordinate[0]) ? '' : splittedCoordinate[0]}, Longitude: ${
-        isNil(splittedCoordinate[1]) ? '' : splittedCoordinate[1]
-      }}`;
+      return `{${firstCoordinateText}: ${
+        isNil(splittedCoordinate[0]) ? '' : splittedCoordinate[0]
+      }, ${secondCoordinateText}: ${isNil(splittedCoordinate[1]) ? '' : splittedCoordinate[1]}}`;
     } else {
-      return `{Latitude: , Longitude: }`;
+      return `{${firstCoordinateText}: , ${secondCoordinateText}: }`;
     }
   }
 };
