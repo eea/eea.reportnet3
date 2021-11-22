@@ -344,6 +344,22 @@ const Dataflow = withRouter(({ history, match }) => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
   };
 
+  const renderValidateReportersButton = usersType => {
+    if (usersType === 'Reporters') {
+      return (
+        <Button
+          className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink ${
+            dataflowState.isUpdatingPermissions ? 'p-button-animated-spin' : ''
+          }`}
+          disabled={dataflowState.isUpdatingPermissions}
+          icon={dataflowState.isUpdatingPermissions ? 'spinnerAnimate' : 'refresh'}
+          label={resourcesContext.messages['updateUsersPermissionsButton']}
+          onClick={() => manageDialogs('isValidateReportersDialogVisible', true)}
+        />
+      );
+    }
+  };
+
   const shareRightsFooterDialogFooter = usersType => {
     const isAddButtonHidden = isBusinessDataflow && !isAdmin && !isSteward;
 
@@ -358,17 +374,7 @@ const Dataflow = withRouter(({ history, match }) => {
           />
         )}
 
-        {usersType === 'Reporters' && (
-          <Button
-            className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink ${
-              dataflowState.isUpdatingPermissions ? 'p-button-animated-spin' : ''
-            }`}
-            disabled={dataflowState.isUpdatingPermissions}
-            icon={dataflowState.isUpdatingPermissions ? 'spinnerAnimate' : 'refresh'}
-            label={resourcesContext.messages['updateUsersPermissionsButton']}
-            onClick={() => manageDialogs('isValidateReportersDialogVisible', true)}
-          />
-        )}
+        {renderValidateReportersButton(usersType)}
 
         <Button
           className={`p-button-secondary p-button-animated-blink`}

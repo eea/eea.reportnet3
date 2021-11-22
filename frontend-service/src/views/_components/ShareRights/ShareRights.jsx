@@ -389,10 +389,9 @@ export const ShareRights = ({
     );
   };
 
-  const renderAccountTemplate = userRight => (
-    <div className={styles.accountWrapper}>
-      {userRight.account}
-      {userType === userTypes.REPORTER && (
+  const renderIsValidUserIcon = userRight => {
+    if (userType === userTypes.REPORTER) {
+      return (
         <Fragment>
           <FontAwesomeIcon
             className={styles.isValidUserIcon}
@@ -406,7 +405,14 @@ export const ShareRights = ({
               : resourcesContext.messages['invalidUserTooltip']}
           </ReactTooltip>
         </Fragment>
-      )}
+      );
+    }
+  };
+
+  const renderAccountTemplate = userRight => (
+    <div className={styles.accountWrapper}>
+      {userRight.account}
+      {renderIsValidUserIcon(userRight)}
     </div>
   );
 
