@@ -791,7 +791,6 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   useCheckNotifications(['RELEASE_COMPLETED_EVENT', 'RELEASE_PROVIDER_COMPLETED_EVENT'], onLoadReportingDataflow);
-
   useCheckNotifications(['DELETE_DATAFLOW_COMPLETED_EVENT'], goToDataflowsPage);
 
   useCheckNotifications(
