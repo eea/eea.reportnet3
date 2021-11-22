@@ -190,6 +190,12 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     return representativeVOs;
   }
 
+  /**
+   * Find representatives by id data flow legacy.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -515,6 +521,27 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e);
+    }
+  }
+
+  /**
+   * Validate lead reporters checking if they are already registered in the system.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @ApiOperation(
+      value = "Validates all lead reporters, checking wether they are registered in the system or not",
+      hidden = true)
+  @ApiResponse(code = 400, message = "Could not validate lead reporters in the requested dataflow.")
+  public void validateLeadReporters(@ApiParam(value = "Dataflow ID", required = true,
+      example = "1") @PathVariable("dataflowId") Long dataflowId) {
+    try {
+      representativeService.validateLeadReporters(dataflowId, true);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.ERROR_VALIDATING_LEAD_REPORTERS, e);
     }
   }
 

@@ -1030,7 +1030,8 @@ public class ContributorServiceImpl implements ContributorService {
    */
   @Override
   @Async
-  public void validateReporters(Long dataflowId, Long dataProviderId) throws EEAException {
+  public void validateReporters(Long dataflowId, Long dataProviderId, boolean sendNotification)
+      throws EEAException {
 
     List<ContributorVO> tempReporterWrite = findTempUserByRoleAndDataflow(
         SecurityRoleEnum.REPORTER_WRITE.toString(), dataflowId, dataProviderId);
@@ -1055,22 +1056,26 @@ public class ContributorServiceImpl implements ContributorService {
             "Error creating contributor with the account: {} in the dataflow {} with role {}.",
             contributor.getAccount(), dataflowId, contributor.getRole());
 
-        NotificationVO notificationVO = NotificationVO.builder()
-            .user(SecurityContextHolder.getContext().getAuthentication().getName())
-            .dataflowId(dataflowId).providerId(dataProviderId).build();
+        if (sendNotification) {
+          NotificationVO notificationVO = NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .dataflowId(dataflowId).providerId(dataProviderId).build();
 
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_REPORTERS_FAILED_EVENT,
-            null, notificationVO);
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_REPORTERS_FAILED_EVENT,
+              null, notificationVO);
+        }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
       }
     }
 
-    NotificationVO notificationVO = NotificationVO.builder()
-        .user(SecurityContextHolder.getContext().getAuthentication().getName())
-        .dataflowId(dataflowId).providerId(dataProviderId).build();
+    if (sendNotification) {
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .dataflowId(dataflowId).providerId(dataProviderId).build();
 
-    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_REPORTERS_COMPLETED_EVENT,
-        null, notificationVO);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_REPORTERS_COMPLETED_EVENT,
+          null, notificationVO);
+    }
 
   }
 
