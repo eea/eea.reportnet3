@@ -528,7 +528,11 @@ const Dataflow = withRouter(({ history, match }) => {
       await DataflowService.generateUsersByCountryFile(dataflowId);
     } catch (error) {
       console.error('Dataflow - onDownloadUsersByCountry.', error);
-      notificationContext.add({ type: 'GENERATE_USERS_LIST_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_USERS_LIST_FILE_ERROR' }, true);
+      }
       setIsDownloadingUsers(false);
     }
   };

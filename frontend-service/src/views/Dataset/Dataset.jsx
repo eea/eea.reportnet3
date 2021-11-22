@@ -822,7 +822,11 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await ValidationService.generateQCRulesFile(datasetId);
     } catch (error) {
       console.error('DatasetDesigner - onDownloadQCRules.', error);
-      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
+      }
       setIsDownloadingQCRules(false);
     }
   };
@@ -945,7 +949,11 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       await ValidationService.generateShowValidationsFile(datasetId);
     } catch (error) {
       console.error('Dataset - onDownloadValidations.', error);
-      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' }, true);
+      }
       setIsDownloadingValidations(false);
     }
   };

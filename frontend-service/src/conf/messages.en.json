@@ -1357,6 +1357,6 @@
     "exportUsersByCountryFailedEvent": "Failed generating validations file",
     "exportUsersByCountryCompletedEvent": "Users list file generated successfully",
     "downloadSchemasInfoStart": "Downloading schemas information file",
-    "downloadFileBadRequestError": "Failed downloading file. Wrong"
+    "downloadFileBadRequestError": "Failed downloading file. The request has wrong or incomplete format"
   }
 }

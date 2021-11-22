@@ -498,7 +498,11 @@ const DatasetSchema = ({
       await ValidationService.generateQCRulesFile(datasetId);
     } catch (error) {
       console.error('DatasetSchema - onDownloadQCRules.', error);
-      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
+      }
       setIsDownloadingQCs(false);
     }
   };
