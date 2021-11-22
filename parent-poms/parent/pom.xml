@@ -13,20 +13,20 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.0.5.5</api-gateway.version>
-    <communication.version>v3.0.5.5</communication.version>
-    <collaboration.version>v3.0.5.5</collaboration.version>
-    <dataflow.version>v3.0.5.5</dataflow.version>
-    <dataset.version>v3.0.5.5</dataset.version>
-    <document.version>v3.0.5.5</document.version>
-    <frontend.version>v3.0.5.5</frontend.version>
-    <indexsearch.version>v3.0.5.5</indexsearch.version>
-    <inspire.version>v3.0.5.5</inspire.version>
-    <recordstore.version>v3.0.5.5</recordstore.version>
-    <ums.version>v3.0.5.5</ums.version>
-    <validation.version>v3.0.5.5</validation.version>
-    <common-interfaces.version>v3.0.5.5</common-interfaces.version>
-    <common-utitlities.version>v3.0.5.5</common-utitlities.version>
-    <rod.version>v3.0.5.5</rod.version>
+    <api-gateway.version>v3.0.5.6</api-gateway.version>
+    <communication.version>v3.0.5.6</communication.version>
+    <collaboration.version>v3.0.5.6</collaboration.version>
+    <dataflow.version>v3.0.5.6</dataflow.version>
+    <dataset.version>v3.0.5.6</dataset.version>
+    <document.version>v3.0.5.6</document.version>
+    <frontend.version>v3.0.5.6</frontend.version>
+    <indexsearch.version>v3.0.5.6</indexsearch.version>
+    <inspire.version>v3.0.5.6</inspire.version>
+    <recordstore.version>v3.0.5.6</recordstore.version>
+    <ums.version>v3.0.5.6</ums.version>
+    <validation.version>v3.0.5.6</validation.version>
+    <common-interfaces.version>v3.0.5.6</common-interfaces.version>
+    <common-utitlities.version>v3.0.5.6</common-utitlities.version>
+    <rod.version>v3.0.5.6</rod.version>
   </properties>
 </project>
