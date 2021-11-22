@@ -66,7 +66,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
   /** The notification controller zuul. */
   @Autowired
-  NotificationControllerZuul notificationControllerZuul;
+  private NotificationControllerZuul notificationControllerZuul;
 
   /**
    * Undo data collection creation.

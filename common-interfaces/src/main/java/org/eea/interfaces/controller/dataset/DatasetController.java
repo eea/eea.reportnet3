@@ -149,7 +149,7 @@ public interface DatasetController {
    * @return the response entity
    */
   @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  ResponseEntity<byte[]> exportFile(@RequestParam("datasetId") Long datasetId,
+  void exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("mimeType") String mimeType);
 
