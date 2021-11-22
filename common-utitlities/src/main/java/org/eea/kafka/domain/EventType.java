@@ -425,6 +425,14 @@ public enum EventType {
   VALIDATE_LEAD_REPORTERS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "validate_lead_reporters_failed_event", true),
 
+  /** The validate all reporters completed event. */
+  VALIDATE_ALL_REPORTERS_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_all_reporters_completed_event", true),
+
+  /** The validate all reporters failed event. */
+  VALIDATE_ALL_REPORTERS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_all_reporters_failed_event", true),
+
   /** The export dataset failed event. */
   EXPORT_DATASET_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_dataset_failed_event",
       true),

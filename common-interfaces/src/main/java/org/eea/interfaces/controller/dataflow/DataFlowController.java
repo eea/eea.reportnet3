@@ -336,4 +336,13 @@ public interface DataFlowController {
   @GetMapping("/downloadPublicSchemaInformation/{dataflowId}")
   ResponseEntity<byte[]> downloadPublicSchemaInformation(
       @PathVariable("dataflowId") Long dataflowId);
+
+
+  /**
+   * Validate all reporters.
+   *
+   * @return the response entity
+   */
+  @PutMapping("/validateAllReporters")
+  ResponseEntity validateAllReporters();
 }

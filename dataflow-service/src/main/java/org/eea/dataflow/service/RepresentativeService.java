@@ -160,7 +160,7 @@ public interface RepresentativeService {
    * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  void validateLeadReporters(Long dataflowId) throws EEAException;
+  void validateLeadReporters(Long dataflowId, boolean sendNotification) throws EEAException;
 
   /**
    * Update representative visibility restrictions.
