@@ -450,57 +450,38 @@ const RepresentativesList = ({
     );
   };
 
-  const renderDeleteBtnColumnTemplate = representative => {
-    return (
-      !isNil(representative.representativeId) &&
-      !representative.hasDatasets && (
-        <ActionsColumn
-          onDeleteClick={() => {
-            formDispatcher({
-              type: 'SHOW_CONFIRM_DIALOG',
-              payload: { representativeId: representative.representativeId }
-            });
-          }}
+  const renderRepresentativesDropdown = () => {
+    if (TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value)) {
+      return (
+        <Dropdown
+          ariaLabel={'dataProviders'}
+          className={styles.dataProvidersDropdown}
+          disabled
+          name="dataProvidersDropdown"
+          optionLabel="label"
+          options={[formState.selectedDataProviderGroup]}
+          value={formState.selectedDataProviderGroup}
         />
-      )
+      );
+    }
+    return (
+      <Dropdown
+        ariaLabel={'dataProviders'}
+        className={styles.dataProvidersDropdown}
+        disabled={formState.representatives.length > 1}
+        name="dataProvidersDropdown"
+        onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
+        optionLabel="label"
+        options={formState.dataProvidersTypesList}
+        placeholder={resourcesContext.messages['manageRolesDialogDropdownPlaceholder']}
+        value={formState.selectedDataProviderGroup}
+      />
     );
   };
 
-  if (isEmpty(formState.representatives)) return <Spinner style={{ top: 0 }} />;
-
-  return (
-    <div className={styles.container}>
-      <div className={styles.selectWrapper}>
-        <div className={styles.title}>{resourcesContext.messages['manageRolesDialogHeader']}</div>
-        <div>
-          <label>{resourcesContext.messages['manageRolesDialogDropdownLabel']} </label>
-          {TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? (
-            <Dropdown
-              ariaLabel={'dataProviders'}
-              className={styles.dataProvidersDropdown}
-              disabled
-              name="dataProvidersDropdown"
-              optionLabel="label"
-              options={[formState.selectedDataProviderGroup]}
-              value={formState.selectedDataProviderGroup}
-            />
-          ) : (
-            <Dropdown
-              ariaLabel={'dataProviders'}
-              className={styles.dataProvidersDropdown}
-              disabled={formState.representatives.length > 1}
-              name="dataProvidersDropdown"
-              onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
-              optionLabel="label"
-              options={formState.dataProvidersTypesList}
-              placeholder={resourcesContext.messages['manageRolesDialogDropdownPlaceholder']}
-              value={formState.selectedDataProviderGroup}
-            />
-          )}
-        </div>
-      </div>
-
-      {!isNil(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders) ? (
+  const renderTable = () => {
+    if (!isNil(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders)) {
+      return (
         <Fragment>
           {formState.isLoading && <Spinner className={styles.spinner} />}
           <DataTable
@@ -526,11 +507,44 @@ const RepresentativesList = ({
             />
           </DataTable>
         </Fragment>
-      ) : (
-        <p className={styles.chooseRepresentative}>
-          {resourcesContext.messages['manageRolesDialogNoRepresentativesMessage']}
-        </p>
-      )}
+      );
+    }
+    return (
+      <p className={styles.chooseRepresentative}>
+        {resourcesContext.messages['manageRolesDialogNoRepresentativesMessage']}
+      </p>
+    );
+  };
+
+  const renderDeleteBtnColumnTemplate = representative => {
+    return (
+      !isNil(representative.representativeId) &&
+      !representative.hasDatasets && (
+        <ActionsColumn
+          onDeleteClick={() => {
+            formDispatcher({
+              type: 'SHOW_CONFIRM_DIALOG',
+              payload: { representativeId: representative.representativeId }
+            });
+          }}
+        />
+      )
+    );
+  };
+
+  if (isEmpty(formState.representatives)) return <Spinner style={{ top: 0 }} />;
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.selectWrapper}>
+        <div className={styles.title}>{resourcesContext.messages['manageRolesDialogHeader']}</div>
+        <div>
+          <label>{resourcesContext.messages['manageRolesDialogDropdownLabel']} </label>
+          {renderRepresentativesDropdown()}
+        </div>
+      </div>
+
+      {renderTable()}
 
       {formState.isVisibleConfirmDeleteDialog && (
         <ConfirmDialog
