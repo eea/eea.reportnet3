@@ -1337,7 +1337,7 @@
     "webLinkDescriptionValidationMax": "Web link description is too long",
     "webLinks": "Web links",
     "writeMessagePlaceholder": "Write your message or drag here a file",
-    "wrongCoordinate": "Wrong or incomplete coordinate",
+    "wrongCoordinate": "Wrong or incomplete coordinates",
     "wrongUrlCountryCode": "The country doesn't exist",
     "wrongUrlDataflowId": "The dataflow doesn't exist",
     "wrongWebLinkError": "The URL is not valid",
@@ -1356,6 +1356,7 @@
     "downloadUsersListFileError": "Failed downloading users list file",
     "exportUsersByCountryFailedEvent": "Failed generating validations file",
     "exportUsersByCountryCompletedEvent": "Users list file generated successfully",
+    "latitude": "Latitude",
     "longitude": "Longitude",
     "x": "X",
     "y": "Y",
@@ -1366,6 +1367,8 @@
     "geoJSONHelpCopy": "Copy GeoJSON",
     "geoJSONHelpCopyTooltip": "Copy complete GeoJSON text",
     "nonEditableDataAndCantParse": "The field is not editable and can't be parsed",
-    "nonEditableDataAndEmpty": "The field is not editable and is empty"
+    "nonEditableDataAndEmpty": "The field is not editable and is empty",
+    "geoJSON": "GeoJSON",
+    "geoJSONErrors": "GeoJSON errors"
   }
 }

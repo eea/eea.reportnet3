@@ -63,7 +63,7 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
   return tableStatisticValuesWithSomeError;
 };
 
-const parseValue = (type, value, feToBe = false) => {
+const parseValue = ({ type, value, feToBe = false }) => {
   if (
     ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type) &&
     value !== '' &&
@@ -82,47 +82,49 @@ const parseValue = (type, value, feToBe = false) => {
       inmValue.geometry.type = type;
       inmValue.geometry.coordinates = [];
     } else {
-      switch (type.toUpperCase()) {
-        case 'POINT':
-          inmValue.geometry.coordinates = [parsedValue.geometry.coordinates[1], parsedValue.geometry.coordinates[0]];
-          break;
-        case 'MULTIPOINT':
-        case 'LINESTRING':
-          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
-            !isNil(coordinate) ? [coordinate[1], coordinate[0]] : []
-          );
-          break;
-        case 'POLYGON':
-        case 'MULTILINESTRING':
-          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate => {
-            if (Array.isArray(coordinate)) {
-              return coordinate.map(innerCoordinate =>
-                !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
-              );
-            } else {
-              return [];
-            }
-          });
-          break;
-        case 'MULTIPOLYGON':
-          inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon => {
-            if (Array.isArray(polygon)) {
-              return polygon.map(coordinate => {
-                if (Array.isArray(coordinate)) {
-                  return coordinate.map(innerCoordinate =>
-                    !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
-                  );
-                } else {
-                  return [];
-                }
-              });
-            } else {
-              return [];
-            }
-          });
-          break;
-        default:
-          break;
+      if (parsedValue.properties.srid !== 'EPSG:3035' && parsedValue.properties.srid !== '3035') {
+        switch (type.toUpperCase()) {
+          case 'POINT':
+            inmValue.geometry.coordinates = [parsedValue.geometry.coordinates[1], parsedValue.geometry.coordinates[0]];
+            break;
+          case 'MULTIPOINT':
+          case 'LINESTRING':
+            inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate =>
+              !isNil(coordinate) ? [coordinate[1], coordinate[0]] : []
+            );
+            break;
+          case 'POLYGON':
+          case 'MULTILINESTRING':
+            inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(coordinate => {
+              if (Array.isArray(coordinate)) {
+                return coordinate.map(innerCoordinate =>
+                  !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
+                );
+              } else {
+                return [];
+              }
+            });
+            break;
+          case 'MULTIPOLYGON':
+            inmValue.geometry.coordinates = parsedValue.geometry.coordinates.map(polygon => {
+              if (Array.isArray(polygon)) {
+                return polygon.map(coordinate => {
+                  if (Array.isArray(coordinate)) {
+                    return coordinate.map(innerCoordinate =>
+                      !isNil(innerCoordinate) ? [innerCoordinate[1], innerCoordinate[0]] : []
+                    );
+                  } else {
+                    return [];
+                  }
+                });
+              } else {
+                return [];
+              }
+            });
+            break;
+          default:
+            break;
+        }
       }
     }
 

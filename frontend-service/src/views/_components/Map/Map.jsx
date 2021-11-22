@@ -291,7 +291,7 @@ export const Map = ({
 
   const onEachFeature = (feature, layer) => {
     if (TextUtils.areEquals(geometryType, 'POINT')) {
-      layer.bindPopup(onPrintCoordinates(feature.geometry.coordinates.join(', ')));
+      layer.bindPopup(renderCoordinates({ data: feature.geometry.coordinates, isGeoJson: false }));
       layer.on({
         click: () =>
           mapRef.current.leafletElement.setView(feature.geometry.coordinates, mapRef.current.leafletElement.zoom)
@@ -354,6 +354,33 @@ export const Map = ({
     );
   };
 
+  const renderCoordinates = ({ data, isGeoJson = false }) => {
+    let popupContent = MapUtils.printCoordinates({
+      data,
+      isGeoJson,
+      geometryType,
+      firstCoordinateText: resourcesContext.messages['latitude'],
+      secondCoordinateText: resourcesContext.messages['longitude']
+    });
+
+    if (!isNil(data) && currentCRS.value !== 'EPSG:4326') {
+      popupContent = `${popupContent}             
+      ${resourcesContext.messages['projectedCoordinates']}      
+      ${MapUtils.printCoordinates({
+        data: projectPointCoordinates({
+          coordinates: isGeoJson ? JSON.parse(data).geometry.coordinates : data,
+          CRS: 'EPSG:4326',
+          newCRS: currentCRS.value
+        }),
+        isGeoJson,
+        geometryType,
+        firstCoordinateText: resourcesContext.messages[currentCRS.value === 'EPSG:3035' ? 'x' : 'latitude'],
+        secondCoordinateText: resourcesContext.messages[currentCRS.value === 'EPSG:3035' ? 'y' : 'longitude']
+      })}`;
+    }
+    return popupContent;
+  };
+
   return (
     <Fragment>
       {hasLegend && (
@@ -372,17 +399,6 @@ export const Map = ({
                   ? MapUtils.printCoordinates(mapGeoJson, true, geometryType)
                   : `{Latitude: , Longitude: }`}
               </label>
-              {/* {(MapUtils.checkValidJSONCoordinates(geoJson) || MapUtils.checkValidJSONMultipleCoordinates(geoJson)) && (
-                <ReactTooltip
-                  border={true}
-                  className={styles.tooltip}
-                  effect="float"
-                  id="coordinatesTooltip"
-                  multiline={true}
-                  place="top">
-                  {MapUtils.printCoordinates(mapGeoJson, true, geometryType)}
-                </ReactTooltip>
-              )} */}
             </div>
           </div>
           {TextUtils.areEquals(geometryType, 'POINT') && (

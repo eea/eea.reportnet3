@@ -3,6 +3,8 @@ import flattenDeep from 'lodash/flattenDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import proj4 from 'proj4';
+
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const changeIncorrectCoordinates = record => {
@@ -217,6 +219,23 @@ const printCoordinates = (data, isGeoJson = true, geometryType) => {
   }
 };
 
+const projectCoordinates = ({ coordinates, currentCRS, newCRS }) => {
+  if (checkValidCoordinates(coordinates)) {
+    if (newCRS === 'EPSG:3035') {
+      return proj4(proj4(currentCRS.value), proj4(newCRS), [coordinates[1], coordinates[0]]);
+    } else {
+      const projectedCoordinates = proj4(proj4(currentCRS.value), proj4(newCRS), coordinates);
+      if (currentCRS.value === 'EPSG:3035') {
+        return [projectedCoordinates[1], projectedCoordinates[0]];
+      } else {
+        return projectedCoordinates;
+      }
+    }
+  } else {
+    return coordinates;
+  }
+};
+
 export const MapUtils = {
   changeIncorrectCoordinates,
   checkValidCoordinates,
@@ -230,5 +249,6 @@ export const MapUtils = {
   lngLatToLatLng,
   parseCoordinates,
   parseGeometryData,
-  printCoordinates
+  printCoordinates,
+  projectCoordinates
 };
