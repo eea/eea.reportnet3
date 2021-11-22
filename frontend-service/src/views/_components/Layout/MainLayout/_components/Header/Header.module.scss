@@ -49,11 +49,14 @@
       display: flex;
       align-items: center;
       margin-right: 1rem;
-      :global .p-button-primary {
+      .loginButton {
         background-color: var(--white);
         color: var(--public-custom-header-bg);
+        padding: 0.25rem 1rem;
+        font-weight: bold;
       }
     }
+
     .userWrapper {
       display: flex;
       align-items: center;

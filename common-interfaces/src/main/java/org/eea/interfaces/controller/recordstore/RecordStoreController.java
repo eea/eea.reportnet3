@@ -62,12 +62,15 @@ public interface RecordStoreController {
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
    * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    */
   @PostMapping(value = "/dataset/{datasetId}/snapshot/create")
   void createSnapshotData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "idSnapshot", required = true) Long idSnapshot,
       @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset,
-      @RequestParam(value = "dateRelease", required = false) String dateRelease);
+      @RequestParam(value = "dateRelease", required = false) String dateRelease,
+      @RequestParam(value = "prefillingReference", required = false,
+          defaultValue = "false") Boolean prefillingReference);
 
 
 
@@ -80,6 +83,7 @@ public interface RecordStoreController {
    * @param datasetType the dataset type
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
+   * @param prefillingReference the prefilling reference
    */
   @PostMapping(value = "/dataset/{datasetId}/snapshot/restore")
   void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
@@ -87,7 +91,9 @@ public interface RecordStoreController {
       @RequestParam(value = "partitionId", required = true) Long partitionId,
       @RequestParam(value = "typeDataset", required = true) DatasetTypeEnum datasetType,
       @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
-      @RequestParam(value = "deleteData", defaultValue = "false") Boolean deleteData);
+      @RequestParam(value = "deleteData", defaultValue = "false") Boolean deleteData,
+      @RequestParam(value = "prefillingReference", required = false,
+          defaultValue = "false") Boolean prefillingReference);
 
   /**
    * Delete snapshot data.
@@ -136,4 +142,13 @@ public interface RecordStoreController {
   @PutMapping("/private/createUpdateQueryView")
   void createUpdateQueryView(@RequestParam("datasetId") Long datasetId,
       @RequestParam("isMaterialized") boolean isMaterialized);
+
+
+  /**
+   * Refresh materialized view.
+   *
+   * @param datasetId the dataset id
+   */
+  @PutMapping("/private/refreshMaterializedView")
+  void refreshMaterializedView(@RequestParam("datasetId") Long datasetId);
 }

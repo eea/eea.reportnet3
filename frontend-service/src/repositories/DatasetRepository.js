@@ -24,8 +24,17 @@ export const DatasetRepository = {
   deleteData: async (datasetId, deletePrefilledTables) =>
     await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteData, { datasetId, deletePrefilledTables }) }),
 
-  deleteAttachment: async (datasetId, fieldId) =>
-    await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteAttachment, { datasetId, fieldId }) }),
+  deleteAttachment: async (dataflowId, datasetId, fieldId, dataProviderId = null) => {
+    const url = dataProviderId
+      ? getUrl(DatasetConfig.deleteAttachmentWithProviderId, {
+          dataflowId,
+          datasetId,
+          fieldId,
+          providerId: dataProviderId
+        })
+      : getUrl(DatasetConfig.deleteAttachment, { dataflowId, datasetId, fieldId });
+    return await HTTPRequester.delete({ url });
+  },
 
   deleteRecord: async (datasetId, recordId, deleteInCascade = false) =>
     await HTTPRequester.delete({
@@ -56,8 +65,8 @@ export const DatasetRepository = {
 
   downloadExportFile: async (datasetId, fileName, providerId = null) => {
     const url = providerId
-      ? getUrl(DatasetConfig.downloadExportFile, { datasetId, fileName, providerId })
-      : getUrl(DatasetConfig.downloadExportFileNoProviderId, { datasetId, fileName });
+      ? getUrl(DatasetConfig.downloadExportFileWithProviderId, { datasetId, fileName, providerId })
+      : getUrl(DatasetConfig.downloadExportFile, { datasetId, fileName });
     return await HTTPRequester.download({ url });
   },
 

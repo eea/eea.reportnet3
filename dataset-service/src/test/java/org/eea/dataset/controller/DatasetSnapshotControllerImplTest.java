@@ -133,7 +133,7 @@ public class DatasetSnapshotControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     datasetSnapshotControllerImpl.createSnapshot(1L, new CreateSnapshotVO());
     Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
   /**

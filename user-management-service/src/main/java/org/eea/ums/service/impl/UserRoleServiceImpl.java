@@ -36,11 +36,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.server.ResponseStatusException;
 import com.opencsv.CSVWriter;
 
 /**
@@ -86,6 +88,10 @@ public class UserRoleServiceImpl implements UserRoleService {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant DOWNLOAD_USERS_BY_COUNTRY_EXCEPTION: {@value}. */
+  private static final String DOWNLOAD_USERS_BY_COUNTRY_EXCEPTION =
+      "Download exported users by country found a file with the followings parameters:, dataflowId: %s + filename: %s";
 
   /**
    * Gets the user roles by dataflow country.
@@ -372,8 +378,9 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     fileFolder.mkdirs();
 
-    NotificationVO notificationVO = NotificationVO.builder().dataflowId(dataflowId)
-        .fileName(fileNameWithExtension).error(creatingFileError).build();
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+        .dataflowId(dataflowId).fileName(fileNameWithExtension).error(creatingFileError).build();
 
     StringWriter stringWriter = new StringWriter();
 
@@ -426,6 +433,29 @@ public class UserRoleServiceImpl implements UserRoleService {
       }
     }
   }
+
+  /**
+   * Download users by country.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @return the file
+   * @throws ResponseStatusException the response status exception
+   */
+  @Override
+  public File downloadUsersByCountry(Long dataflowId, String fileName)
+      throws ResponseStatusException {
+    String folderName = fileName.replace(".csv", "");
+    File file = new File(new File(pathPublicFile, folderName), fileName);
+    if (!file.exists()) {
+      LOG_ERROR.error(String.format(DOWNLOAD_USERS_BY_COUNTRY_EXCEPTION, dataflowId, fileName));
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          String.format(DOWNLOAD_USERS_BY_COUNTRY_EXCEPTION, dataflowId, fileName));
+    }
+    return file;
+  }
+
+
 }
 
 

@@ -181,7 +181,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
-    datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null, null);
+    datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null, null, false);
   }
 
   /**
@@ -633,9 +633,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   public void createReleaseSnapshots(
       @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
           name = "dataflowId") @PathVariable(value = "dataflowId", required = true) Long dataflowId,
-      @ApiParam(type = "Long", value = "Provider Id", example = "0") @LockCriteria(
-          name = "dataProviderId") @PathVariable(value = "dataProviderId",
-              required = true) Long dataProviderId,
+      @ApiParam(type = "Long", value = "Provider Id",
+          example = "0") @LockCriteria(name = "dataProviderId") @PathVariable(
+              value = "dataProviderId", required = true) Long dataProviderId,
       @ApiParam(type = "boolean", value = "Restric from public", example = "true") @RequestParam(
           name = "restrictFromPublic", required = true,
           defaultValue = "false") boolean restrictFromPublic) {

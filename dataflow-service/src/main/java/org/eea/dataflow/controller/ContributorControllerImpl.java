@@ -10,7 +10,6 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.contributor.ContributorVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
-import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.utils.LiteralConstants;
@@ -103,10 +102,13 @@ public class ContributorControllerImpl implements ContributorController {
     checkIsBussinesCustodian(dataflowId);
     // we can only remove role of editor, reporter or reporter partition type
     try {
-      checkAccount(dataflowId, contributorVO.getAccount());
-      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(),
-          contributorVO.getRole(), null);
-      LOG.info("requester {} Deleted", contributorVO.getAccount());
+      if (checkAccount(dataflowId, contributorVO.getAccount())) {
+        contributorService.deleteContributor(dataflowId, contributorVO.getAccount(),
+            contributorVO.getRole(), null);
+        LOG.info("requester {} Deleted", contributorVO.getAccount());
+      } else
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount()));
     } catch (EEAException e) {
       if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -143,10 +145,18 @@ public class ContributorControllerImpl implements ContributorController {
           value = "Contributors Properties") @RequestBody ContributorVO contributorVO) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
-      checkAccount(dataflowId, contributorVO.getAccount());
-      contributorService.deleteContributor(dataflowId, contributorVO.getAccount(),
-          contributorVO.getRole(), dataProviderId);
-      LOG.info("Reporter {} Deleted", contributorVO.getAccount());
+      if (checkAccount(dataflowId, contributorVO.getAccount())) {
+        contributorService.deleteContributor(dataflowId, contributorVO.getAccount(),
+            contributorVO.getRole(), dataProviderId);
+        LOG.info("Reporter {} Deleted", contributorVO.getAccount());
+      } else if (contributorService.findTempUserByAccountAndDataflow(contributorVO.getAccount(),
+          dataflowId, dataProviderId) != null) {
+        contributorService.deleteTemporaryUser(dataflowId, contributorVO.getAccount(),
+            contributorVO.getRole(), dataProviderId);
+        LOG.info("Temporary Reporter {} Deleted", contributorVO.getAccount());
+      } else
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount()));
     } catch (EEAException e) {
       if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -198,10 +208,18 @@ public class ContributorControllerImpl implements ContributorController {
       @ApiParam(type = "Long", value = "Dataflow Id",
           example = "0") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(type = "Long", value = "Dataprovider Id",
-          example = "0") @PathVariable("dataproviderId") Long dataproviderId) {
+          example = "0") @PathVariable("dataproviderId") Long dataProviderId) {
     // find reporters or reporter partition roles based on the dataflow state
-    return contributorService.findContributorsByResourceId(dataflowId, dataproviderId,
-        LiteralConstants.REPORTER);
+    List<ContributorVO> tempReporterWrite = contributorService.findTempUserByRoleAndDataflow(
+        SecurityRoleEnum.REPORTER_WRITE.toString(), dataflowId, dataProviderId);
+    List<ContributorVO> tempReporterRead = contributorService.findTempUserByRoleAndDataflow(
+        SecurityRoleEnum.REPORTER_READ.toString(), dataflowId, dataProviderId);
+    List<ContributorVO> reportersList = contributorService.findContributorsByResourceId(dataflowId,
+        dataProviderId, LiteralConstants.REPORTER);
+    reportersList.addAll(tempReporterWrite);
+    reportersList.addAll(tempReporterRead);
+
+    return reportersList;
   }
 
   /**
@@ -236,9 +254,12 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
-      checkAccount(dataflowId, contributorVO.getAccount());
-      contributorService.updateContributor(dataflowId, contributorVO, null);
-      LOG.info("requester {} Updated", contributorVO.getAccount());
+      if (checkAccount(dataflowId, contributorVO.getAccount())) {
+        contributorService.updateContributor(dataflowId, contributorVO, null);
+        LOG.info("requester {} Updated", contributorVO.getAccount());
+      } else
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+            String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount()));
     } catch (EEAException e) {
       if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
         message = String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount());
@@ -287,9 +308,20 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
-      checkAccount(dataflowId, contributorVO.getAccount());
-      contributorService.updateContributor(dataflowId, contributorVO, dataProviderId);
-      LOG.info("Reporter {} Updated", contributorVO.getAccount());
+      if (checkAccount(dataflowId, contributorVO.getAccount())) {
+        contributorService.updateContributor(dataflowId, contributorVO, dataProviderId);
+        LOG.info("Reporter {} Updated", contributorVO.getAccount());
+      } else if (contributorService.findTempUserByAccountAndDataflow(contributorVO.getAccount(),
+          dataflowId, dataProviderId) != null) {
+        contributorService.updateTemporaryUser(dataflowId, contributorVO, dataProviderId);
+      } else if (contributorService.findTempUserByAccountAndDataflow(contributorVO.getAccount(),
+          dataflowId, dataProviderId) == null) {
+        contributorService.createTempUser(dataflowId, contributorVO, dataProviderId);
+        LOG.info("Inserting user {} into temp user table", contributorVO.getAccount());
+      } else {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "There's already a user assigned with the same e-mail to this dataflow");
+      }
     } catch (EEAException e) {
       if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
         message = String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount());
@@ -301,6 +333,43 @@ public class ContributorControllerImpl implements ContributorController {
       LOG_ERROR.error("Error update the reporter {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
     }
+    return new ResponseEntity<>(message, status);
+  }
+
+  /**
+   * Updates the reporters permissions checking if they are now registered in the system.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param contributorVO the contributor VO
+   * @return the response entity
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER') OR hasAnyRole('ADMIN')")
+  @PutMapping(value = "/validateReporters/dataflow/{dataflowId}/provider/{dataProviderId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(
+      value = "Validates reporters, checking if they are already registered in the system and gives them permissions",
+      hidden = true)
+  @ApiResponse(code = 500,
+      message = "Error creating the associated permissions for requested reporter in the dataflow")
+  public ResponseEntity validateReporters(
+      @ApiParam(value = "Dataflow ID the reporter is assigned to", required = true,
+          example = "1") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Data Provider ID the reporter is assigned to", required = true,
+          example = "1") @PathVariable("dataProviderId") Long dataProviderId) {
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
+    try {
+      contributorService.validateReporters(dataflowId, dataProviderId);
+    } catch (EEAException e) {
+      LOG_ERROR.error(
+          "Error creating the associated permissions for requested reporter in the dataflow: {} with data provider ID {}",
+          dataflowId, dataProviderId);
+      message = e.getMessage();
+      status = HttpStatus.BAD_REQUEST;
+    }
+
     return new ResponseEntity<>(message, status);
   }
 
@@ -340,16 +409,9 @@ public class ContributorControllerImpl implements ContributorController {
    *
    * @throws EEAException
    */
-  private void checkAccount(Long dataflowId, String account) throws EEAException {
-    // check if the email is correct
-    UserRepresentationVO emailUser = userManagementControllerZull.getUserByEmail(account);
-    if (null == emailUser || null == emailUser.getEmail()
-        || !emailUser.getEmail().equalsIgnoreCase(account)) {
-      LOG_ERROR.error(
-          "Error creating contributor with the account: {} in the dataflow {} because the email doesn't exist in the system",
-          account, dataflowId);
-      throw new EEAException(HttpStatus.NOT_FOUND.toString());
-    }
+  private boolean checkAccount(Long dataflowId, String account) {
+
+    return userManagementControllerZull.getUserByEmail(account) != null;
   }
 
 
