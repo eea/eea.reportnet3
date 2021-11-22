@@ -52,7 +52,7 @@ export const DatasetService = {
         newField.value = DatasetUtils.parseValue({
           type: dataTableFieldDTO.fieldData.type,
           value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
-          feToBe: true
+          splitSRID: true
         });
 
         return newField;
@@ -431,7 +431,7 @@ export const DatasetService = {
     datasetTableField.value = DatasetUtils.parseValue({
       type: fieldType,
       value: fieldValue,
-      feToBe: true
+      splitSRID: true
     });
 
     return await DatasetRepository.updateField(datasetId, datasetTableField, updateInCascade);
@@ -466,7 +466,7 @@ export const DatasetService = {
       newField.value = DatasetUtils.parseValue({
         type: dataTableFieldDTO.fieldData.type,
         value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
-        feToBe: true
+        splitSRID: true
       });
 
       return newField;

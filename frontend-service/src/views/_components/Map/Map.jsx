@@ -463,7 +463,7 @@ export const Map = ({
           }}
           optionLabel="label"
           options={crs}
-          placeholder="Select a CRS"
+          placeholder={resourcesContext.messages['selectCRS']}
           style={{ width: '20%' }}
           value={currentCRS}
         />

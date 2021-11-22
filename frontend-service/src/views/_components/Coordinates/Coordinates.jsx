@@ -109,7 +109,7 @@ export const Coordinates = ({
           onChange={e => onCrsChange(e.target.value)}
           optionLabel="label"
           options={crsOptions}
-          placeholder="Select a CRS"
+          placeholder={resourcesContext.messages['selectCRS']}
           value={crsValue}
         />
         <Button

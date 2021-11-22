@@ -63,7 +63,7 @@ const tableStatisticValuesWithErrors = tableStatisticValues => {
   return tableStatisticValuesWithSomeError;
 };
 
-const parseValue = ({ type, value, feToBe = false }) => {
+const parseValue = ({ type, value, splitSRID = false }) => {
   if (
     ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type) &&
     value !== '' &&
@@ -128,7 +128,7 @@ const parseValue = ({ type, value, feToBe = false }) => {
       }
     }
 
-    if (!feToBe) {
+    if (!splitSRID) {
       inmValue.properties.srid = `EPSG:${parsedValue.properties.srid}`;
     } else {
       inmValue.properties.srid = parsedValue.properties.srid.split(':')[1];
@@ -144,15 +144,6 @@ const getValidExtensions = ({ isTooltip = false, validExtensions = '' }) =>
     ?.split(/,\s*/)
     .map(ext => (isTooltip ? ` .${ext}` : `.${ext}`))
     .join(',');
-
-// const getPercentage = valArr => {
-//   let total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));
-//   return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
-// };
-
-// const transposeMatrix = matrix => {
-//   return Object.keys(matrix[0]).map(c => matrix.map(r => r[c]));
-// };
 
 export const DatasetUtils = {
   getAllLevelErrorsFromRuleValidations,
