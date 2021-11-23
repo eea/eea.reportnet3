@@ -20,15 +20,16 @@ import ReactTooltip from 'react-tooltip';
 import { Toolbar } from 'views/_components/Toolbar';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
+import { DatasetService } from 'services/DatasetService';
+
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 
 import { filterReducer } from './_functions/Reducers/filterReducer';
 
-import { DatasetService } from 'services/DatasetService';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { MetadataUtils } from 'views/_functions/Utils';
-import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 const ActionsToolbar = ({
   colsSchema,
