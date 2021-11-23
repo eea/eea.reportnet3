@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
+import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.lock.service.LockService;
@@ -89,6 +90,10 @@ public class ReplacingDataPreviousCallFMECommandTest {
 
   @Test
   public void testExecute() {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setExternalParameters(new HashMap<>());
+    Mockito.when(integrationController.findIntegrationById(Mockito.anyLong()))
+        .thenReturn(integrationVO);
     replacingDataPreviousFMECallCommand.execute(eeaEventVO);
     Mockito.verify(integrationController, times(1)).findIntegrationById(Mockito.anyLong());
   }
