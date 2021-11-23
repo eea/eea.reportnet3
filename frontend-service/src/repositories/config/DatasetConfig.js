@@ -14,8 +14,8 @@ export const DatasetConfig = {
   deleteAttachment: '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}',
   deleteAttachmentWithProviderId:
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}',
-  deleteData: '/dataset/v1/{:datasetId}/deleteImportData?deletePrefilledTables={:deletePrefilledTables}',
-  deleteTableData: '/dataset/v1/{:datasetId}/deleteImportTable/{:tableId}',
+  deleteData: '/dataset/v1/{:datasetId}/deleteDatasetData?deletePrefilledTables={:deletePrefilledTables}',
+  deleteTableData: '/dataset/v1/{:datasetId}/deleteTableData/{:tableId}',
   deleteRecord: '/dataset/{:datasetId}/record/{:recordId}?deleteCascadePK={:deleteInCascade}',
   deleteFieldDesign: '/dataschema/{:datasetId}/fieldSchema/{:fieldSchemaId}',
   deleteTableDesign: '/dataschema/{:datasetId}/tableSchema/{:tableSchemaId}',
