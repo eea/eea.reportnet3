@@ -24,8 +24,6 @@ export const MenuItem = ({ item }) => {
             e.preventDefault();
             if (!item.disabled) {
               item.command();
-            } else {
-              this.setState(state => ({ ...state, menuClick: true }));
             }
           }}
           ref={ref}>
