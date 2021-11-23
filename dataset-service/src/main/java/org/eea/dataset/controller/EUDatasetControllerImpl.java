@@ -111,7 +111,6 @@ public class EUDatasetControllerImpl implements EUDatasetController {
   @Override
   @HystrixCommand
   @PostMapping("/populateData/dataflow/{dataflowId}")
-  @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')  OR (checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN'))")
   @ApiOperation(value = "Populate data from Datacollection", hidden = true,
       notes = "Allowed roles: CUSTODIAN, STEWARD")
