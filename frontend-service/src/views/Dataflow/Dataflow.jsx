@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import first from 'lodash/first';
@@ -29,6 +29,7 @@ import { DownloadFile } from 'views/_components/DownloadFile';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
+import { Menu } from 'views/_components/Menu';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { RepresentativesList } from './_components/RepresentativesList';
@@ -65,6 +66,8 @@ const Dataflow = withRouter(({ history, match }) => {
   const {
     params: { dataflowId, representativeId }
   } = match;
+
+  const exportImportMenuRef = useRef(null);
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -255,6 +258,28 @@ const Dataflow = withRouter(({ history, match }) => {
       setIsDownloadingUsers(false);
     }
   }, [notificationContext.hidden]);
+
+  const exportImportMenuItems = [
+    {
+      disabled: isEmpty(dataflowState.dataProviderSelected),
+      icon: 'download',
+      label: resourcesContext.messages['exportLeadReportersTemplate'],
+      command: onExportLeadReportersTemplate,
+      tooltip: `${resourcesContext.messages['exportLeadReportersTemplateTooltip']} ${dataflowState.dataProviderSelected?.label}`
+    },
+    {
+      icon: 'download',
+      label: resourcesContext.messages['exportLeadReporters'],
+      command: onExportLeadReporters
+    },
+    {
+      disabled: isEmpty(dataflowState.dataProviderSelected),
+      icon: 'upload',
+      label: resourcesContext.messages['importLeadReporters'],
+      command: () => manageDialogs('isImportLeadReportersVisible', true),
+      tooltip: resourcesContext.messages['importLeadReportersTooltip']
+    }
+  ];
 
   const manageDialogs = (dialog, value, secondDialog, secondValue) =>
     dataflowDispatch({
@@ -483,7 +508,7 @@ const Dataflow = withRouter(({ history, match }) => {
     setPreviousObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
   };
 
-  const onExportLeadReporters = async () => {
+  async function onExportLeadReporters() {
     try {
       const { data } = await RepresentativeService.exportFile(dataflowId);
       if (!isNil(data)) {
@@ -496,9 +521,9 @@ const Dataflow = withRouter(({ history, match }) => {
       console.error('Dataflow - onExportLeadReporters.', error);
       notificationContext.add({ type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT' }, true);
     }
-  };
+  }
 
-  const onExportLeadReportersTemplate = async () => {
+  async function onExportLeadReportersTemplate() {
     try {
       const { data } = await RepresentativeService.exportTemplateFile(
         dataflowState.dataProviderSelected?.dataProviderGroupId
@@ -510,7 +535,7 @@ const Dataflow = withRouter(({ history, match }) => {
       console.error('Dataflow - onExportLeadReportersTemplate.', error);
       notificationContext.add({ type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_TEMPLATE_FAILED_EVENT' }, true);
     }
-  };
+  }
 
   const onConfirmValidateReporters = async () => {
     manageDialogs('isValidateReportersDialogVisible', false);
@@ -567,7 +592,23 @@ const Dataflow = withRouter(({ history, match }) => {
         icon="export"
         label={resourcesContext.messages['exportLeadReporters']}
         onClick={onExportLeadReporters}
+      <Button
+        className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink`}
+        icon="sortAlt"
+        id="buttonExportImport"
+        label={resourcesContext.messages['exportImport']}
+        onClick={event => {
+          exportImportMenuRef.current.show(event);
+        }}
       />
+      <Menu
+        className={styles.menu}
+        id="exportImportMenu"
+        model={exportImportMenuItems}
+        popup={true}
+        ref={exportImportMenuRef}
+      />
+
       <Button
         className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink ${
           dataflowState.isUpdatingPermissions ? 'p-button-animated-spin' : ''
