@@ -566,33 +566,6 @@ const Dataflow = withRouter(({ history, match }) => {
   const manageRoleDialogFooter = (
     <Fragment>
       <Button
-        className={`${styles.buttonLeft} p-button-secondary ${
-          !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
-        }`}
-        disabled={isEmpty(dataflowState.dataProviderSelected)}
-        icon="export"
-        label={resourcesContext.messages['exportLeadReportersTemplate']}
-        onClick={onExportLeadReportersTemplate}
-        tooltip={`${resourcesContext.messages['exportLeadReportersTemplateTooltip']} ${dataflowState.dataProviderSelected?.label}`}
-        tooltipOptions={{ position: 'top' }}
-      />
-      <Button
-        className={`${styles.buttonLeft} p-button-secondary ${
-          !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
-        }`}
-        disabled={isEmpty(dataflowState.dataProviderSelected)}
-        icon="import"
-        label={resourcesContext.messages['importLeadReporters']}
-        onClick={() => manageDialogs('isImportLeadReportersVisible', true)}
-        tooltip={resourcesContext.messages['importLeadReportersTooltip']}
-        tooltipOptions={{ position: 'top' }}
-      />
-      <Button
-        className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink`}
-        icon="export"
-        label={resourcesContext.messages['exportLeadReporters']}
-        onClick={onExportLeadReporters}
-      <Button
         className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink`}
         icon="sortAlt"
         id="buttonExportImport"
