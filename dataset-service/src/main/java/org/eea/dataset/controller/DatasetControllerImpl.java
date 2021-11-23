@@ -685,10 +685,6 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDatasetId(datasetId);
-    notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_TABLE_DATA_START",
-        userNotificationContentVO);
     try {
       fileTreatmentHelper.exportFile(datasetId, mimeType, tableSchemaId, tableName);
     } catch (EEAException | IOException e) {
