@@ -5,6 +5,8 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 export const SystemNotificationRepository = {
   all: async () => await HTTPRequester.get({ url: getUrl(SystemNotificationConfig.all) }),
 
+  checkEnabled: async () => await HTTPRequester.get({ url: getUrl(SystemNotificationConfig.checkEnabled) }),
+
   create: async (message, level, enabled) =>
     await HTTPRequester.post({
       url: getUrl(SystemNotificationConfig.create),

@@ -105,7 +105,7 @@ import {
   faUserShield,
   faUserTimes,
   faVectorSquare,
-  faVolumeUp,
+  faVolumeUp
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -445,22 +445,6 @@ export const AwesomeIcons = icon => {
       return faFileCode;
     case 'zip':
       return faFileArchive;
-    case 'howTo':
-      return faBookOpen;
-    case 'table':
-      return faTable;
-    case 'download':
-      return faDownload;
-    case 'sound':
-      return faVolumeUp;
-    case 'flag':
-      return faFlagCheckered;
-    case 'clock':
-      return faClock;
-    case 'externalLink':
-      return faStaylinked;
-    case 'meteor':
-      return faMeteor;
     case 'bullhorn':
       return faBullhorn;
     default:

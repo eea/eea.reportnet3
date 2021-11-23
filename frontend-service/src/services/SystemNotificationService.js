@@ -13,6 +13,8 @@ export const SystemNotificationService = {
     });
   },
 
+  checkEnabled: async () => await SystemNotificationRepository.checkEnabled(),
+
   create: async ({ message, level, enabled }) => await SystemNotificationRepository.create(message, level, enabled),
 
   delete: async id => await SystemNotificationRepository.delete(id),
