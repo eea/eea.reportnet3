@@ -21,7 +21,9 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.dataflow.service.file.DataflowHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
@@ -100,8 +102,15 @@ public class DataflowControllerImpl implements DataFlowController {
   @Autowired
   private LockService lockService;
 
+  /** The dataflow helper. */
   @Autowired
   private DataflowHelper dataflowHelper;
+
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
+
+
 
   /**
    * Find by id.
@@ -895,6 +904,10 @@ public class DataflowControllerImpl implements DataFlowController {
   public void exportSchemaInformation(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     LOG.info("Export schema information from dataflowId {}", dataflowId);
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_SCHEMAS_INFO_START",
+        userNotificationContentVO);
     try {
       dataflowHelper.exportSchemaInformation(dataflowId);
     } catch (IOException | EEAException e) {
