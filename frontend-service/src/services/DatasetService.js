@@ -106,6 +106,8 @@ export const DatasetService = {
   downloadPublicReferenceDatasetFileData: async (dataflowId, fileName) =>
     await DatasetRepository.downloadPublicReferenceDatasetFileData(dataflowId, fileName),
 
+  downloadTableData: async (datasetId, fileName) => await DatasetRepository.downloadTableData(datasetId, fileName),
+
   getStatistics: async (datasetId, tableSchemaNames) => {
     const datasetTablesDTO = await DatasetRepository.getStatistics(datasetId);
 
