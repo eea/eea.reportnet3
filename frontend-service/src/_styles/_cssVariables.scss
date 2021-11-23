@@ -599,4 +599,11 @@
 
   /* Cookies*/
   --cookies-content-color: var(--white);
+
+  /* GoTopButton*/
+  --gotopbutton-bg-color-hover: var(--c-corporate-blue);
+  --gotopbutton-bg-color: var(--c-corporate-blue);
+  --gotopbutton-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
+  --gotopbutton-color-hover: var(--c-corporate-yellow);
+  --gotopbutton-color: var(--white);
 }
