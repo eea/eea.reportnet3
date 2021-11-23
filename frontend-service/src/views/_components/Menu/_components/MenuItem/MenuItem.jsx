@@ -32,9 +32,9 @@ export const MenuItem = ({ item }) => {
         </span>
       </li>
 
-      {isEllipsisActive() && (
+      {(isEllipsisActive() || item.tooltip) && (
         <ReactTooltip className={styles.tooltip} effect="solid" id={item.label} place="right">
-          {item.label}
+          {item.tooltip ? item.tooltip : item.label}
         </ReactTooltip>
       )}
     </Fragment>
