@@ -904,10 +904,6 @@ public class DataflowControllerImpl implements DataFlowController {
   public void exportSchemaInformation(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     LOG.info("Export schema information from dataflowId {}", dataflowId);
-    if (null == dataflowId) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
-    }
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataflowId);
     notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_SCHEMAS_INFO_START",
