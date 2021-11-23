@@ -169,7 +169,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @GetMapping(value = "/v1/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_OBSERVER','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE')")
-  @ApiOperation(value = "Get Representatives by Dataflow Id",
+  @ApiOperation(value = "Get dataflow representatives by dataflow id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = RepresentativeVO.class,
       responseContainer = "List",
       notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR READ, EDITOR WRITE, OBSERVER, LEAD REPORTER, REPORTER WRITE")

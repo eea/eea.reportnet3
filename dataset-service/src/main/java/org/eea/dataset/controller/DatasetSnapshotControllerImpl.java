@@ -194,14 +194,14 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @DeleteMapping(value = "/v1/{idSnapshot}/dataset/{idDataset}/delete")
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
-  @ApiOperation(value = "Delete dataset snapshot by id",
+  @ApiOperation(value = "Delete dataset snapshot by snapshot id",
       notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD \n\n Reference dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete snapshot"),
       @ApiResponse(code = 400, message = "Dataset id incorrect or user request not found")})
   public void deleteSnapshot(
-      @ApiParam(type = "Long", value = "Dataset Id",
+      @ApiParam(type = "Long", value = "Dataset id",
           example = "0") @PathVariable("idDataset") Long datasetId,
-      @ApiParam(type = "Long", value = "snapshot Id",
+      @ApiParam(type = "Long", value = "Snapshot id",
           example = "0") @PathVariable("idSnapshot") Long idSnapshot) {
 
     if (datasetId == null) {
@@ -524,14 +524,14 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @GetMapping(value = "/v1/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD')")
-  @ApiOperation(value = "Get historic releases",
+  @ApiOperation(value = "Get dataset historic releases by dataset id",
       notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD \n\n Data collection: CUSTODIAN, STEWARD \n\n EU dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 400, message = "Dataset not found")})
   public List<ReleaseVO> historicReleases(
-      @ApiParam(type = "Long", value = "Dataset Id",
+      @ApiParam(type = "Long", value = "Dataset id",
           example = "0") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(type = "Long", value = "Dataflow Id",
+      @ApiParam(type = "Long", value = "Dataflow id",
           example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
     List<ReleaseVO> releases;
     // get dataset type
