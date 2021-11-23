@@ -41,6 +41,14 @@ export const qcListReducer = (state, { type, payload }) => {
     case 'SET_DELETED_RULE_ID':
       return { ...state, deletedRuleId: payload.deletedRuleId };
 
+    case 'SET_IS_TABLE_SORTED':
+      return {
+        ...state,
+        isTableSorted: payload.value,
+        sortFieldValidations: payload.sortFieldValidations,
+        sortOrderValidations: payload.sortOrderValidations
+      };
+
     case 'UPDATE_FILTER_DATA_AND_VALIDATIONS':
       return {
         ...state,
