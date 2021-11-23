@@ -139,7 +139,6 @@ const ManageDataflowForm = forwardRef(
           }
         } finally {
           onSubmit(false);
-          onHide();
         }
       }
     };
@@ -150,6 +149,7 @@ const ManageDataflowForm = forwardRef(
           <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
             <InputText
               autoComplete="off"
+              className={styles.dataflowName}
               hasMaxCharCounter={true}
               id="dataflowName"
               maxLength={config.INPUT_MAX_LENGTH}
@@ -161,7 +161,7 @@ const ManageDataflowForm = forwardRef(
               }}
               onFocus={() => {
                 setErrors(previousErrors => {
-                  return { ...previousErrors, name: { message: '', hasErrors: false } };
+                  return { ...previousErrors, name: { message: '', hasErrors: true } };
                 });
               }}
               onKeyPress={e => {
