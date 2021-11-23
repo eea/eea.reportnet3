@@ -488,8 +488,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
 
-    if (null != leadReporterVO.getEmail())
+    if (null != leadReporterVO.getEmail()) {
       leadReporterVO.setEmail(leadReporterVO.getEmail().toLowerCase());
+    }
 
     // Validate email
     if (null == leadReporterVO.getEmail() || !leadReporterVO.getEmail().matches(EMAIL_REGEX)) {
