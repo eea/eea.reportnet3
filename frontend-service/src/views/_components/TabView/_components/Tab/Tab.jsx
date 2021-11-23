@@ -237,6 +237,20 @@ const Tab = ({
     }
   };
 
+  const getExtraStyle = () => {
+    if (totalTabs === 1) return `${styles.tabGeneral} ${styles.fixTableTabEmpty}`;
+    else if (isNavigationHidden) return `${styles.tabGeneral} ${styles.fixTableTabNavigationHidden}`;
+    else if (!isNavigationHidden) return `${styles.tabGeneral} ${styles.fixTableTabNavigationShowed}`;
+  };
+
+  const getClassNameTabView = () => {
+    let extraStyle = getExtraStyle();
+
+    if (editable) return `${styles.p_tabview_design} ${extraStyle}`;
+    else if (addTab) return `${styles.p_tabview_design_add} ${extraStyle} datasetSchema-created-table-help-step`;
+    else return `${styles.p_tabview_noDesign} ${extraStyle}`;
+  };
+
   return (
     <Fragment>
       <div
@@ -285,13 +299,7 @@ const Tab = ({
         <a
           aria-controls={ariaControls}
           aria-selected={selected}
-          className={
-            editable
-              ? styles.p_tabview_design
-              : addTab
-              ? `${styles.p_tabview_design_add} datasetSchema-created-table-help-step`
-              : styles.p_tabview_noDesign
-          }
+          className={getClassNameTabView()}
           draggable={designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (!addTab ? true : false) : false}
           href={'#' + ariaControls}
           id={id}
@@ -329,11 +337,6 @@ const Tab = ({
             }
           }}
           role="tab"
-          style={{
-            pointerEvents: 'fill',
-            height: isNavigationHidden ? '2.6rem' : '2.7rem',
-            minWidth: '3.6rem'
-          }}
           tabIndex={index}>
           {leftIcon && <span className={classNames('p-tabview-left-icon ', leftIcon)}></span>}
           {!isUndefined(editingHeader) && editingHeader ? (
