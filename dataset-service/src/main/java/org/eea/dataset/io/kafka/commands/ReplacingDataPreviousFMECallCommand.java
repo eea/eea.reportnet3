@@ -99,6 +99,7 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
 
       FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
     } catch (IOException e) {
+      integrationVO.getExternalParameters().put("fileIS", "contentFileNotShowedInTheLog");
       LOG_ERROR.error(
           "Error processing the call to FME executing integration: datasetId={}, fileName={}, IntegrationVO={}",
           datasetId, file.getName(), integrationVO);
@@ -106,6 +107,7 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
     }
 
     if (error) {
+      integrationVO.getExternalParameters().put("fileIS", "contentFileNotShowedInTheLog");
       LOG_ERROR.error("Error executing integration: datasetId={}, fileName={}, IntegrationVO={}",
           datasetId, file.getName(), integrationVO);
       manageLock(datasetId);
