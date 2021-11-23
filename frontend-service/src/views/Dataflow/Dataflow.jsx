@@ -613,7 +613,7 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   useCheckNotifications(
-    ['AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE', 'DOWNLOAD_USERS_LIST_FILE_ERROR'],
+    ['AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE', 'DOWNLOAD_USERS_LIST_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
     setIsDownloadingUsers,
     false
   );
