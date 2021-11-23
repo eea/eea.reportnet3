@@ -1,6 +1,7 @@
 .coordinatesWrapper {
   display: flex;
   align-items: center;
+  margin-bottom: 0.5rem;
   .longitude {
     margin-left: 10px;
   }
@@ -29,4 +30,13 @@
   font-weight: bold;
   margin-right: 0.25rem;
   width: fit-content;
+}
+.pointEpsgWrapper {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+  button {
+    margin-left: 1rem;
+    flex: none;
+  }
 }

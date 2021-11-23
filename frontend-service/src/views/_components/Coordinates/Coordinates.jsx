@@ -99,7 +99,7 @@ export const Coordinates = ({
           {showMessageError && <span className={styles.pointError}>{errorMessage}</span>}
         </p>
       )}
-      <div className={styles.pointEpsgWrapper}>
+      <div className={`${!isCellEditor ? styles.pointEpsgWrapper : ''}`}>
         <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
         <Dropdown
           appendTo={document.body}
