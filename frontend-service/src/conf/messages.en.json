@@ -1387,7 +1387,6 @@
     "selectCRS": "Select a CRS",
     "exportTableDataCompletedEvent": "Table data exported successfully",
     "exportTableDataFailedEvent": "Error exporting table data",
-    "downloadTableDataStart": "Downloading table data",
     "exportTableDataStart": "Exporting table data"
   }
 }
