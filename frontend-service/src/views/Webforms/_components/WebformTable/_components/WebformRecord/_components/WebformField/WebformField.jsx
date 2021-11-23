@@ -577,12 +577,20 @@ export const WebformField = ({
           onError={onUploadFileError}
           onUpload={onAttach}
           operation="PUT"
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
-            dataflowId,
-            datasetId,
-            fieldId: selectedFieldId,
-            dataProviderId
-          })}`}
+          url={`${window.env.REACT_APP_BACKEND}${
+            isNil(dataProviderId)
+              ? getUrl(DatasetConfig.uploadAttachment, {
+                  dataflowId,
+                  datasetId,
+                  fieldId: selectedFieldId
+                })
+              : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
+                  dataflowId,
+                  datasetId,
+                  fieldId: selectedFieldId,
+                  dataProviderId
+                })
+          }`}
         />
       )}
       {isDeleteAttachmentVisible && (
