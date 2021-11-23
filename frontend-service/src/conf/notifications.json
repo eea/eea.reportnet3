@@ -802,7 +802,8 @@
         { "key": "EXPORT_USERS_BY_COUNTRY_FAILED_EVENT" },
         { "key": "VALIDATE_ALL_REPORTERS_FAILED_EVENT" },
         { "key": "VALIDATE_LEAD_REPORTERS_FAILED_EVENT" },
-        { "key": "VALIDATE_REPORTERS_FAILED_EVENT" }
+        { "key": "VALIDATE_REPORTERS_FAILED_EVENT" },
+        { "key": "EXPORT_TABLE_DATA_FAILED_EVENT" }
       ]
     },
     {
@@ -1054,7 +1055,8 @@
           }
         },
         { "key": "VALIDATE_REPORTERS_COMPLETED_EVENT" },
-        { "key": "VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT" }
+        { "key": "VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT" },
+        { "key": "EXPORT_TABLE_DATA_COMPLETED_EVENT" }
       ]
     },
     {
