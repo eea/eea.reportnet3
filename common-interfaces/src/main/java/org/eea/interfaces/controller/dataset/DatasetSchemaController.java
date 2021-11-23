@@ -58,8 +58,17 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @return the data set schema VO
    */
-  @GetMapping(value = "/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/v1/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetSchemaVO findDataSchemaByDatasetId(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Find data schema by dataset id legacy.
+   *
+   * @param datasetId the dataset id
+   * @return the data set schema VO
+   */
+  @GetMapping(value = "/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetSchemaVO findDataSchemaByDatasetIdLegacy(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Find data schema by dataset id private.
@@ -311,9 +320,23 @@ public interface DatasetSchemaController {
    * @param providerId the provider id
    * @return the simple schema
    */
-  @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
+  @GetMapping(value = "/v1/getSimpleSchema/dataset/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   SimpleDatasetSchemaVO getSimpleSchema(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
+
+  /**
+   * Gets the simple schema legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return the simple schema legacy
+   */
+  @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  SimpleDatasetSchemaVO getSimpleSchemaLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
 
@@ -345,9 +368,23 @@ public interface DatasetSchemaController {
    * @param providerId the provider id
    * @return the table schemas ids
    */
-  @GetMapping(value = "/getTableSchemasIds/{datasetId}",
+  @GetMapping(value = "/v1/getTableSchemasIds/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<TableSchemaIdNameVO> getTableSchemasIds(@PathVariable("datasetId") Long datasetId,
+      @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
+
+  /**
+   * Gets the table schemas ids legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return the table schemas ids legacy
+   */
+  @GetMapping(value = "/getTableSchemasIds/{datasetId}",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<TableSchemaIdNameVO> getTableSchemasIdsLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
 
@@ -360,9 +397,24 @@ public interface DatasetSchemaController {
    * @param tableSchemaId the table schema id
    * @return the response entity
    */
-  @GetMapping(value = "/{datasetSchemaId}/exportFieldSchemas",
+  @GetMapping(value = "/v1/{datasetSchemaId}/exportFieldSchemas",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<byte[]> exportFieldSchemas(
+      @PathVariable("datasetSchemaId") String datasetSchemaId,
+      @RequestParam(value = "datasetId") final Long datasetId,
+      @RequestParam(value = "tableSchemaId", required = false) final String tableSchemaId);
+
+  /**
+   * Export field schemas legacy.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @return the response entity
+   */
+  @GetMapping(value = "/{datasetSchemaId}/exportFieldSchemas",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<byte[]> exportFieldSchemasLegacy(
       @PathVariable("datasetSchemaId") String datasetSchemaId,
       @RequestParam(value = "datasetId") final Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) final String tableSchemaId);
@@ -376,8 +428,24 @@ public interface DatasetSchemaController {
    * @param file the file
    * @param replace the replace
    */
-  @PostMapping(value = "/{datasetSchemaId}/importFieldSchemas")
+  @PostMapping(value = "/v1/{datasetSchemaId}/importFieldSchemas")
   public void importFieldSchemas(@PathVariable("datasetSchemaId") String datasetSchemaId,
+      @RequestParam(value = "datasetId") Long datasetId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) Boolean replace);
+
+  /**
+   * Import field schemas legacy.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   */
+  @PostMapping(value = "/{datasetSchemaId}/importFieldSchemas")
+  public void importFieldSchemasLegacy(@PathVariable("datasetSchemaId") String datasetSchemaId,
       @RequestParam(value = "datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("file") MultipartFile file,
@@ -390,9 +458,20 @@ public interface DatasetSchemaController {
    * @param datasetId the dataset id
    * @return the response entity
    */
-  @GetMapping(value = "/dataset/{datasetId}/exportFieldSchemas",
+  @GetMapping(value = "/v1/dataset/{datasetId}/exportFieldSchemas",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<byte[]> exportFieldSchemasFromDataset(
+      @PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Export field schemas from dataset legacy.
+   *
+   * @param datasetId the dataset id
+   * @return the response entity
+   */
+  @GetMapping(value = "/dataset/{datasetId}/exportFieldSchemas",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<byte[]> exportFieldSchemasFromDatasetLegacy(
       @PathVariable("datasetId") Long datasetId);
 
 }

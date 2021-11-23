@@ -34,12 +34,12 @@ import io.swagger.annotations.ApiResponses;
 
 
 /**
- * The Class DataFlowWebLinkControllerImpl.
+ * The Class DataflowWebLinkControllerImpl.
  */
 @RestController
 @RequestMapping(value = "/weblink")
 @Api(tags = "Weblinks : Weblinks Manager")
-public class DataFlowWebLinkControllerImpl implements DataFlowWebLinkController {
+public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController {
 
 
   /**

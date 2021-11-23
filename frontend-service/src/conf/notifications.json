@@ -799,7 +799,11 @@
         { "key": "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT" },
         { "key": "DISABLE_RULES_ERROR_EVENT" },
         { "key": "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT" },
-        { "key": "EXPORT_USERS_BY_COUNTRY_FAILED_EVENT" }
+        { "key": "EXPORT_USERS_BY_COUNTRY_FAILED_EVENT" },
+        { "key": "VALIDATE_ALL_REPORTERS_FAILED_EVENT" },
+        { "key": "VALIDATE_LEAD_REPORTERS_FAILED_EVENT" },
+        { "key": "VALIDATE_REPORTERS_FAILED_EVENT" },
+        { "key": "EXPORT_TABLE_DATA_FAILED_EVENT" }
       ]
     },
     {
@@ -1029,6 +1033,7 @@
         { "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD" },
         { "key": "AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE" },
         { "key": "EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT" },
+        { "key": "VALIDATE_ALL_REPORTERS_COMPLETED_EVENT" },
         {
           "key": "IMPORT_FIELD_SCHEMA_COMPLETED_EVENT",
           "navigateTo": {
@@ -1048,7 +1053,10 @@
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]
           }
-        }
+        },
+        { "key": "VALIDATE_REPORTERS_COMPLETED_EVENT" },
+        { "key": "VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT" },
+        { "key": "EXPORT_TABLE_DATA_COMPLETED_EVENT" }
       ]
     },
     {

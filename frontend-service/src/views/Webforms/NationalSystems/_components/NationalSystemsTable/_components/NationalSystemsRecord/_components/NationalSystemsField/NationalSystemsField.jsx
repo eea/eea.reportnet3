@@ -95,7 +95,7 @@ export const NationalSystemsField = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
-      await DatasetService.deleteAttachment(datasetId, field.fieldId);
+      await DatasetService.deleteAttachment(dataflowId, datasetId, field.fieldId, dataProviderId);
       onFillField(field, field.fieldSchemaId, '');
       handleDialogs('deleteAttachment', false);
     } catch (error) {
@@ -366,10 +366,20 @@ export const NationalSystemsField = ({
           onError={onUploadFileError}
           onUpload={onAttachFile}
           operation={'PUT'}
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
-            datasetId,
-            fieldId: field.fieldId
-          })}`}
+          url={`${window.env.REACT_APP_BACKEND}${
+            isNil(dataProviderId)
+              ? getUrl(DatasetConfig.uploadAttachment, {
+                  dataflowId,
+                  datasetId,
+                  fieldId: field.fieldId
+                })
+              : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
+                  dataflowId,
+                  datasetId,
+                  fieldId: field.fieldId,
+                  dataProviderId
+                })
+          }`}
         />
       )}
       {isDialogVisible.deleteAttachment && (

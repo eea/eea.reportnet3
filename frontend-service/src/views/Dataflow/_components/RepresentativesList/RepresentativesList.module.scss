@@ -2,6 +2,32 @@
 
 .container {
   min-height: 25vh;
+  position: relative;
+  .spinner {
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    overflow: hidden !important;
+    user-select: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 9000 !important;
+
+    svg {
+      width: 100px;
+    }
+  }
+}
+.isValidUserIcon {
+  left: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
+  position: relative;
+  top: 10px;
+  cursor: pointer;
+  color: var(--isValid-user-icon-color);
+  font-size: 1.1rem;
 }
 .listContainer {
   padding-left: 0px;
@@ -69,21 +95,6 @@
 .emptyTableHeader {
   :global .p-column-title {
     display: none;
-  }
-}
-
-.table {
-  .spinner {
-    background-color: rgba(0, 0, 0, 0.4);
-    height: 100%;
-    overflow: hidden;
-    position: absolute;
-    user-select: none;
-    width: 100%;
-
-    svg {
-      width: 100px;
-    }
   }
 }
 

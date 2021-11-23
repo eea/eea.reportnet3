@@ -327,7 +327,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             return {
               command: () => {
                 setIsImportDatasetDialogVisible(true);
-                setSelectedCustomImportIntegration({ id: type.id, name: type.name });
+                setSelectedCustomImportIntegration({ id: type.id, name: `${type.name} (.${type.fileExtension})` });
                 setImportSelectedIntegrationExtension(type.fileExtension);
               },
               icon: type.fileExtension,
@@ -346,7 +346,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             label: importOtherSystem.name,
             icon: 'upload',
             command: () => {
-              setSelectedCustomImportIntegration(importOtherSystem.id, importOtherSystem.name);
+              setSelectedCustomImportIntegration({ id: importOtherSystem.id, name: importOtherSystem.name });
               setIsImportOtherSystemsDialogVisible(true);
             }
           }))
@@ -1243,14 +1243,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             setSelectedCustomImportIntegration({ id: null, name: null });
           }}
           visible={isImportOtherSystemsDialogVisible}>
-          <div className={styles.text}>
-            dangerouslySetInnerHTML=
-            {{
+          <div
+            className={styles.text}
+            dangerouslySetInnerHTML={{
               __html: TextUtils.parseText(resourcesContext.messages['importPreviousDataConfirm'], {
                 importName: selectedCustomImportIntegration.name
               })
-            }}
-          </div>
+            }}></div>
           <div className={styles.checkboxWrapper}>
             <Checkbox
               checked={replaceData}
