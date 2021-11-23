@@ -28,6 +28,7 @@ import { filterReducer } from './_functions/Reducers/filterReducer';
 import { DatasetService } from 'services/DatasetService';
 
 import { MetadataUtils } from 'views/_functions/Utils';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 const ActionsToolbar = ({
   colsSchema,
@@ -62,7 +63,6 @@ const ActionsToolbar = ({
   tableId,
   tableName
 }) => {
-  const [exportTableData, setExportTableData] = useState(undefined);
   const [exportTableDataName, setExportTableDataName] = useState('');
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [filter, dispatchFilter] = useReducer(filterReducer, {
@@ -99,11 +99,20 @@ const ActionsToolbar = ({
     }
   }, [isGroupedValidationSelected]);
 
-  useEffect(() => {
-    if (!isUndefined(exportTableData)) {
-      DownloadFile(exportTableData, exportTableDataName);
+  const onDownloadTableData = async () => {
+    try {
+      const { data } = await DatasetService.downloadTableData(datasetId, exportTableDataName);
+      DownloadFile(data, exportTableDataName);
+    } catch (error) {
+      console.error('ActionsToolbar - onDownloadTableData.', error);
+    } finally {
+      setIsLoadingFile(false);
     }
-  }, [exportTableData]);
+  };
+
+  useCheckNotifications(['EXPORT_TABLE_DATA_COMPLETED_EVENT'], onDownloadTableData);
+
+  useCheckNotifications(['EXPORT_TABLE_DATA_FAILED_EVENT'], setIsLoadingFile, false);
 
   const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
     label: resourcesContext.messages[type.key],
@@ -115,10 +124,10 @@ const ActionsToolbar = ({
     setIsLoadingFile(true);
     try {
       setExportTableDataName(createTableName(tableName, fileType));
-      const { data } = await DatasetService.exportTableData(datasetId, tableId, fileType);
-      setExportTableData(data);
+      await DatasetService.exportTableData(datasetId, tableId, fileType);
     } catch (error) {
       console.error('ActionsToolbar - onExportTableData.', error);
+      setIsLoadingFile(false);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -136,8 +145,6 @@ const ActionsToolbar = ({
         },
         true
       );
-    } finally {
-      setIsLoadingFile(false);
     }
   };
 
