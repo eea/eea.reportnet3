@@ -491,11 +491,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
           contributor.get().getEmail(), groupName);
       this.addUserToUserGroup(contributor.get().getId(), groupName);
     } else {
-      LOG.error("Contributor is not present. The userMail is {} and the group name {}", userMail,
-          groupName);
-      throw new EEAException(String.format(
-          "Error, user with mail %s not found and it was impossible to add it to the group %s",
-          userMail, groupName));
+      LOG.info(
+          "Contributor is temporary. The userMail is {} and the group name {}, but permissions were not assigned. Create an user with said userMail and refresh permissions.",
+          userMail, groupName);
     }
   }
 
