@@ -53,6 +53,7 @@ const RepresentativesList = ({
     allPossibleDataProvidersNoSelect: [],
     dataProvidersTypesList: [],
     deleteLeadReporterId: null,
+    focusedLeadReporterId: null,
     isDeleting: false,
     isLoading: false,
     isVisibleConfirmDeleteDialog: false,
@@ -63,8 +64,7 @@ const RepresentativesList = ({
     representativeIdToDelete: '',
     representatives: [],
     selectedDataProviderGroup: null,
-    unusedDataProvidersOptions: [],
-    focusedLeadReporterId: null
+    unusedDataProvidersOptions: []
   };
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);

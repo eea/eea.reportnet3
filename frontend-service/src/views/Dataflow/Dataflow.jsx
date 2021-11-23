@@ -261,22 +261,22 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const exportImportMenuItems = [
     {
+      command: onExportLeadReportersTemplate,
       disabled: isEmpty(dataflowState.dataProviderSelected),
       icon: 'download',
       label: resourcesContext.messages['exportLeadReportersTemplate'],
-      command: onExportLeadReportersTemplate,
       tooltip: `${resourcesContext.messages['exportLeadReportersTemplateTooltip']} ${dataflowState.dataProviderSelected?.label}`
     },
     {
+      command: onExportLeadReporters,
       icon: 'download',
-      label: resourcesContext.messages['exportLeadReporters'],
-      command: onExportLeadReporters
+      label: resourcesContext.messages['exportLeadReporters']
     },
     {
+      command: () => manageDialogs('isImportLeadReportersVisible', true),
       disabled: isEmpty(dataflowState.dataProviderSelected),
       icon: 'upload',
       label: resourcesContext.messages['importLeadReporters'],
-      command: () => manageDialogs('isImportLeadReportersVisible', true),
       tooltip: resourcesContext.messages['importLeadReportersTooltip']
     }
   ];
