@@ -1386,6 +1386,12 @@
     "geoJSONErrors": "GeoJSON errors (click on each error to scroll)",
     "selectCRS": "Select a CRS",
     "exportTableDataCompletedEvent": "Table data exported successfully",
-    "exportTableDataFailedEvent": "Error exporting table data"
+    "exportTableDataFailedEvent": "Error exporting table data",
+    "lat": "Lat",
+    "long": "Long",
+    "coordsOutOfBounds": "Coordinates out of bounds",
+    "coordsOutOfBoundsTooltip": "Coordinates must be between",
+    "coordsOutOfBoundsTooltipGeographical": "-180 and 180 (longitude) and -90 and 90 (latitude)",
+    "coordsOutOfBoundsTooltipMetrical": "1896628.62 and 9512027.50 (X) and 1507846.05 and 4851204.83 (Y)"
   }
 }

@@ -20,6 +20,9 @@
     font-size: 0.7rem;
   }
 }
+.mapButton {
+  margin-top: 2px !important;
+}
 .error {
   border: var(--inputtext-border-error) !important;
   box-shadow: var(--inputtext-box-shadow-focus-error) !important;
