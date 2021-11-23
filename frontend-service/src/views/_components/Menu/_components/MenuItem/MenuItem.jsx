@@ -18,7 +18,7 @@ export const MenuItem = ({ item }) => {
     <Fragment>
       <li className={'p-menuitem'} data-for={item.label} data-tip>
         <span
-          className={`p-menuitem-link ${item.disabled ? styles.menuItemDisabled : null} ${styles.menuItem}`}
+          className={`p-menuitem-link ${item.disabled ? 'p-disabled' : null} ${styles.menuItem} `}
           disabled={item.disabled}
           onClick={e => {
             e.preventDefault();
