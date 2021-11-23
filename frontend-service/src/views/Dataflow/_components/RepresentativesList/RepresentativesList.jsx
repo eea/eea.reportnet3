@@ -63,7 +63,8 @@ const RepresentativesList = ({
     representativeIdToDelete: '',
     representatives: [],
     selectedDataProviderGroup: null,
-    unusedDataProvidersOptions: []
+    unusedDataProvidersOptions: [],
+    focusedLeadReporterId: null
   };
 
   const [formState, formDispatcher] = useReducer(reducer, initialState);
@@ -332,6 +333,9 @@ const RepresentativesList = ({
 
   const setIsDeleting = value => formDispatcher({ type: 'SET_IS_DELETING', payload: { isDeleting: value } });
 
+  const setFocusedLeadReporterId = focusedLeadReporterId =>
+    formDispatcher({ type: 'SET_FOCUSED_LEAD_REPORTER_ID', payload: { focusedLeadReporterId } });
+
   const renderLeadReporterColumnTemplate = representative => {
     const { dataProviderId, representativeId } = representative;
 
@@ -354,15 +358,21 @@ const RepresentativesList = ({
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             disabled={representative.hasDatasets && reporters[leadReporter.id]?.isValid}
             id={`${leadReporter.id}-${representativeId}`}
-            onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
+            onBlur={event => {
+              onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter);
+              setFocusedLeadReporterId(null);
+            }}
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
-            onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
+            onFocus={() => {
+              onCleanErrors(dataProviderId, leadReporter.id);
+              setFocusedLeadReporterId(leadReporter.id);
+            }}
             onKeyDown={event => onKeyDown(event, representativeId, dataProviderId, leadReporter)}
             placeholder={resourcesContext.messages['manageRolesDialogInputPlaceholder']}
             value={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
           />
 
-          {!isNewLeadReporter && isValidEmail(reporters[leadReporter.id]?.account || reporters[leadReporter.id]) && (
+          {!isNewLeadReporter && leadReporter.id !== formState.focusedLeadReporterId && (
             <Fragment>
               <FontAwesomeIcon
                 className={styles.isValidUserIcon}
