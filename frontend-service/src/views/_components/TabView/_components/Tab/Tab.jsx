@@ -2,17 +2,18 @@ import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isUndefined from 'lodash/isUndefined';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { config } from 'conf';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import styles from './Tab.module.css';
+
+import { config } from 'conf';
 
 import classNames from 'classnames';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { ContextMenu } from 'views/_components/ContextMenu';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'views/_components/Icon';
 import { InputText } from 'views/_components/InputText';
+
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 const Tab = ({
