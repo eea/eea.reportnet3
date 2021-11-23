@@ -983,17 +983,6 @@ public class DataflowControllerImplTest {
     Mockito.verify(dataflowHelper, times(1)).exportSchemaInformation(Mockito.anyLong());
   }
 
-  @Test(expected = ResponseStatusException.class)
-  public void exportSchemaInformationTestError() throws EEAException, IOException {
-    dataflowControllerImpl.exportSchemaInformation(null);
-    try {
-
-    } catch (ResponseStatusException e) {
-      Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-      throw e;
-    }
-  }
-
   @Test
   public void exportSchemaInformationEEAExceptionTest() throws EEAException, IOException {
     Mockito.doNothing().when(notificationControllerZuul)
