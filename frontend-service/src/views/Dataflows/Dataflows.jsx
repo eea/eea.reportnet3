@@ -28,9 +28,6 @@ import { DataflowService } from 'services/DataflowService';
 import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { UserService } from 'services/UserService';
 
-import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
-import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
-
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -41,6 +38,10 @@ import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
+
+import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -71,6 +72,7 @@ const Dataflows = withRouter(({ history, match }) => {
     isReferencedDataflowDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
+    isValidatingAllDataflowsUsers: false,
     isUserListVisible: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     reference: [],
@@ -225,6 +227,18 @@ const Dataflows = withRouter(({ history, match }) => {
     setActiveIndexTabOnBack();
   }, [isCustodian, isAdmin]);
 
+  const setIsValidatingAllDataflowsUsers = isValidatingAllDataflowsUsers => {
+    dataflowsDispatch({ type: 'SET_IS_VALIDATING_ALL_DATAFLOWS_USERS', payload: { isValidatingAllDataflowsUsers } });
+  };
+
+  const onValidatingAllDataflowsUsersCompleted = () => {
+    setIsValidatingAllDataflowsUsers(false);
+    manageDialogs('isRecreatePermissionsDialogVisible', false);
+  };
+
+  useCheckNotifications(['VALIDATE_ALL_REPORTERS_FAILED_EVENT'], setIsValidatingAllDataflowsUsers, false);
+  useCheckNotifications(['VALIDATE_ALL_REPORTERS_COMPLETED_EVENT'], onValidatingAllDataflowsUsersCompleted);
+
   const setActiveIndexTabOnBack = () => {
     for (let tabItemIndex = 0; tabItemIndex < tabMenuItems.length; tabItemIndex++) {
       const tabItem = tabMenuItems[tabItemIndex];
@@ -310,11 +324,12 @@ const Dataflows = withRouter(({ history, match }) => {
   };
 
   const onConfirmValidateAllDataflowsUsers = async () => {
-    manageDialogs('isRecreatePermissionsDialogVisible', false);
+    setIsValidatingAllDataflowsUsers(true);
     try {
       await DataflowService.validateAllDataflowsUsers();
     } catch (error) {
       console.error('Dataflows -  onConfirmValidateAllDataflowsUsers.', error);
+      setIsValidatingAllDataflowsUsers(false);
       notificationContext.add({ type: 'VALIDATE_ALL_REPORTERS_FAILED_EVENT' }, true);
     }
   };
@@ -462,7 +477,9 @@ const Dataflows = withRouter(({ history, match }) => {
 
       {dataflowsState.isRecreatePermissionsDialogVisible && (
         <ConfirmDialog
+          disabledConfirm={dataflowsState.isValidatingAllDataflowsUsers}
           header={resourcesContext.messages['adminNewCreatePermissions']}
+          iconConfirm={dataflowsState.isValidatingAllDataflowsUsers ? 'spinnerAnimate' : ''}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmValidateAllDataflowsUsers}
