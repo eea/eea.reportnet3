@@ -225,7 +225,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public DataSetSchemaVO findDataSchemaByDatasetId(@ApiParam(type = "Long", value = "Dataset id",
       example = "0") @PathVariable("datasetId") Long datasetId) {
     try {
-      return dataschemaService.getDataSchemaByDatasetId(trFue, datasetId);
+      return dataschemaService.getDataSchemaByDatasetId(true, datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
