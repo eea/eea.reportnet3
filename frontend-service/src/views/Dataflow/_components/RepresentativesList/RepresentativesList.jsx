@@ -336,6 +336,26 @@ const RepresentativesList = ({
   const setFocusedLeadReporterId = focusedLeadReporterId =>
     formDispatcher({ type: 'SET_FOCUSED_LEAD_REPORTER_ID', payload: { focusedLeadReporterId } });
 
+  const renderIsValidUserIcon = (isNewLeadReporter, leadReporter) => {
+    if (!isNewLeadReporter && leadReporter.id !== formState.focusedLeadReporterId) {
+      return (
+        <Fragment>
+          <FontAwesomeIcon
+            className={styles.isValidUserIcon}
+            data-for={leadReporter?.account}
+            data-tip
+            icon={leadReporter?.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
+          />
+          <ReactTooltip border={true} effect="solid" id={leadReporter?.account} place="top">
+            {leadReporter?.isValid
+              ? resourcesContext.messages['validUserTooltip']
+              : resourcesContext.messages['invalidUserTooltip']}
+          </ReactTooltip>
+        </Fragment>
+      );
+    }
+  };
+
   const renderLeadReporterColumnTemplate = representative => {
     const { dataProviderId, representativeId } = representative;
 
@@ -372,21 +392,7 @@ const RepresentativesList = ({
             value={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
           />
 
-          {!isNewLeadReporter && leadReporter.id !== formState.focusedLeadReporterId && (
-            <Fragment>
-              <FontAwesomeIcon
-                className={styles.isValidUserIcon}
-                data-for={reporters[leadReporter.id]?.account}
-                data-tip
-                icon={reporters[leadReporter.id]?.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
-              />
-              <ReactTooltip border={true} effect="solid" id={reporters[leadReporter.id]?.account} place="top">
-                {reporters[leadReporter.id]?.isValid
-                  ? resourcesContext.messages['validUserTooltip']
-                  : resourcesContext.messages['invalidUserTooltip']}
-              </ReactTooltip>
-            </Fragment>
-          )}
+          {renderIsValidUserIcon(isNewLeadReporter, reporters[leadReporter.id])}
 
           {!isNewLeadReporter && (
             <Button
