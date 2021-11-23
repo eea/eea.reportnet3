@@ -172,9 +172,7 @@ public class NotificationServiceImpl implements NotificationService {
         template.convertAndSend("/user/queue/systemnotifications", systemNotificationVO);
       } else {
         if (systemNotificationRepository.findByEnabledTrue().isEmpty()) {
-          template.convertAndSendToUser(
-              SecurityContextHolder.getContext().getAuthentication().getName(),
-              "/queue/notifications",
+          template.convertAndSend("/user/queue/systemnotifications",
               new Notification(EventType.NO_ENABLED_SYSTEM_NOTIFICATIONS, Collections.emptyMap()));
         }
       }
