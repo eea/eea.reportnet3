@@ -35,7 +35,6 @@ export const UserProvider = ({ children }) => {
   const onLoadSystemNotifications = async () => {
     const unparsedNotifications = await SystemNotificationService.all();
     unparsedNotifications.forEach(notification => {
-      console.log(notification);
       notificationContext.add(notification, false, true);
     });
   };

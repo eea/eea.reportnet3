@@ -20,6 +20,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const SystemNotificationsCreateForm = ({
   formType = '',
+  isCreating = false,
   isVisible,
   notification = {},
   onCreateSystemNotification,
@@ -29,7 +30,6 @@ export const SystemNotificationsCreateForm = ({
   const resourcesContext = useContext(ResourcesContext);
   const growlRef = useRef();
 
-  console.log({ formType });
   const [systemNotification, setSystemNotification] = useState(
     formType === 'EDIT' ? notification : { message: '', enabled: true, level: 'INFO' }
   );
@@ -52,8 +52,8 @@ export const SystemNotificationsCreateForm = ({
     <div>
       <Button
         className={!hasErrors() && 'p-button-animated-blink'}
-        disabled={hasErrors()}
-        icon="add"
+        disabled={hasErrors() || isCreating}
+        icon={isCreating ? 'spinnerAnimate' : 'add'}
         id="createSystemNotificationCreateForm"
         label={resourcesContext.messages[formType === 'EDIT' ? 'update' : 'save']}
         onClick={() =>
@@ -128,7 +128,6 @@ export const SystemNotificationsCreateForm = ({
             <label>{resourcesContext.messages['notificationLevel']}</label>
           </div>
           <div>
-            {console.log({ label: systemNotification.level, value: systemNotification.level })}
             <Dropdown
               appendTo={document.body}
               filterPlaceholder={resourcesContext.messages['systemNotificationLevel']}

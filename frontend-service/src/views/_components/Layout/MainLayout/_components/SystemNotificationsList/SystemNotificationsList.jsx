@@ -36,18 +36,25 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
   const [systemNotificationState, dispatchSystemNotification] = useReducer(systemNotificationReducer, {
     editNotification: {},
     formType: '',
+    isDeleteDialogVisible: false,
+    isDeleting: false,
     isVisibleCreateSysNotification: false,
     systemNotifications: []
   });
 
-  const { isVisibleCreateSysNotification, editNotification, formType, systemNotifications } = systemNotificationState;
+  const {
+    isVisibleCreateSysNotification,
+    editNotification,
+    formType,
+    isDeleteDialogVisible,
+    isDeleting,
+    systemNotifications
+  } = systemNotificationState;
 
   const [columns, setColumns] = useState([]);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isCreating, setCreating] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedRow, setSelectedRow] = useState({});
-  // const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     const headers = [
@@ -85,17 +92,12 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
 
     if (isAdmin) {
       columnsArray.push(
-        <Column
-          body={actionsColumnButtons}
-          header={resourcesContext.messages['actions']}
-          // className={styles.crudColumn}
-          key="buttonsUniqueId"
-        />
+        <Column body={actionsColumnButtons} header={resourcesContext.messages['actions']} key="buttonsUniqueId" />
       );
     }
 
     setColumns(columnsArray);
-  }, [userContext]);
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(columns)) {
@@ -109,7 +111,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         <ActionsColumn
           isDeletingDocument={isDeleting}
           // isUpdating={isUpdating}
-          onDeleteClick={() => setIsDeleteDialogVisible(true)}
+          onDeleteClick={() => onToggleDeleteVisibility(true)}
           onEditClick={() => onEditClick(rowData)}
           rowDataId={rowData.key}
           rowDeletingId={rowData.key}
@@ -147,22 +149,21 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         icon="cancel"
         id="cancelCreateSystemNotification"
         label={resourcesContext.messages['cancel']}
-        onClick={() => {
-          setIsSystemNotificationVisible(false);
-          notificationContext.deleteAll(true);
-        }}
+        onClick={() => setIsSystemNotificationVisible(false)}
       />
     </div>
   );
 
   const onCreateSystemNotification = async systemNotification => {
-    console.log(systemNotification);
     try {
-      SystemNotificationService.create({ ...systemNotification });
+      setCreating(true);
+      await SystemNotificationService.create({ ...systemNotification });
     } catch (error) {
       console.error('SystemNotificationsList - onCreateSystemNotification', error);
+      notificationContext.add({ type: 'CREATE_SYSTEM_NOTIFICATION_ERROR' }, true);
     } finally {
       onToggleCreateFormVisibility(false);
+      setCreating(false);
       onLoadSystemNotifications();
     }
   };
@@ -173,26 +174,27 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
 
   const onUpdateSystemNotification = async systemNotification => {
     try {
-      SystemNotificationService.update({ ...systemNotification });
+      setCreating(true);
+      await SystemNotificationService.update({ ...systemNotification });
     } catch (error) {
       console.error('SystemNotificationsList - onUpdateSystemNotification', error);
+      notificationContext.add({ type: 'UPDATE_SYSTEM_NOTIFICATION_ERROR' }, true);
     } finally {
       onToggleCreateFormVisibility(false);
+      setCreating(false);
       onLoadSystemNotifications();
     }
   };
 
   const onDelete = async () => {
-    setIsDeleting(true);
     try {
-      console.log(selectedRow.id);
+      dispatchSystemNotification({ type: 'ON_DELETE_START' });
       await SystemNotificationService.delete(selectedRow.id);
     } catch (error) {
       console.error('SystemNotificationsList - onDelete.', error);
-      // notificationContext.add({ type: 'DELETE_UNIQUE_CONSTRAINT_ERROR' });
+      notificationContext.add({ type: 'DELETE_SYSTEM_NOTIFICATION_ERROR' }, true);
     } finally {
-      setIsDeleteDialogVisible(false);
-      setIsDeleting(false);
+      dispatchSystemNotification({ type: 'ON_DELETE_END' });
       onLoadSystemNotifications();
     }
   };
@@ -204,18 +206,21 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       dispatchSystemNotification({ type: 'SET_SYSTEM_NOTIFICATIONS', payload: unparsedNotifications });
     } catch (error) {
       console.error('SystemNotificationsList - onLoadSystemNotifications.', error);
+      notificationContext.add({ type: 'GET_SYSTEM_NOTIFICATIONS_ERROR' }, true);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const onToggleDeleteVisibility = visible =>
+    dispatchSystemNotification({ type: 'ON_TOGGLE_DELETE_VISIBILITY', payload: visible });
+
   const onToggleCreateFormVisibility = visible =>
     dispatchSystemNotification({ type: 'ON_TOGGLE_CREATE_FORM_VISIBILITY', payload: visible });
 
   const renderSystemNotifications = () => {
-    console.log(systemNotifications);
     if (isLoading) {
-      return <Spinner />;
+      return <Spinner className={styles.spinner} />;
     } else if (systemNotifications.length > 0) {
       return (
         <DataTable
@@ -251,10 +256,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
           footer={systemNotificationsFooter}
           header={resourcesContext.messages['systemNotifications']}
           modal={true}
-          onHide={() => {
-            setIsSystemNotificationVisible(false);
-            notificationContext.deleteAll(true);
-          }}
+          onHide={() => setIsSystemNotificationVisible(false)}
           style={{ width: '80%' }}
           visible={isSystemNotificationVisible}
           zIndex={3100}>
@@ -264,6 +266,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       {isVisibleCreateSysNotification && (
         <SystemNotificationsCreateForm
           formType={formType}
+          isCreating={isCreating}
           isVisible={isVisibleCreateSysNotification}
           notification={editNotification}
           onCreateSystemNotification={onCreateSystemNotification}
@@ -280,7 +283,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={() => onDelete()}
-          onHide={() => setIsDeleteDialogVisible(false)}
+          onHide={() => onToggleDeleteVisibility(false)}
           visible={isDeleteDialogVisible}>
           {resourcesContext.messages['deleteSystemNotificationConfirm']}
         </ConfirmDialog>

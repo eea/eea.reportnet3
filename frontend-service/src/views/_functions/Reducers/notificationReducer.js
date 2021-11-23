@@ -1,7 +1,6 @@
 export const notificationReducer = (state, { type, payload }) => {
   switch (type) {
     case 'ADD':
-      console.log(payload);
       return {
         ...state,
         toShow: [...state.toShow, payload.notification],

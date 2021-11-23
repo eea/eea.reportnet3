@@ -802,7 +802,11 @@
         { "key": "EXPORT_USERS_BY_COUNTRY_FAILED_EVENT" },
         { "key": "VALIDATE_ALL_REPORTERS_FAILED_EVENT" },
         { "key": "VALIDATE_LEAD_REPORTERS_FAILED_EVENT" },
-        { "key": "VALIDATE_REPORTERS_FAILED_EVENT" }
+        { "key": "VALIDATE_REPORTERS_FAILED_EVENT" },
+        { "key": "CREATE_SYSTEM_NOTIFICATION_ERROR" },
+        { "key": "UPDATE_SYSTEM_NOTIFICATION_ERROR" },
+        { "key": "DELETE_SYSTEM_NOTIFICATION_ERROR" },
+        { "key": "GET_SYSTEM_NOTIFICATIONS_ERROR" }
       ]
     },
     {

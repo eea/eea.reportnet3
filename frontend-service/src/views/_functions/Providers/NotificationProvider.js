@@ -27,7 +27,6 @@ const NotificationProvider = ({ children }) => {
       value={{
         ...state,
         add: (notificationDTO, save = false, isSystemNotification = false) => {
-          console.log(notificationDTO, isSystemNotification);
           if (!isSystemNotification) {
             const { content, onClick, type } = notificationDTO;
             if (save) {

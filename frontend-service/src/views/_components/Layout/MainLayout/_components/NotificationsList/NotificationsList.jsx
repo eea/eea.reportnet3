@@ -143,9 +143,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       });
 
       const notificationsArray = parsedNotifications.map((notification, i) => {
-        // const message = DOMPurify.sanitize(notification.message, { ALLOWED_TAGS: ['a', 'strong'], ALLOWED_ATTR: [] });
-        // console.log(notification.message, message);
-
         const capitalizedLevelError = !isUndefined(notification.type)
           ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
           : notification.type;
@@ -184,7 +181,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       });
 
       setTotalRecords(unparsedNotifications.totalRecords);
-      console.log({ notificationsArray });
       setNotifications(notificationsArray);
     } catch (error) {
       console.error('NotificationsList - onLoadNotifications.', error);

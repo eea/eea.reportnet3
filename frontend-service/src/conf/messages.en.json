@@ -1387,6 +1387,10 @@
     "systemNotificationLevel": "Select the notification level",
     "systemNotification": "System notification",
     "previewNotification": "Preview",
-    "previewNotificationMessage": "Launch notification to preview it"
+    "previewNotificationMessage": "Launch notification to preview it",
+    "createSystemNotificationError": "Error creating a system notification",
+    "updateSystemNotificationError": "Error updating a system notification",
+    "deleteSystemNotificationError": "Error deleting a system notification",
+    "getSystemNotificationsError": "Error getting the system notifications"
   }
 }

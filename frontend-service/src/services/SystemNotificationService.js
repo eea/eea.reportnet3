@@ -6,7 +6,6 @@ export const SystemNotificationService = {
   all: async () => {
     const systemNotificationsDTO = await SystemNotificationRepository.all();
 
-    console.log({ systemNotificationsDTO });
     return systemNotificationsDTO?.data?.map(systemNotificationDTO => {
       const { id, message, enabled, level } = systemNotificationDTO;
       return new SystemNotification({ id, message, enabled, level: level || 'INFO', lifeTime: 5000 });
