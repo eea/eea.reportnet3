@@ -1157,7 +1157,7 @@ public class DatasetControllerImplTest {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
-    datasetControllerImpl.deleteImportData(1L, null, null, false);
+    datasetControllerImpl.deleteDatasetData(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
         Mockito.anyBoolean());
   }
@@ -1182,7 +1182,7 @@ public class DatasetControllerImplTest {
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
-    datasetControllerImpl.deleteImportData(1L, 1L, 1L, false);
+    datasetControllerImpl.deleteDatasetData(1L, 1L, 1L, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
         Mockito.anyBoolean());
   }
@@ -1194,7 +1194,7 @@ public class DatasetControllerImplTest {
 
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(2L);
     try {
-      datasetControllerImpl.deleteImportData(1L, 1L, null, false);
+      datasetControllerImpl.deleteDatasetData(1L, 1L, null, false);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
@@ -1206,7 +1206,7 @@ public class DatasetControllerImplTest {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
-    datasetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", null, null);
+    datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any());
   }
@@ -1230,7 +1230,7 @@ public class DatasetControllerImplTest {
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
-    datasetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", 1L, 1L);
+    datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", 1L, 1L);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any());
   }
@@ -1242,7 +1242,7 @@ public class DatasetControllerImplTest {
 
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(2L);
     try {
-      datasetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", 1L, null);
+      datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", 1L, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
