@@ -1,0 +1,7 @@
+.geoJSONError {
+  color: var(--errors);
+  cursor: pointer;
+  &:hover {
+    font-weight: bold;
+  }
+}

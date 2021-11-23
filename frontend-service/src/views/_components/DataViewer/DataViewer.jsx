@@ -2,6 +2,8 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { useSetRecoilState } from 'recoil';
+
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -21,6 +23,7 @@ import { Chips } from 'views/_components/Chips';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { ContextMenu } from 'views/_components/ContextMenu';
+import { CoordinatesMoreInfo } from 'views/_components/CoordinatesMoreInfo';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'views/_components/DataTable';
@@ -38,6 +41,8 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
+
+import { geoJSONListStore } from 'views/_components/CoordinatesMoreInfo/_functions/Stores/geoJSONListStore';
 
 import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
@@ -87,6 +92,7 @@ const DataViewer = withRouter(
   }) => {
     const levelErrorAllTypes = ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'];
 
+    const setSelectedLine = useSetRecoilState(geoJSONListStore);
     const userContext = useContext(UserContext);
 
     const [addAnotherOne, setAddAnotherOne] = useState(false);
@@ -114,6 +120,7 @@ const DataViewer = withRouter(
     const [valueFilter, setValueFilter] = useState();
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
+      coordinatesMoreInfo: '',
       crs: 'EPSG:4326',
       drawElements: {
         circle: false,
@@ -129,6 +136,7 @@ const DataViewer = withRouter(
       firstPageRecord: 0,
       geometryType: '',
       initialRecordValue: undefined,
+      isCoordinatesMoreInfoVisible: false,
       isMapOpen: false,
       isRecordAdded: false,
       isRecordDeleted: false,
@@ -184,6 +192,7 @@ const DataViewer = withRouter(
           datasetSchemaId={datasetSchemaId}
           hasWritePermissions={hasWritePermissions}
           onChangePointCRS={onChangePointCRS}
+          onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
@@ -220,6 +229,9 @@ const DataViewer = withRouter(
 
     const onChangePointCRS = crs => dispatchRecords({ type: 'SET_MAP_CRS', payload: crs });
 
+    const onCoordinatesMoreInfoClick = geoJson =>
+      dispatchRecords({ type: 'OPEN_COORDINATES_MORE_INFO', payload: geoJson });
+
     const onFileDownload = async (fileName, fieldId) => {
       try {
         const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
@@ -236,6 +248,11 @@ const DataViewer = withRouter(
     const onFileDeleteVisible = (fieldId, fieldSchemaId) => {
       dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
       setIsDeleteAttachmentVisible(true);
+    };
+
+    const onHideCoordinatesMoreInfo = () => {
+      setSelectedLine('');
+      dispatchRecords({ type: 'CLOSE_COORDINATES_MORE_INFO' });
     };
 
     const onShowCoordinateError = errorCount =>
@@ -941,11 +958,34 @@ const DataViewer = withRouter(
       </div>
     );
 
+    const coordinatesMoreInfoDialogFooter = (
+      <div className="ui-dialog-buttonpane p-clearfix">
+        <div className="p-toolbar-group-left">
+          <Button
+            className="p-button-secondary p-button-animated-blink"
+            icon="clone"
+            label={resourcesContext.messages['geoJSONHelpCopy']}
+            onClick={() => navigator.clipboard.writeText(records.coordinatesMoreInfo)}
+            tooltip={resourcesContext.messages['geoJSONHelpCopyTooltip']}
+            tooltipOptions={{ position: 'top' }}
+          />
+        </div>
+        <div>
+          <Button
+            className="p-button-animated-blink"
+            icon="check"
+            label={resourcesContext.messages['ok']}
+            onClick={onHideCoordinatesMoreInfo}
+          />
+        </div>
+      </div>
+    );
+
     const saveMapGeoJsonDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
           className={`p-button-animated-blink ${styles.saveButton}`}
-          icon={'check'}
+          icon="check"
           label={
             areEquals(records.geometryType, 'POINT')
               ? resourcesContext.messages['save']
@@ -969,6 +1009,8 @@ const DataViewer = withRouter(
         )}
       </div>
     );
+
+    const renderCoordinatesMoreInfo = () => <CoordinatesMoreInfo geoJSON={records.coordinatesMoreInfo} />;
 
     const mapRender = () => (
       <Map
@@ -1255,12 +1297,20 @@ const DataViewer = withRouter(
             name="file"
             onUpload={onAttach}
             operation="PUT"
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
-              dataflowId,
-              datasetId,
-              fieldId: records.selectedFieldId,
-              dataProviderId
-            })}`}
+            url={`${window.env.REACT_APP_BACKEND}${
+              isNil(dataProviderId)
+                ? getUrl(DatasetConfig.uploadAttachment, {
+                    dataflowId,
+                    datasetId,
+                    fieldId: records.selectedFieldId
+                  })
+                : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
+                    dataflowId,
+                    datasetId,
+                    fieldId: records.selectedFieldId,
+                    dataProviderId
+                  })
+            }`}
           />
         )}
 
@@ -1406,6 +1456,19 @@ const DataViewer = withRouter(
             onHide={() => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}
             visible={records.isMapOpen}>
             <div className="p-grid p-fluid">{mapRender()}</div>
+          </Dialog>
+        )}
+        {records.isCoordinatesMoreInfoVisible && (
+          <Dialog
+            blockScroll={false}
+            className={styles.coordinatesMoreInfo}
+            footer={coordinatesMoreInfoDialogFooter}
+            header={resourcesContext.messages['geospatialDataMoreInfo']}
+            modal={true}
+            onHide={onHideCoordinatesMoreInfo}
+            style={{}}
+            visible={records.isCoordinatesMoreInfoVisible}>
+            <div className="p-grid p-fluid">{renderCoordinatesMoreInfo()}</div>
           </Dialog>
         )}
       </SnapshotContext.Provider>

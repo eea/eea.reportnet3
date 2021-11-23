@@ -8,6 +8,7 @@ import isNil from 'lodash/isNil';
 import styles from './ShareRights.module.scss';
 
 import { config } from 'conf';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
@@ -15,8 +16,10 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dropdown } from 'views/_components/Dropdown';
 import { Filters } from 'views/_components/Filters';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
+import ReactTooltip from 'react-tooltip';
 
 import { UserRightService } from 'services/UserRightService';
 
@@ -30,6 +33,7 @@ import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 export const ShareRights = ({
   addConfirmHeader,
@@ -47,8 +51,8 @@ export const ShareRights = ({
   placeholder,
   representativeId,
   roleOptions,
-  setRightPermissionsChange = () => {},
   setIsUserRightManagementDialogVisible,
+  setRightPermissionsChange = () => {},
   updateErrorNotificationKey,
   userType
 }) => {
@@ -61,6 +65,8 @@ export const ShareRights = ({
     { type: 'input', properties: [{ name: 'account' }] },
     { type: 'multiselect', properties: [{ name: 'role' }] }
   ];
+
+  const isReporterManagement = userType === userTypes.REPORTER;
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -135,6 +141,8 @@ export const ShareRights = ({
     );
   };
 
+  useCheckNotifications(['VALIDATE_REPORTERS_COMPLETED_EVENT'], onDataChange);
+
   const onEditUserRight = userRight => {
     shareRightsDispatch({ type: 'ON_EDIT_USER_RIGHT', payload: { isEditingModal: true, userRight } });
     setIsUserRightManagementDialogVisible(true);
@@ -190,7 +198,7 @@ export const ShareRights = ({
   const setUserRightId = id => shareRightsDispatch({ type: 'SET_USER_RIGHT_ID', payload: { id } });
 
   const callEndPoint = async (method, userRight) => {
-    if (userType === userTypes.REPORTER) {
+    if (isReporterManagement) {
       switch (method) {
         case methodTypes.DELETE:
           return await UserRightService.deleteReporter(shareRightsState.userRightToDelete, dataflowId, dataProvider);
@@ -201,9 +209,7 @@ export const ShareRights = ({
         default:
           break;
       }
-    }
-
-    if (userType === userTypes.REQUESTER) {
+    } else {
       switch (method) {
         case methodTypes.DELETE:
           return await UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
@@ -307,7 +313,7 @@ export const ShareRights = ({
   };
 
   const renderButtonsColumnTemplate = userRight => {
-    if (userType === userTypes.REQUESTER && notDeletableRolesRequester.includes(userRight?.role) && !isAdmin) {
+    if (!isReporterManagement && notDeletableRolesRequester.includes(userRight?.role) && !isAdmin) {
       return null;
     }
 
@@ -347,9 +353,9 @@ export const ShareRights = ({
       <div className={styles.manageDialog}>
         <div className={styles.inputWrapper}>
           <label className={styles.label} htmlFor="accountInput">
-            {userType === userTypes.REQUESTER
-              ? resourcesContext.messages['userRolesRequesterInputLabel']
-              : resourcesContext.messages['userRolesReporterInputLabel']}
+            {isReporterManagement
+              ? resourcesContext.messages['userRolesReporterInputLabel']
+              : resourcesContext.messages['userRolesRequesterInputLabel']}
           </label>
           <InputText
             className={hasError ? styles.error : ''}
@@ -383,7 +389,38 @@ export const ShareRights = ({
     );
   };
 
-  const renderAccountTemplate = userRight => <div>{userRight.account}</div>;
+  const renderIsValidUserIcon = userRight => {
+    if (isReporterManagement) {
+      return (
+        <Fragment>
+          <FontAwesomeIcon
+            className={styles.isValidUserIcon}
+            data-for={userRight.account}
+            data-tip
+            icon={userRight.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
+          />
+          <ReactTooltip border={true} effect="solid" id={userRight.account} place="top">
+            {userRight.isValid
+              ? resourcesContext.messages['validUserTooltip']
+              : resourcesContext.messages['invalidUserTooltip']}
+          </ReactTooltip>
+        </Fragment>
+      );
+    }
+  };
+
+  const renderAccountTemplate = userRight => (
+    <div className={styles.accountWrapper}>
+      {userRight.account}
+      {renderIsValidUserIcon(userRight)}
+    </div>
+  );
+
+  const renderDisclaimer = () => {
+    if (isReporterManagement) {
+      return <span className={styles.shareRightsDisclaimer}>{resourcesContext.messages['shareRightsDisclaimer']}</span>;
+    }
+  };
 
   const renderDialogLayout = children => (
     <Fragment>
@@ -392,9 +429,7 @@ export const ShareRights = ({
         style={{ height: isEmpty(shareRightsState.userRightList) ? 0 : 'inherit' }}>
         {children}
       </div>
-      {userType === userTypes.REPORTER && (
-        <span className={styles.shareRightsDisclaimer}>{resourcesContext.messages['shareRightsDisclaimer']}</span>
-      )}
+      {renderDisclaimer()}
     </Fragment>
   );
 
