@@ -81,10 +81,10 @@ public class EUDatasetControllerImpl implements EUDatasetController {
   @PostMapping("/v1/populateData/dataflow/{dataflowId}")
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')  OR (checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN'))")
-  @ApiOperation(value = "Populate data from Datacollection",
+  @ApiOperation(value = "Copy data collections data to EU datasets by dataflow id",
       notes = "Allowed roles: CUSTODIAN, STEWARD")
   public void populateDataFromDataCollection(
-      @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
+      @ApiParam(type = "Long", value = "Dataflow id", example = "0") @LockCriteria(
           name = "dataflowId") @PathVariable("dataflowId") Long dataflowId) {
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
