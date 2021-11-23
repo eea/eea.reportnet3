@@ -1155,6 +1155,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isCustodian && dataflowState.isManageRolesDialogVisible && (
           <Dialog
+            className={styles.rolesDialogWidth}
             contentStyle={{ maxHeight: '60vh' }}
             footer={manageRoleDialogFooter}
             header={resourcesContext.messages['manageRolesDialogTitle']}

@@ -1,3 +1,5 @@
+@import '_styles/mixins';
+
 .titleBar {
   display: flex;
   border-bottom: 1px solid var(--gray-25);
@@ -34,4 +36,25 @@
 
 .buttonLeft {
   float: left;
+}
+
+.menu {
+  user-select: none;
+}
+
+.rolesDialogWidth {
+  @include for-phone-landscape-up {
+    width: 90vw !important;
+  }
+
+  @include for-tablet-landscape-up {
+    width: 80vw !important;
+  }
+
+  @include for-desktop-up {
+    width: 60vw !important;
+  }
+  @include for-big-desktop-up {
+    width: 50vw !important;
+  }
 }
