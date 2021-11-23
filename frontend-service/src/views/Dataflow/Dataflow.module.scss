@@ -38,8 +38,9 @@
   float: left;
 }
 
-.menu {
+.exportImportMenu {
   user-select: none;
+  width: auto !important;
 }
 
 .rolesDialogWidth {
@@ -54,6 +55,7 @@
   @include for-desktop-up {
     width: 60vw !important;
   }
+
   @include for-big-desktop-up {
     width: 50vw !important;
   }

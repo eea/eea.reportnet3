@@ -575,7 +575,7 @@ const Dataflow = withRouter(({ history, match }) => {
         }}
       />
       <Menu
-        className={styles.menu}
+        className={styles.exportImportMenu}
         id="exportImportMenu"
         model={exportImportMenuItems}
         popup={true}
