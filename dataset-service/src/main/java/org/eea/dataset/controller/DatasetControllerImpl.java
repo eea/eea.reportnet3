@@ -154,15 +154,15 @@ public class DatasetControllerImpl implements DatasetController {
           example = "0") @RequestParam(value = "pageSize", required = false) Integer pageSize,
       @ApiParam(type = "String", value = "Field names",
           example = "field1") @RequestParam(value = "fields", required = false) String fields,
-      @ApiParam(value = "Level error to filter", example = "INFO,WARNING") @RequestParam(value = "levelError",
-          required = false) ErrorTypeEnum[] levelError,
-      @ApiParam(value = "List of rule ids to filter", example = "a,b,c") @RequestParam(value = "idRules",
-          required = false) String[] idRules,
+      @ApiParam(value = "Level error to filter", example = "INFO,WARNING") @RequestParam(
+          value = "levelError", required = false) ErrorTypeEnum[] levelError,
+      @ApiParam(value = "List of rule ids to filter",
+          example = "a,b,c") @RequestParam(value = "idRules", required = false) String[] idRules,
       @ApiParam(type = "String", value = "Field schema id",
           example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "fieldSchemaId",
               required = false) String fieldSchemaId,
-      @ApiParam(type = "String", value = "Value to filter", example = "3") @RequestParam(
-          value = "fieldValue", required = false) String fieldValue) {
+      @ApiParam(type = "String", value = "Value to filter",
+          example = "3") @RequestParam(value = "fieldValue", required = false) String fieldValue) {
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -569,7 +569,7 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "boolean", value = "Delete prefilled tables",
           example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
               required = false) Boolean deletePrefilledTables) {
-    this.deleteImportData(datasetId, dataflowId, providerId, deletePrefilledTables);
+    this.deleteDatasetData(datasetId, dataflowId, providerId, deletePrefilledTables);
   }
 
   /**
@@ -651,7 +651,7 @@ public class DatasetControllerImpl implements DatasetController {
           example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @ApiParam(type = "Long", value = "Provider id",
           example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
-    this.deleteImportTable(datasetId, tableSchemaId, dataflowId, providerId);
+    this.deleteTableData(datasetId, tableSchemaId, dataflowId, providerId);
   }
 
   /**
@@ -851,10 +851,10 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "Table schema id",
           example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
               required = false) String tableSchemaId,
-      @ApiParam(type = "Integer", value = "Limit",
-          example = "0") @RequestParam(value = "limit", required = false) Integer limit,
-      @ApiParam(type = "Integer", value = "Offset",
-          example = "0") @RequestParam(value = "offset", required = false) Integer offset,
+      @ApiParam(type = "Integer", value = "Limit", example = "0") @RequestParam(value = "limit",
+          required = false) Integer limit,
+      @ApiParam(type = "Integer", value = "Offset", example = "0") @RequestParam(value = "offset",
+          required = false) Integer offset,
       @ApiParam(type = "String", value = "Filter value", example = "value") @RequestParam(
           value = "filterValue", required = false) String filterValue,
       @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
@@ -907,10 +907,10 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "Table schema id",
           example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
               required = false) String tableSchemaId,
-      @ApiParam(type = "Integer", value = "Limit",
-          example = "0") @RequestParam(value = "limit", required = false) Integer limit,
-      @ApiParam(type = "Integer", value = "Offset",
-          example = "0") @RequestParam(value = "offset", required = false) Integer offset,
+      @ApiParam(type = "Integer", value = "Limit", example = "0") @RequestParam(value = "limit",
+          required = false) Integer limit,
+      @ApiParam(type = "Integer", value = "Offset", example = "0") @RequestParam(value = "offset",
+          required = false) Integer offset,
       @ApiParam(type = "String", value = "Filter value", example = "value") @RequestParam(
           value = "filterValue", required = false) String filterValue,
       @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
