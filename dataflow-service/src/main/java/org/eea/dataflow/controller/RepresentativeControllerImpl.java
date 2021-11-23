@@ -448,6 +448,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     if (null == leadReporterVO || null == leadReporterVO.getEmail()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
     }
+    leadReporterVO.setEmail(leadReporterVO.getEmail().toLowerCase());
     Pattern p = Pattern.compile(EMAIL_REGEX);
     Matcher m = p.matcher(leadReporterVO.getEmail().toLowerCase());
     boolean result = m.matches();
@@ -486,6 +487,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       LOG_ERROR.error("LeadReporter not allowed: leadReporterVO={}", leadReporterVO);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     }
+
+    if (null != leadReporterVO.getEmail())
+      leadReporterVO.setEmail(leadReporterVO.getEmail().toLowerCase());
 
     // Validate email
     if (null == leadReporterVO.getEmail() || !leadReporterVO.getEmail().matches(EMAIL_REGEX)) {
