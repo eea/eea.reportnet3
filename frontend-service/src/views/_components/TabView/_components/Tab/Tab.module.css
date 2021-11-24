@@ -53,14 +53,14 @@ input.p_tabview_input_design {
   color: var(--tabview-highlight-color) !important;
 }
 
-.fixTableTabEmpty {
+.tabViewTableEmpty {
   height: 2.34rem !important;
 }
 
-.fixTableTabNavigationHidden {
+.tabViewNavigationHidden {
   height: 2.6rem !important;
 }
 
-.fixTableTabNavigationShowed {
+.tabViewTabNavigationShown {
   height: 2.7rem !important;
 }

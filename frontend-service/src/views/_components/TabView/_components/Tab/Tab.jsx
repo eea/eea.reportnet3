@@ -238,9 +238,9 @@ const Tab = ({
   };
 
   const getExtraStyle = () => {
-    if (totalTabs === 1) return `${styles.tabGeneral} ${styles.fixTableTabEmpty}`;
-    else if (isNavigationHidden) return `${styles.tabGeneral} ${styles.fixTableTabNavigationHidden}`;
-    else if (!isNavigationHidden) return `${styles.tabGeneral} ${styles.fixTableTabNavigationShowed}`;
+    if (totalTabs === 1) return `${styles.tabGeneral} ${styles.tabViewTableEmpty}`;
+    else if (isNavigationHidden) return `${styles.tabGeneral} ${styles.tabViewNavigationHidden}`;
+    else if (!isNavigationHidden) return `${styles.tabGeneral} ${styles.tabViewTabNavigationShown}`;
   };
 
   const getClassNameTabView = () => {
