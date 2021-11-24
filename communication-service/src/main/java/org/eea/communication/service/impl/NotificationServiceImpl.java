@@ -144,6 +144,10 @@ public class NotificationServiceImpl implements NotificationService {
   public void deleteSystemNotification(String systemNotificationId) throws EEAException {
     try {
       systemNotificationRepository.deleteSystemNotficationById(systemNotificationId);
+      if (systemNotificationRepository.findByEnabledTrue().isEmpty()) {
+        template.convertAndSend("/user/queue/systemnotifications",
+            new Notification(EventType.NO_ENABLED_SYSTEM_NOTIFICATIONS, Collections.emptyMap()));
+      }
       LOG.info("System Notification deleted succesfully in mongo");
     } catch (IllegalArgumentException e) {
       LOG_ERROR.error("Error deleting a System Notification");
