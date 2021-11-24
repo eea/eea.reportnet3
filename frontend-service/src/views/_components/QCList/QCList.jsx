@@ -1,8 +1,6 @@
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -20,6 +18,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
 import { QCFieldEditor } from './_components/QCFieldEditor';
 import { Spinner } from 'views/_components/Spinner';
