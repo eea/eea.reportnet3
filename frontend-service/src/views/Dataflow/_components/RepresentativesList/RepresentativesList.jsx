@@ -9,6 +9,7 @@ import uniq from 'lodash/uniq';
 
 import styles from './RepresentativesList.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { config } from 'conf';
 
 import { ActionsColumn } from 'views/_components/ActionsColumn';
@@ -17,8 +18,10 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dropdown } from 'views/_components/Dropdown';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
+import ReactTooltip from 'react-tooltip';
 
 import { RepresentativeService } from 'services/RepresentativeService';
 
@@ -30,6 +33,7 @@ import { reducer } from './_functions/Reducers/representativeReducer';
 import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 const RepresentativesList = ({
   dataflowId,
@@ -49,6 +53,7 @@ const RepresentativesList = ({
     allPossibleDataProvidersNoSelect: [],
     dataProvidersTypesList: [],
     deleteLeadReporterId: null,
+    focusedLeadReporterId: null,
     isDeleting: false,
     isLoading: false,
     isVisibleConfirmDeleteDialog: false,
@@ -110,6 +115,12 @@ const RepresentativesList = ({
     }
   }, [formState.representatives]);
 
+  const refreshData = () => {
+    formDispatcher({ type: 'REFRESH' });
+  };
+
+  useCheckNotifications(['VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT'], refreshData);
+
   const createUnusedOptionsList = () => formDispatcher({ type: 'CREATE_UNUSED_OPTIONS_LIST' });
 
   const getAllDataProviders = async () => {
@@ -135,19 +146,26 @@ const RepresentativesList = ({
     formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: selectedDataProviderGroup });
 
   const getInitialData = async () => {
-    switch (dataflowType) {
-      case config.dataflowType.BUSINESS.value:
-        await getDataProviderGroup();
-        break;
-      case config.dataflowType.CITIZEN_SCIENCE.value:
-        await getGroupOrganizations();
-        break;
-      default:
-        await getGroupCountries();
-        break;
-    }
+    try {
+      formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
+      switch (dataflowType) {
+        case config.dataflowType.BUSINESS.value:
+          await getDataProviderGroup();
+          break;
+        case config.dataflowType.CITIZEN_SCIENCE.value:
+          await getGroupOrganizations();
+          break;
+        default:
+          await getGroupCountries();
+          break;
+      }
 
-    await getRepresentatives();
+      await getRepresentatives();
+    } catch (error) {
+      console.error('RepresentativesList - getInitialData.', error);
+    } finally {
+      formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
+    }
 
     if (!isEmpty(formState.representatives)) {
       await getAllDataProviders();
@@ -209,7 +227,6 @@ const RepresentativesList = ({
       } catch (error) {
         console.error('RepresentativesList - onAddRepresentative.', error);
         notificationContext.add({ type: 'ADD_DATA_PROVIDER_ERROR' }, true);
-      } finally {
         formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
       }
     }
@@ -240,7 +257,6 @@ const RepresentativesList = ({
       } catch (error) {
         console.error('RepresentativesList - onDataProviderIdChange.', error);
         notificationContext.add({ type: 'UPDATE_DATA_PROVIDER_ERROR' }, true);
-      } finally {
         formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
       }
     } else {
@@ -317,6 +333,29 @@ const RepresentativesList = ({
 
   const setIsDeleting = value => formDispatcher({ type: 'SET_IS_DELETING', payload: { isDeleting: value } });
 
+  const setFocusedLeadReporterId = focusedLeadReporterId =>
+    formDispatcher({ type: 'SET_FOCUSED_LEAD_REPORTER_ID', payload: { focusedLeadReporterId } });
+
+  const renderIsValidUserIcon = (isNewLeadReporter, leadReporter) => {
+    if (!isNewLeadReporter && leadReporter.id !== formState.focusedLeadReporterId) {
+      return (
+        <Fragment>
+          <FontAwesomeIcon
+            className={styles.isValidUserIcon}
+            data-for={leadReporter?.account}
+            data-tip
+            icon={leadReporter?.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
+          />
+          <ReactTooltip border={true} effect="solid" id={leadReporter?.account} place="top">
+            {leadReporter?.isValid
+              ? resourcesContext.messages['validUserTooltip']
+              : resourcesContext.messages['invalidUserTooltip']}
+          </ReactTooltip>
+        </Fragment>
+      );
+    }
+  };
+
   const renderLeadReporterColumnTemplate = representative => {
     const { dataProviderId, representativeId } = representative;
 
@@ -334,17 +373,26 @@ const RepresentativesList = ({
           }`}
           key={`${leadReporter.id}-${representativeId}`}>
           <InputText
+            autoComplete={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
             autoFocus={isNewLeadReporter}
-            autocomplete={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
+            disabled={representative.hasDatasets && reporters[leadReporter.id]?.isValid}
             id={`${leadReporter.id}-${representativeId}`}
-            onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
+            onBlur={event => {
+              onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter);
+              setFocusedLeadReporterId(null);
+            }}
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
-            onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
+            onFocus={() => {
+              onCleanErrors(dataProviderId, leadReporter.id);
+              setFocusedLeadReporterId(leadReporter.id);
+            }}
             onKeyDown={event => onKeyDown(event, representativeId, dataProviderId, leadReporter)}
             placeholder={resourcesContext.messages['manageRolesDialogInputPlaceholder']}
             value={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
           />
+
+          {renderIsValidUserIcon(isNewLeadReporter, reporters[leadReporter.id])}
 
           {!isNewLeadReporter && (
             <Button
@@ -410,6 +458,74 @@ const RepresentativesList = ({
     );
   };
 
+  const renderRepresentativesDropdown = () => {
+    if (TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value)) {
+      return (
+        <Dropdown
+          ariaLabel={'dataProviders'}
+          className={styles.dataProvidersDropdown}
+          disabled
+          name="dataProvidersDropdown"
+          optionLabel="label"
+          options={[formState.selectedDataProviderGroup]}
+          value={formState.selectedDataProviderGroup}
+        />
+      );
+    }
+
+    return (
+      <Dropdown
+        ariaLabel={'dataProviders'}
+        className={styles.dataProvidersDropdown}
+        disabled={formState.representatives.length > 1}
+        name="dataProvidersDropdown"
+        onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
+        optionLabel="label"
+        options={formState.dataProvidersTypesList}
+        placeholder={resourcesContext.messages['manageRolesDialogDropdownPlaceholder']}
+        value={formState.selectedDataProviderGroup}
+      />
+    );
+  };
+
+  const renderTable = () => {
+    if (isNil(formState.selectedDataProviderGroup) || isEmpty(formState.allPossibleDataProviders)) {
+      return (
+        <p className={styles.chooseRepresentative}>
+          {resourcesContext.messages['manageRolesDialogNoRepresentativesMessage']}
+        </p>
+      );
+    }
+
+    return (
+      <Fragment>
+        {formState.isLoading && <Spinner className={styles.spinner} />}
+        <DataTable
+          value={
+            formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
+              ? formState.representatives.filter(representative => !isNil(representative.representativeId))
+              : formState.representatives
+          }>
+          <Column
+            body={renderDeleteBtnColumnTemplate}
+            className={styles.emptyTableHeader}
+            header={resourcesContext.messages['deleteRepresentativeButtonTableHeader']}
+            style={{ width: '60px' }}
+          />
+          <Column
+            body={renderDropdownColumnTemplate}
+            header={resourcesContext.messages['manageRolesDialogDataProviderColumn']}
+            style={{ width: '16rem' }}
+          />
+          <Column
+            body={renderLeadReporterColumnTemplate}
+            header={resourcesContext.messages['manageRolesDialogAccountColumn']}
+          />
+        </DataTable>
+      </Fragment>
+    );
+  };
+
   const renderDeleteBtnColumnTemplate = representative => {
     return (
       !isNil(representative.representativeId) &&
@@ -434,63 +550,11 @@ const RepresentativesList = ({
         <div className={styles.title}>{resourcesContext.messages['manageRolesDialogHeader']}</div>
         <div>
           <label>{resourcesContext.messages['manageRolesDialogDropdownLabel']} </label>
-          {TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ? (
-            <Dropdown
-              ariaLabel={'dataProviders'}
-              className={styles.dataProvidersDropdown}
-              disabled
-              name="dataProvidersDropdown"
-              optionLabel="label"
-              options={[formState.selectedDataProviderGroup]}
-              value={formState.selectedDataProviderGroup}
-            />
-          ) : (
-            <Dropdown
-              ariaLabel={'dataProviders'}
-              className={styles.dataProvidersDropdown}
-              disabled={formState.representatives.length > 1}
-              name="dataProvidersDropdown"
-              onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
-              optionLabel="label"
-              options={formState.dataProvidersTypesList}
-              placeholder={resourcesContext.messages['manageRolesDialogDropdownPlaceholder']}
-              value={formState.selectedDataProviderGroup}
-            />
-          )}
+          {renderRepresentativesDropdown()}
         </div>
       </div>
 
-      {!isNil(formState.selectedDataProviderGroup) && !isEmpty(formState.allPossibleDataProviders) ? (
-        <div className={styles.table}>
-          {formState.isLoading && <Spinner className={styles.spinner} style={{ top: 0, left: 0, zIndex: 6000 }} />}
-          <DataTable
-            value={
-              formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
-                ? formState.representatives.filter(representative => !isNil(representative.representativeId))
-                : formState.representatives
-            }>
-            <Column
-              body={renderDeleteBtnColumnTemplate}
-              className={styles.emptyTableHeader}
-              header={resourcesContext.messages['deleteRepresentativeButtonTableHeader']}
-              style={{ width: '60px' }}
-            />
-            <Column
-              body={renderDropdownColumnTemplate}
-              header={resourcesContext.messages['manageRolesDialogDataProviderColumn']}
-              style={{ width: '16rem' }}
-            />
-            <Column
-              body={renderLeadReporterColumnTemplate}
-              header={resourcesContext.messages['manageRolesDialogAccountColumn']}
-            />
-          </DataTable>
-        </div>
-      ) : (
-        <p className={styles.chooseRepresentative}>
-          {resourcesContext.messages['manageRolesDialogNoRepresentativesMessage']}
-        </p>
-      )}
+      {renderTable()}
 
       {formState.isVisibleConfirmDeleteDialog && (
         <ConfirmDialog

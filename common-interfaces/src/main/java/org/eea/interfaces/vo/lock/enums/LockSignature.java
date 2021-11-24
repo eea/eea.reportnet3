@@ -6,14 +6,14 @@ public enum LockSignature {
   /** The empty. */
   EMPTY(""),
 
-  /** DataSetControllerImpl.importFileData(..) */
-  IMPORT_FILE_DATA("DataSetControllerImpl.importFileData(..)"),
+  /** DatasetControllerImpl.importFileData(..) */
+  IMPORT_FILE_DATA("DatasetControllerImpl.importFileData(..)"),
 
-  /** DataSetSnapshotControllerImpl.createSnapshot(..) */
-  CREATE_SNAPSHOT("DataSetSnapshotControllerImpl.createSnapshot(..)"),
+  /** DatasetSnapshotControllerImpl.createSnapshot(..) */
+  CREATE_SNAPSHOT("DatasetSnapshotControllerImpl.createSnapshot(..)"),
 
-  /** DataSetSnapshotControllerImpl.restoreSnapshot(..) */
-  RESTORE_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSnapshot(..)"),
+  /** DatasetSnapshotControllerImpl.restoreSnapshot(..) */
+  RESTORE_SNAPSHOT("DatasetSnapshotControllerImpl.restoreSnapshot(..)"),
 
   /** ValidationHelper.executeValidation(..) */
   EXECUTE_VALIDATION("ValidationHelper.executeValidation(..)"),
@@ -21,23 +21,23 @@ public enum LockSignature {
   /** ValidationControllerImpl.validateDataSetData(..) */
   FORCE_EXECUTE_VALIDATION("ValidationControllerImpl.validateDataSetData(..)"),
 
-  /** DataSetSnapshotControllerImpl.createSchemaSnapshot(..) */
-  CREATE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.createSchemaSnapshot(..)"),
+  /** DatasetSnapshotControllerImpl.createSchemaSnapshot(..) */
+  CREATE_SCHEMA_SNAPSHOT("DatasetSnapshotControllerImpl.createSchemaSnapshot(..)"),
 
-  /** DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..) */
-  RESTORE_SCHEMA_SNAPSHOT("DataSetSnapshotControllerImpl.restoreSchemaSnapshot(..)"),
+  /** DatasetSnapshotControllerImpl.restoreSchemaSnapshot(..) */
+  RESTORE_SCHEMA_SNAPSHOT("DatasetSnapshotControllerImpl.restoreSchemaSnapshot(..)"),
 
-  /** DataSetSnapshotControllerImpl.createReleaseSnapshots(..) */
-  RELEASE_SNAPSHOTS("DataSetSnapshotControllerImpl.createReleaseSnapshots(..)"),
+  /** DatasetSnapshotControllerImpl.createReleaseSnapshots(..) */
+  RELEASE_SNAPSHOTS("DatasetSnapshotControllerImpl.createReleaseSnapshots(..)"),
 
   /** DataCollectionControllerImpl.createEmptyDataCollection(..) */
   CREATE_DATA_COLLECTION("DataCollectionControllerImpl.createEmptyDataCollection(..)"),
 
-  /** DataSetControllerImpl.deleteImportTable(..) */
-  DELETE_IMPORT_TABLE("DataSetControllerImpl.deleteImportTable(..)"),
+  /** DatasetControllerImpl.deleteImportTable(..) */
+  DELETE_IMPORT_TABLE("DatasetControllerImpl.deleteTableData(..)"),
 
-  /** DataSetControllerImpl.deleteImportData(..) */
-  DELETE_DATASET_VALUES("DataSetControllerImpl.deleteImportData(..)"),
+  /** DatasetControllerImpl.deleteImportData(..) */
+  DELETE_DATASET_VALUES("DatasetControllerImpl.deleteDatasetData(..)"),
 
   /** DataCollectionControllerImpl.updateDataCollection(..) */
   UPDATE_DATA_COLLECTION("DataCollectionControllerImpl.updateDataCollection(..)"),
@@ -51,20 +51,20 @@ public enum LockSignature {
   /** IntegrationControllerImpl.executeEUDatasetExport(..) */
   EXPORT_EU_DATASET("IntegrationControllerImpl.executeEUDatasetExport(..)"),
 
-  /** DataSetControllerImpl.deleteRecord(..) */
-  DELETE_RECORDS("DataSetControllerImpl.deleteRecord(..)"),
+  /** DatasetControllerImpl.deleteRecord(..) */
+  DELETE_RECORDS("DatasetControllerImpl.deleteRecord(..)"),
 
-  /** DataSetControllerImpl.insertRecords(..) */
-  INSERT_RECORDS("DataSetControllerImpl.insertRecords(..)"),
+  /** DatasetControllerImpl.insertRecords(..) */
+  INSERT_RECORDS("DatasetControllerImpl.insertRecords(..)"),
 
-  /** DataSetControllerImpl.insertRecordsMultiTable(..) */
-  INSERT_RECORDS_MULTITABLE("DataSetControllerImpl.insertRecordsMultiTable(..)"),
+  /** DatasetControllerImpl.insertRecordsMultiTable(..) */
+  INSERT_RECORDS_MULTITABLE("DatasetControllerImpl.insertRecordsMultiTable(..)"),
 
-  /** DataSetControllerImpl.updateRecords(..) */
-  UPDATE_RECORDS("DataSetControllerImpl.updateRecords(..)"),
+  /** DatasetControllerImpl.updateRecords(..) */
+  UPDATE_RECORDS("DatasetControllerImpl.updateRecords(..)"),
 
-  /** DataSetControllerImpl.updateField(..) */
-  UPDATE_FIELD("DataSetControllerImpl.updateField(..)"),
+  /** DatasetControllerImpl.updateField(..) */
+  UPDATE_FIELD("DatasetControllerImpl.updateField(..)"),
 
   /** DatasetSchemaControllerImpl.deleteFieldSchema(..) */
   DELETE_FIELD_SCHEMA("DatasetSchemaControllerImpl.deleteFieldSchema(..)"),

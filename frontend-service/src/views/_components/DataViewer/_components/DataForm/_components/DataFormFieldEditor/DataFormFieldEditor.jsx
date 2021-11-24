@@ -6,13 +6,14 @@ import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-import proj4 from 'proj4';
+
 import utc from 'dayjs/plugin/utc';
 
 import styles from './DataFormFieldEditor.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Calendar } from 'views/_components/Calendar';
+import { Coordinates } from 'views/_components/Coordinates';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
@@ -164,6 +165,42 @@ const DataFormFieldEditor = ({
     onCheckCoordinateFieldsError(field, map.showCoordinateError);
   }, [map.showCoordinateError]);
 
+  const onCoordinatesBlur = coordinates => {
+    onChangeForm(
+      field,
+      changePoint(
+        JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
+        coordinates,
+        map.currentCRS.value,
+        false
+      )
+    );
+  };
+
+  const onCoordinatesChange = coordinates => {
+    onChangeForm(
+      field,
+      changePoint(
+        JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
+        coordinates,
+        map.currentCRS.value,
+        false
+      )
+    );
+  };
+
+  const onCrsChange = crs => {
+    onChangeForm(
+      field,
+      changePoint(
+        JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
+        JSON.parse(fieldValue).geometry.coordinates,
+        crs
+      )
+    );
+    dispatchMap({ type: 'SET_MAP_CRS', payload: { crs } });
+  };
+
   const onFilter = async filter => onLoadColsSchema(filter);
 
   const onLoadColsSchema = async filter => {
@@ -194,7 +231,7 @@ const DataFormFieldEditor = ({
   };
 
   const onSelectPoint = (coordinates, selectedCrs) => {
-    const filteredCRS = crs.filter(crsItem => crsItem.value === selectedCrs)[0];
+    const filteredCRS = crs.find(crsItem => crsItem.value === selectedCrs);
     dispatchMap({ type: 'SET_MAP_NEW_POINT', payload: { coordinates, filteredCRS } });
   };
 
@@ -203,7 +240,7 @@ const DataFormFieldEditor = ({
       let coords = coordinates;
       geoJson.geometry.type = 'Point';
       if (withCRS) {
-        coords = projectCoordinates(coordinates, crs.value);
+        coords = MapUtils.projectCoordinates({ coordinates, currentCRS: map.currentCRS, newCRS: crs.value });
         geoJson.geometry.coordinates = coords;
         geoJson.properties.srid = crs.value;
       } else {
@@ -212,6 +249,7 @@ const DataFormFieldEditor = ({
           MapUtils.checkValidCoordinates(coords)
         );
       }
+
       dispatchMap({ type: 'TOGGLE_MAP_DISABLED', payload: !MapUtils.checkValidCoordinates(coords, true) });
       dispatchMap({ type: 'DISPLAY_COORDINATE_ERROR', payload: !MapUtils.checkValidCoordinates(coords, true) });
       return JSON.stringify(geoJson);
@@ -289,12 +327,6 @@ const DataFormFieldEditor = ({
     } finally {
       setIsLoadingData(false);
     }
-  };
-
-  const projectCoordinates = (coordinates, newCRS) => {
-    return MapUtils.checkValidCoordinates(coordinates)
-      ? proj4(proj4(map.currentCRS.value), proj4(newCRS), coordinates)
-      : coordinates;
   };
 
   const renderCodelistDropdown = (field, fieldValue) => {
@@ -387,7 +419,7 @@ const DataFormFieldEditor = ({
     ) : type === 'DATETIME' ? (
       renderDatetimeCalendar(field, fieldValue)
     ) : type === 'POINT' ? (
-      renderMapType(field, fieldValue)
+      renderMapType(fieldValue)
     ) : type === 'ATTACHMENT' ? (
       renderAttachment(field, fieldValue)
     ) : ['POLYGON', 'LINESTRING', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(type) ? (
@@ -524,76 +556,28 @@ const DataFormFieldEditor = ({
       selectedCRS={map.currentCRS.value}></Map>
   );
 
-  const renderMapType = (field, fieldValue) => (
+  const renderMapType = fieldValue => (
     <div>
       <div className={styles.pointEpsgWrapper}>
-        <label className={styles.epsg}>{resourcesContext.messages['coords']}</label>
-        <InputText
-          className={`${styles.pointInput} ${map.showCoordinateError && styles.pointInputError}`}
+        <Coordinates
+          crsDisabled={
+            !MapUtils.checkValidCoordinates(
+              fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates.join(', ') : ''
+            )
+          }
+          crsOptions={crs}
+          crsValue={map.currentCRS}
           disabled={(column.readOnly && reporting) || isSaving}
+          errorMessage={resourcesContext.messages['wrongCoordinate']}
+          hasErrorMessage={true}
           id="coordinates"
-          keyfilter={RecordUtils.getFilter(type)}
-          onBlur={e =>
-            onChangeForm(
-              field,
-              changePoint(
-                JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
-                e.target.value,
-                map.currentCRS.value,
-                false
-              )
-            )
-          }
-          onChange={e =>
-            onChangeForm(
-              field,
-              changePoint(
-                JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
-                e.target.value,
-                map.currentCRS.value,
-                false
-              )
-            )
-          }
-          ref={pointRef}
-          type="text"
-          value={fieldValue !== '' ? JSON.parse(fieldValue).geometry.coordinates : ''}
-        />
-        {map.showCoordinateError && (
-          <span className={styles.pointError}>{resourcesContext.messages['wrongCoordinate']}</span>
-        )}
-      </div>
-
-      <div className={styles.pointEpsgWrapper}>
-        <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
-        <Dropdown
-          appendTo={document.body}
-          ariaLabel={'crs'}
-          className={styles.epsgSwitcher}
-          disabled={map.isMapDisabled}
-          onChange={e => {
-            onChangeForm(
-              field,
-              changePoint(
-                JSON.parse(fieldValue !== '' ? fieldValue : fieldEmptyPointValue),
-                JSON.parse(fieldValue).geometry.coordinates,
-                e.target.value
-              )
-            );
-            dispatchMap({ type: 'SET_MAP_CRS', payload: { crs: e.target.value } });
-          }}
-          optionLabel="label"
-          options={crs}
-          placeholder="Select a CRS"
-          value={map.currentCRS}
-        />
-        <Button
-          className={`p-button-secondary-transparent button ${styles.mapButton}`}
-          disabled={map.isMapDisabled}
-          icon="marker"
-          onClick={() => onMapOpen(fieldValue)}
-          tooltip={resourcesContext.messages['selectGeographicalDataOnMap']}
-          tooltipOptions={{ position: 'bottom' }}
+          initialGeoJson={fieldValue}
+          onBlur={coordinates => onCoordinatesBlur(coordinates)}
+          onChange={coordinates => onCoordinatesChange(coordinates)}
+          onCrsChange={crs => onCrsChange(crs)}
+          onMapOpen={() => onMapOpen(fieldValue)}
+          showMessageError={map.showCoordinateError}
+          xyLabels={map.currentCRS.value === 'EPSG:3035'}
         />
       </div>
     </div>

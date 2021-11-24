@@ -5,6 +5,7 @@ package org.eea.dataset.service.helper;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -1254,4 +1255,42 @@ public class FileTreatmentHelper implements DisposableBean {
     return partition;
   }
 
+  /**
+   * Export file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   * @param tableSchemaId the table schema id
+   * @param tableName the table name
+   * @throws EEAException the EEA exception
+   * @throws FileNotFoundException the file not found exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Async
+  public void exportFile(Long datasetId, String mimeType, String tableSchemaId, String tableName)
+      throws EEAException, FileNotFoundException, IOException {
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+        .fileName(tableName).datasetSchemaId(tableSchemaId).error("Error exporting table data")
+        .build();
+    File fileFolder = new File(pathPublicFile, "dataset-" + datasetId);
+    String creatingFileError = String.format(
+        "Failed generating file from datasetId {} with schema {}.", datasetId, tableSchemaId);
+    fileFolder.mkdirs();
+    try {
+      byte[] file = datasetService.exportFile(datasetId, mimeType, tableSchemaId);
+      File fileWrite =
+          new File(new File(pathPublicFile, "dataset-" + datasetId), tableName + "." + mimeType);
+      try (OutputStream out = new FileOutputStream(fileWrite.toString());) {
+        out.write(file);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT,
+            null, notificationVO);
+      }
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId,
+          tableSchemaId);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_FAILED_EVENT, null,
+          notificationVO);
+    }
+  }
 }

@@ -39,15 +39,15 @@ public class TempUser {
   private String email;
 
   /** The user type. */
-  @Column(name = "usertype")
+  @Column(name = "user_type")
   private String role;
 
   /** The dataflow id. */
-  @Column(name = "dataflowid")
+  @Column(name = "dataflow_id")
   private Long dataflowId;
 
   /** The dataprovider id. */
-  @Column(name = "dataproviderid")
+  @Column(name = "data_provider_id")
   private Long dataProviderId;
 
   /** The registered date. */

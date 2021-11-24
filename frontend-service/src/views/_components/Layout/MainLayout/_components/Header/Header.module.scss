@@ -49,11 +49,18 @@
       display: flex;
       align-items: center;
       margin-right: 1rem;
-      :global .p-button-primary {
+      .loginButton {
         background-color: var(--white);
         color: var(--public-custom-header-bg);
+        padding: 0.25rem 0.9rem;
+        font-weight: bold;
+        span:first-child {
+          margin-left: 0.5rem;
+          margin-top: -0.5rem;
+        }
       }
     }
+
     .userWrapper {
       display: flex;
       align-items: center;

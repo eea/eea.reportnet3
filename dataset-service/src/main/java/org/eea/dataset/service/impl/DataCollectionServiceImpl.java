@@ -741,7 +741,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               }
             } else {
               if (!referenceDatasetIdsEmails.containsKey(referenceDatasetId)) {
-                referenceDatasetIdsEmails.put(referenceDatasetId, null);
+                referenceDatasetIdsEmails.put(referenceDatasetId, new ArrayList<>());
               }
             }
           }

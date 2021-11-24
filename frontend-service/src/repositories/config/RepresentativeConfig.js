@@ -15,5 +15,6 @@ export const RepresentativeConfig = {
   updateDataProviderId: '/representative/update',
   updateLeadReporter: '/representative/leadReporter/update/dataflow/{:dataflowId}',
   updateRestrictFromPublic:
-    '/representative/update/restrictFromPublic/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}?restrictFromPublic={:restrictFromPublic}'
+    '/representative/update/restrictFromPublic/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}?restrictFromPublic={:restrictFromPublic}',
+  validateLeadReporters: '/representative/validateLeadReporters/dataflow/{:dataflowId}'
 };

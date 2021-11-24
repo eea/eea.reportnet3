@@ -21,7 +21,9 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.dataflow.service.file.DataflowHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
@@ -74,18 +76,18 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 /**
- * The Class DataFlowControllerImpl.
+ * The Class DataflowControllerImpl.
  */
 @RestController
 @RequestMapping(value = "/dataflow")
 @Api(tags = "Dataflows : Dataflows Manager")
-public class DataFlowControllerImpl implements DataFlowController {
+public class DataflowControllerImpl implements DataFlowController {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DataFlowControllerImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DataflowControllerImpl.class);
 
   /** The dataflow service. */
   @Autowired
@@ -100,8 +102,15 @@ public class DataFlowControllerImpl implements DataFlowController {
   @Autowired
   private LockService lockService;
 
+  /** The dataflow helper. */
   @Autowired
   private DataflowHelper dataflowHelper;
+
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
+
+
 
   /**
    * Find by id.
@@ -114,13 +123,13 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/v1/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Get Dataflow by Id", produces = MediaType.APPLICATION_JSON_VALUE,
+  @ApiOperation(value = "Get dataflow by dataflow id", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataFlowVO.class,
       notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public DataFlowVO findById(
-      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId) {
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @RequestParam(value = "Provider id", required = false) Long providerId) {
 
     if (dataflowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -544,12 +553,12 @@ public class DataFlowControllerImpl implements DataFlowController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
   @GetMapping(value = "/v1/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Get meta information from a Dataflow based on its Id",
+  @ApiOperation(value = "Get dataflow metadata by dataflow id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public DataFlowVO getMetabaseById(
-      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     if (dataflowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATAFLOW_INCORRECT_ID);
@@ -859,28 +868,6 @@ public class DataFlowControllerImpl implements DataFlowController {
     return dataflowTypesCount;
   }
 
-  /**
-   * Checks if is user requester.
-   *
-   * @param dataflowId the dataflow id
-   * @return true, if is user requester
-   */
-  private boolean isUserRequester(Long dataflowId) {
-    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
-    for (GrantedAuthority role : SecurityContextHolder.getContext().getAuthentication()
-        .getAuthorities()) {
-      if (ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)
-          .equals(role.getAuthority())
-          || ObjectAccessRoleEnum.DATAFLOW_OBSERVER.getAccessRole(dataflowId)
-              .equals(role.getAuthority())
-          || ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)
-              .equals(role.getAuthority())
-          || roleAdmin.equals(role.getAuthority())) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   /**
    * Gets the dataset summary by dataflow id.
@@ -917,6 +904,10 @@ public class DataFlowControllerImpl implements DataFlowController {
   public void exportSchemaInformation(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     LOG.info("Export schema information from dataflowId {}", dataflowId);
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_SCHEMAS_INFO_START",
+        userNotificationContentVO);
     try {
       dataflowHelper.exportSchemaInformation(dataflowId);
     } catch (IOException | EEAException e) {
@@ -1002,7 +993,61 @@ public class DataFlowControllerImpl implements DataFlowController {
           dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
     }
+  }
 
+  /**
+   * Validate all reporters.
+   *
+   * @return the response entity
+   */
+  @Override
+  @PutMapping("/validateAllReporters")
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(
+      value = "Validates lead reporters and reporters from all the dataflows in the system.",
+      hidden = true)
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "Reporters and Lead Reporters validated successfully."),
+      @ApiResponse(code = 400,
+          message = "There was an error validating Reporters and Lead Reporters.")})
+  public ResponseEntity validateAllReporters() {
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
 
+    try {
+      dataflowService.validateAllReporters(userId);
+    } catch (Exception e) {
+      message =
+          "Couldn't validate all reporters and lead reporters, an error was produced during the process.";
+      status = HttpStatus.BAD_REQUEST;
+    }
+
+    return new ResponseEntity<>(message, status);
+  }
+
+  /**
+   * Checks if is user requester.
+   *
+   * @param dataflowId the dataflow id
+   * @return true, if is user requester
+   */
+  private boolean isUserRequester(Long dataflowId) {
+    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
+    for (GrantedAuthority role : SecurityContextHolder.getContext().getAuthentication()
+        .getAuthorities()) {
+      if (ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)
+          .equals(role.getAuthority())
+          || ObjectAccessRoleEnum.DATAFLOW_OBSERVER.getAccessRole(dataflowId)
+              .equals(role.getAuthority())
+          || ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)
+              .equals(role.getAuthority())
+          || roleAdmin.equals(role.getAuthority())) {
+        return true;
+      }
+    }
+    return false;
   }
 }

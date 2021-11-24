@@ -52,7 +52,8 @@ public interface ContributorService {
    * @param dataflowId the dataflow id
    * @return the list
    */
-  ContributorVO findTempUserByAccountAndDataflow(String account, Long dataflowId);
+  ContributorVO findTempUserByAccountAndDataflow(String account, Long dataflowId,
+      Long dataProviderId);
 
   /**
    * Find temp user by role and dataflow id.
@@ -61,7 +62,8 @@ public interface ContributorService {
    * @param dataflowId the dataflow id
    * @return the list
    */
-  List<ContributorVO> findTempUserByRoleAndDataflow(String role, Long dataflowId);
+  List<ContributorVO> findTempUserByRoleAndDataflow(String role, Long dataflowId,
+      Long dataProviderId);
 
   /**
    * Creates the temp user.
@@ -70,7 +72,7 @@ public interface ContributorService {
    * @param contributorVO the contributor VO
    * @param dataproviderId the dataprovider id
    */
-  void createTempUser(Long dataflowId, ContributorVO contributorVO, Long dataproviderId);
+  void createTempUser(Long dataflowId, ContributorVO contributorVO, Long dataProviderId);
 
   /**
    * Update role user.
@@ -101,6 +103,16 @@ public interface ContributorService {
    * @param dataProviderId the data provider id
    */
   void deleteTemporaryUser(Long dataflowId, String email, String role, Long dataProviderId);
+
+  /**
+   * Validate reporters.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @throws EEAException the EEA exception
+   */
+  void validateReporters(Long dataflowId, Long dataProviderId, boolean sendNotification)
+      throws EEAException;
 
   /**
    * Creates the associated permissions.

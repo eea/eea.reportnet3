@@ -20,12 +20,14 @@ import ReactTooltip from 'react-tooltip';
 import { Toolbar } from 'views/_components/Toolbar';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
+import { DatasetService } from 'services/DatasetService';
+
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 
 import { filterReducer } from './_functions/Reducers/filterReducer';
 
-import { DatasetService } from 'services/DatasetService';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { MetadataUtils } from 'views/_functions/Utils';
 
@@ -62,7 +64,6 @@ const ActionsToolbar = ({
   tableId,
   tableName
 }) => {
-  const [exportTableData, setExportTableData] = useState(undefined);
   const [exportTableDataName, setExportTableDataName] = useState('');
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [filter, dispatchFilter] = useReducer(filterReducer, {
@@ -99,26 +100,35 @@ const ActionsToolbar = ({
     }
   }, [isGroupedValidationSelected]);
 
-  useEffect(() => {
-    if (!isUndefined(exportTableData)) {
-      DownloadFile(exportTableData, exportTableDataName);
+  const onDownloadTableData = async () => {
+    try {
+      const { data } = await DatasetService.downloadTableData(datasetId, exportTableDataName);
+      DownloadFile(data, exportTableDataName);
+    } catch (error) {
+      console.error('ActionsToolbar - onDownloadTableData.', error);
+    } finally {
+      setIsLoadingFile(false);
     }
-  }, [exportTableData]);
+  };
+
+  useCheckNotifications(['EXPORT_TABLE_DATA_COMPLETED_EVENT'], onDownloadTableData);
+  useCheckNotifications(['EXPORT_TABLE_DATA_FAILED_EVENT'], setIsLoadingFile, false);
 
   const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
-    label: type.text,
+    label: resourcesContext.messages[type.key],
     icon: type.code,
     command: () => onExportTableData(type.code)
   }));
 
   const onExportTableData = async fileType => {
     setIsLoadingFile(true);
+    notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
       setExportTableDataName(createTableName(tableName, fileType));
-      const { data } = await DatasetService.exportTableData(datasetId, tableId, fileType);
-      setExportTableData(data);
+      await DatasetService.exportTableData(datasetId, tableId, fileType);
     } catch (error) {
       console.error('ActionsToolbar - onExportTableData.', error);
+      setIsLoadingFile(false);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -136,8 +146,6 @@ const ActionsToolbar = ({
         },
         true
       );
-    } finally {
-      setIsLoadingFile(false);
     }
   };
 

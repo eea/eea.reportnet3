@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
@@ -10,24 +10,23 @@ import { DataflowsReporterHelpConfig } from 'conf/help/dataflows/reporter';
 import { DataflowsRequesterHelpConfig } from 'conf/help/dataflows/requester';
 
 import { Button } from 'views/_components/Button';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'views/_components/Dialog';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
-import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
+import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
+import { GoTopButton } from 'views/_components/GoTopButton';
 
-import { DataflowService } from 'services/DataflowService';
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
-import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { CitizenScienceDataflowService } from 'services/CitizenScienceDataflowService';
+import { DataflowService } from 'services/DataflowService';
+import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { UserService } from 'services/UserService';
-
-import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
-import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -39,6 +38,10 @@ import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
+
+import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -60,24 +63,28 @@ const Dataflows = withRouter(({ history, match }) => {
     citizenScience: [],
     dataflowsCount: {},
     dataflowsCountFirstLoad: false,
-    reporting: [],
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
-    isReportingDataflowDialogVisible: false,
+    isCitizenScienceDataflowDialogVisible: false,
     isCustodian: null,
     isNationalCoordinator: false,
+    isRecreatePermissionsDialogVisible: false,
     isReferencedDataflowDialogVisible: false,
-    isCitizenScienceDataflowDialogVisible: false,
+    isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
+    isValidatingAllDataflowsUsers: false,
     isUserListVisible: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
-    reference: []
+    reference: [],
+    reporting: []
   });
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
     useReportingObligations();
 
   const { activeIndex, dataflowsCount, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
+
+  const containerRef = useRef(null);
 
   const tabMenuItems =
     isCustodian || isAdmin
@@ -174,8 +181,18 @@ const Dataflows = withRouter(({ history, match }) => {
       title: 'allDataflowsUserList'
     };
 
+    const adminCreateNewPermissionsBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'userShield',
+      isVisible: isAdmin,
+      label: 'adminCreatePermissions',
+      onClick: () => manageDialogs('isRecreatePermissionsDialogVisible', true),
+      title: 'adminCreatePermissions'
+    };
+
     leftSideBarContext.addModels(
       [
+        adminCreateNewPermissionsBtn,
         createBusinessDataflowBtn,
         createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
@@ -209,6 +226,18 @@ const Dataflows = withRouter(({ history, match }) => {
   useEffect(() => {
     setActiveIndexTabOnBack();
   }, [isCustodian, isAdmin]);
+
+  const setIsValidatingAllDataflowsUsers = isValidatingAllDataflowsUsers => {
+    dataflowsDispatch({ type: 'SET_IS_VALIDATING_ALL_DATAFLOWS_USERS', payload: { isValidatingAllDataflowsUsers } });
+  };
+
+  const onValidatingAllDataflowsUsersCompleted = () => {
+    setIsValidatingAllDataflowsUsers(false);
+    manageDialogs('isRecreatePermissionsDialogVisible', false);
+  };
+
+  useCheckNotifications(['VALIDATE_ALL_REPORTERS_FAILED_EVENT'], setIsValidatingAllDataflowsUsers, false);
+  useCheckNotifications(['VALIDATE_ALL_REPORTERS_COMPLETED_EVENT'], onValidatingAllDataflowsUsersCompleted);
 
   const setActiveIndexTabOnBack = () => {
     for (let tabItemIndex = 0; tabItemIndex < tabMenuItems.length; tabItemIndex++) {
@@ -292,6 +321,17 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const manageDialogs = (dialog, value) => {
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
+  };
+
+  const onConfirmValidateAllDataflowsUsers = async () => {
+    setIsValidatingAllDataflowsUsers(true);
+    try {
+      await DataflowService.validateAllDataflowsUsers();
+    } catch (error) {
+      console.error('Dataflows -  onConfirmValidateAllDataflowsUsers.', error);
+      setIsValidatingAllDataflowsUsers(false);
+      notificationContext.add({ type: 'VALIDATE_ALL_REPORTERS_FAILED_EVENT' }, true);
+    }
   };
 
   const onCreateDataflow = dialog => {
@@ -380,13 +420,15 @@ const Dataflows = withRouter(({ history, match }) => {
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
-        <TabMenu
-          activeIndex={activeIndex}
-          headerLabelChildrenCount={dataflowsCount}
-          headerLabelLoading={loadingStatus}
-          model={tabMenuItems}
-          onTabChange={event => onChangeTab(event.index, event.value)}
-        />
+        <div ref={containerRef}>
+          <TabMenu
+            activeIndex={activeIndex}
+            headerLabelChildrenCount={dataflowsCount}
+            headerLabelLoading={loadingStatus}
+            model={tabMenuItems}
+            onTabChange={event => onChangeTab(event.index, event.value)}
+          />
+        </div>
         <DataflowsList
           className="dataflowList-accepted-help-step"
           content={{
@@ -401,6 +443,8 @@ const Dataflows = withRouter(({ history, match }) => {
           visibleTab={tabId}
         />
       </div>
+
+      <GoTopButton parentRef={containerRef} referenceMargin={70} />
 
       {dataflowsState.isUserListVisible && (
         <Dialog
@@ -429,6 +473,20 @@ const Dataflows = withRouter(({ history, match }) => {
           onCreateDataflow={onCreateDataflow}
           resetObligations={resetObligations}
         />
+      )}
+
+      {dataflowsState.isRecreatePermissionsDialogVisible && (
+        <ConfirmDialog
+          disabledConfirm={dataflowsState.isValidatingAllDataflowsUsers}
+          header={resourcesContext.messages['adminNewCreatePermissions']}
+          iconConfirm={dataflowsState.isValidatingAllDataflowsUsers ? 'spinnerAnimate' : ''}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onConfirmValidateAllDataflowsUsers}
+          onHide={() => manageDialogs('isRecreatePermissionsDialogVisible', false)}
+          visible={dataflowsState.isRecreatePermissionsDialogVisible}>
+          {resourcesContext.messages['confirmCreateNewPermissions']}
+        </ConfirmDialog>
       )}
 
       {dataflowsState.isCitizenScienceDataflowDialogVisible && (

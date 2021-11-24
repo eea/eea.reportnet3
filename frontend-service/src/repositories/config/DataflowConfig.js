@@ -9,11 +9,13 @@ export const DataflowConfig = {
   delete: '/dataflow/{:dataflowId}',
   downloadAllSchemasInfo: '/dataflow/downloadSchemaInformation/{:dataflowId}?fileName={:fileName}',
   downloadPublicAllSchemasInfoFile: '/dataflow/downloadPublicSchemaInformation/{:dataflowId}',
+  downloadUsersListFile: '/user/downloadUsersByCountry/{:dataflowId}/?fileName={:fileName}',
   exportSchemas: '/dataschema/export?dataflowId={:dataflowId}',
   getAll: '/dataflow/getDataflows',
   getCloneableDataflows: '/dataflow/cloneableDataflows',
   getAllDataflowsUserList: '/dataflow/getUserRolesAllDataflows',
   generateAllSchemasInfoFile: '/dataflow/exportSchemaInformation/{:dataflowId}',
+  generateUsersByCountryFile: '/user/exportUsersByCountry/dataflow/{:dataflowId}',
   getApiKey: '/user/getApiKey?dataflowId={:dataflowId}&dataProvider={:dataProviderId}',
   getApiKeyCustodian: '/user/getApiKey?dataflowId={:dataflowId}',
   getDetails: '/dataflow/v1/{:dataflowId}/getmetabase',
@@ -30,5 +32,6 @@ export const DataflowConfig = {
   getSchemas: '/dataschema/getSchemas/dataflow/{:dataflowId}',
   getSchemasValidation: '/dataschema/validate/dataflow/{:dataflowId}',
   getUserList: '/user/getUserRolesByDataflow/{:dataflowId}/dataProviderId/{:representativeId}',
-  importSchema: '/dataschema/import?dataflowId={:dataflowId}'
+  importSchema: '/dataschema/import?dataflowId={:dataflowId}',
+  validateAllDataflowsUsers: '/dataflow/validateAllReporters'
 };

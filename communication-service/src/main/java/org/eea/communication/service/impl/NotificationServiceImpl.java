@@ -1,5 +1,6 @@
 package org.eea.communication.service.impl;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.eea.communication.mapper.SystemNotificationMapper;
@@ -14,6 +15,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.communication.SystemNotificationVO;
 import org.eea.interfaces.vo.communication.UserNotificationListVO;
 import org.eea.interfaces.vo.communication.UserNotificationVO;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,10 @@ import org.springframework.util.CollectionUtils;
  */
 @Service("notificationService")
 public class NotificationServiceImpl implements NotificationService {
+
+
+  /** The Constant MAX_LENGTH_MESSAGE. */
+  private static final int MAX_LENGTH_MESSAGE = 300;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(NotificationServiceImpl.class);
@@ -113,10 +119,16 @@ public class NotificationServiceImpl implements NotificationService {
     try {
       SystemNotification systemNotification =
           systemNotificationMapper.classToEntity(systemNotificationVO);
-      systemNotificationRepository.save(systemNotification);
+
+      systemNotification.setMessage(systemNotification.getMessage().substring(0,
+          Math.min(systemNotification.getMessage().length(), MAX_LENGTH_MESSAGE)));
+
+      systemNotification = systemNotificationRepository.save(systemNotification);
+      SystemNotificationVO sysNotiVO = systemNotificationMapper.entityToClass(systemNotification);
+      template.convertAndSend("/user/queue/systemnotifications", sysNotiVO);
       LOG.info("System Notification created succesfully in mongo");
     } catch (IllegalArgumentException e) {
-      LOG_ERROR.error("Error creating a System Notification. {}", e);
+      LOG_ERROR.error("Error creating a System Notification. {}", e.getMessage(), e);
       throw new EEAException(e.getMessage());
     }
   }
@@ -132,6 +144,10 @@ public class NotificationServiceImpl implements NotificationService {
   public void deleteSystemNotification(String systemNotificationId) throws EEAException {
     try {
       systemNotificationRepository.deleteSystemNotficationById(systemNotificationId);
+      if (systemNotificationRepository.findByEnabledTrue().isEmpty()) {
+        template.convertAndSend("/user/queue/systemnotifications",
+            new Notification(EventType.NO_ENABLED_SYSTEM_NOTIFICATIONS, Collections.emptyMap()));
+      }
       LOG.info("System Notification deleted succesfully in mongo");
     } catch (IllegalArgumentException e) {
       LOG_ERROR.error("Error deleting a System Notification");
@@ -152,7 +168,18 @@ public class NotificationServiceImpl implements NotificationService {
       SystemNotification systemNotification =
           systemNotificationMapper.classToEntity(systemNotificationVO);
 
+      systemNotification.setMessage(systemNotification.getMessage().substring(0,
+          Math.min(systemNotification.getMessage().length(), MAX_LENGTH_MESSAGE)));
+
       systemNotificationRepository.updateSystemNotficationById(systemNotification);
+      if (systemNotification != null && systemNotification.isEnabled()) {
+        template.convertAndSend("/user/queue/systemnotifications", systemNotificationVO);
+      } else {
+        if (systemNotificationRepository.findByEnabledTrue().isEmpty()) {
+          template.convertAndSend("/user/queue/systemnotifications",
+              new Notification(EventType.NO_ENABLED_SYSTEM_NOTIFICATIONS, Collections.emptyMap()));
+        }
+      }
       LOG.info("System Notification updated succesfully in mongo");
 
     } catch (IllegalArgumentException e) {
@@ -192,6 +219,33 @@ public class NotificationServiceImpl implements NotificationService {
    */
   @Override
   public List<SystemNotificationVO> findSystemNotifications() {
-    return systemNotificationMapper.entityListToClass(systemNotificationRepository.findAll());
+    List<SystemNotification> listSystemNotification;
+    if (isAdmin()) {
+      listSystemNotification = systemNotificationRepository.findAll();
+    } else {
+      listSystemNotification = systemNotificationRepository.findByEnabledTrue();
+    }
+    return systemNotificationMapper.entityListToClass(listSystemNotification);
+  }
+
+  /**
+   * Check any system notification enabled.
+   *
+   * @return true, if successful
+   */
+  @Override
+  public boolean checkAnySystemNotificationEnabled() {
+    return systemNotificationRepository.existsByEnabledTrue();
+  }
+
+  /**
+   * Checks if is admin.
+   *
+   * @return true, if is admin
+   */
+  private boolean isAdmin() {
+    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
+    return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+        .anyMatch(role -> roleAdmin.equals(role.getAuthority()));
   }
 }

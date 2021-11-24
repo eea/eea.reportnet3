@@ -342,6 +342,9 @@
           "key": "GENERATE_SCHEMAS_INFO_FILE_ERROR"
         },
         {
+          "key": "GENERATE_USERS_LIST_FILE_ERROR"
+        },
+        {
           "key": "CREATE_DATA_COLLECTION_ERROR"
         },
         {
@@ -724,6 +727,9 @@
           "key": "DOWNLOAD_QC_RULES_FILE_ERROR"
         },
         {
+          "key": "DOWNLOAD_USERS_LIST_FILE_ERROR"
+        },
+        {
           "key": "DOWNLOAD_VALIDATIONS_FILE_ERROR"
         },
         {
@@ -792,7 +798,12 @@
         { "key": "EXPORT_QC_FAILED_EVENT" },
         { "key": "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT" },
         { "key": "DISABLE_RULES_ERROR_EVENT" },
-        { "key": "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT" }
+        { "key": "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT" },
+        { "key": "EXPORT_USERS_BY_COUNTRY_FAILED_EVENT" },
+        { "key": "VALIDATE_ALL_REPORTERS_FAILED_EVENT" },
+        { "key": "VALIDATE_LEAD_REPORTERS_FAILED_EVENT" },
+        { "key": "VALIDATE_REPORTERS_FAILED_EVENT" },
+        { "key": "EXPORT_TABLE_DATA_FAILED_EVENT" }
       ]
     },
     {
@@ -1019,6 +1030,10 @@
         { "key": "AUTOMATICALLY_DOWNLOAD_SCHEMAS_INFO_FILE" },
         { "key": "AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE" },
         { "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE" },
+        { "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD" },
+        { "key": "AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE" },
+        { "key": "EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT" },
+        { "key": "VALIDATE_ALL_REPORTERS_COMPLETED_EVENT" },
         {
           "key": "IMPORT_FIELD_SCHEMA_COMPLETED_EVENT",
           "navigateTo": {
@@ -1038,7 +1053,10 @@
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]
           }
-        }
+        },
+        { "key": "VALIDATE_REPORTERS_COMPLETED_EVENT" },
+        { "key": "VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT" },
+        { "key": "EXPORT_TABLE_DATA_COMPLETED_EVENT" }
       ]
     },
     {
@@ -1057,7 +1075,6 @@
             "hasQueryString": true
           }
         },
-
         { "key": "CREATE_DATA_COLLECTION_INIT" },
         { "key": "CREATE_REFERENCE_DATASETS_INIT" },
         { "key": "CLONE_DATASET_SCHEMAS_INIT" },
@@ -1076,13 +1093,17 @@
         { "key": "DELETE_TABLE_DATA_INIT" },
         { "key": "RELEASE_START_EVENT" },
         { "key": "IMPORT_TABLE_SCHEMA_INIT" },
-        { "key": "RECEIVED_MESSAGE" }
+        { "key": "RECEIVED_MESSAGE" },
+        { "key": "DOWNLOAD_USERS_BY_COUNTRY_START" },
+        { "key": "EXPORT_TABLE_DATA_START" }
       ]
     }
   ],
   "hiddenNotifications": [
     "EXPORT_DATASET_COMPLETED_EVENT",
     "EXPORT_DATASET_FAILED_EVENT",
+    "EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT",
+    "EXPORT_USERS_BY_COUNTRY_FAILED_EVENT",
     "DOWNLOAD_VALIDATIONS_COMPLETED_EVENT",
     "DOWNLOAD_VALIDATIONS_FAILED_EVENT",
     "EXPORT_QC_COMPLETED_EVENT",

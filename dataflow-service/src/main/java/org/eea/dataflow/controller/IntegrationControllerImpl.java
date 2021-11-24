@@ -279,11 +279,11 @@ public class IntegrationControllerImpl implements IntegrationController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') OR (checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD'))")
   @LockMethod
   @PostMapping(value = "/v1/executeEUDatasetExport")
-  @ApiOperation(value = "Execute EUDataset Export", response = ExecutionResultVO.class,
+  @ApiOperation(value = "Execute EU dataset export", response = ExecutionResultVO.class,
       responseContainer = "List", notes = "Allowed roles: CUSTODIAN, STEWARD")
   @ApiResponse(code = 500, message = "Internal Server Error")
   public List<ExecutionResultVO> executeEUDatasetExport(
-      @ApiParam(value = "Dataflow Id", example = "0") @LockCriteria(
+      @ApiParam(value = "Dataflow id", example = "0") @LockCriteria(
           name = "dataflowId") @RequestParam("dataflowId") Long dataflowId) {
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
