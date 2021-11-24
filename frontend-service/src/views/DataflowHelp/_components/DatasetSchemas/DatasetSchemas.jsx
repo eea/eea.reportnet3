@@ -66,7 +66,6 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
       notificationContext.add({ type: 'DOWNLOAD_SCHEMAS_INFO_START' });
     } catch (error) {
       console.error('DatasetSchema - onDownloadAllSchemasInfo .', error);
-      console.log(`error.response`, error);
       if (error.response?.status === 400) {
         notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
       } else {
