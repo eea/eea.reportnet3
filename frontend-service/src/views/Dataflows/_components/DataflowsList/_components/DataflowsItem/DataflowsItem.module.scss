@@ -88,10 +88,12 @@
   &.OPEN,
   &.CLOSED {
     box-shadow: var(--card-item-box-shadow);
-    transition: box-shadow 0.1s ease-in;
+    transform: scale(1, 1);
+    transition: all 0.1s ease-in;
     &:hover {
       box-shadow: var(--card-item-box-shadow-hover);
-      transition: box-shadow 0.1s ease-in;
+      transform: scale(1.01, 1.01);
+      transition: all 0.1s ease-in;
     }
   }
   &:first-of-type {
