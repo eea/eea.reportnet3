@@ -28,7 +28,8 @@ export const notificationReducer = (state, { type, payload }) => {
       return {
         ...state,
         toShow: [],
-        all: state.all.filter(notification => (!payload ? notification.isSystem : !notification.isSystem))
+        all: state.all.filter(notification => (!payload ? notification.isSystem : !notification.isSystem)),
+        refreshedAndEnabled: payload ? false : state.refreshedAndEnabled
       };
 
     case 'NEW_NOTIFICATION_ADDED':
@@ -45,6 +46,9 @@ export const notificationReducer = (state, { type, payload }) => {
 
     case 'CLEAR_HIDDEN':
       return { ...state, hidden: [] };
+
+    case 'REFRESHED_PAGE':
+      return { ...state, refreshedAndEnabled: true };
 
     default:
       return state;

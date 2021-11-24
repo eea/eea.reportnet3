@@ -86,9 +86,8 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
           icon={AwesomeIcons(icon)}
           role="button"
         />
-        {notificationContext.all.filter(notification => notification.isSystem === true).length > 0 && (
-          <span className={styles.systemNotificationMark}>!</span>
-        )}
+        {(notificationContext.all.filter(notification => notification.isSystem === true).length > 0 ||
+          notificationContext.refreshedAndEnabled) && <span className={styles.systemNotificationMark}>!</span>}
       </div>
       <span className={styles.leftSideBarUserText}>{resourcesContext.messages[label]}</span>
     </Fragment>

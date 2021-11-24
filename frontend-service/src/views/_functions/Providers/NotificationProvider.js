@@ -19,6 +19,7 @@ const NotificationProvider = ({ children }) => {
     all: [],
     hidden: [],
     newNotification: false,
+    refreshedAndEnabled: false,
     toShow: []
   });
 
@@ -105,6 +106,8 @@ const NotificationProvider = ({ children }) => {
         removeHiddenByKey: key => {
           dispatch({ type: 'HIDE_BY_KEY', payload: state.hidden.filter(notification => notification.key !== key) });
         },
+
+        refreshedPage: () => dispatch({ type: 'REFRESHED_PAGE' }),
 
         hide: notificationDTO => {
           const { type, content } = notificationDTO;

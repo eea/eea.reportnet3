@@ -1395,6 +1395,7 @@
     "createSystemNotificationError": "Error creating a system notification",
     "updateSystemNotificationError": "Error updating a system notification",
     "deleteSystemNotificationError": "Error deleting a system notification",
-    "getSystemNotificationsError": "Error getting the system notifications"
+    "getSystemNotificationsError": "Error getting the system notifications",
+    "checkEnabledSystemNotificationsError": "Error checking enabled notifications"
   }
 }
