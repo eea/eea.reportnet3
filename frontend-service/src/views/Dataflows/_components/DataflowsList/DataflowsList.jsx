@@ -11,6 +11,7 @@ import styles from './DataflowsList.module.scss';
 
 import { DataflowsItem } from './_components/DataflowsItem';
 import { Filters } from 'views/_components/Filters';
+import { MyFilters } from 'views/_components/Filters/MyFilters';
 import { ReferencedDataflowItem } from './_components/ReferencedDataflowItem';
 import { Spinner } from 'views/_components/Spinner';
 
@@ -157,6 +158,20 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
     });
   };
 
+  const FILTER_OPTIONS = [
+    { category: 'LEVEL_ERROR', key: 'obligation', label: 'Obligation', order: 0, type: 'INPUT' },
+    { category: undefined, key: 'operationName', label: 'Another label', order: 1, type: 'INPUT', options: undefined },
+    { category: 'BOOLEAN', key: 'anotherKeyName', label: 'Bool type', options: [], order: 2, type: 'MULTI_SELECT' },
+    {
+      type: 'INPUT',
+      category: 'ANOTHER_TYPE_OF_CATEGORY',
+      options: [
+        { key: 'obligation', label: 'Obligation', order: 0 },
+        { key: 'operationName', label: 'Another label', order: 1 }
+      ]
+    }
+  ];
+
   const filterOptions = {
     reporting: [
       {
@@ -211,7 +226,10 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
           { name: 'obligationId' }
         ]
       },
-      { type: 'multiselect', properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }] },
+      {
+        type: 'multiselect',
+        properties: [{ name: 'status' }, { name: 'userRole' }, { name: 'pinned' }]
+      },
       {
         type: 'date',
         properties: [{ name: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'] }]
@@ -293,7 +311,7 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
     <div className={`${styles.wrap} ${className}`}>
       <div className="dataflowList-filters-help-step">
         {visibleTab === 'reporting' && (
-          <Filters
+          <MyFilters
             className={'dataflowsListFilters'}
             data={dataToFilter['reporting']}
             getFilteredData={onLoadFilteredData}
