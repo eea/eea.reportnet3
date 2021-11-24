@@ -35,19 +35,23 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
 
   const [systemNotificationState, dispatchSystemNotification] = useReducer(systemNotificationReducer, {
     editNotification: {},
+    firstRow: 0,
     formType: '',
     isDeleteDialogVisible: false,
     isDeleting: false,
     isVisibleCreateSysNotification: false,
+    numberRows: 10,
     systemNotifications: []
   });
 
   const {
+    firstRow,
     isVisibleCreateSysNotification,
     editNotification,
     formType,
     isDeleteDialogVisible,
     isDeleting,
+    numberRows,
     systemNotifications
   } = systemNotificationState;
 
@@ -186,6 +190,8 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
     }
   };
 
+  const onChangePage = event => dispatchSystemNotification({ type: 'ON_CHANGE_PAGE', payload: event });
+
   const onDelete = async () => {
     try {
       dispatchSystemNotification({ type: 'ON_DELETE_START' });
@@ -225,11 +231,14 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       return (
         <DataTable
           autoLayout={true}
+          first={firstRow}
+          hasDefaultCurrentPage={true}
           loading={isLoading}
+          onPage={onChangePage}
           onRowClick={event => setSelectedRow(event.data)}
           paginator={true}
           paginatorRight={<span>{`${resourcesContext.messages['totalRecords']}  ${systemNotifications.length}`}</span>}
-          rows={10}
+          rows={numberRows}
           rowsPerPageOptions={[5, 10, 15]}
           summary="notificationsList"
           totalRecords={systemNotifications.length}

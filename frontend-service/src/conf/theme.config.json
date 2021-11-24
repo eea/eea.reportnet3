@@ -296,7 +296,7 @@
     "paginator-dropdown-label-color": "var(--gray-110)",
     "paginator-pages-color": "var(--white)",
     "paginator-pages-highlight-bg": "var(--white)",
-    "paginator-pages-highlight-box-shadow": "inset 0 0 0 0.1em var(--c-corporate-blue",
+    "paginator-pages-highlight-box-shadow": "inset 0 0 0 0.1em var(--c-corporate-blue)",
     "paginator-pages-highlight-color": "var(--black)",
     "paginator-pages-not-highlight-hover-bg": "var(--white)",
     "paginator-pages-not-highlight-hover-border": "1px solid var(--c-corporate-blue)",

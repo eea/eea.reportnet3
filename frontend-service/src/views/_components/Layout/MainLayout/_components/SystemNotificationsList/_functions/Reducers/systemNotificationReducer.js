@@ -1,5 +1,8 @@
 export const systemNotificationReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'ON_CHANGE_PAGE':
+      return { ...state, numberRows: payload.rows, firstRow: payload.first };
+
     case 'ON_DELETE_END':
       return { ...state, isDeleting: false, isDeleteDialogVisible: false };
 
