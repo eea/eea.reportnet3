@@ -31,7 +31,7 @@ export const NotificationService = {
     return notifications;
   },
 
-  create: async (type, date, content) => await NotificationRepository.create(type, date, content),
+  create: async (type, content) => await NotificationRepository.create(type, content),
 
   // removeById: async () => {},
 
