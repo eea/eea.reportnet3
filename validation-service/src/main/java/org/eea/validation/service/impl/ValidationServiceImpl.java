@@ -228,7 +228,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private RulesErrorUtils rulesErrorUtils;
 
-  /** The rules service */
+  /** The rules service. */
   @Autowired
   private RulesServiceImpl ruleservice;
 
@@ -329,9 +329,8 @@ public class ValidationServiceImpl implements ValidationService {
    * Load rules knowledge base.
    *
    * @param datasetId the dataset id
-   *
+   * @param rule the rule
    * @return the kie session
-   *
    * @throws EEAException the EEA exception
    * @throws SecurityException the security exception
    * @throws IllegalArgumentException the illegal argument exception
@@ -384,6 +383,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param idTable the id table
    * @param kieBase the kie base
+   * @param processId the process id
    */
   @Override
   @Transactional
@@ -790,6 +790,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @param fileName the file name
    * @return the file
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws ResponseStatusException the response status exception
    */
   @Override
   public File downloadExportedFile(Long datasetId, String fileName)
@@ -914,7 +915,6 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param nHeaders the n headers
-   * @param fieldsToWrite the fields to write
    * @param csvWriter the csv writer
    * @param notificationVO the notification VO
    * @throws EEAException the EEA exception

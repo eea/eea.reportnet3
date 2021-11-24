@@ -82,9 +82,8 @@ public class KieBaseManager {
    *
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema
-   *
+   * @param sqlRule the sql rule
    * @return the kie base
-   *
    * @throws FileNotFoundException the file not found exception
    */
   public KieBase reloadRules(Long datasetId, String datasetSchemaId, Rule sqlRule)
@@ -167,7 +166,6 @@ public class KieBaseManager {
     }
 
     KieHelper kieHelper = kiebaseAssemble(compiler, kieServices, ruleAttributes);
-    System.err.println(ruleAttributes.stream().collect(Collectors.toList()));
     // this is a shared variable in a single instanced object.
     return kieHelper.build();
   }
@@ -255,7 +253,6 @@ public class KieBaseManager {
    *
    * @param dataSetSchema the data set schema
    * @param rule the rule
-   * @param tableName the table name
    * @return the list
    */
   private List<String> fillFieldOriginName(DataSetSchema dataSetSchema, Rule rule) {

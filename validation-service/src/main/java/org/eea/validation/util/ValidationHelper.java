@@ -138,6 +138,7 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
+  /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
@@ -145,6 +146,7 @@ public class ValidationHelper implements DisposableBean {
   /** The Constant DATASET_: {@value}. */
   private static final String DATASET = "dataset_";
 
+  /** The Constant Rule: {@value}. */
   private static final String Rule = null;
 
   /**
@@ -174,9 +176,8 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param processId the process id
    * @param datasetId the dataset id
-   *
+   * @param rule the rule
    * @return the kie base
-   *
    * @throws EEAException the eea exception
    */
   public KieBase getKieBase(String processId, Long datasetId, Rule rule) throws EEAException {
@@ -402,7 +403,7 @@ public class ValidationHelper implements DisposableBean {
     LOG.info("Collecting Field Validation tasks");
     releaseFieldsValidation(dataset, processId, !filterEmptyFields(rules.getRules()));
     LOG.info("Collecting Table Validation tasks");
-    // releaseTableValidation(dataset, processId);
+    releaseTableValidation(dataset, processId);
     startProcess(processId);
   }
 
@@ -631,9 +632,9 @@ public class ValidationHelper implements DisposableBean {
   /**
    * Release fields validation.
    *
-   * @param datasetId the dataset id
+   * @param dataset the dataset
    * @param uuId the uu id
-   * @param fullCountFields the full count fields
+   * @param onlyEmptyFields the only empty fields
    */
   private void releaseFieldsValidation(final DataSetMetabaseVO dataset, String uuId,
       boolean onlyEmptyFields) {
@@ -652,7 +653,7 @@ public class ValidationHelper implements DisposableBean {
   /**
    * Release records validation.
    *
-   * @param datasetId the dataset id
+   * @param dataset the dataset
    * @param uuId the uu id
    */
   private void releaseRecordsValidation(final DataSetMetabaseVO dataset, String uuId) {
@@ -670,7 +671,7 @@ public class ValidationHelper implements DisposableBean {
   /**
    * Release table validation.
    *
-   * @param datasetId the dataset id
+   * @param dataset the dataset
    * @param uuId the uu id
    */
   private void releaseTableValidation(final DataSetMetabaseVO dataset, String uuId) {
@@ -700,6 +701,13 @@ public class ValidationHelper implements DisposableBean {
   }
 
 
+  /**
+   * Check sub table.
+   *
+   * @param referenceId the reference id
+   * @param table the table
+   * @return true, if successful
+   */
   private boolean checkSubTable(ObjectId referenceId, TableSchema table) {
     boolean found = false;
     if (table != null) {
@@ -719,7 +727,7 @@ public class ValidationHelper implements DisposableBean {
   /**
    * Release dataset validation.
    *
-   * @param datasetId the dataset id
+   * @param dataset the dataset
    * @param processId the uuid
    */
   private void releaseDatasetValidation(final DataSetMetabaseVO dataset, final String processId) {
@@ -733,9 +741,10 @@ public class ValidationHelper implements DisposableBean {
   /**
    * Release table validation.
    *
-   * @param datasetId the dataset id
+   * @param dataset the dataset
    * @param processId the processId
    * @param idTable the idTable
+   * @param sqlRule the sql rule
    */
   private void releaseTableValidation(final DataSetMetabaseVO dataset, final String processId,
       Long idTable, Rule sqlRule) {
@@ -753,7 +762,7 @@ public class ValidationHelper implements DisposableBean {
   /**
    * Release record validation.
    *
-   * @param datasetId the dataset id
+   * @param dataset the dataset
    * @param processId the processId
    * @param numPag the numPag
    */
@@ -771,7 +780,7 @@ public class ValidationHelper implements DisposableBean {
   /**
    * Release field validation.
    *
-   * @param datasetId the dataset id
+   * @param dataset the dataset
    * @param processId the uuid
    * @param numPag the numPag
    * @param onlyEmptyFields the only empty fields
@@ -906,6 +915,10 @@ public class ValidationHelper implements DisposableBean {
     }
     return isProcessStarted;
   }
+
+  /**
+   * Instantiates a new validation task.
+   */
 
   /**
    * Instantiates a new validation task.
