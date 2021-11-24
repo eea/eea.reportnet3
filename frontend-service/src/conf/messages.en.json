@@ -1388,6 +1388,7 @@
     "exportTableDataCompletedEvent": "Table data exported successfully",
     "exportTableDataFailedEvent": "Error exporting table data",
     "exportTableDataStart": "Exporting table data",
+    "exportImport": "Export/Import",
     "disabledQuickEdit": "Quick edit is disabled when data table is sorted or filtered"
   }
 }
