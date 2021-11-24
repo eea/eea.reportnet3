@@ -1608,6 +1608,8 @@ public class DataflowServiceImpl implements DataflowService {
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_ALL_REPORTERS_FAILED_EVENT,
           null, notificationVO);
+
+      return;
     }
 
     NotificationVO notificationVO = NotificationVO.builder()

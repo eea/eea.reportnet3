@@ -587,14 +587,95 @@ public class ContributorServiceImplTest {
     contributor.setAccount("reporter_write@reportnet.net");
     contributor.setRole("REPORTER_WRITE");
     contributor.setDataProviderId(1L);
+    contributor.setInvalid(true);
+    List<ContributorVO> contributors = new ArrayList<>();
+    contributors.add(contributor);
 
+    List<TempUser> tempUserList = new ArrayList<>();
+    TempUser tempUser1 = new TempUser();
+    tempUser1.setEmail("reporter_write@reportnet.net");
+    tempUser1.setRole("REPORTER_WRITE");
+    tempUser1.setDataProviderId(1L);
+    TempUser tempUser2 = new TempUser();
+    tempUser2.setEmail("reporter_read@reportnet.net");
+    tempUser2.setRole("REPORTER_READ");
+    tempUser2.setDataProviderId(2L);
+
+    tempUserList.add(tempUser1);
+    tempUserList.add(tempUser2);
+
+    UserRepresentationVO userRepresentationVORead = new UserRepresentationVO();
+    userRepresentationVORead.setEmail("reportnet@reportnet.net");
+
+    Mockito.lenient().when(contributorServiceImpl.findTempUserByRoleAndDataflow(Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(contributors);
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("name");
+    when(userManagementControllerZull.getUserByEmail(Mockito.anyString()))
+        .thenReturn(userRepresentationVORead);
 
-    contributorServiceImpl.validateReporters(1L, 1L, true);
+    when(tempUserRepository.findTempUserByRoleAndDataflow(Mockito.anyString(), Mockito.anyLong(),
+        Mockito.any())).thenReturn(tempUserList);
 
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    Mockito.when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
+        .thenReturn(new ResourceInfoVO());
+    contributorServiceImpl.createContributor(1L, contributorVORead, 1L, false);
 
+    try {
+      contributorServiceImpl.validateReporters(1L, 1L, true);
+      Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+          Mockito.any(), Mockito.any());
+    } catch (ResponseStatusException e) {
+    }
+  }
+
+  /**
+   * Validate reporters test.
+   *
+   * @throws EEAException
+   */
+  @Test
+  public void validateReportersExceptionTest() throws EEAException {
+
+    ContributorVO contributor = new ContributorVO();
+    contributor.setAccount("reporter_write@reportnet.net");
+    contributor.setRole("REPORTER_WRITE");
+    contributor.setDataProviderId(1L);
+    contributor.setInvalid(true);
+    List<ContributorVO> contributors = new ArrayList<>();
+    contributors.add(contributor);
+
+    List<TempUser> tempUserList = new ArrayList<>();
+    TempUser tempUser1 = new TempUser();
+    tempUser1.setEmail("reporter_write@reportnet.net");
+    tempUser1.setRole("REPORTER_WRITE");
+    tempUser1.setDataProviderId(1L);
+    TempUser tempUser2 = new TempUser();
+    tempUser2.setEmail("reporter_read@reportnet.net");
+    tempUser2.setRole("REPORTER_READ");
+    tempUser2.setDataProviderId(2L);
+
+    tempUserList.add(tempUser1);
+    tempUserList.add(tempUser2);
+
+    UserRepresentationVO userRepresentationVORead = new UserRepresentationVO();
+    userRepresentationVORead.setEmail("reportnet@reportnet.net");
+
+    Mockito.lenient().when(contributorServiceImpl.findTempUserByRoleAndDataflow(Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(contributors);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("name");
+    when(userManagementControllerZull.getUserByEmail(Mockito.anyString()))
+        .thenReturn(userRepresentationVORead);
+
+    when(tempUserRepository.findTempUserByRoleAndDataflow(Mockito.anyString(), Mockito.anyLong(),
+        Mockito.any())).thenReturn(tempUserList);
+
+    try {
+      contributorServiceImpl.validateReporters(1L, 1L, true);
+    } catch (ResponseStatusException e) {
+      Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+          Mockito.any(), Mockito.any());
+    }
   }
 }
