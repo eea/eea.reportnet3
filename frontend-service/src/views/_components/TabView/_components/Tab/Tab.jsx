@@ -248,7 +248,7 @@ const Tab = ({
       }
     };
 
-    let extraStyle = getExtraStyle();
+    const extraStyle = getExtraStyle();
 
     if (editable) {
       return `${styles.p_tabview_design} ${extraStyle}`;
