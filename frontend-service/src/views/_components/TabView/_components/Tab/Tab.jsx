@@ -238,17 +238,25 @@ const Tab = ({
   };
 
   const getExtraStyle = () => {
-    if (totalTabs === 1) return `${styles.tabGeneral} ${styles.tabViewTableEmpty}`;
-    else if (isNavigationHidden) return `${styles.tabGeneral} ${styles.tabViewNavigationHidden}`;
-    else if (!isNavigationHidden) return `${styles.tabGeneral} ${styles.tabViewTabNavigationShown}`;
+    if (totalTabs === 1) {
+      return `${styles.tabGeneral} ${styles.tabViewTableEmpty}`;
+    } else if (isNavigationHidden) {
+      return `${styles.tabGeneral} ${styles.tabViewNavigationHidden}`;
+    } else if (!isNavigationHidden) {
+      return `${styles.tabGeneral} ${styles.tabViewTabNavigationShown}`;
+    }
   };
 
   const getClassNameTabView = () => {
     let extraStyle = getExtraStyle();
 
-    if (editable) return `${styles.p_tabview_design} ${extraStyle}`;
-    else if (addTab) return `${styles.p_tabview_design_add} ${extraStyle} datasetSchema-created-table-help-step`;
-    else return `${styles.p_tabview_noDesign} ${extraStyle}`;
+    if (editable) {
+      return `${styles.p_tabview_design} ${extraStyle}`;
+    } else if (addTab) {
+      return `${styles.p_tabview_design_add} ${extraStyle} datasetSchema-created-table-help-step`;
+    } else {
+      return `${styles.p_tabview_noDesign} ${extraStyle}`;
+    }
   };
 
   return (
