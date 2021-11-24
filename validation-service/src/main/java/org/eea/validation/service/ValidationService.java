@@ -20,6 +20,7 @@ import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.schemas.DataSetSchema;
+import org.eea.validation.persistence.schemas.rule.Rule;
 import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
 import org.springframework.data.domain.Pageable;
@@ -81,7 +82,8 @@ public interface ValidationService {
    * @param kieBase the kie base
    * @throws EEAException the EEA exception
    */
-  void validateTable(@DatasetId Long datasetId, Long idTable, KieBase kieBase) throws EEAException;
+  void validateTable(@DatasetId Long datasetId, Long idTable, KieBase kieBase, String processId)
+      throws EEAException;
 
 
   /**
@@ -103,7 +105,7 @@ public interface ValidationService {
    * @return the kie session
    * @throws EEAException the EEA exception
    */
-  KieBase loadRulesKnowledgeBase(@DatasetId Long datasetId) throws EEAException;
+  KieBase loadRulesKnowledgeBase(@DatasetId Long datasetId, Rule rule) throws EEAException;
 
   /**
    * Gets the record errors.

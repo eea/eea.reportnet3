@@ -174,11 +174,12 @@ public class ValidationHelperTest {
    */
   @Test
   public void getKieBase() throws EEAException {
-    Mockito.when(validationService.loadRulesKnowledgeBase(Mockito.eq(1l))).thenReturn(kieBase);
+    Mockito.when(validationService.loadRulesKnowledgeBase(Mockito.eq(1l), Mockito.any()))
+        .thenReturn(kieBase);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
-    KieBase result = validationHelper.getKieBase("", 1l);
+    KieBase result = validationHelper.getKieBase("", 1l, new Rule());
     Assert.assertNotNull(result);
   }
 
@@ -195,8 +196,8 @@ public class ValidationHelperTest {
     Mockito.when(authentication.getName()).thenReturn("user");
 
     Mockito.doThrow(new EEAException("error")).when(validationService)
-        .loadRulesKnowledgeBase(Mockito.eq(1l));
-    validationHelper.getKieBase("", 1l);
+        .loadRulesKnowledgeBase(Mockito.eq(1l), Mockito.any());
+    validationHelper.getKieBase("", 1l, null);
   }
 
   /**
@@ -260,12 +261,6 @@ public class ValidationHelperTest {
     ReflectionTestUtils.setField(validationHelper, "fieldBatchSize", 20);
     ReflectionTestUtils.setField(validationHelper, "recordBatchSize", 20);
     ReflectionTestUtils.setField(validationHelper, "initialTax", 2);
-    List<TableValue> tables = new ArrayList<>();
-    TableValue table = new TableValue();
-    table.setId(1l);
-    tables.add(table);
-    Mockito.when(tableRepository.findAll()).thenReturn(tables);
-
     ConsumerGroupVO consumerGroups = new ConsumerGroupVO();
     Collection<MemberDescriptionVO> members = new ArrayList<>();
 

@@ -1,8 +1,10 @@
 package org.eea.validation.persistence.schemas.rule;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
@@ -17,7 +19,13 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Rule {
+public class Rule implements Serializable {
+
+
+  /** The Constant serialVersionUID. */
+  @Transient
+  private static final long serialVersionUID = -8466833976496437805L;
+
   /** The rule id. */
   @Id
   @Field(value = "_id")
