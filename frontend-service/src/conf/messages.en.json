@@ -1385,6 +1385,9 @@
     "geoJSON": "GeoJSON",
     "geoJSONErrors": "GeoJSON errors (click on each error to scroll)",
     "selectCRS": "Select a CRS",
+    "exportTableDataCompletedEvent": "Table data exported successfully",
+    "exportTableDataFailedEvent": "Error exporting table data",
+    "exportTableDataStart": "Exporting table data",
     "disabledQuickEdit": "Quick edit disabled because the table is sorted"
   }
 }
