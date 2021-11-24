@@ -463,7 +463,7 @@ public class ValidationServiceTest {
   @Test(expected = EEAException.class)
   public void testLoadRulesKnowledgeBaseThrow() throws FileNotFoundException, EEAException {
     doThrow(FileNotFoundException.class).when(kieBaseManager).reloadRules(Mockito.any(),
-        Mockito.any(), null);
+        Mockito.any(), Mockito.any());
     try {
       validationServiceImpl.loadRulesKnowledgeBase(1L, null);
     } catch (EEAException e) {
@@ -551,7 +551,8 @@ public class ValidationServiceTest {
     KieHelper kieHelper = new KieHelper();
     KieBase kiebase = kieHelper.build();
     when(datasetSchemaControllerZuul.getDatasetSchemaId(Mockito.any())).thenReturn("");
-    when(kieBaseManager.reloadRules(Mockito.any(), Mockito.any(), null)).thenReturn(kiebase);
+    when(kieBaseManager.reloadRules(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(kiebase);
     assertEquals("assertion error", kiebase,
         validationServiceImpl.loadRulesKnowledgeBase(1L, null));
   }
@@ -569,7 +570,7 @@ public class ValidationServiceTest {
     KieHelper kieHelper = new KieHelper();
     kieHelper.build();
     Mockito.doThrow(new FileNotFoundException()).when(kieBaseManager).reloadRules(Mockito.anyLong(),
-        Mockito.any(), null);
+        Mockito.any(), Mockito.any());
 
     validationServiceImpl.loadRulesKnowledgeBase(1L, null);
   }
