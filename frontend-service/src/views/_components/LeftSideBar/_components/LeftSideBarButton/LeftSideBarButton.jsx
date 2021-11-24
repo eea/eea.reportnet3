@@ -16,6 +16,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
   const resourcesContext = useContext(ResourcesContext);
 
   const [animate, setAnimate] = useState(false);
+  const [animateSystemNotification, setAnimateSystemNotification] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -30,6 +31,20 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
       isMounted = false;
     };
   }, [notificationContext.newNotification]);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (notificationContext.newSystemNotification) {
+      setAnimateSystemNotification(true);
+    } else {
+      setTimeout(() => {
+        if (isMounted) setAnimateSystemNotification(false);
+      }, 600);
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [notificationContext.newSystemNotification]);
 
   const defaultLayout = (
     <Fragment>
@@ -51,16 +66,34 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
           icon={AwesomeIcons(icon)}
           role="button"
         />
-
-        {notificationContext.all.length > 0 && (
-          <span className={styles.notificationCounter}>{notificationContext.all.length || 0}</span>
+        {notificationContext.all.filter(notification => !notification.isSystem).length > 0 && (
+          <span className={styles.notificationCounter}>
+            {notificationContext.all.filter(notification => !notification.isSystem).length || 0}
+          </span>
         )}
       </div>
       <span className={styles.leftSideBarUserText}>{resourcesContext.messages[label]}</span>
     </Fragment>
   );
+  const systemNotificationsLayout = (
+    <Fragment>
+      <div className={`${styles.notificationIconWrapper} ${styles.leftSideBarElementAnimation}`}>
+        <FontAwesomeIcon
+          aria-label={resourcesContext.messages['notifications']}
+          className={`${styles.leftSideBarUserIcon} ${
+            animateSystemNotification ? styles.leftSideBarElementSystemNotification : ''
+          }`}
+          icon={AwesomeIcons(icon)}
+          role="button"
+        />
+        {(notificationContext.all.filter(notification => notification.isSystem === true).length > 0 ||
+          notificationContext.refreshedAndEnabled) && <span className={styles.systemNotificationMark}>!</span>}
+      </div>
+      <span className={styles.leftSideBarUserText}>{resourcesContext.messages[label]}</span>
+    </Fragment>
+  );
 
-  const buttonsLayouts = { defaultLayout, notificationsLayout };
+  const buttonsLayouts = { defaultLayout, notificationsLayout, systemNotificationsLayout };
 
   return (
     <Fragment>
