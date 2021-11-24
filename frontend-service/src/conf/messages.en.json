@@ -1384,6 +1384,9 @@
     "nonEditableDataAndEmpty": "The field is not editable and is empty",
     "geoJSON": "GeoJSON",
     "geoJSONErrors": "GeoJSON errors (click on each error to scroll)",
-    "selectCRS": "Select a CRS"
+    "selectCRS": "Select a CRS",
+    "exportTableDataCompletedEvent": "Table data exported successfully",
+    "exportTableDataFailedEvent": "Error exporting table data",
+    "exportTableDataStart": "Exporting table data"
   }
 }
