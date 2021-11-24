@@ -2,8 +2,6 @@ import { useContext, useEffect, useState } from 'react';
 import isNil from 'lodash/isNil';
 import classNames from 'classnames';
 
-import { config } from 'conf';
-
 import styles from './Coordinates.module.scss';
 
 import { Button } from 'views/_components/Button';
@@ -12,6 +10,8 @@ import { InputText } from 'views/_components/InputText';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
+import { MapUtils } from 'views/_functions/Utils/MapUtils';
 
 export const Coordinates = ({
   crsDisabled,
@@ -36,6 +36,8 @@ export const Coordinates = ({
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
+  const { inBounds } = MapUtils;
+
   useEffect(() => {
     if (initialGeoJson) {
       const parsedInitialGeoJson = JSON.parse(initialGeoJson);
@@ -44,36 +46,17 @@ export const Coordinates = ({
     }
   }, [initialGeoJson]);
 
-  const checkCoordinates = (lat, long) => {
+  const checkCoordinates = (lat, long, checkProjected = false) => {
     setHasErrors({
       latitude: checkEmptyCoordinate(lat),
       longitude: checkEmptyCoordinate(long),
-      latOutOfBounds: !inBounds(lat, 'latitude'),
-      longOutOfBounds: !inBounds(long, 'longitude')
+      latOutOfBounds: !inBounds({ coord: lat, coordType: 'latitude', checkProjected, crs: crsValue.value }),
+      longOutOfBounds: !inBounds({ coord: long, coordType: 'longitude', checkProjected, crs: crsValue.value }),
+      checkProjected
     });
   };
 
   const checkEmptyCoordinate = coord => (!isNil(coord) ? coord.toString().trim() === '' : true);
-
-  const inBounds = (coord, coordType) => {
-    console.log(crsValue);
-    const parsedCoord = parseFloat(coord) || 0;
-    if (crsValue.value !== 'EPSG:3035') {
-      if (coordType === 'latitude') {
-        console.log(parsedCoord, config.GEOGRAPHICAL_LAT_COORD.min, config.GEOGRAPHICAL_LAT_COORD.max);
-        return parsedCoord >= config.GEOGRAPHICAL_LAT_COORD.min && parsedCoord <= config.GEOGRAPHICAL_LAT_COORD.max;
-      } else {
-        console.log(parsedCoord, config.MIN_GEOGRAPHICAL_LONG_COORD, config.MAX_GEOGRAPHICAL_LONG_COORD);
-        return parsedCoord >= config.GEOGRAPHICAL_LONG_COORD.min && parsedCoord <= config.GEOGRAPHICAL_LONG_COORD.max;
-      }
-    } else {
-      if (coordType === 'latitude') {
-        return parsedCoord >= config.METRICAL_X_COORD.min && parsedCoord <= config.METRICAL_X_COORD.max;
-      } else {
-        return parsedCoord >= config.METRICAL_Y_COORD.min && parsedCoord <= config.METRICAL_Y_COORD.max;
-      }
-    }
-  };
 
   const renderLabel = keys => {
     if (!xyLabels) {
@@ -83,11 +66,43 @@ export const Coordinates = ({
     }
   };
 
-  const renderTooltipButtonMessage = () => {
-    if (!xyLabels) {
-      return `${resourcesContext.messages['coordsOutOfBoundsTooltip']} ${resourcesContext.messages['coordsOutOfBoundsTooltipGeographical']}`;
+  const renderErrorMessage = () => {
+    let message = errorMessage;
+    if (hasErrors.latOutOfBounds || hasErrors.longOutOfBounds) {
+      return `${message}: `;
+    }
+    return message;
+  };
+
+  const renderOutOfBoundsErrorMessage = () => {
+    if (hasErrors.checkProjected) {
+      return resourcesContext.messages['coordsOutOfBoundsProjected'];
     } else {
-      return `${resourcesContext.messages['coordsOutOfBoundsTooltip']} ${resourcesContext.messages['coordsOutOfBoundsTooltipMetrical']}`;
+      return resourcesContext.messages['coordsOutOfBounds'];
+    }
+  };
+
+  const renderTooltipButtonMessage = () => {
+    const getCoordinatesBoundariesTitle = () => {
+      if (hasErrors.checkProjected) {
+        return resourcesContext.messages['coordsOutOfBoundsTooltipProjected'];
+      } else {
+        return resourcesContext.messages['coordsOutOfBoundsTooltip'];
+      }
+    };
+
+    const getCoordinatesBoundaries = () => {
+      if (hasErrors.checkProjected) {
+        return resourcesContext.messages['coordsOutOfBoundsTooltipGeographicalProjected'];
+      } else {
+        return resourcesContext.messages['coordsOutOfBoundsTooltipGeographical'];
+      }
+    };
+
+    if (!xyLabels) {
+      return `${getCoordinatesBoundariesTitle()} ${getCoordinatesBoundaries()}`;
+    } else {
+      return `${getCoordinatesBoundariesTitle()} ${resourcesContext.messages['coordsOutOfBoundsTooltipMetrical']}`;
     }
   };
 
@@ -115,6 +130,8 @@ export const Coordinates = ({
             onFocus();
           }}
           onKeyDown={e => onKeyDown(e, e.target.value)}
+          tooltip={hasErrors.latOutOfBounds ? renderTooltipButtonMessage() : ''}
+          tooltipOptions={{ position: 'top' }}
           type="text"
           value={latitude}
         />
@@ -139,20 +156,22 @@ export const Coordinates = ({
             onFocus();
           }}
           onKeyDown={e => onKeyDown(e, e.target.value)}
+          tooltip={hasErrors.longOutOfBounds ? renderTooltipButtonMessage() : ''}
+          tooltipOptions={{ position: 'top' }}
           type="text"
           value={longitude}
         />
       </div>
       {hasErrorMessage && (
-        <p className={styles.errorMessage}>
-          {showMessageError && <span className={styles.pointError}>{errorMessage}. </span>}
+        <span className={styles.errorMessage}>
+          {showMessageError && <span className={styles.pointError}>{renderErrorMessage()}</span>}
           {(hasErrors.latOutOfBounds || hasErrors.longOutOfBounds) && (
             <span>
-              <span className={styles.pointError}>{resourcesContext.messages['coordsOutOfBounds']}</span>
+              <span className={styles.pointError}>{renderOutOfBoundsErrorMessage()}</span>
               <TooltipButton message={renderTooltipButtonMessage()} />
             </span>
           )}
-        </p>
+        </span>
       )}
       <div className={`${!isCellEditor ? styles.pointEpsgWrapper : ''}`}>
         <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
@@ -161,7 +180,22 @@ export const Coordinates = ({
           ariaLabel={'crs'}
           className={styles.epsgSwitcher}
           disabled={crsDisabled || hasErrors.latOutOfBounds || hasErrors.longOutOfBounds}
-          onChange={e => onCrsChange(e.target.value)}
+          onChange={e => {
+            if (
+              e.target.value.value === 'EPSG:3035' &&
+              (!inBounds({ coord: latitude, coordType: 'latitude', checkProjected: true, crs: e.target.value.value }) ||
+                !inBounds({
+                  coord: longitude,
+                  coordType: 'longitude',
+                  checkProjected: true,
+                  crs: e.target.value.value
+                }))
+            ) {
+              checkCoordinates(latitude, longitude, true);
+              return false;
+            }
+            onCrsChange(e.target.value);
+          }}
           optionLabel="label"
           options={crsOptions}
           placeholder={resourcesContext.messages['selectCRS']}

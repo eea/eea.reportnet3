@@ -1402,9 +1402,14 @@
     "checkEnabledSystemNotificationsError": "Error checking enabled notifications",
     "lat": "Lat",
     "long": "Long",
-    "coordsOutOfBounds": "Coordinates out of bounds",
-    "coordsOutOfBoundsTooltip": "Coordinates must be between",
+    "coordsOutOfBounds": "Entered coordinates out of bounds",
+    "coordsOutOfBoundsProjected": "Projected coordinates out of bounds",
+    "coordsOutOfBoundsTooltip": "Entered coordinates must be between",
+    "coordsOutOfBoundsTooltipProjected": "Projected coordinates must be between",
     "coordsOutOfBoundsTooltipGeographical": "-180 and 180 (longitude) and -90 and 90 (latitude)",
-    "coordsOutOfBoundsTooltipMetrical": "1896628.62 and 9512027.50 (X) and 1507846.05 and 4851204.83 (Y)"
+    "coordsOutOfBoundsTooltipGeographicalProjected": "-16.1 and 40.18 (longitude) and 32.88 and 84.17 (latitude)",
+    "coordsOutOfBoundsTooltipMetrical": "1896628.62 and 4851204.83 (X) and 1507846.05 and 6829874.45 (Y)",
+    "newPointErrorMessage": "In the EPSG:3035, the new point must be between -16.1 and 40.18 (longitude) and 32.88 and 84.17 (latitude)",
+    "newPointErrorTitle": "Coordinate error"
   }
 }
