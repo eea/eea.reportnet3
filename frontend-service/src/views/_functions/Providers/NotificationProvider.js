@@ -31,7 +31,7 @@ const NotificationProvider = ({ children }) => {
           if (!isSystemNotification) {
             const { content, onClick, type } = notificationDTO;
             if (save) {
-              NotificationService.create(notificationDTO.type, new Date(), notificationDTO.content);
+              NotificationService.create(notificationDTO.type, notificationDTO.content);
             }
             const notification = NotificationService.parse({
               config: config.notifications.notificationSchema,
