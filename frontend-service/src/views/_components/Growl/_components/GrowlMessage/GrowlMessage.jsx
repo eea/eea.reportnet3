@@ -7,6 +7,11 @@ import classNames from 'classnames';
 
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
 export class GrowlMessage extends Component {
   static defaultProps = {
     closableOnClick: false,
@@ -21,6 +26,8 @@ export class GrowlMessage extends Component {
     onClose: PropTypes.func,
     onClick: PropTypes.func
   };
+
+  static contextType = ResourcesContext;
 
   constructor(props) {
     super(props);
@@ -69,9 +76,13 @@ export class GrowlMessage extends Component {
   }
 
   renderCloseIcon() {
+    const closeIconClassName = classNames('p-growl-icon-close p-link', {
+      'p-growl-message-disabled-icons': this.props.message.preview
+    });
+
     if (this.props.message.closable !== false) {
       return (
-        <button className="p-growl-icon-close p-link" onClick={this.onClose} type="button">
+        <button className={closeIconClassName} onClick={this.onClose} type="button">
           <span className="p-growl-icon-close-icon pi pi-times"></span>
         </button>
       );
@@ -80,19 +91,30 @@ export class GrowlMessage extends Component {
     }
   }
 
+  renderIcon(iconClassName) {
+    if (!this.props.message.system) {
+      return <span className={iconClassName} onClick={this.onClose}></span>;
+    } else {
+      return <FontAwesomeIcon className={iconClassName} icon={AwesomeIcons('bullhorn')} role="presentation" />;
+    }
+  }
+
   render() {
     let className = classNames('p-growl-item-container p-highlight', {
       'p-growl-message-info': this.props.message.severity === 'info',
       'p-growl-message-warn': this.props.message.severity === 'warn',
       'p-growl-message-error': this.props.message.severity === 'error',
-      'p-growl-message-success': this.props.message.severity === 'success'
+      'p-growl-message-success': this.props.message.severity === 'success',
+      'p-growl-message-system-notification': this.props.message.system
     });
 
     let iconClassName = classNames('p-growl-image pi', {
       'pi-info-circle': this.props.message.severity === 'info',
       'pi-exclamation-triangle': this.props.message.severity === 'warn',
       'pi-times-circle': this.props.message.severity === 'error',
-      'pi-check': this.props.message.severity === 'success'
+      'pi-check': this.props.message.severity === 'success',
+      'p-growl-message-system-notification-icon': this.props.message.system,
+      'p-growl-message-disabled-icons': this.props.message.preview
     });
 
     let titleClassName = classNames('p-growl-title', {
@@ -103,6 +125,7 @@ export class GrowlMessage extends Component {
     });
 
     let closeIcon = this.renderCloseIcon();
+    let renderIcon = this.renderIcon(iconClassName);
 
     return (
       <div
@@ -114,9 +137,13 @@ export class GrowlMessage extends Component {
         }}>
         <div aria-atomic="true" aria-live="assertive" className="p-growl-item" role="alert">
           {closeIcon}
-          <span className={iconClassName} onClick={this.onClose}></span>
+          {renderIcon}
           <div className="p-growl-message">
-            <span className={titleClassName}>{this.props.message.summary}</span>
+            <span className={titleClassName}>
+              {this.props.message.system
+                ? this.context.messages['systemNotification'].toUpperCase()
+                : this.props.message.summary}
+            </span>
             {this.props.message.detail && <div className="p-growl-details">{this.props.message.detail}</div>}
           </div>
         </div>

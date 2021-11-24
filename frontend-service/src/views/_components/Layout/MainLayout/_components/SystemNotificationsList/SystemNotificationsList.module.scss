@@ -26,3 +26,23 @@
   display: flex;
   justify-content: center;
 }
+
+.invisibleHeader {
+  display: none;
+}
+
+.enabledColumnWrapper {
+  text-align: center;
+}
+
+.spinner {
+  top: 0 !important;
+}
+
+.checkboxEditorWrapper {
+  display: flex;
+  justify-content: center;
+  .checkboxEditor {
+    width: 20px !important;
+  }
+}
