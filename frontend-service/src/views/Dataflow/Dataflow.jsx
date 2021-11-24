@@ -611,19 +611,23 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onDownloadUsersByCountry = async () => {
     setIsDownloadingUsers(true);
-    notificationContext.add({ type: 'DOWNLOAD_USERS_BY_COUNTRY_START' });
 
     try {
       await DataflowService.generateUsersByCountryFile(dataflowId);
+      notificationContext.add({ type: 'DOWNLOAD_USERS_BY_COUNTRY_START' });
     } catch (error) {
       console.error('Dataflow - onDownloadUsersByCountry.', error);
-      notificationContext.add({ type: 'GENERATE_USERS_LIST_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_USERS_LIST_FILE_ERROR' }, true);
+      }
       setIsDownloadingUsers(false);
     }
   };
 
   useCheckNotifications(
-    ['AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE', 'DOWNLOAD_USERS_LIST_FILE_ERROR'],
+    ['AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE', 'DOWNLOAD_USERS_LIST_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
     setIsDownloadingUsers,
     false
   );
@@ -635,7 +639,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const renderUserListDialogFooter = () => (
     <div className={styles.buttonsRolesFooter}>
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary p-button-animated-blink ${styles.buttonLeft}`}
         disabled={dataflowState.isDownloadingUsers}
         icon={dataflowState.isDownloadingUsers ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadUsersListButtonLabel']}
