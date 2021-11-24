@@ -1386,6 +1386,7 @@
     "selectCRS": "Select a CRS",
     "exportTableDataCompletedEvent": "Table data exported successfully",
     "exportTableDataFailedEvent": "Error exporting table data",
+    "exportTableDataStart": "Exporting table data",
     "systemNotificationLevel": "Select the notification level",
     "systemNotification": "System notification",
     "previewNotification": "Preview",
