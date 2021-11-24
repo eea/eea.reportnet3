@@ -60,17 +60,17 @@ export const Coordinates = ({
     const parsedCoord = parseFloat(coord) || 0;
     if (crsValue.value !== 'EPSG:3035') {
       if (coordType === 'latitude') {
-        console.log(parsedCoord, config.MIN_GEOGRAPHICAL_LAT_COORD, config.MAX_GEOGRAPHICAL_LAT_COORD);
-        return parsedCoord >= config.MIN_GEOGRAPHICAL_LAT_COORD && parsedCoord <= config.MAX_GEOGRAPHICAL_LAT_COORD;
+        console.log(parsedCoord, config.GEOGRAPHICAL_LAT_COORD.min, config.GEOGRAPHICAL_LAT_COORD.max);
+        return parsedCoord >= config.GEOGRAPHICAL_LAT_COORD.min && parsedCoord <= config.GEOGRAPHICAL_LAT_COORD.max;
       } else {
         console.log(parsedCoord, config.MIN_GEOGRAPHICAL_LONG_COORD, config.MAX_GEOGRAPHICAL_LONG_COORD);
-        return parsedCoord >= config.MIN_GEOGRAPHICAL_LONG_COORD && parsedCoord <= config.MAX_GEOGRAPHICAL_LONG_COORD;
+        return parsedCoord >= config.GEOGRAPHICAL_LONG_COORD.min && parsedCoord <= config.GEOGRAPHICAL_LONG_COORD.max;
       }
     } else {
       if (coordType === 'latitude') {
-        return parsedCoord >= config.MIN_METRICAL_X_COORD && parsedCoord <= config.MAX_METRICAL_X_COORD;
+        return parsedCoord >= config.METRICAL_X_COORD.min && parsedCoord <= config.METRICAL_X_COORD.max;
       } else {
-        return parsedCoord >= config.MIN_METRICAL_Y_COORD && parsedCoord <= config.MAX_METRICAL_Y_COORD;
+        return parsedCoord >= config.METRICAL_Y_COORD.min && parsedCoord <= config.METRICAL_Y_COORD.max;
       }
     }
   };
