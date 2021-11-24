@@ -648,7 +648,7 @@
     "importTableSchema": "Import definition",
     "importTableSchemaDialogHeader": "Import schema definition in table",
     "importTableSchemaInit": "Importing table schema definition",
-    "impossibleRoleError": "The lead reporter couldn't be assigned as reporter",
+    "impossibleRoleError": "The lead reporter cannot be assigned as reporter",
     "incompleteDataTooltip": "Incomplete data",
     "info": "Info",
     "instrumentColumnTitle": "Instrument",
