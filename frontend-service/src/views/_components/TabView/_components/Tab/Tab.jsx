@@ -237,17 +237,17 @@ const Tab = ({
     }
   };
 
-  const getExtraStyle = () => {
-    if (totalTabs === 1) {
-      return `${styles.tabGeneral} ${styles.tabViewTableEmpty}`;
-    } else if (isNavigationHidden) {
-      return `${styles.tabGeneral} ${styles.tabViewNavigationHidden}`;
-    } else if (!isNavigationHidden) {
-      return `${styles.tabGeneral} ${styles.tabViewTabNavigationShown}`;
-    }
-  };
-
   const getClassNameTabView = () => {
+    const getExtraStyle = () => {
+      if (totalTabs === 1) {
+        return `${styles.tabGeneral} ${styles.tabViewTableEmpty}`;
+      } else if (isNavigationHidden) {
+        return `${styles.tabGeneral} ${styles.tabViewNavigationHidden}`;
+      } else if (!isNavigationHidden) {
+        return `${styles.tabGeneral} ${styles.tabViewTabNavigationShown}`;
+      }
+    };
+
     let extraStyle = getExtraStyle();
 
     if (editable) {
