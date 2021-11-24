@@ -1,8 +1,6 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -20,6 +18,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
 import { QCFieldEditor } from './_components/QCFieldEditor';
 import { Spinner } from 'views/_components/Spinner';
@@ -62,6 +61,9 @@ export const QCList = withRouter(
       isDeletingRule: false,
       editingRows: [],
       isLoading: true,
+      isTableSorted: false,
+      sortFieldValidations: null,
+      sortOrderValidations: null,
       validationId: '',
       validationList: {}
     });
@@ -584,7 +586,7 @@ export const QCList = withRouter(
             field={field}
             header={getHeader(field)}
             key={field}
-            sortable={true}
+            sortable={tabsValidationsState.editingRows.length === 0}
             style={columnStyles(field)}
           />
         );
@@ -622,6 +624,17 @@ export const QCList = withRouter(
     };
 
     const onRowEditCancel = event => tabsValidationsDispatch({ type: 'RESET_FILTERED_DATA', payload: event.data });
+
+    const onSort = event => {
+      tabsValidationsDispatch({
+        type: 'SET_IS_TABLE_SORTED',
+        payload: {
+          value: true,
+          sortFieldValidations: event.sortField,
+          sortOrderValidations: event.sortOrder
+        }
+      });
+    };
 
     const onUpdateValidationRule = async event => {
       try {
@@ -707,7 +720,7 @@ export const QCList = withRouter(
               onRowEditCancel={onRowEditCancel}
               onRowEditInit={onRowEditInit}
               onRowEditSave={onUpdateValidationRule}
-              // paginator={tabsValidationsState.editingRows.length === 0}
+              onSort={event => onSort(event)}
               paginator={true}
               paginatorDisabled={tabsValidationsState.editingRows.length > 0}
               paginatorRight={!isNil(tabsValidationsState.filteredData) && getPaginatorRecordsCount()}
@@ -718,11 +731,14 @@ export const QCList = withRouter(
                 condition:
                   validationContext.isFetchingData ||
                   tabsValidationsState.filtered ||
-                  tabsValidationsState.hasEmptyFields,
+                  tabsValidationsState.hasEmptyFields ||
+                  tabsValidationsState.isTableSorted,
                 requiredFields: ['name', 'message', 'shortCode']
               }}
               rows={10}
               rowsPerPageOptions={[5, 10, 15]}
+              sortField={tabsValidationsState.sortFieldValidations}
+              sortOrder={tabsValidationsState.sortOrderValidations}
               totalRecords={tabsValidationsState.validationList.validations.length}
               value={cloneDeep(tabsValidationsState.filteredData)}>
               {renderColumns(tabsValidationsState.validationList.validations)}

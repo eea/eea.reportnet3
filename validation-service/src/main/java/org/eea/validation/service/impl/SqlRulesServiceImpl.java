@@ -47,7 +47,6 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
-import org.hibernate.exception.SQLGrammarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -376,9 +375,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           try {
             checkQueryTestExecution(query.replace(";", ""), dataSetMetabaseVO, rule);
           } catch (EEAInvalidSQLException e) {
-            LOG_ERROR.error("SQL is not correct: {}",
-                ((SQLGrammarException) e.getCause()).getSQLException().getMessage(), e);
-            isSQLCorrect = ((SQLGrammarException) e.getCause()).getSQLException().getMessage();
+            LOG_ERROR.error("SQL is not correct: {}", e.getCause().getCause().getMessage());
+            isSQLCorrect = e.getMessage();
           }
         } else {
           isSQLCorrect = "Datasets " + ids.toString() + " not from this dataflow";

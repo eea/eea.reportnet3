@@ -164,8 +164,9 @@ public class ContributorServiceImpl implements ContributorService {
       contributor.setAccount(foundUser.getEmail());
       contributor.setRole(foundUser.getRole());
       contributor.setDataProviderId(foundUser.getDataProviderId());
-    } else
+    } else {
       contributor = null;
+    }
 
     return contributor;
 

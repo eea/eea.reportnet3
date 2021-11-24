@@ -604,6 +604,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (user == null) {
       leadReporter.setInvalid(true);
     } else {
+      leadReporter.setInvalid(false);
       modifyLeadReporterPermissions(email, representative, false);
     }
     return leadReporterRepository.save(leadReporter).getId();
@@ -637,7 +638,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         leadReporterVO.setEmail(leadReporterVO.getEmail().toLowerCase());
         UserRepresentationVO newUser =
             userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail().toLowerCase());
-        leadReporter.setInvalid(newUser == null ? true : null);
+        leadReporter.setInvalid(newUser == null ? true : false);
         if (null != representative.getLeadReporters() && representative.getLeadReporters().stream()
             .filter(reporter -> leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
             .collect(Collectors.counting()) == 0) {
@@ -805,33 +806,39 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    */
   private void modifyLeadReporterPermissions(String email, Representative representative,
       boolean remove) {
-    if (Boolean.TRUE.equals(representative.getHasDatasets())) {
-      List<ResourceAssignationVO> assignments = new ArrayList<>();
-      // get datasetId
-      List<ReportingDatasetVO> datasets =
-          datasetMetabaseController.findReportingDataSetIdByDataflowIdAndProviderId(
-              representative.getDataflow().getId(), representative.getDataProvider().getId());
-      // assign resource to lead reporter
-      for (ReportingDatasetVO dataset : datasets) {
-        assignments.add(
-            createAssignments(dataset.getId(), email, ResourceGroupEnum.DATASET_LEAD_REPORTER));
-      }
-      // assign reference to lead reporter
-      List<ReferenceDatasetVO> references = referenceDatasetControllerZuul
-          .findReferenceDatasetByDataflowId(representative.getDataflow().getId());
-      for (ReferenceDatasetVO referenceDatasetVO : references) {
-        assignments.add(createAssignments(referenceDatasetVO.getId(), email,
-            ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
-      }
+    if (userManagementControllerZull.getUserByEmail(email.toLowerCase()) != null) {
+      if (Boolean.TRUE.equals(representative.getHasDatasets())) {
+        List<ResourceAssignationVO> assignments = new ArrayList<>();
+        // get datasetId
+        List<ReportingDatasetVO> datasets =
+            datasetMetabaseController.findReportingDataSetIdByDataflowIdAndProviderId(
+                representative.getDataflow().getId(), representative.getDataProvider().getId());
+        // assign resource to lead reporter
+        for (ReportingDatasetVO dataset : datasets) {
+          assignments.add(
+              createAssignments(dataset.getId(), email, ResourceGroupEnum.DATASET_LEAD_REPORTER));
+        }
+        // assign reference to lead reporter
+        List<ReferenceDatasetVO> references = referenceDatasetControllerZuul
+            .findReferenceDatasetByDataflowId(representative.getDataflow().getId());
+        for (ReferenceDatasetVO referenceDatasetVO : references) {
+          assignments.add(createAssignments(referenceDatasetVO.getId(), email,
+              ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+        }
 
-      // Assign Dataflow-%s-LEAD_REPORTER
-      assignments.add(createAssignments(representative.getDataflow().getId(), email,
-          ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
-      if (!remove) {
-        userManagementControllerZull.addContributorsToResources(assignments);
-      } else {
-        userManagementControllerZull.removeContributorsFromResources(assignments);
+        // Assign Dataflow-%s-LEAD_REPORTER
+        assignments.add(createAssignments(representative.getDataflow().getId(), email,
+            ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
+        if (!remove) {
+          userManagementControllerZull.addContributorsToResources(assignments);
+        } else {
+          userManagementControllerZull.removeContributorsFromResources(assignments);
+        }
       }
+    } else {
+      LOG.info(
+          "Permissions were not assigned or deleted because the email pertains to a temporary Lead Reporter. Email: {}",
+          email);
     }
   }
 

@@ -228,7 +228,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private RulesErrorUtils rulesErrorUtils;
 
-  /** The rules service */
+  /** The rules service. */
   @Autowired
   private RulesServiceImpl ruleservice;
 
@@ -329,19 +329,18 @@ public class ValidationServiceImpl implements ValidationService {
    * Load rules knowledge base.
    *
    * @param datasetId the dataset id
-   *
+   * @param rule the rule
    * @return the kie session
-   *
    * @throws EEAException the EEA exception
    * @throws SecurityException the security exception
    * @throws IllegalArgumentException the illegal argument exception
    */
   @Override
-  public KieBase loadRulesKnowledgeBase(Long datasetId) throws EEAException {
+  public KieBase loadRulesKnowledgeBase(Long datasetId, Rule rule) throws EEAException {
     KieBase kieBase;
     try {
       kieBase = kieBaseManager.reloadRules(datasetId,
-          datasetSchemaController.getDatasetSchemaId(datasetId));
+          datasetSchemaController.getDatasetSchemaId(datasetId), rule);
     } catch (FileNotFoundException e) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND, e);
     } catch (Exception e) {
@@ -384,10 +383,11 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param idTable the id table
    * @param kieBase the kie base
+   * @param processId the process id
    */
   @Override
   @Transactional
-  public void validateTable(Long datasetId, Long idTable, KieBase kieBase) {
+  public void validateTable(Long datasetId, Long idTable, KieBase kieBase, String processId) {
     // Validating tables
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     TableValue table = tableRepository.findById(idTable).orElse(null);
@@ -401,6 +401,7 @@ public class ValidationServiceImpl implements ValidationService {
     } finally {
       table = null;
       session.destroy();
+      System.gc();
     }
   }
 
@@ -789,6 +790,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @param fileName the file name
    * @return the file
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws ResponseStatusException the response status exception
    */
   @Override
   public File downloadExportedFile(Long datasetId, String fileName)
@@ -913,7 +915,6 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param nHeaders the n headers
-   * @param fieldsToWrite the fields to write
    * @param csvWriter the csv writer
    * @param notificationVO the notification VO
    * @throws EEAException the EEA exception
