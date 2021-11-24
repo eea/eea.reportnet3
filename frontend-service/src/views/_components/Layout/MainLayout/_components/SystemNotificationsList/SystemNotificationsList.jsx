@@ -143,7 +143,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         className="p-button-animated-blink"
         icon="add"
         id="createSystemNotification"
-        // className={`${styles.columnActionButton}`}
         label={resourcesContext.messages['add']}
         onClick={() => onToggleCreateFormVisibility(true)}
         visible={isAdmin}

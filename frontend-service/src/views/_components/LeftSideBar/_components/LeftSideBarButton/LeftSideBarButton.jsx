@@ -81,7 +81,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
         <FontAwesomeIcon
           aria-label={resourcesContext.messages['notifications']}
           className={`${styles.leftSideBarUserIcon} ${
-            animateSystemNotification ? styles.leftSideBarElementNotification : ''
+            animateSystemNotification ? styles.leftSideBarElementSystemNotification : ''
           }`}
           icon={AwesomeIcons(icon)}
           role="button"

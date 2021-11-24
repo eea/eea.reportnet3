@@ -91,6 +91,14 @@ export class GrowlMessage extends Component {
     }
   }
 
+  renderIcon(iconClassName) {
+    if (!this.props.message.system) {
+      return <span className={iconClassName} onClick={this.onClose}></span>;
+    } else {
+      return <FontAwesomeIcon className={iconClassName} icon={AwesomeIcons('bullhorn')} role="presentation" />;
+    }
+  }
+
   render() {
     let className = classNames('p-growl-item-container p-highlight', {
       'p-growl-message-info': this.props.message.severity === 'info',
@@ -117,6 +125,7 @@ export class GrowlMessage extends Component {
     });
 
     let closeIcon = this.renderCloseIcon();
+    let renderIcon = this.renderIcon(iconClassName);
 
     return (
       <div
@@ -128,11 +137,7 @@ export class GrowlMessage extends Component {
         }}>
         <div aria-atomic="true" aria-live="assertive" className="p-growl-item" role="alert">
           {closeIcon}
-          {!this.props.message.system ? (
-            <span className={iconClassName} onClick={this.onClose}></span>
-          ) : (
-            <FontAwesomeIcon className={iconClassName} icon={AwesomeIcons('bullhorn')} role="presentation" />
-          )}
+          {renderIcon}
           <div className="p-growl-message">
             <span className={titleClassName}>
               {this.props.message.system

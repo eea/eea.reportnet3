@@ -56,11 +56,13 @@ export const SystemNotificationsCreateForm = ({
         icon={isCreating ? 'spinnerAnimate' : 'add'}
         id="createSystemNotificationCreateForm"
         label={resourcesContext.messages[formType === 'EDIT' ? 'update' : 'save']}
-        onClick={() =>
-          formType === 'EDIT'
-            ? onUpdateSystemNotification(systemNotification)
-            : onCreateSystemNotification(systemNotification)
-        }
+        onClick={() => {
+          if (formType === 'EDIT') {
+            onUpdateSystemNotification(systemNotification);
+          } else {
+            onCreateSystemNotification(systemNotification);
+          }
+        }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -109,7 +111,6 @@ export const SystemNotificationsCreateForm = ({
           <div>
             <InputText
               id="systemNotificationMessage"
-              // keyfilter={RecordUtils.getFilter(type)}
               maxLength={config.SYSTEM_NOTIFICATION_MAX_LENGTH}
               name="systemNotificationMessage"
               onChange={e => onChange('message', e.target.value)}

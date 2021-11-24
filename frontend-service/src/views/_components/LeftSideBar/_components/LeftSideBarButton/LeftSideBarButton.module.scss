@@ -15,6 +15,11 @@
   transition: 0.08s ease-in;
 }
 
+.leftSideBarElementSystemNotification {
+  transition: 0.6s ease-in;
+  animation: blink 0.6s;
+}
+
 .leftSideBarElementNotification {
   transition: 0.3s ease-in;
   animation: bell 0.6s;
@@ -58,6 +63,21 @@
   border: 1px solid var(--main-font-color) !important;
   &:after {
     border-right-color: var(--main-font-color) !important;
+  }
+}
+
+@keyframes blink {
+  0% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+  }
+  50% {
+    -webkit-transform: scale(1.25);
+    transform: scale(1.25);
+  }
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
   }
 }
 

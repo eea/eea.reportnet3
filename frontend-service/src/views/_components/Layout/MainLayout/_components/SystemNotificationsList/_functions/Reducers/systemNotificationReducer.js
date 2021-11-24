@@ -20,6 +20,7 @@ export const systemNotificationReducer = (state, { type, payload }) => {
 
     case 'SET_SYSTEM_NOTIFICATIONS':
       return { ...state, systemNotifications: payload };
+
     default:
       return state;
   }
