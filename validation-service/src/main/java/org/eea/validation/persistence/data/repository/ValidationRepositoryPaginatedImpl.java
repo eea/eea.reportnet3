@@ -114,7 +114,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
 
     String finalQuery = basicQuery + partLevelError + partTypeEntities + partTableFilter
         + partFieldFilter + orderPart + page;
-    System.out.println(finalQuery);
+
     return session.doReturningWork(new ReturningWork<List<GroupValidationVO>>() {
       @Override
       public List<GroupValidationVO> execute(Connection conn) throws SQLException {

@@ -471,6 +471,7 @@ export const ShareRights = ({
             <DataTable
               first={shareRightsState.pagination.first}
               getPageChange={onPaginate}
+              loading={loadingStatus.isActionButtonsLoading}
               paginator={true}
               rows={shareRightsState.pagination.rows}
               rowsPerPageOptions={[5, 10, 15]}
