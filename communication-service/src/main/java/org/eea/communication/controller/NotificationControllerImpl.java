@@ -1,6 +1,5 @@
 package org.eea.communication.controller;
 
-import java.util.Date;
 import java.util.List;
 import org.eea.communication.service.NotificationService;
 import org.eea.exception.EEAException;
@@ -73,7 +72,6 @@ public class NotificationControllerImpl implements NotificationController {
     try {
       UserNotificationVO userNotificationVO = new UserNotificationVO();
       userNotificationVO.setEventType(eventType);
-      userNotificationVO.setInsertDate(new Date());
       userNotificationVO.setContent(content);
       notificationService.createUserNotification(userNotificationVO);
     } catch (EEAException e) {
