@@ -588,7 +588,7 @@ export const WebformField = ({
                   dataflowId,
                   datasetId,
                   fieldId: selectedFieldId,
-                  dataProviderId
+                  providerId: dataProviderId
                 })
           }`}
         />
