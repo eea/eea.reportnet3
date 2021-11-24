@@ -178,7 +178,7 @@
   --tabview-color: var(--gray-110);
   --tabview-highlight-bg: var(--bg);
   --tabview-highlight-border: 1px solid var(--gray-25);
-  --tabview-highlight-border-bottom: 1px solid var(--bg);
+  --tabview-highlight-border-bottom: 0px;
   --tabview-highlight-color: var(--c-corporate-blue);
   --tabview-highlight-icon-color: var(--errors);
   --tabview-highlight-bg-hover: var(--c-corporate-yellow);
@@ -592,12 +592,19 @@
   --accordion-header-highlight-bg-color-hover: var(--gray-25);
   --accordion-header-highlight-border-hover: 1px solid var(--accordion-header-highlight-bg-color-hover);
 
-  /* Borders*/
+  /* Borders */
   --general-border-style: '1px solid var(--general-border-color)';
 
-  /* Left sidebar*/
+  /* Left sidebar */
   --left-sidebar-text-color: var(--white);
 
-  /* Cookies*/
+  /* Cookies */
   --cookies-content-color: var(--white);
+
+  /* Go top button */
+  --go-top-button-bg-color-hover: var(--c-corporate-blue);
+  --go-top-button-bg-color: var(--c-corporate-blue);
+  --go-top-button-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
+  --go-top-button-color-hover: var(--c-corporate-yellow);
+  --go-top-button-color: var(--white);
 }
