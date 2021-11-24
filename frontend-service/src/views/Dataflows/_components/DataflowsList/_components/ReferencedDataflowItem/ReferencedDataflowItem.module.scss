@@ -68,11 +68,11 @@
   &.DESIGN,
   &.OPEN,
   &.CLOSED {
-    box-shadow: var(--dataflowsitem-box-shadow);
-    transition: var(--dataflowsitem-transition-box-shadow);
+    box-shadow: var(--dataflow-item-box-shadow);
+    transition: var(--dataflow-item-transition-box-shadow);
     &:hover {
-      box-shadow: var(--dataflowsitem-box-shadow-hover);
-      transition: var(--dataflowsitem-transition-box-shadow);
+      box-shadow: var(--dataflow-item-box-shadow-hover);
+      transition: var(--dataflow-item-transition-box-shadow);
     }
   }
   &:first-of-type {
