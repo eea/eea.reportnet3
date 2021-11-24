@@ -1,6 +1,7 @@
 package org.eea.communication.service.impl;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.eea.communication.mapper.SystemNotificationMapper;
@@ -97,6 +98,7 @@ public class NotificationServiceImpl implements NotificationService {
   @Override
   public void createUserNotification(UserNotificationVO userNotificationVO) throws EEAException {
     try {
+      userNotificationVO.setInsertDate(new Date());
       UserNotification userNotification = userNotificationMapper.classToEntity(userNotificationVO);
       userNotification.setUserId(SecurityContextHolder.getContext().getAuthentication().getName());
       userNotificationRepository.save(userNotification);
