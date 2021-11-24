@@ -130,6 +130,7 @@ export class InputText extends Component {
         <input
           autoComplete="off"
           autoFocus={this.props.autoFocus}
+          maxLength={this.props.maxLength}
           ref={el => (this.element = el)}
           {...inputProps}
           className={className}

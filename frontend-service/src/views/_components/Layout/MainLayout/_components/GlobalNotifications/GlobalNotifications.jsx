@@ -25,7 +25,18 @@ const GlobalNotifications = () => {
     downloadExportFMEFile();
     downloadExportDatasetFile();
     getErrorExportDatasetNotification();
+    clearSystemNotifications();
   }, [notificationContext.hidden]);
+
+  const clearSystemNotifications = () => {
+    const notification = findHiddenNotification('NO_ENABLED_SYSTEM_NOTIFICATIONS');
+
+    if (isNil(notification)) {
+      return;
+    }
+
+    notificationContext.deleteAll(true);
+  };
 
   const findHiddenNotification = key => notificationContext.hidden.find(notification => notification.key === key);
 

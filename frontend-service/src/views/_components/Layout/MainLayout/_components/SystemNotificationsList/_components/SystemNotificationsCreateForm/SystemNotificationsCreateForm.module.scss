@@ -2,10 +2,32 @@
   display: flex;
   flex-direction: column;
   > div > div {
-    padding: 0.75em;
+    padding: 0.5em;
   }
-  .calendarWrapper {
+  > div > div {
+    label {
+      font-weight: bold;
+    }
+  }
+  .enabledCheckbox {
     display: flex;
-    flex-direction: row;
+    align-items: center;
+    label {
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 0.5rem;
+    }
+  }
+  .previewSystemNotification {
+    display: flex;
+    justify-content: center;
+    > div {
+      margin: 0 !important;
+    }
+  }
+  .previewButtonWrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
   }
 }
