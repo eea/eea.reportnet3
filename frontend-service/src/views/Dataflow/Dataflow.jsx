@@ -635,7 +635,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const renderUserListDialogFooter = () => (
     <div className={styles.buttonsRolesFooter}>
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary p-button-animated-blink ${styles.buttonLeft}`}
         disabled={dataflowState.isDownloadingUsers}
         icon={dataflowState.isDownloadingUsers ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadUsersListButtonLabel']}
