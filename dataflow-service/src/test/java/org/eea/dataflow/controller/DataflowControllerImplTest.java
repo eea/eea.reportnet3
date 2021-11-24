@@ -1068,4 +1068,34 @@ public class DataflowControllerImplTest {
     dataflowControllerImpl.getDataflowsCount();
     Mockito.verify(dataflowService, times(1)).getDataflowsCount();
   }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getPublicDataflowNotFoundExceptionTest() throws EEAException {
+    try {
+      Mockito.doThrow(new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND)).when(dataflowService)
+          .getPublicDataflowById(Mockito.anyLong());
+      dataflowControllerImpl.getPublicDataflow(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void findReferenceDataflowsExceptionTest() throws EEAException {
+    List<DataFlowVO> dataflows = new ArrayList<>();
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "1");
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(details);
+    SecurityContextHolder.setContext(securityContext);
+    Mockito.doThrow(EEAException.class).when(dataflowService).getDataflows(Mockito.anyString(),
+        Mockito.any());
+    dataflows = dataflowControllerImpl.findReferenceDataflows();
+    Mockito.verify(dataflowService, times(1)).getDataflows(Mockito.anyString(), Mockito.any());
+  }
+
+
 }

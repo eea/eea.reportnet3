@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.dataflow.mapper.RepresentativeMapper;
+import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -68,6 +70,13 @@ public class RepresentativeControllerImplTest {
 
   /** The lead reporters. */
   private List<LeadReporterVO> leadReporters;
+
+  /** The representative repository. */
+  @Mock
+  private RepresentativeRepository representativeRepository;
+
+  @Mock
+  private RepresentativeMapper representativeMapper;
 
   /**
    * Inits the mocks.
