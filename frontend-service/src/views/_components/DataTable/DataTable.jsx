@@ -561,7 +561,9 @@ export class DataTable extends Component {
     let sortOrder = null;
     let multiSortMeta;
 
-    if (this.getSortOrder() === 1) {
+    console.log(this.getSortOrder());
+
+    if (this.getSortOrder() >= 0) {
       sortField = event.sortField;
       sortOrder = this.getSortField() === event.sortField ? this.getSortOrder() * -1 : this.props.defaultSortOrder;
     }
