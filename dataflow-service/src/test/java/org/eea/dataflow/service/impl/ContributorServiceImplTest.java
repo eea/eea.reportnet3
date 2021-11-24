@@ -506,7 +506,7 @@ public class ContributorServiceImplTest {
   }
 
   /**
-   * Create temporary test.
+   * Create temporary user test.
    */
   @Test
   public void createTemporaryUserTest() {
@@ -524,7 +524,7 @@ public class ContributorServiceImplTest {
 
 
   /**
-   * Update temporary test.
+   * Update temporary user test.
    */
   @Test
   public void updateTemporaryUserTest() {
@@ -549,7 +549,7 @@ public class ContributorServiceImplTest {
   }
 
   /**
-   * Delete temporary test.
+   * Delete temporary user test.
    */
   @Test
   public void deleteTemporaryUserTest() {
@@ -576,7 +576,7 @@ public class ContributorServiceImplTest {
 
 
   /**
-   * Update temporary test.
+   * Validate reporters test.
    *
    * @throws EEAException
    */
