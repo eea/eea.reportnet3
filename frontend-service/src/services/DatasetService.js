@@ -49,11 +49,11 @@ export const DatasetService = {
         newField.id = null;
         newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
         newField.type = dataTableFieldDTO.fieldData.type;
-        newField.value = DatasetUtils.parseValue(
-          dataTableFieldDTO.fieldData.type,
-          dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
-          true
-        );
+        newField.value = DatasetUtils.parseValue({
+          type: dataTableFieldDTO.fieldData.type,
+          value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
+          splitSRID: true
+        });
 
         return newField;
       });
@@ -105,6 +105,8 @@ export const DatasetService = {
 
   downloadPublicReferenceDatasetFileData: async (dataflowId, fileName) =>
     await DatasetRepository.downloadPublicReferenceDatasetFileData(dataflowId, fileName),
+
+  downloadTableData: async (datasetId, fileName) => await DatasetRepository.downloadTableData(datasetId, fileName),
 
   getStatistics: async (datasetId, tableSchemaNames) => {
     const datasetTablesDTO = await DatasetRepository.getStatistics(datasetId);
@@ -376,7 +378,10 @@ export const DatasetService = {
           name: DataTableFieldDTO.name,
           recordId: dataTableRecordDTO.idRecordSchema,
           type: DataTableFieldDTO.type,
-          value: DatasetUtils.parseValue(DataTableFieldDTO.type, DataTableFieldDTO.value)
+          value: DatasetUtils.parseValue({
+            type: DataTableFieldDTO.type,
+            value: DataTableFieldDTO.value
+          })
         });
 
         if (!isNull(DataTableFieldDTO.fieldValidations)) {
@@ -425,7 +430,11 @@ export const DatasetService = {
     datasetTableField.id = fieldId;
     datasetTableField.idFieldSchema = fieldSchemaId;
     datasetTableField.type = fieldType;
-    datasetTableField.value = DatasetUtils.parseValue(fieldType, fieldValue, true);
+    datasetTableField.value = DatasetUtils.parseValue({
+      type: fieldType,
+      value: fieldValue,
+      splitSRID: true
+    });
 
     return await DatasetRepository.updateField(datasetId, datasetTableField, updateInCascade);
   },
@@ -456,11 +465,11 @@ export const DatasetService = {
       newField.id = dataTableFieldDTO.fieldData.id;
       newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
       newField.type = dataTableFieldDTO.fieldData.type;
-      newField.value = DatasetUtils.parseValue(
-        dataTableFieldDTO.fieldData.type,
-        dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
-        true
-      );
+      newField.value = DatasetUtils.parseValue({
+        type: dataTableFieldDTO.fieldData.type,
+        value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
+        splitSRID: true
+      });
 
       return newField;
     });

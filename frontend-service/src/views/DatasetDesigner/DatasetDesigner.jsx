@@ -387,7 +387,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     type: 'GET_SELECTED_IMPORT_EXTENSION',
                     payload: { selectedImportExtension: type.fileExtension }
                   });
-                  setSelectedCustomImportIntegration({ id: type.id, name: type.name });
+                  setSelectedCustomImportIntegration({ id: type.id, name: `${type.name} (.${type.fileExtension})` });
                 },
                 icon: type.fileExtension,
                 label: `${type.name} (.${type.fileExtension})`
@@ -714,13 +714,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   );
 
   useCheckNotifications(
-    ['AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE', 'DOWNLOAD_QC_RULES_FILE_ERROR'],
+    ['AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE', 'DOWNLOAD_QC_RULES_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
     setIsDownloadingQCRules,
     false
   );
 
   useCheckNotifications(
-    ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR'],
+    ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
     setIsDownloadingValidations,
     false
   );
@@ -1076,27 +1076,32 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
   const onDownloadQCRules = async () => {
     setIsDownloadingQCRules(true);
-    notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
 
     try {
       await ValidationService.generateQCRulesFile(datasetId);
+      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
     } catch (error) {
-      console.error('DatasetDesigner - onDownloadQCRules.', error);
-      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
+      }
       setIsDownloadingQCRules(false);
     }
   };
 
   const onDownloadValidations = async () => {
     setIsDownloadingValidations(true);
-    notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
-
     try {
       await ValidationService.generateShowValidationsFile(datasetId);
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
     } catch (error) {
       console.error('DatasetDesigner - onDownloadValidations.', error);
-      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' }, true);
-
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' }, true);
+      }
       setIsDownloadingValidations(false);
     }
   };

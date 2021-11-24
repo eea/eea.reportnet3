@@ -465,6 +465,10 @@ public enum EventType {
   EXPORT_SCHEMA_INFORMATION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "export_schema_information_failed_event", true),
 
+  /** The no enabled system notifications. */
+  NO_ENABLED_SYSTEM_NOTIFICATIONS(LiteralConstants.DATA_REPORTING_TOPIC,
+      "no_enabled_system_notifications", true),
+
   /** The export users by country completed event. */
   EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "export_users_by_country_completed_event", true),
@@ -483,9 +487,15 @@ public enum EventType {
 
   /** The continue fme process event. */
   CONTINUE_FME_PROCESS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "continue_fme_process_event",
-      true);
+      true),
 
+  /** The export table data completed event. */
+  EXPORT_TABLE_DATA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_table_data_completed_event", true),
 
+  /** The export table data failed event. */
+  EXPORT_TABLE_DATA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_table_data_failed_event", true);
 
   /** The topic. */
   private String topic;

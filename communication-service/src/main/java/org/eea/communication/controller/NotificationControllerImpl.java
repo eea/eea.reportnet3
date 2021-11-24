@@ -1,6 +1,5 @@
 package org.eea.communication.controller;
 
-import java.util.Date;
 import java.util.List;
 import org.eea.communication.service.NotificationService;
 import org.eea.exception.EEAException;
@@ -73,7 +72,6 @@ public class NotificationControllerImpl implements NotificationController {
     try {
       UserNotificationVO userNotificationVO = new UserNotificationVO();
       userNotificationVO.setEventType(eventType);
-      userNotificationVO.setInsertDate(new Date());
       userNotificationVO.setContent(content);
       notificationService.createUserNotification(userNotificationVO);
     } catch (EEAException e) {
@@ -168,5 +166,19 @@ public class NotificationControllerImpl implements NotificationController {
   public List<SystemNotificationVO> findSystemNotifications() {
 
     return notificationService.findSystemNotifications();
+  }
+
+  /**
+   * Check any system notification enabled.
+   *
+   * @return true, if successful
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/checkAnySystemNotificationEnabled")
+  @ApiOperation(value = "Check any system notifications is enabled", hidden = true)
+  public boolean checkAnySystemNotificationEnabled() {
+
+    return notificationService.checkAnySystemNotificationEnabled();
   }
 }

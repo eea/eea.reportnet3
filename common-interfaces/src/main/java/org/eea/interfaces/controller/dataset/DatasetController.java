@@ -119,8 +119,8 @@ public interface DatasetController {
    * @param providerId the provider id
    * @param deletePrefilledTables the delete prefilled tables
    */
-  @DeleteMapping("/v1/{datasetId}/deleteImportData")
-  void deleteImportData(@PathVariable("datasetId") Long datasetId,
+  @DeleteMapping("/v1/{datasetId}/deleteDatasetData")
+  void deleteDatasetData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
@@ -149,8 +149,8 @@ public interface DatasetController {
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    */
-  @DeleteMapping("/v1/{datasetId}/deleteImportTable/{tableSchemaId}")
-  void deleteImportTable(@PathVariable("datasetId") Long datasetId,
+  @DeleteMapping("/v1/{datasetId}/deleteTableData/{tableSchemaId}")
+  void deleteTableData(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
@@ -169,16 +169,16 @@ public interface DatasetController {
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
 
+
   /**
    * Export file.
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param mimeType the mime type
-   * @return the response entity
    */
   @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  ResponseEntity<byte[]> exportFile(@RequestParam("datasetId") Long datasetId,
+  void exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("mimeType") String mimeType);
 

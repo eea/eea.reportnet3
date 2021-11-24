@@ -551,6 +551,23 @@ public class DatasetControllerImplTest {
     }
   }
 
+
+  /**
+   * Etl export dataset dataflow legacy test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void etlExportDatasetDataflowLegacyTest() throws EEAException {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(null);
+    try {
+      datasetControllerImpl.etlExportDatasetLegacy(1L, 1L, 1L, "", 1, 1, "", "");
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
+      throw e;
+    }
+  }
+
   /**
    * Etl export dataset exception test.
    *
@@ -579,6 +596,20 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
     datasetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L);
+    Mockito.verify(fileTreatmentHelper, times(1)).etlImportDataset(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
+   * Etl import dataset legacy test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void etlImportDatasetLegacyTest() throws EEAException {
+    Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
+    Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
+    datasetControllerImpl.etlImportDatasetLegacy(1L, new ETLDatasetVO(), 1L, 1L);
     Mockito.verify(fileTreatmentHelper, times(1)).etlImportDataset(Mockito.any(), Mockito.any(),
         Mockito.any());
   }
@@ -653,6 +684,23 @@ public class DatasetControllerImplTest {
   }
 
   /**
+   * Gets the attachment legacy test.
+   *
+   * @return the attachment legacy test
+   * @throws Exception the exception
+   */
+  @Test
+  public void getAttachmentLegacyTest() throws Exception {
+
+    AttachmentValue attachment = new AttachmentValue();
+    attachment.setFileName("test.txt");
+    attachment.setContent(fileMock.getBytes());
+    when(datasetService.getAttachment(Mockito.any(), Mockito.any())).thenReturn(attachment);
+    datasetControllerImpl.getAttachmentLegacy(1L, "600B66C6483EA7C8B55891DA171A3E7F", 1L, 1L);
+    Mockito.verify(datasetService, times(1)).getAttachment(Mockito.any(), Mockito.any());
+  }
+
+  /**
    * Test get attachment exception.
    *
    * @throws Exception the exception
@@ -687,6 +735,24 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchemaVO);
     datasetControllerImpl.updateAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F", file);
+    Mockito.verify(datasetService, times(1)).updateAttachment(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void updateAttachmentLegacyTest() throws Exception {
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setName("test");
+    fieldSchemaVO.setId("id");
+    FieldVO fieldVO = new FieldVO();
+    fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
+    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
+    Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
+    Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(fieldSchemaVO);
+    datasetControllerImpl.updateAttachmentLegacy(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F",
+        file);
     Mockito.verify(datasetService, times(1)).updateAttachment(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -825,6 +891,13 @@ public class DatasetControllerImplTest {
     Mockito.verify(datasetService, times(1)).deleteAttachment(Mockito.any(), Mockito.any());
   }
 
+  @Test
+  public void deleteAttachmentLegacyTest() throws Exception {
+
+    datasetControllerImpl.deleteAttachmentLegacy(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F");
+    Mockito.verify(datasetService, times(1)).deleteAttachment(Mockito.any(), Mockito.any());
+  }
+
   /**
    * Test delete attachment exception.
    *
@@ -852,11 +925,11 @@ public class DatasetControllerImplTest {
   public void exportFileTest() throws EEAException, IOException {
     Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
         .thenReturn("tableName");
-    Mockito.when(datasetService.exportFile(Mockito.anyLong(), Mockito.any(), Mockito.any()))
-        .thenReturn(new byte[1]);
-    ResponseEntity<byte[]> result = datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190",
-        FileTypeEnum.CSV.getValue());
-    Assert.assertEquals(1, result.getBody().length);
+    Mockito.doNothing().when(fileTreatmentHelper).exportFile(Mockito.anyLong(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+    datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue());
+    Mockito.verify(fileTreatmentHelper, times(1)).exportFile(1L, FileTypeEnum.CSV.getValue(),
+        "5cf0e9b3b793310e9ceca190", "tableName");
   }
 
   /**
@@ -887,8 +960,8 @@ public class DatasetControllerImplTest {
   public void exportFileExceptionExportingTest() throws EEAException, IOException {
     Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
         .thenReturn("tableName");
-    Mockito.when(datasetService.exportFile(Mockito.anyLong(), Mockito.any(), Mockito.any()))
-        .thenThrow(EEAException.class);
+    Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).exportFile(Mockito.anyLong(),
+        Mockito.any(), Mockito.any(), Mockito.any());
     try {
       datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue());
     } catch (ResponseStatusException e) {
@@ -1024,6 +1097,22 @@ public class DatasetControllerImplTest {
   }
 
   /**
+   * Import file data legacy test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void importFileDataLegacyTest() throws EEAException {
+
+    Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),
+        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+    datasetControllerImpl.importFileDataLegacy(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", null, true,
+        1L, null);
+    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),
+        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+  }
+
+  /**
    * Import file data exception test.
    *
    * @throws EEAException the EEA exception
@@ -1068,10 +1157,24 @@ public class DatasetControllerImplTest {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
-    datasetControllerImpl.deleteImportData(1L, null, null, false);
+    datasetControllerImpl.deleteDatasetData(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
         Mockito.anyBoolean());
   }
+
+  /**
+   * Delete import data legacy test.
+   */
+  @Test
+  public void deleteImportDataLegacyTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    datasetControllerImpl.deleteImportDataLegacy(1L, null, null, false);
+    Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
+        Mockito.anyBoolean());
+  }
+
 
   @Test
   public void deleteImportDataRestApiTest() {
@@ -1079,7 +1182,7 @@ public class DatasetControllerImplTest {
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
-    datasetControllerImpl.deleteImportData(1L, 1L, 1L, false);
+    datasetControllerImpl.deleteDatasetData(1L, 1L, 1L, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
         Mockito.anyBoolean());
   }
@@ -1091,7 +1194,7 @@ public class DatasetControllerImplTest {
 
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(2L);
     try {
-      datasetControllerImpl.deleteImportData(1L, 1L, null, false);
+      datasetControllerImpl.deleteDatasetData(1L, 1L, null, false);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
@@ -1103,7 +1206,20 @@ public class DatasetControllerImplTest {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
-    datasetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", null, null);
+    datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", null, null);
+    Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
+        Mockito.any());
+  }
+
+  /**
+   * Delete import table legacy test.
+   */
+  @Test
+  public void deleteImportTableLegacyTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    datasetControllerImpl.deleteImportTableLegacy(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any());
   }
@@ -1114,7 +1230,7 @@ public class DatasetControllerImplTest {
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
-    datasetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", 1L, 1L);
+    datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", 1L, 1L);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any());
   }
@@ -1126,7 +1242,7 @@ public class DatasetControllerImplTest {
 
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(2L);
     try {
-      datasetControllerImpl.deleteImportTable(1L, "5cf0e9b3b793310e9ceca190", 1L, null);
+      datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", 1L, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;

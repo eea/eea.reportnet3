@@ -31,5 +31,8 @@ export const UserRightRepository = {
     await HTTPRequester.update({
       url: getUrl(UserRightConfig.updateReporter, { dataflowId, dataProviderId }),
       data: { account: userRight.account, role: userRight.role }
-    })
+    }),
+
+  validateReporters: async (dataflowId, dataProviderId) =>
+    await HTTPRequester.update({ url: getUrl(UserRightConfig.validateReporters, { dataflowId, dataProviderId }) })
 };

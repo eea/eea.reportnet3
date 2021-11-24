@@ -35,6 +35,12 @@ const useSocket = () => {
               ? notificationContext.hide({ type, content })
               : notificationContext.add({ type, content });
           });
+          stompClient.subscribe('/user/queue/systemnotifications', notification => {
+            const { type, content } = JSON.parse(notification.body);
+            config.notifications.hiddenNotifications.includes(type)
+              ? notificationContext.hide({ type, content })
+              : notificationContext.add(JSON.parse(notification.body), false, true);
+          });
         }
       });
 

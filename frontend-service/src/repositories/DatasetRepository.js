@@ -87,6 +87,11 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadPublicReferenceDatasetFileData, { dataflowId, fileName })
     }),
 
+  downloadTableData: async (datasetId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadTableData, { datasetId, fileName })
+    }),
+
   downloadTableDefinitions: async datasetSchemaId =>
     await HTTPRequester.download({ url: getUrl(DatasetConfig.downloadTableDefinitions, { datasetSchemaId }) }),
 

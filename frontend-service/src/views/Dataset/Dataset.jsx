@@ -327,7 +327,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             return {
               command: () => {
                 setIsImportDatasetDialogVisible(true);
-                setSelectedCustomImportIntegration({ id: type.id, name: type.name });
+                setSelectedCustomImportIntegration({ id: type.id, name: `${type.name} (.${type.fileExtension})` });
                 setImportSelectedIntegrationExtension(type.fileExtension);
               },
               icon: type.fileExtension,
@@ -346,7 +346,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             label: importOtherSystem.name,
             icon: 'upload',
             command: () => {
-              setSelectedCustomImportIntegration(importOtherSystem.id, importOtherSystem.name);
+              setSelectedCustomImportIntegration({ id: importOtherSystem.id, name: importOtherSystem.name });
               setIsImportOtherSystemsDialogVisible(true);
             }
           }))
@@ -560,13 +560,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
   );
 
   useCheckNotifications(
-    ['AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE', 'DOWNLOAD_QC_RULES_FILE_ERROR'],
+    ['AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE', 'DOWNLOAD_QC_RULES_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
     setIsDownloadingQCRules,
     false
   );
 
   useCheckNotifications(
-    ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR'],
+    ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
     setIsDownloadingValidations,
     false
   );
@@ -816,13 +816,17 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onDownloadQCRules = async () => {
     setIsDownloadingQCRules(true);
-    notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
 
     try {
       await ValidationService.generateQCRulesFile(datasetId);
+      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
     } catch (error) {
       console.error('DatasetDesigner - onDownloadQCRules.', error);
-      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
+      }
       setIsDownloadingQCRules(false);
     }
   };
@@ -939,13 +943,17 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onDownloadValidations = async () => {
     setIsDownloadingValidations(true);
-    notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
 
     try {
       await ValidationService.generateShowValidationsFile(datasetId);
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
     } catch (error) {
       console.error('Dataset - onDownloadValidations.', error);
-      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' }, true);
+      }
       setIsDownloadingValidations(false);
     }
   };
@@ -1243,14 +1251,13 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
             setSelectedCustomImportIntegration({ id: null, name: null });
           }}
           visible={isImportOtherSystemsDialogVisible}>
-          <div className={styles.text}>
-            dangerouslySetInnerHTML=
-            {{
+          <div
+            className={styles.text}
+            dangerouslySetInnerHTML={{
               __html: TextUtils.parseText(resourcesContext.messages['importPreviousDataConfirm'], {
                 importName: selectedCustomImportIntegration.name
               })
-            }}
-          </div>
+            }}></div>
           <div className={styles.checkboxWrapper}>
             <Checkbox
               checked={replaceData}

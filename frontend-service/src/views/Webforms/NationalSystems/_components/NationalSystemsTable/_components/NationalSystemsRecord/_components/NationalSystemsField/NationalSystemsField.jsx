@@ -366,12 +366,20 @@ export const NationalSystemsField = ({
           onError={onUploadFileError}
           onUpload={onAttachFile}
           operation={'PUT'}
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
-            dataflowId,
-            datasetId,
-            fieldId: field.fieldId,
-            dataProviderId
-          })}`}
+          url={`${window.env.REACT_APP_BACKEND}${
+            isNil(dataProviderId)
+              ? getUrl(DatasetConfig.uploadAttachment, {
+                  dataflowId,
+                  datasetId,
+                  fieldId: field.fieldId
+                })
+              : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
+                  dataflowId,
+                  datasetId,
+                  fieldId: field.fieldId,
+                  providerId: dataProviderId
+                })
+          }`}
         />
       )}
       {isDialogVisible.deleteAttachment && (

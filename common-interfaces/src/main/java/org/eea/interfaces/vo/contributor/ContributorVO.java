@@ -31,4 +31,54 @@ public class ContributorVO implements Serializable {
   /** Is the contributor temporary?. */
   private boolean invalid;
 
+  /**
+   * Hash code.
+   *
+   * @return the int
+   */
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((account == null) ? 0 : account.hashCode());
+    result = prime * result + ((dataProviderId == null) ? 0 : dataProviderId.hashCode());
+    result = prime * result + (invalid ? 1231 : 1237);
+    result = prime * result + ((role == null) ? 0 : role.hashCode());
+    return result;
+  }
+
+  /**
+   * Equals.
+   *
+   * @param obj the obj
+   * @return true, if successful
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    ContributorVO other = (ContributorVO) obj;
+    if (account == null) {
+      if (other.account != null)
+        return false;
+    } else if (!account.equals(other.account))
+      return false;
+    if (dataProviderId == null) {
+      if (other.dataProviderId != null)
+        return false;
+    } else if (!dataProviderId.equals(other.dataProviderId))
+      return false;
+    if (invalid != other.invalid)
+      return false;
+    if (role == null) {
+      if (other.role != null)
+        return false;
+    } else if (!role.equals(other.role))
+      return false;
+    return true;
+  }
 }

@@ -97,6 +97,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_IS_EXPORTING':
       return { ...state, isExporting: payload };
 
+    case 'SET_IS_UPDATING_PERMISSIONS':
+      return { ...state, isUpdatingPermissions: payload.isUpdatingPermissions };
+
     case 'SET_REPRESENTATIVE':
       return { ...state, representative: payload };
 

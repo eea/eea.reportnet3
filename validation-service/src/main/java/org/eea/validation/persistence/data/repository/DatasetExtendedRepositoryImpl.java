@@ -278,6 +278,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         }
       }
     }
+    System.gc();
     return tableValue;
   }
 

@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.mapper.DataflowPrivateMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
@@ -48,6 +49,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
+import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
@@ -186,6 +188,9 @@ public class DataFlowServiceImplTest {
    */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Mock
+  private DataflowPrivateMapper dataflowPrivateMapper;
 
   /** The dataflows. */
   private List<Dataflow> dataflows;
@@ -1396,6 +1401,43 @@ public class DataFlowServiceImplTest {
     Mockito.when(datasetMetabaseController.getDatasetsSummaryList(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
     assertEquals(new ArrayList<>(), dataflowServiceImpl.getDatasetSummary(1L));
+  }
+
+  @Test
+  public void getPrivateDataflowByIdTest() throws EEAException {
+    DataflowPrivateVO dataflowPrivateVO = new DataflowPrivateVO();
+    dataflowPrivateVO.setId(1L);
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    List<DocumentVO> documents = new ArrayList<>();
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    documents.add(document);
+    Mockito.when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataflow));
+    Mockito.when(dataflowPrivateMapper.entityToClass(Mockito.any())).thenReturn(dataflowPrivateVO);
+    Mockito.when(documentControllerZuul.getAllDocumentsByDataflow(Mockito.anyLong()))
+        .thenReturn(documents);
+    assertEquals(dataflowPrivateVO, dataflowServiceImpl.getPrivateDataflowById(1L));
+  }
+
+  @Test(expected = EEAException.class)
+  public void getPrivateDataflowIdNotFoundTest() throws EEAException {
+    try {
+      DataflowPrivateVO dataflowPrivateVO = dataflowServiceImpl.getPrivateDataflowById(1L);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void getPrivateDataflowIncorrectIdTest() throws EEAException {
+    try {
+      DataflowPrivateVO dataflowPrivateVO = dataflowServiceImpl.getPrivateDataflowById(null);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, e.getMessage());
+      throw e;
+    }
   }
 
 }

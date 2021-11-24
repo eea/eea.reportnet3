@@ -89,4 +89,12 @@ public interface NotificationController {
   @GetMapping(value = "/findSystemNotifications")
   List<SystemNotificationVO> findSystemNotifications();
 
+  /**
+   * Check any system notification enabled.
+   *
+   * @return true, if successful
+   */
+  @GetMapping(value = "/checkAnySystemNotificationEnabled")
+  boolean checkAnySystemNotificationEnabled();
+
 }

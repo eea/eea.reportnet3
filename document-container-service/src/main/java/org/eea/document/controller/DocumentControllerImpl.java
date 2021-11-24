@@ -86,13 +86,17 @@ public class DocumentControllerImpl implements DocumentController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
   @HystrixCommand
   @PostMapping(value = "/v1/upload/{dataflowId}")
-  @ApiOperation(value = "Upload dataflow document by dataflow Id", hidden = false,
+  @ApiOperation(value = "Upload document to dataflow help", hidden = false,
       notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
-  public void uploadDocument(@RequestPart("file") final MultipartFile file,
-      @PathVariable("dataflowId") final Long dataflowId,
-      @RequestParam("description") final String description,
-      @RequestParam("language") final String language,
-      @RequestParam("isPublic") final Boolean isPublic) {
+  public void uploadDocument(@ApiParam(value = "File to upload") @RequestPart("file") final MultipartFile file,
+      @ApiParam(value = "Dataflow id",
+          example = "0") @PathVariable("dataflowId") final Long dataflowId,
+      @ApiParam(value = "Document description",
+          example = "description") @RequestParam("description") final String description,
+      @ApiParam(value = "Document language",
+          example = "English") @RequestParam("language") final String language,
+      @ApiParam(value = "If document is public or not",
+          example = "true") @RequestParam("isPublic") final Boolean isPublic) {
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataflowId);
@@ -161,13 +165,13 @@ public class DocumentControllerImpl implements DocumentController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/v1/{documentId}/dataflow/{dataflowId}",
       produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  @ApiOperation(value = "Download dataflow document by document Id", hidden = false,
+  @ApiOperation(value = "Download document from dataflow help by document id", hidden = false,
       notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
   @HystrixCommand
   public Resource getDocument(
-      @ApiParam(value = "Document Id",
+      @ApiParam(value = "Document id",
           example = "0") @PathVariable("documentId") final Long documentId,
-      @ApiParam(value = "Dataflow Id",
+      @ApiParam(value = "Dataflow id",
           example = "0") @PathVariable("dataflowId") final Long dataflowId) {
     try {
       DocumentVO document = dataflowController.getDocumentInfoById(documentId);
@@ -195,7 +199,7 @@ public class DocumentControllerImpl implements DocumentController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/{documentId}/dataflow/{dataflowId}",
       produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  @ApiOperation(value = "Download dataflow document by document Id", hidden = true,
+  @ApiOperation(value = "Download document from dataflow help by document id", hidden = true,
       notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
   @HystrixCommand
   public Resource getDocumentLegacy(
@@ -253,14 +257,14 @@ public class DocumentControllerImpl implements DocumentController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
   @DeleteMapping(value = "/v1/{documentId}/dataflow/{dataflowId}")
-  @ApiOperation(value = "Delete dataflow document by document Id", hidden = false,
+  @ApiOperation(value = "Delete document from dataflow help by document id", hidden = false,
       notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
   public void deleteDocument(
-      @ApiParam(value = "document Id",
+      @ApiParam(value = "Document id",
           example = "0") @PathVariable("documentId") final Long documentId,
-      @ApiParam(value = "Dataflow Id",
+      @ApiParam(value = "Dataflow id",
           example = "0") @PathVariable("dataflowId") final Long dataflowId,
-      @ApiParam(value = "delete document in Metabase", example = "true") @RequestParam(
+      @ApiParam(value = "Delete document in metabase", example = "true") @RequestParam(
           value = "deleteMetabase", required = false,
           defaultValue = "true") final Boolean deleteMetabase)
       throws Exception {
@@ -301,14 +305,14 @@ public class DocumentControllerImpl implements DocumentController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
   @DeleteMapping(value = "/{documentId}/dataflow/{dataflowId}")
-  @ApiOperation(value = "Delete dataflow document by document Id", hidden = true,
+  @ApiOperation(value = "Delete document from dataflow help by document id", hidden = true,
       notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
   public void deleteDocumentLegacy(
-      @ApiParam(value = "document Id",
+      @ApiParam(value = "Document id",
           example = "0") @PathVariable("documentId") final Long documentId,
-      @ApiParam(value = "Dataflow Id",
+      @ApiParam(value = "Dataflow id",
           example = "0") @PathVariable("dataflowId") final Long dataflowId,
-      @ApiParam(value = "delete document in Metabase", example = "true") @RequestParam(
+      @ApiParam(value = "Delete document in metabase", example = "true") @RequestParam(
           value = "deleteMetabase", required = false,
           defaultValue = "true") final Boolean deleteMetabase)
       throws Exception {
@@ -329,20 +333,20 @@ public class DocumentControllerImpl implements DocumentController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
   @PutMapping(value = "/v1/update/{idDocument}/dataflow/{dataflowId}")
-  @ApiOperation(value = "Update dataflow document", hidden = false,
+  @ApiOperation(value = "Update dataflow document by document id", hidden = false,
       notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
   public void updateDocument(
-      @ApiParam(value = "File") @RequestPart(name = "file",
+      @ApiParam(value = "File to upload") @RequestPart(name = "file",
           required = false) final MultipartFile file,
-      @ApiParam(value = "Dataflow Id",
+      @ApiParam(value = "Dataflow id",
           example = "0") @PathVariable("dataflowId") final Long dataflowId,
-      @ApiParam(value = "Document description", example = "abc") @RequestParam(name = "description",
+      @ApiParam(value = "Document description", example = "description") @RequestParam(name = "description",
           required = false) final String description,
       @ApiParam(value = "Document language", example = "English") @RequestParam(name = "language",
           required = false) final String language,
-      @ApiParam(value = "Document Id",
+      @ApiParam(value = "Document id",
           example = "0") @PathVariable("idDocument") final Long idDocument,
-      @ApiParam(value = "Document is public or not",
+      @ApiParam(value = "If the document is public or not",
           example = "true") @RequestParam("isPublic") final Boolean isPublic) {
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
@@ -402,15 +406,15 @@ public class DocumentControllerImpl implements DocumentController {
   @ApiOperation(value = "Update dataflow document", hidden = true,
       notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
   public void updateDocumentLegacy(
-      @ApiParam(value = "File") @RequestPart(name = "file",
+      @ApiParam(value = "File to upload") @RequestPart(name = "file",
           required = false) final MultipartFile file,
-      @ApiParam(value = "Dataflow Id",
+      @ApiParam(value = "Dataflow id",
           example = "0") @PathVariable("dataflowId") final Long dataflowId,
       @ApiParam(value = "Document description", example = "abc") @RequestParam(name = "description",
           required = false) final String description,
       @ApiParam(value = "Document language", example = "English") @RequestParam(name = "language",
           required = false) final String language,
-      @ApiParam(value = "Document Id",
+      @ApiParam(value = "Document id",
           example = "0") @PathVariable("idDocument") final Long idDocument,
       @ApiParam(value = "Document is public or not",
           example = "true") @RequestParam("isPublic") final Boolean isPublic) {
@@ -427,12 +431,13 @@ public class DocumentControllerImpl implements DocumentController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/v1/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Get the list of all documents by dataflow Id",
+  @ApiOperation(value = "Get list of dataflow documents from dataflow help",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class,
       responseContainer = "List", hidden = false,
       notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
-  public List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId) {
+  public List<DocumentVO> getAllDocumentsByDataflow(@ApiParam(value = "Dataflow id",
+          example = "0") @PathVariable("dataflowId") Long dataflowId) {
     List<DocumentVO> documents = new ArrayList<>();
     documents = dataflowController.getAllDocumentsByDataflowId(dataflowId);
     return documents;
@@ -448,7 +453,7 @@ public class DocumentControllerImpl implements DocumentController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Get the list of all documents by dataflow Id",
+  @ApiOperation(value = "Get list of dataflow documents from dataflow help",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class,
       responseContainer = "List", hidden = true,
       notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")

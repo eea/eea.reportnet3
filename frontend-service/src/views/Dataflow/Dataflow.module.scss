@@ -1,3 +1,5 @@
+@import '_styles/mixins';
+
 .titleBar {
   display: flex;
   border-bottom: 1px solid var(--gray-25);
@@ -9,13 +11,6 @@
       color: var(--main-font-color);
     }
   }
-}
-.manageLeadReportersButton {
-  float: left;
-}
-
-.exportTemplate {
-  float: left;
 }
 
 .dialog :global .p-dialog-content {
@@ -35,15 +30,33 @@
   }
 }
 
-.buttonsRolesFooter {
-  display: flex;
-  justify-content: space-between;
-}
-
 .pointer {
   cursor: pointer;
 }
 
-.closeButton {
-  margin-right: 0 !important;
+.buttonLeft {
+  float: left;
+}
+
+.exportImportMenu {
+  user-select: none;
+  width: auto !important;
+}
+
+.leadReportersDialog {
+  @include for-phone-landscape-up {
+    width: 90vw !important;
+  }
+
+  @include for-tablet-landscape-up {
+    width: 80vw !important;
+  }
+
+  @include for-desktop-up {
+    width: 60vw !important;
+  }
+
+  @include for-big-desktop-up {
+    width: 50vw !important;
+  }
 }
