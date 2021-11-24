@@ -1387,6 +1387,7 @@
     "exportTableDataCompletedEvent": "Table data exported successfully",
     "exportTableDataFailedEvent": "Error exporting table data",
     "exportTableDataStart": "Exporting table data",
+    "exportImport": "Export/Import",
     "systemNotificationLevel": "Select the notification level",
     "systemNotification": "System notification",
     "previewNotification": "Preview",
