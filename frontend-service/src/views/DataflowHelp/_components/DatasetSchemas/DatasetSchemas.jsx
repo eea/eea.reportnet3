@@ -63,9 +63,14 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
     try {
       setIsDownloading(true);
       await DataflowService.generateAllSchemasInfoFile(dataflowId);
+      notificationContext.add({ type: 'DOWNLOAD_SCHEMAS_INFO_START' });
     } catch (error) {
       console.error('DatasetSchema - onDownloadAllSchemasInfo .', error);
-      notificationContext.add({ type: 'GENERATE_SCHEMAS_INFO_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_SCHEMAS_INFO_FILE_ERROR' }, true);
+      }
       setIsDownloading(false);
     }
   };

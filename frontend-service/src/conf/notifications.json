@@ -803,7 +803,8 @@
         { "key": "VALIDATE_ALL_REPORTERS_FAILED_EVENT" },
         { "key": "VALIDATE_LEAD_REPORTERS_FAILED_EVENT" },
         { "key": "VALIDATE_REPORTERS_FAILED_EVENT" },
-        { "key": "EXPORT_TABLE_DATA_FAILED_EVENT" }
+        { "key": "EXPORT_TABLE_DATA_FAILED_EVENT" },
+        { "key": "DOWNLOAD_FILE_BAD_REQUEST_ERROR" }
       ]
     },
     {
@@ -1095,7 +1096,8 @@
         { "key": "IMPORT_TABLE_SCHEMA_INIT" },
         { "key": "RECEIVED_MESSAGE" },
         { "key": "DOWNLOAD_USERS_BY_COUNTRY_START" },
-        { "key": "EXPORT_TABLE_DATA_START" }
+        { "key": "EXPORT_TABLE_DATA_START" },
+        { "key": "DOWNLOAD_SCHEMAS_INFO_START" }
       ]
     }
   ],
