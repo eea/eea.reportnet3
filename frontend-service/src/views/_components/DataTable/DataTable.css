@@ -125,6 +125,11 @@ body .p-datatable .p-datatable-tbody > tr.p-highlight {
   font-weight: bold;
 }
 
+body .p-datatable .p-datatable-tbody > tr.p-highlight-bg {
+  background-color: var(--datatable-body-row-highlight-bg);
+  color: var(--datatable-body-row-highlight-color);
+}
+
 body .p-datatable .p-datatable-tbody > tr.p-highlight .p-row-toggler {
   color: var(--datatable-body-row-toggler-hightlight-color);
 }
@@ -145,6 +150,10 @@ body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight {
   background-color: var(--datatable-body-row-highlight-bg);
   color: var(--datatable-body-row-highlight-color);
   font-weight: bold;
+}
+body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight-bg {
+  background-color: var(--datatable-body-row-highlight-bg);
+  color: var(--datatable-body-row-highlight-color);
 }
 body .p-datatable .p-datatable-tbody > tr:nth-child(even).p-highlight .p-row-toggler {
   color: #ffffff;

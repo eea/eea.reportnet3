@@ -19,6 +19,7 @@ const NotificationProvider = ({ children }) => {
     all: [],
     hidden: [],
     newNotification: false,
+    refreshedAndEnabled: false,
     toShow: []
   });
 
@@ -26,28 +27,47 @@ const NotificationProvider = ({ children }) => {
     <NotificationContext.Provider
       value={{
         ...state,
-        add: (notificationDTO, save = false) => {
-          const { content, onClick, type } = notificationDTO;
-          if (save) {
-            NotificationService.create(notificationDTO.type, new Date(), notificationDTO.content);
+        add: (notificationDTO, save = false, isSystemNotification = false) => {
+          if (!isSystemNotification) {
+            const { content, onClick, type } = notificationDTO;
+            if (save) {
+              NotificationService.create(notificationDTO.type, new Date(), notificationDTO.content);
+            }
+            const notification = NotificationService.parse({
+              config: config.notifications.notificationSchema,
+              content,
+              date: new Date(),
+              message: resourcesContext.messages[camelCase(type)],
+              onClick,
+              routes,
+              type
+            });
+            dispatch({
+              type: 'ADD',
+              payload: { notification, isSystemNotification: false }
+            });
+            dispatch({
+              type: 'NEW_NOTIFICATION_ADDED'
+            });
+          } else {
+            const systemNotification = {
+              id: notificationDTO.id,
+              message: notificationDTO.message,
+              lifeTime: notificationDTO.lifeTime,
+              type: notificationDTO.level.toLowerCase(),
+              fixed: true,
+              isSystem: true
+            };
+            if (notificationDTO.enabled) {
+              dispatch({
+                type: 'ADD',
+                payload: { notification: systemNotification, isSystemNotification: true }
+              });
+              dispatch({
+                type: 'NEW_SYSTEM_NOTIFICATION_ADDED'
+              });
+            }
           }
-          const notification = NotificationService.parse({
-            config: config.notifications.notificationSchema,
-            content,
-            date: new Date(),
-            message: resourcesContext.messages[camelCase(type)],
-            onClick,
-            routes,
-            type
-          });
-
-          dispatch({
-            type: 'ADD',
-            payload: notification
-          });
-          dispatch({
-            type: 'NEW_NOTIFICATION_ADDED'
-          });
         },
 
         read: notificationId => {
@@ -74,9 +94,10 @@ const NotificationProvider = ({ children }) => {
           });
         },
 
-        deleteAll: () => {
+        deleteAll: (isSystemNotification = false) => {
           dispatch({
-            type: 'DESTROY'
+            type: 'DESTROY',
+            payload: isSystemNotification
           });
         },
 
@@ -85,6 +106,8 @@ const NotificationProvider = ({ children }) => {
         removeHiddenByKey: key => {
           dispatch({ type: 'HIDE_BY_KEY', payload: state.hidden.filter(notification => notification.key !== key) });
         },
+
+        refreshedPage: () => dispatch({ type: 'REFRESHED_PAGE' }),
 
         hide: notificationDTO => {
           const { type, content } = notificationDTO;

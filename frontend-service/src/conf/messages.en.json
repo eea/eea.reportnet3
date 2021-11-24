@@ -60,7 +60,6 @@
     "automaticallyDownloadValidationsFile": "Validations file generated successfully",
     "availableInPublic": "Available in public",
     "availableInPublicView": "Available in public view",
-    "availablePeriod": "Available period",
     "basemapLayer": "Basemap layer",
     "blocker": "Blocker",
     "bulkDeleteCheckTooltip": "Delete multiple fields",
@@ -1151,7 +1150,7 @@
     "supportedFileExtensionsTooltip": "Supported file extensions: ",
     "supportingDocuments": "Supporting documents",
     "supportsMultipleValues": "Supports multiple values?",
-    "systemNotifications": "Manage system notifications",
+    "systemNotifications": "System notifications",
     "table": "Table",
     "tableDataByIdError": "Failed loading data",
     "tableIsNotCreated": "The table {:tableName} is not created in the design, please check it",
@@ -1391,6 +1390,15 @@
     "exportImport": "Export/Import",
     "disabledQuickEdit": "Quick edit is disabled when data table is sorted or filtered",
     "downloadSchemasInfoStart": "Downloading schemas information file",
-    "downloadFileBadRequestError": "Failed downloading file process. Request is wrong or has incomplete format"
+    "downloadFileBadRequestError": "Failed downloading file process. Request is wrong or has incomplete format",
+    "systemNotificationLevel": "Select the notification level",
+    "systemNotification": "System notification",
+    "previewNotification": "Preview",
+    "previewNotificationMessage": "Launch notification to preview it",
+    "createSystemNotificationError": "Error creating a system notification",
+    "updateSystemNotificationError": "Error updating a system notification",
+    "deleteSystemNotificationError": "Error deleting a system notification",
+    "getSystemNotificationsError": "Error getting the system notifications",
+    "checkEnabledSystemNotificationsError": "Error checking enabled notifications"
   }
 }
