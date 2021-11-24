@@ -1389,6 +1389,6 @@
     "exportTableDataFailedEvent": "Error exporting table data",
     "exportTableDataStart": "Exporting table data",
     "downloadSchemasInfoStart": "Downloading schemas information file",
-    "downloadFileBadRequestError": "Failed downloading file. The request has wrong or incomplete format"
+    "downloadFileBadRequestError": "Failed downloading file process. Request is wrong or has incomplete format"
   }
 }
