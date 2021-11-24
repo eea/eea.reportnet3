@@ -636,7 +636,7 @@
     "importFromFile": "Import from file",
     "importFromOtherSystemOperationManageIntegration": "Import from other system",
     "importLeadReporters": "Import lead reporters",
-    "importLeadReportersTooltip": "Import result file is downloaded after import process",
+    "importLeadReportersTooltip": "Import lead reporters from a CSV file (result file is downloaded afterwards)",
     "importOperationManageIntegration": "Import",
     "importPreviousData": "Other custom imports",
     "importPreviousDataConfirm": "Do you want to import using <strong>\"{:importName}\"</strong> integration?",
@@ -648,7 +648,7 @@
     "importTableSchema": "Import definition",
     "importTableSchemaDialogHeader": "Import schema definition in table",
     "importTableSchemaInit": "Importing table schema definition",
-    "impossibleRoleError": "The lead reporter couldn't be assigned as reporter",
+    "impossibleRoleError": "The lead reporter cannot be assigned as reporter",
     "incompleteDataTooltip": "Incomplete data",
     "info": "Info",
     "instrumentColumnTitle": "Instrument",
@@ -1399,6 +1399,7 @@
     "updateSystemNotificationError": "Error updating a system notification",
     "deleteSystemNotificationError": "Error deleting a system notification",
     "getSystemNotificationsError": "Error getting the system notifications",
-    "checkEnabledSystemNotificationsError": "Error checking enabled notifications"
+    "checkEnabledSystemNotificationsError": "Error checking enabled notifications",
+    "exportLeadReportersTooltip": "Export a CSV with the current lead reporters assigned"
   }
 }

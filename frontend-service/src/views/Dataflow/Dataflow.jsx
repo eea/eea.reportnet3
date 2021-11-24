@@ -270,7 +270,8 @@ const Dataflow = withRouter(({ history, match }) => {
     {
       command: () => onExportLeadReporters(),
       icon: 'download',
-      label: resourcesContext.messages['exportLeadReporters']
+      label: resourcesContext.messages['exportLeadReporters'],
+      tooltip: resourcesContext.messages['exportLeadReportersTooltip']
     },
     {
       command: () => manageDialogs('isImportLeadReportersVisible', true),
