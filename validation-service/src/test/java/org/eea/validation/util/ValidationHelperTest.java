@@ -32,6 +32,8 @@ import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.ValidationService;
@@ -136,6 +138,9 @@ public class ValidationHelperTest {
 
   @Mock
   private RulesRepository rulesRepository;
+
+  @Mock
+  private SchemasRepository schemasRepository;
 
   /**
    * Inits the mocks.
@@ -286,7 +291,8 @@ public class ValidationHelperTest {
     rules.setRules(Arrays.asList(rule));
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rules);
     Mockito.when(validationService.countRecordsDataset(Mockito.eq(1l))).thenReturn(1);
-
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any()))
+        .thenReturn(new DataSetSchema());
     validationHelper.executeValidation(1l, "1", false, false);
     Mockito.verify(validationService, Mockito.times(1)).deleteAllValidation(Mockito.eq(1l));
     Mockito.verify(kafkaSenderUtils, Mockito.times(2))
