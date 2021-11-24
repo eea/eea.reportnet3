@@ -604,6 +604,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (user == null) {
       leadReporter.setInvalid(true);
     } else {
+      leadReporter.setInvalid(false);
       modifyLeadReporterPermissions(email, representative, false);
     }
     return leadReporterRepository.save(leadReporter).getId();
@@ -637,7 +638,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         leadReporterVO.setEmail(leadReporterVO.getEmail().toLowerCase());
         UserRepresentationVO newUser =
             userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail().toLowerCase());
-        leadReporter.setInvalid(newUser == null ? true : null);
+        leadReporter.setInvalid(newUser == null ? true : false);
         if (null != representative.getLeadReporters() && representative.getLeadReporters().stream()
             .filter(reporter -> leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
             .collect(Collectors.counting()) == 0) {
