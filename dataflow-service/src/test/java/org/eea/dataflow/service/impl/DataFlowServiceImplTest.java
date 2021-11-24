@@ -23,6 +23,7 @@ import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.Representative;
+import org.eea.dataflow.persistence.domain.TempUser;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
@@ -32,6 +33,7 @@ import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus
 import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
+import org.eea.dataflow.persistence.repository.TempUserRepository;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -183,6 +185,13 @@ public class DataFlowServiceImplTest {
 
   @Mock
   private FMEUserRepository fmeUserRepository;
+
+  @Mock
+  private TempUserRepository tempUserRepository;
+
+  @Mock
+  private ContributorServiceImpl contributorServiceImpl;
+
   /**
    * The kafka sender utils.
    */
@@ -1438,6 +1447,74 @@ public class DataFlowServiceImplTest {
       assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, e.getMessage());
       throw e;
     }
+  }
+
+  /**
+   * Validate all reporters test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void validateAllReportersTest() throws EEAException {
+
+    TempUser tempUser1 = new TempUser();
+    tempUser1.setEmail("reporter_write@reportnet.net");
+    tempUser1.setRole("REPORTER_WRITE");
+    tempUser1.setDataProviderId(1L);
+    tempUser1.setDataflowId(1L);
+    List<TempUser> tempUserList = new ArrayList<>();
+    tempUserList.add(tempUser1);
+
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    List<Representative> representatives = new ArrayList<>();
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representative.setDataflow(dataflow);
+    representatives.add(representative);
+
+    when(tempUserRepository.findAll()).thenReturn(tempUserList);
+    when(representativeRepository.findAllByInvalid(Mockito.anyBoolean()))
+        .thenReturn(representatives);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("name");
+    dataflowServiceImpl.validateAllReporters("user");
+
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Validate all reporters exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void validateAllReportersExceptionTest() throws EEAException {
+
+    TempUser tempUser1 = new TempUser();
+    tempUser1.setEmail("reporter_write@reportnet.net");
+    tempUser1.setRole("REPORTER_WRITE");
+    tempUser1.setDataProviderId(1L);
+    tempUser1.setDataflowId(1L);
+    List<TempUser> tempUserList = new ArrayList<>();
+    tempUserList.add(tempUser1);
+
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    List<Representative> representatives = new ArrayList<>();
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representative.setDataflow(dataflow);
+    representatives.add(representative);
+
+    doThrow(EEAException.class).when(representativeService).validateLeadReporters(1L, false);
+    when(representativeRepository.findAllByInvalid(Mockito.anyBoolean()))
+        .thenReturn(representatives);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("name");
+
+    dataflowServiceImpl.validateAllReporters("user");
   }
 
 }
