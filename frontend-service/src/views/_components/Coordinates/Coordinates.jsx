@@ -1,5 +1,6 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import isNil from 'lodash/isNil';
+import uniqueId from 'lodash/uniqueId';
 import classNames from 'classnames';
 
 import styles from './Coordinates.module.scss';
@@ -24,6 +25,7 @@ export const Coordinates = ({
   initialGeoJson,
   isCellEditor = false,
   onBlur = () => {},
+  onCoordinatesMoreInfoClick = () => {},
   onCrsChange = () => {},
   onFocus = () => {},
   onKeyDown = () => {},
@@ -66,12 +68,181 @@ export const Coordinates = ({
     }
   };
 
+  const renderEPSG = () => {
+    const renderButton = () => {
+      if (MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+        return (
+          <Button
+            className={`p-button-secondary-transparent button ${styles.mapButton}`}
+            disabled={hasErrors.latOutOfBounds || hasErrors.longOutOfBounds}
+            icon="marker"
+            onClick={() => onMapOpen(initialGeoJson)}
+            tooltip={resourcesContext.messages['selectGeographicalDataOnMap']}
+            tooltipOptions={{ position: 'bottom' }}
+          />
+        );
+      }
+    };
+
+    const renderDropdown = () => {
+      if (MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+        return (
+          <Dropdown
+            appendTo={document.body}
+            ariaLabel={'crs'}
+            className={styles.epsgSwitcher}
+            disabled={crsDisabled || hasErrors.latOutOfBounds || hasErrors.longOutOfBounds}
+            onChange={e => {
+              if (
+                e.target.value.value === 'EPSG:3035' &&
+                (!inBounds({
+                  coord: latitude,
+                  coordType: 'latitude',
+                  checkProjected: true,
+                  crs: e.target.value.value
+                }) ||
+                  !inBounds({
+                    coord: longitude,
+                    coordType: 'longitude',
+                    checkProjected: true,
+                    crs: e.target.value.value
+                  }))
+              ) {
+                checkCoordinates(latitude, longitude, true);
+                return false;
+              }
+              onCrsChange(e.target.value);
+            }}
+            optionLabel="label"
+            options={crsOptions}
+            placeholder={resourcesContext.messages['selectCRS']}
+            value={crsValue}
+          />
+        );
+      } else {
+        return <span>{JSON.parse(initialGeoJson)?.properties?.srid?.split(':')[1]}</span>;
+      }
+    };
+
+    const renderMoreInfoTooltip = () => {
+      if (!MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+        return (
+          <TooltipButton
+            message={resourcesContext.messages['coordinatesMoreInfo']}
+            onClick={() => onCoordinatesMoreInfoClick(initialGeoJson)}
+            uniqueIdentifier={uniqueId('coordinates_more_info')}></TooltipButton>
+        );
+      }
+    };
+
+    return (
+      <div className={`${!isCellEditor ? styles.pointEpsgWrapper : ''}`}>
+        <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
+        {renderDropdown()}
+        {renderButton()}
+        {renderMoreInfoTooltip()}
+      </div>
+    );
+  };
+
   const renderErrorMessage = () => {
+    if (hasErrorMessage) {
+      return (
+        <span className={styles.errorMessage}>
+          {showMessageError && <span className={styles.pointError}>{renderErrorMessageSeparator()}</span>}
+          {(hasErrors.latOutOfBounds || hasErrors.longOutOfBounds) && (
+            <span>
+              <span className={styles.pointError}>{renderOutOfBoundsErrorMessage()}</span>
+              <TooltipButton message={renderTooltipButtonMessage()} />
+            </span>
+          )}
+        </span>
+      );
+    }
+  };
+
+  const renderErrorMessageSeparator = () => {
     let message = errorMessage;
     if (hasErrors.latOutOfBounds || hasErrors.longOutOfBounds) {
       return `${message}: `;
     }
     return message;
+  };
+
+  const renderLatitudeLongitudeInput = () => {
+    const renderLatitude = () => {
+      if (MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+        return (
+          <InputText
+            className={classNames({
+              [styles.error]: hasErrors.latitude || hasErrors.latOutOfBounds,
+              [styles.isCellEditor]: isCellEditor
+            })}
+            disabled={disabled}
+            id={`${id}_lat`}
+            keyfilter="coordinates"
+            onBlur={e => {
+              onBlur([e.target.value, longitude].join(', '));
+              checkCoordinates(e.target.value, longitude);
+            }}
+            onChange={event => setLatitude(event.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onFocus();
+            }}
+            onKeyDown={e => onKeyDown(e, e.target.value)}
+            tooltip={hasErrors.latOutOfBounds ? renderTooltipButtonMessage() : ''}
+            tooltipOptions={{ position: 'top' }}
+            type="text"
+            value={latitude}
+          />
+        );
+      } else {
+        return <span>{latitude}</span>;
+      }
+    };
+
+    const renderLongitude = () => {
+      if (MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+        return (
+          <InputText
+            className={classNames({
+              [styles.error]: hasErrors.longitude || hasErrors.longOutOfBounds,
+              [styles.isCellEditor]: isCellEditor
+            })}
+            disabled={disabled}
+            id={`${id}_long`}
+            keyfilter="coordinates"
+            onBlur={e => {
+              onBlur([latitude, e.target.value].join(', '));
+              checkCoordinates(latitude, e.target.value);
+            }}
+            onChange={event => setLongitude(event.target.value)}
+            onFocus={e => {
+              e.preventDefault();
+              onFocus();
+            }}
+            onKeyDown={e => onKeyDown(e, e.target.value)}
+            tooltip={hasErrors.longOutOfBounds ? renderTooltipButtonMessage() : ''}
+            tooltipOptions={{ position: 'top' }}
+            type="text"
+            value={longitude}
+          />
+        );
+      } else {
+        return <span>{longitude}</span>;
+      }
+    };
+
+    return (
+      <Fragment>
+        {renderLatitude()}
+        <label className={classNames(styles.epsg, styles.longitude)}>
+          {renderLabel({ geographical: 'longitude', geographicalShort: 'long', metrical: 'y' })}:
+        </label>
+        {renderLongitude()}
+      </Fragment>
+    );
   };
 
   const renderOutOfBoundsErrorMessage = () => {
@@ -112,104 +283,10 @@ export const Coordinates = ({
         <label className={styles.epsg}>
           {renderLabel({ geographical: 'latitude', geographicalShort: 'lat', metrical: 'x' })}:
         </label>
-        <InputText
-          className={classNames({
-            [styles.error]: hasErrors.latitude || hasErrors.latOutOfBounds,
-            [styles.isCellEditor]: isCellEditor
-          })}
-          disabled={disabled}
-          id={`${id}_lat`}
-          keyfilter="coordinates"
-          onBlur={e => {
-            onBlur([e.target.value, longitude].join(', '));
-            checkCoordinates(e.target.value, longitude);
-          }}
-          onChange={event => setLatitude(event.target.value)}
-          onFocus={e => {
-            e.preventDefault();
-            onFocus();
-          }}
-          onKeyDown={e => onKeyDown(e, e.target.value)}
-          tooltip={hasErrors.latOutOfBounds ? renderTooltipButtonMessage() : ''}
-          tooltipOptions={{ position: 'top' }}
-          type="text"
-          value={latitude}
-        />
-        <label className={classNames(styles.epsg, styles.longitude)}>
-          {renderLabel({ geographical: 'longitude', geographicalShort: 'long', metrical: 'y' })}:
-        </label>
-        <InputText
-          className={classNames({
-            [styles.error]: hasErrors.longitude || hasErrors.longOutOfBounds,
-            [styles.isCellEditor]: isCellEditor
-          })}
-          disabled={disabled}
-          id={`${id}_long`}
-          keyfilter="coordinates"
-          onBlur={e => {
-            onBlur([latitude, e.target.value].join(', '));
-            checkCoordinates(latitude, e.target.value);
-          }}
-          onChange={event => setLongitude(event.target.value)}
-          onFocus={e => {
-            e.preventDefault();
-            onFocus();
-          }}
-          onKeyDown={e => onKeyDown(e, e.target.value)}
-          tooltip={hasErrors.longOutOfBounds ? renderTooltipButtonMessage() : ''}
-          tooltipOptions={{ position: 'top' }}
-          type="text"
-          value={longitude}
-        />
+        {renderLatitudeLongitudeInput()}
       </div>
-      {hasErrorMessage && (
-        <span className={styles.errorMessage}>
-          {showMessageError && <span className={styles.pointError}>{renderErrorMessage()}</span>}
-          {(hasErrors.latOutOfBounds || hasErrors.longOutOfBounds) && (
-            <span>
-              <span className={styles.pointError}>{renderOutOfBoundsErrorMessage()}</span>
-              <TooltipButton message={renderTooltipButtonMessage()} />
-            </span>
-          )}
-        </span>
-      )}
-      <div className={`${!isCellEditor ? styles.pointEpsgWrapper : ''}`}>
-        <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
-        <Dropdown
-          appendTo={document.body}
-          ariaLabel={'crs'}
-          className={styles.epsgSwitcher}
-          disabled={crsDisabled || hasErrors.latOutOfBounds || hasErrors.longOutOfBounds}
-          onChange={e => {
-            if (
-              e.target.value.value === 'EPSG:3035' &&
-              (!inBounds({ coord: latitude, coordType: 'latitude', checkProjected: true, crs: e.target.value.value }) ||
-                !inBounds({
-                  coord: longitude,
-                  coordType: 'longitude',
-                  checkProjected: true,
-                  crs: e.target.value.value
-                }))
-            ) {
-              checkCoordinates(latitude, longitude, true);
-              return false;
-            }
-            onCrsChange(e.target.value);
-          }}
-          optionLabel="label"
-          options={crsOptions}
-          placeholder={resourcesContext.messages['selectCRS']}
-          value={crsValue}
-        />
-        <Button
-          className={`p-button-secondary-transparent button ${styles.mapButton}`}
-          disabled={hasErrors.latOutOfBounds || hasErrors.longOutOfBounds}
-          icon="marker"
-          onClick={() => onMapOpen(initialGeoJson)}
-          tooltip={resourcesContext.messages['selectGeographicalDataOnMap']}
-          tooltipOptions={{ position: 'bottom' }}
-        />
-      </div>
+      {renderErrorMessage()}
+      {renderEPSG()}
     </div>
   );
 };

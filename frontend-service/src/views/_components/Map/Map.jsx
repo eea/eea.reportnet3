@@ -168,14 +168,32 @@ export const Map = ({
       results.clearLayers();
       if (TextUtils.areEquals(geometryType, 'POINT')) {
         for (let i = data.results.length - 1; i >= 0; i--) {
-          setNewPositionMarker([data.results[i].latlng.lat, data.results[i].latlng.lng]);
-          onSelectPoint(
-            projectPointCoordinates({
-              coordinates: [data.results[i].latlng.lat, data.results[i].latlng.lng],
-              newCRS: currentCRS.value
-            }),
-            currentCRS.value
-          );
+          if (
+            !MapUtils.inBounds({
+              coord: data.results[i].latlng.lat,
+              coordType: 'latitude',
+              checkProjected: true,
+              crs: currentCRS.value
+            }) ||
+            !MapUtils.inBounds({
+              coord: data.results[i].latlng.lng,
+              coordType: 'longitude',
+              checkProjected: true,
+              crs: currentCRS.value
+            })
+          ) {
+            setHasErrors({ ...hasErrors, newPointError: true });
+            return false;
+          } else {
+            setNewPositionMarker([data.results[i].latlng.lat, data.results[i].latlng.lng]);
+            onSelectPoint(
+              projectPointCoordinates({
+                coordinates: [data.results[i].latlng.lat, data.results[i].latlng.lng],
+                newCRS: currentCRS.value
+              }),
+              currentCRS.value
+            );
+          }
         }
       }
     });

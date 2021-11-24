@@ -142,6 +142,11 @@ const getGeometryType = json =>
 
 const getSrid = json => (!isNil(json) && json !== '' ? JSON.parse(json).properties.srid : 'EPSG:4326');
 
+const hasValidCRS = (fieldValue, crs) => {
+  const parsedGeoJsonData = JSON.parse(fieldValue);
+  return crs.some(crsItem => crsItem.value === parsedGeoJsonData.properties.srid);
+};
+
 const inBounds = ({ coord, coordType, checkProjected = false, crs }) => {
   const parsedCoord = parseFloat(coord) || 0;
   if (checkProjected) {
@@ -279,6 +284,7 @@ export const MapUtils = {
   getFirstPointComplexGeometry,
   getGeometryType,
   getSrid,
+  hasValidCRS,
   inBounds,
   isValidJSON,
   latLngToLngLat,
