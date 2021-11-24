@@ -365,7 +365,6 @@ const RepresentativesList = ({
       const reporters = formState.leadReporters[dataProviderId];
       const errors = formState.leadReportersErrors[dataProviderId];
       const isNewLeadReporter = TextUtils.areEquals(leadReporter.id, 'empty');
-
       const uniqueInputId = `${leadReporter.id}-${representativeId}`;
       return (
         <div
