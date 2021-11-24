@@ -53,6 +53,7 @@ const RepresentativesList = ({
     allPossibleDataProvidersNoSelect: [],
     dataProvidersTypesList: [],
     deleteLeadReporterId: null,
+    focusedLeadReporterId: null,
     isDeleting: false,
     isLoading: false,
     isVisibleConfirmDeleteDialog: false,
@@ -332,6 +333,29 @@ const RepresentativesList = ({
 
   const setIsDeleting = value => formDispatcher({ type: 'SET_IS_DELETING', payload: { isDeleting: value } });
 
+  const setFocusedLeadReporterId = focusedLeadReporterId =>
+    formDispatcher({ type: 'SET_FOCUSED_LEAD_REPORTER_ID', payload: { focusedLeadReporterId } });
+
+  const renderIsValidUserIcon = (isNewLeadReporter, leadReporter) => {
+    if (!isNewLeadReporter && leadReporter.id !== formState.focusedLeadReporterId) {
+      return (
+        <Fragment>
+          <FontAwesomeIcon
+            className={styles.isValidUserIcon}
+            data-for={leadReporter?.account}
+            data-tip
+            icon={leadReporter?.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
+          />
+          <ReactTooltip border={true} effect="solid" id={leadReporter?.account} place="top">
+            {leadReporter?.isValid
+              ? resourcesContext.messages['validUserTooltip']
+              : resourcesContext.messages['invalidUserTooltip']}
+          </ReactTooltip>
+        </Fragment>
+      );
+    }
+  };
+
   const renderLeadReporterColumnTemplate = representative => {
     const { dataProviderId, representativeId } = representative;
 
@@ -354,29 +378,21 @@ const RepresentativesList = ({
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             disabled={representative.hasDatasets && reporters[leadReporter.id]?.isValid}
             id={`${leadReporter.id}-${representativeId}`}
-            onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
+            onBlur={event => {
+              onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter);
+              setFocusedLeadReporterId(null);
+            }}
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
-            onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
+            onFocus={() => {
+              onCleanErrors(dataProviderId, leadReporter.id);
+              setFocusedLeadReporterId(leadReporter.id);
+            }}
             onKeyDown={event => onKeyDown(event, representativeId, dataProviderId, leadReporter)}
             placeholder={resourcesContext.messages['manageRolesDialogInputPlaceholder']}
             value={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
           />
 
-          {!isNewLeadReporter && isValidEmail(reporters[leadReporter.id]?.account || reporters[leadReporter.id]) && (
-            <Fragment>
-              <FontAwesomeIcon
-                className={styles.isValidUserIcon}
-                data-for={reporters[leadReporter.id]?.account}
-                data-tip
-                icon={reporters[leadReporter.id]?.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
-              />
-              <ReactTooltip border={true} effect="solid" id={reporters[leadReporter.id]?.account} place="top">
-                {reporters[leadReporter.id]?.isValid
-                  ? resourcesContext.messages['validUserTooltip']
-                  : resourcesContext.messages['invalidUserTooltip']}
-              </ReactTooltip>
-            </Fragment>
-          )}
+          {renderIsValidUserIcon(isNewLeadReporter, reporters[leadReporter.id])}
 
           {!isNewLeadReporter && (
             <Button
