@@ -587,7 +587,7 @@ export const QCList = withRouter(
             field={field}
             header={getHeader(field)}
             key={field}
-            sortable={true}
+            sortable={tabsValidationsState.editingRows.length > 0 ? false : true}
             style={columnStyles(field)}
           />
         );
