@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
+import { isNil } from 'lodash';
 
 export const Calendar = forwardRef((props, _) => {
   const {
@@ -30,7 +31,7 @@ export const Calendar = forwardRef((props, _) => {
     showButtonBar,
     showSeconds = false,
     showTime = false,
-    showWeek,
+    showWeek = false,
     style,
     todayButtonClassName,
     value,
@@ -62,6 +63,9 @@ export const Calendar = forwardRef((props, _) => {
     clear: 'Clear',
     weekHeader: 'Wk'
   };
+
+  const yearRangeValue =
+    yearNavigator && isNil(yearRange) ? `${new Date().getFullYear() - 10}:${new Date().getFullYear() + 10}` : yearRange;
 
   return (
     <PrimeCalendar
@@ -97,7 +101,7 @@ export const Calendar = forwardRef((props, _) => {
       todayButtonClassName={todayButtonClassName}
       value={value}
       yearNavigator={yearNavigator}
-      yearRange={yearRange}
+      yearRange={yearRangeValue}
     />
   );
 });

@@ -111,7 +111,6 @@ export const SystemNotificationsCreateForm = ({
                 onChange={e => onChange('from', e.value)}
                 // readOnlyInput={true}
                 showTime={true}
-                showWeek={true}
                 // style={{ zoom: '0.95' }}
                 value={systemNotification.from}
                 yearNavigator={true}
@@ -134,7 +133,6 @@ export const SystemNotificationsCreateForm = ({
                 onChange={e => onChange('to', e.value)}
                 // readOnlyInput={true}
                 showTime={true}
-                showWeek={true}
                 // style={{ zoom: '0.95' }}
                 value={systemNotification.to}
                 yearNavigator={true}

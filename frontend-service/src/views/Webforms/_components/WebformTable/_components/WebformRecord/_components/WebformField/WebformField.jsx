@@ -98,7 +98,7 @@ export const WebformField = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
-      await DatasetService.deleteAttachment(datasetId, selectedFieldId);
+      await DatasetService.deleteAttachment(dataflowId, datasetId, selectedFieldId, dataProviderId);
       onFillField(record, selectedFieldSchemaId, '');
       onToggleDeleteAttachmentDialogVisible(false);
     } catch (error) {
@@ -577,10 +577,20 @@ export const WebformField = ({
           onError={onUploadFileError}
           onUpload={onAttach}
           operation="PUT"
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
-            datasetId,
-            fieldId: selectedFieldId
-          })}`}
+          url={`${window.env.REACT_APP_BACKEND}${
+            isNil(dataProviderId)
+              ? getUrl(DatasetConfig.uploadAttachment, {
+                  dataflowId,
+                  datasetId,
+                  fieldId: selectedFieldId
+                })
+              : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
+                  dataflowId,
+                  datasetId,
+                  fieldId: selectedFieldId,
+                  dataProviderId
+                })
+          }`}
         />
       )}
       {isDeleteAttachmentVisible && (

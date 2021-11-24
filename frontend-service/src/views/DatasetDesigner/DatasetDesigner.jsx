@@ -387,7 +387,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     type: 'GET_SELECTED_IMPORT_EXTENSION',
                     payload: { selectedImportExtension: type.fileExtension }
                   });
-                  setSelectedCustomImportIntegration({ id: type.id, name: type.name });
+                  setSelectedCustomImportIntegration({ id: type.id, name: `${type.name} (.${type.fileExtension})` });
                 },
                 icon: type.fileExtension,
                 label: `${type.name} (.${type.fileExtension})`
