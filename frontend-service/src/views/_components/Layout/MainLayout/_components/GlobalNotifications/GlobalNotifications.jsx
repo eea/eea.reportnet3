@@ -48,7 +48,11 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadAllSchemasInfoFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_SCHEMAS_INFO_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'DOWNLOAD_SCHEMAS_INFO_FILE_ERROR' }, true);
+      }
     } finally {
       notificationContext.clearHiddenNotifications();
     }
@@ -73,7 +77,11 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadQCRulesFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' }, true);
+      }
     } finally {
       notificationContext.clearHiddenNotifications();
     }
@@ -98,7 +106,11 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadUsersListFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_USERS_LIST_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'DOWNLOAD_USERS_LIST_FILE_ERROR' }, true);
+      }
     } finally {
       notificationContext.clearHiddenNotifications();
     }
@@ -123,7 +135,11 @@ const GlobalNotifications = () => {
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadValidationsFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_FILE_ERROR' }, true);
+      }
     } finally {
       notificationContext.clearHiddenNotifications();
     }
