@@ -15,6 +15,7 @@ import {
   faBookOpen,
   faBraille,
   faBroom,
+  faBullhorn,
   faCaretDown,
   faCaretRight,
   faChartBar,
@@ -104,7 +105,7 @@ import {
   faUserShield,
   faUserTimes,
   faVectorSquare,
-  faVolumeUp,
+  faVolumeUp
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -444,6 +445,8 @@ export const AwesomeIcons = icon => {
       return faFileCode;
     case 'zip':
       return faFileArchive;
+    case 'bullhorn':
+      return faBullhorn;
     default:
       return faFileAlt;
   }

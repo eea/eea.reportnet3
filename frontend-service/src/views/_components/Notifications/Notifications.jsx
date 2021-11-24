@@ -93,7 +93,8 @@ const Notifications = () => {
         summary: resourcesContext.messages[`notification${capitalize(notification.type)}Title`],
         detail: message,
         life: notification.lifeTime,
-        sticky: notification.fixed
+        sticky: notification.fixed,
+        system: notification.isSystem || false
       });
 
       if (userContext.userProps.pushNotifications && document.visibilityState === 'hidden') {
