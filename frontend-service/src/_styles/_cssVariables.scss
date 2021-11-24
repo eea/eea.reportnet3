@@ -158,7 +158,7 @@
   --breadCrumb-icon-color: var(--c-corporate-blue);
   --breadCrumb-chevron-color: var(--c-corporate-blue-lighter);
 
-  /* Leftside bar*/
+  /* Leftside bar */
 
   --leftSideBar-bg: var(--c-corporate-blue);
   --leftSideBar-box-shadow: 0 5px 0.5rem rgba(0, 0, 0, 0.6);
@@ -185,7 +185,7 @@
   --tabview-highlight-border-hover: 1px solid var(--gray-25);
   --tabview-highlight-color-hover: var(--gray-110);
 
-  /* TabMenu */
+  /* Tab menu */
   --tabmenu-highlight-bg: var(--bg);
   --tabmenu-highlight-border: 1px solid var(--gray-25);
   --tabmenu-highlight-border-bottom: 1px solid var(--bg);
@@ -239,6 +239,11 @@
   --datatable-body-row-contextmenu-hightlight-color: var(--white);
   --datatable-column-resizer-bg: var(--c-corporate-blue);
   --datatable-toolbar-border: 1px solid var(--gray-25);
+
+  /* Dataflow item */
+  --dataflow-item-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --dataflow-item-box-shadow-hover: 0 10px 20px rgba(0, 0, 0, 0.21), 0 6px 6px rgba(0, 0, 0, 0.25);
+  --dataflow-item-transition-box-shadow: box-shadow 0.1s ease-in;
 
   /* Paginator */
   --paginator-bg: var(--c-corporate-blue);
@@ -544,13 +549,14 @@
   --map-marker-color: var(--c-corporate-blue-lighter);
   --map-new-marker-color: var(--c-green);
 
-  /*Eu header footer*/
+  /* EU header & footer */
   --eu-header-shadow: 0 4px 5px 0 var(--shadow-color-rgba);
   --eu-header-bg: var(--gray-110);
   --eu-footer-bottom-bg: #d9d9d9;
   --eu-footer-bottom-font: #016394;
   --eu-footer-bottom: var(--eu-footer-bottom-bg);
-  /* custom header */
+
+  /* Custom header */
   --header-footer-bg: var(--gray-10);
 
   /* Footer */
@@ -593,7 +599,7 @@
   --accordion-header-highlight-border-hover: 1px solid var(--accordion-header-highlight-bg-color-hover);
 
   /* Borders */
-  --general-border-style: '1px solid var(--general-border-color)';
+  --general-border-style: 1px solid var(--general-border-color);
 
   /* Left sidebar */
   --left-sidebar-text-color: var(--white);
