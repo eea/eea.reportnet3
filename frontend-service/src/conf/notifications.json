@@ -1065,7 +1065,7 @@
     },
     {
       "key": "info",
-      "lifeTime": 50000,
+      "lifeTime": 5000,
       "fixed": false,
       "types": [
         { "key": "DATASET_DATA_LOADING_INIT", "messageKeys": {} },
