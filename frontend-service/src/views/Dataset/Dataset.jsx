@@ -816,10 +816,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onDownloadQCRules = async () => {
     setIsDownloadingQCRules(true);
-    notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
 
     try {
       await ValidationService.generateQCRulesFile(datasetId);
+      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
     } catch (error) {
       console.error('DatasetDesigner - onDownloadQCRules.', error);
       if (error.response?.status === 400) {
@@ -943,10 +943,10 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onDownloadValidations = async () => {
     setIsDownloadingValidations(true);
-    notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
 
     try {
       await ValidationService.generateShowValidationsFile(datasetId);
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
     } catch (error) {
       console.error('Dataset - onDownloadValidations.', error);
       if (error.response?.status === 400) {

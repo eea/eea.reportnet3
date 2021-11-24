@@ -611,10 +611,10 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onDownloadUsersByCountry = async () => {
     setIsDownloadingUsers(true);
-    notificationContext.add({ type: 'DOWNLOAD_USERS_BY_COUNTRY_START' });
 
     try {
       await DataflowService.generateUsersByCountryFile(dataflowId);
+      notificationContext.add({ type: 'DOWNLOAD_USERS_BY_COUNTRY_START' });
     } catch (error) {
       console.error('Dataflow - onDownloadUsersByCountry.', error);
       if (error.response?.status === 400) {

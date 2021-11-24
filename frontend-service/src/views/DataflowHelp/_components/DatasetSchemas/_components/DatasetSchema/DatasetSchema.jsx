@@ -492,10 +492,10 @@ const DatasetSchema = ({
 
   const onDownloadQCRules = async datasetId => {
     setIsDownloadingQCs(true);
-    notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
 
     try {
       await ValidationService.generateQCRulesFile(datasetId);
+      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
     } catch (error) {
       console.error('DatasetSchema - onDownloadQCRules.', error);
       if (error.response?.status === 400) {
