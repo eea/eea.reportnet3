@@ -1308,7 +1308,7 @@ const DataViewer = withRouter(
                     dataflowId,
                     datasetId,
                     fieldId: records.selectedFieldId,
-                    dataProviderId
+                    providerId: dataProviderId
                   })
             }`}
           />
