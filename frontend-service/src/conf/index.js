@@ -28,8 +28,8 @@ config.DESCRIPTION_MAX_LENGTH = 10000;
 config.SYSTEM_NOTIFICATION_MAX_LENGTH = 300;
 config.GEOGRAPHICAL_LAT_COORD = { min: -90, max: 90 };
 config.GEOGRAPHICAL_LONG_COORD = { min: -180, max: 180 };
-config.METRICAL_X_COORD = { min: 1896628.62, max: 9512027.5 };
-config.METRICAL_Y_COORD = { min: 1507846.05, max: 4851204.83 };
+config.METRICAL_X_COORD = { min: 1896628.62, max: 4851204.83 };
+config.METRICAL_Y_COORD = { min: 1507846.05, max: 6829874.45 };
 
 config.MAX_ATTACHMENT_SIZE = 20 * config.MB_SIZE;
 
