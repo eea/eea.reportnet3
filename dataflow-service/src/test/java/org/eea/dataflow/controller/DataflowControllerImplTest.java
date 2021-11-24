@@ -28,6 +28,8 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowCountVO;
+import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
@@ -1030,5 +1032,40 @@ public class DataflowControllerImplTest {
       Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       throw e;
     }
+  }
+
+  @Test
+  public void getPrivateDataflowByIdTest() throws EEAException {
+    DataflowPrivateVO dataflowPrivateVO = new DataflowPrivateVO();
+    dataflowPrivateVO.setId(1L);
+    Mockito.when(dataflowService.getPrivateDataflowById(Mockito.anyLong()))
+        .thenReturn(dataflowPrivateVO);
+    assertEquals(dataflowPrivateVO, dataflowControllerImpl.getPrivateDataflowById(1L));
+  }
+
+  @Test
+  public void getPrivateDataflowByIdExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(dataflowService)
+        .getPrivateDataflowById(Mockito.anyLong());
+    dataflowControllerImpl.getPrivateDataflowById(1L);
+    Mockito.verify(dataflowService, times(1)).getPrivateDataflowById(Mockito.anyLong());
+  }
+
+  @Test
+  public void getDataflowsCountTest() throws EEAException {
+    List<DataflowCountVO> dataflows = new ArrayList<>();
+    DataflowCountVO dataflowCountVO = new DataflowCountVO();
+    dataflowCountVO.setAmount(1L);
+    dataflowCountVO.setType(TypeDataflowEnum.REFERENCE);
+    dataflows.add(dataflowCountVO);
+    Mockito.when(dataflowService.getDataflowsCount()).thenReturn(dataflows);
+    assertEquals(dataflows, dataflowControllerImpl.getDataflowsCount());
+  }
+
+  @Test
+  public void getDataflowsCountExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(dataflowService).getDataflowsCount();
+    dataflowControllerImpl.getDataflowsCount();
+    Mockito.verify(dataflowService, times(1)).getDataflowsCount();
   }
 }
