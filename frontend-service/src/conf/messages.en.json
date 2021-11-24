@@ -1386,6 +1386,8 @@
     "geoJSONErrors": "GeoJSON errors (click on each error to scroll)",
     "selectCRS": "Select a CRS",
     "exportTableDataCompletedEvent": "Table data exported successfully",
-    "exportTableDataFailedEvent": "Error exporting table data"
+    "exportTableDataFailedEvent": "Error exporting table data",
+    "exportTableDataStart": "Exporting table data",
+    "exportImport": "Export/Import"
   }
 }
