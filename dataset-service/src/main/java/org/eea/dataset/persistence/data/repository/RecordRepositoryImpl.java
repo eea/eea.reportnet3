@@ -52,6 +52,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /** The Constant MAX_FILTERS. */
   private static final int MAX_FILTERS = 5;
 
@@ -499,8 +503,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /**
    * Check sql.
    *
-   * @param sql the sql
+   * @param text the text
    * @return true, if successful
+   * @throws EEAException the EEA exception
    */
   private boolean checkSql(String text) throws EEAException {
     List<String> illegalwords = Arrays.asList(RESERVED_SQL_WORDS);
@@ -509,6 +514,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       if (illegalwords.contains(text.toUpperCase())) {
         isAllowed = true;
       } else {
+        LOG_ERROR.error("Param {} is illegal.", text);
         throw new EEAException("Unprocessable Entity",
             new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY));
       }
@@ -820,6 +826,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param filterValue the filter value
    * @param columnName the column name
    * @return the string
+   * @throws EEAException the EEA exception
    */
   @SuppressWarnings("unchecked")
   private String returnigJsonWithNoData(Long datasetId, String datasetSchemaId,
