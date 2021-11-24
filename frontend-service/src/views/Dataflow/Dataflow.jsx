@@ -261,14 +261,14 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const exportImportMenuItems = [
     {
-      command: onExportLeadReportersTemplate,
+      command: () => onExportLeadReportersTemplate(),
       disabled: isEmpty(dataflowState.dataProviderSelected),
       icon: 'download',
       label: resourcesContext.messages['exportLeadReportersTemplate'],
       tooltip: `${resourcesContext.messages['exportLeadReportersTemplateTooltip']} ${dataflowState.dataProviderSelected?.label}`
     },
     {
-      command: onExportLeadReporters,
+      command: () => onExportLeadReporters(),
       icon: 'download',
       label: resourcesContext.messages['exportLeadReporters']
     },
@@ -508,7 +508,7 @@ const Dataflow = withRouter(({ history, match }) => {
     setPreviousObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
   };
 
-  async function onExportLeadReporters() {
+  const onExportLeadReporters = async () => {
     try {
       const { data } = await RepresentativeService.exportFile(dataflowId);
       if (!isNil(data)) {
@@ -521,9 +521,9 @@ const Dataflow = withRouter(({ history, match }) => {
       console.error('Dataflow - onExportLeadReporters.', error);
       notificationContext.add({ type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT' }, true);
     }
-  }
+  };
 
-  async function onExportLeadReportersTemplate() {
+  const onExportLeadReportersTemplate = async () => {
     try {
       const { data } = await RepresentativeService.exportTemplateFile(
         dataflowState.dataProviderSelected?.dataProviderGroupId
@@ -535,7 +535,7 @@ const Dataflow = withRouter(({ history, match }) => {
       console.error('Dataflow - onExportLeadReportersTemplate.', error);
       notificationContext.add({ type: 'EXPORT_DATAFLOW_LEAD_REPORTERS_TEMPLATE_FAILED_EVENT' }, true);
     }
-  }
+  };
 
   const onConfirmValidateReporters = async () => {
     manageDialogs('isValidateReportersDialogVisible', false);
