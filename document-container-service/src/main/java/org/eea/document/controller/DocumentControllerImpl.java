@@ -88,7 +88,7 @@ public class DocumentControllerImpl implements DocumentController {
   @PostMapping(value = "/v1/upload/{dataflowId}")
   @ApiOperation(value = "Upload document to dataflow help", hidden = false,
       notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
-  public void uploadDocument(@RequestPart("file") final MultipartFile file,
+  public void uploadDocument(@ApiParam(value = "File to upload") @RequestPart("file") final MultipartFile file,
       @ApiParam(value = "Dataflow id",
           example = "0") @PathVariable("dataflowId") final Long dataflowId,
       @ApiParam(value = "Document description",
@@ -406,7 +406,7 @@ public class DocumentControllerImpl implements DocumentController {
   @ApiOperation(value = "Update dataflow document", hidden = true,
       notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
   public void updateDocumentLegacy(
-      @ApiParam(value = "File") @RequestPart(name = "file",
+      @ApiParam(value = "File to upload") @RequestPart(name = "file",
           required = false) final MultipartFile file,
       @ApiParam(value = "Dataflow id",
           example = "0") @PathVariable("dataflowId") final Long dataflowId,
