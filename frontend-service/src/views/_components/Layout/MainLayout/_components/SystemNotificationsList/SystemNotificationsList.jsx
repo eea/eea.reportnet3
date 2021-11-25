@@ -151,7 +151,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
         id="cancelCreateSystemNotification"
-        label={resourcesContext.messages['cancel']}
+        label={resourcesContext.messages['close']}
         onClick={() => setIsSystemNotificationVisible(false)}
       />
     </div>

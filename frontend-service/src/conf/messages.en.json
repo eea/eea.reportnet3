@@ -1411,6 +1411,7 @@
     "coordsOutOfBoundsTooltipGeographicalProjected": "-16.1 and 40.18 (longitude) and 32.88 and 84.17 (latitude)",
     "coordsOutOfBoundsTooltipMetrical": "1896628.62 and 4851204.83 (X) and 1507846.05 and 6829874.45 (Y)",
     "newPointErrorMessage": "In the EPSG:3035, the new point must be between -16.1 and 40.18 (longitude) and 32.88 and 84.17 (latitude)",
-    "newPointErrorTitle": "Coordinate error"
+    "newPointErrorTitle": "Coordinate error",
+    "addSystemNotification": "Add system notification"
   }
 }

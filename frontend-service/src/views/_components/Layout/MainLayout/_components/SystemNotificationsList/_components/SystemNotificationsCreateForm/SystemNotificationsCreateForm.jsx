@@ -97,7 +97,7 @@ export const SystemNotificationsCreateForm = ({
       className="edit-table"
       contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
       footer={systemNotificationsCreateFormFooter}
-      header={resourcesContext.messages['add']}
+      header={resourcesContext.messages['addSystemNotification']}
       modal={true}
       onHide={() => onToggleVisibility(false)}
       style={{ width: '40vw' }}
@@ -124,13 +124,12 @@ export const SystemNotificationsCreateForm = ({
             />
           </div>
         </div>
-        <div>
-          <div>
+        <div className={styles.systemNotificationColumnGroup}>
+          <div className={styles.systemNotificationColumn}>
             <label>{resourcesContext.messages['notificationLevel']}</label>
-          </div>
-          <div>
             <Dropdown
               appendTo={document.body}
+              className={styles.systemNotificationLevelDropdown}
               filterPlaceholder={resourcesContext.messages['systemNotificationLevel']}
               id="errorLevel"
               itemTemplate={rowData => notificationLevelTemplate(rowData, true)}
@@ -143,14 +142,11 @@ export const SystemNotificationsCreateForm = ({
               value={{ label: systemNotification.level, value: systemNotification.level }}
             />
           </div>
-        </div>
-        <div>
-          <div className={styles.enabledCheckbox}>
-            <label onClick={e => onChange('enabled', !systemNotification.enabled)}>
-              {resourcesContext.messages['ruleEnabled']}
-            </label>
+          <div className={styles.systemNotificationColumn}>
+            <label>{resourcesContext.messages['ruleEnabled']}</label>
             <Checkbox
               checked={systemNotification.enabled}
+              className={styles.enabledCheckbox}
               id="systemNotification_Enabled"
               inputId="systemNotification_Enabled"
               onChange={e => onChange('enabled', e.checked)}
