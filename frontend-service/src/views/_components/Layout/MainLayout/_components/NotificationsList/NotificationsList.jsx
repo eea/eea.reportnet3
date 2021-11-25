@@ -123,6 +123,23 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     onLoadNotifications(event.first, event.rows);
   };
 
+  const onHideNotificationsList = () => {
+    setIsNotificationVisible(false);
+    notificationContext.deleteAll();
+  };
+
+  const notificationsFooter = (
+    <div>
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon="cancel"
+        id="cancelNotification"
+        label={resourcesContext.messages['close']}
+        onClick={onHideNotificationsList}
+      />
+    </div>
+  );
+
   const onLoadNotifications = async (fRow, nRows) => {
     try {
       setIsLoading(true);
@@ -239,12 +256,10 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         blockScroll={false}
         className="edit-table"
         contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
+        footer={notificationsFooter}
         header={resourcesContext.messages['notifications']}
         modal={true}
-        onHide={() => {
-          setIsNotificationVisible(false);
-          notificationContext.deleteAll();
-        }}
+        onHide={onHideNotificationsList}
         style={{ width: '80%' }}
         visible={isNotificationVisible}
         zIndex={3100}>
