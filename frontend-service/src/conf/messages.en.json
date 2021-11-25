@@ -1387,7 +1387,7 @@
     "exportTableDataCompletedEvent": "Table data exported successfully",
     "exportTableDataFailedEvent": "Error exporting table data",
     "exportTableDataStart": "Exporting table data",
-    "exportImport": "Export/Import",
+    "exportImport": "Import/Export",
     "disabledQuickEdit": "Quick edit is disabled when data table is sorted or filtered",
     "downloadSchemasInfoStart": "Downloading schemas information file",
     "downloadFileBadRequestError": "Failed downloading file process. Request is wrong or has incomplete format",
