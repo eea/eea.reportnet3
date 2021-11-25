@@ -521,6 +521,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                   LeadReporter leadReporter = new LeadReporter();
                   leadReporter.setRepresentative(representative);
                   leadReporter.setEmail(email.toLowerCase());
+                  if (null == user) {
+                    leadReporter.setInvalid(true);
+                  }
                   representative.setLeadReporters(new ArrayList<>(Arrays.asList(leadReporter)));
                 } else {
                   representative.setLeadReporters(new ArrayList<>());
@@ -534,6 +537,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                     LeadReporter leadReporter = new LeadReporter();
                     leadReporter.setRepresentative(representative);
                     leadReporter.setEmail(innerEmail);
+                    if (null == user) {
+                      leadReporter.setInvalid(true);
+                    }
                     leadReporters.add(leadReporter);
                     representative.setLeadReporters(leadReporters);
                   }

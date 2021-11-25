@@ -1367,6 +1367,7 @@ const DataViewer = withRouter(
                 isSaving={isSaving}
                 onChangeForm={onEditAddFormInput}
                 onConditionalChange={onConditionalChange}
+                onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
                 onShowCoordinateError={onShowCoordinateError}
                 onShowFieldInfo={onShowFieldInfo}
                 records={records}

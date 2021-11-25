@@ -85,6 +85,7 @@ const Dataflow = withRouter(({ history, match }) => {
     description: '',
     designDatasetSchemas: [],
     formHasRepresentatives: false,
+    hasReporters: false,
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
@@ -368,6 +369,13 @@ const Dataflow = withRouter(({ history, match }) => {
     });
   };
 
+  const setHasReporters = hasReporters => {
+    dataflowDispatch({
+      type: 'SET_HAS_REPORTERS',
+      payload: { hasReporters }
+    });
+  };
+
   const setIsUserRightManagementDialogVisible = isVisible => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
   };
@@ -377,9 +385,9 @@ const Dataflow = withRouter(({ history, match }) => {
       return (
         <Button
           className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink ${
-            dataflowState.isUpdatingPermissions ? 'p-button-animated-spin' : ''
+            dataflowState.isUpdatingPermissions || !dataflowState.hasReporters ? 'p-button-animated-spin' : ''
           }`}
-          disabled={dataflowState.isUpdatingPermissions}
+          disabled={dataflowState.isUpdatingPermissions || !dataflowState.hasReporters}
           icon={dataflowState.isUpdatingPermissions ? 'spinnerAnimate' : 'refresh'}
           label={resourcesContext.messages['updateUsersPermissionsButton']}
           onClick={() => manageDialogs('isValidateReportersDialogVisible', true)}
@@ -567,7 +575,10 @@ const Dataflow = withRouter(({ history, match }) => {
   const manageRoleDialogFooter = (
     <Fragment>
       <Button
-        className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink`}
+        className={`${styles.buttonLeft} p-button-secondary ${
+          !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
+        }`}
+        disabled={isEmpty(dataflowState.dataProviderSelected)}
         icon="sortAlt"
         id="buttonExportImport"
         label={resourcesContext.messages['exportImport']}
@@ -584,10 +595,10 @@ const Dataflow = withRouter(({ history, match }) => {
       />
 
       <Button
-        className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink ${
-          dataflowState.isUpdatingPermissions ? 'p-button-animated-spin' : ''
-        }`}
-        disabled={dataflowState.isUpdatingPermissions}
+        className={`${styles.buttonLeft} p-button-secondary ${
+          !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
+        } ${dataflowState.isUpdatingPermissions ? 'p-button-animated-spin' : ''}`}
+        disabled={dataflowState.isUpdatingPermissions || isEmpty(dataflowState.dataProviderSelected)}
         icon={dataflowState.isUpdatingPermissions ? 'spinnerAnimate' : 'refresh'}
         label={resourcesContext.messages['updateUsersPermissionsButton']}
         onClick={() => manageDialogs('isValidateLeadReportersDialogVisible', true)}
@@ -1244,6 +1255,7 @@ const Dataflow = withRouter(({ history, match }) => {
               placeholder={resourcesContext.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={reporterRoleOptions}
+              setHasReporters={setHasReporters}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}
