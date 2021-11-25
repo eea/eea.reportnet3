@@ -415,10 +415,12 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   /**
    * Refresh materialized query.
    *
-   * @param datasetId the dataset id
+   * @param datasetIds the dataset ids
+   * @param continueValidation the continue validation
    */
   @Override
-  public void refreshMaterializedQuery(Long datasetId) {
+  public void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation,
+      boolean released, Long datasetId) {
     LOG.info("Refresh async materialized view");
   }
 }
