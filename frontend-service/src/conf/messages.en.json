@@ -121,7 +121,7 @@
     "confirmReleaseHeader": "Confirm release",
     "confirmReleaseQuestion": "Are you sure you want to release all the datasets to the data collection?",
     "cooperatingCountries": "EEA Cooperating Countries",
-    "coords": "Coords:",
+    "coords": "Coords",
     "copyDataCollectionEuDatasetError": "Error copying data from Data Collections to EU datasets",
     "copyDataCollectionToEUDatasetHeader": "Copy Data Collections to EU datasets",
     "copyDataCollectionToEUDatasetMessage": "Are you sure you want to copy Data Collections to EU datasets?",
