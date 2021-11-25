@@ -371,7 +371,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const setHasReporters = hasReporters => {
     dataflowDispatch({
-      type: 'SET_IS_HAS_REPORTERS',
+      type: 'SET_HAS_REPORTERS',
       payload: { hasReporters }
     });
   };
