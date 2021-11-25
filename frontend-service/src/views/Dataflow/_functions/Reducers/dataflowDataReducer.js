@@ -82,6 +82,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_UPDATED_DATASET_SCHEMA':
       return { ...state, updatedDatasetSchema: payload.updatedData };
 
+    case 'SET_HAS_REPORTERS':
+      return { ...state, hasReporters: payload.hasReporters };
+
     case 'SET_IS_RECEIPT_LOADING':
       return { ...state, isReceiptLoading: payload.isReceiptLoading };
 
