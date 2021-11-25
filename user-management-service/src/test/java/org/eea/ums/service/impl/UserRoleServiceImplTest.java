@@ -46,10 +46,6 @@ public class UserRoleServiceImplTest {
   @InjectMocks
   private UserRoleServiceImpl userRoleService;
 
-  /** The dataflow controller zuul. */
-  @Mock
-  private DataSetMetabaseControllerZuul dataflowControllerZuul;
-
   /** The keycloak connector service. */
   @Mock
   private KeycloakConnectorService keycloakConnectorService;
@@ -92,8 +88,10 @@ public class UserRoleServiceImplTest {
     List<Long> datasetIds = new ArrayList<>();
     datasetIds.add(1L);
     datasetIds.add(2L);
-    Mockito.when(dataflowControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(Mockito.any(),
-        Mockito.any())).thenReturn(datasetIds);
+    Mockito
+        .when(datasetMetabaseControllerZuul
+            .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.any(), Mockito.any()))
+        .thenReturn(datasetIds);
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any()))
         .thenReturn(new GroupInfo[] {group, group});
     Mockito.when(keycloakConnectorService.getUsersByGroupId(Mockito.any()))
@@ -136,6 +134,19 @@ public class UserRoleServiceImplTest {
     notification.setFileName("dataflow-" + 1L + "-UsersByCountry.csv");
     notification.setError("Failed generating CSV file with name dataflow-" + 1L
         + "-UsersByCountry.csv, using dataflowId " + 1L);
+    RepresentativeVO rep = new RepresentativeVO();
+    rep.setLeadReporters(Arrays.asList(new LeadReporterVO()));
+    GroupInfo[] group = {new GroupInfo()};
+    UserRepresentation[] users = {new UserRepresentation()};
+
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
+        .thenReturn(Arrays.asList(rep));
+    Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
+        .thenReturn(Arrays.asList(new DataProviderVO()));
+    Mockito.when(datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(Mockito.any()))
+        .thenReturn(Arrays.asList(new ReportingDatasetVO()));
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(group);
+    Mockito.when(keycloakConnectorService.getUsersByGroupId(Mockito.any())).thenReturn(users);
     userRoleService.exportUsersByCountry(1L);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(
         EventType.EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT, null, notification);
