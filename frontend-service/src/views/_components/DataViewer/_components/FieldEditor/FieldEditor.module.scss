@@ -7,9 +7,10 @@
   align-items: flex-start;
   display: flex;
   flex-direction: column;
-  > label:not(.nonEditableData) {
-    max-height: 100px;
-    overflow-y: scroll;
+  .completeCoordinatesWrapper {
+    max-height: 75px;
+    overflow-y: auto;
+    margin-bottom: 0.5rem;
   }
 }
 
