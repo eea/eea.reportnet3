@@ -48,6 +48,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
   /** The Constant RECORD_ID: {@value}. */
   private static final String RECORD_ID = "record_id";
 
+  /** The geometry error message. */
   @Value("${query.message.geometry.error}")
   private String geometryErrorMessage;
 
@@ -222,8 +223,10 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       EntityTypeEnum entityTypeEnum, Long datasetId, Long idTable) throws SQLException {
     conn.setSchema("dataset_" + datasetId);
     TableValue tableValue;
+    conn.setAutoCommit(false);
     try (PreparedStatement stmt = conn.prepareStatement(query);
         ResultSet rs = stmt.executeQuery()) {
+      stmt.setFetchSize(250);
       ResultSetMetaData rsm = stmt.getMetaData();
       LOG.info("Query executed: {}", query);
       tableValue = new TableValue();
@@ -277,8 +280,10 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             break;
         }
       }
+      stmt.setFetchSize(0);
     }
     System.gc();
+    conn.setAutoCommit(true);
     return tableValue;
   }
 

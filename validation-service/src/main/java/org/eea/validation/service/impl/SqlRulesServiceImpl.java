@@ -228,7 +228,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * Retrieve table data.
    *
    * @param query the query
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the data set metabase VO
    * @param rule the rule
    * @param ischeckDC the ischeck DC
    * @return the table value
@@ -353,9 +353,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * Validate rule.
    *
    * @param query the query
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the data set metabase VO
    * @param rule the rule
-   * @param ischeckDC the ischeck DC
    * @return the boolean
    */
   private String validateRule(String query, DataSetMetabaseVO dataSetMetabaseVO, Rule rule) {
@@ -417,7 +416,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * Check query test execution.
    *
    * @param query the query
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the data set metabase VO
    * @param rule the rule
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
@@ -632,7 +631,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /**
    * Proccess query.
    *
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the data set metabase VO
    * @param query the query
    * @return the string
    */
@@ -870,7 +869,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
-   * Gets a list with the id of the query datasets
+   * Gets a list with the id of the query datasets.
    *
    * @param query the query
    * @return Gets a list with the id of the query datasets
@@ -891,7 +890,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /**
    * Check dataset from same dataflow.
    *
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the data set metabase VO
    * @param ids the ids
    * @return the list
    */

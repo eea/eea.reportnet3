@@ -366,13 +366,17 @@ public class ValidationServiceImpl implements ValidationService {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
+    List<DatasetValidation> validations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
     try {
-      List<DatasetValidation> validations = runDatasetValidations(dataset, session);
+      validations = runDatasetValidations(dataset, session);
 
       validationDatasetRepository.saveAll(validations);
     } finally {
       session.destroy();
+      validations = null;
+      dataset = null;
+      System.gc();
     }
 
   }
@@ -383,23 +387,27 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param idTable the id table
    * @param kieBase the kie base
-   * @param processId the process id
+   * @param sqlRule the sql rule
    */
   @Override
   @Transactional
-  public void validateTable(Long datasetId, Long idTable, KieBase kieBase, String processId) {
+  public void validateTable(Long datasetId, Long idTable, KieBase kieBase, String sqlRule) {
     // Validating tables
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     TableValue table = tableRepository.findById(idTable).orElse(null);
     KieSession session = kieBase.newKieSession();
-
+    List<TableValidation> validations = new ArrayList<>();
     try {
       if (table != null) {
-        List<TableValidation> validations = runTableValidations(table, session);
+        if (sqlRule.equals("null")) {
+          table.setRecords(new ArrayList<RecordValue>());
+        }
+        validations = runTableValidations(table, session);
         tableValidationRepository.saveAll(validations);
       }
     } finally {
       table = null;
+      validations = null;
       session.destroy();
       System.gc();
     }
@@ -420,10 +428,11 @@ public class ValidationServiceImpl implements ValidationService {
     List<RecordValue> records = recordRepository.findRecordsPageable(pageable);
     List<RecordValidation> recordValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
+    List<RecordValidation> validations = new ArrayList<>();
     try {
       for (RecordValue row : records) {
         runRecordValidations(row, session);
-        List<RecordValidation> validations = row.getRecordValidations();
+        validations = row.getRecordValidations();
         recordValidations.addAll(validations);
       }
       if (!recordValidations.isEmpty()) {
@@ -432,7 +441,9 @@ public class ValidationServiceImpl implements ValidationService {
       }
     } finally {
       records = null;
+      validations = null;
       session.destroy();
+      System.gc();
     }
   }
 
@@ -454,18 +465,17 @@ public class ValidationServiceImpl implements ValidationService {
     List<FieldValidation> fieldValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
     try {
-      fields.forEach(field -> {
-
+      for (FieldValue field : fields) {
         List<FieldValidation> resultFields = runFieldValidations(field, session);
-
         fieldValidations.addAll(resultFields);
-      });
+      }
       if (!fieldValidations.isEmpty()) {
         TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         validationFieldRepository.saveAll(fieldValidations);
       }
     } finally {
       fields = null;
+      fieldValidations = null;
       session.destroy();
     }
   }

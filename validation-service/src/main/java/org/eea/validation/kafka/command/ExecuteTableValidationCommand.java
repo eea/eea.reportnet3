@@ -5,9 +5,9 @@ import org.eea.kafka.domain.EventType;
 import org.kie.api.KieBase;
 import org.springframework.stereotype.Component;
 
+
 /**
- * The Class EventHandlerCommand. Event Handler Command where we are encapsulating both
- * Object[EventHandlerReceiver] and the operation[Close] together as command.
+ * The Class ExecuteTableValidationCommand.
  */
 @Component
 public class ExecuteTableValidationCommand extends ExecuteValidationCommand {
@@ -23,17 +23,27 @@ public class ExecuteTableValidationCommand extends ExecuteValidationCommand {
     return EventType.COMMAND_VALIDATE_TABLE;
   }
 
+  /**
+   * Gets the notification event type.
+   *
+   * @return the notification event type
+   */
   @Override
   public EventType getNotificationEventType() {
     return EventType.COMMAND_VALIDATED_TABLE_COMPLETED;
   }
 
+  /**
+   * Gets the validation action.
+   *
+   * @return the validation action
+   */
   @Override
   public Validator getValidationAction() {
     return (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
       final Long idTable = Long.parseLong(String.valueOf(eeaEventVO.getData().get("idTable")));
-      final String processId = String.valueOf(eeaEventVO.getData().get("processId"));
-      validationService.validateTable(datasetId, idTable, kieBase, processId);
+      final String sqlRule = String.valueOf(eeaEventVO.getData().get("sqlRule"));
+      validationService.validateTable(datasetId, idTable, kieBase, sqlRule);
     };
   }
 }
