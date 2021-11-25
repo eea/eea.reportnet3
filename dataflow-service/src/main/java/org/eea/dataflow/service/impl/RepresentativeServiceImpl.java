@@ -490,13 +490,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             user = userManagementControllerZull.getUserByEmail(email.toLowerCase());
           }
         }
-        if (!countryCodeList.contains(contryCode) && null == user) {
-          fieldsToWrite[2] =
-              "KO imported " + dataProviderType + " and user doesn't exist in reportnet";
-        } else if (!countryCodeList.contains(contryCode)) {
+
+        if (!countryCodeList.contains(contryCode)) {
           fieldsToWrite[2] = "KO imported " + dataProviderType + " doesn't exist";
-        } else if (null == user && StringUtils.isNotBlank(email)) {
-          fieldsToWrite[2] = "KO imported user doesn't exist in reportnet";
         } else {
           DataProvider dataProvider = dataProviderList.stream()
               .filter(dataProv -> contryCode.equalsIgnoreCase(dataProv.getCode())).findFirst()
