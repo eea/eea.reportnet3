@@ -233,6 +233,7 @@ const DataFormFieldEditor = ({
   const onSelectPoint = (coordinates, selectedCrs) => {
     const filteredCRS = crs.find(crsItem => crsItem.value === selectedCrs);
     dispatchMap({ type: 'SET_MAP_NEW_POINT', payload: { coordinates, filteredCRS } });
+    dispatchMap({ type: 'DISPLAY_COORDINATE_ERROR', payload: !MapUtils.checkValidCoordinates(coordinates, true) });
   };
 
   const changePoint = (geoJson, coordinates, crs, withCRS = true) => {

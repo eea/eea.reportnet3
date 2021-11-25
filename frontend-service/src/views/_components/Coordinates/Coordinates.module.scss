@@ -1,6 +1,7 @@
 .coordinatesWrapper {
   display: flex;
   align-items: center;
+  margin-bottom: 0.5rem;
   .longitude {
     margin-left: 10px;
   }
@@ -19,6 +20,9 @@
     font-size: 0.7rem;
   }
 }
+.mapButton {
+  margin-top: 2px !important;
+}
 .error {
   border: var(--inputtext-border-error) !important;
   box-shadow: var(--inputtext-box-shadow-focus-error) !important;
@@ -29,4 +33,13 @@
   font-weight: bold;
   margin-right: 0.25rem;
   width: fit-content;
+}
+.pointEpsgWrapper {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+  button {
+    margin-left: 1rem;
+    flex: none;
+  }
 }
