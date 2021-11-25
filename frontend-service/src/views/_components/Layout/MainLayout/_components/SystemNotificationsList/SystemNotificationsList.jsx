@@ -45,12 +45,12 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
   });
 
   const {
-    firstRow,
-    isVisibleCreateSysNotification,
     editNotification,
+    firstRow,
     formType,
     isDeleteDialogVisible,
     isDeleting,
+    isVisibleCreateSysNotification,
     numberRows,
     systemNotifications
   } = systemNotificationState;
@@ -74,7 +74,8 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       {
         id: 'level',
         header: resourcesContext.messages['notificationLevel'],
-        template: rowData => notificationLevelTemplate(rowData, false)
+        template: rowData => notificationLevelTemplate(rowData, false),
+        style: { width: '6rem' }
       },
       {
         id: 'enabled',

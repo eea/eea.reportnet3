@@ -104,7 +104,7 @@ export const SystemNotificationsCreateForm = ({
       visible={isVisible}
       zIndex={3200}>
       <div className={styles.systemNotificationFormWrapper}>
-        <div>
+        <div className={styles.formElementWrapper}>
           <div>
             <label>{resourcesContext.messages['message']}</label>
           </div>
@@ -120,11 +120,11 @@ export const SystemNotificationsCreateForm = ({
             <CharacterCounter
               currentLength={systemNotification.message.length}
               maxLength={config.SYSTEM_NOTIFICATION_MAX_LENGTH}
-              style={{ position: 'relative', top: '0.25rem' }}
+              style={{ position: 'relative', top: '0.25rem', marginBottom: '0' }}
             />
           </div>
         </div>
-        <div className={styles.systemNotificationColumnGroup}>
+        <div className={`${styles.systemNotificationColumnGroup} ${styles.formElementWrapper}`}>
           <div className={styles.systemNotificationColumn}>
             <label>{resourcesContext.messages['notificationLevel']}</label>
             <Dropdown
@@ -154,9 +154,9 @@ export const SystemNotificationsCreateForm = ({
             />
           </div>
         </div>
-        <div>
+        <div className={styles.previewElementWrapper}>
           <div>
-            <h3>{resourcesContext.messages['previewNotification']}</h3>
+            <label>{resourcesContext.messages['previewNotification']}</label>
             <Growl ref={growlRef} />
           </div>
           {renderSystemNotificationPreview()}
