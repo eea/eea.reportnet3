@@ -210,6 +210,7 @@ public class RecordStoreControllerImplTest {
   @Test
   public void testRefreshMaterializedView() {
     recordStoreControllerImpl.refreshMaterializedView(1L);
-    Mockito.verify(recordStoreService, times(1)).refreshMaterializedQuery(Mockito.any());
+    Mockito.verify(recordStoreService, times(1)).refreshMaterializedQuery(Mockito.any(),
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any());
   }
 }

@@ -80,9 +80,10 @@ public interface ValidationService {
    * @param datasetId the dataset id
    * @param idTable the id table
    * @param kieBase the kie base
+   * @param sqlRule the sql rule
    * @throws EEAException the EEA exception
    */
-  void validateTable(@DatasetId Long datasetId, Long idTable, KieBase kieBase, String processId)
+  void validateTable(@DatasetId Long datasetId, Long idTable, KieBase kieBase, String sqlRule)
       throws EEAException;
 
 
@@ -102,6 +103,7 @@ public interface ValidationService {
    * Load rules knowledge base.
    *
    * @param datasetId the dataset id
+   * @param rule the rule
    * @return the kie session
    * @throws EEAException the EEA exception
    */
@@ -251,7 +253,6 @@ public interface ValidationService {
    * @param fileName the file name
    * @return the file
    * @throws IOException Signals that an I/O exception has occurred.
-   * @throws EEAException the EEA exception
    */
   File downloadExportedFile(Long datasetId, String fileName) throws IOException;
 

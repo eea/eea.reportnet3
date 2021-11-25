@@ -271,7 +271,7 @@ public class ValidationHelper implements DisposableBean {
       values.put("referencesToRefresh",
           List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
               dataset.getDataflowId(), dataset.getDatasetSchema())));
-      kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
     }
   }
 
@@ -394,6 +394,8 @@ public class ValidationHelper implements DisposableBean {
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
+    LOG.info("Collecting Table Validation tasks");
+    releaseTableValidation(dataset, processId);
     LOG.info("Collecting Dataset Validation tasks");
     releaseDatasetValidation(dataset, processId);
     LOG.info("Collecting Record Validation tasks");
@@ -402,8 +404,6 @@ public class ValidationHelper implements DisposableBean {
     }
     LOG.info("Collecting Field Validation tasks");
     releaseFieldsValidation(dataset, processId, !filterEmptyFields(rules.getRules()));
-    LOG.info("Collecting Table Validation tasks");
-    releaseTableValidation(dataset, processId);
     startProcess(processId);
   }
 
@@ -918,6 +918,17 @@ public class ValidationHelper implements DisposableBean {
 
   /**
    * Instantiates a new validation task.
+   */
+
+  /**
+   * Instantiates a new validation task.
+   *
+   * @param eeaEventVO the eea event VO
+   * @param validator the validator
+   * @param datasetId the dataset id
+   * @param kieBase the kie base
+   * @param processId the process id
+   * @param notificationEventType the notification event type
    */
 
   /**

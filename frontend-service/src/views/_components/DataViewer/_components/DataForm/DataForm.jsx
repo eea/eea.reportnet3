@@ -26,6 +26,7 @@ const DataForm = ({
   isSaving = false,
   onChangeForm,
   onConditionalChange,
+  onCoordinatesMoreInfoClick,
   onShowCoordinateError = () => {},
   records,
   reporting,
@@ -151,6 +152,7 @@ const DataForm = ({
                       }}
                       onCheckCoordinateFieldsError={onCheckCoordinateFieldsError}
                       onConditionalChange={onConditionalChange}
+                      onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
                       records={records}
                       reporting={reporting}
                       type={column.type}

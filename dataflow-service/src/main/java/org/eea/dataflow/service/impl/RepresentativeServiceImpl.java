@@ -490,13 +490,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             user = userManagementControllerZull.getUserByEmail(email.toLowerCase());
           }
         }
-        if (!countryCodeList.contains(contryCode) && null == user) {
-          fieldsToWrite[2] =
-              "KO imported " + dataProviderType + " and user doesn't exist in reportnet";
-        } else if (!countryCodeList.contains(contryCode)) {
+
+        if (!countryCodeList.contains(contryCode)) {
           fieldsToWrite[2] = "KO imported " + dataProviderType + " doesn't exist";
-        } else if (null == user && StringUtils.isNotBlank(email)) {
-          fieldsToWrite[2] = "KO imported user doesn't exist in reportnet";
         } else {
           DataProvider dataProvider = dataProviderList.stream()
               .filter(dataProv -> contryCode.equalsIgnoreCase(dataProv.getCode())).findFirst()
@@ -525,6 +521,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                   LeadReporter leadReporter = new LeadReporter();
                   leadReporter.setRepresentative(representative);
                   leadReporter.setEmail(email.toLowerCase());
+                  if (null == user) {
+                    leadReporter.setInvalid(true);
+                  }
                   representative.setLeadReporters(new ArrayList<>(Arrays.asList(leadReporter)));
                 } else {
                   representative.setLeadReporters(new ArrayList<>());
@@ -538,6 +537,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                     LeadReporter leadReporter = new LeadReporter();
                     leadReporter.setRepresentative(representative);
                     leadReporter.setEmail(innerEmail);
+                    if (null == user) {
+                      leadReporter.setInvalid(true);
+                    }
                     leadReporters.add(leadReporter);
                     representative.setLeadReporters(leadReporters);
                   }

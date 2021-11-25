@@ -1600,6 +1600,13 @@ public class DataflowServiceImpl implements DataflowService {
         contributorService.validateReporters(tempuser.getDataflowId(), tempuser.getDataProviderId(),
             false);
       }
+
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+          EventType.VALIDATE_ALL_REPORTERS_COMPLETED_EVENT, null, notificationVO);
+
     } catch (EEAException e) {
       LOG.error(
           "An error was produced while validating reporters and lead reporters for all dataflows");
@@ -1609,12 +1616,6 @@ public class DataflowServiceImpl implements DataflowService {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_ALL_REPORTERS_FAILED_EVENT,
           null, notificationVO);
     }
-
-    NotificationVO notificationVO = NotificationVO.builder()
-        .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
-
-    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_ALL_REPORTERS_COMPLETED_EVENT,
-        null, notificationVO);
   }
 
   /**

@@ -901,7 +901,7 @@ public class ValidationServiceTest {
   public void validateTable() throws EEAException {
     when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(tableValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
-    validationServiceImpl.validateTable(1L, Mockito.any(), kieBase, null);
+    validationServiceImpl.validateTable(1L, Mockito.any(), kieBase, "null");
     Mockito.verify(tableValidationRepository, times(1)).saveAll(Mockito.any());
   }
 

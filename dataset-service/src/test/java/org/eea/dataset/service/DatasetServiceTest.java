@@ -37,6 +37,7 @@ import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.domain.Validation;
 import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.DatasetValidationRepository;
@@ -90,6 +91,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
+import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -3731,6 +3733,75 @@ public class DatasetServiceTest {
     datasetService.createReferenceDatasetFiles(dataset);
     Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
 
+  }
+
+  @Test
+  public void getTotalFailedValidationsByIdDatasetTest() {
+    FailedValidationsDatasetVO failedValidationsDatasetVO = new FailedValidationsDatasetVO();
+    failedValidationsDatasetVO.setIdDataset(1L);
+    failedValidationsDatasetVO.setTotalFilteredRecords(1L);
+    failedValidationsDatasetVO.setErrors(new ArrayList<>());
+    DataSetMetabase dataset = new DataSetMetabase();
+    dataset.setId(1L);
+    List<FieldValidation> fieldValidations = new ArrayList<>();
+    FieldValidation fieldValidation = new FieldValidation();
+    fieldValidation.setId(1L);
+    FieldValue fieldValue = new FieldValue();
+    fieldValue.setId("fieldValueId");
+    fieldValidation.setFieldValue(fieldValue);
+    TableValue tableValue = new TableValue();
+    tableValue.setIdTableSchema("schemaId");
+    RecordValue recordValue = new RecordValue();
+    recordValue.setId("recordId");
+    recordValue.setTableValue(tableValue);
+    fieldValue.setRecord(recordValue);
+    Validation validation = new Validation();
+    validation.setFieldName("fieldName");
+    validation.setLevelError(ErrorTypeEnum.BLOCKER);
+    validation.setMessage("message");
+    validation.setTableName("tableName");;
+    validation.setTypeEntity(EntityTypeEnum.DATASET);
+    validation.setValidationDate("date");
+    validation.setShortCode("code");
+    fieldValidation.setValidation(validation);
+    fieldValidations.add(fieldValidation);
+    List<RecordValidation> records = new ArrayList<>();
+    RecordValidation record = new RecordValidation();
+    record.setId(1L);
+    RecordValue recordValueAux = new RecordValue();
+    recordValueAux.setId("recordValueId");
+    recordValueAux.setTableValue(tableValue);
+    record.setRecordValue(recordValueAux);
+    record.setValidation(validation);
+    records.add(record);
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(dataset));
+    Mockito.when(validationRepository.count()).thenReturn(1L);
+    Mockito
+        .when(fieldValidationRepository
+            .findFieldValidationsByIdDatasetAndIdTableSchema(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(fieldValidations);
+    Mockito
+        .when(recordValidationRepository
+            .findRecordValidationsByIdDatasetAndIdTableSchema(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(records);
+    Assert.assertNotNull(datasetService.getTotalFailedValidationsByIdDataset(1L, "schemaId"));
+  }
+
+  @Test
+  public void checkIfDatasetLockedOrReadOnlyTest() {
+    ReferenceDataset reference = new ReferenceDataset();
+    reference.setId(1L);
+    reference.setUpdatable(true);
+    DataSetSchema datasetSchema = new DataSetSchema();
+    datasetSchema.setIdDataSetSchema(new ObjectId("5ce524fad31fc52540abae73"));
+    Mockito.when(referenceDatasetRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(reference));
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5ce524fad31fc52540abae73");
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    Assert.assertFalse(datasetService.checkIfDatasetLockedOrReadOnly(1L, "idRecordSchema",
+        EntityTypeEnum.DATASET));
   }
 
   /**

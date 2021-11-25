@@ -161,7 +161,9 @@ public interface RecordStoreService {
   /**
    * Refresh materialized query.
    *
-   * @param datasetId the dataset id
+   * @param datasetIds the dataset ids
+   * @param continueValidation the continue validation
    */
-  void refreshMaterializedQuery(Long datasetId);
+  void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation, boolean released,
+      Long datasetId);
 }
