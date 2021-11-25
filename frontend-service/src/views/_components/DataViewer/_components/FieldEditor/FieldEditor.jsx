@@ -401,6 +401,29 @@ const FieldEditor = ({
     onChangePointCRS(crs.value);
   };
 
+  const renderCRS = fieldValue => {
+    const parsedGeoJsonData = JSON.parse(fieldValue);
+    const selectedCRS = crs.find(crsItem => crsItem.value === parsedGeoJsonData.properties.srid);
+    if (!isNil(selectedCRS)) {
+      return selectedCRS.label;
+    } else {
+      return parsedGeoJsonData.properties.srid.split(':')[1];
+    }
+  };
+
+  const renderEPSGInfo = (fieldValue, differentTypes, isValidJSON) => {
+    if (!differentTypes) {
+      return (
+        <div className={styles.pointEpsgWrapper}>
+          {!isNil(fieldValue) && fieldValue !== '' && isValidJSON && (
+            <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
+          )}
+          {!isNil(fieldValue) && fieldValue !== '' && isValidJSON && <span>{renderCRS(fieldValue)}</span>}
+        </div>
+      );
+    }
+  };
+
   const renderField = type => {
     const longCharacters = 20;
     const decimalCharacters = 40;
@@ -504,6 +527,7 @@ const FieldEditor = ({
               initialGeoJson={RecordUtils.getCellValue(cells, cells.field)}
               isCellEditor={true}
               onBlur={coordinates => onCoordinatesBlur(coordinates)}
+              onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
               onCrsChange={crs => onCrsChange(crs)}
               onFocus={() => onEditorValueFocus(cells, RecordUtils.getCellValue(cells, cells.field))}
               onKeyDown={(e, value) => onCoordinatesKeyDown(e, value)}
@@ -530,21 +554,14 @@ const FieldEditor = ({
           <div>
             <div className={styles.pointWrapper}>
               {renderMultipleCoordinatesInfo(value, isValidJSON, differentTypes)}
-              {!differentTypes && (
-                <div className={styles.pointEpsgWrapper}>
-                  {!isNil(value) && value !== '' && isValidJSON && (
-                    <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
-                  )}
-                  <div>{!isNil(value) && value !== '' && isValidJSON && <span>{currentCRS.label}</span>}</div>
-                </div>
-              )}
+              {renderEPSGInfo(value, differentTypes, isValidJSON)}
             </div>
-            {!isNil(value) && value !== '' && isValidJSON && (
+            {!isNil(value) && value !== '' && isValidJSON && MapUtils.hasValidCRS(value, crs) && (
               <Button
                 className={`p-button-secondary-transparent button ${styles.mapButton}`}
                 disabled={differentTypes}
                 icon="marker"
-                onClick={e => {
+                onClick={() => {
                   if (!isNil(onMapOpen)) {
                     onMapOpen(value, cells, type);
                   }
