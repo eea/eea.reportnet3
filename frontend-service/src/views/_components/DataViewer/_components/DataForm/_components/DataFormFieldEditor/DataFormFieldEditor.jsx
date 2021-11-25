@@ -47,6 +47,7 @@ const DataFormFieldEditor = ({
   onChangeForm,
   onCheckCoordinateFieldsError,
   onConditionalChange,
+  onCoordinatesMoreInfoClick,
   records,
   reporting,
   type
@@ -575,6 +576,7 @@ const DataFormFieldEditor = ({
           initialGeoJson={fieldValue}
           onBlur={coordinates => onCoordinatesBlur(coordinates)}
           onChange={coordinates => onCoordinatesChange(coordinates)}
+          onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
           onCrsChange={crs => onCrsChange(crs)}
           onMapOpen={() => onMapOpen(fieldValue)}
           showMessageError={map.showCoordinateError}
