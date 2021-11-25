@@ -92,6 +92,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         header={col.header}
         key={col.id}
         sortable={true}
+        style={col.style}
       />
     ));
 
