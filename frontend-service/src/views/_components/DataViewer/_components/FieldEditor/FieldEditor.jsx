@@ -821,9 +821,12 @@ const FieldEditor = ({
 
     return (
       <div>
-        {isNil(infoLabelClass) && <label className={styles.epsg}>{resourcesContext.messages['coords']}: </label>}
-        <label className={infoLabelClass}>{completeCoordinates}</label>
-        {renderMoreInfo()}
+        {isNil(infoLabelClass) && <label className={styles.epsg}>{resourcesContext.messages['coords']}</label>}
+        {isNil(infoLabelClass) && renderMoreInfo()}
+        <div className={styles.completeCoordinatesWrapper}>
+          <label className={infoLabelClass}>{completeCoordinates}</label>
+          {!isNil(infoLabelClass) && renderMoreInfo()}
+        </div>
       </div>
     );
   };
