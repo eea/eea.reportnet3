@@ -2,11 +2,18 @@
   display: flex;
   align-items: center;
   margin-bottom: 0.5rem;
-  .longitude {
-    margin-left: 10px;
+  input {
+    margin-top: 0.25rem;
+  }
+  .coordinatesModalWrapper {
+    display: flex;
+    align-items: center;
+    div:first-child {
+      margin-right: 0.5rem;
+    }
   }
   .isCellEditor {
-    width: 30% !important;
+    width: 100%;
   }
 }
 
@@ -36,10 +43,18 @@
 }
 .pointEpsgWrapper {
   display: flex;
-  align-items: center;
-  margin-top: 1rem;
+  flex-direction: column;
+  margin-top: 0.5rem;
   button {
     margin-left: 1rem;
     flex: none;
   }
+
+  .pointEpsgAndButtonWrapper {
+    display: flex;
+    margin-top: 0.25rem;
+  }
+}
+.pointEpsgWrapperCellEditor {
+  display: flex;
 }
