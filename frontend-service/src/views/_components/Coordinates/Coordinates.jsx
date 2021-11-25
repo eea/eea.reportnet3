@@ -41,6 +41,12 @@ export const Coordinates = ({
   const { inBounds } = MapUtils;
 
   useEffect(() => {
+    if (crsValue.value !== 'EPSG:3035') {
+      checkCoordinates(latitude, longitude);
+    }
+  }, [latitude, longitude, crsValue.value]);
+
+  useEffect(() => {
     if (initialGeoJson) {
       const parsedInitialGeoJson = JSON.parse(initialGeoJson);
       setLatitude(parsedInitialGeoJson.geometry.coordinates[0]);
