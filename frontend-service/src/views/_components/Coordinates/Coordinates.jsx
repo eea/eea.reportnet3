@@ -40,6 +40,8 @@ export const Coordinates = ({
 
   const { inBounds } = MapUtils;
 
+  const hasValidCRS = MapUtils.hasValidCRS(initialGeoJson, crsOptions);
+
   useEffect(() => {
     if (crsValue.value !== 'EPSG:3035') {
       checkCoordinates(latitude, longitude);
@@ -66,17 +68,25 @@ export const Coordinates = ({
 
   const checkEmptyCoordinate = coord => (!isNil(coord) ? coord.toString().trim() === '' : true);
 
+  const getEPSGLabelClassName = () => {
+    if (!isCellEditor) {
+      return styles.pointEpsgWrapper;
+    } else if (!hasValidCRS) {
+      return styles.pointEpsgWrapperCellEditor;
+    }
+  };
+
   const renderLabel = keys => {
     if (!xyLabels) {
-      return resourcesContext.messages[isCellEditor ? keys.geographicalShort : keys.geographical];
+      return `${resourcesContext.messages[keys.geographical]}${!hasValidCRS ? ':' : ''}`;
     } else {
-      return resourcesContext.messages[keys.metrical];
+      return `${resourcesContext.messages[keys.metrical]}${!hasValidCRS ? ':' : ''}`;
     }
   };
 
   const renderEPSG = () => {
     const renderButton = () => {
-      if (MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+      if (hasValidCRS) {
         return (
           <Button
             className={`p-button-secondary-transparent button ${styles.mapButton}`}
@@ -91,7 +101,7 @@ export const Coordinates = ({
     };
 
     const renderDropdown = () => {
-      if (MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+      if (hasValidCRS) {
         return (
           <Dropdown
             appendTo={document.body}
@@ -131,7 +141,7 @@ export const Coordinates = ({
     };
 
     const renderMoreInfoTooltip = () => {
-      if (!MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+      if (!hasValidCRS) {
         return (
           <TooltipButton
             message={resourcesContext.messages['coordinatesMoreInfo']}
@@ -142,17 +152,21 @@ export const Coordinates = ({
     };
 
     return (
-      <div className={`${!isCellEditor ? styles.pointEpsgWrapper : ''}`}>
-        <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
-        {renderDropdown()}
-        {renderButton()}
-        {renderMoreInfoTooltip()}
+      <div className={getEPSGLabelClassName()}>
+        <div>
+          <label className={styles.epsg}>{`${resourcesContext.messages['epsg']}${!hasValidCRS ? ':' : ''}`}</label>
+        </div>
+        <div className={`${!isCellEditor ? styles.pointEpsgAndButtonWrapper : ''}`}>
+          {renderDropdown()}
+          {renderButton()}
+          {renderMoreInfoTooltip()}
+        </div>
       </div>
     );
   };
 
   const renderErrorMessage = () => {
-    if (hasErrorMessage) {
+    if (hasErrorMessage && hasValidCRS) {
       return (
         <span className={styles.errorMessage}>
           {showMessageError && <span className={styles.pointError}>{renderErrorMessageSeparator()}</span>}
@@ -177,7 +191,7 @@ export const Coordinates = ({
 
   const renderLatitudeLongitudeInput = () => {
     const renderLatitude = () => {
-      if (MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+      if (hasValidCRS) {
         return (
           <InputText
             className={classNames({
@@ -209,7 +223,7 @@ export const Coordinates = ({
     };
 
     const renderLongitude = () => {
-      if (MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+      if (hasValidCRS) {
         return (
           <InputText
             className={classNames({
@@ -241,13 +255,18 @@ export const Coordinates = ({
     };
 
     return (
-      <Fragment>
-        {renderLatitude()}
-        <label className={classNames(styles.epsg, styles.longitude)}>
-          {renderLabel({ geographical: 'longitude', geographicalShort: 'long', metrical: 'y' })}:
-        </label>
-        {renderLongitude()}
-      </Fragment>
+      <div className={!isCellEditor ? styles.coordinatesModalWrapper : ''}>
+        <div>
+          <label className={styles.epsg}>{renderLabel({ geographical: 'latitude', metrical: 'x' })}</label>
+          {renderLatitude()}
+        </div>
+        <div>
+          <label className={classNames(styles.epsg, styles.longitude)}>
+            {renderLabel({ geographical: 'longitude', metrical: 'y' })}
+          </label>
+          {renderLongitude()}
+        </div>
+      </div>
     );
   };
 
@@ -285,12 +304,7 @@ export const Coordinates = ({
 
   return (
     <div>
-      <div className={styles.coordinatesWrapper}>
-        <label className={styles.epsg}>
-          {renderLabel({ geographical: 'latitude', geographicalShort: 'lat', metrical: 'x' })}:
-        </label>
-        {renderLatitudeLongitudeInput()}
-      </div>
+      <div className={styles.coordinatesWrapper}>{renderLatitudeLongitudeInput()}</div>
       {renderErrorMessage()}
       {renderEPSG()}
     </div>
