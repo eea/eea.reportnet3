@@ -143,6 +143,7 @@ const getGeometryType = json =>
 const getSrid = json => (!isNil(json) && json !== '' ? JSON.parse(json).properties.srid : 'EPSG:4326');
 
 const hasValidCRS = (fieldValue, crs) => {
+  if (fieldValue === '') return true;
   const parsedGeoJsonData = JSON.parse(fieldValue);
   return crs.some(crsItem => crsItem.value === parsedGeoJsonData.properties.srid);
 };
