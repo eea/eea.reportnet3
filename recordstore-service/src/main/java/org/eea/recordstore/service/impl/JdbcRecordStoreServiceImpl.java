@@ -845,6 +845,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           releaseNotificableKafkaEvent(failEventType, value, datasetId,
               "Error restoring the snapshot data");
         }
+      } else {
+        LOG_ERROR.error(
+            "Error restoring the snapshot data into the prefilling reference dataset due to error {}.",
+            e.getMessage(), e);
       }
     } finally {
       // Release the lock manually
@@ -1235,25 +1239,34 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /**
    * Refresh materialized query.
    *
-   * @param datasetId the dataset id
+   * @param datasetIds the dataset ids
    */
   @Override
   @Async
-  public void refreshMaterializedQuery(Long datasetId) {
-    String viewToUpdate =
-        "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
-    List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
+  public void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation,
+      boolean released, Long datasetId) {
+    datasetIds.forEach(id -> {
+      String viewToUpdate =
+          "select matviewname from pg_matviews  where schemaname = 'dataset_" + id + "'";
+      List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
 
-    String updateQuery = "refresh materialized view concurrently dataset_";
+      String updateQuery = "refresh materialized view concurrently dataset_";
 
-    for (String view : viewList) {
-      try {
-        executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
-      } catch (RecordStoreAccessException e) {
-        LOG_ERROR.error("Error refreshing materialized view from dataset {}", datasetId);
+      for (String view : viewList) {
+        try {
+          executeQueryViewCommands(updateQuery + id + "." + "\"" + view + "\"");
+        } catch (RecordStoreAccessException e) {
+          LOG_ERROR.error("Error refreshing materialized view from dataset {}", id);
+        }
       }
+      LOG.info("These materialized views: {} have been refreshed.", viewList);
+    });
+    if (Boolean.TRUE.equals(continueValidation)) {
+      Map<String, Object> values = new HashMap<>();
+      values.put(LiteralConstants.DATASET_ID, datasetId);
+      values.put("released", released);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
     }
-    LOG.info("These materialized views: {} have been refreshed.", viewList);
   }
 
 

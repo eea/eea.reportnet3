@@ -1,6 +1,7 @@
 package org.eea.communication.service.impl;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.eea.communication.mapper.SystemNotificationMapper;
@@ -38,6 +39,8 @@ public class NotificationServiceImpl implements NotificationService {
 
   /** The Constant MAX_LENGTH_MESSAGE. */
   private static final int MAX_LENGTH_MESSAGE = 300;
+
+  private static final String SYSTEM_NOTIFICATION_QUEUE_NAME = "/user/queue/systemnotifications";
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(NotificationServiceImpl.class);
@@ -97,6 +100,7 @@ public class NotificationServiceImpl implements NotificationService {
   @Override
   public void createUserNotification(UserNotificationVO userNotificationVO) throws EEAException {
     try {
+      userNotificationVO.setInsertDate(new Date());
       UserNotification userNotification = userNotificationMapper.classToEntity(userNotificationVO);
       userNotification.setUserId(SecurityContextHolder.getContext().getAuthentication().getName());
       userNotificationRepository.save(userNotification);
@@ -125,7 +129,7 @@ public class NotificationServiceImpl implements NotificationService {
 
       systemNotification = systemNotificationRepository.save(systemNotification);
       SystemNotificationVO sysNotiVO = systemNotificationMapper.entityToClass(systemNotification);
-      template.convertAndSend("/user/queue/systemnotifications", sysNotiVO);
+      template.convertAndSend(SYSTEM_NOTIFICATION_QUEUE_NAME, sysNotiVO);
       LOG.info("System Notification created succesfully in mongo");
     } catch (IllegalArgumentException e) {
       LOG_ERROR.error("Error creating a System Notification. {}", e.getMessage(), e);
@@ -145,7 +149,7 @@ public class NotificationServiceImpl implements NotificationService {
     try {
       systemNotificationRepository.deleteSystemNotficationById(systemNotificationId);
       if (systemNotificationRepository.findByEnabledTrue().isEmpty()) {
-        template.convertAndSend("/user/queue/systemnotifications",
+        template.convertAndSend(SYSTEM_NOTIFICATION_QUEUE_NAME,
             new Notification(EventType.NO_ENABLED_SYSTEM_NOTIFICATIONS, Collections.emptyMap()));
       }
       LOG.info("System Notification deleted succesfully in mongo");
@@ -172,11 +176,11 @@ public class NotificationServiceImpl implements NotificationService {
           Math.min(systemNotification.getMessage().length(), MAX_LENGTH_MESSAGE)));
 
       systemNotificationRepository.updateSystemNotficationById(systemNotification);
-      if (systemNotification != null && systemNotification.isEnabled()) {
-        template.convertAndSend("/user/queue/systemnotifications", systemNotificationVO);
+      if (systemNotification.isEnabled()) {
+        template.convertAndSend(SYSTEM_NOTIFICATION_QUEUE_NAME, systemNotificationVO);
       } else {
         if (systemNotificationRepository.findByEnabledTrue().isEmpty()) {
-          template.convertAndSend("/user/queue/systemnotifications",
+          template.convertAndSend(SYSTEM_NOTIFICATION_QUEUE_NAME,
               new Notification(EventType.NO_ENABLED_SYSTEM_NOTIFICATIONS, Collections.emptyMap()));
         }
       }

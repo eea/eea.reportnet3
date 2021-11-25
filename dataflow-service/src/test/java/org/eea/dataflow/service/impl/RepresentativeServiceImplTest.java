@@ -647,4 +647,22 @@ public class RepresentativeServiceImplTest {
     assertEquals(Arrays.asList(1L), representativeServiceImpl.getProviderIds());
   }
 
+  @Test
+  public void findRepresentativesByDataflowIdAnDataproviderListTest() {
+    List<Representative> representatives = new ArrayList<>();
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representatives.add(representative);
+    List<RepresentativeVO> representativeVOs = new ArrayList<>();
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setId(1L);
+    representativeVOs.add(representativeVO);
+    Mockito.when(representativeRepository.findByDataflowIdAndDataProviderIdIn(Mockito.anyLong(),
+        Mockito.any())).thenReturn(representatives);
+    Mockito.when(representativeMapper.entityListToClass(Mockito.anyList()))
+        .thenReturn(representativeVOs);
+    assertEquals(representativeVOs, representativeServiceImpl
+        .findRepresentativesByDataflowIdAndDataproviderList(1L, Arrays.asList(1L)));
+  }
+
 }

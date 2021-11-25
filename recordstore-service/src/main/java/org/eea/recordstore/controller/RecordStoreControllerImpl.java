@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -330,8 +331,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
-    recordStoreService.refreshMaterializedQuery(datasetId);
-
+    recordStoreService.refreshMaterializedQuery(Arrays.asList(datasetId), false, false, null);
   }
 
 }

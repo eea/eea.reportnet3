@@ -31,15 +31,7 @@ export const NotificationService = {
     return notifications;
   },
 
-  create: async (type, date, content) => await NotificationRepository.create(type, date, content),
-
-  // removeById: async () => {},
-
-  // removeAll: async () => {},
-
-  // readById: async () => {},
-
-  // readAll: async () => {},
+  create: async (type, content) => await NotificationRepository.create(type, content),
 
   parse: ({ config, content = {}, date, message, onClick, routes, type }) => {
     content = merge(content, content.customContent);

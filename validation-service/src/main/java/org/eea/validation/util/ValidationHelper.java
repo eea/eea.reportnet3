@@ -271,7 +271,7 @@ public class ValidationHelper implements DisposableBean {
       values.put("referencesToRefresh",
           List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
               dataset.getDataflowId(), dataset.getDatasetSchema())));
-      kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
     }
   }
 

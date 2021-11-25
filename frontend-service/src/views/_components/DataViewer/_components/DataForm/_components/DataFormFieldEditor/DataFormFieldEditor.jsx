@@ -47,6 +47,7 @@ const DataFormFieldEditor = ({
   onChangeForm,
   onCheckCoordinateFieldsError,
   onConditionalChange,
+  onCoordinatesMoreInfoClick,
   records,
   reporting,
   type
@@ -233,6 +234,7 @@ const DataFormFieldEditor = ({
   const onSelectPoint = (coordinates, selectedCrs) => {
     const filteredCRS = crs.find(crsItem => crsItem.value === selectedCrs);
     dispatchMap({ type: 'SET_MAP_NEW_POINT', payload: { coordinates, filteredCRS } });
+    dispatchMap({ type: 'DISPLAY_COORDINATE_ERROR', payload: !MapUtils.checkValidCoordinates(coordinates, true) });
   };
 
   const changePoint = (geoJson, coordinates, crs, withCRS = true) => {
@@ -574,6 +576,7 @@ const DataFormFieldEditor = ({
           initialGeoJson={fieldValue}
           onBlur={coordinates => onCoordinatesBlur(coordinates)}
           onChange={coordinates => onCoordinatesChange(coordinates)}
+          onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
           onCrsChange={crs => onCrsChange(crs)}
           onMapOpen={() => onMapOpen(fieldValue)}
           showMessageError={map.showCoordinateError}
