@@ -3,6 +3,8 @@ import flattenDeep from 'lodash/flattenDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
+
 import proj4 from 'proj4';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -140,6 +142,33 @@ const getGeometryType = json =>
 
 const getSrid = json => (!isNil(json) && json !== '' ? JSON.parse(json).properties.srid : 'EPSG:4326');
 
+const hasValidCRS = (fieldValue, crs) => {
+  if (fieldValue === '') return true;
+  const parsedGeoJsonData = JSON.parse(fieldValue);
+  return crs.some(crsItem => crsItem.value === parsedGeoJsonData.properties.srid);
+};
+
+const inBounds = ({ coord, coordType, checkProjected = false }) => {
+  const parsedCoord = parseFloat(coord) || 0;
+  if (checkProjected) {
+    if (coordType === 'latitude') {
+      return (
+        parsedCoord >= config.GEOGRAPHICAL_LAT_COORD_3035.min && parsedCoord <= config.GEOGRAPHICAL_LAT_COORD_3035.max
+      );
+    } else {
+      return (
+        parsedCoord >= config.GEOGRAPHICAL_LONG_COORD_3035.min && parsedCoord <= config.GEOGRAPHICAL_LONG_COORD_3035.max
+      );
+    }
+  } else {
+    if (coordType === 'latitude') {
+      return parsedCoord >= config.GEOGRAPHICAL_LAT_COORD.min && parsedCoord <= config.GEOGRAPHICAL_LAT_COORD.max;
+    } else {
+      return parsedCoord >= config.GEOGRAPHICAL_LONG_COORD.min && parsedCoord <= config.GEOGRAPHICAL_LONG_COORD.max;
+    }
+  }
+};
+
 const latLngToLngLat = (coordinates = []) =>
   typeof coordinates[0] === 'number'
     ? [coordinates[0], coordinates[1]]
@@ -250,6 +279,8 @@ export const MapUtils = {
   getFirstPointComplexGeometry,
   getGeometryType,
   getSrid,
+  hasValidCRS,
+  inBounds,
   isValidJSON,
   latLngToLngLat,
   lngLatToLatLng,

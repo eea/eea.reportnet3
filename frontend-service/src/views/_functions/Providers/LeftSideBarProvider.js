@@ -44,16 +44,6 @@ const LeftSideBarProvider = ({ children }) => {
         })
       );
     }
-    // Object.keys(config).forEach(key => {
-    //   if (roles.indexOf(key) > -1) {
-    //     config[key].forEach(step =>
-    //       steps.push({
-    //         content: <h3>{resources.messages[step.content]}</h3>,
-    //         target: step.target
-    //       })
-    //     );
-    //   }
-    // });
 
     const loadedClassesSteps = [...steps].filter(
       step =>

@@ -1,7 +1,5 @@
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
@@ -20,6 +18,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
 import { QCFieldEditor } from './_components/QCFieldEditor';
 import { Spinner } from 'views/_components/Spinner';
@@ -63,8 +62,8 @@ export const QCList = withRouter(
       editingRows: [],
       isLoading: true,
       isTableSorted: false,
-      sortFieldValidations: '',
-      sortOrderValidations: '',
+      sortFieldValidations: null,
+      sortOrderValidations: null,
       validationId: '',
       validationList: {}
     });
@@ -632,7 +631,7 @@ export const QCList = withRouter(
       tabsValidationsDispatch({
         type: 'SET_IS_TABLE_SORTED',
         payload: {
-          value: true,
+          value: event.sortOrder === 1 || event.sortOrder === -1,
           sortFieldValidations: event.sortField,
           sortOrderValidations: event.sortOrder
         }
@@ -724,7 +723,6 @@ export const QCList = withRouter(
               onRowEditInit={onRowEditInit}
               onRowEditSave={onUpdateValidationRule}
               onSort={event => onSort(event)}
-              // paginator={tabsValidationsState.editingRows.length === 0}
               paginator={true}
               paginatorDisabled={tabsValidationsState.editingRows.length > 0}
               paginatorRight={!isNil(tabsValidationsState.filteredData) && getPaginatorRecordsCount()}

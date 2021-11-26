@@ -135,8 +135,8 @@ export const reducer = (state, { type, payload }) => {
     case 'SET_IS_DELETING':
       return { ...state, isDeleting: payload.isDeleting };
 
-    case 'SET_FOCUSED_LEAD_REPORTER_ID':
-      return { ...state, focusedLeadReporterId: payload.focusedLeadReporterId };
+    case 'SET_FOCUSED_INPUT_ID':
+      return { ...state, focusedInputId: payload.focusedInputId };
 
     default:
       return state;

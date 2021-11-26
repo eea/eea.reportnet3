@@ -8,7 +8,6 @@ import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
-import DOMPurify from 'dompurify';
 
 import styles from './NotificationsList.module.scss';
 
@@ -43,7 +42,8 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     const headers = [
       {
         id: 'message',
-        header: resourcesContext.messages['message']
+        header: resourcesContext.messages['message'],
+        template: messageTemplate
       },
       {
         id: 'levelError',
@@ -100,6 +100,14 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     );
   };
 
+  const messageTemplate = rowData => (
+    <label
+      className={styles.label}
+      dangerouslySetInnerHTML={{
+        __html: rowData.message
+      }}></label>
+  );
+
   const notificationLevelTemplate = rowData => {
     return (
       !isNil(rowData.levelError) && (
@@ -114,6 +122,23 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     setPaginationInfo({ ...paginationInfo, recordsPerPage: event.rows, firstPageRecord: event.first });
     onLoadNotifications(event.first, event.rows);
   };
+
+  const onHideNotificationsList = () => {
+    setIsNotificationVisible(false);
+    notificationContext.deleteAll();
+  };
+
+  const notificationsFooter = (
+    <div>
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon="cancel"
+        id="cancelNotification"
+        label={resourcesContext.messages['close']}
+        onClick={onHideNotificationsList}
+      />
+    </div>
+  );
 
   const onLoadNotifications = async (fRow, nRows) => {
     try {
@@ -135,8 +160,6 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       });
 
       const notificationsArray = parsedNotifications.map((notification, i) => {
-        const message = DOMPurify.sanitize(notification.message, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
-
         const capitalizedLevelError = !isUndefined(notification.type)
           ? notification.type.charAt(0).toUpperCase() + notification.type.slice(1)
           : notification.type;
@@ -144,7 +167,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
         return {
           index: i + nRows * Math.floor(fRow / nRows),
           key: notification.key,
-          message: message,
+          message: notification.message,
           levelError: capitalizedLevelError,
           date: dayjs(notification.date).format(
             `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
@@ -223,7 +246,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   const newNotificationsClassName = rowData => {
     return {
-      'p-highlight': rowData.index < notificationContext.all.length
+      'p-highlight-bg': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
     };
   };
 

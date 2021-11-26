@@ -51,6 +51,7 @@ export const ShareRights = ({
   placeholder,
   representativeId,
   roleOptions,
+  setHasReporters = () => {},
   setIsUserRightManagementDialogVisible,
   setRightPermissionsChange = () => {},
   updateErrorNotificationKey,
@@ -98,6 +99,10 @@ export const ShareRights = ({
   useEffect(() => {
     getAllUsers();
   }, [shareRightsState.dataUpdatedCount]);
+
+  useEffect(() => {
+    setHasReporters(!isEmpty(shareRightsState.userRightList));
+  }, [shareRightsState.userRightList]);
 
   useEffect(() => {
     if (!userRight.isNew && dropdownRef.current && isUserRightManagementDialogVisible) {
@@ -471,6 +476,7 @@ export const ShareRights = ({
             <DataTable
               first={shareRightsState.pagination.first}
               getPageChange={onPaginate}
+              loading={loadingStatus.isActionButtonsLoading}
               paginator={true}
               rows={shareRightsState.pagination.rows}
               rowsPerPageOptions={[5, 10, 15]}
