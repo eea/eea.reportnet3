@@ -416,7 +416,7 @@ const FieldEditor = ({
       return (
         <div className={styles.pointEpsgWrapper}>
           {!isNil(fieldValue) && fieldValue !== '' && isValidJSON && (
-            <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
+            <label className={styles.epsg}>{resourcesContext.messages['epsg']}: </label>
           )}
           {!isNil(fieldValue) && fieldValue !== '' && isValidJSON && <span>{renderCRS(fieldValue)}</span>}
         </div>
@@ -822,8 +822,11 @@ const FieldEditor = ({
     return (
       <div>
         {isNil(infoLabelClass) && <label className={styles.epsg}>{resourcesContext.messages['coords']}</label>}
-        <label className={infoLabelClass}>{completeCoordinates}</label>
-        {renderMoreInfo()}
+        {isNil(infoLabelClass) && renderMoreInfo()}
+        <div className={styles.completeCoordinatesWrapper}>
+          <label className={infoLabelClass}>{completeCoordinates}</label>
+          {!isNil(infoLabelClass) && renderMoreInfo()}
+        </div>
       </div>
     );
   };

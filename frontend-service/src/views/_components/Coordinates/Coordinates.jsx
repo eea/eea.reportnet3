@@ -38,13 +38,15 @@ export const Coordinates = ({
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
 
-  const { inBounds } = MapUtils;
+  const { inBounds, projectCoordinates } = MapUtils;
+
+  const hasValidCRS = MapUtils.hasValidCRS(initialGeoJson, crsOptions);
 
   useEffect(() => {
-    if (crsValue.value !== 'EPSG:3035') {
+    if (crsValue.value !== 'EPSG:3035' && showMessageError) {
       checkCoordinates(latitude, longitude);
     }
-  }, [latitude, longitude, crsValue.value]);
+  }, [latitude, longitude]);
 
   useEffect(() => {
     if (initialGeoJson) {
@@ -55,28 +57,55 @@ export const Coordinates = ({
   }, [initialGeoJson]);
 
   const checkCoordinates = (lat, long, checkProjected = false) => {
+    if (checkProjected && lat !== '' && long !== '') {
+      const projectedCoords = projectCoordinates({
+        coordinates: [parseFloat(lat), parseFloat(long)],
+        currentCRS: crsValue,
+        newCRS: 'EPSG:4326'
+      });
+      lat = projectedCoords[0];
+      long = projectedCoords[1];
+    }
+
     setHasErrors({
       latitude: checkEmptyCoordinate(lat),
       longitude: checkEmptyCoordinate(long),
-      latOutOfBounds: !inBounds({ coord: lat, coordType: 'latitude', checkProjected, crs: crsValue.value }),
-      longOutOfBounds: !inBounds({ coord: long, coordType: 'longitude', checkProjected, crs: crsValue.value }),
+      latOutOfBounds: !inBounds({ coord: lat, coordType: 'latitude', checkProjected }),
+      longOutOfBounds: !inBounds({ coord: long, coordType: 'longitude', checkProjected }),
       checkProjected
     });
   };
 
   const checkEmptyCoordinate = coord => (!isNil(coord) ? coord.toString().trim() === '' : true);
 
+  const getEPSGLabelClassName = () => {
+    if (!isCellEditor) {
+      return styles.pointEpsgWrapper;
+    } else if (!hasValidCRS) {
+      return styles.pointEpsgWrapperCellEditor;
+    }
+  };
+
+  const getProjectedCoordinates = () => {
+    const projectedCoords = projectCoordinates({
+      coordinates: [parseFloat(latitude), parseFloat(longitude)],
+      currentCRS: crsValue,
+      newCRS: 'EPSG:4326'
+    });
+    return projectedCoords;
+  };
+
   const renderLabel = keys => {
     if (!xyLabels) {
-      return resourcesContext.messages[isCellEditor ? keys.geographicalShort : keys.geographical];
+      return `${resourcesContext.messages[keys.geographical]}${!hasValidCRS ? ':' : ''}`;
     } else {
-      return resourcesContext.messages[keys.metrical];
+      return `${resourcesContext.messages[keys.metrical]}${!hasValidCRS ? ':' : ''}`;
     }
   };
 
   const renderEPSG = () => {
     const renderButton = () => {
-      if (MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+      if (hasValidCRS) {
         return (
           <Button
             className={`p-button-secondary-transparent button ${styles.mapButton}`}
@@ -91,7 +120,7 @@ export const Coordinates = ({
     };
 
     const renderDropdown = () => {
-      if (MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+      if (hasValidCRS) {
         return (
           <Dropdown
             appendTo={document.body}
@@ -102,16 +131,14 @@ export const Coordinates = ({
               if (
                 e.target.value.value === 'EPSG:3035' &&
                 (!inBounds({
-                  coord: latitude,
+                  coord: getProjectedCoordinates()[0],
                   coordType: 'latitude',
-                  checkProjected: true,
-                  crs: e.target.value.value
+                  checkProjected: true
                 }) ||
                   !inBounds({
-                    coord: longitude,
+                    coord: getProjectedCoordinates()[1],
                     coordType: 'longitude',
-                    checkProjected: true,
-                    crs: e.target.value.value
+                    checkProjected: true
                   }))
               ) {
                 checkCoordinates(latitude, longitude, true);
@@ -131,7 +158,7 @@ export const Coordinates = ({
     };
 
     const renderMoreInfoTooltip = () => {
-      if (!MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+      if (!hasValidCRS) {
         return (
           <TooltipButton
             message={resourcesContext.messages['coordinatesMoreInfo']}
@@ -142,17 +169,21 @@ export const Coordinates = ({
     };
 
     return (
-      <div className={`${!isCellEditor ? styles.pointEpsgWrapper : ''}`}>
-        <label className={styles.epsg}>{resourcesContext.messages['epsg']}</label>
-        {renderDropdown()}
-        {renderButton()}
-        {renderMoreInfoTooltip()}
+      <div className={getEPSGLabelClassName()}>
+        <div>
+          <label className={styles.epsg}>{`${resourcesContext.messages['epsg']}${!hasValidCRS ? ':' : ''}`}</label>
+        </div>
+        <div className={`${!isCellEditor ? styles.pointEpsgAndButtonWrapper : ''}`}>
+          {renderDropdown()}
+          {renderButton()}
+          {renderMoreInfoTooltip()}
+        </div>
       </div>
     );
   };
 
   const renderErrorMessage = () => {
-    if (hasErrorMessage) {
+    if (hasErrorMessage && hasValidCRS) {
       return (
         <span className={styles.errorMessage}>
           {showMessageError && <span className={styles.pointError}>{renderErrorMessageSeparator()}</span>}
@@ -177,7 +208,7 @@ export const Coordinates = ({
 
   const renderLatitudeLongitudeInput = () => {
     const renderLatitude = () => {
-      if (MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+      if (hasValidCRS) {
         return (
           <InputText
             className={classNames({
@@ -189,7 +220,7 @@ export const Coordinates = ({
             keyfilter="coordinates"
             onBlur={e => {
               onBlur([e.target.value, longitude].join(', '));
-              checkCoordinates(e.target.value, longitude);
+              checkCoordinates(e.target.value, longitude, crsValue.value === 'EPSG:3035');
             }}
             onChange={event => setLatitude(event.target.value)}
             onFocus={e => {
@@ -209,7 +240,7 @@ export const Coordinates = ({
     };
 
     const renderLongitude = () => {
-      if (MapUtils.hasValidCRS(initialGeoJson, crsOptions)) {
+      if (hasValidCRS) {
         return (
           <InputText
             className={classNames({
@@ -221,7 +252,7 @@ export const Coordinates = ({
             keyfilter="coordinates"
             onBlur={e => {
               onBlur([latitude, e.target.value].join(', '));
-              checkCoordinates(latitude, e.target.value);
+              checkCoordinates(latitude, e.target.value, crsValue.value === 'EPSG:3035');
             }}
             onChange={event => setLongitude(event.target.value)}
             onFocus={e => {
@@ -241,13 +272,18 @@ export const Coordinates = ({
     };
 
     return (
-      <Fragment>
-        {renderLatitude()}
-        <label className={classNames(styles.epsg, styles.longitude)}>
-          {renderLabel({ geographical: 'longitude', geographicalShort: 'long', metrical: 'y' })}:
-        </label>
-        {renderLongitude()}
-      </Fragment>
+      <div className={!isCellEditor ? styles.coordinatesModalWrapper : ''}>
+        <div>
+          <label className={styles.epsg}>{renderLabel({ geographical: 'latitude', metrical: 'x' })}</label>
+          {renderLatitude()}
+        </div>
+        <div>
+          <label className={classNames(styles.epsg, styles.longitude)}>
+            {renderLabel({ geographical: 'longitude', metrical: 'y' })}
+          </label>
+          {renderLongitude()}
+        </div>
+      </div>
     );
   };
 
@@ -270,7 +306,9 @@ export const Coordinates = ({
 
     const getCoordinatesBoundaries = () => {
       if (hasErrors.checkProjected) {
-        return resourcesContext.messages['coordsOutOfBoundsTooltipGeographicalProjected'];
+        return `${resourcesContext.messages['coordsOutOfBoundsTooltipGeographicalProjected']} ${
+          resourcesContext.messages['coordsOutOfBoundsTooltipGeographicalProjectedValues']
+        } ${getProjectedCoordinates().join(', ')}`;
       } else {
         return resourcesContext.messages['coordsOutOfBoundsTooltipGeographical'];
       }
@@ -279,18 +317,17 @@ export const Coordinates = ({
     if (!xyLabels) {
       return `${getCoordinatesBoundariesTitle()} ${getCoordinatesBoundaries()}`;
     } else {
-      return `${getCoordinatesBoundariesTitle()} ${resourcesContext.messages['coordsOutOfBoundsTooltipMetrical']}`;
+      return `${getCoordinatesBoundariesTitle()} ${
+        resourcesContext.messages['coordsOutOfBoundsTooltipGeographicalProjected']
+      } ${
+        resourcesContext.messages['coordsOutOfBoundsTooltipGeographicalProjectedValues']
+      } ${getProjectedCoordinates().join(', ')}`;
     }
   };
 
   return (
     <div>
-      <div className={styles.coordinatesWrapper}>
-        <label className={styles.epsg}>
-          {renderLabel({ geographical: 'latitude', geographicalShort: 'lat', metrical: 'x' })}:
-        </label>
-        {renderLatitudeLongitudeInput()}
-      </div>
+      <div className={styles.coordinatesWrapper}>{renderLatitudeLongitudeInput()}</div>
       {renderErrorMessage()}
       {renderEPSG()}
     </div>
