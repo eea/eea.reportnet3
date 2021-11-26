@@ -43,7 +43,7 @@ public interface SqlRulesService {
    * Retrieve table data.
    *
    * @param query the query
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the data set metabase VO
    * @param rule the rule
    * @param ischeckDC the ischeck DC
    * @return the table value

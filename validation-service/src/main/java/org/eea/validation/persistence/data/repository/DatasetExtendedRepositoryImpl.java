@@ -53,6 +53,10 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
   @Value("${query.message.geometry.error}")
   private String geometryErrorMessage;
 
+  /** The field batch size. */
+  @Value("${validation.sqlFetchSize}")
+  private int sqlFetchSize;
+
   /** The entity manager. */
   @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
   private EntityManager entityManager;
@@ -226,7 +230,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     TableValue tableValue;
     conn.setAutoCommit(false);
     Statement stmt = conn.createStatement();
-    stmt.setFetchSize(250);
+    stmt.setFetchSize(sqlFetchSize);
     try (ResultSet rs = stmt.executeQuery(query)) {
       ResultSetMetaData rsm = rs.getMetaData();
       LOG.info("Query executed: {}", query);
