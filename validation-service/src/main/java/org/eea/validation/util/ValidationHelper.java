@@ -186,7 +186,7 @@ public class ValidationHelper implements DisposableBean {
       if (!processesMap.containsKey(processId)) {
         initializeProcess(processId, false, false);
       }
-      if (null == rule) {
+      if (null != rule) {
         if (null == processesMap.get(processId).getKieBase()) {
           processesMap.get(processId)
               .setKieBase(validationService.loadRulesKnowledgeBase(datasetId, null));
@@ -916,20 +916,6 @@ public class ValidationHelper implements DisposableBean {
     return isProcessStarted;
   }
 
-  /**
-   * Instantiates a new validation task.
-   */
-
-  /**
-   * Instantiates a new validation task.
-   *
-   * @param eeaEventVO the eea event VO
-   * @param validator the validator
-   * @param datasetId the dataset id
-   * @param kieBase the kie base
-   * @param processId the process id
-   * @param notificationEventType the notification event type
-   */
 
   /**
    * Instantiates a new validation task.
