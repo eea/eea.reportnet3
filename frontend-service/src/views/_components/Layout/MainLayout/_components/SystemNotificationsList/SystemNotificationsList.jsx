@@ -45,12 +45,12 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
   });
 
   const {
-    firstRow,
-    isVisibleCreateSysNotification,
     editNotification,
+    firstRow,
     formType,
     isDeleteDialogVisible,
     isDeleting,
+    isVisibleCreateSysNotification,
     numberRows,
     systemNotifications
   } = systemNotificationState;
@@ -74,7 +74,8 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       {
         id: 'level',
         header: resourcesContext.messages['notificationLevel'],
-        template: rowData => notificationLevelTemplate(rowData, false)
+        template: rowData => notificationLevelTemplate(rowData, false),
+        style: { width: '6rem' }
       },
       {
         id: 'enabled',
@@ -91,6 +92,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         header={col.header}
         key={col.id}
         sortable={true}
+        style={col.style}
       />
     ));
 
@@ -151,7 +153,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
         id="cancelCreateSystemNotification"
-        label={resourcesContext.messages['cancel']}
+        label={resourcesContext.messages['close']}
         onClick={() => setIsSystemNotificationVisible(false)}
       />
     </div>
