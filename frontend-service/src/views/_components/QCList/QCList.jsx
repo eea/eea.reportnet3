@@ -629,7 +629,7 @@ export const QCList = withRouter(
       tabsValidationsDispatch({
         type: 'SET_IS_TABLE_SORTED',
         payload: {
-          value: event.sortOrder === 1 || event.sortOrder === -1 ? true : false,
+          value: event.sortOrder === 1 || event.sortOrder === -1,
           sortFieldValidations: event.sortField,
           sortOrderValidations: event.sortOrder
         }
