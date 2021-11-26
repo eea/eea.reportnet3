@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -224,10 +225,10 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     conn.setSchema("dataset_" + datasetId);
     TableValue tableValue;
     conn.setAutoCommit(false);
-    try (PreparedStatement stmt = conn.prepareStatement(query);
-        ResultSet rs = stmt.executeQuery()) {
-      stmt.setFetchSize(250);
-      ResultSetMetaData rsm = stmt.getMetaData();
+    Statement stmt = conn.createStatement();
+    stmt.setFetchSize(250);
+    try (ResultSet rs = stmt.executeQuery(query)) {
+      ResultSetMetaData rsm = rs.getMetaData();
       LOG.info("Query executed: {}", query);
       tableValue = new TableValue();
       List<RecordValue> records = new ArrayList<>();
@@ -281,9 +282,11 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         }
       }
       stmt.setFetchSize(0);
+    } finally {
+      stmt.close();
+      conn.setAutoCommit(true);
     }
     System.gc();
-    conn.setAutoCommit(true);
     return tableValue;
   }
 
