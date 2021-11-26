@@ -1,0 +1,60 @@
+.systemNotificationFormWrapper {
+  display: flex;
+  flex-direction: column;
+  > div > div {
+    padding-bottom: 0.3rem;
+  }
+  > div > div {
+    label {
+      font-weight: bold;
+    }
+  }
+  .systemNotificationColumnGroup {
+    display: flex;
+    flex-direction: row;
+    .systemNotificationColumn {
+      display: flex;
+      flex-direction: column;
+      .systemNotificationLevelDropdown {
+        margin-top: 0.5em;
+      }
+      .enabledCheckbox {
+        align-self: center;
+        margin-top: 0.5em;
+        width: 2rem;
+        height: 2rem;
+        :global .p-checkbox {
+          width: 2rem;
+          height: 2rem;
+        }
+        :global .p-checkbox-box {
+          width: 2rem;
+          height: 2rem;
+        }
+        :global .p-checkbox-icon {
+          font-size: calc(2rem - 4px);
+        }
+      }
+    }
+  }
+
+  .previewSystemNotification {
+    display: flex;
+    justify-content: center;
+    > div {
+      margin: 0 !important;
+    }
+  }
+  .previewButtonWrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.3rem;
+  }
+}
+
+.formElementWrapper {
+  margin-bottom: 1.2rem;
+}
+.previewElementWrapper {
+  margin-top: 1.2rem;
+}

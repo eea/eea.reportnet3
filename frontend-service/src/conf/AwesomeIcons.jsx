@@ -5,15 +5,17 @@ import {
   faAngleDoubleRight,
   faAngleDoubleUp,
   faAngleDown,
-  faAngleUp,
   faAngleRight,
+  faAngleUp,
   faArchive,
   faArrowDown,
   faArrowUp,
   faAt,
   faBars,
   faBookOpen,
+  faBraille,
   faBroom,
+  faBullhorn,
   faCaretDown,
   faCaretRight,
   faChartBar,
@@ -21,19 +23,24 @@ import {
   faCircleNotch,
   faClipboard,
   faClipboardList,
+  faClock,
   faCloudUploadAlt,
   faCog,
   faCogs,
   faCoins,
+  faCommentMedical,
   faCube,
   faDatabase,
   faDice,
   faDiceFour,
+  faDownload,
   faDraftingCompass,
   faDrawPolygon,
+  faEdit,
   faExclamationCircle,
   faExternalLinkAlt,
   faEye,
+  faFile,
   faFileAlt,
   faFileArchive,
   faFileAudio,
@@ -47,8 +54,10 @@ import {
   faFilePowerpoint,
   faFileVideo,
   faFileWord,
+  faFlagCheckered,
   faFolder,
   faGlobeEurope,
+  faGripLines,
   faHome,
   faIgloo,
   faInfo,
@@ -57,9 +66,11 @@ import {
   faLayerGroup,
   faLink,
   faList,
+  faListOl,
   faLock,
   faMapMarkedAlt,
   faMapPin,
+  faMeteor,
   faPalette,
   faPaperclip,
   faPen,
@@ -70,35 +81,31 @@ import {
   faPowerOff,
   faQuestion,
   faReply,
+  faSearch,
   faShareAlt,
   faSitemap,
   faSortAlphaDown,
   faSortAlphaUpAlt,
   faSquareRootAlt,
+  faTable,
   faTasks,
   faThList,
   faThumbtack,
   faTimes,
+  faTimesCircle,
   faToggleOff,
   faTrashAlt,
+  faUpload,
+  faUserCheck,
   faUserCircle,
-  faUsers,
   faUserCog,
+  faUserLock,
+  faUsers,
   faUsersCog,
   faUserShield,
+  faUserTimes,
   faVectorSquare,
-  faGripLines,
-  faBraille,
-  faTable,
-  faDownload,
-  faVolumeUp,
-  faFlagCheckered,
-  faUpload,
-  faFile,
-  faClock,
-  faMeteor,
-  faSearch,
-  faTimesCircle
+  faVolumeUp
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -134,8 +141,6 @@ export const AwesomeIcons = icon => {
       return faSortAlphaDown;
     case 'alphabeticOrderUp':
       return faSortAlphaUpAlt;
-    case 'angleSingleUp':
-      return faAngleUp;
     case 'angleDoubleLeft':
       return faAngleDoubleLeft;
     case 'angleDoubleRight':
@@ -144,6 +149,8 @@ export const AwesomeIcons = icon => {
       return faAngleDown;
     case 'angleRight':
       return faAngleRight;
+    case 'angleSingleUp':
+      return faAngleUp;
     case 'angleUp':
       return faAngleDoubleUp;
     case 'archive':
@@ -174,12 +181,16 @@ export const AwesomeIcons = icon => {
       return faPaperclip;
     case 'clipboard':
       return faClipboard;
+    case 'clock':
+      return faClock;
     case 'clone':
       return faClone;
     case 'cofings':
       return faCogs;
     case 'collapsed':
       return faCaretRight;
+    case 'comment':
+      return faCommentMedical;
     case 'comments':
       return faComments;
     case 'compass':
@@ -194,8 +205,6 @@ export const AwesomeIcons = icon => {
       return faDatabase;
     case 'delete':
       return faTrashAlt;
-    case 'solidDeleteCircle':
-      return faTimesCircle;
     case 'deleteCircle':
       return farTimesCircle;
     case 'disk':
@@ -204,6 +213,8 @@ export const AwesomeIcons = icon => {
       return faFileWord;
     case 'docx':
       return faFileWord;
+    case 'download':
+      return faDownload;
     case 'dropDown':
       return faCaretDown;
     case 'edit':
@@ -218,16 +229,22 @@ export const AwesomeIcons = icon => {
       return faExclamationCircle;
     case 'expanded':
       return faCaretDown;
+    case 'externalLink':
+      return faStaylinked;
     case 'externalUrl':
       return faExternalLinkAlt;
     case 'eye':
       return faEye;
     case 'eyeSlash':
       return faEyeSlash;
+    case 'file':
+      return faFile;
     case 'fileDownload':
       return faFileDownload;
     case 'fileExport':
       return faFileExport;
+    case 'flag':
+      return faFlagCheckered;
     case 'folder':
       return faFolder;
     case 'formula':
@@ -236,6 +253,8 @@ export const AwesomeIcons = icon => {
       return faFileImage;
     case 'home':
       return faHome;
+    case 'howTo':
+      return faBookOpen;
     case 'ico':
       return faFileImage;
     case 'info':
@@ -252,14 +271,18 @@ export const AwesomeIcons = icon => {
       return faFileCode;
     case 'key':
       return faFilePowerpoint;
+    case 'lightPdf':
+      return farFilePdf;
+    case 'line':
+      return faGripLines;
     case 'link':
       return faLink;
     case 'linkData':
       return faVectorSquare;
+    case 'list-ol':
+      return faListOl;
     case 'list':
       return faList;
-    case 'thList':
-      return faThList;
     case 'listClipboard':
       return faClipboardList;
     case 'localhostAlert':
@@ -274,6 +297,8 @@ export const AwesomeIcons = icon => {
       return faMapMarkedAlt;
     case 'mdb':
       return faDatabase;
+    case 'meteor':
+      return faMeteor;
     case 'minusSquare':
       return faMinusSquare;
     case 'mobile':
@@ -316,10 +341,6 @@ export const AwesomeIcons = icon => {
       return faPalette;
     case 'pdf':
       return faFilePdf;
-    case 'lightPdf':
-      return farFilePdf;
-    case 'line':
-      return faGripLines;
     case 'pencilRuler':
       return faPencilRuler;
     case 'percentage':
@@ -340,8 +361,6 @@ export const AwesomeIcons = icon => {
       return faDrawPolygon;
     case 'power-off':
       return faPowerOff;
-    case 'file':
-      return faFile;
     case 'pps':
       return faFilePowerpoint;
     case 'ppt':
@@ -354,6 +373,8 @@ export const AwesomeIcons = icon => {
       return faQuestion;
     case 'questionCircle':
       return farQuestionCircle;
+    case 'quickEdit':
+      return faEdit;
     case 'rar':
       return faFileArchive;
     case 'released':
@@ -370,16 +391,24 @@ export const AwesomeIcons = icon => {
       return faShareAlt;
     case 'siteMap':
       return faSitemap;
+    case 'solidDeleteCircle':
+      return faTimesCircle;
+    case 'sound':
+      return faVolumeUp;
     case 'spinner':
       return faCircleNotch;
     case 'sql':
       return faDatabase;
     case 'square':
       return farSquareRegular;
+    case 'table':
+      return faTable;
     case 'tar.gz':
       return faFileArchive;
     case 'text':
       return faAlignJustify;
+    case 'thList':
+      return faThList;
     case 'tif':
       return faFileImage;
     case 'tiff':
@@ -388,14 +417,20 @@ export const AwesomeIcons = icon => {
       return faUpload;
     case 'url':
       return faGlobeEurope;
-    case 'users':
-      return faUsers;
     case 'user-profile':
       return faUserCircle;
+    case 'userCheck':
+      return faUserCheck;
     case 'userConfig':
       return faUserCog;
+    case 'userLock':
+      return faUserLock;
+    case 'users':
+      return faUsers;
     case 'userShield':
       return faUserShield;
+    case 'userTimes':
+      return faUserTimes;
     case 'wav':
       return faFileAudio;
     case 'wma':
@@ -410,22 +445,8 @@ export const AwesomeIcons = icon => {
       return faFileCode;
     case 'zip':
       return faFileArchive;
-    case 'howTo':
-      return faBookOpen;
-    case 'table':
-      return faTable;
-    case 'download':
-      return faDownload;
-    case 'sound':
-      return faVolumeUp;
-    case 'flag':
-      return faFlagCheckered;
-    case 'clock':
-      return faClock;
-    case 'externalLink':
-      return faStaylinked;
-    case 'meteor':
-      return faMeteor;
+    case 'bullhorn':
+      return faBullhorn;
     default:
       return faFileAlt;
   }

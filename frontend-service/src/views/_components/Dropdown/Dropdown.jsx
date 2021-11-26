@@ -188,14 +188,17 @@ export class Dropdown extends Component {
 
   onUpKey(event) {
     if (this.props.options) {
-      let selectedItemIndex = this.findOptionIndex(this.props.value);
-      let prevItem = this.findPrevVisibleItem(selectedItemIndex);
+      const selectedItemIndex = this.findOptionIndex(this.props.value);
 
-      if (prevItem) {
-        this.selectItem({
-          originalEvent: event,
-          option: prevItem
-        });
+      if (selectedItemIndex !== -1) {
+        const prevItem = this.findPrevVisibleItem(selectedItemIndex);
+
+        if (prevItem) {
+          this.selectItem({
+            originalEvent: event,
+            option: prevItem
+          });
+        }
       }
     }
 
@@ -503,8 +506,10 @@ export class Dropdown extends Component {
       this.clearClickState();
 
       this.hideTimeout = setTimeout(() => {
-        this.panel.element.style.display = 'none';
-        DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
+        if (this.panel) {
+          this.panel.element.style.display = 'none';
+          DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
+        }
       }, 150);
     }
   }
@@ -609,7 +614,6 @@ export class Dropdown extends Component {
           onKeyDown={this.onInputKeyDown}
           readOnly={true}
           ref={el => (this.focusInput = el)}
-          role="listbox"
           tabIndex={this.props.tabIndex}
           type="text"
         />

@@ -17,6 +17,13 @@
   font-weight: bold;
 }
 
+.checkboxEditorWrapper {
+  display: flex;
+  justify-content: center;
+  .checkboxEditor {
+    width: 20px !important;
+  }
+}
 .emptyFilteredData {
   height: 75%;
 }
@@ -61,8 +68,9 @@
   justify-content: center;
   align-items: center;
 
-  .btnDelete {
-    border: 1px solid var(--c-custom-gray) !important;
+  .btnDelete,
+  .btnEdit {
+    border: 1px solid var(--general-border-color) !important;
     box-shadow: 0em var(--blue-100) !important;
     color: var(--errors) !important;
     margin-left: 3px !important;
@@ -70,16 +78,13 @@
     &:focus {
       box-shadow: none;
     }
+
+    &:enabled:hover {
+      border-color: var(--button-secondary-border-color-hover) !important;
+    }
   }
   .btnEdit {
-    border: 1px solid var(--c-custom-gray) !important;
-    box-shadow: 0em var(--blue-100) !important;
     color: var(--main-color-font) !important;
-    margin-left: 3px !important;
-
-    &:focus {
-      box-shadow: none;
-    }
   }
 }
 
@@ -113,14 +118,13 @@
   }
 }
 
-.actionTemplate {
-  display: flex;
-  justify-content: center;
-}
 .editRowButton {
-  border: 1px solid var(--c-custom-gray) !important;
+  border: 1px solid var(--general-border-color) !important;
   @include shadow-0em;
   margin-left: 3px !important;
+  &:enabled:hover {
+    border-color: var(--button-secondary-border-color-hover) !important;
+  }
 }
 .deleteRowButton {
   @extend .editRowButton;

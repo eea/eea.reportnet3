@@ -22,6 +22,7 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
 import { DataflowService } from 'services/DataflowService';
 import { RepresentativeService } from 'services/RepresentativeService';
+import { UserService } from 'services/UserService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -29,8 +30,6 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
-
-import { UserService } from 'services/UserService';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -177,12 +176,14 @@ export const ManageBusinessDataflow = ({
       await DataflowService.delete(dataflowId);
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('ManageBusinessDataflow - onDeleteDataflow.', error);
-        notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } });
+        notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } }, true);
       }
       setIsDeleting(false);
+    } finally {
+      userContext.setCurrentDataflowType(undefined);
     }
   };
 
@@ -222,14 +223,14 @@ export const ManageBusinessDataflow = ({
     } catch (error) {
       if (TextUtils.areEquals(error?.response?.data, 'Dataflow name already exists')) {
         handleErrors({ field: 'name', hasErrors: true, message: resourcesContext.messages['dataflowNameExists'] });
-        notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
+        notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' }, true);
       } else {
         console.error('ManageBusinessDataflow - onManageBusinessDataflow.', error);
         const notification = isEditing
           ? { type: 'BUSINESS_DATAFLOW_UPDATING_ERROR', content: { dataflowId, dataflowName: name } }
           : { type: 'BUSINESS_DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
 
-        notificationContext.add(notification);
+        notificationContext.add(notification, true);
       }
     } finally {
       setIsSending(false);
@@ -257,7 +258,7 @@ export const ManageBusinessDataflow = ({
               uniqueIdentifier="pinDataflow"></TooltipButton>
           </div>
         )}
-        {isEditing && isDesign && (
+        {isEditing && isDesign && isAdmin && (
           <Button
             className="p-button-danger p-button-animated-blink"
             icon="trash"

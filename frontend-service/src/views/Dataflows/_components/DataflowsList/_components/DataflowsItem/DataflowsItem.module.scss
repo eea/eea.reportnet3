@@ -1,7 +1,6 @@
 .container {
   position: relative;
   border: none;
-  background-color: var(--c-lilac-100);
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -19,7 +18,7 @@
       grid-template-rows: 15% 50% 25%;
       row-gap: 1rem;
       column-gap: 1.5rem;
-      color: var(--gray-110);
+      color: var(--main-font-color);
       padding: 1rem;
       .card_component {
         &_btn {
@@ -62,9 +61,11 @@
       }
     }
     &.DESIGN {
-      background-color: var(--c-lilac-100);
+      color: var(--main-font-color);
+      background: var(--card-design-dataflow-bg);
+
       &:hover {
-        background-color: #c2c8cf;
+        background: var(--card-design-dataflow-bg-hover);
       }
     }
     &.OPEN,
@@ -76,11 +77,21 @@
       .containerLink {
         color: var(--white);
         background-image: url('/views/_assets/images/logos/logo-blanco.png');
-        .deliveryDate {
+        .dataflowDates {
           color: var(--white);
-          text-align: right;
+          margin-left: auto;
         }
       }
+    }
+  }
+  &.DESIGN,
+  &.OPEN,
+  &.CLOSED {
+    box-shadow: var(--dataflow-item-box-shadow);
+    transition: var(--dataflow-item-transition-box-shadow);
+    &:hover {
+      box-shadow: var(--dataflow-item-box-shadow-hover);
+      transition: var(--dataflow-item-transition-box-shadow);
     }
   }
   &:first-of-type {
@@ -151,13 +162,19 @@
     font-size: 2.5rem;
     opacity: 0.6;
   }
+  .upperIcon {
+    grid-column: 1/2;
+    grid-row: 1/3;
+    margin: 0px;
+    font-size: 1.5rem;
+  }
 
-  .deliveryDate {
+  .dataflowDates {
     grid-column: 3/3;
     grid-row: 1/2;
-    color: var(--gray-110);
+    color: var(--main-font-color);
     font-size: 1rem;
-    text-align: right;
+    margin-left: auto;
     margin-right: 3rem;
     span {
       font-weight: normal;
@@ -306,7 +323,7 @@
     .icon {
       display: none;
     }
-    .deliveryDate {
+    .dataflowDates {
       grid-column: 2/2;
       font-size: 0.9rem;
     }
@@ -350,7 +367,7 @@
     .role {
       grid-row: 1/2;
     }
-    .deliveryDate {
+    .dataflowDates {
       grid-column: 1/1;
       grid-row: 2/3;
       text-align: left;

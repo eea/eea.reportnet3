@@ -195,10 +195,15 @@ const TabView = withRouter(
 
     const renderTabHeader = (tab, index) => {
       const selected = isSelected(index);
-      const className = classNames(tab.props.headerClassName, 'p-unselectable-text', {
-        'p-tabview-selected p-highlight': selected,
-        'p-disabled': tab.props.disabled
-      });
+      const classNamed = classNames(
+        tab.props.headerClassName,
+        'p-unselectable-text',
+        {
+          'p-tabview-selected p-highlight': selected,
+          'p-disabled': tab.props.disabled
+        },
+        className
+      );
       const id = `${idx}_header_${index}`;
       const ariaControls = `${idx}_content_${index}`;
       return (
@@ -208,7 +213,7 @@ const TabView = withRouter(
             ariaControls={ariaControls}
             checkEditingTabs={checkEditingTabs}
             children={tab.props.children}
-            className={className}
+            className={classNamed}
             designMode={designMode}
             disabled={tab.props.disabled}
             divScrollTabsRef={divTabsRef.current}
@@ -240,6 +245,7 @@ const TabView = withRouter(
             onTabMouseWheel={onTabMouseWheel}
             onTabNameError={onTabNameError}
             rightIcon={tab.props.rightIcon}
+            rightIconClass={tab.props.rightIconClass}
             scrollTo={scrollTo}
             selected={selected}
             tableSchemaId={tab.props.tableSchemaId}

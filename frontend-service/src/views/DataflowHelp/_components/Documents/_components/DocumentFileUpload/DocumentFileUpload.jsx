@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import sortBy from 'lodash/sortBy';
 
@@ -6,10 +6,10 @@ import styles from './DocumentFileUpload.module.scss';
 
 import { config } from 'conf';
 
-import { Button } from 'views/_components/Button';
+import { CharacterCounter } from 'views/_components/CharacterCounter';
+import { Checkbox } from 'views/_components/Checkbox';
 import { Dropdown } from 'views/_components/Dropdown';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
-import { CharacterCounter } from 'views/_components/CharacterCounter';
 
 import { DocumentService } from 'services/DocumentService';
 
@@ -19,12 +19,14 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 const DocumentFileUpload = ({
   dataflowId,
   documentInitialValues,
+  footerRef,
   isEditForm = false,
   isUploadDialogVisible,
   onUpload,
-  setIsUploadDialogVisible,
   setFileUpdatingId,
-  setIsUpdating
+  setIsUpdating,
+  setIsUploading,
+  setSubmitting
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -37,8 +39,7 @@ const DocumentFileUpload = ({
     lang: { message: '', hasErrors: false },
     uploadFile: { message: '', hasErrors: false }
   });
-  const [isUploading, setIsUploading] = useState(false);
-  const [isSubmitting, setSubmitting] = useState(false);
+
   const [inputs, setInputs] = useState(documentInitialValues);
   const [inputsChecked, setInputsChecked] = useState({
     description: false,
@@ -122,6 +123,10 @@ const DocumentFileUpload = ({
     return hasErrors;
   };
 
+  useImperativeHandle(footerRef, () => ({
+    onConfirm
+  }));
+
   const onConfirm = async () => {
     checkInputForErrors('description');
     checkInputForErrors('lang');
@@ -165,16 +170,10 @@ const DocumentFileUpload = ({
       } catch (error) {
         console.error('DocumentFileUpload - onConfirm.', error);
         if (isEditForm) {
-          notificationContext.add({
-            type: 'DOCUMENT_EDITING_ERROR',
-            content: {}
-          });
+          notificationContext.add({ type: 'DOCUMENT_EDITING_ERROR', content: {} }, true);
           setIsUpdating(false);
         } else {
-          notificationContext.add({
-            type: 'DOCUMENT_UPLOADING_ERROR',
-            content: {}
-          });
+          notificationContext.add({ type: 'DOCUMENT_UPLOADING_ERROR', content: {} }, true);
         }
         onUpload();
         setFileUpdatingId('');
@@ -291,36 +290,28 @@ const DocumentFileUpload = ({
 
       <fieldset>
         <div className={styles.checkboxIsPublic}>
-          <input
+          <Checkbox
+            ariaLabelledBy="isPublic"
             checked={inputs.isPublic}
             id="isPublic"
+            inputId="isPublic"
             onChange={() => {
               setInputs(previousValues => {
                 return { ...previousValues, isPublic: !previousValues.isPublic };
               });
             }}
-            type="checkbox"
+            role="checkbox"
           />
-          <label htmlFor="isPublic" style={{ display: 'block' }}>
+          <label
+            htmlFor="isPublic"
+            onClick={() => {
+              setInputs(previousValues => {
+                return { ...previousValues, isPublic: !previousValues.isPublic };
+              });
+            }}
+            style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
             {resourcesContext.messages['checkboxIsPublic']}
           </label>
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
-          <Button
-            disabled={isSubmitting || isUploading}
-            icon={!isUploading ? (isEditForm ? 'check' : 'add') : 'spinnerAnimate'}
-            label={isEditForm ? resourcesContext.messages['save'] : resourcesContext.messages['upload']}
-            onClick={() => onConfirm()}
-          />
-          <Button
-            className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
-            icon="cancel"
-            label={resourcesContext.messages['cancel']}
-            onClick={() => setIsUploadDialogVisible(false)}
-          />
         </div>
       </fieldset>
     </form>

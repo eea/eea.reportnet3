@@ -35,3 +35,13 @@
 .fieldset {
   padding: 0;
 }
+
+.dataflowName {
+  &:hover {
+    border-color: var(--inputtext-border-color-focus) !important;
+    box-shadow: none !important;
+    &:focus {
+      box-shadow: var(--inputtext-box-shadow-focus) !important;
+    }
+  }
+}

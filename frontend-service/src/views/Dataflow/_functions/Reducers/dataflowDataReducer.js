@@ -64,20 +64,26 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_IS_DATA_UPDATED':
       return { ...state, isDataUpdated: !state.isDataUpdated };
 
+    case 'SET_IS_DOWNLOADING_USERS':
+      return { ...state, isDownloadingUsers: payload };
+
     case 'SET_IS_EXPORT_EU_DATASET':
       return { ...state, isExportEUDatasetLoading: payload.isExportEUDatasetLoading };
 
     case 'SET_IS_PAGE_LOADING':
       return { ...state, isPageLoading: payload.isPageLoading };
 
-    case 'SET_IS_ADMIN_ASSIGNED_DATAFLOW':
+    case 'SET_IS_RIGHT_PERMISSIONS_CHANGED':
       return {
         ...state,
-        isAdminAssignedDataflow: payload.isAdminAssignedDataflow
+        isRightPermissionsChanged: payload.isRightPermissionsChanged
       };
 
     case 'SET_UPDATED_DATASET_SCHEMA':
       return { ...state, updatedDatasetSchema: payload.updatedData };
+
+    case 'SET_HAS_REPORTERS':
+      return { ...state, hasReporters: payload.hasReporters };
 
     case 'SET_IS_RECEIPT_LOADING':
       return { ...state, isReceiptLoading: payload.isReceiptLoading };
@@ -91,14 +97,30 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_IS_FETCHING_DATA':
       return { ...state, isFetchingData: payload.isFetchingData };
 
-    case 'ON_ERROR_UPDATE_IS_RELEASABLE':
-      return { ...state, isFetchingData: payload.isFetchingData, isReleasable: payload.isReleasable };
-
     case 'SET_IS_EXPORTING':
       return { ...state, isExporting: payload };
 
+    case 'SET_IS_UPDATING_PERMISSIONS':
+      return { ...state, isUpdatingPermissions: payload.isUpdatingPermissions };
+
+    case 'SET_REPRESENTATIVE':
+      return { ...state, representative: payload };
+
     case 'SET_RESTRICT_FROM_PUBLIC':
       return { ...state, restrictFromPublic: payload };
+
+    case 'RESTRICT_FROM_PUBLIC_IS_UPDATING':
+      return {
+        ...state,
+        restrictFromPublicIsUpdating: {
+          value: payload.value,
+          dataProviderId: payload.dataProviderId
+        }
+      };
+
+    case 'SHOW_PUBLIC_INFO_IS_UPDATING':
+      return { ...state, isShowPublicInfoUpdating: payload.isShowPublicInfoUpdating };
+
     case 'ON_CLEAN_UP_RECEIPT':
       return { ...state, ...payload };
 

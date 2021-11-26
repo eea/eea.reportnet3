@@ -75,6 +75,17 @@ public interface IntegrationController {
   @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
   List<IntegrationVO> findExtensionsAndOperations(IntegrationVO integrationVO);
 
+
+  /**
+   * Find extensions and operations private.
+   *
+   * @param integrationVO the integration VO
+   * @return the list
+   */
+  @PutMapping(value = "/private/listPublicExtensionsOperations",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<IntegrationVO> findExtensionsAndOperationsPrivate(IntegrationVO integrationVO);
+
   /**
    * Execute integration process.
    *
@@ -98,8 +109,17 @@ public interface IntegrationController {
    * @param dataflowId the dataflow id
    * @return the execution result VO
    */
-  @PostMapping(value = "/executeEUDatasetExport")
+  @PostMapping(value = "/v1/executeEUDatasetExport")
   List<ExecutionResultVO> executeEUDatasetExport(@RequestParam("dataflowId") Long dataflowId);
+
+  /**
+   * Execute EU dataset export legacy.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @PostMapping(value = "/executeEUDatasetExport")
+  List<ExecutionResultVO> executeEUDatasetExportLegacy(@RequestParam("dataflowId") Long dataflowId);
 
   /**
    * Copy integrations.

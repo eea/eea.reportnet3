@@ -58,10 +58,10 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     TenantResolver.setTenantName("dataset_" + datasetId);
     TenantResolver.getTenantName();
     String QUERY_FILTER_BASIC = "select v  from Validation v  where v.idRule is not null ";
-    String partLevelError = levelErrorFilter(levelErrorsFilter, false);
-    String partTypeEntities = typeEntities(typeEntitiesFilter, false);
-    String partTableFilter = originFilter(tableFilter, false, TABLE);
-    String partFieldFilter = originFilter(fieldValueFilter, false, FIELD);
+    String partLevelError = levelErrorFilter(levelErrorsFilter);
+    String partTypeEntities = typeEntities(typeEntitiesFilter);
+    String partTableFilter = originFilter(tableFilter, TABLE);
+    String partFieldFilter = originFilter(fieldValueFilter, FIELD);
     String orderPart = addOrderBy(headerField, asc);
 
     String FINAL_QUERY = QUERY_FILTER_BASIC + partLevelError + partTypeEntities + partTableFilter
@@ -97,21 +97,24 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
       String tableFilter, String fieldValueFilter, Pageable pageable, String headerField,
       Boolean asc, boolean paged) {
     Session session = (Session) entityManager.getDelegate();
-    String basicQuery = String.format(
-        "select  v.id_rule as idRule, v.level_error as levelError, v.type_entity as typeEntity,v.table_name as tableName,v.short_code as shortCode, v.field_name as fieldName, count(*) as numberOfRecords from dataset_%s.Validation v  where v.id is not null ",
-        datasetId);
-    String partLevelError = levelErrorFilter(levelErrorsFilter, true);
-    String partTypeEntities = typeEntities(typeEntitiesFilter, true);
-    String partTableFilter = originFilter(tableFilter, true, TABLE);
-    String partFieldFilter = originFilter(fieldValueFilter, true, FIELD);
-    String groupBy =
-        "group by v.level_error, v.id_rule, v.type_entity,v.table_name,v.short_code,v.field_name ";
+    String basicQuery = String.format("select * from("
+        + "select v.id_rule as idRule, v.level_error as levelError, v.type_entity as typeEntity, v.table_name as tableName, v.short_code as shortCode, v.field_name as fieldName, '' as message, count(*) as numberOfRecords from dataset_%s.Validation v"
+        + "  where v.id is not null and type_entity != 'TABLE'  group by v.level_error, v.id_rule, v.type_entity, v.table_name, v.short_code, v.field_name "
+        + "union "
+        + "select v.id_rule as idRule, v.level_error as levelError, v.type_entity as typeEntity, v.table_name as tableName, v.short_code as shortCode, v.field_name as fieldName, v.message, count(*) as numberOfRecords from dataset_%s.Validation v"
+        + "  where v.id is not null and type_entity not in ('RECORD', 'FIELD') group by v.level_error, v.id_rule, v.type_entity, v.table_name, v.short_code, v.field_name, v.message"
+        + " ) tableaux where idRule is not null ", datasetId, datasetId);
+    String partLevelError = levelErrorFilter(levelErrorsFilter);
+    String partTypeEntities = typeEntities(typeEntitiesFilter);
+    String partTableFilter = originFilter(tableFilter, TABLE);
+    String partFieldFilter = originFilter(fieldValueFilter, FIELD);
     String orderPart = addOrderBy(headerField, asc);
     String page =
         paged ? " LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset() : "";
 
     String finalQuery = basicQuery + partLevelError + partTypeEntities + partTableFilter
-        + partFieldFilter + groupBy + orderPart + page;
+        + partFieldFilter + orderPart + page;
+
     return session.doReturningWork(new ReturningWork<List<GroupValidationVO>>() {
       @Override
       public List<GroupValidationVO> execute(Connection conn) throws SQLException {
@@ -127,6 +130,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
             validation.setNameTableSchema(rs.getString("tableName"));
             validation.setShortCode(rs.getString("shortCode"));
             validation.setNameFieldSchema(rs.getString("fieldName"));
+            validation.setMessage(rs.getString("message"));
             groupsValidations.add(validation);
           }
         }
@@ -140,8 +144,6 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    *
    * @param headerField the header field
    * @param asc the asc
-   * @param orderPart the order part
-   *
    * @return the string
    */
   private String addOrderBy(String headerField, Boolean asc) {
@@ -166,10 +168,10 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     TenantResolver.setTenantName("dataset_" + datasetId);
     TenantResolver.getTenantName();
     String QUERY_FILTER_BASIC = "select count(v)  from Validation v  where v.idRule is not null ";
-    String partLevelError = levelErrorFilter(levelErrorsFilter, false);
-    String partTypeEntities = typeEntities(typeEntitiesFilter, false);
-    String partTableFilter = originFilter(tableFilter, false, TABLE);
-    String partFieldFilter = originFilter(fieldValueFilter, false, FIELD);
+    String partLevelError = levelErrorFilter(levelErrorsFilter);
+    String partTypeEntities = typeEntities(typeEntitiesFilter);
+    String partTableFilter = originFilter(tableFilter, TABLE);
+    String partFieldFilter = originFilter(fieldValueFilter, FIELD);
 
     String FINAL_QUERY =
         QUERY_FILTER_BASIC + partLevelError + partTypeEntities + partTableFilter + partFieldFilter;
@@ -182,17 +184,13 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * Origin filter.
    *
    * @param originsFilter the origins filter
-   * @param group the group
    * @param entity the entity
-   *
    * @return the string
    */
-  private String originFilter(String originsFilter, boolean group, String entity) {
+  private String originFilter(String originsFilter, String entity) {
     StringBuilder stringBuilder = new StringBuilder("");
     if (!StringUtils.isBlank(originsFilter)) {
-      stringBuilder
-          .append(group ? "and v." + entity + "_name in " : " and v." + entity + "Name  in ")
-          .append(composeListQuery(originsFilter));
+      stringBuilder.append(" and " + entity + "Name  in ").append(composeListQuery(originsFilter));
     }
     return stringBuilder.toString();
   }
@@ -223,14 +221,12 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * Type entities.
    *
    * @param typeEntitiesFilter the type entities filter
-   * @param group the group
-   *
    * @return the string
    */
-  private String typeEntities(List<EntityTypeEnum> typeEntitiesFilter, boolean group) {
+  private String typeEntities(List<EntityTypeEnum> typeEntitiesFilter) {
     StringBuilder stringBuilder = new StringBuilder("");
     if (null != typeEntitiesFilter && !typeEntitiesFilter.isEmpty()) {
-      stringBuilder.append(group ? " and v.type_entity in " : " and v.typeEntity in ")
+      stringBuilder.append(" and typeEntity in ")
           .append(composeListQuery(removeSpacesEnum(typeEntitiesFilter.toString())));
     }
     return stringBuilder.toString();
@@ -240,14 +236,12 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
    * Level error filter.
    *
    * @param levelErrorsFilter the level errors filter
-   * @param group the group
-   *
    * @return the string
    */
-  private String levelErrorFilter(List<ErrorTypeEnum> levelErrorsFilter, boolean group) {
+  private String levelErrorFilter(List<ErrorTypeEnum> levelErrorsFilter) {
     StringBuilder stringBuilder = new StringBuilder("");
     if (null != levelErrorsFilter && !levelErrorsFilter.isEmpty()) {
-      stringBuilder.append(group ? " and v.level_error in " : " and v.levelError in ")
+      stringBuilder.append(" and levelError in ")
           .append(composeListQuery(removeSpacesEnum(levelErrorsFilter.toString())));
     }
     return stringBuilder.toString();

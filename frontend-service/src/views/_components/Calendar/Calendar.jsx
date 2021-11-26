@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
+import { isNil } from 'lodash';
 
 export const Calendar = forwardRef((props, _) => {
   const {
@@ -16,7 +17,6 @@ export const Calendar = forwardRef((props, _) => {
     inputRef,
     keepInvalid,
     key,
-    locale,
     maxDate,
     minDate,
     monthNavigator,
@@ -31,13 +31,42 @@ export const Calendar = forwardRef((props, _) => {
     showButtonBar,
     showSeconds = false,
     showTime = false,
-    showWeek,
+    showWeek = false,
     style,
     todayButtonClassName,
     value,
     yearNavigator,
     yearRange
   } = props;
+
+  const locale = {
+    firstDayOfWeek: 1,
+    dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+    monthNames: [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ],
+    monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    today: 'Today',
+    clear: 'Clear',
+    weekHeader: 'Wk'
+  };
+
+  const yearRangeValue =
+    yearNavigator && isNil(yearRange) ? `${new Date().getFullYear() - 10}:${new Date().getFullYear() + 10}` : yearRange;
+
   return (
     <PrimeCalendar
       appendTo={appendTo}
@@ -72,7 +101,7 @@ export const Calendar = forwardRef((props, _) => {
       todayButtonClassName={todayButtonClassName}
       value={value}
       yearNavigator={yearNavigator}
-      yearRange={yearRange}
+      yearRange={yearRangeValue}
     />
   );
 });

@@ -6,6 +6,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -53,7 +54,9 @@ public class ImportReportingCompletedEventTest {
 
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(8,
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowVO.getStatus()).thenReturn(TypeStatusEnum.DESIGN);
+    Assert.assertEquals(9,
         loadDataCompletedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L)
             .dataflowId(1L).datasetName("datasetName").dataflowName("dataflowName")
             .tableSchemaId("tableSchemaId").tableSchemaName("tableSchemaName").fileName("fileName")
@@ -71,7 +74,8 @@ public class ImportReportingCompletedEventTest {
         .thenReturn("tableSchemaName");
     Mockito.when(datasetMetabaseVO.getDataSetName()).thenReturn("datasetName");
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
-    Assert.assertEquals(8,
+    Mockito.when(dataflowVO.getStatus()).thenReturn(TypeStatusEnum.DESIGN);
+    Assert.assertEquals(9,
         loadDataCompletedEvent
             .getMap(
                 NotificationVO.builder().user("user").datasetId(1L).fileName("fileName").build())

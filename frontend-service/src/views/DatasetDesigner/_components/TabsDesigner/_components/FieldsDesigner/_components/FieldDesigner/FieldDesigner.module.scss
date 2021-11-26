@@ -11,12 +11,23 @@
 .checkPK {
   margin-left: 1rem !important;
 }
+.checkBulkDelete {
+  margin-left: 1rem !important;
+  padding-top: 3px !important;
+}
 .draggableFieldDiv .inputField {
   margin-left: 2.5rem;
   width: 20%;
   &.withCodeListOrLink {
     width: 15%;
   }
+}
+
+.draggableFieldDivDisabled {
+  pointer-events: none !important;
+  text-decoration: none;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .inputFieldDescription {
   margin-left: 0.4rem !important;
@@ -43,7 +54,7 @@
   cursor: -webkit-grabbing;
 }
 
-.draggableFieldDiv * {
+.disablePointerEvent * {
   pointer-events: none;
 }
 
@@ -68,10 +79,13 @@
 
 .codelistButton {
   margin-left: 0.4rem !important;
-  border: 1px solid var(--gray-25) !important;
+  border: 1px solid var(--general-border-color) !important;
   width: 8%;
   height: 1.95rem;
   width: 4rem;
+  &:hover {
+    border-color: var(--button-secondary-border-color-hover) !important;
+  }
 }
 
 .codelistButton span {
@@ -83,62 +97,70 @@
 }
 
 .button {
-  padding-top: 0.3rem;
-  padding-bottom: 0.3rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.35rem;
   margin-left: 0.4rem;
   border-radius: 3px;
   height: 1.95rem;
-  border: 1px solid var(--c-custom-gray);
+  border: 1px solid var(--general-border-color);
   color: var(--main-font-color);
-  :hover {
-    background-color: var(--c-custom-gray);
+  &:hover {
+    background-color: var(--button-secondary-transparent-bg-hover);
     color: var(--main-font-color);
+    border-color: var(--button-secondary-border-color-hover);
   }
 }
 
 .deleteButton {
   color: var(--errors);
   cursor: pointer;
+  &:hover {
+    color: var(--errors);
+    border-color: var(--button-secondary-border-color-hover);
+  }
 }
 
-.deleteButton:hover {
-  background-color: var(--c-custom-gray);
-  color: var(--errors);
-}
-
-.disabledDeleteButton {
+.disabledButton {
   pointer-events: none !important;
   text-decoration: none;
   opacity: 0.5;
   cursor: not-allowed;
-}
-.disabledDeleteButton:hover {
-  background-color: transparent;
+  &:hover {
+    background-color: transparent;
+  }
 }
 
-.fieldSeparator {
-  box-shadow: var(--field-designer-separator-box-shadow);
-  width: 74.5vw;
-  height: 30px;
-  background-color: var(--field-designer-separator-bg);
-  margin: 5px 0 5px 2rem;
-  padding: 5px;
-  order: 2;
-  display: none;
+.duplicateButton {
+  cursor: pointer;
+  &:hover {
+    background-color: var(--button-secondary-transparent-bg-hover);
+    border-color: var(--button-secondary-border-color-hover);
+  }
 }
+
 .fieldSeparator:first-child {
   order: 1;
 }
 
 .fieldSeparatorDragging {
-  display: block;
-  animation-name: fadeInBorder;
-  animation-iteration-count: 1;
-  animation-timing-function: ease-in;
-  animation-duration: 100ms;
-  border: 2px dashed var(--field-designer-separator-border-color);
-  opacity: 0.7;
-  border-radius: 3px;
+  &:before {
+    content: '';
+    pointer-events: none;
+    animation-duration: 100ms;
+    animation-iteration-count: 1;
+    animation-name: fadeInBorder;
+    animation-timing-function: ease-in;
+    background-color: var(--field-designer-separator-bg);
+    border-radius: 3px;
+    border: 2px dashed var(--field-designer-separator-border-color) !important;
+    box-shadow: var(--field-designer-separator-box-shadow) !important;
+    display: block;
+    height: 30px;
+    margin: 5px 0;
+    opacity: 0.7;
+    padding: 5px;
+    width: 94%;
+  }
 }
 
 .fadeIn {
@@ -154,8 +176,11 @@
 }
 
 .qcButton {
-  border: 1px solid var(--c-custom-gray) !important;
+  border: 1px solid var(--general-border-color) !important;
   align-self: center;
+  &:hover {
+    border-color: var(--button-secondary-border-color-hover) !important;
+  }
 }
 
 .linkDisabled {

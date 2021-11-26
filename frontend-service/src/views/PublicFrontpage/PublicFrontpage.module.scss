@@ -240,19 +240,6 @@
     }
   }
 
-  .currentDataflows {
-    margin-top: 2rem;
-    .dataflowsList {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      margin-bottom: 2rem;
-      @media (max-width: 1349px) {
-        justify-content: space-between;
-      }
-    }
-  }
-
   .otherPortals {
     width: 100%;
     padding-bottom: 4rem;
@@ -261,6 +248,7 @@
       justify-content: flex-start;
       flex-wrap: wrap;
       width: 100%;
+      padding-top: 0.5rem;
       .portalBox {
         display: flex;
         flex-direction: column;
@@ -297,6 +285,7 @@
   .showPublicBox {
     margin-top: 2rem;
     margin-right: 2rem;
+    margin-bottom: 2rem;
 
     .showPublicData {
       display: flex;

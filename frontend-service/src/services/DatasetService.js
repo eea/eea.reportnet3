@@ -49,11 +49,11 @@ export const DatasetService = {
         newField.id = null;
         newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
         newField.type = dataTableFieldDTO.fieldData.type;
-        newField.value = DatasetUtils.parseValue(
-          dataTableFieldDTO.fieldData.type,
-          dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
-          true
-        );
+        newField.value = DatasetUtils.parseValue({
+          type: dataTableFieldDTO.fieldData.type,
+          value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
+          splitSRID: true
+        });
 
         return newField;
       });
@@ -76,7 +76,8 @@ export const DatasetService = {
   deleteData: async (datasetId, arePrefilledTablesDeleted) =>
     await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
 
-  deleteAttachment: async (datasetId, fieldId) => await DatasetRepository.deleteAttachment(datasetId, fieldId),
+  deleteAttachment: async (dataflowId, datasetId, fieldId, dataProviderId) =>
+    await DatasetRepository.deleteAttachment(dataflowId, datasetId, fieldId, dataProviderId),
 
   deleteFieldDesign: async (datasetId, recordId) => await DatasetRepository.deleteFieldDesign(datasetId, recordId),
 
@@ -104,6 +105,8 @@ export const DatasetService = {
 
   downloadPublicReferenceDatasetFileData: async (dataflowId, fileName) =>
     await DatasetRepository.downloadPublicReferenceDatasetFileData(dataflowId, fileName),
+
+  downloadTableData: async (datasetId, fileName) => await DatasetRepository.downloadTableData(datasetId, fileName),
 
   getStatistics: async (datasetId, tableSchemaNames) => {
     const datasetTablesDTO = await DatasetRepository.getStatistics(datasetId);
@@ -240,13 +243,14 @@ export const DatasetService = {
       totalFilteredErrors: datasetErrorsDTO.data.totalFilteredRecords
     });
 
-    const errors = datasetErrorsDTO.data.errors.map(
+    dataset.errors = datasetErrorsDTO.data.errors.map(
       datasetErrorDTO =>
         datasetErrorDTO &&
         new DatasetError({
           entityType: datasetErrorDTO.typeEntity,
           fieldSchemaName: datasetErrorDTO.nameFieldSchema,
           levelError: datasetErrorDTO.levelError,
+          message: datasetErrorDTO.message,
           numberOfRecords: datasetErrorDTO.numberOfRecords,
           objectId: datasetErrorDTO.idObject,
           ruleId: datasetErrorDTO.idRule,
@@ -258,7 +262,6 @@ export const DatasetService = {
         })
     );
 
-    dataset.errors = errors;
     return dataset;
   },
 
@@ -268,9 +271,9 @@ export const DatasetService = {
   updateTableOrder: async (datasetId, position, tableSchemaId) =>
     await DatasetRepository.updateTableOrder(datasetId, position, tableSchemaId),
 
-  getSchema: async datasetId => {
+  getSchema: async (dataflowId, datasetId) => {
     const datasetSchemaDTO = await DatasetRepository.getSchema(datasetId);
-    const rulesDTO = await ValidationRepository.getAll(datasetSchemaDTO.data.idDataSetSchema);
+    const rulesDTO = await ValidationRepository.getAll(dataflowId, datasetSchemaDTO.data.idDataSetSchema);
 
     const dataset = new Dataset({
       availableInPublic: datasetSchemaDTO.data.availableInPublic,
@@ -375,7 +378,10 @@ export const DatasetService = {
           name: DataTableFieldDTO.name,
           recordId: dataTableRecordDTO.idRecordSchema,
           type: DataTableFieldDTO.type,
-          value: DatasetUtils.parseValue(DataTableFieldDTO.type, DataTableFieldDTO.value)
+          value: DatasetUtils.parseValue({
+            type: DataTableFieldDTO.type,
+            value: DataTableFieldDTO.value
+          })
         });
 
         if (!isNull(DataTableFieldDTO.fieldValidations)) {
@@ -417,12 +423,18 @@ export const DatasetService = {
     return table;
   },
 
+  downloadTableDefinitions: async datasetSchemaId => await DatasetRepository.downloadTableDefinitions(datasetSchemaId),
+
   updateField: async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue, updateInCascade) => {
     const datasetTableField = new DatasetTableField({});
     datasetTableField.id = fieldId;
     datasetTableField.idFieldSchema = fieldSchemaId;
     datasetTableField.type = fieldType;
-    datasetTableField.value = DatasetUtils.parseValue(fieldType, fieldValue, true);
+    datasetTableField.value = DatasetUtils.parseValue({
+      type: fieldType,
+      value: fieldValue,
+      splitSRID: true
+    });
 
     return await DatasetRepository.updateField(datasetId, datasetTableField, updateInCascade);
   },
@@ -453,11 +465,11 @@ export const DatasetService = {
       newField.id = dataTableFieldDTO.fieldData.id;
       newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
       newField.type = dataTableFieldDTO.fieldData.type;
-      newField.value = DatasetUtils.parseValue(
-        dataTableFieldDTO.fieldData.type,
-        dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
-        true
-      );
+      newField.value = DatasetUtils.parseValue({
+        type: dataTableFieldDTO.fieldData.type,
+        value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
+        splitSRID: true
+      });
 
       return newField;
     });

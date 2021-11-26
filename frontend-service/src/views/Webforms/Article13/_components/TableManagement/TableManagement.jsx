@@ -195,19 +195,20 @@ export const TableManagement = ({
       onRefresh();
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({
-          type: 'GENERIC_BLOCKED_ERROR'
-        });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('TableManagement - onDeleteRow.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
         } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add({
-          type: 'DELETE_RECORD_BY_ID_ERROR',
-          content: { dataflowId, dataflowName, datasetId, datasetName, tableName: 'tableName' }
-        });
+        notificationContext.add(
+          {
+            type: 'DELETE_RECORD_BY_ID_ERROR',
+            content: { dataflowId, dataflowName, datasetId, datasetName }
+          },
+          true
+        );
       }
     } finally {
       manageDialogs('delete', false);
@@ -276,14 +277,15 @@ export const TableManagement = ({
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
       if (updateInCascade) {
-        notificationContext.add({
-          type: 'UPDATE_RECORDS_IN_CASCADE_BY_ID_ERROR'
-        });
+        notificationContext.add({ type: 'UPDATE_RECORDS_IN_CASCADE_BY_ID_ERROR' }, true);
       } else {
-        notificationContext.add({
-          type: 'UPDATE_RECORDS_BY_ID_ERROR',
-          content: { dataflowId, datasetId, dataflowName, datasetName }
-        });
+        notificationContext.add(
+          {
+            type: 'UPDATE_RECORDS_BY_ID_ERROR',
+            content: { dataflowId, datasetId, dataflowName, datasetName }
+          },
+          true
+        );
       }
     } finally {
       tableManagementDispatch({ type: 'ON_SAVE_RECORD' });
@@ -469,6 +471,7 @@ export const TableManagement = ({
           header={resourcesContext.messages['editRow']}
           modal={true}
           onHide={() => manageDialogs('manageRows', false)}
+          style={{ width: '30%' }}
           visible={isDialogVisible.manageRows}
           zIndex={3003}>
           <div className="p-grid p-fluid">

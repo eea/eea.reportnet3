@@ -30,6 +30,7 @@ const ManageDataflowForm = forwardRef(
       isEditForm,
       onCreate,
       onEdit,
+      onHide,
       onResetData,
       onSearch,
       onSubmit,
@@ -128,13 +129,13 @@ const ManageDataflowForm = forwardRef(
                 name: { message: resourcesContext.messages['dataflowNameExists'], hasErrors: true }
               };
             });
-            notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' });
+            notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' }, true);
           } else {
             const notification = isEditForm
               ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: data.id, dataflowName: name } }
               : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
 
-            notificationContext.add(notification);
+            notificationContext.add(notification, true);
           }
         } finally {
           onSubmit(false);
@@ -148,6 +149,7 @@ const ManageDataflowForm = forwardRef(
           <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
             <InputText
               autoComplete="off"
+              className={styles.dataflowName}
               hasMaxCharCounter={true}
               id="dataflowName"
               maxLength={config.INPUT_MAX_LENGTH}
@@ -159,7 +161,7 @@ const ManageDataflowForm = forwardRef(
               }}
               onFocus={() => {
                 setErrors(previousErrors => {
-                  return { ...previousErrors, name: { message: '', hasErrors: false } };
+                  return { ...previousErrors, name: { message: '', hasErrors: true } };
                 });
               }}
               onKeyPress={e => {

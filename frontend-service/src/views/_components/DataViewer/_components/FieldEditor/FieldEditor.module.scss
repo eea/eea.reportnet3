@@ -1,44 +1,22 @@
-.mapButtonWrapper {
-  margin-top: 0.5rem;
-}
 .nonEditableData {
   font-style: italic;
   font-weight: bold;
 }
-.pointEpsgWrapper {
+
+.pointWrapper {
+  align-items: flex-start;
   display: flex;
   flex-direction: column;
-  margin-top: 0.5rem;
-  width: 100%;
-  label:first-child {
-    width: 80px;
-    color: var(--main-font-color);
-    font-size: 0.9em;
-    font-weight: bold;
-    padding-left: 0;
-  }
-  > div {
-    display: flex;
-    flex-direction: column;
-    .epsgSwitcher {
-      width: 100%;
-    }
+  .completeCoordinatesWrapper {
+    max-height: 75px;
+    overflow-y: auto;
+    margin-bottom: 0.5rem;
   }
 }
 
-.pointWrapper {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  > label:not(.nonEditableData) {
-    max-height: 100px;
-    overflow-y: scroll;
-  }
-}
 .epsg {
-  width: 60px;
+  width: 5rem;
   color: var(--main-font-color);
   font-size: 0.9em;
   font-weight: bold;
-  padding: 5px;
 }

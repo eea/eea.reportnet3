@@ -16,16 +16,6 @@ public interface RecordStoreService {
 
 
   /**
-   * Reset dataset database.
-   *
-   * @throws RecordStoreAccessException the docker access exception
-   * @deprecated (pending to remove)
-   */
-  @Deprecated
-  void resetDatasetDatabase() throws RecordStoreAccessException;
-
-
-  /**
    * Creates the empty data set.
    *
    * @param datasetName the dataset name
@@ -154,11 +144,11 @@ public interface RecordStoreService {
   /**
    * Update materialized query view.
    *
-   * @param dataflowId the dataflow id
-   * @param released
-   * @param user
+   * @param datasetId the dataset id
+   * @param user the user
+   * @param released the released
    */
-  void updateMaterializedQueryView(Long dataflowId, String user, Boolean released);
+  void updateMaterializedQueryView(Long datasetId, String user, Boolean released);
 
   /**
    * Launch update materialized query view.
@@ -168,5 +158,12 @@ public interface RecordStoreService {
    */
   void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException;
 
-
+  /**
+   * Refresh materialized query.
+   *
+   * @param datasetIds the dataset ids
+   * @param continueValidation the continue validation
+   */
+  void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation, boolean released,
+      Long datasetId);
 }

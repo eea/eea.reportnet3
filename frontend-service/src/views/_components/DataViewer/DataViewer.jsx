@@ -2,6 +2,8 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { withRouter } from 'react-router-dom';
 
+import { useSetRecoilState } from 'recoil';
+
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -21,6 +23,7 @@ import { Chips } from 'views/_components/Chips';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { ContextMenu } from 'views/_components/ContextMenu';
+import { CoordinatesMoreInfo } from 'views/_components/CoordinatesMoreInfo';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DataForm } from './_components/DataForm';
 import { DataTable } from 'views/_components/DataTable';
@@ -38,6 +41,8 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
+
+import { geoJSONListStore } from 'views/_components/CoordinatesMoreInfo/_functions/Stores/geoJSONListStore';
 
 import { recordReducer } from './_functions/Reducers/recordReducer';
 import { sortReducer } from './_functions/Reducers/sortReducer';
@@ -87,11 +92,11 @@ const DataViewer = withRouter(
   }) => {
     const levelErrorAllTypes = ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'];
 
+    const setSelectedLine = useSetRecoilState(geoJSONListStore);
     const userContext = useContext(UserContext);
+
     const [addAnotherOne, setAddAnotherOne] = useState(false);
     const [addDialogVisible, setAddDialogVisible] = useState(false);
-    const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
-    const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
     const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
     const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -100,19 +105,22 @@ const DataViewer = withRouter(
     const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
     const [importTableDialogVisible, setImportTableDialogVisible] = useState(false);
     const [initialCellValue, setInitialCellValue] = useState();
+    const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
     const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
     const [isDataUpdated, setIsDataUpdated] = useState(false);
+    const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
-    const [prevFilterValue, setPrevFilterValue] = useState('');
     const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isNewRecord, setIsNewRecord] = useState(false);
     const [isPasting, setIsPasting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorAllTypes);
+    const [prevFilterValue, setPrevFilterValue] = useState('');
     const [valueFilter, setValueFilter] = useState();
 
     const [records, dispatchRecords] = useReducer(recordReducer, {
+      coordinatesMoreInfo: '',
       crs: 'EPSG:4326',
       drawElements: {
         circle: false,
@@ -128,6 +136,7 @@ const DataViewer = withRouter(
       firstPageRecord: 0,
       geometryType: '',
       initialRecordValue: undefined,
+      isCoordinatesMoreInfoVisible: false,
       isMapOpen: false,
       isRecordAdded: false,
       isRecordDeleted: false,
@@ -183,6 +192,7 @@ const DataViewer = withRouter(
           datasetSchemaId={datasetSchemaId}
           hasWritePermissions={hasWritePermissions}
           onChangePointCRS={onChangePointCRS}
+          onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
           onEditorKeyChange={onEditorKeyChange}
           onEditorSubmitValue={onEditorSubmitValue}
           onEditorValueChange={onEditorValueChange}
@@ -219,6 +229,9 @@ const DataViewer = withRouter(
 
     const onChangePointCRS = crs => dispatchRecords({ type: 'SET_MAP_CRS', payload: crs });
 
+    const onCoordinatesMoreInfoClick = geoJson =>
+      dispatchRecords({ type: 'OPEN_COORDINATES_MORE_INFO', payload: geoJson });
+
     const onFileDownload = async (fileName, fieldId) => {
       try {
         const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
@@ -235,6 +248,11 @@ const DataViewer = withRouter(
     const onFileDeleteVisible = (fieldId, fieldSchemaId) => {
       dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
       setIsDeleteAttachmentVisible(true);
+    };
+
+    const onHideCoordinatesMoreInfo = () => {
+      setSelectedLine('');
+      dispatchRecords({ type: 'CLOSE_COORDINATES_MORE_INFO' });
     };
 
     const onShowCoordinateError = errorCount =>
@@ -376,10 +394,13 @@ const DataViewer = withRouter(
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
         } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add({
-          type: 'TABLE_DATA_BY_ID_ERROR',
-          content: { dataflowId, datasetId, dataflowName, datasetName }
-        });
+        notificationContext.add(
+          {
+            type: 'TABLE_DATA_BY_ID_ERROR',
+            content: { dataflowId, datasetId, dataflowName, datasetName }
+          },
+          true
+        );
       } finally {
         setIsLoading(false);
       }
@@ -524,17 +545,20 @@ const DataViewer = withRouter(
         dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
         } else {
           console.error('DataViewer - onConfirmDeleteTable.', error);
           const {
             dataflow: { name: dataflowName },
             dataset: { name: datasetName }
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-          notificationContext.add({
-            type: 'DELETE_TABLE_DATA_BY_ID_ERROR',
-            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-          });
+          notificationContext.add(
+            {
+              type: 'DELETE_TABLE_DATA_BY_ID_ERROR',
+              content: { dataflowId, datasetId, dataflowName, datasetName, customContent: { tableName } }
+            },
+            true
+          );
         }
       } finally {
         setDeleteDialogVisible(false);
@@ -543,7 +567,7 @@ const DataViewer = withRouter(
 
     const onConfirmDeleteAttachment = async () => {
       try {
-        await DatasetService.deleteAttachment(datasetId, records.selectedFieldId);
+        await DatasetService.deleteAttachment(dataflowId, datasetId, records.selectedFieldId, dataProviderId);
         RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
         setIsDeleteAttachmentVisible(false);
       } catch (error) {
@@ -563,17 +587,20 @@ const DataViewer = withRouter(
         dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
         } else {
           console.error('DataViewer - onConfirmDeleteRow.', error);
           const {
             dataflow: { name: dataflowName },
             dataset: { name: datasetName }
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-          notificationContext.add({
-            type: 'DELETE_RECORD_BY_ID_ERROR',
-            content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-          });
+          notificationContext.add(
+            {
+              type: 'DELETE_RECORD_BY_ID_ERROR',
+              content: { dataflowId, datasetId, dataflowName, datasetName, customContent: { tableName } }
+            },
+            true
+          );
         }
       } finally {
         setDeleteDialogVisible(false);
@@ -630,17 +657,20 @@ const DataViewer = withRouter(
             );
           } catch (error) {
             if (error.response.status === 423) {
-              notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+              notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
             } else {
               console.error('DataViewer - onEditorSubmitValue.', error);
               const {
                 dataflow: { name: dataflowName },
                 dataset: { name: datasetName }
               } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-              notificationContext.add({
-                type: 'UPDATE_FIELD_BY_ID_ERROR',
-                content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-              });
+              notificationContext.add(
+                {
+                  type: 'UPDATE_FIELD_BY_ID_ERROR',
+                  content: { dataflowId, datasetId, dataflowName, datasetName, customContent: { tableName } }
+                },
+                true
+              );
             }
           }
         }
@@ -694,23 +724,26 @@ const DataViewer = withRouter(
         }
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
         } else {
           console.error('DataViewer - onPasteAccept.', error);
           const {
             dataflow: { name: dataflowName },
             dataset: { name: datasetName }
           } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-          notificationContext.add({
-            type: 'ADD_RECORDS_PASTING_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              dataflowName,
-              datasetName,
-              tableName
-            }
-          });
+          notificationContext.add(
+            {
+              type: 'ADD_RECORDS_PASTING_ERROR',
+              content: {
+                dataflowId,
+                datasetId,
+                dataflowName,
+                datasetName,
+                customContent: { tableName }
+              }
+            },
+            true
+          );
         }
       } finally {
         setConfirmPasteVisible(false);
@@ -754,17 +787,20 @@ const DataViewer = withRouter(
           onRefresh();
         } catch (error) {
           if (error.response.status === 423) {
-            notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+            notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
           } else {
             console.error('DataViewer - onSaveRecord - add.', error);
             const {
               dataflow: { name: dataflowName },
               dataset: { name: datasetName }
             } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-            notificationContext.add({
-              type: 'ADD_RECORDS_BY_ID_ERROR',
-              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-            });
+            notificationContext.add(
+              {
+                type: 'ADD_RECORDS_BY_ID_ERROR',
+                content: { dataflowId, datasetId, dataflowName, datasetName, customContent: { tableName } }
+              },
+              true
+            );
           }
         } finally {
           if (!addAnotherOne) {
@@ -780,17 +816,20 @@ const DataViewer = withRouter(
           onRefresh();
         } catch (error) {
           if (error.response.status === 423) {
-            notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+            notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
           } else {
             console.error('DataViewer - onSaveRecord - update.', error);
             const {
               dataflow: { name: dataflowName },
               dataset: { name: datasetName }
             } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-            notificationContext.add({
-              type: 'UPDATE_RECORDS_BY_ID_ERROR',
-              content: { dataflowId, datasetId, dataflowName, datasetName, tableName }
-            });
+            notificationContext.add(
+              {
+                type: 'UPDATE_RECORDS_BY_ID_ERROR',
+                content: { dataflowId, datasetId, dataflowName, datasetName, customContent: { tableName } }
+              },
+              true
+            );
           }
         } finally {
           onCancelRowEdit();
@@ -837,16 +876,21 @@ const DataViewer = withRouter(
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add({
-        type: 'DATASET_DATA_LOADING_INIT',
-        content: {
-          datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-          title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
-          datasetLoading: resourcesContext.messages['datasetLoading'],
-          dataflowName,
-          datasetName
-        }
-      });
+      notificationContext.add(
+        {
+          type: 'DATASET_DATA_LOADING_INIT',
+          content: {
+            dataflowName,
+            datasetName,
+            customContent: {
+              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+              title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
+              datasetLoading: resourcesContext.messages['datasetLoading']
+            }
+          }
+        },
+        true
+      );
     };
 
     const addRowDialogFooter = (
@@ -914,11 +958,34 @@ const DataViewer = withRouter(
       </div>
     );
 
+    const coordinatesMoreInfoDialogFooter = (
+      <div className="ui-dialog-buttonpane p-clearfix">
+        <div className="p-toolbar-group-left">
+          <Button
+            className="p-button-secondary p-button-animated-blink"
+            icon="clone"
+            label={resourcesContext.messages['geoJSONHelpCopy']}
+            onClick={() => navigator.clipboard.writeText(records.coordinatesMoreInfo)}
+            tooltip={resourcesContext.messages['geoJSONHelpCopyTooltip']}
+            tooltipOptions={{ position: 'top' }}
+          />
+        </div>
+        <div>
+          <Button
+            className="p-button-animated-blink"
+            icon="check"
+            label={resourcesContext.messages['ok']}
+            onClick={onHideCoordinatesMoreInfo}
+          />
+        </div>
+      </div>
+    );
+
     const saveMapGeoJsonDialogFooter = (
       <div className="ui-dialog-buttonpane p-clearfix">
         <Button
           className={`p-button-animated-blink ${styles.saveButton}`}
-          icon={'check'}
+          icon="check"
           label={
             areEquals(records.geometryType, 'POINT')
               ? resourcesContext.messages['save']
@@ -942,6 +1009,8 @@ const DataViewer = withRouter(
         )}
       </div>
     );
+
+    const renderCoordinatesMoreInfo = () => <CoordinatesMoreInfo geoJSON={records.coordinatesMoreInfo} />;
 
     const mapRender = () => (
       <Map
@@ -1021,7 +1090,7 @@ const DataViewer = withRouter(
 
     const onImportTableError = async ({ xhr }) => {
       if (xhr.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       }
     };
 
@@ -1226,10 +1295,20 @@ const DataViewer = withRouter(
             name="file"
             onUpload={onAttach}
             operation="PUT"
-            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
-              datasetId,
-              fieldId: records.selectedFieldId
-            })}`}
+            url={`${window.env.REACT_APP_BACKEND}${
+              isNil(dataProviderId)
+                ? getUrl(DatasetConfig.uploadAttachment, {
+                    dataflowId,
+                    datasetId,
+                    fieldId: records.selectedFieldId
+                  })
+                : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
+                    dataflowId,
+                    datasetId,
+                    fieldId: records.selectedFieldId,
+                    providerId: dataProviderId
+                  })
+            }`}
           />
         )}
 
@@ -1288,6 +1367,7 @@ const DataViewer = withRouter(
                 isSaving={isSaving}
                 onChangeForm={onEditAddFormInput}
                 onConditionalChange={onConditionalChange}
+                onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
                 onShowCoordinateError={onShowCoordinateError}
                 onShowFieldInfo={onShowFieldInfo}
                 records={records}
@@ -1375,6 +1455,19 @@ const DataViewer = withRouter(
             onHide={() => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}
             visible={records.isMapOpen}>
             <div className="p-grid p-fluid">{mapRender()}</div>
+          </Dialog>
+        )}
+        {records.isCoordinatesMoreInfoVisible && (
+          <Dialog
+            blockScroll={false}
+            className={styles.coordinatesMoreInfo}
+            footer={coordinatesMoreInfoDialogFooter}
+            header={resourcesContext.messages['geospatialDataMoreInfo']}
+            modal={true}
+            onHide={onHideCoordinatesMoreInfo}
+            style={{}}
+            visible={records.isCoordinatesMoreInfoVisible}>
+            <div className="p-grid p-fluid">{renderCoordinatesMoreInfo()}</div>
           </Dialog>
         )}
       </SnapshotContext.Provider>

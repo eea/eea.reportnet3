@@ -42,15 +42,22 @@ export const PublicCountries = withRouter(({ history }) => {
 
     const isAssociate = associatesCountriesCodes.includes(countryCode);
 
+    const onOpenCountry = e => {
+      e.preventDefault();
+      const url = getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true);
+      if (e.button === 0) {
+        history.push(url);
+      } else if (e.button === 1) {
+        window.open(url, 'blank');
+      }
+    };
+
     return (
       <div
         className={styles.wrapper}
         href={getUrl(routes.COUNTRY)}
         key={country.code}
-        onClick={e => {
-          e.preventDefault();
-          history.push(getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true));
-        }}>
+        onMouseDown={e => onOpenCountry(e)}>
         <ReactCountryFlag aria-label={country.name} className={styles.flag} countryCode={country.flag} svg />
 
         <div className={styles.titleWrap}>

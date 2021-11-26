@@ -100,7 +100,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       setDatasetSchemaId(metadata.dataset.datasetSchemaId);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
-      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } }, true);
     }
   };
 
@@ -130,10 +130,13 @@ export const DataCollection = withRouter(({ match, history }) => {
         dataset: { name: datasetName }
       } = metadata;
 
-      notificationContext.add({
-        type: 'EXPORT_DATA_BY_ID_ERROR',
-        content: { dataflowName: dataflowName, datasetName: datasetName }
-      });
+      notificationContext.add(
+        {
+          type: 'EXPORT_DATA_BY_ID_ERROR',
+          content: { dataflowName: dataflowName, datasetName: datasetName }
+        },
+        true
+      );
     }
   };
 
@@ -157,10 +160,13 @@ export const DataCollection = withRouter(({ match, history }) => {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
       } = metadata;
-      notificationContext.add({
-        type: 'REPORTING_ERROR',
-        content: { dataflowId, datasetId, dataflowName, datasetName }
-      });
+      notificationContext.add(
+        {
+          type: 'REPORTING_ERROR',
+          content: { dataflowId, datasetId, dataflowName, datasetName }
+        },
+        true
+      );
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOWS));
       }
@@ -172,7 +178,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const onLoadDatasetSchema = async () => {
     try {
       setLoading(true);
-      const datasetSchema = await DatasetService.getSchema(datasetId);
+      const datasetSchema = await DatasetService.getSchema(dataflowId, datasetId);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const tableSchemaNamesList = [];
       setTableSchema(
@@ -224,7 +230,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       } else {
         datasetError.type = 'ERROR_STATISTICS_BY_ID_ERROR';
       }
-      notificationContext.add(datasetError);
+      notificationContext.add(datasetError, true);
       if (!isUndefined(response) && (response.status === 401 || response.status === 403)) {
         history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }

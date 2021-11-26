@@ -72,26 +72,24 @@ public interface RepresentativeController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataProviderCodeVO> findAllDataProviderOrganizationType();
 
-
-  /**
-   * Find data provider group by dataflow id.
-   *
-   * @param dataflowId the dataflow id
-   * @return the data provider code VO
-   */
-  @GetMapping(value = "/dataProviderGroup/dataflow/{dataflowId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  DataProviderCodeVO findDataProviderGroupByDataflowId(@PathVariable("dataflowId") Long dataflowId);
-
-
   /**
    * Find representatives by id data flow.
    *
    * @param dataflowId the dataflow id
    * @return the list
    */
-  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/v1/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<RepresentativeVO> findRepresentativesByIdDataFlow(
+      @PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Find representatives by id data flow legacy.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<RepresentativeVO> findRepresentativesByIdDataFlowLegacy(
       @PathVariable("dataflowId") Long dataflowId);
 
   /**
@@ -217,6 +215,14 @@ public interface RepresentativeController {
       @PathVariable("dataflowId") Long dataflowId);
 
   /**
+   * Validate lead reporters checking if they are already registered in the system.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @PutMapping("/validateLeadReporters/dataflow/{dataflowId}")
+  void validateLeadReporters(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
    * Find fme users.
    *
    * @return the list
@@ -253,5 +259,21 @@ public interface RepresentativeController {
   List<RepresentativeVO> findRepresentativesByDataFlowIdAndProviderIdList(
       @PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerIdList") List<Long> providerIdList);
+
+
+  /**
+   * Update restrict from public.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
+   */
+  @PutMapping(
+      value = "/update/restrictFromPublic/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
+  void updateRestrictFromPublic(
+      @PathVariable(value = "dataflowId", required = true) Long dataflowId,
+      @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
+      @RequestParam(value = "restrictFromPublic", required = true,
+          defaultValue = "false") Boolean restrictFromPublic);
 
 }

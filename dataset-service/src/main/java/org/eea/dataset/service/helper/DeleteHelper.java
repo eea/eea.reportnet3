@@ -2,9 +2,12 @@ package org.eea.dataset.service.helper;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.domain.EventType;
@@ -45,6 +48,14 @@ public class DeleteHelper {
   @Autowired
   private LockService lockService;
 
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
+
+  /** The dataset metabase service. */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
   /**
    * Instantiates a new file loader helper.
    */
@@ -79,6 +90,12 @@ public class DeleteHelper {
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
         .tableSchemaId(tableSchemaId).build();
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+    notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+    notificationVO.setDataflowName(
+        dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+
     value.put(LiteralConstants.DATASET_ID, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     try {
@@ -100,6 +117,10 @@ public class DeleteHelper {
     LOG.info("Deleting data from dataset {}", datasetId);
     datasetService.deleteImportData(datasetId, deletePrefilledTables);
 
+    EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+        ? EventType.DELETE_DATASET_DATA_COMPLETED_EVENT
+        : EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT;
+
     // Release the lock manually
     Map<String, Object> deleteDatasetValues = new HashMap<>();
     deleteDatasetValues.put(LiteralConstants.SIGNATURE,
@@ -112,11 +133,16 @@ public class DeleteHelper {
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
         .build();
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+    notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+    notificationVO.setDataflowName(
+        dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+
     value.put(LiteralConstants.DATASET_ID, datasetId);
     kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
     try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATASET_DATA_COMPLETED_EVENT,
-          value, notificationVO);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error releasing notification: {}", e.getMessage());
     }

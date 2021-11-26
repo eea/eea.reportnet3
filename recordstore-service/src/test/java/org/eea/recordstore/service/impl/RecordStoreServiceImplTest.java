@@ -130,31 +130,6 @@ public class RecordStoreServiceImplTest {
     recordStoreServiceImpl.createEmptyDataSet(DATASET, "");
   }
 
-  /**
-   * Test reset dataset database.
-   *
-   * @throws RecordStoreAccessException the docker access exception
-   */
-  @Test
-  public void testResetDatasetDatabase() throws RecordStoreAccessException {
-    Mockito.when(dockerInterfaceService.getContainer(Mockito.any())).thenReturn(new Container());
-    recordStoreServiceImpl.resetDatasetDatabase();
-    Mockito.verify(dockerInterfaceService, times(1)).getContainer(Mockito.any());
-  }
-
-  /**
-   * Test reset dataset database exception.
-   *
-   * @throws RecordStoreAccessException the docker access exception
-   * @throws InterruptedException the interrupted exception
-   */
-  @Test(expected = RecordStoreAccessException.class)
-  public void testResetDatasetDatabaseException()
-      throws RecordStoreAccessException, InterruptedException {
-    doThrow(new InterruptedException()).when(dockerInterfaceService)
-        .executeCommandInsideContainer(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    recordStoreServiceImpl.resetDatasetDatabase();
-  }
 
   /**
    * Test connection data.

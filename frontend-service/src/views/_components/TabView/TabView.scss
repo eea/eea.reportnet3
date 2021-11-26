@@ -19,7 +19,8 @@ body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a {
   background-color: var(--tabview-bg);
   border: var(--tabview-border);
   float: none;
-  display: inline-block;
+  display: flex;
+  align-items: center;
   color: var(--tabview-color);
   padding: 0.571rem 1.3rem;
   font-weight: 700;
@@ -28,19 +29,66 @@ body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a {
   -webkit-transition: background-color 0.2s, box-shadow 0.2s;
   transition: background-color 0.2s, box-shadow 0.2s;
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a .p-tabview-left-icon,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a .p-tabview-left-icon,
-body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li a .p-tabview-left-icon,
-body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a .p-tabview-left-icon {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li:not(.sameColor) a .p-tabview-left-icon,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li:not(.sameColor) a .p-tabview-left-icon,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li:not(.sameColor) a .p-tabview-left-icon,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li:not(.sameColor) a .p-tabview-left-icon {
   margin-right: 0.5em;
   color: var(--tabview-highlight-icon-color);
 }
-body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon,
-body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon,
-body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon,
-body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li a .p-tabview-right-icon {
+body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li:not(.sameColor) a .p-tabview-right-icon,
+body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li:not(.sameColor) a .p-tabview-right-icon,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li:not(.sameColor) a .p-tabview-right-icon,
+body .p-tabview.p-tabview-right .p-tabview-nav li.p-tabview-nav-li:not(.sameColor) a .p-tabview-right-icon {
   margin-left: 0.5em;
   color: var(--tabview-highlight-icon-color);
+}
+body
+  .p-tabview.p-tabview-top
+  .p-tabview-nav
+  li.p-tabview-nav-li.sameColor.p-tabview-selected:not(.p-tav)
+  a
+  .p-tabview-right-icon,
+body
+  .p-tabview.p-tabview-bottom
+  .p-tabview-nav
+  li.p-tabview-nav-li.sameColor.p-tabview-selected
+  a
+  .p-tabview-right-icon,
+body .p-tabview.p-tabview-left .p-tabview-nav li.p-tabview-nav-li.sameColor.p-tabview-selected a .p-tabview-right-icon,
+body
+  .p-tabview.p-tabview-right
+  .p-tabview-nav
+  li.p-tabview-nav-li.sameColor.p-tabview-selected
+  a
+  .p-tabview-right-icon {
+  color: var(--tabview-highlight-icon-color-active);
+}
+body
+  .p-tabview.p-tabview-top
+  .p-tabview-nav
+  li.p-tabview-nav-li.sameColor:not(.p-highlight)
+  a:hover
+  .p-tabview-right-icon,
+body
+  .p-tabview.p-tabview-bottom
+  .p-tabview-nav
+  li.p-tabview-nav-li.sameColor:not(.p-highlight)
+  a:hover
+  .p-tabview-right-icon,
+body
+  .p-tabview.p-tabview-left
+  .p-tabview-nav
+  li.p-tabview-nav-li.sameColor:not(.p-highlight)
+  a:hover
+  .p-tabview-right-icon,
+body
+  .p-tabview.p-tabview-right
+  .p-tabview-nav
+  li.p-tabview-nav-li.sameColor:not(.p-highlight)
+  a:hover
+  .p-tabview-right-icon {
+  color: var(--tabview-highlight-icon-color-hover);
 }
 body .p-tabview.p-tabview-top .p-tabview-nav li.p-tabview-nav-li a:not(.p-disabled):focus,
 body .p-tabview.p-tabview-bottom .p-tabview-nav li.p-tabview-nav-li a:not(.p-disabled):focus,

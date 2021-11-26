@@ -45,6 +45,7 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -160,7 +161,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;
 
-
   /**
    * The Constant LOG.
    */
@@ -195,7 +195,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     List<DataSetMetabase> datasets = dataSetMetabaseRepository.findByDataflowId(idFlow);
     return dataSetMetabaseMapper.entityListToClass(datasets);
   }
-
 
   /**
    * Fill dataset.
@@ -999,6 +998,100 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     }
     return nextIdValidation;
 
+  }
+
+  /**
+   * Gets the datasets summary list from dataset type.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetType the dataset type
+   * @return the datasets summary list from dataset type
+   */
+  private List<DatasetsSummaryVO> getDatasetsSummaryListFromDatasetType(Long dataflowId,
+      DatasetTypeEnum datasetType) {
+    List<DatasetsSummaryVO> datasetsSummaryList = new ArrayList<>();
+    List<?> datasets;
+    switch (datasetType) {
+      case DESIGN:
+        datasets = designDatasetRepository.findByDataflowId(dataflowId);
+        break;
+      case REFERENCE:
+        datasets = referenceDatasetRepository.findByDataflowId(dataflowId);
+        break;
+      case TEST:
+        datasets = testDatasetRepository.findByDataflowId(dataflowId);
+        break;
+      case COLLECTION:
+        datasets = dataCollectionRepository.findByDataflowId(dataflowId);
+        break;
+      case EUDATASET:
+        datasets = euDatasetRepository.findByDataflowId(dataflowId);
+        break;
+      default:
+        datasets = new ArrayList<>();
+        break;
+    }
+    for (DataSetMetabase dataset : (List<DataSetMetabase>) datasets) {
+      var datasetsSummary = new DatasetsSummaryVO();
+      datasetsSummary.setId(dataset.getId());
+      datasetsSummary.setDataSetName(dataset.getDataSetName());
+      datasetsSummary.setDatasetTypeEnum(datasetType);
+      datasetsSummaryList.add(datasetsSummary);
+    }
+    return datasetsSummaryList;
+  }
+
+  /**
+   * Gets the reporting datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the reporting datasets summary list
+   */
+  private List<DatasetsSummaryVO> getReportingDatasetsSummaryList(Long dataflowId) {
+    List<DatasetsSummaryVO> datasetsSummaryList = new ArrayList<>();
+    List<ReportingDataset> reportingDatasets =
+        reportingDatasetRepository.findByDataflowId(dataflowId);
+    for (ReportingDataset reportingDataset : reportingDatasets) {
+      DatasetsSummaryVO datasetsSummary = new DatasetsSummaryVO();
+      datasetsSummary.setId(reportingDataset.getId());
+      datasetsSummary.setDataSetName(reportingDataset.getDataSetName());
+      datasetsSummary.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
+      DataProviderVO dataProvider =
+          representativeControllerZuul.findDataProviderById(reportingDataset.getDataProviderId());
+      datasetsSummary.setDataProviderCode(dataProvider.getCode());
+      datasetsSummary.setDataProviderName(dataProvider.getLabel());
+      Optional<DesignDataset> designDataset =
+          designDatasetRepository.findFirstByDatasetSchema(reportingDataset.getDatasetSchema());
+      if (designDataset.isPresent()) {
+        datasetsSummary.setDataSetName(
+            reportingDataset.getDataSetName() + " - " + designDataset.get().getDataSetName());
+      }
+      datasetsSummaryList.add(datasetsSummary);
+    }
+    return datasetsSummaryList;
+  }
+
+  /**
+   * Gets the datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the datasets summary list
+   */
+  @Override
+  public List<DatasetsSummaryVO> getDatasetsSummaryList(Long dataflowId) {
+    List<DatasetsSummaryVO> datasetsSummaryList = new ArrayList<>();
+    datasetsSummaryList
+        .addAll(getDatasetsSummaryListFromDatasetType(dataflowId, DatasetTypeEnum.DESIGN));
+    datasetsSummaryList
+        .addAll(getDatasetsSummaryListFromDatasetType(dataflowId, DatasetTypeEnum.REFERENCE));
+    datasetsSummaryList
+        .addAll(getDatasetsSummaryListFromDatasetType(dataflowId, DatasetTypeEnum.COLLECTION));
+    datasetsSummaryList
+        .addAll(getDatasetsSummaryListFromDatasetType(dataflowId, DatasetTypeEnum.EUDATASET));
+    datasetsSummaryList
+        .addAll(getDatasetsSummaryListFromDatasetType(dataflowId, DatasetTypeEnum.TEST));
+    datasetsSummaryList.addAll(getReportingDatasetsSummaryList(dataflowId));
+    return datasetsSummaryList;
   }
 
 }

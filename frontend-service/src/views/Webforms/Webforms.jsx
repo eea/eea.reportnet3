@@ -1,16 +1,62 @@
+import { useContext, useEffect, useState } from 'react';
+
+import styles from './Webforms.module.scss';
+
 import { Article13 } from './Article13';
 import { Article15 } from './Article15';
+import { Button } from 'views/_components/Button';
 import { NationalSystems } from './NationalSystems';
+import { Spinner } from 'views/_components/Spinner';
+
+import { WebformService } from 'services/WebformService';
+
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const Webforms = ({
-  dataProviderId,
   dataflowId,
+  dataProviderId,
   datasetId,
   isReleasing,
   isReporting = false,
+  options = [],
   state,
   webformType
 }) => {
+  const notificationContext = useContext(NotificationContext);
+  const resourcesContext = useContext(ResourcesContext);
+
+  const [selectedConfiguration, setSelectedConfiguration] = useState({ tables: [] });
+  const [loadingStatus, setLoadingStatus] = useState('idle');
+
+  useEffect(() => {
+    getWebformConfiguration();
+  }, []);
+
+  const getWebformConfiguration = async () => {
+    setLoadingStatus('pending');
+    try {
+      const selectedWebform = options.find(item => item.value === webformType);
+      setSelectedConfiguration(await WebformService.getWebformConfig(selectedWebform.id));
+      setLoadingStatus('success');
+    } catch (error) {
+      console.error('Webforms - getWebformConfiguration.', error);
+      setLoadingStatus('failed');
+      notificationContext.add({ type: 'LOADING_WEBFORM_ERROR' }, true);
+    }
+  };
+
+  if (loadingStatus === 'pending') return <Spinner style={{ top: 0, margin: '1rem' }} />;
+
+  if (loadingStatus === 'failed') {
+    return (
+      <div className={styles.somethingWentWrong}>
+        {resourcesContext.messages['somethingWentWrongWebform']}
+        <Button icon="refresh" label={'Refresh'} onClick={getWebformConfiguration} />
+      </div>
+    );
+  }
+
   switch (webformType) {
     case 'MMR-ART13':
       return (
@@ -21,6 +67,7 @@ export const Webforms = ({
           isReleasing={isReleasing}
           isReporting={isReporting}
           state={state}
+          tables={selectedConfiguration.tables}
         />
       );
     case 'MMR-ART15':
@@ -31,6 +78,7 @@ export const Webforms = ({
           datasetId={datasetId}
           isReporting={isReporting}
           state={state}
+          tables={selectedConfiguration.tables}
         />
       );
     case 'NATIONAL-SYSTEMS':
@@ -41,6 +89,7 @@ export const Webforms = ({
           datasetId={datasetId}
           isReporting={isReporting}
           state={state}
+          tables={selectedConfiguration.tables}
         />
       );
     default:

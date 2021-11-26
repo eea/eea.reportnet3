@@ -21,6 +21,20 @@
           }
         },
         {
+          "key": "UPDATE_PUBLIC_STATUS_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
+          "key": "UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
           "key": "RESTORE_DATASET_SNAPSHOT_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET",
@@ -43,6 +57,12 @@
         },
         {
           "key": "IMPORT_DESIGN_FAILED_EVENT"
+        },
+        {
+          "key": "DOWNLOAD_ALL_TABS_INFO_FAILED"
+        },
+        {
+          "key": "DOWNLOAD_TABLE_DEFINITIONS_ERROR"
         },
         {
           "key": "EXTERNAL_EXPORT_EUDATASET_FAILED_EVENT",
@@ -317,6 +337,12 @@
         },
         {
           "key": "GENERATE_QC_RULES_FILE_ERROR"
+        },
+        {
+          "key": "GENERATE_SCHEMAS_INFO_FILE_ERROR"
+        },
+        {
+          "key": "GENERATE_USERS_LIST_FILE_ERROR"
         },
         {
           "key": "CREATE_DATA_COLLECTION_ERROR"
@@ -701,7 +727,13 @@
           "key": "DOWNLOAD_QC_RULES_FILE_ERROR"
         },
         {
+          "key": "DOWNLOAD_USERS_LIST_FILE_ERROR"
+        },
+        {
           "key": "DOWNLOAD_VALIDATIONS_FILE_ERROR"
+        },
+        {
+          "key": "DOWNLOAD_SCHEMAS_INFO_FILE_ERROR"
         },
         {
           "key": "EXPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT"
@@ -757,9 +789,27 @@
             "parameters": ["dataflowId", "datasetId", "datasetName"]
           }
         },
-        {
-          "key": "UNLOCK_DATASET_ERROR"
-        }
+        { "key": "UNLOCK_DATASET_ERROR" },
+        { "key": "LOAD_DATASETS_SUMMARY_ERROR" },
+        { "key": "LOADING_WEBFORM_ERROR" },
+        { "key": "LOADING_WEBFORM_OPTIONS_ERROR" },
+        { "key": "EXPORT_DATASET_FAILED_EVENT" },
+        { "key": "DOWNLOAD_VALIDATIONS_FAILED_EVENT" },
+        { "key": "EXPORT_QC_FAILED_EVENT" },
+        { "key": "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT" },
+        { "key": "DISABLE_RULES_ERROR_EVENT" },
+        { "key": "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT" },
+        { "key": "EXPORT_USERS_BY_COUNTRY_FAILED_EVENT" },
+        { "key": "VALIDATE_ALL_REPORTERS_FAILED_EVENT" },
+        { "key": "VALIDATE_LEAD_REPORTERS_FAILED_EVENT" },
+        { "key": "VALIDATE_REPORTERS_FAILED_EVENT" },
+        { "key": "EXPORT_TABLE_DATA_FAILED_EVENT" },
+        { "key": "DOWNLOAD_FILE_BAD_REQUEST_ERROR" },
+        { "key": "CREATE_SYSTEM_NOTIFICATION_ERROR" },
+        { "key": "UPDATE_SYSTEM_NOTIFICATION_ERROR" },
+        { "key": "DELETE_SYSTEM_NOTIFICATION_ERROR" },
+        { "key": "GET_SYSTEM_NOTIFICATIONS_ERROR" },
+        { "key": "CHECK_ENABLED_SYSTEM_NOTIFICATIONS_ERROR" }
       ]
     },
     {
@@ -982,22 +1032,37 @@
             "parameters": ["dataflowId", "dataProvider", "representativeId"]
           }
         },
-        {
-          "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD"
-        },
-        {
-          "key": "AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE"
-        },
-        {
-          "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE"
-        },
+        { "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD" },
+        { "key": "AUTOMATICALLY_DOWNLOAD_SCHEMAS_INFO_FILE" },
+        { "key": "AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE" },
+        { "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE" },
+        { "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD" },
+        { "key": "AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE" },
+        { "key": "EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT" },
+        { "key": "VALIDATE_ALL_REPORTERS_COMPLETED_EVENT" },
         {
           "key": "IMPORT_FIELD_SCHEMA_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]
           }
-        }
+        },
+        { "key": "EXPORT_DATASET_COMPLETED_EVENT" },
+        { "key": "DOWNLOAD_VALIDATIONS_COMPLETED_EVENT" },
+        { "key": "EXPORT_QC_COMPLETED_EVENT" },
+        { "key": "EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT" },
+        { "key": "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT" },
+        { "key": "EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT" },
+        {
+          "key": "DELETE_DATASET_SCHEMA_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        { "key": "VALIDATE_REPORTERS_COMPLETED_EVENT" },
+        { "key": "VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT" },
+        { "key": "EXPORT_TABLE_DATA_COMPLETED_EVENT" }
       ]
     },
     {
@@ -1005,15 +1070,9 @@
       "lifeTime": 5000,
       "fixed": false,
       "types": [
-        {
-          "key": "DATASET_DATA_LOADING_INIT"
-        },
-        {
-          "key": "DOCUMENT_UPLOADING_INIT_INFO"
-        },
-        {
-          "key": "DELETE_DOCUMENT_INIT_INFO"
-        },
+        { "key": "DATASET_DATA_LOADING_INIT", "messageKeys": {} },
+        { "key": "DOCUMENT_UPLOADING_INIT_INFO" },
+        { "key": "DELETE_DOCUMENT_INIT_INFO" },
         {
           "key": "VALIDATE_DATA_INIT",
           "navigateTo": {
@@ -1022,69 +1081,36 @@
             "hasQueryString": true
           }
         },
-
-        {
-          "key": "CREATE_DATA_COLLECTION_INIT"
-        },
-        {
-          "key": "CREATE_REFERENCE_DATASETS_INIT"
-        },
-        {
-          "key": "CLONE_DATASET_SCHEMAS_INIT"
-        },
-        {
-          "key": "COPY_TO_EU_DATASET_INIT"
-        },
-        {
-          "key": "EXPORT_EU_DATASET_INIT"
-        },
-        {
-          "key": "EXPORT_DATASET_DATA"
-        },
-        {
-          "key": "DOWNLOAD_VALIDATIONS_START"
-        },
-        {
-          "key": "DOWNLOAD_QC_RULES_START"
-        },
-        {
-          "key": "DATASET_IMPORT_INIT"
-        },
-        {
-          "key": "DATAFLOW_PINNED_INIT",
-          "lifeTime": 1500
-        },
-        {
-          "key": "DATAFLOW_UNPINNED_INIT",
-          "lifeTime": 1500
-        },
-        {
-          "key": "IMPORT_DATASET_SCHEMA_INIT"
-        },
-        {
-          "key": "DELETE_DATASET_DATA_INIT"
-        },
-        {
-          "key": "RESTORE_DATASET_SNAPSHOT_INIT_INFO"
-        },
-        {
-          "key": "DATAFLOW_LOADING_LEAD_REPORTERS_INIT"
-        },
-        {
-          "key": "DELETE_TABLE_DATA_INIT"
-        },
-        {
-          "key": "RELEASE_START_EVENT"
-        },
-        {
-          "key": "IMPORT_TABLE_SCHEMA_INIT"
-        }
+        { "key": "CREATE_DATA_COLLECTION_INIT" },
+        { "key": "CREATE_REFERENCE_DATASETS_INIT" },
+        { "key": "CLONE_DATASET_SCHEMAS_INIT" },
+        { "key": "COPY_TO_EU_DATASET_INIT" },
+        { "key": "EXPORT_EU_DATASET_INIT" },
+        { "key": "EXPORT_DATASET_DATA" },
+        { "key": "DOWNLOAD_VALIDATIONS_START" },
+        { "key": "DOWNLOAD_QC_RULES_START" },
+        { "key": "DATASET_IMPORT_INIT" },
+        { "key": "DATAFLOW_PINNED_INIT", "lifeTime": 1500 },
+        { "key": "DATAFLOW_UNPINNED_INIT", "lifeTime": 1500 },
+        { "key": "IMPORT_DATASET_SCHEMA_INIT" },
+        { "key": "DELETE_DATASET_DATA_INIT" },
+        { "key": "RESTORE_DATASET_SNAPSHOT_INIT_INFO" },
+        { "key": "DATAFLOW_LOADING_LEAD_REPORTERS_INIT" },
+        { "key": "DELETE_TABLE_DATA_INIT" },
+        { "key": "RELEASE_START_EVENT" },
+        { "key": "IMPORT_TABLE_SCHEMA_INIT" },
+        { "key": "RECEIVED_MESSAGE" },
+        { "key": "DOWNLOAD_USERS_BY_COUNTRY_START" },
+        { "key": "EXPORT_TABLE_DATA_START" },
+        { "key": "DOWNLOAD_SCHEMAS_INFO_START" }
       ]
     }
   ],
   "hiddenNotifications": [
     "EXPORT_DATASET_COMPLETED_EVENT",
     "EXPORT_DATASET_FAILED_EVENT",
+    "EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT",
+    "EXPORT_USERS_BY_COUNTRY_FAILED_EVENT",
     "DOWNLOAD_VALIDATIONS_COMPLETED_EVENT",
     "DOWNLOAD_VALIDATIONS_FAILED_EVENT",
     "EXPORT_QC_COMPLETED_EVENT",
@@ -1093,6 +1119,9 @@
     "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
     "DISABLE_RULES_ERROR_EVENT",
     "RECEIVED_MESSAGE",
-    "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT"
+    "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT",
+    "EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT",
+    "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT",
+    "NO_ENABLED_SYSTEM_NOTIFICATIONS"
   ]
 }

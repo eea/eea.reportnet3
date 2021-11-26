@@ -188,10 +188,13 @@ export const Feedback = withRouter(({ match, history }) => {
       dispatchFeedback({ type: 'SET_DATAFLOW_DATA', payload: dataflow });
     } catch (error) {
       console.error('Feedback - onGetDataflowName.', error);
-      notificationContext.add({
-        type: 'DATAFLOW_DETAILS_ERROR',
-        content: {}
-      });
+      notificationContext.add(
+        {
+          type: 'DATAFLOW_DETAILS_ERROR',
+          content: {}
+        },
+        true
+      );
     } finally {
       dispatchFeedback({ type: 'SET_IS_LOADING', payload: false });
     }
@@ -210,10 +213,13 @@ export const Feedback = withRouter(({ match, history }) => {
       dispatchFeedback({ type: 'ON_LOAD_MORE_MESSAGES', payload: data.messages });
     } catch (error) {
       console.error('Feedback - onGetMoreMessages.', error);
-      notificationContext.add({
-        type: 'LOAD_DATASET_FEEDBACK_MESSAGES_ERROR',
-        content: {}
-      });
+      notificationContext.add(
+        {
+          type: 'LOAD_DATASET_FEEDBACK_MESSAGES_ERROR',
+          content: {}
+        },
+        true
+      );
     }
   };
 
@@ -222,7 +228,7 @@ export const Feedback = withRouter(({ match, history }) => {
     await markMessagesAsRead(data);
     dispatchFeedback({
       type: 'SET_MESSAGES',
-      payload: { msgs: !isNil(data) ? data.messages : [], totalMessages: data.totalMessages }
+      payload: { msgs: !isNil(data) ? data.messages : [], totalMessages: !isNil(data) ? data.totalMessages : 0 }
     });
   };
 
@@ -232,10 +238,10 @@ export const Feedback = withRouter(({ match, history }) => {
       if (files[0].size <= config.MAX_ATTACHMENT_SIZE) {
         dispatchFeedback({ type: 'SET_DRAGGED_FILES', payload: files });
       } else {
-        notificationContext.add({ type: 'FEEDBACK_MAX_FILE_SIZE_ERROR' });
+        notificationContext.add({ type: 'FEEDBACK_MAX_FILE_SIZE_ERROR' }, true);
       }
     } else {
-      notificationContext.add({ type: 'FEEDBACK_INVALID_FILE_ERROR' });
+      notificationContext.add({ type: 'FEEDBACK_INVALID_FILE_ERROR' }, true);
     }
     dispatchFeedback({ type: 'TOGGLE_IS_DRAGGING', payload: false });
 
@@ -260,7 +266,9 @@ export const Feedback = withRouter(({ match, history }) => {
 
   const onImportFileError = async ({ xhr }) => {
     if (xhr.status === 423) {
-      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+    } else {
+      notificationContext.add({ type: 'UPLOAD_FILE_ERROR' }, true);
     }
   };
 
@@ -365,7 +373,7 @@ export const Feedback = withRouter(({ match, history }) => {
           <div className={`${styles.dataProviderWrapper} feedback-dataProvider-help-step`}>
             <ListBox
               ariaLabel="dataProviders"
-              className={styles.dataProvider}
+              className={`${styles.dataProvider} ${messages.length > 0 && styles.hasCounter}`}
               onChange={e => {
                 onChangeDataProvider(e.target.value);
               }}
@@ -379,12 +387,17 @@ export const Feedback = withRouter(({ match, history }) => {
           <span className={styles.dragAndDropFileMessage}>{resourcesContext.messages['dragAndDropFileMessage']}</span>
         )}
         <div
-          className={`${styles.listMessagesWrapper} ${
-            isCustodian ? styles.flexBasisCustodian : styles.flexBasisProvider
-          }`}
+          className={styles.listMessagesWrapper}
           onDragLeave={isCustodian && !isEmpty(selectedDataProvider) ? onDragLeave : () => {}}
           onDragOver={isCustodian && !isEmpty(selectedDataProvider) ? onDragOver : () => {}}
           onDrop={isCustodian && !isEmpty(selectedDataProvider) ? onDrop : () => {}}>
+          {messages.length > 0 && (
+            <div
+              className={
+                styles.messageCounter
+              }>{`${messages.length} ${resourcesContext.messages['of']} ${totalMessages} ${resourcesContext.messages['messages']}`}</div>
+          )}
+
           <ListMessages
             canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
             className={`feedback-messages-help-step`}
@@ -430,28 +443,31 @@ export const Feedback = withRouter(({ match, history }) => {
                 }
                 value={messageToSend}
               />
-              <Button
-                className={`${
-                  (isCustodian && isEmpty(selectedDataProvider)) || isSending ? '' : 'p-button-animated-right-blink'
-                } p-button-secondary ${styles.attachFileMessageButton}`}
-                disabled={(isCustodian && isEmpty(selectedDataProvider)) || isSending}
-                icon="clipboard"
-                iconPos="right"
-                label={resourcesContext.messages['uploadAttachment']}
-                onClick={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: true })}
-              />
-              <Button
-                className={`${
-                  messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending
-                    ? ''
-                    : 'p-button-animated-right-blink'
-                } p-button-primary ${styles.sendMessageButton}`}
-                disabled={messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending}
-                icon="comment"
-                iconPos="right"
-                label={resourcesContext.messages['send']}
-                onClick={() => onSendMessage(messageToSend)}
-              />
+              <div className={styles.buttonsWrapper}>
+                <Button
+                  className={`${
+                    (isCustodian && isEmpty(selectedDataProvider)) || isSending ? '' : 'p-button-animated-right-blink'
+                  } p-button-secondary ${styles.attachFileMessageButton}`}
+                  disabled={(isCustodian && isEmpty(selectedDataProvider)) || isSending}
+                  icon="clipboard"
+                  iconPos="right"
+                  label={resourcesContext.messages['uploadAttachment']}
+                  onClick={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: true })}
+                />
+
+                <Button
+                  className={`${
+                    messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending
+                      ? ''
+                      : 'p-button-animated-right-blink'
+                  } p-button-primary ${styles.sendMessageButton}`}
+                  disabled={messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending}
+                  icon="comment"
+                  iconPos="right"
+                  label={resourcesContext.messages['send']}
+                  onClick={() => onSendMessage(messageToSend)}
+                />
+              </div>
             </div>
           )}
         </div>

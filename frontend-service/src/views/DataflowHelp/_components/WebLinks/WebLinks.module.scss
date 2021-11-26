@@ -12,19 +12,20 @@
   text-align: center;
   width: 7em;
 }
-.deleteRowButton {
-  border: 1px solid var(--c-custom-gray) !important;
-  @include shadow-0em;
-  color: var(--errors) !important;
+.deleteRowButton,
+.editRowButton {
+  border: 1px solid var(--general-border-color) !important;
   margin-left: 3px !important;
+  @include shadow-0em;
+  &:hover {
+    border: 1px solid var(--button-secondary-border-color-hover) !important;
+  }
 }
 .dialog {
   height: auto !important;
 }
-.editRowButton {
-  border: 1px solid var(--c-custom-gray) !important;
-  @include shadow-0em;
-  margin-left: 3px !important;
+.deleteRowButton {
+  color: var(--errors) !important;
 }
 .iconStyle {
   text-align: center;
@@ -43,6 +44,7 @@
 
 .webLinksToolbar {
   border: 0px !important;
+  margin-bottom: 0.5rem;
 }
 
 .checkboxIsPublic {

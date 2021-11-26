@@ -577,4 +577,14 @@ public interface DatasetSchemaService {
   void importFieldsSchema(String tableSchemaId, String datasetSchemaId, Long datasetId,
       InputStream file, boolean replace);
 
+
+  /**
+   * Export zip field schemas.
+   *
+   * @param datasetId the dataset id
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   */
+  byte[] exportZipFieldSchemas(Long datasetId) throws EEAException;
+
 }

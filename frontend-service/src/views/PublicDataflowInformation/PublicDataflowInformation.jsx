@@ -5,6 +5,7 @@ import ReactTooltip from 'react-tooltip';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
@@ -15,12 +16,14 @@ import { routes } from 'conf/routes';
 
 import styles from './PublicDataflowInformation.module.scss';
 
+import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
 import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
+import { Toolbar } from 'views/_components/Toolbar';
 
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
@@ -51,6 +54,7 @@ export const PublicDataflowInformation = withRouter(
 
     const [contentStyles, setContentStyles] = useState({});
     const [dataflowData, setDataflowData] = useState({ documents: [], referenceDatasets: [], type: '', webLinks: [] });
+    const [isDownloading, setIsDownloading] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
     const [representatives, setRepresentatives] = useState({});
@@ -243,10 +247,26 @@ export const PublicDataflowInformation = withRouter(
       </div>
     );
 
+    const onDownloadAllSchemasInfo = async () => {
+      try {
+        setIsDownloading(true);
+        const { data } = await DataflowService.downloadPublicAllSchemasInfoFile(dataflowId);
+
+        if (!isNil(data)) {
+          DownloadFile(data, `dataflow-${dataflowId}-Schema_Information_${dayjs().format('YYYY-MM-DD HH.mm.ss')}.xlsx`);
+        }
+      } catch (error) {
+        console.error('PublicDataflowInformation - onDownloadAllSchemasInfo .', error);
+        notificationContext.add({ type: 'GENERATE_SCHEMAS_INFO_FILE_ERROR' }, true);
+      } finally {
+        setIsDownloading(false);
+      }
+    };
+
     const onDownloadDocument = async document => {
       try {
         const { data } = await DocumentService.publicDownload(document.id, dataflowId);
-        DownloadFile(data, document.file);
+        if (!isNil(data)) DownloadFile(data, document.file);
       } catch (error) {
         console.error('PublicDataflowInformation - onDownloadDocument.', error);
       }
@@ -265,13 +285,9 @@ export const PublicDataflowInformation = withRouter(
       } catch (error) {
         console.error('PublicDataflowInformation - onFileDownload.', error);
         if (error.response.status === 404) {
-          notificationContext.add({
-            type: 'DOWNLOAD_DATASET_FILE_NOT_FOUND_EVENT'
-          });
+          notificationContext.add({ type: 'DOWNLOAD_DATASET_FILE_NOT_FOUND_EVENT' }, true);
         } else {
-          notificationContext.add({
-            type: 'DOWNLOAD_DATASET_FILE_ERROR'
-          });
+          notificationContext.add({ type: 'DOWNLOAD_DATASET_FILE_ERROR' }, true);
         }
       }
     };
@@ -286,7 +302,7 @@ export const PublicDataflowInformation = withRouter(
         if (error.response.status === 404 || error.response.status === 400) {
           setIsWrongUrlDataflowId(true);
         } else {
-          notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' });
+          notificationContext.add({ type: 'LOAD_DATAFLOW_INFO_ERROR' }, true);
         }
       } finally {
         setIsLoading(false);
@@ -463,6 +479,22 @@ export const PublicDataflowInformation = withRouter(
       return (
         <Fragment>
           <Title icon="clone" iconSize="4rem" subtitle={dataflowData.description} title={dataflowData.name} />
+          {!TextUtils.areEquals(dataflowData.type, config.dataflowType.BUSINESS.value) && (
+            <Toolbar className={styles.actionsToolbar}>
+              <div className={'p-toolbar-group-left'}>
+                <Button
+                  className={`p-button-rounded p-button-secondary ${!isDownloading ? 'p-button-animated-blink' : ''}`}
+                  disabled={isDownloading}
+                  icon={isDownloading ? 'spinnerAnimate' : 'export'}
+                  label={resourcesContext.messages['downloadSchemasInfo']}
+                  onClick={() => onDownloadAllSchemasInfo()}
+                  tooltip={resourcesContext.messages['downloadSchemasInfoTooltip']}
+                  tooltipOptions={{ position: 'right' }}
+                />
+              </div>
+            </Toolbar>
+          )}
+
           {!isEmpty(representatives) && (
             <div className={styles.dataTableWrapper}>
               <div className={styles.dataTableTitle}>{resourcesContext.messages['reportingDatasets']}</div>

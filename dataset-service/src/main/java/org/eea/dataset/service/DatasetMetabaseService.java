@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
@@ -242,5 +243,13 @@ public interface DatasetMetabaseService {
    * @throws EEAException the EEA exception
    */
   void updateDatasetStatus(DatasetStatusMessageVO datasetStatusMessageVO) throws EEAException;
+
+  /**
+   * Gets the datasets summary list.
+   *
+   * @param dataflowId the dataflow id
+   * @return the datasets summary list
+   */
+  List<DatasetsSummaryVO> getDatasetsSummaryList(Long dataflowId);
 
 }

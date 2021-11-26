@@ -486,7 +486,7 @@ public class DatasetSchemaServiceTest {
     Mockito.doNothing().when(schemasRepository).deleteDatasetSchemaById(Mockito.any());
     when(schemasRepository.save(Mockito.any())).thenReturn(schema);
     doNothing().when(recordStoreControllerZuul).restoreSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
     dataSchemaServiceImpl.replaceSchema("1L", schema, 1L, 1L);
     verify(schemasRepository, times(1)).save(Mockito.any());
@@ -2799,6 +2799,50 @@ public class DatasetSchemaServiceTest {
     dataSchemaServiceImpl.importFieldsSchema(new ObjectId().toString(), new ObjectId().toString(),
         1L, multipartFile.getInputStream(), true);
     Mockito.verify(schemasRepository, times(1)).findById(Mockito.any());
+  }
+
+
+
+  @Test
+  public void testExportZipFieldSchemas() throws IOException, EEAException {
+
+    DesignDataset design = new DesignDataset();
+    design.setId(1L);
+    design.setDataSetName("DS");
+    design.setDatasetSchema(new ObjectId().toString());
+    Mockito.when(designDatasetRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(design));
+
+    DataSetSchema schema = new DataSetSchema();
+    schema.setIdDataSetSchema(new ObjectId());
+    TableSchema table = new TableSchema();
+    table.setIdTableSchema(new ObjectId());
+    table.setNameTableSchema("table");
+    RecordSchema record = new RecordSchema();
+    record.setIdRecordSchema(new ObjectId());
+    FieldSchema field = new FieldSchema();
+    field.setIdFieldSchema(new ObjectId());
+    field.setHeaderName("field");
+    record.setFieldSchema(Arrays.asList(field));
+    table.setRecordSchema(record);
+    schema.setTableSchemas(Arrays.asList(table));
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
+
+    dataSchemaServiceImpl.exportZipFieldSchemas(1L);
+    Mockito.verify(designDatasetRepository, times(1)).findById(Mockito.anyLong());
+  }
+
+  @Test(expected = EEAException.class)
+  public void testExportZipFieldSchemasException() throws IOException, EEAException {
+
+    Mockito.when(designDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+    try {
+      dataSchemaServiceImpl.exportZipFieldSchemas(1L);
+    } catch (EEAException e) {
+      assertEquals(String.format("No field schemas to export in the dataset %s", 1L),
+          e.getMessage());
+      throw e;
+    }
   }
 
 }

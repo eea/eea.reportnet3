@@ -46,8 +46,6 @@ export const NationalSystemsField = ({
   title,
   tooltip
 }) => {
-  const getInputMaxLength = { TEXT: 10000, RICH_TEXT: 10000, EMAIL: 256, NUMBER_INTEGER: 20, NUMBER_DECIMAL: 40 };
-
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -97,7 +95,7 @@ export const NationalSystemsField = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
-      await DatasetService.deleteAttachment(datasetId, field.fieldId);
+      await DatasetService.deleteAttachment(dataflowId, datasetId, field.fieldId, dataProviderId);
       onFillField(field, field.fieldSchemaId, '');
       handleDialogs('deleteAttachment', false);
     } catch (error) {
@@ -120,10 +118,10 @@ export const NationalSystemsField = ({
       await DatasetService.updateField(datasetId, option, field.fieldId, field.fieldType, parsedValue);
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('NationalSystemsField - onEditorSubmitValue.', error);
-        notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' });
+        notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
       }
     }
   };
@@ -157,14 +155,10 @@ export const NationalSystemsField = ({
 
   const onUploadFileError = async ({ xhr }) => {
     if (xhr.status === 400) {
-      notificationContext.add({
-        type: 'UPLOAD_FILE_ERROR'
-      });
+      notificationContext.add({ type: 'UPLOAD_FILE_ERROR' }, true);
     }
     if (xhr.status === 423) {
-      notificationContext.add({
-        type: 'GENERIC_BLOCKED_ERROR'
-      });
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
     }
   };
 
@@ -181,9 +175,9 @@ export const NationalSystemsField = ({
       case 'URL':
         return (
           <InputText
+            hasMaxCharCounter
             id={field.fieldId}
             keyfilter={RecordUtils.getFilter(type)}
-            maxLength={getInputMaxLength[type]}
             onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
             onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
@@ -196,18 +190,14 @@ export const NationalSystemsField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
+              hasMaxCharCounter
               id={field.fieldId}
-              maxLength={getInputMaxLength[type]}
               onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
               onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
               onKeyDown={event => onEditorKeyChange(event, field, fieldSchemaId)}
               value={field.value}
             />
-            <CharacterCounter
-              currentLength={field.value.length}
-              maxLength={getInputMaxLength.RICH_TEXT}
-              style={{ position: 'relative', top: '0.25rem' }}
-            />
+            <CharacterCounter currentLength={field.value.length} style={{ position: 'relative', top: '0.25rem' }} />
           </div>
         );
       case 'CODELIST':
@@ -376,10 +366,20 @@ export const NationalSystemsField = ({
           onError={onUploadFileError}
           onUpload={onAttachFile}
           operation={'PUT'}
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
-            datasetId,
-            fieldId: field.fieldId
-          })}`}
+          url={`${window.env.REACT_APP_BACKEND}${
+            isNil(dataProviderId)
+              ? getUrl(DatasetConfig.uploadAttachment, {
+                  dataflowId,
+                  datasetId,
+                  fieldId: field.fieldId
+                })
+              : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
+                  dataflowId,
+                  datasetId,
+                  fieldId: field.fieldId,
+                  providerId: dataProviderId
+                })
+          }`}
         />
       )}
       {isDialogVisible.deleteAttachment && (

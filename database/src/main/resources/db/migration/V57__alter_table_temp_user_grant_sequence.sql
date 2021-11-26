@@ -1,0 +1,1 @@
+GRANT ALL ON TABLE public.temp_user TO testuser, dataflow, dataset, validation, recordstore;

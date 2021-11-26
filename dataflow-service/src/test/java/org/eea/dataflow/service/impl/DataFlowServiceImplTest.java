@@ -16,20 +16,24 @@ import java.util.Optional;
 import java.util.Set;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
+import org.eea.dataflow.mapper.DataflowPrivateMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.mapper.DocumentMapper;
 import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.Representative;
+import org.eea.dataflow.persistence.domain.TempUser;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.DataflowRepository.IDataflowCount;
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.DocumentRepository;
 import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
+import org.eea.dataflow.persistence.repository.TempUserRepository;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -46,6 +50,8 @@ import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceMa
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.DataflowCountVO;
+import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
@@ -179,11 +185,21 @@ public class DataFlowServiceImplTest {
 
   @Mock
   private FMEUserRepository fmeUserRepository;
+
+  @Mock
+  private TempUserRepository tempUserRepository;
+
+  @Mock
+  private ContributorServiceImpl contributorServiceImpl;
+
   /**
    * The kafka sender utils.
    */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Mock
+  private DataflowPrivateMapper dataflowPrivateMapper;
 
   /** The dataflows. */
   private List<Dataflow> dataflows;
@@ -1169,6 +1185,99 @@ public class DataFlowServiceImplTest {
     assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.CITIZEN_SCIENCE));
   }
 
+  /**
+   * Gets the dataflows count as an Admin user.
+   *
+   * @return the dataflows count admin test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getDataflowsCountAdminTest() throws EEAException {
+
+    IDataflowCount idc1 = new IDataflowCount() {
+
+      @Override
+      public TypeDataflowEnum getType() {
+        return TypeDataflowEnum.REPORTING;
+      }
+
+      @Override
+      public Long getAmount() {
+        return 1L;
+      }
+    };
+
+    IDataflowCount idc2 = new IDataflowCount() {
+
+      @Override
+      public TypeDataflowEnum getType() {
+        return TypeDataflowEnum.REFERENCE;
+      }
+
+      @Override
+      public Long getAmount() {
+        return 1L;
+      }
+    };
+
+    List<IDataflowCount> listObject = Arrays.asList(idc1, idc2);
+    DataflowCountVO dataflowCountVO = new DataflowCountVO();
+    dataflowCountVO.setType(TypeDataflowEnum.REPORTING);
+    dataflowCountVO.setAmount(1L);
+    List<DataflowCountVO> dataflowCountVOList = new ArrayList<>();
+    dataflowCountVOList.add(dataflowCountVO);
+
+    ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
+    resourceAccessVO.setId(0L);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
+        .thenReturn(Arrays.asList(resourceAccessVO));
+    Mockito.when(dataflowRepository.countDataflowByType()).thenReturn(listObject);
+
+
+    assertNotNull(dataflowServiceImpl.getDataflowsCount());
+  }
+
+  /**
+   * Gets the dataflows count test.
+   *
+   * @return the dataflows count test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getDataflowsCountTest() throws EEAException {
+
+    IDataflowCount idc1 = new IDataflowCount() {
+
+      @Override
+      public TypeDataflowEnum getType() {
+        return TypeDataflowEnum.REFERENCE;
+      }
+
+      @Override
+      public Long getAmount() {
+        return 15L;
+      }
+    };
+
+    ResourceAccessVO resource = new ResourceAccessVO();
+    resource.setId(1L);
+    List<ResourceAccessVO> resources = new ArrayList<>();
+    resources.add(resource);
+    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+        .thenReturn(resources);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_CUSTODIAN"));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(dataflowRepository.countReferenceDataflowsDraft()).thenReturn(idc1);
+
+    assertNotNull(dataflowServiceImpl.getDataflowsCount());
+  }
+
   @Test
   public void getDataflowsExceptReferenceTest() throws EEAException {
     DataFlowVO dataflowVO = new DataFlowVO();
@@ -1271,6 +1380,141 @@ public class DataFlowServiceImplTest {
 
     assertTrue(dataflowServiceImpl.isDataflowType(TypeDataflowEnum.REFERENCE,
         EntityClassEnum.DATASET, 1L));
+  }
+
+  @Test(expected = EEAException.class)
+  public void getDatasetSummaryDataflowIncorrectIdExceptionTest() throws EEAException {
+    try {
+      dataflowServiceImpl.getDatasetSummary(null);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, ex.getMessage());
+      throw ex;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void getDatasetSummaryDataflowNotFoundExceptionTest() throws EEAException {
+    Mockito.when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.ofNullable(null));
+    try {
+      dataflowServiceImpl.getDatasetSummary(1L);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, ex.getMessage());
+      throw ex;
+    }
+  }
+
+  @Test
+  public void getDatasetSummaryTest() throws EEAException {
+    Mockito.when(dataflowRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(new Dataflow()));
+    Mockito.when(datasetMetabaseController.getDatasetsSummaryList(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    assertEquals(new ArrayList<>(), dataflowServiceImpl.getDatasetSummary(1L));
+  }
+
+  @Test
+  public void getPrivateDataflowByIdTest() throws EEAException {
+    DataflowPrivateVO dataflowPrivateVO = new DataflowPrivateVO();
+    dataflowPrivateVO.setId(1L);
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    List<DocumentVO> documents = new ArrayList<>();
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    documents.add(document);
+    Mockito.when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataflow));
+    Mockito.when(dataflowPrivateMapper.entityToClass(Mockito.any())).thenReturn(dataflowPrivateVO);
+    Mockito.when(documentControllerZuul.getAllDocumentsByDataflow(Mockito.anyLong()))
+        .thenReturn(documents);
+    assertEquals(dataflowPrivateVO, dataflowServiceImpl.getPrivateDataflowById(1L));
+  }
+
+  @Test(expected = EEAException.class)
+  public void getPrivateDataflowIdNotFoundTest() throws EEAException {
+    try {
+      DataflowPrivateVO dataflowPrivateVO = dataflowServiceImpl.getPrivateDataflowById(1L);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void getPrivateDataflowIncorrectIdTest() throws EEAException {
+    try {
+      DataflowPrivateVO dataflowPrivateVO = dataflowServiceImpl.getPrivateDataflowById(null);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Validate all reporters test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void validateAllReportersTest() throws EEAException {
+
+    TempUser tempUser1 = new TempUser();
+    tempUser1.setEmail("reporter_write@reportnet.net");
+    tempUser1.setRole("REPORTER_WRITE");
+    tempUser1.setDataProviderId(1L);
+    tempUser1.setDataflowId(1L);
+    List<TempUser> tempUserList = new ArrayList<>();
+    tempUserList.add(tempUser1);
+
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    List<Representative> representatives = new ArrayList<>();
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representative.setDataflow(dataflow);
+    representatives.add(representative);
+
+    when(tempUserRepository.findAll()).thenReturn(tempUserList);
+    when(representativeRepository.findAllByInvalid(Mockito.anyBoolean()))
+        .thenReturn(representatives);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("name");
+    dataflowServiceImpl.validateAllReporters("user");
+
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Validate all reporters exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void validateAllReportersExceptionTest() throws EEAException {
+
+    TempUser tempUser1 = new TempUser();
+    tempUser1.setEmail("reporter_write@reportnet.net");
+    tempUser1.setRole("REPORTER_WRITE");
+    tempUser1.setDataProviderId(1L);
+    tempUser1.setDataflowId(1L);
+    List<TempUser> tempUserList = new ArrayList<>();
+    tempUserList.add(tempUser1);
+
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    List<Representative> representatives = new ArrayList<>();
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representative.setDataflow(dataflow);
+    representatives.add(representative);
+
+    doThrow(EEAException.class).when(representativeService).validateLeadReporters(1L, false);
+    when(representativeRepository.findAllByInvalid(Mockito.anyBoolean()))
+        .thenReturn(representatives);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("name");
+
+    dataflowServiceImpl.validateAllReporters("user");
   }
 
 }

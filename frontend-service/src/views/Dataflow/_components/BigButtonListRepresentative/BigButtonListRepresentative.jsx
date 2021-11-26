@@ -17,12 +17,14 @@ import { ConfirmationReceiptService } from 'services/ConfirmationReceiptService'
 
 import { bigButtonListRepresentativeReducer } from './_functions/Reducers/bigButtonListRepresentativeReducer';
 
-import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
+import { useBigButtonListRepresentative } from './_functions/Hooks/useBigButtonListRepresentative';
 
 export const BigButtonListRepresentative = ({
   dataflowState,
   dataProviderId,
   handleRedirect,
+  isLeadReporterOfCountry,
+  manageDialogs,
   match,
   onCleanUpReceipt,
   onOpenReleaseConfirmDialog,
@@ -77,9 +79,7 @@ export const BigButtonListRepresentative = ({
       onCleanUpReceipt();
     } catch (error) {
       console.error('BigButtonListRepresentative - onLoadReceiptData.', error);
-      notificationContext.add({
-        type: 'LOAD_RECEIPT_DATA_ERROR'
-      });
+      notificationContext.add({ type: 'LOAD_RECEIPT_DATA_ERROR' }, true);
     } finally {
       setIsReceiptLoading(false);
     }
@@ -103,11 +103,12 @@ export const BigButtonListRepresentative = ({
       <div className={styles.buttonsWrapper}>
         <div className={styles.splitButtonWrapper}>
           <div className={styles.datasetItem}>
-            {useBigButtonList({
+            {useBigButtonListRepresentative({
               dataflowState,
               dataProviderId,
               getDataHistoricReleases,
               handleRedirect,
+              isLeadReporterOfCountry,
               match,
               onLoadReceiptData,
               onOpenReleaseConfirmDialog,
@@ -116,7 +117,7 @@ export const BigButtonListRepresentative = ({
             })
               .filter(button => button.visibility)
               .map(button => (
-                <BigButton key={button.caption} {...button} />
+                <BigButton key={button.caption} manageDialogs={manageDialogs} {...button} />
               ))}
           </div>
         </div>

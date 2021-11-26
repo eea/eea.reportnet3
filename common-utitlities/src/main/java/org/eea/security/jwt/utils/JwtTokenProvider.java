@@ -13,11 +13,12 @@ import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
-import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.security.jwt.data.CacheTokenVO;
 import org.eea.security.jwt.data.TokenDataVO;
 import org.keycloak.TokenVerifier;
@@ -64,9 +65,6 @@ public class JwtTokenProvider {
   /** The external public keys. */
   private Map<String, PublicKey> externalPublicKeys;
 
-  /** The user management controller zull. */
-  @Autowired
-  private UserManagementControllerZull userManagementControllerZull;
 
   /** The security redis template. */
   @Autowired
@@ -153,7 +151,11 @@ public class JwtTokenProvider {
     if (null != token.getRealmAccess()) {
       tokenDataVO.setRoles(token.getRealmAccess().getRoles());
     }
-    tokenDataVO.setExpiration(token.getExpiration());
+    Date tokenTime =
+        new Date(TimeUnit.MILLISECONDS.convert(token.getExpiration(), TimeUnit.SECONDS));
+    Date timeNow = new Date();
+    Long diff = tokenTime.getTime() - timeNow.getTime();// it should be 5 minutes as initial time
+    tokenDataVO.setExpiration(diff.intValue());
     return tokenDataVO;
   }
 

@@ -145,7 +145,7 @@ public class RepresentativeServiceImplTest {
     representativeVO.setLeadReporters(leadReportersVO);
     arrayId = new ArrayList<>();
     arrayId.add(new Representative());
-    leadReporter = new LeadReporter(1L, "email@host.com", representative);
+    leadReporter = new LeadReporter(1L, "email@host.com", representative, null);
     leadReporters = new ArrayList<>();
     leadReporters.add(leadReporter);
     MockitoAnnotations.openMocks(this);
@@ -474,28 +474,8 @@ public class RepresentativeServiceImplTest {
   }
 
   @Test(expected = EEAException.class)
-  public void createLeadReporterNotFoundUserExceptionTest() throws EEAException {
-    Representative representative = new Representative();
-    representative.setId(1L);
-    representative.setLeadReporters(leadReporters);
-    RepresentativeVO representativeVO = new RepresentativeVO();
-    representativeVO.setLeadReporters(leadReportersVO);
-    representativeVO.setDataProviderId(1L);
-
-    Mockito.when(representativeRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(representative));
-    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
-    try {
-      representativeServiceImpl.createLeadReporter(1L, leadReporterVO);
-    } catch (EEAException e) {
-      Assert.assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getMessage());
-      throw e;
-    }
-  }
-
-  @Test(expected = EEAException.class)
   public void createLeadReporterDuplicatedUserExceptionTest() throws EEAException {
-    LeadReporter leadReporter2 = new LeadReporter(1L, "email@user.com", representative);
+    LeadReporter leadReporter2 = new LeadReporter(1L, "email@user.com", representative, null);
     leadReporters.add(leadReporter2);
     Representative representative = new Representative();
     representative.setId(1L);
@@ -591,29 +571,6 @@ public class RepresentativeServiceImplTest {
     }
   }
 
-  @Test(expected = EEAException.class)
-  public void updateLeadReporterUserNotFoundExceptionTest() throws EEAException {
-    Representative representative = new Representative();
-    representative.setId(1L);
-    representative.setLeadReporters(leadReporters);
-    representative.setHasDatasets(true);
-    representative.setDataflow(new Dataflow());
-    representative.setDataProvider(new DataProvider());
-    leadReporterVO.setRepresentativeId(1L);
-
-    Mockito.when(leadReporterRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(leadReporter));
-    Mockito.when(representativeRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(representative));
-    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
-    try {
-      representativeServiceImpl.updateLeadReporter(leadReporterVO);
-    } catch (EEAException e) {
-      Assert.assertEquals(EEAErrorMessage.USER_NOTFOUND, e.getMessage());
-      throw e;
-    }
-  }
-
   @Test
   public void deleteLeadReporterTest() throws EEAException {
     Mockito.when(leadReporterRepository.findById(Mockito.any()))
@@ -688,6 +645,24 @@ public class RepresentativeServiceImplTest {
     Mockito.when(dataProviderMapper.entityListToClass(Mockito.any()))
         .thenReturn(dataProviderListVO);
     assertEquals(Arrays.asList(1L), representativeServiceImpl.getProviderIds());
+  }
+
+  @Test
+  public void findRepresentativesByDataflowIdAnDataproviderListTest() {
+    List<Representative> representatives = new ArrayList<>();
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representatives.add(representative);
+    List<RepresentativeVO> representativeVOs = new ArrayList<>();
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setId(1L);
+    representativeVOs.add(representativeVO);
+    Mockito.when(representativeRepository.findByDataflowIdAndDataProviderIdIn(Mockito.anyLong(),
+        Mockito.any())).thenReturn(representatives);
+    Mockito.when(representativeMapper.entityListToClass(Mockito.anyList()))
+        .thenReturn(representativeVOs);
+    assertEquals(representativeVOs, representativeServiceImpl
+        .findRepresentativesByDataflowIdAndDataproviderList(1L, Arrays.asList(1L)));
   }
 
 }

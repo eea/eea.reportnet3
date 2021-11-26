@@ -122,18 +122,38 @@ export const useLeftSideBar = (
             : 'dataflowUsersList'
       };
 
+      const datasetsInfoBtn = {
+        className: 'dataflow-help-datasets-info-step',
+        icon: 'listClipboard',
+        isVisible: buttonsVisibility.datasetsInfoBtn,
+        label: 'datasetsInfo',
+        onClick: () => manageDialogs('isDatasetsInfoDialogVisible', true),
+        title: 'datasetsInfo'
+      };
+
+      const restrictFromPublicBtn = {
+        className: 'dataflow-showPublicInfo-help-step',
+        icon: 'userLock',
+        isVisible: buttonsVisibility.restrictFromPublicBtn,
+        label: 'restrictFromPublicSideBarButton',
+        onClick: () => manageDialogs('isRestrictFromPublicDialogVisible', true),
+        title: 'restrictFromPublicSideBarButton'
+      };
+
       //DON'T SORT ALPHABETICALLY
       const allButtons = [
         propertiesBtn,
         editBtn,
         editBusinessBtn,
         releaseableBtn,
+        restrictFromPublicBtn,
         showPublicInfoBtn,
         exportSchemaBtn,
         apiKeyBtn,
         manageRequestersBtn,
         manageReportersBtn,
-        userListBtn
+        userListBtn,
+        datasetsInfoBtn
       ];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));

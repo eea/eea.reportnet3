@@ -167,6 +167,19 @@ public class RepresentativeControllerImplTest {
   }
 
   /**
+   * Find represetatives by id data flow success legacy test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void findRepresetativesByIdDataFlowSuccessLegacyTest() throws EEAException {
+    when(representativeService.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(representativeVOs);
+    assertEquals("error in the message", representativeVOs,
+        representativeControllerImpl.findRepresentativesByIdDataFlowLegacy(1L));
+  }
+
+  /**
    * Update representative success test.
    *
    * @throws EEAException the EEA exception
@@ -567,5 +580,12 @@ public class RepresentativeControllerImplTest {
   public void findRepresentativesByDataFlowIdAndProviderIdListTest() {
     assertNotNull("is null", representativeControllerImpl
         .findRepresentativesByDataFlowIdAndProviderIdList(0L, new ArrayList<>()));
+  }
+
+  @Test
+  public void updateRestrictFromPublicTest() {
+    representativeControllerImpl.updateRestrictFromPublic(1L, 1L, true);
+    Mockito.verify(representativeService, times(1)).updateRepresentativeVisibilityRestrictions(
+        Mockito.anyLong(), Mockito.anyLong(), Mockito.anyBoolean());
   }
 }

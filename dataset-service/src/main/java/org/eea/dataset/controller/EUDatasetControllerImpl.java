@@ -3,7 +3,9 @@ package org.eea.dataset.controller;
 import java.util.List;
 import org.eea.dataset.service.EUDatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -20,12 +22,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * The Class EUDatasetControllerImpl.
  */
 @RestController
 @RequestMapping("/euDataset")
+@Api(tags = "EU datasets : EU Dataset Manager")
 public class EUDatasetControllerImpl implements EUDatasetController {
 
 
@@ -33,6 +39,9 @@ public class EUDatasetControllerImpl implements EUDatasetController {
   @Autowired
   private EUDatasetService euDatasetService;
 
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
 
   /**
    * The Constant LOG.
@@ -54,8 +63,10 @@ public class EUDatasetControllerImpl implements EUDatasetController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<EUDatasetVO> findEUDatasetByDataflowId(@PathVariable("id") Long idDataflow) {
+  @GetMapping(value = "/private/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Populate data from Datacollection", hidden = true)
+  public List<EUDatasetVO> findEUDatasetByDataflowId(@ApiParam(type = "Long", value = "Dataflow Id",
+      example = "0") @PathVariable("id") Long idDataflow) {
 
     return euDatasetService.getEUDatasetByDataflowId(idDataflow);
   }
@@ -67,11 +78,20 @@ public class EUDatasetControllerImpl implements EUDatasetController {
    */
   @Override
   @HystrixCommand
-  @PostMapping("/populateData/dataflow/{dataflowId}")
+  @PostMapping("/v1/populateData/dataflow/{dataflowId}")
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')  OR (checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN'))")
+  @ApiOperation(value = "Copy data collections data to EU datasets by dataflow id",
+      notes = "Allowed roles: CUSTODIAN, STEWARD")
   public void populateDataFromDataCollection(
-      @LockCriteria(name = "dataflowId") @PathVariable("dataflowId") Long dataflowId) {
+      @ApiParam(type = "Long", value = "Dataflow id", example = "0") @LockCriteria(
+          name = "dataflowId") @PathVariable("dataflowId") Long dataflowId) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    notificationControllerZuul.createUserNotificationPrivate("COPY_TO_EU_DATASET_INIT",
+        userNotificationContentVO);
+
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
@@ -82,4 +102,22 @@ public class EUDatasetControllerImpl implements EUDatasetController {
       LOG_ERROR.error("Error populating the EU Dataset because: {}", e.getMessage());
     }
   }
+
+  /**
+   * Populate data from data collection legacy.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping("/populateData/dataflow/{dataflowId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')  OR (checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN'))")
+  @ApiOperation(value = "Populate data from Datacollection", hidden = true,
+      notes = "Allowed roles: CUSTODIAN, STEWARD")
+  public void populateDataFromDataCollectionLegacy(
+      @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
+          name = "dataflowId") @PathVariable("dataflowId") Long dataflowId) {
+    this.populateDataFromDataCollection(dataflowId);
+  }
+
 }

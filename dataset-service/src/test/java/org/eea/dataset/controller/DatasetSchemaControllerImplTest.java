@@ -27,6 +27,7 @@ import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.impl.DataschemaServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
@@ -139,6 +140,10 @@ public class DatasetSchemaControllerImplTest {
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  /** The notification controller zuul. */
+  @Mock
+  private NotificationControllerZuul notificationControllerZuul;
+
 
   /**
    * The dataset schema VO.
@@ -219,8 +224,19 @@ public class DatasetSchemaControllerImplTest {
   public void findDataSchemaByDatasetIdTest() throws EEAException {
     when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.TRUE), Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
-    DataSetSchemaVO result = dataSchemaControllerImpl.findDataSchemaByDatasetId(1L);
-    Assert.assertNotNull(result);
+    Assert.assertNotNull(dataSchemaControllerImpl.findDataSchemaByDatasetId(1L));
+  }
+
+  /**
+   * Find data schema by dataset id legacy test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void findDataSchemaByDatasetIdLegacyTest() throws EEAException {
+    when(dataschemaService.getDataSchemaByDatasetId(Mockito.eq(Boolean.TRUE), Mockito.any()))
+        .thenReturn(new DataSetSchemaVO());
+    Assert.assertNotNull(dataSchemaControllerImpl.findDataSchemaByDatasetIdLegacy(1L));
   }
 
   /**
@@ -1649,6 +1665,17 @@ public class DatasetSchemaControllerImplTest {
     assertNull(dataSchemaControllerImpl.getSimpleSchema(1L, 1L, 1L));
   }
 
+
+  /**
+   * Gets the simple schema legacy test.
+   *
+   * @return the simple schema legacy test
+   */
+  @Test
+  public void getSimpleSchemaLegacyTest() {
+    assertNull(dataSchemaControllerImpl.getSimpleSchemaLegacy(1L, 1L, 1L));
+  }
+
   /**
    * Gets the simple schema null test.
    *
@@ -1685,6 +1712,9 @@ public class DatasetSchemaControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void importSchemasForbiddenTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
     MultipartFile multipartFile =
         new MockMultipartFile("file", "file.zip", "application/x-zip-compressed", "".getBytes());
     DataFlowVO dataflowVO = new DataFlowVO();
@@ -1700,6 +1730,8 @@ public class DatasetSchemaControllerImplTest {
 
   @Test
   public void testImportSchemas() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
@@ -1725,6 +1757,8 @@ public class DatasetSchemaControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void testImportSchemasException() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
@@ -1789,6 +1823,21 @@ public class DatasetSchemaControllerImplTest {
         Mockito.any());
   }
 
+  /**
+   * Export field schemas legacy test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void exportFieldSchemasLegacyTest() throws EEAException, IOException {
+
+    dataSchemaControllerImpl.exportFieldSchemasLegacy(new ObjectId().toString(), 1L,
+        new ObjectId().toString());
+    Mockito.verify(dataschemaService, times(1)).exportFieldsSchema(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
 
   @Test(expected = ResponseStatusException.class)
   public void testExportFieldSchemasException() throws EEAException, IOException {
@@ -1808,6 +1857,8 @@ public class DatasetSchemaControllerImplTest {
 
   @Test
   public void testImportFieldSchemas() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
@@ -1831,6 +1882,162 @@ public class DatasetSchemaControllerImplTest {
         Mockito.any(), Mockito.any(), Mockito.anyBoolean());
   }
 
+  /**
+   * Import field schemas legacy test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void importFieldSchemasLegacyTest() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    ZipOutputStream zip = new ZipOutputStream(baos);
+    ZipEntry entry1 = new ZipEntry("Table.schema");
+    ZipEntry entry2 = new ZipEntry("Table.qcrules");
+    zip.putNextEntry(entry1);
+    zip.putNextEntry(entry2);
+    zip.close();
+    MultipartFile multipartFile = new MockMultipartFile("file", "file.zip",
+        "application/x-zip-compressed", baos.toByteArray());
+
+    dataSchemaControllerImpl.importFieldSchemasLegacy(new ObjectId().toString(), 1L,
+        new ObjectId().toString(), multipartFile, true);
+    Mockito.verify(dataschemaService, times(1)).importFieldsSchema(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+  }
+
+
+  @Test
+  public void testExportFieldSchemasFromDataset() throws EEAException, IOException {
+
+    dataSchemaControllerImpl.exportFieldSchemasFromDataset(1L);
+    Mockito.verify(dataschemaService, times(1)).exportZipFieldSchemas(Mockito.anyLong());
+  }
+
+
+  /**
+   * Export field schemas from dataset legacy test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void exportFieldSchemasFromDatasetLegacyTest() throws EEAException, IOException {
+    dataSchemaControllerImpl.exportFieldSchemasFromDatasetLegacy(1L);
+    Mockito.verify(dataschemaService, times(1)).exportZipFieldSchemas(Mockito.anyLong());
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void testExportFieldSchemasFromDatasetException() throws EEAException, IOException {
+    try {
+      doThrow(new EEAException("error")).when(dataschemaService)
+          .exportZipFieldSchemas(Mockito.anyLong());
+
+      dataSchemaControllerImpl.exportFieldSchemasFromDataset(1L);
+
+    } catch (EEAException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getTableSchemasIdsExceptionTest() {
+    try {
+      dataSchemaControllerImpl.getTableSchemasIds(null, 1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getTableSchemasIdsInternalServerErrorException() throws EEAException {
+    try {
+      doThrow(new EEAException("error")).when(dataschemaService).getTableSchemasIds(1L);
+      dataSchemaControllerImpl.getTableSchemasIds(1L, 1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void getTableSchemasIdsTest() throws EEAException {
+    dataSchemaControllerImpl.getTableSchemasIds(1L, 1L, 1L);
+    Mockito.verify(dataschemaService, times(1)).getTableSchemasIds(Mockito.anyLong());
+  }
+
+  /**
+   * Gets the table schemas ids legacy test.
+   *
+   * @return the table schemas ids legacy test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getTableSchemasIdsLegacyTest() throws EEAException {
+    dataSchemaControllerImpl.getTableSchemasIdsLegacy(1L, 1L, 1L);
+    Mockito.verify(dataschemaService, times(1)).getTableSchemasIds(Mockito.anyLong());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void findPublicDataSchemaByDatasetIdExceptionTest() throws EEAException {
+    try {
+      doThrow(new EEAException("error")).when(dataschemaService).getDataSchemaByDatasetId(true, 1L);
+      dataSchemaControllerImpl.findDataSchemaByDatasetIdPrivate(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void findPublicDataSchemaByDatasetIdTest() throws EEAException {
+    dataSchemaControllerImpl.findDataSchemaByDatasetIdPrivate(1L);
+    Mockito.verify(dataschemaService, times(1)).getDataSchemaByDatasetId(true, 1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getPublicUniqueConstraintsExceptionTest() {
+    try {
+      dataSchemaControllerImpl.getPublicUniqueConstraints(null, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void getPublicUniqueConstraintsTest() {
+    dataSchemaControllerImpl.getPublicUniqueConstraints("schema", 1L);
+    Mockito.verify(dataschemaService, times(1)).getUniqueConstraints("schema");
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void findDataSchemasByIdDataflowExceptionTest() throws EEAException {
+    List<DesignDatasetVO> designs = new ArrayList<>();
+    DesignDatasetVO design = new DesignDatasetVO();
+    design.setId(1L);
+    designs.add(design);
+    try {
+      doThrow(new EEAException("error")).when(dataschemaService).getDataSchemaByDatasetId(false,
+          1L);
+      Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(1L)).thenReturn(designs);
+      dataSchemaControllerImpl.findDataSchemasByIdDataflow(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
 
 }

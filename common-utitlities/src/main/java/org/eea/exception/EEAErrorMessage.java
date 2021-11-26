@@ -359,6 +359,14 @@ public final class EEAErrorMessage {
   /** The Constant MESSAGE_INCORRECT_ID: {@value}. */
   public static final String MESSAGE_INCORRECT_ID = "Message Id incorrect";
 
+  /** The Constant IS_RESTRICT_FROM_PUBLIC: {@value}. */
+  public static final String IS_RESTRICT_FROM_PUBLIC =
+      "The representative is restricted from public";
+
+  /** The Constant ERROR_VALIDATING_LEAD_REPORTERS: {@value}. */
+  public static final String ERROR_VALIDATING_LEAD_REPORTERS =
+      "There was an error validating the Lead Reporters.";
+
   /**
    * Instantiates a new EEA error message.
    */

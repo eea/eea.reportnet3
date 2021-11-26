@@ -13,11 +13,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The type Obligation controller.
  */
 @RestController
+@ApiIgnore
 @RequestMapping("/obligation")
 public class ObligationControllerImpl implements ObligationController {
 
@@ -38,12 +42,21 @@ public class ObligationControllerImpl implements ObligationController {
    */
   @Override
   @GetMapping(value = "/findOpened")
+  @ApiOperation(value = "Gets a list with all the opened obligations",
+      response = ObligationVO.class, responseContainer = "List", hidden = true)
   public List<ObligationVO> findOpenedObligations(
-      @RequestParam(value = "clientId", required = false) Integer clientId,
-      @RequestParam(value = "spatialId", required = false) Integer spatialId,
-      @RequestParam(value = "issueId", required = false) Integer issueId,
-      @RequestParam(value = "deadlineDateFrom", required = false) Long deadlineDateFrom,
-      @RequestParam(value = "deadlineDateTo", required = false) Long deadlineDateTo) {
+      @ApiParam(value = "Client Id", example = "0") @RequestParam(value = "clientId",
+          required = false) Integer clientId,
+      @ApiParam(value = "Spatial Id", example = "0") @RequestParam(value = "spatialId",
+          required = false) Integer spatialId,
+      @ApiParam(value = "Issue Id", example = "0") @RequestParam(value = "issueId",
+          required = false) Integer issueId,
+      @ApiParam(value = "Deadline date starting from", example = "YYYY-MM-DD",
+          required = false) @RequestParam(value = "deadlineDateFrom",
+              required = false) Long deadlineDateFrom,
+      @ApiParam(value = "Deadline date ending on", example = "YYYY-MM-DD",
+          required = false) @RequestParam(value = "deadlineDateTo",
+              required = false) Long deadlineDateTo) {
     Date deadlineFrom =
         Optional.ofNullable(deadlineDateFrom).map(date -> new Date(date)).orElse(null);
     Date deadlineTo = Optional.ofNullable(deadlineDateTo).map(date -> new Date(date)).orElse(null);
@@ -59,6 +72,8 @@ public class ObligationControllerImpl implements ObligationController {
    */
   @Override
   @GetMapping(value = "/{id}", produces = {MediaType.APPLICATION_JSON_VALUE})
+  @ApiOperation(value = "Gets an obligation based on its Id", response = ObligationVO.class,
+      hidden = true)
   public ObligationVO findObligationById(@PathVariable(value = "id") Integer id) {
 
     return obligationService.findObligationById(id);

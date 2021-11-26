@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.GroupValidationVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.multitenancy.DatasetId;
@@ -25,8 +26,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+
 /**
- * The Class FileTreatmentHelper.
+ * The Class LoadValidationsHelper.
  */
 @Component
 public class LoadValidationsHelper {
@@ -153,12 +155,15 @@ public class LoadValidationsHelper {
     validation.setIdDatasetSchema(dataset.getIdDatasetSchema());
     validation.setIdDataset(datasetId);
 
-    validation.setErrors(validationRepository.findGroupRecordsByFilter(datasetId, levelErrorsFilter,
-        typeEntitiesFilter, tableFilter, fieldValueFilter, pageable, headerField, asc, true));
+    List<GroupValidationVO> errors =
+        validationRepository.findGroupRecordsByFilter(datasetId, levelErrorsFilter,
+            typeEntitiesFilter, tableFilter, fieldValueFilter, pageable, headerField, asc, true);
+    validationService.getRuleMessage(dataset, errors);
+
+    validation.setErrors(errors);
     validation.setTotalErrors(validationRepository.count());
 
-    validation.setTotalRecords(Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId,
-        new ArrayList<>(), new ArrayList<>(), "", "", pageable, "", asc, false).size()));
+    validation.setTotalRecords(Long.valueOf(errors.size()));
 
     validation.setTotalFilteredRecords(
         Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId, levelErrorsFilter,

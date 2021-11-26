@@ -45,6 +45,7 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.UniqueConstraintSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.util.GeometryValidationUtils;
 import org.eea.validation.util.KieBaseManager;
 import org.junit.Assert;
 import org.junit.Before;
@@ -113,6 +114,10 @@ public class RulesServiceImplTest {
    */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The Geometry validation utils. */
+  @Mock
+  private GeometryValidationUtils GeometryValidationUtils;
 
   /** The unique repository. */
   @Mock
@@ -513,6 +518,9 @@ public class RulesServiceImplTest {
   public void createAutomaticRulesPositionTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     List<Rule> rules = new ArrayList<>();
+    Document doc = new Document();
+    when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
+        .thenReturn(doc);
     Rule rule = new Rule();
     rule.setShortCode("ft01");
     rules.add(rule);
@@ -520,13 +528,16 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.MULTIPOLYGON, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(3)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   @Test
   public void createAutomaticRulesPointTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     List<Rule> rules = new ArrayList<>();
+    Document doc = new Document();
+    when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
+        .thenReturn(doc);
     Rule rule = new Rule();
     rule.setShortCode("ft01");
     rules.add(rule);
@@ -534,27 +545,34 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.POINT, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(3)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   @Test
   public void createAutomaticRulesMultipointTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
+    Document doc = new Document();
+    when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
+        .thenReturn(doc);
     List<Rule> rules = new ArrayList<>();
     Rule rule = new Rule();
     rule.setShortCode("ft01");
     rules.add(rule);
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.MULTIPOINT, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(3)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   @Test
   public void createAutomaticRulesLinestringTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     List<Rule> rules = new ArrayList<>();
+    Document doc = new Document();
+    when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
+        .thenReturn(doc);
     Rule rule = new Rule();
     rule.setShortCode("ft01");
     rules.add(rule);
@@ -562,13 +580,16 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.LINESTRING, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(3)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   @Test
   public void createAutomaticRulesMultilinestringTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     List<Rule> rules = new ArrayList<>();
+    Document doc = new Document();
+    when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
+        .thenReturn(doc);
     Rule rule = new Rule();
     rule.setShortCode("ft01");
     rules.add(rule);
@@ -576,13 +597,16 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.MULTILINESTRING, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(3)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   @Test
   public void createAutomaticRulesPolygonTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     List<Rule> rules = new ArrayList<>();
+    Document doc = new Document();
+    when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
+        .thenReturn(doc);
     Rule rule = new Rule();
     rule.setShortCode("ft01");
     rules.add(rule);
@@ -590,13 +614,16 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.POLYGON, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(3)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   @Test
   public void createAutomaticRulesGeometrycollectionTest() throws EEAException {
     RulesSchema ruleSchema = new RulesSchema();
     List<Rule> rules = new ArrayList<>();
+    Document doc = new Document();
+    when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
+        .thenReturn(doc);
     Rule rule = new Rule();
     rule.setShortCode("ft01");
     rules.add(rule);
@@ -604,7 +631,7 @@ public class RulesServiceImplTest {
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.GEOMETRYCOLLECTION, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
-    Mockito.verify(rulesRepository, times(2)).createNewRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesRepository, times(3)).createNewRule(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -1175,58 +1202,6 @@ public class RulesServiceImplTest {
     }
   }
 
-  /**
-   * Insert rule in position test.
-   */
-  @Test
-  public void insertRuleInPositionTest() {
-    Rule rule = new Rule();
-    when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
-    when(rulesRepository.deleteRuleById(Mockito.any(), Mockito.any())).thenReturn(true);
-    when(rulesRepository.insertRuleInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
-        .thenReturn(true);
-    rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        0);
-    Mockito.verify(rulesRepository, times(1)).insertRuleInPosition(Mockito.any(), Mockito.any(),
-        Mockito.anyInt());
-  }
-
-  /**
-   * Insert rule in position no delete test.
-   */
-  @Test
-  public void insertRuleInPositionNoDeleteTest() {
-    when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
-    when(rulesRepository.deleteRuleById(Mockito.any(), Mockito.any())).thenReturn(false);
-    rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        0);
-    Mockito.verify(rulesRepository, times(1)).deleteRuleById(Mockito.any(), Mockito.any());
-  }
-
-  /**
-   * Insert rule in position no insert test.
-   */
-  @Test
-  public void insertRuleInPositionNoInsertTest() {
-    when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
-    when(rulesRepository.deleteRuleById(Mockito.any(), Mockito.any())).thenReturn(true);
-    when(rulesRepository.insertRuleInPosition(Mockito.any(), Mockito.any(), Mockito.anyInt()))
-        .thenReturn(false);
-    rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
-        0);
-    Mockito.verify(rulesRepository, times(1)).insertRuleInPosition(Mockito.any(), Mockito.any(),
-        Mockito.anyInt());
-  }
-
-  /**
-   * Insert rule in position not found test.
-   */
-  @Test
-  public void insertRuleInPositionNotFoundTest() {
-    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(null);
-    Assert.assertEquals(false, rulesServiceImpl.insertRuleInPosition("5e44110d6a9e3a270ce13fac",
-        "5e44110d6a9e3a270ce13fac", 0));
-  }
 
   /**
    * Udate automatic rule all properties updated test.

@@ -104,9 +104,7 @@ const UserConfiguration = () => {
       return response;
     } catch (error) {
       console.error('UserConfiguration - changeUserProperties.', error);
-      notificationContext.add({
-        type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR'
-      });
+      notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' }, true);
     }
   };
 

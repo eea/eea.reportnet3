@@ -1,3 +1,5 @@
+@import '_styles/mixins';
+
 .actionTemplate {
   display: flex;
 }
@@ -10,8 +12,19 @@
   display: inline-block;
   vertical-align: middle;
 }
+
 .addEditRecordDialog {
-  width: 35vw !important;
+  @include for-phone-landscape-up {
+    max-width: 90%;
+  }
+
+  @include for-tablet-landscape-up {
+    max-width: 80%;
+  }
+
+  @include for-desktop-up {
+    max-width: 60%;
+  }
 }
 .fieldDisabled {
   cursor: default;
@@ -19,6 +32,19 @@
 .chips {
   display: flex !important;
   justify-content: center;
+}
+.coordinatesMoreInfo {
+  @include for-phone-landscape-up {
+    width: 90vw;
+  }
+
+  @include for-tablet-landscape-up {
+    width: 80vw;
+  }
+
+  @include for-desktop-up {
+    width: 70vw;
+  }
 }
 .currentPageWrapper {
   label {

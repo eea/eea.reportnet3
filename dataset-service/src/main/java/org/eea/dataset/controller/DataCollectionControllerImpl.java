@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -38,6 +40,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The Class DataCollectionControllerImpl.
@@ -45,6 +49,7 @@ import io.swagger.annotations.ApiResponse;
 @RestController
 @RequestMapping("/datacollection")
 @Api(tags = "Dataset: Data Collection Manager")
+@ApiIgnore
 public class DataCollectionControllerImpl implements DataCollectionController {
 
   /** The Constant LOG. */
@@ -61,6 +66,10 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @Autowired
   private LockService lockService;
 
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
+
   /**
    * Undo data collection creation.
    *
@@ -70,8 +79,12 @@ public class DataCollectionControllerImpl implements DataCollectionController {
    */
   @Override
   @PutMapping("/private/rollback/dataflow/{dataflowId}")
-  public void undoDataCollectionCreation(@RequestParam("datasetIds") List<Long> datasetIds,
-      @PathVariable("dataflowId") Long dataflowId, boolean isCreation) {
+  @ApiOperation(value = "Rollback DataCollection creation", hidden = true)
+  public void undoDataCollectionCreation(
+      @ApiParam(value = "List of dataset Ids",
+          example = "1,2,3") @RequestParam("datasetIds") List<Long> datasetIds,
+      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "check if method is creation", example = "true") boolean isCreation) {
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
@@ -95,8 +108,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @PostMapping("/create")
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataCollectionVO.idDataflow,'DATAFLOW_CUSTODIAN', 'DATAFLOW_STEWARD')")
-  @ApiOperation(value = "Create a Data Collection")
-  @ApiResponse(code = 400, message = EEAErrorMessage.NOT_DESIGN_DATAFLOW)
+  @ApiOperation(value = "Create a Data Collection", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create data collection"),
+      @ApiResponse(code = 400, message = EEAErrorMessage.NOT_DESIGN_DATAFLOW)})
   public void createEmptyDataCollection(@ApiParam(
       value = "Stop And Notify SQL Errors: If an error is found in the SQL rules, it stops the creation process.",
       example = "true") @RequestParam(defaultValue = "true",
@@ -115,6 +129,10 @@ public class DataCollectionControllerImpl implements DataCollectionController {
           example = "true") @RequestParam(defaultValue = "true",
               name = "stopAndNotifyPKError") boolean stopAndNotifyPKError) {
 
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataCollectionVO.getIdDataflow());
+    userNotificationContentVO.setDatasetName(dataCollectionVO.getDataSetName());
+
     Date date = dataCollectionVO.getDueDate();
     Long dataflowId = dataCollectionVO.getIdDataflow();
     // new check: dataflow is Reference dataset?
@@ -125,6 +143,12 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       showPublicInfo = false;
       manualCheck = false;
       stopAndNotifySQLErrors = false;
+
+      notificationControllerZuul.createUserNotificationPrivate("CREATE_REFERENCE_DATASETS_INIT",
+          userNotificationContentVO);
+    } else {
+      notificationControllerZuul.createUserNotificationPrivate("CREATE_DATA_COLLECTION_INIT",
+          userNotificationContentVO);
     }
 
     // Continue if the dataflow exists and is DESIGN
@@ -160,8 +184,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   @PutMapping("/update/{dataflowId}")
   @LockMethod(removeWhenFinish = false)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
-  @ApiOperation(value = "Update a Data Collection")
-  @ApiResponse(code = 400, message = EEAErrorMessage.NOT_DRAFT_DATAFLOW)
+  @ApiOperation(value = "Update a Data Collection", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update data collection"),
+      @ApiResponse(code = 400, message = EEAErrorMessage.NOT_DRAFT_DATAFLOW)})
   public void updateDataCollection(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") @LockCriteria(
           name = "dataflowId") Long dataflowId) {
@@ -202,12 +227,13 @@ public class DataCollectionControllerImpl implements DataCollectionController {
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find a Data Collection by Dataflow id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataCollectionVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<DataCollectionVO> findDataCollectionIdByDataflowId(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long idDataflow) {
     return dataCollectionService.getDataCollectionIdByDataflowId(idDataflow);
   }
+
 }

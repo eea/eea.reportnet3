@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import isNil from 'lodash/isNil';
 
@@ -52,6 +52,8 @@ export const WebformField = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const inputRef = useRef(null);
+
   const [webformFieldState, webformFieldDispatch] = useReducer(webformFieldReducer, {
     initialFieldValue: '',
     isDeleteAttachmentVisible: false,
@@ -81,7 +83,7 @@ export const WebformField = ({
     selectedFieldSchemaId
   } = webformFieldState;
 
-  const { formatDate, getInputMaxLength, getMultiselectValues } = WebformRecordUtils;
+  const { formatDate, getMultiselectValues } = WebformRecordUtils;
 
   const { getObjectiveOptions } = PaMsUtils;
 
@@ -96,7 +98,7 @@ export const WebformField = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
-      await DatasetService.deleteAttachment(datasetId, selectedFieldId);
+      await DatasetService.deleteAttachment(dataflowId, datasetId, selectedFieldId, dataProviderId);
       onFillField(record, selectedFieldSchemaId, '');
       onToggleDeleteAttachmentDialogVisible(false);
     } catch (error) {
@@ -175,9 +177,7 @@ export const WebformField = ({
       webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
     } catch (error) {
       console.error('WebformField - onFilter.', error);
-      notificationContext.add({
-        type: 'GET_REFERENCED_LINK_VALUES_ERROR'
-      });
+      notificationContext.add({ type: 'GET_REFERENCED_LINK_VALUES_ERROR' }, true);
     } finally {
       webformFieldDispatch({ type: 'SET_IS_LOADING_DATA', payload: false });
     }
@@ -224,13 +224,13 @@ export const WebformField = ({
       }
     } catch (error) {
       if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('WebformField - onEditorSubmitValue.', error);
         if (updateInCascade) {
-          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' });
+          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' }, true);
         } else {
-          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' });
+          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
         }
       }
     } finally {
@@ -269,14 +269,10 @@ export const WebformField = ({
 
   const onUploadFileError = async ({ xhr }) => {
     if (xhr.status === 400) {
-      notificationContext.add({
-        type: 'UPLOAD_FILE_ERROR'
-      });
+      notificationContext.add({ type: 'UPLOAD_FILE_ERROR' }, true);
     }
     if (xhr.status === 423) {
-      notificationContext.add({
-        type: 'GENERIC_BLOCKED_ERROR'
-      });
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
     }
   };
 
@@ -453,18 +449,18 @@ export const WebformField = ({
       case 'NUMBER_DECIMAL':
         return (
           <InputText
+            characterCounterStyles={{ marginBottom: 0 }}
+            hasMaxCharCounter
             id={field.fieldId}
             keyfilter={RecordUtils.getFilter(type)}
-            maxLength={getInputMaxLength[type]}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value, field.isPrimary, field.updatesGroupInfo);
             }}
             onChange={event => onFillField(field, option, event.target.value)}
-            onFocus={event => {
-              onFocusField(event.target.value);
-            }}
+            onFocus={event => onFocusField(event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
+            ref={inputRef}
             value={field.value}
           />
         );
@@ -475,21 +471,17 @@ export const WebformField = ({
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
               id={field.fieldId}
-              maxLength={getInputMaxLength[type]}
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
                 else onEditorSubmitValue(field, option, event.target.value);
               }}
               onChange={event => onFillField(field, option, event.target.value)}
-              onFocus={event => {
-                onFocusField(event.target.value);
-              }}
+              onFocus={event => onFocusField(event.target.value)}
               onKeyDown={event => onEditorKeyChange(event, field, option)}
               value={field.value}
             />
             <CharacterCounter
               currentLength={field.value.length}
-              maxLength={getInputMaxLength.RICH_TEXT}
               style={{ position: 'relative', right: '0', top: '0.25rem' }}
             />
           </Fragment>
@@ -585,10 +577,20 @@ export const WebformField = ({
           onError={onUploadFileError}
           onUpload={onAttach}
           operation="PUT"
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.uploadAttachment, {
-            datasetId,
-            fieldId: selectedFieldId
-          })}`}
+          url={`${window.env.REACT_APP_BACKEND}${
+            isNil(dataProviderId)
+              ? getUrl(DatasetConfig.uploadAttachment, {
+                  dataflowId,
+                  datasetId,
+                  fieldId: selectedFieldId
+                })
+              : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
+                  dataflowId,
+                  datasetId,
+                  fieldId: selectedFieldId,
+                  providerId: dataProviderId
+                })
+          }`}
         />
       )}
       {isDeleteAttachmentVisible && (
