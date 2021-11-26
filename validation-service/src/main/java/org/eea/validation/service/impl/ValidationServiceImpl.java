@@ -399,9 +399,6 @@ public class ValidationServiceImpl implements ValidationService {
     List<TableValidation> validations = new ArrayList<>();
     try {
       if (table != null) {
-        if (!sqlRule.equals("null")) {
-          table.setRecords(new ArrayList<RecordValue>());
-        }
         validations = runTableValidations(table, session);
         tableValidationRepository.saveAll(validations);
       }

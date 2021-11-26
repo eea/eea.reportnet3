@@ -186,7 +186,7 @@ public class ValidationHelper implements DisposableBean {
       if (!processesMap.containsKey(processId)) {
         initializeProcess(processId, false, false);
       }
-      if (null != rule) {
+      if (null == rule) {
         if (null == processesMap.get(processId).getKieBase()) {
           processesMap.get(processId)
               .setKieBase(validationService.loadRulesKnowledgeBase(datasetId, null));
@@ -394,8 +394,6 @@ public class ValidationHelper implements DisposableBean {
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
-    LOG.info("Collecting Table Validation tasks");
-    releaseTableValidation(dataset, processId);
     LOG.info("Collecting Dataset Validation tasks");
     releaseDatasetValidation(dataset, processId);
     LOG.info("Collecting Record Validation tasks");
@@ -404,6 +402,8 @@ public class ValidationHelper implements DisposableBean {
     }
     LOG.info("Collecting Field Validation tasks");
     releaseFieldsValidation(dataset, processId, !filterEmptyFields(rules.getRules()));
+    LOG.info("Collecting Table Validation tasks");
+    releaseTableValidation(dataset, processId);
     startProcess(processId);
   }
 
@@ -684,6 +684,12 @@ public class ValidationHelper implements DisposableBean {
         schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
     for (Integer totalTables = tableList.size(); totalTables > 0; totalTables = totalTables - 1) {
       Long idTable = tableList.get(i++).getId();
+      releaseTableValidation(dataset, uuId, idTable, null);
+
+    }
+    i = 0;
+    for (Integer totalTables = tableList.size(); totalTables > 0; totalTables = totalTables - 1) {
+      Long idTable = tableList.get(i++).getId();
       for (Rule rule : rules) {
         String idTableSchema = tableList.get(i - 1).getIdTableSchema();
         if (EntityTypeEnum.TABLE.equals(rule.getType())
@@ -695,8 +701,6 @@ public class ValidationHelper implements DisposableBean {
           releaseTableValidation(dataset, uuId, idTable, rule);
         }
       }
-      releaseTableValidation(dataset, uuId, idTable, null);
-
     }
   }
 
