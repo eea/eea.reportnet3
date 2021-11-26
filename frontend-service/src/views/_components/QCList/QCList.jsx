@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import cloneDeep from 'lodash/cloneDeep';
@@ -62,8 +62,8 @@ export const QCList = withRouter(
       editingRows: [],
       isLoading: true,
       isTableSorted: false,
-      sortFieldValidations: '',
-      sortOrderValidations: '',
+      sortFieldValidations: null,
+      sortOrderValidations: null,
       validationId: '',
       validationList: {}
     });
@@ -629,7 +629,7 @@ export const QCList = withRouter(
       tabsValidationsDispatch({
         type: 'SET_IS_TABLE_SORTED',
         payload: {
-          value: true,
+          value: event.sortOrder === 1 || event.sortOrder === -1,
           sortFieldValidations: event.sortField,
           sortOrderValidations: event.sortOrder
         }
@@ -721,7 +721,6 @@ export const QCList = withRouter(
               onRowEditInit={onRowEditInit}
               onRowEditSave={onUpdateValidationRule}
               onSort={event => onSort(event)}
-              // paginator={tabsValidationsState.editingRows.length === 0}
               paginator={true}
               paginatorDisabled={tabsValidationsState.editingRows.length > 0}
               paginatorRight={!isNil(tabsValidationsState.filteredData) && getPaginatorRecordsCount()}
