@@ -172,14 +172,12 @@ export const Map = ({
             !MapUtils.inBounds({
               coord: data.results[i].latlng.lat,
               coordType: 'latitude',
-              checkProjected: true,
-              crs: currentCRS.value
+              checkProjected: true
             }) ||
             !MapUtils.inBounds({
               coord: data.results[i].latlng.lng,
               coordType: 'longitude',
-              checkProjected: true,
-              crs: currentCRS.value
+              checkProjected: true
             })
           ) {
             setHasErrors({ ...hasErrors, newPointError: true });
@@ -343,14 +341,12 @@ export const Map = ({
         (!MapUtils.inBounds({
           coord: e.latlng.lat,
           coordType: 'latitude',
-          checkProjected: true,
-          crs: currentCRS.value
+          checkProjected: true
         }) ||
           !MapUtils.inBounds({
             coord: e.latlng.lng,
             coordType: 'longitude',
-            checkProjected: true,
-            crs: currentCRS.value
+            checkProjected: true
           }))
       ) {
         setHasErrors({ ...hasErrors, newPointError: true });
@@ -543,16 +539,14 @@ export const Map = ({
                     ? newPositionMarker[0]
                     : JSON.parse(mapGeoJson).geometry.coordinates[0],
                   coordType: 'latitude',
-                  checkProjected: true,
-                  crs: e.target.value.value
+                  checkProjected: true
                 }) &&
                 MapUtils.inBounds({
                   coord: isNewPositionMarkerVisible
                     ? newPositionMarker[1]
                     : JSON.parse(mapGeoJson).geometry.coordinates[1],
                   coordType: 'longitude',
-                  checkProjected: true,
-                  crs: e.target.value.value
+                  checkProjected: true
                 })
               ) {
                 onCRSChange(e.target.value);

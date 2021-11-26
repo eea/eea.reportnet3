@@ -325,6 +325,7 @@ const DataViewer = withRouter(
 
     const filterDataResponse = data => {
       const dataFiltered = DataViewerUtils.parseData(data);
+
       if (dataFiltered.length > 0) {
         dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
       } else {

@@ -148,7 +148,7 @@ const hasValidCRS = (fieldValue, crs) => {
   return crs.some(crsItem => crsItem.value === parsedGeoJsonData.properties.srid);
 };
 
-const inBounds = ({ coord, coordType, checkProjected = false, crs }) => {
+const inBounds = ({ coord, coordType, checkProjected = false }) => {
   const parsedCoord = parseFloat(coord) || 0;
   if (checkProjected) {
     if (coordType === 'latitude') {
@@ -160,17 +160,11 @@ const inBounds = ({ coord, coordType, checkProjected = false, crs }) => {
         parsedCoord >= config.GEOGRAPHICAL_LONG_COORD_3035.min && parsedCoord <= config.GEOGRAPHICAL_LONG_COORD_3035.max
       );
     }
-  } else if (crs !== 'EPSG:3035') {
+  } else {
     if (coordType === 'latitude') {
       return parsedCoord >= config.GEOGRAPHICAL_LAT_COORD.min && parsedCoord <= config.GEOGRAPHICAL_LAT_COORD.max;
     } else {
       return parsedCoord >= config.GEOGRAPHICAL_LONG_COORD.min && parsedCoord <= config.GEOGRAPHICAL_LONG_COORD.max;
-    }
-  } else {
-    if (coordType === 'latitude') {
-      return parsedCoord >= config.METRICAL_X_COORD.min && parsedCoord <= config.METRICAL_X_COORD.max;
-    } else {
-      return parsedCoord >= config.METRICAL_Y_COORD.min && parsedCoord <= config.METRICAL_Y_COORD.max;
     }
   }
 };
