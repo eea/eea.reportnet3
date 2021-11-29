@@ -228,7 +228,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private RulesErrorUtils rulesErrorUtils;
 
-  /** The rules service */
+  /** The rules service. */
   @Autowired
   private RulesServiceImpl ruleservice;
 
@@ -329,19 +329,18 @@ public class ValidationServiceImpl implements ValidationService {
    * Load rules knowledge base.
    *
    * @param datasetId the dataset id
-   *
+   * @param rule the rule
    * @return the kie session
-   *
    * @throws EEAException the EEA exception
    * @throws SecurityException the security exception
    * @throws IllegalArgumentException the illegal argument exception
    */
   @Override
-  public KieBase loadRulesKnowledgeBase(Long datasetId) throws EEAException {
+  public KieBase loadRulesKnowledgeBase(Long datasetId, Rule rule) throws EEAException {
     KieBase kieBase;
     try {
       kieBase = kieBaseManager.reloadRules(datasetId,
-          datasetSchemaController.getDatasetSchemaId(datasetId));
+          datasetSchemaController.getDatasetSchemaId(datasetId), rule);
     } catch (FileNotFoundException e) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND, e);
     } catch (Exception e) {
@@ -367,13 +366,17 @@ public class ValidationServiceImpl implements ValidationService {
     if (dataset == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
+    List<DatasetValidation> validations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
     try {
-      List<DatasetValidation> validations = runDatasetValidations(dataset, session);
+      validations = runDatasetValidations(dataset, session);
 
       validationDatasetRepository.saveAll(validations);
     } finally {
       session.destroy();
+      validations = null;
+      dataset = null;
+      System.gc();
     }
 
   }
@@ -384,22 +387,26 @@ public class ValidationServiceImpl implements ValidationService {
    * @param datasetId the dataset id
    * @param idTable the id table
    * @param kieBase the kie base
+   * @param sqlRule the sql rule
    */
   @Override
   @Transactional
-  public void validateTable(Long datasetId, Long idTable, KieBase kieBase) {
+  public void validateTable(Long datasetId, Long idTable, KieBase kieBase, String sqlRule) {
     // Validating tables
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     TableValue table = tableRepository.findById(idTable).orElse(null);
     KieSession session = kieBase.newKieSession();
-
+    List<TableValidation> validations = new ArrayList<>();
     try {
       if (table != null) {
-        List<TableValidation> validations = runTableValidations(table, session);
+        validations = runTableValidations(table, session);
         tableValidationRepository.saveAll(validations);
       }
     } finally {
+      table = null;
+      validations = null;
       session.destroy();
+      System.gc();
     }
   }
 
@@ -418,10 +425,11 @@ public class ValidationServiceImpl implements ValidationService {
     List<RecordValue> records = recordRepository.findRecordsPageable(pageable);
     List<RecordValidation> recordValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
+    List<RecordValidation> validations = new ArrayList<>();
     try {
       for (RecordValue row : records) {
         runRecordValidations(row, session);
-        List<RecordValidation> validations = row.getRecordValidations();
+        validations = row.getRecordValidations();
         recordValidations.addAll(validations);
       }
       if (!recordValidations.isEmpty()) {
@@ -429,7 +437,10 @@ public class ValidationServiceImpl implements ValidationService {
         recordValidationRepository.saveAll(recordValidations);
       }
     } finally {
+      records = null;
+      validations = null;
       session.destroy();
+      System.gc();
     }
   }
 
@@ -451,17 +462,17 @@ public class ValidationServiceImpl implements ValidationService {
     List<FieldValidation> fieldValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
     try {
-      fields.forEach(field -> {
-
+      for (FieldValue field : fields) {
         List<FieldValidation> resultFields = runFieldValidations(field, session);
-
         fieldValidations.addAll(resultFields);
-      });
+      }
       if (!fieldValidations.isEmpty()) {
         TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
         validationFieldRepository.saveAll(fieldValidations);
       }
     } finally {
+      fields = null;
+      fieldValidations = null;
       session.destroy();
     }
   }
@@ -786,6 +797,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @param fileName the file name
    * @return the file
    * @throws IOException Signals that an I/O exception has occurred.
+   * @throws ResponseStatusException the response status exception
    */
   @Override
   public File downloadExportedFile(Long datasetId, String fileName)
@@ -910,7 +922,6 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param datasetId the dataset id
    * @param nHeaders the n headers
-   * @param fieldsToWrite the fields to write
    * @param csvWriter the csv writer
    * @param notificationVO the notification VO
    * @throws EEAException the EEA exception

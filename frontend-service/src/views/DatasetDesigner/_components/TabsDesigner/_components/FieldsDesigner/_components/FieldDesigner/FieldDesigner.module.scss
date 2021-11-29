@@ -219,11 +219,11 @@
 
 @keyframes fadeInBorder {
   0% {
-    border: 0px dashed var(--gray-75);
+    border: 0px dashed var(--c-gray-75);
     opacity: 0.2;
   }
   100% {
-    border: 1px dashed var(--gray-75);
+    border: 1px dashed var(--c-gray-75);
     opacity: 0.7;
   }
 }

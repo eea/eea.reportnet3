@@ -96,6 +96,23 @@ public class EUDatasetControllerImplTest {
   }
 
   /**
+   * Populate data from data collection legacy test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void populateDataFromDataCollectionLegacyTest() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doNothing().when(euDatasetService).populateEUDatasetWithDataCollection(Mockito.any());
+    euDatasetControllerImpl.populateDataFromDataCollectionLegacy(1L);
+    Mockito.verify(euDatasetService, times(1)).populateEUDatasetWithDataCollection(Mockito.any());
+  }
+
+  /**
    * Populate data from data collection exception test.
    *
    * @throws EEAException the EEA exception

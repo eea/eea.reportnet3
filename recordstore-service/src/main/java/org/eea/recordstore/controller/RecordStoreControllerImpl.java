@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
@@ -36,12 +37,14 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The Class RecordStoreControllerImpl.
  */
 @RestController
 @RequestMapping("/recordstore")
+@ApiIgnore
 public class RecordStoreControllerImpl implements RecordStoreController {
 
   /**
@@ -157,7 +160,10 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @ApiParam(value = "Dataset Partition Id", example = "0", required = true) @RequestParam(
           value = "idPartitionDataset", required = true) Long idPartitionDataset,
       @ApiParam(value = "Release date", example = "YYYY-MM-DD", required = false) @RequestParam(
-          value = "dateRelease", required = false) String dateRelease) {
+          value = "dateRelease", required = false) String dateRelease,
+      @ApiParam(value = "Prefilling reference", example = "false", required = false) @RequestParam(
+          value = "prefillingReference", required = false,
+          defaultValue = "false") Boolean prefillingReference) {
     try {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
@@ -169,7 +175,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       if (StringUtils.isNotBlank(dateRelease)) {
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateRelease);
       }
-      recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset, dateRelease);
+      recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset, dateRelease,
+          prefillingReference);
       LOG.info("Snapshot created");
     } catch (SQLException | IOException | RecordStoreAccessException | EEAException
         | ParseException e) {
@@ -208,11 +215,14 @@ public class RecordStoreControllerImpl implements RecordStoreController {
               required = true) Boolean isSchemaSnapshot,
       @ApiParam(value = "Should prior data be erased?", example = "true",
           defaultValue = "true") @RequestParam(value = "deleteData",
-              defaultValue = "true") Boolean deleteData) {
+              defaultValue = "true") Boolean deleteData,
+      @ApiParam(value = "Prefilling reference", example = "false", required = false) @RequestParam(
+          value = "prefillingReference", required = false,
+          defaultValue = "false") Boolean prefillingReference) {
 
     try {
       restoreSnapshotHelper.processRestoration(datasetId, idSnapshot, idPartition, datasetType,
-          isSchemaSnapshot, deleteData);
+          isSchemaSnapshot, deleteData, prefillingReference);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
@@ -306,6 +316,22 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @ApiParam(value = "Is the schema going to be materialized?",
           example = "true") @RequestParam("isMaterialized") boolean isMaterialized) {
     recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
+  }
+
+  /**
+   * Refresh materialized view.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @PutMapping("/private/refreshMaterializedView")
+  @ApiOperation(value = "Refreshes a materialized view", hidden = true)
+  public void refreshMaterializedView(
+      @ApiParam(value = "Dataset Id", example = "0") @RequestParam("datasetId") Long datasetId) {
+
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    recordStoreService.refreshMaterializedQuery(Arrays.asList(datasetId), false, false, null);
   }
 
 }

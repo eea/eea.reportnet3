@@ -3,6 +3,8 @@ package org.eea.validation.util;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.transaction.Transactional;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -89,6 +91,54 @@ public class GeometryValidationUtils {
       }
     }
     return true;
+  }
+
+  /**
+   * Check EPSGSRID.
+   *
+   * @param fieldValue the field value
+   * @return true, if successful
+   */
+  public static boolean checkEPSGSRID(FieldValue fieldValue) {
+    boolean rtn = false;
+    if (fieldValue.getValue().isEmpty()) {
+      rtn = true;
+    }
+    if (!rtn && existRSID(fieldValue.getValue())) {
+      // Obtain the SRID code removing all other characters from geojson
+      // The cases are the SRID supported in reportnet
+      Pattern p = Pattern.compile("\"srid\"+:\"+[0-9]+\"");
+      Matcher m = p.matcher(fieldValue.getValue());
+      List<String> srids = new ArrayList<>();
+      while (m.find()) {
+        srids.add(m.group().replaceAll("\\D+", ""));
+      }
+      for (String rsidAux : srids) {
+        switch (rsidAux.trim()) {
+          case "4326":
+          case "4258":
+          case "3035":
+            rtn = true;
+            break;
+          default:
+            rtn = false;
+            break;
+        }
+      }
+    }
+    return rtn;
+  }
+
+  /**
+   * Exist RSID.
+   *
+   * @param value the value
+   * @return true, if successful
+   */
+  private static boolean existRSID(String value) {
+    Pattern p = Pattern.compile("\\bsrid\\b");
+    Matcher m = p.matcher(value);
+    return m.find();
   }
 
   /**

@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The type Issue controller.
  */
 @RestController
+@ApiIgnore
 @RequestMapping("/obligation_issue")
 public class IssueControllerImpl implements IssueController {
 
