@@ -98,7 +98,7 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
               icon={isDownloading ? 'spinnerAnimate' : 'export'}
               iconPos="right"
               onClick={() => onFileDownload(dataflowId, message.id, message.providerId)}
-              style={{ color: message.direction ? 'var(--white)' : 'var(--c-black-400)' }}
+              style={{ color: message.direction ? 'var(--white-color)' : 'var(--c-black-400)' }}
               tooltip={`${resourcesContext.messages['downloadFile']}: ${message.messageAttachment.name}`}
               tooltipOptions={{ position: 'top' }}
             />

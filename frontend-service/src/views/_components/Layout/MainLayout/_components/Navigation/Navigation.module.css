@@ -1,6 +1,6 @@
 .header {
   overflow: hidden;
-  background-color: var(--white);
+  background-color: var(--white-color);
   padding: 0px 0px;
   display: flex;
   flex-direction: row;

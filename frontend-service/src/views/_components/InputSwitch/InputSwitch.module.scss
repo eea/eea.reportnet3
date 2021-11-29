@@ -1,6 +1,6 @@
 .inputswitch_dark_theme_checked:before {
-  background-color: var(--black) !important;
-  box-shadow: inset -4px 0px 1px 0.5px var(--white) !important;
+  background-color: var(--black-color) !important;
+  box-shadow: inset -4px 0px 1px 0.5px var(--white-color) !important;
 }
 
 .inputswitch_dark_theme_unchecked,
@@ -9,7 +9,7 @@
 }
 
 .inputswitch_dark_theme_checked {
-  background-color: var(--black) !important;
+  background-color: var(--black-color) !important;
 }
 
 .inputswitch_dark_theme_unchecked:before {
