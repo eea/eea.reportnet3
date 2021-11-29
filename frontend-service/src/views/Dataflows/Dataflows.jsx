@@ -428,23 +428,23 @@ const Dataflows = withRouter(({ history, match }) => {
     reporting: [
       {
         options: [
-          { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
-          { key: 'legalInstrument', label: 'This is inside a array -- INSTRUMENT', order: 2 },
-          { key: 'name', label: 'This is inside a array -- NAME', order: 0 },
-          { key: 'obligationId', label: 'This is inside a array -- OBLIGATION ID', order: 4 },
-          { key: 'obligationTitle', label: 'This is inside a array -- OBLIGATION TITLE', order: 3 }
+          // { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
+          // { key: 'legalInstrument', label: 'This is inside a array -- INSTRUMENT', order: 2 },
+          { key: 'name', label: 'This is inside a array -- NAME', order: 0 }
+          // { key: 'obligationId', label: 'This is inside a array -- OBLIGATION ID', order: 4 },
+          // { key: 'obligationTitle', label: 'This is inside a array -- OBLIGATION TITLE', order: 3 }
         ],
         type: 'INPUT'
-      },
-      {
-        type: 'MULTI_SELECT',
-        options: [
-          { key: 'status', label: 'This is inside a array -- STATUS', order: 0 },
-          { key: 'userRole', label: 'This is inside a array -- ROLES', order: 1 },
-          { key: 'pinned', label: 'This is inside a array -- PINNED', order: 2 }
-        ]
-      },
-      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' }
+      }
+      // {
+      //   type: 'MULTI_SELECT',
+      //   options: [
+      //     { key: 'status', label: 'This is inside a array -- STATUS', order: 0 },
+      //     { key: 'userRole', label: 'This is inside a array -- ROLES', order: 1 },
+      //     { key: 'pinned', label: 'This is inside a array -- PINNED', order: 2 }
+      //   ]
+      // },
+      // { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' }
       // (isCustodian || isAdmin) && {
       //   key: 'creationDate',
       //   label: resourcesContext.messages['creationDateFilterLabel'],
