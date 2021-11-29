@@ -122,6 +122,7 @@ const ActionsToolbar = ({
 
   const onExportTableData = async fileType => {
     setIsLoadingFile(true);
+    notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
       setExportTableDataName(createTableName(tableName, fileType));
       await DatasetService.exportTableData(datasetId, tableId, fileType);

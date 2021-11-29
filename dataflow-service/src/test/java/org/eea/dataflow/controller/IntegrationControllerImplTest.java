@@ -318,6 +318,25 @@ public class IntegrationControllerImplTest {
     Assert.assertEquals(0, response.size());
   }
 
+
+  /**
+   * Execute EU dataset export legacy test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void executeEUDatasetExportLegacyTest() throws EEAException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    Mockito.doNothing().when(integrationService).addPopulateEUDatasetLock(Mockito.anyLong());
+    Mockito.when(integrationService.executeEUDatasetExport(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Mockito.doNothing().when(integrationService).releasePopulateEUDatasetLock(Mockito.anyLong());
+    List<ExecutionResultVO> response = integrationControllerImpl.executeEUDatasetExportLegacy(1L);
+    Assert.assertEquals(0, response.size());
+  }
+
   /**
    * Execute EU dataset export exception test.
    *

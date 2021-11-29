@@ -32,6 +32,8 @@ import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
+import org.eea.validation.persistence.repository.SchemasRepository;
+import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.ValidationService;
@@ -137,6 +139,9 @@ public class ValidationHelperTest {
   @Mock
   private RulesRepository rulesRepository;
 
+  @Mock
+  private SchemasRepository schemasRepository;
+
   /**
    * Inits the mocks.
    */
@@ -174,11 +179,12 @@ public class ValidationHelperTest {
    */
   @Test
   public void getKieBase() throws EEAException {
-    Mockito.when(validationService.loadRulesKnowledgeBase(Mockito.eq(1l))).thenReturn(kieBase);
+    Mockito.when(validationService.loadRulesKnowledgeBase(Mockito.eq(1l), Mockito.any()))
+        .thenReturn(kieBase);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
-    KieBase result = validationHelper.getKieBase("", 1l);
+    KieBase result = validationHelper.getKieBase("", 1l, new Rule());
     Assert.assertNotNull(result);
   }
 
@@ -195,8 +201,8 @@ public class ValidationHelperTest {
     Mockito.when(authentication.getName()).thenReturn("user");
 
     Mockito.doThrow(new EEAException("error")).when(validationService)
-        .loadRulesKnowledgeBase(Mockito.eq(1l));
-    validationHelper.getKieBase("", 1l);
+        .loadRulesKnowledgeBase(Mockito.eq(1l), Mockito.any());
+    validationHelper.getKieBase("", 1l, null);
   }
 
   /**
@@ -260,12 +266,6 @@ public class ValidationHelperTest {
     ReflectionTestUtils.setField(validationHelper, "fieldBatchSize", 20);
     ReflectionTestUtils.setField(validationHelper, "recordBatchSize", 20);
     ReflectionTestUtils.setField(validationHelper, "initialTax", 2);
-    List<TableValue> tables = new ArrayList<>();
-    TableValue table = new TableValue();
-    table.setId(1l);
-    tables.add(table);
-    Mockito.when(tableRepository.findAll()).thenReturn(tables);
-
     ConsumerGroupVO consumerGroups = new ConsumerGroupVO();
     Collection<MemberDescriptionVO> members = new ArrayList<>();
 
@@ -291,7 +291,8 @@ public class ValidationHelperTest {
     rules.setRules(Arrays.asList(rule));
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rules);
     Mockito.when(validationService.countRecordsDataset(Mockito.eq(1l))).thenReturn(1);
-
+    Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any()))
+        .thenReturn(new DataSetSchema());
     validationHelper.executeValidation(1l, "1", false, false);
     Mockito.verify(validationService, Mockito.times(1)).deleteAllValidation(Mockito.eq(1l));
     Mockito.verify(kafkaSenderUtils, Mockito.times(2))

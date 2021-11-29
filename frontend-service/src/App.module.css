@@ -13,7 +13,7 @@ body {
 html,
 body h1,
 h2 {
-  color: var(--gray-110);
+  color: var(--c-gray-110);
 }
 .app {
   position: relative;

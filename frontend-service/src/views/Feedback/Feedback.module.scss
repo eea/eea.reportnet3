@@ -70,7 +70,7 @@
       .sendMessageTextarea {
         overflow: hidden;
         &:disabled {
-          border: 1px solid var(--gray-50);
+          border: 1px solid var(--c-gray-50);
         }
       }
       .buttonsWrapper {

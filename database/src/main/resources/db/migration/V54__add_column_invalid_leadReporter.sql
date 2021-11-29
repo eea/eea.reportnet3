@@ -1,0 +1,1 @@
+ALTER TABLE public.representative_leadreporter ADD column if not exists "invalid" bool NULL;

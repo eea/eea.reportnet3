@@ -284,7 +284,6 @@ public class ValidationControllerImpl implements ValidationController {
   public void exportValidationDataCSV(@ApiParam(value = "Dataset id used in the export process",
       example = "1") @PathVariable("datasetId") Long datasetId) {
     LOG.info("Export dataset validation data from datasetId {}, with type .csv", datasetId);
-
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDatasetId(datasetId);
     notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_VALIDATIONS_START",

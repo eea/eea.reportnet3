@@ -18,7 +18,7 @@
 
 .design {
   background-color: var(--statusBox-designer-bg);
-  color: var(--black);
+  color: var(--c-black-color);
 }
 
 .disabled {
@@ -65,6 +65,7 @@
   background-color: var(--c-growl-success-lighter-green);
   color: var(--c-growl-success-darker-green);
 }
+
 .valid {
   background-color: var(--statusBox-true-bg);
   color: var(--statusBox-true-color);

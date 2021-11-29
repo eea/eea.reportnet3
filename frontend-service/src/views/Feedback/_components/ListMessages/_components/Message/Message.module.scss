@@ -8,7 +8,7 @@
     background-color: var(--c-corporate-blue);
     border-radius: 12px;
     border: 2px solid var(--c-corporate-blue);
-    color: var(--white);
+    color: var(--c-white-color);
     cursor: pointer;
     height: 1.25rem;
     left: 6px;
@@ -36,10 +36,10 @@
     }
     .messageTextWrapper {
       .messageText {
-        color: var(--white);
+        color: var(--c-white-color);
       }
       .datetime {
-        color: var(--gray-5);
+        color: var(--c-gray-5);
       }
       .messageAttachment {
         background-color: var(--c-corporate-blue-lighter);
@@ -50,7 +50,7 @@
         width: fit-content;
         max-width: 30rem;
         span {
-          color: var(--white);
+          color: var(--c-white-color);
         }
         .downloadFileButton {
           margin-left: auto;
@@ -78,7 +78,7 @@
             }
           }
           svg {
-            color: var(--white);
+            color: var(--c-white-color);
             font-size: 16pt;
           }
         }
@@ -86,7 +86,7 @@
           margin-top: 0.5rem;
           font-weight: bold;
           span {
-            color: var(--gray-15);
+            color: var(--c-gray-15);
             font-size: 8pt;
             font-style: italic;
           }
@@ -101,7 +101,7 @@
     align-self: flex-start;
     border-radius: 0 10px 10px 10px;
     margin: 10px 0 3px 25px;
-    color: var(--white);
+    color: var(--c-white-color);
     background: var(--c-lilac-300);
     &.automatic {
       background-color: var(--automatic-message-receiver-bg) !important;
@@ -116,10 +116,10 @@
     }
     .messageTextWrapper {
       .messageText {
-        color: var(--white);
+        color: var(--c-white-color);
       }
       .datetime {
-        color: var(--gray-5);
+        color: var(--c-gray-5);
       }
       .messageAttachment {
         background-color: var(--c-lilac-200);

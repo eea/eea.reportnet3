@@ -272,17 +272,29 @@ export class BodyCell extends Component {
       } else {
         content = (
           <div className={styles.actionTemplate}>
-            <Button
-              className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
-                this.props.quickEditRowInfo && !this.props.quickEditRowInfo.condition ? 'p-button-animated-blink' : ''
-              }`}
-              disabled={this.props.quickEditRowInfo ? this.props.quickEditRowInfo.condition : false}
-              icon={this.props.quickEditRowInfo && this.calculateRowDisabledQuickEdit() ? 'spinnerAnimate' : 'clock'}
-              onClick={this.props.onRowEditInit}
-              tooltip={this.context.messages['quickEdit']}
-              tooltipOptions={{ position: 'top' }}
-              type="button"
-            />
+            <span data-for="sortedQuickEditTooltip" data-tip>
+              <Button
+                className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
+                  this.props.quickEditRowInfo && !this.props.quickEditRowInfo.condition ? 'p-button-animated-blink' : ''
+                }`}
+                disabled={this.props.quickEditRowInfo ? this.props.quickEditRowInfo.condition : false}
+                icon={this.props.quickEditRowInfo && this.calculateRowDisabledQuickEdit() ? 'spinnerAnimate' : 'clock'}
+                onClick={this.props.onRowEditInit}
+                tooltip={this.context.messages['quickEdit']}
+                tooltipOptions={{ position: 'top' }}
+                type="button"
+              />
+            </span>
+            {this.props.quickEditRowInfo.condition && (
+              <ReactTooltip
+                border={true}
+                className={styles.tooltip}
+                effect="solid"
+                id="sortedQuickEditTooltip"
+                place="top">
+                <span> {this.context.messages['disabledQuickEdit']} </span>
+              </ReactTooltip>
+            )}
             {this.props.body(this.props.rowData, this.props)}
           </div>
         );

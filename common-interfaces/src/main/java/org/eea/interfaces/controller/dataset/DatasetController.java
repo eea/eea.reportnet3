@@ -119,8 +119,23 @@ public interface DatasetController {
    * @param providerId the provider id
    * @param deletePrefilledTables the delete prefilled tables
    */
+  @DeleteMapping("/v1/{datasetId}/deleteDatasetData")
+  void deleteDatasetData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
+          required = false) Boolean deletePrefilledTables);
+
+  /**
+   * Delete import data legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param deletePrefilledTables the delete prefilled tables
+   */
   @DeleteMapping("/{datasetId}/deleteImportData")
-  void deleteImportData(@PathVariable("datasetId") Long datasetId,
+  void deleteImportDataLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
@@ -134,11 +149,26 @@ public interface DatasetController {
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    */
-  @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
-  void deleteImportTable(@PathVariable("datasetId") Long datasetId,
+  @DeleteMapping("/v1/{datasetId}/deleteTableData/{tableSchemaId}")
+  void deleteTableData(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
+
+  /**
+   * Delete import table legacy.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   */
+  @DeleteMapping("/{datasetId}/deleteImportTable/{tableSchemaId}")
+  void deleteImportTableLegacy(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("tableSchemaId") String tableSchemaId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
+
 
   /**
    * Export file.
@@ -146,10 +176,9 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param mimeType the mime type
-   * @return the response entity
    */
   @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  ResponseEntity<byte[]> exportFile(@RequestParam("datasetId") Long datasetId,
+  void exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("mimeType") String mimeType);
 
@@ -236,9 +265,33 @@ public interface DatasetController {
    * @param columnName the column name
    * @return the ETL dataset VO
    */
-  @GetMapping("/{datasetId}/etlExport")
+  @GetMapping("/v1/{datasetId}/etlExport")
   ResponseEntity<StreamingResponseBody> etlExportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam(value = "limit", required = false) Integer limit,
+      @RequestParam(value = "offset", required = false) Integer offset,
+      @RequestParam(value = "filterValue", required = false) String filterValue,
+      @RequestParam(value = "columnName", required = false) String columnName);
+
+
+  /**
+   * Etl export dataset legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @return the response entity
+   */
+  @GetMapping("/{datasetId}/etlExport")
+  ResponseEntity<StreamingResponseBody> etlExportDatasetLegacy(
+      @PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam(value = "limit", required = false) Integer limit,
@@ -254,8 +307,21 @@ public interface DatasetController {
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    */
-  @PostMapping("/{datasetId}/etlImport")
+  @PostMapping("/v1/{datasetId}/etlImport")
   void etlImportDataset(@PathVariable("datasetId") Long datasetId,
+      @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
+
+  /**
+   * Etl import dataset legacy.
+   *
+   * @param datasetId the dataset id
+   * @param etlDatasetVO the etl dataset VO
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   */
+  @PostMapping("/{datasetId}/etlImport")
+  void etlImportDatasetLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
 
@@ -268,9 +334,24 @@ public interface DatasetController {
    * @param providerId the provider id
    * @return the attachment
    */
-  @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
+  @GetMapping(value = "/v1/{datasetId}/field/{fieldId}/attachment",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   ResponseEntity<byte[]> getAttachment(@PathVariable("datasetId") Long datasetId,
+      @PathVariable("fieldId") String fieldId, @RequestParam(value = "dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
+
+  /**
+   * Gets the attachment legacy.
+   *
+   * @param datasetId the dataset id
+   * @param fieldId the field id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return the attachment legacy
+   */
+  @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  ResponseEntity<byte[]> getAttachmentLegacy(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String fieldId, @RequestParam(value = "dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
 
@@ -278,24 +359,59 @@ public interface DatasetController {
    * Update attachment.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param idField the id field
+   * @param file the file
+   */
+  @PutMapping("/v1/{datasetId}/field/{fieldId}/attachment")
+  void updateAttachment(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file);
+
+  /**
+   * Update attachment legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param idField the id field
    * @param file the file
    */
   @PutMapping("/{datasetId}/field/{fieldId}/attachment")
-  void updateAttachment(@PathVariable("datasetId") Long datasetId,
+  void updateAttachmentLegacy(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
       @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file);
 
   /**
    * Delete attachment.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param idField the id field
+   */
+  @DeleteMapping("/v1/{datasetId}/field/{fieldId}/attachment")
+  void deleteAttachment(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @PathVariable("fieldId") String idField);
+
+  /**
+   * Delete attachment legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
    * @param idField the id field
    */
   @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
-  void deleteAttachment(@PathVariable("datasetId") Long datasetId,
+  void deleteAttachmentLegacy(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
       @PathVariable("fieldId") String idField);
-
-
 
   /**
    * Delete data before replacing.
@@ -331,8 +447,30 @@ public interface DatasetController {
    * @param integrationId the integration id
    * @param delimiter the delimiter
    */
-  @PostMapping("/{datasetId}/importFileData")
+  @PostMapping("/v1/{datasetId}/importFileData")
   void importFileData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId,
+      @RequestParam(value = "delimiter", required = false) String delimiter);
+
+  /**
+   * Import file data legacy.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   * @param integrationId the integration id
+   * @param delimiter the delimiter
+   */
+  @PostMapping("/{datasetId}/importFileData")
+  void importFileDataLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,

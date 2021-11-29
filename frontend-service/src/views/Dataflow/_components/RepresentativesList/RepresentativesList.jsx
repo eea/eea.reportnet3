@@ -53,6 +53,7 @@ const RepresentativesList = ({
     allPossibleDataProvidersNoSelect: [],
     dataProvidersTypesList: [],
     deleteLeadReporterId: null,
+    focusedInputId: null,
     isDeleting: false,
     isLoading: false,
     isVisibleConfirmDeleteDialog: false,
@@ -332,6 +333,29 @@ const RepresentativesList = ({
 
   const setIsDeleting = value => formDispatcher({ type: 'SET_IS_DELETING', payload: { isDeleting: value } });
 
+  const setFocusedInputId = focusedInputId =>
+    formDispatcher({ type: 'SET_FOCUSED_INPUT_ID', payload: { focusedInputId } });
+
+  const renderIsValidUserIcon = (isNewLeadReporter, leadReporter, currentInputId) => {
+    if (!isNewLeadReporter && formState.focusedInputId !== currentInputId) {
+      return (
+        <Fragment>
+          <FontAwesomeIcon
+            className={styles.isValidUserIcon}
+            data-for={leadReporter?.account}
+            data-tip
+            icon={leadReporter?.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
+          />
+          <ReactTooltip border={true} effect="solid" id={leadReporter?.account} place="top">
+            {leadReporter?.isValid
+              ? resourcesContext.messages['validUserTooltip']
+              : resourcesContext.messages['invalidUserTooltip']}
+          </ReactTooltip>
+        </Fragment>
+      );
+    }
+  };
+
   const renderLeadReporterColumnTemplate = representative => {
     const { dataProviderId, representativeId } = representative;
 
@@ -341,42 +365,34 @@ const RepresentativesList = ({
       const reporters = formState.leadReporters[dataProviderId];
       const errors = formState.leadReportersErrors[dataProviderId];
       const isNewLeadReporter = TextUtils.areEquals(leadReporter.id, 'empty');
-
+      const uniqueInputId = `${leadReporter.id}-${representativeId}`;
       return (
         <div
           className={`${styles.inputWrapper} ${
             representative.leadReporters.length > 1 ? styles.inputWrapperMargin : undefined
           }`}
-          key={`${leadReporter.id}-${representativeId}`}>
+          key={uniqueInputId}>
           <InputText
             autoComplete={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
             autoFocus={isNewLeadReporter}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             disabled={representative.hasDatasets && reporters[leadReporter.id]?.isValid}
-            id={`${leadReporter.id}-${representativeId}`}
-            onBlur={event => onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter)}
+            id={uniqueInputId}
+            onBlur={event => {
+              onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter);
+              setFocusedInputId(null);
+            }}
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
-            onFocus={() => onCleanErrors(dataProviderId, leadReporter.id)}
+            onFocus={() => {
+              onCleanErrors(dataProviderId, leadReporter.id);
+              setFocusedInputId(uniqueInputId);
+            }}
             onKeyDown={event => onKeyDown(event, representativeId, dataProviderId, leadReporter)}
             placeholder={resourcesContext.messages['manageRolesDialogInputPlaceholder']}
             value={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
           />
 
-          {!isNewLeadReporter && isValidEmail(reporters[leadReporter.id]?.account || reporters[leadReporter.id]) && (
-            <Fragment>
-              <FontAwesomeIcon
-                className={styles.isValidUserIcon}
-                data-for={reporters[leadReporter.id]?.account}
-                data-tip
-                icon={reporters[leadReporter.id]?.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
-              />
-              <ReactTooltip border={true} effect="solid" id={reporters[leadReporter.id]?.account} place="top">
-                {reporters[leadReporter.id]?.isValid
-                  ? resourcesContext.messages['validUserTooltip']
-                  : resourcesContext.messages['invalidUserTooltip']}
-              </ReactTooltip>
-            </Fragment>
-          )}
+          {renderIsValidUserIcon(isNewLeadReporter, reporters[leadReporter.id], uniqueInputId)}
 
           {!isNewLeadReporter && (
             <Button

@@ -12,12 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The Class EmailControllerImpl.
  */
 @RestController
 @RequestMapping("/email")
+@ApiIgnore
 @Api(tags = "Email : Email Manager")
 public class EmailControllerImpl implements EmailController {
 
@@ -33,7 +35,7 @@ public class EmailControllerImpl implements EmailController {
   @Override
   @PostMapping(value = "/private/send", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Sends a email message using an E-mail object with the information.",
-      hidden = false)
+      hidden = true)
   public void sendMessage(
       @ApiParam(value = "Email object containing the data") @RequestBody EmailVO emailVO) {
     emailService.sendMessage(emailVO);

@@ -1,5 +1,10 @@
 package org.eea.ums.service.impl;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,30 +12,44 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.ums.UserRoleVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.ums.service.UserRoleService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.server.ResponseStatusException;
+import com.opencsv.CSVWriter;
 
 /**
  * The Class UserRoleServiceImpl.
  */
 @Service("UserRoleService")
+
 public class UserRoleServiceImpl implements UserRoleService {
 
 
@@ -42,8 +61,37 @@ public class UserRoleServiceImpl implements UserRoleService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  /** The representative controller zuul. */
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The Constant ROLE: {@value}. */
+  private static final String ROLE = "Role";
+
+  /** The Constant USER: {@value}. */
+  private static final String USER = "User";
+
+  /** The Constant COUNTRY: {@value}. */
+  private static final String COUNTRY = "Country";
+
+  /** The delimiter. */
+  @Value("${exportDataDelimiter}")
+  private char delimiter;
+
+  /** The path public file. */
+  @Value("${umsExportPathFile}")
+  private String pathPublicFile;
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant DOWNLOAD_USERS_BY_COUNTRY_EXCEPTION: {@value}. */
+  private static final String DOWNLOAD_USERS_BY_COUNTRY_EXCEPTION =
+      "Download exported users by country found a file with the followings parameters:, dataflowId: %s + filename: %s";
 
   /**
    * Gets the user roles by dataflow country.
@@ -309,6 +357,102 @@ public class UserRoleServiceImpl implements UserRoleService {
         userRoleList.add(userRoleVO);
       } ;
     }
+  }
+
+  /**
+   * Export users by country.
+   *
+   * @param dataflowId the dataflow id
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Async
+  @Override
+  public void exportUsersByCountry(Long dataflowId) throws IOException, EEAException {
+    String composedFileName = "dataflow-" + dataflowId + "-UsersByCountry";
+    String fileNameWithExtension = composedFileName + "." + FileTypeEnum.CSV.getValue();
+    File fileFolder = new File(pathPublicFile, composedFileName);
+    String creatingFileError =
+        String.format("Failed generating CSV file with name %s, using dataflowId %s",
+            fileNameWithExtension, dataflowId);
+
+    fileFolder.mkdirs();
+
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+        .dataflowId(dataflowId).fileName(fileNameWithExtension).error(creatingFileError).build();
+
+    StringWriter stringWriter = new StringWriter();
+
+    try (CSVWriter csvWriter =
+        new CSVWriter(stringWriter, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+      List<String> headers = new ArrayList<>();
+      headers.add(ROLE);
+      headers.add(USER);
+      headers.add(COUNTRY);
+      csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+      int nHeaders = 3;
+      fillUserByCountryExportData(csvWriter, dataflowId, nHeaders);
+    } catch (IOException e) {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_USERS_BY_COUNTRY_FAILED_EVENT,
+          null, notificationVO);
+      LOG_ERROR.info(String.format(EEAErrorMessage.CSV_FILE_ERROR, e, "DataflowId: " + dataflowId));
+      return;
+    }
+
+    String csv = stringWriter.getBuffer().toString();
+    byte[] file = csv.getBytes();
+
+    File fileWrite = new File(new File(pathPublicFile, composedFileName), fileNameWithExtension);
+
+    try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
+      out.write(file);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+          EventType.EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT, null, notificationVO);
+    }
+  }
+
+  /**
+   * Fill user by country export data.
+   *
+   * @param csvWriter the csv writer
+   * @param dataflowId the dataflow id
+   * @param nHeaders the n headers
+   */
+  private void fillUserByCountryExportData(CSVWriter csvWriter, Long dataflowId, int nHeaders) {
+    List<UserRoleVO> userRoles = getUserRolesByDataflow(dataflowId);
+    if (userRoles != null) {
+      String[] fieldsToWrite;
+      for (UserRoleVO userRole : userRoles) {
+        fieldsToWrite = new String[nHeaders];
+        fieldsToWrite[0] = userRole.getRoles().get(0);
+        fieldsToWrite[1] = userRole.getEmail();
+        fieldsToWrite[2] = userRole.getDataProviderName();
+        csvWriter.writeNext(fieldsToWrite);
+      }
+    }
+  }
+
+  /**
+   * Download users by country.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @return the file
+   * @throws ResponseStatusException the response status exception
+   */
+  @Override
+  public File downloadUsersByCountry(Long dataflowId, String fileName)
+      throws ResponseStatusException {
+    String folderName = fileName.replace(".csv", "");
+    File file = new File(new File(pathPublicFile, folderName), fileName);
+    if (!file.exists()) {
+      LOG_ERROR.error(String.format(DOWNLOAD_USERS_BY_COUNTRY_EXCEPTION, dataflowId, fileName));
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          String.format(DOWNLOAD_USERS_BY_COUNTRY_EXCEPTION, dataflowId, fileName));
+    }
+    return file;
   }
 
 

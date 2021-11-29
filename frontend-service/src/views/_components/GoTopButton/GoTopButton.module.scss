@@ -6,14 +6,14 @@
   font-size: 20px;
   border: none;
   outline: none;
-  background-color: var(--gotopbutton-bg-color);
-  color: var(--gotopbutton-color);
+  background-color: var(--go-top-button-bg-color);
+  color: var(--go-top-button-color);
   cursor: pointer;
   padding: 8px;
   border-radius: 50%;
-  box-shadow: var(--gotopbutton-box-shadow);
+  box-shadow: var(--go-top-button-box-shadow);
   :hover {
-    color: var(--gotopbutton-color-hover);
-    background-color: var(--gotopbutton-bg-color-hover);
+    color: var(--go-top-button-color-hover);
+    background-color: var(--go-top-button-bg-color-hover);
   }
 }

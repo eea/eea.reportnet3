@@ -13,6 +13,8 @@ import proj4 from 'proj4';
 import * as ELG from 'esri-leaflet-geocoder';
 import * as esri from 'esri-leaflet';
 
+import { Button } from 'views/_components/Button';
+import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { Map as MapComponent, GeoJSON, Marker, Popup } from 'react-leaflet';
 // import { EditControl } from 'react-leaflet-draw';
@@ -107,6 +109,7 @@ export const Map = ({
       : selectedCRS
   );
 
+  const [hasErrors, setHasErrors] = useState({});
   const [newPositionMarker, setNewPositionMarker] = useState();
   const [mapGeoJson, setMapGeoJson] = useState(
     geoJson === ''
@@ -165,14 +168,30 @@ export const Map = ({
       results.clearLayers();
       if (TextUtils.areEquals(geometryType, 'POINT')) {
         for (let i = data.results.length - 1; i >= 0; i--) {
-          setNewPositionMarker([data.results[i].latlng.lat, data.results[i].latlng.lng]);
-          onSelectPoint(
-            projectPointCoordinates({
-              coordinates: [data.results[i].latlng.lat, data.results[i].latlng.lng],
-              newCRS: currentCRS.value
-            }),
-            currentCRS.value
-          );
+          if (
+            !MapUtils.inBounds({
+              coord: data.results[i].latlng.lat,
+              coordType: 'latitude',
+              checkProjected: true
+            }) ||
+            !MapUtils.inBounds({
+              coord: data.results[i].latlng.lng,
+              coordType: 'longitude',
+              checkProjected: true
+            })
+          ) {
+            setHasErrors({ ...hasErrors, newPointError: true });
+            return false;
+          } else {
+            setNewPositionMarker([data.results[i].latlng.lat, data.results[i].latlng.lng]);
+            onSelectPoint(
+              projectPointCoordinates({
+                coordinates: [data.results[i].latlng.lat, data.results[i].latlng.lng],
+                newCRS: currentCRS.value
+              }),
+              currentCRS.value
+            );
+          }
         }
       }
     });
@@ -286,9 +305,65 @@ export const Map = ({
     }
   };
 
-  const onCRSChange = item => {
-    const selectedCRS = crs.filter(t => t.value === item.value)[0];
-    setCurrentCRS(selectedCRS);
+  const onHideNewPointError = () => {
+    setHasErrors({ projection: false, newPointError: false });
+  };
+
+  const newPointErrorDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <div>
+        <Button
+          className="p-button-animated-blink"
+          icon="check"
+          label={resourcesContext.messages['ok']}
+          onClick={onHideNewPointError}
+        />
+      </div>
+    </div>
+  );
+
+  const onCRSChange = newCRS => {
+    setCurrentCRS(newCRS);
+    onSelectPoint(
+      projectPointCoordinates({
+        coordinates: isNewPositionMarkerVisible ? newPositionMarker : JSON.parse(mapGeoJson).geometry.coordinates,
+        newCRS: newCRS.value
+      }),
+      newCRS.value
+    );
+    setHasErrors({ ...hasErrors, projection: false });
+  };
+
+  const onDoubleClick = e => {
+    if (TextUtils.areEquals(geometryType, 'POINT')) {
+      if (
+        currentCRS.value === 'EPSG:3035' &&
+        (!MapUtils.inBounds({
+          coord: e.latlng.lat,
+          coordType: 'latitude',
+          checkProjected: true
+        }) ||
+          !MapUtils.inBounds({
+            coord: e.latlng.lng,
+            coordType: 'longitude',
+            checkProjected: true
+          }))
+      ) {
+        setHasErrors({ ...hasErrors, newPointError: true });
+        return false;
+      } else {
+        setNewPositionMarker([e.latlng.lat, e.latlng.lng]);
+        onSelectPoint(
+          projectPointCoordinates({
+            coordinates: [e.latlng.lat, e.latlng.lng],
+            CRS: 'EPSG:4326',
+            newCRS: currentCRS.value
+          }),
+          currentCRS.value
+        );
+        mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
+      }
+    }
   };
 
   const onEachFeature = (feature, layer) => {
@@ -396,6 +471,14 @@ export const Map = ({
     return popupContent;
   };
 
+  const renderErrorMessage = () => {
+    if (hasErrors.newPointError) {
+      return resourcesContext.messages['newPointErrorMessage'];
+    } else {
+      return `${resourcesContext.messages['coordsOutOfBoundsTooltipProjected']} ${resourcesContext.messages['coordsOutOfBoundsTooltipGeographicalProjected']}`;
+    }
+  };
+
   return (
     <Fragment>
       {hasLegend && (
@@ -446,19 +529,34 @@ export const Map = ({
         />
         <Dropdown
           ariaLabel="crs"
-          className={styles.crsSwitcherSplitButton}
+          className={`${styles.crsSwitcherSplitButton} ${hasErrors.projection ? styles.error : ''}`}
           disabled={!MapUtils.checkValidJSONCoordinates(geoJson) && !isNewPositionMarkerVisible}
           onChange={e => {
-            onCRSChange(e.target.value);
-            onSelectPoint(
-              projectPointCoordinates({
-                coordinates: isNewPositionMarkerVisible
-                  ? newPositionMarker
-                  : JSON.parse(mapGeoJson).geometry.coordinates,
-                newCRS: e.target.value.value
-              }),
-              e.target.value.value
-            );
+            if (e.target.value.value === 'EPSG:3035') {
+              if (
+                MapUtils.inBounds({
+                  coord: isNewPositionMarkerVisible
+                    ? newPositionMarker[0]
+                    : JSON.parse(mapGeoJson).geometry.coordinates[0],
+                  coordType: 'latitude',
+                  checkProjected: true
+                }) &&
+                MapUtils.inBounds({
+                  coord: isNewPositionMarkerVisible
+                    ? newPositionMarker[1]
+                    : JSON.parse(mapGeoJson).geometry.coordinates[1],
+                  coordType: 'longitude',
+                  checkProjected: true
+                })
+              ) {
+                onCRSChange(e.target.value);
+              } else {
+                setHasErrors({ ...hasErrors, projection: true });
+                return false;
+              }
+            } else {
+              onCRSChange(e.target.value);
+            }
           }}
           optionLabel="label"
           options={crs}
@@ -470,22 +568,7 @@ export const Map = ({
         <MapComponent
           center={projectGeoJsonCoordinates(getCenter(), true)}
           doubleClickZoom={false}
-          onDblclick={
-            TextUtils.areEquals(geometryType, 'POINT')
-              ? e => {
-                  setNewPositionMarker([e.latlng.lat, e.latlng.lng]);
-                  onSelectPoint(
-                    projectPointCoordinates({
-                      coordinates: [e.latlng.lat, e.latlng.lng],
-                      CRS: 'EPSG:4326',
-                      newCRS: currentCRS.value
-                    }),
-                    currentCRS.value
-                  );
-                  mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
-                }
-              : null
-          }
+          onDblclick={onDoubleClick}
           ref={mapRef}
           style={{ height: '60vh', marginTop: '6px' }}
           zoom="4">
@@ -505,6 +588,19 @@ export const Map = ({
             </Marker>
           )}
         </MapComponent>
+        {(hasErrors.newPointError || hasErrors.projection) && (
+          <Dialog
+            blockScroll={false}
+            className={styles.newPointError}
+            footer={newPointErrorDialogFooter}
+            header={resourcesContext.messages['newPointErrorTitle']}
+            modal={true}
+            onHide={onHideNewPointError}
+            style={{}}
+            visible={hasErrors.newPointError || hasErrors.projection}>
+            <span>{renderErrorMessage()}</span>
+          </Dialog>
+        )}
       </div>
     </Fragment>
   );

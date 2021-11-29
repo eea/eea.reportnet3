@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -445,16 +446,15 @@ public class FileTreatmentHelperTest {
     // Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(integrationController.findIntegrationById(Mockito.anyLong()))
         .thenReturn(integrationVO);
-    Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(executionResultVO);
+    // Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
+    // Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(executionResultVO);
 
     fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false, 1L,
         null);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
 
-    Mockito.verify(integrationController, times(1)).executeIntegrationProcess(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -873,6 +873,25 @@ public class FileTreatmentHelperTest {
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
 
+  @Test
+  public void exportFileTest() throws FileNotFoundException, EEAException, IOException {
+    byte[] file = "Test".getBytes();
+    Mockito.when(datasetService.exportFile(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+        .thenReturn(file);
+    fileTreatmentHelper.exportFile(1L, "csv", "tableschema", "tableName");
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void exportFileFailedTest() throws FileNotFoundException, EEAException, IOException {
+    Mockito.doThrow(EEAException.class).when(datasetService).exportFile(Mockito.anyLong(),
+        Mockito.any(), Mockito.any());
+    fileTreatmentHelper.exportFile(1L, "csv", "tablesSchema", "tableName");
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
 
   /**
    * After tests.
@@ -886,6 +905,7 @@ public class FileTreatmentHelperTest {
 
     }
   }
+
 
 }
 
