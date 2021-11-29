@@ -43,6 +43,7 @@ import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { MyFilters } from 'views/_components/Filters/MyFilters';
 
 const Dataflows = withRouter(({ history, match }) => {
   const {
@@ -74,13 +75,20 @@ const Dataflows = withRouter(({ history, match }) => {
     isUserListVisible: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     reference: [],
-    reporting: []
+    reporting: [],
+    filteredData: {
+      business: [],
+      citizenScience: [],
+      reference: [],
+      reporting: []
+    }
   });
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
     useReportingObligations();
 
-  const { activeIndex, dataflowsCount, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
+  const { activeIndex, dataflowsCount, filteredData, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } =
+    dataflowsState;
 
   const containerRef = useRef(null);
 
@@ -402,6 +410,67 @@ const Dataflows = withRouter(({ history, match }) => {
     </Fragment>
   );
 
+  const FILTER_OPTIONS = [
+    { category: 'LEVEL_ERROR', key: 'obligation', label: 'Obligation', order: 0, type: 'INPUT' },
+    { category: undefined, key: 'operationName', label: 'Another label', order: 1, type: 'INPUT', options: undefined },
+    { category: 'BOOLEAN', key: 'anotherKeyName', label: 'Bool type', options: [], order: 2, type: 'MULTI_SELECT' },
+    {
+      category: undefined,
+      options: [
+        { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
+        { key: 'name', label: 'This is inside a array -- NAME', order: 0 }
+      ],
+      type: 'INPUT'
+    }
+  ];
+
+  const options = {
+    reporting: [
+      {
+        options: [
+          { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
+          { key: 'legalInstrument', label: 'This is inside a array -- INSTRUMENT', order: 2 },
+          { key: 'name', label: 'This is inside a array -- NAME', order: 0 },
+          { key: 'obligationId', label: 'This is inside a array -- OBLIGATION ID', order: 4 },
+          { key: 'obligationTitle', label: 'This is inside a array -- OBLIGATION TITLE', order: 3 }
+        ],
+        type: 'INPUT'
+      },
+      {
+        type: 'MULTI_SELECT',
+        options: [
+          { key: 'status', label: 'This is inside a array -- STATUS', order: 0 },
+          { key: 'userRole', label: 'This is inside a array -- ROLES', order: 1 },
+          { key: 'pinned', label: 'This is inside a array -- PINNED', order: 2 }
+        ]
+      },
+      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' }
+      // (isCustodian || isAdmin) && {
+      //   key: 'creationDate',
+      //   label: resourcesContext.messages['creationDateFilterLabel'],
+      //   type: 'DATE'
+      // }
+    ],
+    reference: [
+      {
+        options: [
+          { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
+          { key: 'name', label: 'This is inside a array -- NAME', order: 0 }
+        ],
+        type: 'INPUT'
+      },
+      {
+        options: [
+          { key: 'status', label: 'This is inside a array -- STATUS', order: 0 },
+          { key: 'pinned', label: 'This is inside a array -- PINNED', order: 1 }
+        ],
+        type: 'MULTI_SELECT'
+      }
+    ]
+  };
+
+  const getFilteredData = data => dataflowsDispatch({ type: 'GET_FILTERED_DATA', payload: { type: tabId, data } });
+
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
@@ -414,13 +483,20 @@ const Dataflows = withRouter(({ history, match }) => {
             onTabChange={event => onChangeTab(event.index, event.value)}
           />
         </div>
+        <MyFilters
+          className={'dataflowsListFilters'}
+          data={dataflowsState['reporting']}
+          getFilteredData={getFilteredData}
+          options={options[tabId]}
+          viewType={tabId}
+        />
         <DataflowsList
           className="dataflowList-accepted-help-step"
           content={{
-            reporting: dataflowsState['reporting'],
-            business: dataflowsState['business'],
-            citizenScience: dataflowsState['citizenScience'],
-            reference: dataflowsState['reference']
+            reporting: filteredData['reporting'],
+            business: filteredData['business'],
+            citizenScience: filteredData['citizenScience'],
+            reference: filteredData['reference']
           }}
           isAdmin={isAdmin}
           isCustodian={isCustodian}

@@ -13,6 +13,7 @@ import { MultiSelect } from 'views/_components/MultiSelect';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { filtersStateFamily } from './_functions/Stores/filtersStores';
+import { isEmpty } from 'lodash';
 
 export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode, onFilter, options, viewType }) => {
   const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
@@ -23,32 +24,35 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode
 
   const { filterBy, filteredData, loadingStatus } = filters;
 
-  console.log('filters :>> ', filters);
+  console.log('filterBy :>> ', filterBy);
 
   const resourcesContext = useContext(ResourcesContext);
 
-  // const [filtersState, filtersDispatch] = useReducer(filtersReducer, {
-  //   data,
-  //   filterBy: {},
-  //   filteredData: data,
-  //   loadingStatus: 'IDLE'
-  // });
-
-  // const { filterBy, filteredData, loadingStatus } = filtersState;
-
-  // useLayoutEffect(() => {
-  //   loadFilters();
-  // }, []);
+  useLayoutEffect(() => {
+    loadFilters();
+  }, []);
 
   useEffect(() => {
     if (getFilteredData) getFilteredData(filteredData);
   }, [filteredData]);
 
+  const applyFilters = () => {
+    if (isEmpty(filterBy)) return data;
+
+    return data.filter(item => {
+      return Object.keys(filterBy).map(filterKey =>
+        item[filterKey].toLowerCase().includes(filterBy[filterKey].toLowerCase())
+      );
+    });
+  };
+
   const loadFilters = () => {
     setLoadingStatus('PENDING');
+    const filteredData = applyFilters();
+    console.log('filteredData :>> ', filteredData);
 
     try {
-      setFilters({ ...filters, data: data, filteredData: data, loadingStatus: 'SUCCESS' });
+      setFilters({ ...filters, data: data, filteredData, loadingStatus: 'SUCCESS' });
       // setLoadingStatus('SUCCESS');
     } catch (error) {
       setLoadingStatus('FAILED');
@@ -56,10 +60,9 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode
     }
   };
 
-  const onClear = () => {};
-
   const onChange = ({ key, value }) => {
     const test = doFilter({ key, value });
+    console.log('new test :>> ', test);
 
     setFilters({ ...filters, filterBy: { ...filters.filterBy, [key]: value }, filteredData: test });
   };
@@ -72,6 +75,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode
 
   const renderFilters = () => {
     return options.map(option => {
+      console.log('option.type :>> ', option.type);
       switch (option.type) {
         case 'CHECKBOX':
           return [];

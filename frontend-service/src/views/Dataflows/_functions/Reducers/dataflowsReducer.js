@@ -20,6 +20,7 @@ export const dataflowsReducer = (state, { type, payload }) => {
       return {
         ...state,
         [payload.type]: payload.data,
+        filteredData: { ...state.filteredData, [payload.type]: payload.data },
         dataflowsCountFirstLoad: false,
         dataflowsCount: { ...state.dataflowsCount, [payload.type]: payload.data.length },
         activeIndex:
@@ -60,6 +61,9 @@ export const dataflowsReducer = (state, { type, payload }) => {
 
     case 'ON_LOAD_OBLIGATION':
       return { ...state, obligation: { id: payload.id, title: payload.title } };
+
+    case 'GET_FILTERED_DATA':
+      return { ...state, filteredData: { ...state.filteredData, [payload.type]: payload.data } };
 
     default:
       return state;

@@ -166,8 +166,8 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
       type: 'INPUT',
       category: 'ANOTHER_TYPE_OF_CATEGORY',
       options: [
-        { key: 'obligation', label: 'Obligation', order: 0 },
-        { key: 'operationName', label: 'Another label', order: 1 }
+        { key: 'obligation', label: 'This is inside a array', order: 0 },
+        { key: 'operationName', label: 'This is inside a array 2', order: 1 }
       ]
     }
   ];
@@ -310,16 +310,17 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
   return (
     <div className={`${styles.wrap} ${className}`}>
       <div className="dataflowList-filters-help-step">
-        {visibleTab === 'reporting' && (
+        {/* {visibleTab === 'reporting' && (
           <MyFilters
             className={'dataflowsListFilters'}
             data={dataToFilter['reporting']}
             getFilteredData={onLoadFilteredData}
-            options={filterOptions['reporting'].filter(Boolean)}
+            options={FILTER_OPTIONS}
             sortCategory={'pinned'}
             sortable={true}
+            viewType="REPORTING"
           />
-        )}
+        )} */}
 
         {visibleTab === 'business' && (
           <Filters
