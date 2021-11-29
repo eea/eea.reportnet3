@@ -6,9 +6,9 @@
   font-size: 12pt !important;
   color: var(--datatable-header-info-button-color) !important;
   margin-left: 0.4rem !important;
-  background-color: var(--white-color) !important;
+  background-color: var(--c-white-color) !important;
   &:focus {
-    box-shadow: var(--white-color) !important;
+    box-shadow: var(--c-white-color) !important;
   }
   span:nth-of-type(1) {
     left: 46% !important;

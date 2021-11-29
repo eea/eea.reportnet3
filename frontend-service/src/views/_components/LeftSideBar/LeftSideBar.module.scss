@@ -66,7 +66,7 @@ h2 {
 
   hr {
     width: 80%;
-    border-color: var(--gray-15);
+    border-color: var(--c-gray-15);
     margin-top: 0;
     margin-bottom: 0;
   }
@@ -77,7 +77,7 @@ h2 {
 }
 
 .leftSideBar a .leftSideBar a:hover:not(:first-child) {
-  color: var(--white-color);
+  color: var(--c-white-color);
 }
 
 .leftSideBarText {

@@ -4,7 +4,7 @@
   padding-left: 1rem;
   background-color: var(--eu-header-bg);
   .globanContent {
-    color: var(--white-color);
+    color: var(--c-white-color);
     height: 28px;
     line-height: 22px;
     font-weight: normal;
@@ -113,7 +113,7 @@
     align-items: center;
     .language {
       font-weight: bold;
-      color: var(--blue-120);
+      color: var(--c-blue-120);
       &::after {
         background-image: url('/views/_assets/images/logos/englishIcon.jpg');
         content: '\00a0' !important;
