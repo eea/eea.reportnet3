@@ -5,7 +5,7 @@
 }
 .notificationWrapper.error {
   background-color: var(--errors);
-  color: var(--white);
+  color: var(--c-white-color);
 }
 .notificationWrapper.warning {
   background-color: var(--warning-color);
@@ -34,7 +34,7 @@
 }
 
 .notificationWrapper .header a {
-  color: var(--white);
+  color: var(--c-white-color);
   cursor: pointer;
 }
 

@@ -394,8 +394,6 @@ public class ValidationHelper implements DisposableBean {
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
-    LOG.info("Collecting Table Validation tasks");
-    releaseTableValidation(dataset, processId);
     LOG.info("Collecting Dataset Validation tasks");
     releaseDatasetValidation(dataset, processId);
     LOG.info("Collecting Record Validation tasks");
@@ -404,6 +402,8 @@ public class ValidationHelper implements DisposableBean {
     }
     LOG.info("Collecting Field Validation tasks");
     releaseFieldsValidation(dataset, processId, !filterEmptyFields(rules.getRules()));
+    LOG.info("Collecting Table Validation tasks");
+    releaseTableValidation(dataset, processId);
     startProcess(processId);
   }
 
@@ -684,6 +684,12 @@ public class ValidationHelper implements DisposableBean {
         schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
     for (Integer totalTables = tableList.size(); totalTables > 0; totalTables = totalTables - 1) {
       Long idTable = tableList.get(i++).getId();
+      releaseTableValidation(dataset, uuId, idTable, null);
+
+    }
+    i = 0;
+    for (Integer totalTables = tableList.size(); totalTables > 0; totalTables = totalTables - 1) {
+      Long idTable = tableList.get(i++).getId();
       for (Rule rule : rules) {
         String idTableSchema = tableList.get(i - 1).getIdTableSchema();
         if (EntityTypeEnum.TABLE.equals(rule.getType())
@@ -695,8 +701,6 @@ public class ValidationHelper implements DisposableBean {
           releaseTableValidation(dataset, uuId, idTable, rule);
         }
       }
-      releaseTableValidation(dataset, uuId, idTable, null);
-
     }
   }
 
@@ -916,20 +920,6 @@ public class ValidationHelper implements DisposableBean {
     return isProcessStarted;
   }
 
-  /**
-   * Instantiates a new validation task.
-   */
-
-  /**
-   * Instantiates a new validation task.
-   *
-   * @param eeaEventVO the eea event VO
-   * @param validator the validator
-   * @param datasetId the dataset id
-   * @param kieBase the kie base
-   * @param processId the process id
-   * @param notificationEventType the notification event type
-   */
 
   /**
    * Instantiates a new validation task.

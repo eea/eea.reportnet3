@@ -1734,5 +1734,9 @@
   {
     "key": "config/validation/management.metrics.export.elastic.enabled",
     "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
+  },
+  {
+    "key": "config/validation/validation.sqlFetchSize",
+    "value": "JHtWQUxJREFUSU9OX1NRTF9GRVRDSF9TSVpFOjI1MH0="
   }
 ]
