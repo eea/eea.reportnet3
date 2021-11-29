@@ -61,7 +61,7 @@
       display: flex;
       align-items: center;
       .infoButton {
-        background-color: var(--white) !important;
+        background-color: var(--white-color) !important;
         border-radius: 50% !important;
         color: red !important;
         font-size: 12pt !important;
@@ -172,7 +172,7 @@
       display: flex;
       align-items: center;
       .infoButton {
-        background-color: var(--white) !important;
+        background-color: var(--white-color) !important;
         border-radius: 50% !important;
         color: var(--errors) !important;
         font-size: 12pt !important;
@@ -194,7 +194,7 @@
     }
 
     .infoCircle {
-      background-color: var(--white);
+      background-color: var(--white-color);
       border-radius: 50%;
       color: var(--datatable-header-info-button-color);
       font-size: 12pt;
@@ -214,7 +214,7 @@
     }
   }
   .infoCircle {
-    background-color: var(--white) !important;
+    background-color: var(--white-color) !important;
     border-radius: 50% !important;
     color: var(--datatable-header-info-button-color) !important;
     font-size: 12pt;

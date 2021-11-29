@@ -60,7 +60,7 @@
         background-color: #6565a8;
       }
       .containerLink {
-        color: var(--white);
+        color: var(--white-color);
         background-image: url('/views/_assets/images/logos/logo-blanco.png');
       }
     }
@@ -101,7 +101,7 @@
     font-size: 14pt;
     margin-left: 0.9rem;
     margin-top: 0.7rem;
-    color: var(--white);
+    color: var(--white-color);
     cursor: pointer;
     &.pinned {
       transform: rotate(0deg);

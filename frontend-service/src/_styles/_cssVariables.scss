@@ -14,7 +14,7 @@
   --yellow-75: #ffde39;
   --yellow-50: #ffe879;
   --yellow-25: #fff4bb;
-  --black: #000000;
+  --black-color: #000000;
   --gray-110: #404040;
   --gray-75: #707070;
   --gray-65: #898989;
@@ -23,7 +23,7 @@
   --gray-15: #e3e3e3;
   --gray-10: #ebebeb;
   --gray-5: #f5f5f5;
-  --white: #ffffff;
+  --white-color: #ffffff;
   --white-font: #ffffffe7;
   --informative-color: #006fb4;
   --warning-color: #f29527;
@@ -150,7 +150,7 @@
   --header-height: 180px;
 
   /* Theme switcher */
-  --bg: var(--white);
+  --bg: var(--white-color);
   --main-font-color: var(--gray-110);
 
   /* Chevron */
@@ -193,26 +193,26 @@
 
   /* Inputswitch */
   --inputswitch-checked-bg: var(--c-corporate-blue);
-  --inputswitch-checked-before-bg: var(--white);
-  --inputswitch-dark-theme-checked: inset 4px -1px var(--white);
+  --inputswitch-checked-before-bg: var(--white-color);
+  --inputswitch-dark-theme-checked: inset 4px -1px var(--white-color);
   --inputswitch-unchecked-bg: var(--gray-25);
-  --inputswitch-slider-bg: var(--white);
+  --inputswitch-slider-bg: var(--white-color);
 
   /* Datatable */
   --datatable-header-bg: var(--gray-5);
   --datatable-header-color: var(--gray-110);
   --datatable-header-border: 1px solid var(--c-custom-gray);
   --datatable-body-border: 1px solid var(--c-custom-gray);
-  --datatable-body-color: var(--black);
-  --datatable-body-bg: var(--white);
+  --datatable-body-color: var(--black-color);
+  --datatable-body-bg: var(--white-color);
   --datatable-body-even-bg: var(--gray-5);
   --datatable-body-highlight-bg: var(--gray-10);
 
   --datatable-column-sortable-hightlight-bg: var(--c-corporate-blue);
-  --datatable-column-sortable-hightlight-color: var(--white);
-  --datatable-column-sortable-hightlight-icon-color: var(--white);
+  --datatable-column-sortable-hightlight-color: var(--white-color);
+  --datatable-column-sortable-hightlight-icon-color: var(--white-color);
   --datatable-column-sortable-hightlight-box-shadow-focus: inset 0 0 0 0.1em var(--gray-25);
-  --datatable-header-footer-bg: var(--white);
+  --datatable-header-footer-bg: var(--white-color);
   --datatable-header-footer-color: var(--gray-110);
   --datatable-header-footer-border: 1px solid var(--gray-25);
   --datatable-header-info-button-color: var(--c-corporate-blue);
@@ -234,9 +234,9 @@
   --datatable-body-row-highlight-bg: rgba(240, 233, 145, 0.3);
   --datatable-body-row-highlight-color: var(gray-110);
   --datatable-body-row-toggler-hightlight-color: var(--c-corporate-blue);
-  --datatable-body-row-toggler-hightlight-color-hover: var(--white);
+  --datatable-body-row-toggler-hightlight-color-hover: var(--white-color);
   --datatable-body-row-contextmenu-hightlight-bg: var(--c-corporate-blue);
-  --datatable-body-row-contextmenu-hightlight-color: var(--white);
+  --datatable-body-row-contextmenu-hightlight-color: var(--white-color);
   --datatable-column-resizer-bg: var(--c-corporate-blue);
   --datatable-toolbar-border: 1px solid var(--gray-25);
 
@@ -248,45 +248,45 @@
   /* Paginator */
   --paginator-bg: var(--c-corporate-blue);
   --paginator-border: 1px solid var(--blue-75);
-  --paginator-color: var(--white);
+  --paginator-color: var(--white-color);
   --paginator-bg-hover: var(--gray-10);
   --paginator-color-hover: var(--gray-110);
   --paginator-dropdown-label-color: var(--gray-110);
   --paginator-dropdown-label-color-hover: var(--gray-110);
-  --paginator-pages-not-highlight-hover-bg: var(--white);
+  --paginator-pages-not-highlight-hover-bg: var(--white-color);
   --paginator-pages-not-highlight-hover-color: var(--gray-110);
   --paginator-pages-not-highlight-hover-border: 1px solid var(--c-corporate-blue);
   --paginator-pages-highlight-box-shadow: inset 0 0 0 0.1em var(--gray-75);
-  --paginator-pages-highlight-bg: var(--white);
-  --paginator-pages-highlight-color: var(--black);
-  --paginator-pages-color: var(--white);
-  --paginator-right-content: var(--white);
+  --paginator-pages-highlight-bg: var(--white-color);
+  --paginator-pages-highlight-color: var(--black-color);
+  --paginator-pages-color: var(--white-color);
+  --paginator-right-content: var(--white-color);
 
   /* Dropdown */
   --dropdown-bg: var(--bg);
   --dropdown-border: 1px solid var(--gray-50);
   --dropdown-border-color-hover: var(--gray-75);
-  --dropdown-bg-hover: var(--white);
+  --dropdown-bg-hover: var(--white-color);
   --dropdown-bg-focus: var(--c-corporate-blue);
-  --dropdown-trigger-bg: var(--white);
+  --dropdown-trigger-bg: var(--white-color);
   --dropdown-trigger-color: var(--gray-50);
   --dropdown-trigger-clear-icon-color: var(--gray-50);
   --dropdown-panel-border: 1px solid var(--gray-25);
-  --dropdown-panel-bg: var(--white);
+  --dropdown-panel-bg: var(--white-color);
   --dropdown-panel-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
   --dropdown-panel-filter-border: 1px solid var(--gray-10);
   --dropdown-panel-filter-color: var(--gray-110);
-  --dropdown-panel-filter-bg: var(--white);
+  --dropdown-panel-filter-bg: var(--white-color);
   --dropdown-panel-filter-icon-color: var(--c-corporate-blue);
   --dropdown-panel-items-group-color: var(--gray-110);
-  --dropdown-panel-items-group-highlight-color: var(--white);
+  --dropdown-panel-items-group-highlight-color: var(--white-color);
   --dropdown-panel-items-group-highlight-bg: var(--c-corporate-blue);
   --dropdown-panel-items-group-not-highlight-color-hover: var(--gray-110);
   --dropdown-panel-items-group-not-highlight-bg-hover: var(--gray-25);
 
   /* DropdownFilter */
   --dropdownFilter-border: 1px solid var(--c-black-200);
-  --dropdownFilter-bg-color: var(--white);
+  --dropdownFilter-bg-color: var(--white-color);
   --dropdownFilter-color: var(--c-black-400);
   --dropdownFilter-box-shadow: 0 0px 6px 0 rgba(0, 0, 0, 0.16);
   --dropdownFilter-border-color-hover: var(--gray-25);
@@ -302,19 +302,19 @@
   /* Growl */
   --growl-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
   --growl-info-bg: var(--c-growl-info-blue);
-  --growl-info-color: var(--black);
+  --growl-info-color: var(--black-color);
   --growl-info-icon-color: var(--c-growl-info-darker-blue);
   --growl-info-border-color: var(--c-growl-info-darker-blue);
   --growl-success-bg: var(--c-growl-success-lighter-green);
-  --growl-success-color: var(--black);
+  --growl-success-color: var(--black-color);
   --growl-success-icon-color: var(--c-growl-success-darker-green);
   --growl-success-border-color: var(--c-growl-success-darker-green);
   --growl-warning-bg: var(--c-corporate-yellow);
-  --growl-warning-color: var(--black);
+  --growl-warning-color: var(--black-color);
   --growl-warning-icon-color: var(--c-growl-warning-darker-yellow);
   --growl-warning-border-color: var(--c-growl-warning-darker-yellow);
   --growl-error-bg: var(--c-pink-light);
-  --growl-error-color: var(--black);
+  --growl-error-color: var(--black-color);
   --growl-error-icon-color: var(--c-growl-error-darker-red);
   --growl-error-border-color: var(--c-growl-error-darker-red);
   --growl-close-icon-color: var(--gray-75);
@@ -335,10 +335,10 @@
 
   /* Treeview */
   --treeview-expandable-color: var(--c-corporate-blue);
-  --treeview-property-title-color: var(--black);
-  --treeview-property-value-color: var(--black);
-  --treeview-empty-property-color: var(--black);
-  --treeview-table-icon-color: var(--black);
+  --treeview-property-title-color: var(--black-color);
+  --treeview-property-value-color: var(--black-color);
+  --treeview-empty-property-color: var(--black-color);
+  --treeview-table-icon-color: var(--black-color);
 
   /* Documentation */
   --documenticon-color: var(--c-corporate-blue);
@@ -347,14 +347,14 @@
   --dialog-header-bg: var(--gray-10);
   --dialog-header-icon-color: var(--gray-75);
   --dialog-header-icon-color-hover: var(--gray-110);
-  --dialog-content-bg: var(--white);
-  --dialog-footer-bg: var(--white);
+  --dialog-content-bg: var(--white-color);
+  --dialog-footer-bg: var(--white-color);
   --dialog-header-border: 1px solid var(--gray-25);
   --dialog-content-border: 1px solid var(--gray-25);
   --dialog-footer-border: 1px solid var(--gray-25);
-  --dialog-header-color: var(--black);
-  --dialog-content-color: var(--black);
-  --dialog-footer-color: var(--black);
+  --dialog-header-color: var(--black-color);
+  --dialog-content-color: var(--black-color);
+  --dialog-footer-color: var(--black-color);
 
   /* Buttons */
   --button-primary-bg: var(--c-corporate-blue);
@@ -363,10 +363,10 @@
   --button-primary-border: 1px solid var(--c-corporate-blue);
   --button-primary-border-color-hover: var(--blue-120);
   --button-primary-border-color-active: var(--blue-140);
-  --button-primary-color: var(--white);
-  --button-primary-color-hover: var(--white);
-  --button-primary-color-icon: var(--white);
-  --button-primary-color-active: var(--white);
+  --button-primary-color: var(--white-color);
+  --button-primary-color-hover: var(--white-color);
+  --button-primary-color-icon: var(--white-color);
+  --button-primary-color-active: var(--white-color);
   --button-primary-box-shadow-focus: 0 0 0 0.2em var(--c-blue-300);
 
   --button-success-bg: var(--success-color);
@@ -375,10 +375,10 @@
   --button-success-border: 1px solid var(--success-color);
   --button-success-border-color-hover: var(--success-color-dark);
   --button-success-border-color-active: var(--success-color-darker);
-  --button-success-color: var(--white);
-  --button-success-color-hover: var(--white);
-  --button-success-color-icon: var(--white);
-  --button-success-color-active: var(--white);
+  --button-success-color: var(--white-color);
+  --button-success-color-hover: var(--white-color);
+  --button-success-color-icon: var(--white-color);
+  --button-success-color-active: var(--white-color);
   --button-success-box-shadow-focus: 0 0 0 0.2em var(--success-color-light);
 
   --button-secondary-bg: var(--gray-10);
@@ -432,18 +432,18 @@
   --chart-color: var(--main-font-color);
 
   /* Multiselect */
-  --multiselect-bg: var(--white);
+  --multiselect-bg: var(--white-color);
   --multiselect-border: 1px solid var(--gray-50);
   --multiselect-bg-hover: var(--gray-110);
   --multiselect-label-color: var(--gray-110);
-  --multiselect-trigger-bg: var(--white);
+  --multiselect-trigger-bg: var(--white-color);
   --multiselect-trigger-color: var(--gray-50);
   --multiselect-panel-border: 1px solid var(--gray-25);
-  --multiselect-panel-bg: var(--white);
+  --multiselect-panel-bg: var(--white-color);
   --multiselect-panel-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.16);
   --multiselect-panel-header-border-bottom: 1px solid var(--gray-10);
   --multiselect-panel-header-color: var(--gray-110);
-  --multiselect-panel-header-bg: var(--white);
+  --multiselect-panel-header-bg: var(--white-color);
   --multiselect-panel-header-filter-icon-color: var(--c-corporate-blue);
   --multiselect-panel-header-close-color: var(--gray-25);
   --multiselect-panel-item-color: var(--gray-110);
@@ -452,16 +452,16 @@
 
   /* Checkbox */
   --checkbox-box-border: 1px solid var(--gray-50);
-  --checkbox-box-bg: var(--white);
-  --checkbox-box-bg-hover: var(--black);
+  --checkbox-box-bg: var(--white-color);
+  --checkbox-box-bg-hover: var(--black-color);
   --checkbox-box-box-shadow-focus: 0 0 0 0.2em var(--c-corporate-blue);
   --checkbox-box-bg-focus: var(--c-corporate-blue);
   --checkbox-box-highlight-border-color: var(--c-corporate-blue);
   --checkbox-box-highlight-bg: var(--c-corporate-blue);
-  --checkbox-box-highlight-color: var(--white);
+  --checkbox-box-highlight-color: var(--white-color);
   --checkbox-box-highlight-border-color-hover: var(--c-corporate-blue-lighter);
   --checkbox-box-highlight-bg-hover: var(--c-corporate-blue-lighter);
-  --checkbox-box-highlight-color-hover: var(--white);
+  --checkbox-box-highlight-color-hover: var(--white-color);
 
   /* InputTextArea */
   --inputtextarea-box-shadow: 0 10px 6px -6px rgba(var(--c-corporate-blue-rgb), 0.1);
@@ -473,7 +473,7 @@
   --field-designer-separator-border-color: var(--gray-75);
 
   /* SideBar */
-  --sidebar-bg: var(--white);
+  --sidebar-bg: var(--white-color);
   --sidebar-color: var(--gray-110);
   --sidebar-border: 1px solid var(--gray-50);
   --sidebar-boxshadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
@@ -486,8 +486,8 @@
   --sidebar-title-color: var(--c-corporate-blue);
 
   /* Form field */
-  --form-field-bg: var(--white);
-  --form-field-color: var(--black);
+  --form-field-bg: var(--white-color);
+  --form-field-color: var(--black-color);
 
   /* Hyperlinks */
   --hyperlink-color: var(--c-corporate-blue);
@@ -508,20 +508,20 @@
   --chips-input-box-shadow-error: 0 0 0 0.2em var(--errors);
   --chips-input-border-color: var(--c-corporate-blue);
   --chips-input-border-color-hover: var(--c-corporate-blue);
-  --chips-input-color: var(--black);
+  --chips-input-color: var(--black-color);
   --chips-token-bg: var(--c-corporate-blue);
-  --chips-token-color: var(--white);
+  --chips-token-color: var(--white-color);
 
   /* ListBox */
   --listbox-item-highlight-bg: var(--c-corporate-blue);
   --listbox-item-highlight-bg-hover: var(--gray-10);
-  --listbox-item-highlight-color: var(--white);
+  --listbox-item-highlight-color: var(--white-color);
   --listbox-item-pk-indicator-bg: var(--gray-25);
   --listbox-item-pk-indicator-color: var(--main-font-color);
 
   /* Tooltip */
   --tooltip-body-bg: var(--gray-110);
-  --tooltip-body-color: var(--white);
+  --tooltip-body-color: var(--white-color);
   --tooltip-body-border-color: var(--gray-110);
   --tooltip-arrow-border-color: var(--gray-110);
   --tooltip-arrow-bg: var(--gray-110);
@@ -602,15 +602,15 @@
   --general-border-style: 1px solid var(--general-border-color);
 
   /* Left sidebar */
-  --left-sidebar-text-color: var(--white);
+  --left-sidebar-text-color: var(--white-color);
 
   /* Cookies */
-  --cookies-content-color: var(--white);
+  --cookies-content-color: var(--white-color);
 
   /* Go top button */
   --go-top-button-bg-color-hover: var(--c-corporate-blue);
   --go-top-button-bg-color: var(--c-corporate-blue);
   --go-top-button-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
   --go-top-button-color-hover: var(--c-corporate-yellow);
-  --go-top-button-color: var(--white);
+  --go-top-button-color: var(--white-color);
 }
