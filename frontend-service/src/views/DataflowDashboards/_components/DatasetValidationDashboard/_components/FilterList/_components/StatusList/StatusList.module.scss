@@ -60,7 +60,7 @@
   &[data-status='warning'],
   &[data-status='error'],
   &[data-status='blocker'] {
-    border: 1px solid var(--gray-50);
+    border: 1px solid var(--c-gray-50);
   }
 
   &:not(:checked) {

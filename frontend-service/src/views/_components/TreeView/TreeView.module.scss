@@ -5,16 +5,16 @@
 
 .fieldsTable td,
 .fieldsTable th {
-  border: 1px solid var(--gray-10);
+  border: 1px solid var(--c-gray-10);
   padding: 8px;
 }
 
 .fieldsTable tr:nth-child(even) {
-  background-color: var(--gray-5);
+  background-color: var(--c-gray-5);
 }
 
 .fieldsTable tr:hover {
-  background-color: var(--gray-10);
+  background-color: var(--c-gray-10);
   cursor: pointer;
 }
 

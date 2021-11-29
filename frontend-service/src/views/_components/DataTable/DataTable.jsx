@@ -514,7 +514,7 @@ export class DataTable extends Component {
                 layout: `FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport`,
                 CurrentPageReport: options => {
                   return (
-                    <span style={{ color: 'var(--white)', marginLeft: '1.5rem', userSelect: 'none' }}>
+                    <span style={{ color: 'var(--c-white-color)', marginLeft: '1.5rem', userSelect: 'none' }}>
                       <label style={{ margin: '0 0.5rem' }}>{this.context.messages['goTo']}</label>
                       <InputText
                         data-for="pageInputTooltip"
