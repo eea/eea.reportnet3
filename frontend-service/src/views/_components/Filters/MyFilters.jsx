@@ -1,4 +1,5 @@
-import { useEffect, useContext, useReducer } from 'react';
+import { useLayoutEffect, useContext, useEffect, useReducer } from 'react';
+import { useRecoilCallback, useRecoilState } from 'recoil';
 import PropTypes from 'prop-types';
 
 import isNil from 'lodash/isNil';
@@ -7,66 +8,88 @@ import styles from './MyFilters.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { InputText } from 'views/_components/InputText';
+import { MultiSelect } from 'views/_components/MultiSelect';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-// filterOptions = [
-//   { name: 'campoDelListado', label: messages..., type: 'multiselect', special: 'levelError' },
-//   { name: 'campoDelListado2', label: messages..., type: 'multiselect' }
-// ]
+import { filtersStateFamily } from './_functions/Stores/filtersStores';
 
-// { type: 'input', properties: [{ name: 'integrationName' }] },
+export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode, onFilter, options, viewType }) => {
+  const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
 
-const options = [
-  { category: 'LEVEL_ERROR', key: 'integrationName', label: 'Label', order: 0, type: 'INPUT' },
-  { category: 'LEVEL_ERROR', key: 'operationName', label: 'Label', order: 1, type: 'INPUT' },
-  { category: 'LEVEL_ERROR', key: 'anotherKeyName', label: 'Label', options: [], order: 2, type: 'MULTI_SELECT' }
-];
+  // const updateRecord = useRecoilCallback(({ set }, record) => {
+  //   set(filtersStateFamily(viewType), record);
+  // });
 
-export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode, onFilter, options }) => {
+  const { filterBy, filteredData, loadingStatus } = filters;
+
+  console.log('filters :>> ', filters);
+
   const resourcesContext = useContext(ResourcesContext);
 
-  const [filtersState, filtersDispatch] = useReducer(filtersReducer, {
-    data,
-    filterBy: {},
-    filteredData: data,
-    loadingStatus: 'IDLE'
-  });
+  // const [filtersState, filtersDispatch] = useReducer(filtersReducer, {
+  //   data,
+  //   filterBy: {},
+  //   filteredData: data,
+  //   loadingStatus: 'IDLE'
+  // });
 
-  const { filterBy, filteredData, loadingStatus } = filtersState;
+  // const { filterBy, filteredData, loadingStatus } = filtersState;
 
-  useEffect(() => {
-    loadFilters();
-  }, []);
+  // useLayoutEffect(() => {
+  //   loadFilters();
+  // }, []);
 
   useEffect(() => {
     if (getFilteredData) getFilteredData(filteredData);
   }, [filteredData]);
 
-  const loadFilters = () => {};
+  const loadFilters = () => {
+    setLoadingStatus('PENDING');
+
+    try {
+      setFilters({ ...filters, data: data, filteredData: data, loadingStatus: 'SUCCESS' });
+      // setLoadingStatus('SUCCESS');
+    } catch (error) {
+      setLoadingStatus('FAILED');
+      console.log('error :>> ', error);
+    }
+  };
 
   const onClear = () => {};
+
+  const onChange = ({ key, value }) => {
+    const test = doFilter({ key, value });
+
+    setFilters({ ...filters, filterBy: { ...filters.filterBy, [key]: value }, filteredData: test });
+  };
+
+  const doFilter = ({ key, value }) => {
+    return filteredData.filter(item => item[key].toLowerCase().includes(value.toLowerCase()));
+  };
+
+  const setLoadingStatus = status => setFilters({ ...filters, loadingStatus: status });
 
   const renderFilters = () => {
     return options.map(option => {
       switch (option.type) {
-        // case 'checkbox':
-        //   return option.properties.map(property => renderInput({ label: property.label, name: property.name }));
+        case 'CHECKBOX':
+          return [];
 
-        // case 'date':
-        //   return option.properties.map(property => renderInput({ label: property.label, name: property.name }));
+        case 'DATE':
+          return [];
 
-        // case 'dropdown':
-        //   return option.properties.map(property => renderInput({ label: property.label, name: property.name }));
+        case 'DROPDOWN':
+          return [];
 
         case 'INPUT':
-          return option.properties.map(property => renderInput({ label: property.label, property: property.name }));
+          return renderInput(option);
 
-        // case 'multiSelect':
-        //   return option.properties.map(property => renderInput({ label: property.label, name: property.name }));
+        case 'MULTI_SELECT':
+          return renderMultiSelect(option);
 
         default:
-          return [];
+          throw new Error('The option type is not correct.');
       }
     });
   };
@@ -75,9 +98,28 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode
 
   //   const renderDropdown = () => {};
 
-  const renderInput = ({ label, property }) => <InputText />;
+  const renderInput = option => {
+    if (option.options) {
+      return option.options.map(option => renderInput(option));
+    }
 
-  //   const renderMultiSelect = () => {};
+    return (
+      <InputText
+        key={option.key}
+        onChange={event => onChange({ key: option.key, value: event.target.value })}
+        placeholder={option.label}
+        value={filterBy[option.key] || ''}
+      />
+    );
+  };
+
+  const renderMultiSelect = option => {
+    if (option.options) {
+      return option.options.map(option => renderMultiSelect(option));
+    }
+
+    return <MultiSelect key={option.key} />;
+  };
 
   if (loadingStatus === 'PENDING') return <div>LOADING</div>;
 
@@ -100,7 +142,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode
         className="p-button-secondary p-button-rounded p-button-animated-blink"
         icon="undo"
         label={resourcesContext.messages['reset']}
-        onClick={onClear}
+        onClick={loadFilters}
       />
     </div>
   );
@@ -108,8 +150,8 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode
 
 const filtersReducer = (state, { type, payload }) => {
   switch (type) {
-    case 'typeName':
-      return { ...state, ...payload };
+    case 'SET_LOADING_STATUS':
+      return { ...state, loadingStatus: payload.status };
 
     default:
       return state;
@@ -122,7 +164,8 @@ MyFilters.propTypes = {
   isSearchVisible: PropTypes.bool,
   isStrickMode: PropTypes.bool,
   onFilter: PropTypes.func,
-  options: PropTypes.object
+  options: PropTypes.object,
+  viewType: PropTypes.string
 };
 
 MyFilters.defaultProps = {
