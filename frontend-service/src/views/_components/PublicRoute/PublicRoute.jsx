@@ -24,5 +24,5 @@ export const PublicRoute = ({ component: Component, location, path, parentPath }
     }
   };
 
-  return <Route path={path} render={props => checkRedirect(props)} />;
+  return <Route children={props => checkRedirect(props)} path={path} />;
 };

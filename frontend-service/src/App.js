@@ -80,9 +80,15 @@ const App = () => {
                                   parentPath={routes.PUBLIC_DATAFLOW_INFORMATION}
                                   path={routes.PUBLIC_DATAFLOW_INFORMATION_ID}
                                 />
-                                <Route component={PublicFrontpage} exact path={routes.ACCESS_POINT} />
-                                <Route component={ReportnetLogin} exact path={routes.LOGIN} />
-                                <Route component={EULogin} exact path={routes.EULOGIN} />
+                                <Route exact path={routes.ACCESS_POINT}>
+                                  <PublicFrontpage />
+                                </Route>
+                                <Route exact path={routes.LOGIN}>
+                                  <ReportnetLogin />
+                                </Route>
+                                <Route exact path={routes.EULOGIN}>
+                                  <EULogin />
+                                </Route>
                                 <PrivateRoute component={Feedback} exact path={routes.DATAFLOW_FEEDBACK} />
                                 <PrivateRoute component={Feedback} exact path={routes.DATAFLOW_FEEDBACK_CUSTODIAN} />
                                 <PrivateRoute component={DataflowDashboards} exact path={routes.DASHBOARDS} />
@@ -107,7 +113,9 @@ const App = () => {
                                 <PrivateRoute component={Dataset} exact path={routes.DATASET} />
                                 <PrivateRoute component={DataflowHelp} exact path={routes.DOCUMENTS} />
                                 <PrivateRoute component={EUDataset} exact path={routes.EU_DATASET} />
-                                <Route component={PrivacyStatement} exact path={routes.PRIVACY_STATEMENT} />
+                                <Route exact path={routes.PRIVACY_STATEMENT}>
+                                  <PrivacyStatement />
+                                </Route>
                                 <PrivateRoute component={Settings} exact path={routes.SETTINGS} />
                                 <PrivateRoute component={ReferenceDataflow} exact path={routes.REFERENCE_DATAFLOW} />
                                 <PrivateRoute
@@ -116,7 +124,9 @@ const App = () => {
                                   exact
                                   path={routes.REFERENCE_DATASET}
                                 />
-                                <Route component={PublicFrontpage} exact path={routes.ACCESS_POINT_ERROR} />
+                                <Route exact path={routes.ACCESS_POINT_ERROR}>
+                                  <PublicFrontpage />
+                                </Route>
                                 <Route>
                                   <Redirect to={'/error/notFound'} />
                                 </Route>

@@ -33,7 +33,7 @@ export const PrivateRoute = ({ component: Component, componentProps = {}, locati
   if (window.env.REACT_APP_EULOGIN.toString() === 'true') {
     if (LocalUserStorageUtils.hasToken() || !isUndefined(userContext.id)) {
       LocalUserStorageUtils.removeSessionStorageProperty('redirectUrl');
-      return <Route path={path} render={props => checkRedirect(props)} />;
+      return <Route children={props => checkRedirect(props)} path={path} />;
     } else {
       if (isNull(userContext.isLoggedOut) || isUndefined(userContext.isLoggedOut)) {
         LocalUserStorageUtils.setPropertyToSessionStorage({ redirectUrl: window.location.href });
@@ -41,8 +41,8 @@ export const PrivateRoute = ({ component: Component, componentProps = {}, locati
       if (userContext.isLoggedOut) {
         return (
           <Route
+            children={props => <Redirect to={{ pathname: routes.ACCESS_POINT, state: { from: props.location } }} />}
             path={path}
-            render={props => <Redirect to={{ pathname: routes.ACCESS_POINT, state: { from: props.location } }} />}
           />
         );
       }
@@ -51,14 +51,14 @@ export const PrivateRoute = ({ component: Component, componentProps = {}, locati
   } else {
     return (
       <Route
-        path={path}
-        render={props => {
+        children={props => {
           if (LocalUserStorageUtils.hasToken() || !isUndefined(userContext.id)) {
             return checkRedirect(props);
           } else {
             return <Redirect to={{ pathname: routes.ACCESS_POINT, state: { from: props.location } }} />;
           }
         }}
+        path={path}
       />
     );
   }

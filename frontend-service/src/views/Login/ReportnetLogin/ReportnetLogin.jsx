@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react';
+import { useHistory } from 'react-router';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
@@ -17,7 +18,9 @@ import { UserService } from 'services/UserService';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 
-const ReportnetLogin = ({ history }) => {
+const ReportnetLogin = () => {
+  const history = useHistory();
+
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);

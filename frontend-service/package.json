@@ -34,7 +34,7 @@
     "react-leaflet-draw": "0.19.8",
     "react-leaflet": "2.8.0",
     "react-mapbox-gl": "5.1.1",
-    "react-router-dom": "5.0.1",
+    "react-router-dom": "5.3.0",
     "react-tooltip": "4.2.21",
     "react-transition-group": "4.4.2",
     "react": "16.14.0",
