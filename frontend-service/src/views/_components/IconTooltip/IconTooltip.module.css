@@ -7,7 +7,7 @@
   visibility: hidden;
   width: 250px;
   background-color: #555;
-  color: var(--white-color);
+  color: var(--c-white-color);
   text-align: center;
   padding: 15px;
   border-radius: 6px;

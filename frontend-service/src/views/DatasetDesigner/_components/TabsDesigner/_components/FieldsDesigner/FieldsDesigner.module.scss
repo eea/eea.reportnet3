@@ -105,7 +105,7 @@
     }
     .bulkConfirmDeleteButton {
       background-color: var(--errors);
-      color: var(--white-color);
+      color: var(--c-white-color);
     }
     .bulkCancelDeleteButtonTooltip {
       font-size: 9pt;
@@ -117,7 +117,7 @@
       margin-left: 0.5rem !important;
     }
     .PKInfoButton {
-      background-color: var(--white-color) !important;
+      background-color: var(--c-white-color) !important;
       border-radius: 50% !important;
       color: var(--datatable-header-info-button-color) !important;
       font-size: 12pt !important;
@@ -197,7 +197,7 @@
       span {
         background-color: var(--statusBox-designer-bg);
         border-radius: 3px;
-        color: var(--black-color);
+        color: var(--c-black-color);
         font-size: 10pt;
         font-weight: 600;
         margin-right: 1rem;

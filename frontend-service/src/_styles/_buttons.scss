@@ -9,16 +9,16 @@
   margin: 0;
   padding: 0.5rem 1rem;
   text-decoration: none;
-  color: var(--white-color);
+  color: var(--c-white-color);
   cursor: pointer;
 }
 
 .rp-btn.default {
-  color: var(--white-color);
+  color: var(--c-white-color);
 }
 .rp-btn.default:hover {
   background-color: var(--c-orange-200);
-  color: var(--blue-120);
+  color: var(--c-blue-120);
   border: 2px solid var(--c-orange-200);
 }
 
@@ -33,12 +33,12 @@
   margin: 0;
   padding: 0.5rem 1rem;
   text-decoration: none;
-  color: var(--white-color);
+  color: var(--c-white-color);
   cursor: pointer;
 }
 .rp-btn.primary:hover {
   background-color: var(--c-orange-200);
-  color: var(--blue-120);
+  color: var(--c-blue-120);
   border: 2px solid var(--c-orange-200);
 }
 
@@ -50,23 +50,23 @@
 }
 .rp-btn.warning {
   background-color: var(--c-tile);
-  color: var(--white-color);
+  color: var(--c-white-color);
 }
 .rp-btn.warning:hover {
   background-color: var(--c-orange-400) !important;
   border: 1px solid var(--c-orange-400) !important;
-  color: var(--white-color) !important;
+  color: var(--c-white-color) !important;
 }
 
 @keyframes p-progress-spinner-color {
   0% {
-    stroke: var(--blue-120);
+    stroke: var(--c-blue-120);
   }
   25% {
     stroke: var(--c-corporate-yellow);
   }
   50% {
-    stroke: var(--blue-120);
+    stroke: var(--c-blue-120);
   }
   100% {
     stroke: var(--c-corporate-yellow);

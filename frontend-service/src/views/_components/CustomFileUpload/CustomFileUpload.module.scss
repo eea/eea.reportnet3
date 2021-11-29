@@ -130,7 +130,7 @@
 }
 
 .infoButton {
-  background-color: var(--white-color) !important;
+  background-color: var(--c-white-color) !important;
   border-radius: 50% !important;
   color: var(--datatable-header-info-button-color) !important;
   font-size: 12pt !important;
@@ -191,7 +191,7 @@
 
 .replaceCheckboxSpanDisabled {
   cursor: not-allowed !important;
-  color: var(--gray-50) !important;
+  color: var(--c-gray-50) !important;
 }
 .iconPreview {
   font-size: 20pt;

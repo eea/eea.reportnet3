@@ -93,7 +93,7 @@
 
   &.DRAFT {
     background: var(--c-lilac-300);
-    color: var(--white-color);
+    color: var(--c-white-color);
     opacity: 0.8;
 
     &::before {
@@ -153,7 +153,7 @@
   }
 
   &.DRAFT {
-    color: var(--white-color);
+    color: var(--c-white-color);
     opacity: 1;
 
     &::before {
@@ -183,7 +183,7 @@
       width: 200%;
       height: 200%;
       opacity: 0.8;
-      background-color: var(--white-color);
+      background-color: var(--c-white-color);
       background-repeat: no-repeat;
       background-size: 50% 50%, 50% 50%;
       background-position: 0 0, 100% 0, 100% 100%, 0 100%;

@@ -25,7 +25,7 @@
   margin-top: 1.75px;
 }
 .navigationTabIcons:hover {
-  color: var(--black-color);
+  color: var(--c-black-color);
 }
 .scrollTab {
   scrollbar-color: var(--bg) var(--c-custom-gray);
@@ -38,14 +38,14 @@
 
 .scrollTab::-webkit-scrollbar-track {
   background: var(--bg);
-  border-left: 1px solid var(--gray-25);
-  border-right: 1px solid var(--gray-25);
+  border-left: 1px solid var(--c-gray-25);
+  border-right: 1px solid var(--c-gray-25);
 }
 
 .scrollTab::-webkit-scrollbar-thumb {
-  background: var(--gray-75);
+  background: var(--c-gray-75);
 }
 
 .scrollTab::-webkit-scrollbar-thumb:hover {
-  background: var(--gray-50);
+  background: var(--c-gray-50);
 }

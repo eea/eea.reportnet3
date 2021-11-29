@@ -5,10 +5,10 @@
   align-items: center;
   width: 100vw;
   height: 100vh;
-  background-color: var(--blue-120);
+  background-color: var(--c-blue-120);
 }
 .loginBoxContainer .loginBox {
-  background-color: var(--white-color);
+  background-color: var(--c-white-color);
   padding: 1rem;
   border-radius: 5px;
   width: 400px;
