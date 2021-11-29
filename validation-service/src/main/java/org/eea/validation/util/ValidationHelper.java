@@ -191,7 +191,7 @@ public class ValidationHelper implements DisposableBean {
           processesMap.get(processId)
               .setKieBase(validationService.loadRulesKnowledgeBase(datasetId, null));
         } else {
-          kieBase = processesMap.get(processId).getKieBase();
+          kieBase = validationService.loadRulesKnowledgeBase(datasetId, null);
         }
       } else {
         kieBase = validationService.loadRulesKnowledgeBase(datasetId, rule);
