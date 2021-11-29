@@ -76,11 +76,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
         header: resourcesContext.messages['notificationLevel'],
         template: rowData => notificationLevelTemplate(rowData, false),
         style: { width: '6rem' }
-      },
-      {
-        id: 'enabled',
-        header: resourcesContext.messages['ruleEnabled'],
-        template: enabledTemplate
       }
     ];
 
@@ -97,6 +92,15 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
     ));
 
     if (isAdmin) {
+      columnsArray.push(
+        <Column
+          body={enabledTemplate}
+          field="enabled"
+          header={resourcesContext.messages['ruleEnabled']}
+          key="enabled"
+          sortable={true}
+        />
+      );
       columnsArray.push(
         <Column body={actionsColumnButtons} header={resourcesContext.messages['actions']} key="buttonsUniqueId" />
       );
@@ -116,7 +120,6 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       <div className={styles.actionsColumnButtons}>
         <ActionsColumn
           isDeletingDocument={isDeleting}
-          // isUpdating={isUpdating}
           onDeleteClick={() => onToggleDeleteVisibility(true)}
           onEditClick={() => onEditClick(rowData)}
           rowDataId={rowData.key}

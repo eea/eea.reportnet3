@@ -50,7 +50,7 @@
       align-items: center;
       margin-right: 1rem;
       .loginButton {
-        background-color: var(--white);
+        background-color: var(--white-color);
         color: var(--public-custom-header-bg);
         padding: 0.25rem 0.9rem;
         font-weight: bold;
@@ -109,7 +109,7 @@
     }
 
     .themeSwitcherInputSwitch:before {
-      background-color: var(--black);
+      background-color: var(--black-color);
       box-shadow: var(--inputswitch-dark-theme-checked);
     }
   }

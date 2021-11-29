@@ -8,7 +8,7 @@
   background-color: var(--blue-120);
 }
 .loginBoxContainer .loginBox {
-  background-color: var(--white);
+  background-color: var(--white-color);
   padding: 1rem;
   border-radius: 5px;
   width: 400px;
