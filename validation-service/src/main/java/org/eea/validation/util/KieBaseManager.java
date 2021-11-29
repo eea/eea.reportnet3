@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.drools.template.ObjectDataCompiler;
@@ -93,18 +92,18 @@ public class KieBaseManager {
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
     KieServices kieServices = KieServices.Factory.get();
-    RulesSchema schemaRules = null;
-    List<Rule> filteredRules = new ArrayList<>();
-    if (sqlRule == null) {
-      schemaRules = rulesRepository.getActiveAndVerifiedRules(datasetSchemaOId);
-      filteredRules = schemaRules.getRules().stream()
-          .filter(rule -> !rule.getWhenCondition().startsWith("isSQL"))
-          .collect(Collectors.toList());
-    } else {
-      filteredRules.add(sqlRule);
-      schemaRules = new RulesSchema();
-    }
-    schemaRules.setRules(filteredRules);
+    RulesSchema schemaRules = rulesRepository.getActiveAndVerifiedRules(datasetSchemaOId);;
+    // List<Rule> filteredRules = new ArrayList<>();
+    // if (sqlRule == null) {
+    // schemaRules = rulesRepository.getActiveAndVerifiedRules(datasetSchemaOId);
+    // filteredRules = schemaRules.getRules().stream()
+    // .filter(rule -> !rule.getWhenCondition().startsWith("isSQL"))
+    // .collect(Collectors.toList());
+    // } else {
+    // filteredRules.add(sqlRule);
+    // schemaRules = new RulesSchema();
+    // }
+    // schemaRules.setRules(filteredRules);
     // Get enabled and verified rules
 
     // we bring the datasetschema
