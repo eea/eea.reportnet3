@@ -12,7 +12,7 @@
     "react/no-deprecated": "warn",
     "react/no-array-index-key": "warn",
     "react/no-direct-mutation-state": "warn",
-    "react/no-multi-comp": "warn",
+    "react/no-multi-comp": "off",
     "react/no-unused-prop-types": "warn",
     "react/no-unused-state": "warn",
     "react/jsx-key": "warn",

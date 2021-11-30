@@ -1139,14 +1139,14 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
           selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
           selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
+          tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
           tableSchemaId={dataViewerOptions.tableSchemaId}
-          tables={tableSchema}
         />
       ) : (
         <Webforms
-          dataProviderId={metadata?.dataset.dataProviderId}
           dataflowId={dataflowId}
+          dataProviderId={metadata?.dataset.dataProviderId}
           datasetId={datasetId}
           isReleasing={dataset.isReleasing}
           isReporting
