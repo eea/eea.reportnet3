@@ -13,6 +13,8 @@ import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'views/_components/Dialog';
+import { GoTopButton } from 'views/_components/GoTopButton';
+import { List } from './_components/List';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
@@ -20,7 +22,6 @@ import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDatafl
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
-import { GoTopButton } from 'views/_components/GoTopButton';
 
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
 import { CitizenScienceDataflowService } from 'services/CitizenScienceDataflowService';
@@ -505,7 +506,8 @@ const Dataflows = withRouter(({ history, match }) => {
           options={options[tabId]}
           viewType={tabId}
         />
-        <DataflowsList
+        <List dataflows={filteredData['reporting']} />
+        {/* <DataflowsList
           className="dataflowList-accepted-help-step"
           content={{
             reporting: filteredData['reporting'],
@@ -517,7 +519,7 @@ const Dataflows = withRouter(({ history, match }) => {
           isCustodian={isCustodian}
           isLoading={loadingStatus[tabId]}
           visibleTab={tabId}
-        />
+        /> */}
       </div>
 
       <GoTopButton parentRef={containerRef} referenceMargin={70} />

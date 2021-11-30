@@ -1,7 +1,8 @@
-import { useLayoutEffect, useContext, useEffect, useReducer } from 'react';
-import { useRecoilCallback, useRecoilState } from 'recoil';
+import { useContext, useEffect, useLayoutEffect } from 'react';
+import { useRecoilState } from 'recoil';
 import PropTypes from 'prop-types';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './MyFilters.module.scss';
@@ -13,14 +14,9 @@ import { MultiSelect } from 'views/_components/MultiSelect';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { filtersStateFamily } from './_functions/Stores/filtersStores';
-import { isEmpty } from 'lodash';
 
-export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode, onFilter, options, viewType }) => {
+export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode, onFilter, options, viewType }) => {
   const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
-
-  // const updateRecord = useRecoilCallback(({ set }, record) => {
-  //   set(filtersStateFamily(viewType), record);
-  // });
 
   const { filterBy, filteredData, loadingStatus } = filters;
 
@@ -49,11 +45,9 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode
   const loadFilters = () => {
     setLoadingStatus('PENDING');
     const filteredData = applyFilters();
-    console.log('filteredData :>> ', filteredData);
 
     try {
       setFilters({ ...filters, data: data, filteredData, loadingStatus: 'SUCCESS' });
-      // setLoadingStatus('SUCCESS');
     } catch (error) {
       setLoadingStatus('FAILED');
       console.log('error :>> ', error);
@@ -62,7 +56,6 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode
 
   const onChange = ({ key, value }) => {
     const test = doFilter({ key, value });
-    console.log('new test :>> ', test);
 
     setFilters({ ...filters, filterBy: { ...filters.filterBy, [key]: value }, filteredData: test });
   };
@@ -75,7 +68,6 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode
 
   const renderFilters = () => {
     return options.map(option => {
-      console.log('option.type :>> ', option.type);
       switch (option.type) {
         case 'CHECKBOX':
           return [];
@@ -131,7 +123,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode
     <div className={styles.filters}>
       {isSearchVisible ? <InputText placeholder="Search" /> : null}
       {renderFilters()}
-      {isStrickMode ? <InputText placeholder="StrictMode" /> : null}
+      {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
       {!isNil(onFilter) && (
         <Button
@@ -152,21 +144,11 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrickMode
   );
 };
 
-const filtersReducer = (state, { type, payload }) => {
-  switch (type) {
-    case 'SET_LOADING_STATUS':
-      return { ...state, loadingStatus: payload.status };
-
-    default:
-      return state;
-  }
-};
-
 MyFilters.propTypes = {
   data: PropTypes.array,
   getFilteredData: PropTypes.func,
   isSearchVisible: PropTypes.bool,
-  isStrickMode: PropTypes.bool,
+  isStrictMode: PropTypes.bool,
   onFilter: PropTypes.func,
   options: PropTypes.object,
   viewType: PropTypes.string
@@ -176,7 +158,7 @@ MyFilters.defaultProps = {
   data: [],
   getFilteredData: null,
   isSearchVisible: false,
-  isStrickMode: false,
+  isStrictMode: false,
   onFilter: null,
   options: []
 };
