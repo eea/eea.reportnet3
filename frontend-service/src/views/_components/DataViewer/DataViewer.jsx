@@ -1108,8 +1108,8 @@ const DataViewer = withRouter(
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={isExportable}
-          isFilterValidationsActive={isFilterValidationsActive}
           isFilterable={isFilterable}
+          isFilterValidationsActive={isFilterValidationsActive}
           isGroupedValidationSelected={isGroupedValidationSelected}
           isLoading={isLoading}
           levelErrorTypesWithCorrects={levelErrorAllTypes}
@@ -1187,12 +1187,12 @@ const DataViewer = withRouter(
             resizableColumns={true}
             rows={records.recordsPerPage}
             rowsPerPageOptions={[5, 10, 20, 100]}
-            scrollHeight="70vh"
             scrollable={true}
+            scrollHeight="70vh"
             selectionMode="single"
+            sortable={true}
             sortField={sort.sortField}
             sortOrder={sort.sortOrder}
-            sortable={true}
             totalRecords={
               !isNil(records.totalFilteredRecords) &&
               (isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== ''))

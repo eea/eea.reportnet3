@@ -254,8 +254,8 @@ export const ManageUniqueConstraint = ({
         setSelectedFields([]);
       }}
       optionLabel="name"
-      optionValue="value"
       options={getTableOptions()}
+      optionValue="value"
       title={resourcesContext.messages['selectUniqueTableTitle']}
       value={selectedTable}
     />
@@ -269,8 +269,8 @@ export const ManageUniqueConstraint = ({
       multiple={true}
       onChange={event => !isNil(event.value) && setSelectedFields(event.value)}
       optionLabel="name"
-      optionValue="value"
       options={getFieldOptions()}
+      optionValue="value"
       title={resourcesContext.messages['selectUniqueFieldsTitle']}
       value={selectedFields}
     />

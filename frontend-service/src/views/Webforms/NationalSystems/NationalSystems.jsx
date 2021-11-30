@@ -61,8 +61,8 @@ export const NationalSystems = ({ dataflowId, dataProviderId, datasetId, state, 
         return (
           <Fragment key={uniqueId()}>
             <NationalSystemsTable
-              dataProviderId={dataProviderId}
               dataflowId={dataflowId}
+              dataProviderId={dataProviderId}
               datasetId={datasetId}
               errorMessages={getErrorMessages}
               schemaTables={schemaTable}

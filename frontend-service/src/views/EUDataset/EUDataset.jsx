@@ -301,9 +301,9 @@ export const EUDataset = withRouter(({ history, match }) => {
       onLoadTableData={onLoadTableData}
       onTabChange={table => onTabChange(table)}
       showWriteButtons={false}
+      tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}
       tableSchemaId={dataViewerOptions.tableSchemaId}
-      tables={tableSchema}
     />
   );
 

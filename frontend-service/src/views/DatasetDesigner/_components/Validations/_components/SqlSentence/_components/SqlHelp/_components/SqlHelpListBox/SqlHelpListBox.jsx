@@ -30,8 +30,8 @@ export const SqlHelpListBox = ({
         listStyle={{ height: '100px' }}
         onChange={e => onChange(e.value)}
         optionLabel="label"
-        optionValue="value"
         options={options}
+        optionValue="value"
         spinner={isSpinnerVisible}
         value={selectedItem}
       />

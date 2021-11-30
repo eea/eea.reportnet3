@@ -546,8 +546,8 @@ export const QCList = withRouter(
           itemTemplate={rowData => levelErrorTemplate(rowData, true)}
           onChange={e => onRowEditorValueChange(props, e.target.value.value)}
           optionLabel="label"
-          optionValue="value"
           options={config.validations.errorLevels}
+          optionValue="value"
           placeholder={resourcesContext.messages['errorTypePlaceholder']}
           value={{ label: props.rowData[field], value: props.rowData[field] }}
         />
