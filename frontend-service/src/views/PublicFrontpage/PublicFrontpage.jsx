@@ -1,5 +1,5 @@
 import { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -25,14 +25,13 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 
 import { ErrorUtils } from 'views/_functions/Utils';
 
-export const PublicFrontpage = withRouter(({ history, match }) => {
+export const PublicFrontpage = () => {
+  const history = useHistory();
+  const { errorType: urlErrorType } = useParams();
+
   const notificationContext = useContext(NotificationContext);
   const themeContext = useContext(ThemeContext);
   const [contentStyles, setContentStyles] = useState({});
-
-  const {
-    params: { errorType: urlErrorType }
-  } = match;
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_INDEX });
 
@@ -214,4 +213,4 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
       </div>
     </PublicLayout>
   );
-});
+};

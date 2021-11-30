@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 
@@ -32,10 +32,9 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
 
-export const EUDataset = withRouter(({ history, match }) => {
-  const {
-    params: { dataflowId, datasetId }
-  } = match;
+export const EUDataset = () => {
+  const history = useHistory();
+  const { dataflowId, datasetId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -96,14 +95,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     }
   }, [notificationContext.hidden]);
 
-  useBreadCrumbs({
-    currentPage: CurrentPage.EU_DATASET,
-    dataflowId,
-    dataflowType,
-    history,
-    isLoading,
-    metaData: metadata
-  });
+  useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, dataflowType, isLoading, metaData: metadata });
 
   const setMetadata = async () => {
     try {
@@ -117,7 +109,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const getDataflowDetails = async () => {
     try {
-      const data = await DataflowService.getDetails(match.params.dataflowId);
+      const data = await DataflowService.getDetails(dataflowId);
       euDatasetDispatch({
         type: 'GET_DATAFLOW_DETAILS',
         payload: {
@@ -335,4 +327,4 @@ export const EUDataset = withRouter(({ history, match }) => {
       {renderTabsSchema()}
     </Fragment>
   );
-});
+};

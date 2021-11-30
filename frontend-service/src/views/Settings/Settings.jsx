@@ -1,5 +1,4 @@
 import { Fragment, useContext, useEffect } from 'react';
-import { useHistory } from 'react-router';
 
 import { SettingsHelpConfig } from 'conf/help/settings';
 
@@ -17,12 +16,10 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { CurrentPage } from 'views/_functions/Utils';
 
 const Settings = () => {
-  const history = useHistory();
-
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  useBreadCrumbs({ currentPage: CurrentPage.USER_SETTINGS, history });
+  useBreadCrumbs({ currentPage: CurrentPage.USER_SETTINGS });
 
   useEffect(() => {
     leftSideBarContext.addModels([]);

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { useHistory } from 'react-router';
+import { useHistory } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 import { ErrorBoundary } from 'react-error-boundary';

@@ -1,4 +1,5 @@
 import { useContext, useEffect } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -19,13 +20,14 @@ export const useBreadCrumbs = ({
   dataflowType,
   dataProviderId,
   dataProviderName,
-  history,
   isLoading,
-  matchParams,
   metaData,
   referenceDataflowId,
   representativeId
 }) => {
+  const history = useHistory();
+  const params = useParams();
+
   const breadCrumbContext = useContext(BreadCrumbContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -37,7 +39,7 @@ export const useBreadCrumbs = ({
     dataProviderId,
     dataProviderName,
     isLoading,
-    matchParams,
+    params,
     metaData,
     representativeId
   ]);

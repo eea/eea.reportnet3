@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router';
+import { useHistory } from 'react-router-dom';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -31,7 +31,7 @@ export const PublicDataflows = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [publicDataflows, setPublicDataflows] = useState([]);
 
-  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOWS, history });
+  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOWS });
 
   useEffect(() => {
     onLoadPublicDataflows();

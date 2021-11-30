@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { useHistory } from 'react-router';
+import { useHistory } from 'react-router-dom';
 
 import logo from 'views/_assets/images/logos/logo.png';
 import styles from './Navigation.module.css';

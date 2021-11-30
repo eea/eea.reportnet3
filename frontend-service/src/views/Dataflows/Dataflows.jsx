@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
 
@@ -45,11 +45,8 @@ import { useReportingObligations } from 'views/_components/ReportingObligations/
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const Dataflows = withRouter(({ history, match }) => {
-  const {
-    params: { errorType: dataflowsErrorType }
-  } = match;
-
+const Dataflows = () => {
+  const { errorType: dataflowsErrorType } = useParams();
   const { permissions } = config;
 
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -123,7 +120,7 @@ const Dataflows = withRouter(({ history, match }) => {
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
-  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
+  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
   useEffect(() => {
     getDataflowsCount();
@@ -524,6 +521,6 @@ const Dataflows = withRouter(({ history, match }) => {
       )}
     </div>
   );
-});
+};
 
 export { Dataflows };

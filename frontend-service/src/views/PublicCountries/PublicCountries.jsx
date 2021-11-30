@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router';
+import { useHistory } from 'react-router-dom';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -27,7 +27,7 @@ export const PublicCountries = () => {
 
   const [contentStyles, setContentStyles] = useState({});
 
-  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRIES, history });
+  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRIES });
 
   useEffect(() => {
     if (!themeContext.headerCollapse) {

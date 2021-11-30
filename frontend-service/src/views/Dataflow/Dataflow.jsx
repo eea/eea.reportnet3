@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router';
 
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
@@ -62,10 +62,11 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const Dataflow = withRouter(({ history, match }) => {
-  const {
-    params: { dataflowId, representativeId }
-  } = match;
+const Dataflow = () => {
+  const history = useHistory();
+  const params = useParams();
+
+  const { dataflowId, representativeId } = params;
 
   const exportImportMenuRef = useRef(null);
 
@@ -233,8 +234,6 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowId,
     dataflowStateData: dataflowState.data,
     dataflowType: dataflowState.dataflowType,
-    history,
-    matchParams: match.params,
     representativeId
   });
 
@@ -1118,9 +1117,9 @@ const Dataflow = withRouter(({ history, match }) => {
           handleRedirect={handleRedirect}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           manageDialogs={manageDialogs}
-          match={match}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
+          representativeId={representativeId}
           setIsReceiptLoading={setIsReceiptLoading}
         />
       );
@@ -1505,7 +1504,6 @@ const Dataflow = withRouter(({ history, match }) => {
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
             isCustodian={dataflowState.isCustodian}
             manageDialogs={manageDialogs}
-            match={match}
           />
         )}
 
@@ -1521,6 +1519,6 @@ const Dataflow = withRouter(({ history, match }) => {
       </div>
     </div>
   );
-});
+};
 
 export { Dataflow };

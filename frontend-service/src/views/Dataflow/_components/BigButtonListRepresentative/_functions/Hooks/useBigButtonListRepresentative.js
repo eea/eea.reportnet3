@@ -17,10 +17,10 @@ const useBigButtonListRepresentative = ({
   getDataHistoricReleases,
   handleRedirect,
   isLeadReporterOfCountry,
-  match,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
-  onShowHistoricReleases
+  onShowHistoricReleases,
+  representativeId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -35,7 +35,7 @@ const useBigButtonListRepresentative = ({
 
   const getButtonsVisibility = () => {
     const isManualAcceptance = dataflowState.data.manualAcceptance;
-    const isTestDataset = parseInt(match.params.representativeId) === 0;
+    const isTestDataset = parseInt(representativeId) === 0;
     const isReleased =
       !isNil(dataflowState.data.datasets) &&
       dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
@@ -134,7 +134,7 @@ const useBigButtonListRepresentative = ({
   });
 
   const groupByRepresentativeModels = dataflowState.data.datasets
-    .filter(dataset => dataset.dataProviderId === parseInt(match.params.representativeId))
+    .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
     .map(dataset => {
       const datasetName = dataset.name;
       const datasetId = dataset.datasetId;
@@ -185,7 +185,7 @@ const useBigButtonListRepresentative = ({
   };
 
   const isReleased = dataflowState.data.datasets
-    .filter(dataset => dataset.dataProviderId === parseInt(match.params.representativeId))
+    .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
     .some(dataset => dataset.isReleased);
 
   const representative = dataflowState.data.representatives.find(

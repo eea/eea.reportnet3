@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
@@ -33,10 +33,9 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
 
-export const DataCollection = withRouter(({ match, history }) => {
-  const {
-    params: { dataflowId, datasetId }
-  } = match;
+export const DataCollection = () => {
+  const history = useHistory();
+  const { dataflowId, datasetId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -59,13 +58,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   let exportMenuRef = useRef();
   let growlRef = useRef();
 
-  useBreadCrumbs({
-    currentPage: CurrentPage.DATA_COLLECTION,
-    dataflowId,
-    dataflowType,
-    history,
-    isLoading
-  });
+  useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, dataflowType, isLoading });
 
   useCheckNotifications(
     ['DOWNLOAD_EXPORT_DATASET_FILE_ERROR', 'EXPORT_DATA_BY_ID_ERROR', 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD'],
@@ -142,7 +135,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const onLoadDataflowData = async () => {
     try {
-      const data = await DataflowService.get(match.params.dataflowId);
+      const data = await DataflowService.get(dataflowId);
       const dataCollection = data
         ? data.dataCollections.filter(dataset => dataset.dataCollectionId.toString() === datasetId)
         : [];
@@ -296,4 +289,4 @@ export const DataCollection = withRouter(({ match, history }) => {
       {onRenderTabsSchema}
     </Fragment>
   );
-});
+};
