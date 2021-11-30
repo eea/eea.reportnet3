@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -19,7 +19,9 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { EuroFlag } from './_components/EuroFlag';
 
-export const PublicCountries = withRouter(({ history }) => {
+export const PublicCountries = () => {
+  const history = useHistory();
+
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
@@ -94,4 +96,4 @@ export const PublicCountries = withRouter(({ history }) => {
       </div>
     </PublicLayout>
   );
-});
+};

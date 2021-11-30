@@ -357,7 +357,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const renderRedirectText = (text, url) => (
     <span>
       {text}{' '}
-      <a href={url} rel="noreferrer" target="_blank" title={text}>
+      <a href={url} rel="noopener noreferrer" target="_blank" title={text}>
         <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalUrl')} />
       </a>
     </span>
@@ -396,9 +396,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
               }
               rows={numberRows}
               rowsPerPageOptions={[5, 10, 15]}
+              sortable={true}
               sortField={sortField}
               sortOrder={sortOrder}
-              sortable={true}
               totalRecords={totalRecords}
               value={dataflows}>
               {renderColumns(dataflows)}

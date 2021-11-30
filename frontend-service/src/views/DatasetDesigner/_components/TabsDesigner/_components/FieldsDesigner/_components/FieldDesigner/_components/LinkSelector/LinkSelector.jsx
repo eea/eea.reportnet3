@@ -420,8 +420,8 @@ const LinkSelector = withRouter(
                         }
                       }}
                       optionLabel="name"
-                      optionValue="value"
                       options={getOptions(datasetSchema)}
+                      optionValue="value"
                       title={datasetSchema.datasetSchemaName}
                       value={link}></ListBox>
                   );
