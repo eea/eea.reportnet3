@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -65,6 +67,9 @@ public class UserManagementControllerImplTest {
 
   @Mock
   private UserRoleService userRoleService;
+
+  @Mock
+  private NotificationControllerZuul notificationController;
 
 
   @Before
@@ -707,6 +712,29 @@ public class UserManagementControllerImplTest {
   @Test
   public void getUserRolesByDataflowTest() {
     assertNotNull(userManagementController.getUserRolesByDataflow(0L));
+  }
+
+
+  @Test(expected = ResponseStatusException.class)
+  public void downloadUsersByCountryExceptionTest() {
+    Mockito.doThrow(ResponseStatusException.class).when(userRoleService)
+        .downloadUsersByCountry(Mockito.anyLong(), Mockito.anyString());
+    try {
+      userManagementController.downloadUsersByCountry(1L, "fileName", null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void exportUsersByCountryTest() throws IOException, EEAException {
+    UserNotificationContentVO notification = new UserNotificationContentVO();
+    notification.setDataflowId(1L);
+    Mockito.lenient().doNothing().when(notificationController)
+        .createUserNotificationPrivate("EVENT", notification);
+    userManagementController.exportUsersByCountry(1L);
+    Mockito.verify(userRoleService, times(1)).exportUsersByCountry(1L);
   }
 
 }

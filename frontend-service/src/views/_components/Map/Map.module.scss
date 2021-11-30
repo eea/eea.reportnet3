@@ -18,6 +18,11 @@
   z-index: 9999;
 }
 
+.error {
+  border: var(--inputtext-border-error) !important;
+  box-shadow: var(--inputtext-box-shadow-focus-error) !important;
+}
+
 .mapButtonsBar {
   display: flex;
   align-items: center;
@@ -50,6 +55,10 @@
   background: #e6e6e6;
   position: absolute;
   border-radius: 50%;
+}
+
+.newPointError {
+  width: 30rem;
 }
 
 .selectPointButton {

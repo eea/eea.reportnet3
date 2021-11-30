@@ -325,6 +325,7 @@ const DataViewer = withRouter(
 
     const filterDataResponse = data => {
       const dataFiltered = DataViewerUtils.parseData(data);
+
       if (dataFiltered.length > 0) {
         dispatchRecords({ type: 'FIRST_FILTERED_RECORD', payload: dataFiltered[0] });
       } else {
@@ -1306,7 +1307,7 @@ const DataViewer = withRouter(
                     dataflowId,
                     datasetId,
                     fieldId: records.selectedFieldId,
-                    dataProviderId
+                    providerId: dataProviderId
                   })
             }`}
           />
@@ -1367,6 +1368,7 @@ const DataViewer = withRouter(
                 isSaving={isSaving}
                 onChangeForm={onEditAddFormInput}
                 onConditionalChange={onConditionalChange}
+                onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
                 onShowCoordinateError={onShowCoordinateError}
                 onShowFieldInfo={onShowFieldInfo}
                 records={records}

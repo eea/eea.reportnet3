@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
 import first from 'lodash/first';
@@ -29,6 +29,7 @@ import { DownloadFile } from 'views/_components/DownloadFile';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
+import { Menu } from 'views/_components/Menu';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { RepresentativesList } from './_components/RepresentativesList';
@@ -66,6 +67,8 @@ const Dataflow = withRouter(({ history, match }) => {
     params: { dataflowId, representativeId }
   } = match;
 
+  const exportImportMenuRef = useRef(null);
+
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -82,6 +85,7 @@ const Dataflow = withRouter(({ history, match }) => {
     description: '',
     designDatasetSchemas: [],
     formHasRepresentatives: false,
+    hasReporters: false,
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
@@ -256,6 +260,29 @@ const Dataflow = withRouter(({ history, match }) => {
     }
   }, [notificationContext.hidden]);
 
+  const exportImportMenuItems = [
+    {
+      command: () => onExportLeadReportersTemplate(),
+      disabled: isEmpty(dataflowState.dataProviderSelected),
+      icon: 'download',
+      label: resourcesContext.messages['exportLeadReportersTemplate'],
+      tooltip: `${resourcesContext.messages['exportLeadReportersTemplateTooltip']} ${dataflowState.dataProviderSelected?.label}`
+    },
+    {
+      command: () => onExportLeadReporters(),
+      icon: 'download',
+      label: resourcesContext.messages['exportLeadReporters'],
+      tooltip: resourcesContext.messages['exportLeadReportersTooltip']
+    },
+    {
+      command: () => manageDialogs('isImportLeadReportersVisible', true),
+      disabled: isEmpty(dataflowState.dataProviderSelected),
+      icon: 'upload',
+      label: resourcesContext.messages['importLeadReporters'],
+      tooltip: resourcesContext.messages['importLeadReportersTooltip']
+    }
+  ];
+
   const manageDialogs = (dialog, value, secondDialog, secondValue) =>
     dataflowDispatch({
       type: 'MANAGE_DIALOGS',
@@ -342,6 +369,13 @@ const Dataflow = withRouter(({ history, match }) => {
     });
   };
 
+  const setHasReporters = hasReporters => {
+    dataflowDispatch({
+      type: 'SET_HAS_REPORTERS',
+      payload: { hasReporters }
+    });
+  };
+
   const setIsUserRightManagementDialogVisible = isVisible => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
   };
@@ -351,9 +385,9 @@ const Dataflow = withRouter(({ history, match }) => {
       return (
         <Button
           className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink ${
-            dataflowState.isUpdatingPermissions ? 'p-button-animated-spin' : ''
+            dataflowState.isUpdatingPermissions || !dataflowState.hasReporters ? 'p-button-animated-spin' : ''
           }`}
-          disabled={dataflowState.isUpdatingPermissions}
+          disabled={dataflowState.isUpdatingPermissions || !dataflowState.hasReporters}
           icon={dataflowState.isUpdatingPermissions ? 'spinnerAnimate' : 'refresh'}
           label={resourcesContext.messages['updateUsersPermissionsButton']}
           onClick={() => manageDialogs('isValidateReportersDialogVisible', true)}
@@ -545,34 +579,26 @@ const Dataflow = withRouter(({ history, match }) => {
           !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
         }`}
         disabled={isEmpty(dataflowState.dataProviderSelected)}
-        icon="export"
-        label={resourcesContext.messages['exportLeadReportersTemplate']}
-        onClick={onExportLeadReportersTemplate}
-        tooltip={`${resourcesContext.messages['exportLeadReportersTemplateTooltip']} ${dataflowState.dataProviderSelected?.label}`}
-        tooltipOptions={{ position: 'top' }}
+        icon="sortAlt"
+        id="buttonExportImport"
+        label={resourcesContext.messages['exportImport']}
+        onClick={event => {
+          exportImportMenuRef.current.show(event);
+        }}
       />
+      <Menu
+        className={styles.exportImportMenu}
+        id="exportImportMenu"
+        model={exportImportMenuItems}
+        popup={true}
+        ref={exportImportMenuRef}
+      />
+
       <Button
         className={`${styles.buttonLeft} p-button-secondary ${
           !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
-        }`}
-        disabled={isEmpty(dataflowState.dataProviderSelected)}
-        icon="import"
-        label={resourcesContext.messages['importLeadReporters']}
-        onClick={() => manageDialogs('isImportLeadReportersVisible', true)}
-        tooltip={resourcesContext.messages['importLeadReportersTooltip']}
-        tooltipOptions={{ position: 'top' }}
-      />
-      <Button
-        className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink`}
-        icon="export"
-        label={resourcesContext.messages['exportLeadReporters']}
-        onClick={onExportLeadReporters}
-      />
-      <Button
-        className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink ${
-          dataflowState.isUpdatingPermissions ? 'p-button-animated-spin' : ''
-        }`}
-        disabled={dataflowState.isUpdatingPermissions}
+        } ${dataflowState.isUpdatingPermissions ? 'p-button-animated-spin' : ''}`}
+        disabled={dataflowState.isUpdatingPermissions || isEmpty(dataflowState.dataProviderSelected)}
         icon={dataflowState.isUpdatingPermissions ? 'spinnerAnimate' : 'refresh'}
         label={resourcesContext.messages['updateUsersPermissionsButton']}
         onClick={() => manageDialogs('isValidateLeadReportersDialogVisible', true)}
@@ -597,19 +623,23 @@ const Dataflow = withRouter(({ history, match }) => {
 
   const onDownloadUsersByCountry = async () => {
     setIsDownloadingUsers(true);
-    notificationContext.add({ type: 'DOWNLOAD_USERS_BY_COUNTRY_START' });
 
     try {
       await DataflowService.generateUsersByCountryFile(dataflowId);
+      notificationContext.add({ type: 'DOWNLOAD_USERS_BY_COUNTRY_START' });
     } catch (error) {
       console.error('Dataflow - onDownloadUsersByCountry.', error);
-      notificationContext.add({ type: 'GENERATE_USERS_LIST_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_USERS_LIST_FILE_ERROR' }, true);
+      }
       setIsDownloadingUsers(false);
     }
   };
 
   useCheckNotifications(
-    ['AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE', 'DOWNLOAD_USERS_LIST_FILE_ERROR'],
+    ['AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE', 'DOWNLOAD_USERS_LIST_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
     setIsDownloadingUsers,
     false
   );
@@ -621,7 +651,7 @@ const Dataflow = withRouter(({ history, match }) => {
   const renderUserListDialogFooter = () => (
     <div className={styles.buttonsRolesFooter}>
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary p-button-animated-blink ${styles.buttonLeft}`}
         disabled={dataflowState.isDownloadingUsers}
         icon={dataflowState.isDownloadingUsers ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadUsersListButtonLabel']}
@@ -1141,6 +1171,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isCustodian && dataflowState.isManageRolesDialogVisible && (
           <Dialog
+            className={styles.leadReportersDialog}
             contentStyle={{ maxHeight: '60vh' }}
             footer={manageRoleDialogFooter}
             header={resourcesContext.messages['manageRolesDialogTitle']}
@@ -1224,6 +1255,7 @@ const Dataflow = withRouter(({ history, match }) => {
               placeholder={resourcesContext.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={reporterRoleOptions}
+              setHasReporters={setHasReporters}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}

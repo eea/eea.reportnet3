@@ -138,21 +138,21 @@
 :global .p-datatable-scrollable-body::-webkit-scrollbar-button:single-button:vertical:increment {
   background-color: var(--bg);
   border-width: 8px 8px 0 8px;
-  border-color: var(--gray-75) transparent transparent transparent;
+  border-color: var(--c-gray-75) transparent transparent transparent;
 }
 :global .p-datatable-scrollable-body::-webkit-scrollbar-button:single-button:vertical:decrement {
   background-color: var(--bg);
   border-width: 0px 8px 8px 8px;
-  border-color: transparent transparent var(--gray-75) transparent;
+  border-color: transparent transparent var(--c-gray-75) transparent;
 }
 
 :global .p-datatable-scrollable-body::-webkit-scrollbar-button:single-button:horizontal:increment {
   background-color: var(--bg);
   border-width: 8px 0 8px 8px;
-  border-color: transparent transparent transparent var(--gray-75);
+  border-color: transparent transparent transparent var(--c-gray-75);
 }
 :global .p-datatable-scrollable-body::-webkit-scrollbar-button:single-button:horizontal:decrement {
   background-color: var(--bg);
   border-width: 8px 8px 8px 0px;
-  border-color: transparent var(--gray-75) transparent transparent;
+  border-color: transparent var(--c-gray-75) transparent transparent;
 }

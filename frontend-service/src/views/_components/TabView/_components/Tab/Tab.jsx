@@ -2,17 +2,18 @@ import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isUndefined from 'lodash/isUndefined';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { config } from 'conf';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import styles from './Tab.module.css';
+
+import { config } from 'conf';
 
 import classNames from 'classnames';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { ContextMenu } from 'views/_components/ContextMenu';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'views/_components/Icon';
 import { InputText } from 'views/_components/InputText';
+
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 const Tab = ({
@@ -236,6 +237,28 @@ const Tab = ({
     }
   };
 
+  const getClassNameTabView = () => {
+    const getExtraStyle = () => {
+      if (totalTabs === 1) {
+        return `${styles.tabGeneral} ${styles.tabViewTableEmpty}`;
+      } else if (isNavigationHidden) {
+        return `${styles.tabGeneral} ${styles.tabViewNavigationHidden}`;
+      } else if (!isNavigationHidden) {
+        return `${styles.tabGeneral} ${styles.tabViewTabNavigationShown}`;
+      }
+    };
+
+    const extraStyle = getExtraStyle();
+
+    if (editable) {
+      return `${styles.p_tabview_design} ${extraStyle}`;
+    } else if (addTab) {
+      return `${styles.p_tabview_design_add} ${extraStyle} datasetSchema-created-table-help-step`;
+    } else {
+      return `${styles.p_tabview_noDesign} ${extraStyle}`;
+    }
+  };
+
   return (
     <Fragment>
       <div
@@ -284,13 +307,7 @@ const Tab = ({
         <a
           aria-controls={ariaControls}
           aria-selected={selected}
-          className={
-            editable
-              ? styles.p_tabview_design
-              : addTab
-              ? `${styles.p_tabview_design_add} datasetSchema-created-table-help-step`
-              : styles.p_tabview_noDesign
-          }
+          className={getClassNameTabView()}
           draggable={designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (!addTab ? true : false) : false}
           href={'#' + ariaControls}
           id={id}
@@ -328,11 +345,6 @@ const Tab = ({
             }
           }}
           role="tab"
-          style={{
-            pointerEvents: 'fill',
-            height: isNavigationHidden ? '2.6rem' : '2.7rem',
-            minWidth: '3.6rem'
-          }}
           tabIndex={index}>
           {leftIcon && <span className={classNames('p-tabview-left-icon ', leftIcon)}></span>}
           {!isUndefined(editingHeader) && editingHeader ? (

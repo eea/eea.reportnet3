@@ -761,7 +761,6 @@ public class RulesControllerImpl implements RulesController {
   public void exportQCCSV(@ApiParam(value = "Dataset id used in the export process.",
       example = "10") @PathVariable("datasetId") Long datasetId) {
     LOG.info("Export dataset QC from datasetId {}, with type .csv", datasetId);
-
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDatasetId(datasetId);
     notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_QC_RULES_START",

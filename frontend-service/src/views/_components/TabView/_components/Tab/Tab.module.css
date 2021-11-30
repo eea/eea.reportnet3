@@ -34,6 +34,11 @@ a.p_tabview_design_add span {
   position: absolute;
 }
 
+a.tabGeneral {
+  pointer-events: fill;
+  min-width: 3.6rem;
+}
+
 input.p_tabview_input_design {
   min-width: 140px;
   height: 21px;
@@ -46,4 +51,16 @@ input.p_tabview_input_design {
 
 .highlight {
   color: var(--tabview-highlight-color) !important;
+}
+
+.tabViewTableEmpty {
+  height: 2.34rem !important;
+}
+
+.tabViewNavigationHidden {
+  height: 2.6rem !important;
+}
+
+.tabViewTabNavigationShown {
+  height: 2.7rem !important;
 }

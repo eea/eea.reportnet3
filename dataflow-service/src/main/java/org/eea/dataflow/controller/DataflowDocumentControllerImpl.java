@@ -27,15 +27,17 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import springfox.documentation.annotations.ApiIgnore;
 
 
 /**
- * The Class DataFlowDocumentControllerImpl.
+ * The Class DataflowDocumentControllerImpl.
  */
 @RestController
 @RequestMapping(value = "/dataflowDocument")
+@ApiIgnore
 @Api(tags = "Documents : Documents Manager")
-public class DataFlowDocumentControllerImpl implements DataFlowDocumentController {
+public class DataflowDocumentControllerImpl implements DataFlowDocumentController {
 
   /**
    * The dataflow service.
@@ -46,7 +48,7 @@ public class DataFlowDocumentControllerImpl implements DataFlowDocumentControlle
   /**
    * The Constant LOG.
    */
-  private static final Logger LOG = LoggerFactory.getLogger(DataFlowDocumentControllerImpl.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DataflowDocumentControllerImpl.class);
 
   /**
    * Gets the document info by id.

@@ -715,39 +715,6 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
         Mockito.eq("group1"));
   }
 
-  @Test(expected = EEAException.class)
-  public void addContributorToUserGroupNotPresentUserError() throws EEAException {
-
-    String userMail = "test@reportnet.net";
-    String groupName = "group1";
-
-    UserRepresentation[] userRepresentations = new UserRepresentation[] {};
-    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(userRepresentations);
-    Optional<UserRepresentation> contributor = Optional.empty();
-
-    ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users",
-        new ArrayList<>());
-    GroupInfo[] groups = new GroupInfo[1];
-    GroupInfo groupInfo = new GroupInfo();
-    groupInfo.setName(groupName);
-    groupInfo.setId(groupName);
-    groups[0] = groupInfo;
-
-    Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groups);
-
-    try {
-      keycloakSecurityProviderInterfaceService.addContributorToUserGroup(contributor, userMail,
-          groupName);
-    } catch (EEAException e) {
-      Assert.assertEquals(String.format(
-          "Error, user with mail %s not found and it was impossible to add it to the group %s",
-          userMail, groupName), e.getMessage());
-      throw e;
-    }
-
-    Mockito.verify(keycloakConnectorService, Mockito.times(1)).addUserToGroup(Mockito.eq("user1"),
-        Mockito.eq("group1"));
-  }
 
   @Test
   public void authenticateEmail() {

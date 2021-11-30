@@ -478,7 +478,7 @@ export class DataTable extends Component {
     }
   }
 
-  onPageChange(event) {    
+  onPageChange(event) {
     this.setState({ currentPage: event.currentPage, pageInputTooltip: event.pageInputTooltip });
 
     if (this.props.onPage) this.props.onPage(event);
@@ -514,7 +514,7 @@ export class DataTable extends Component {
                 layout: `FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport`,
                 CurrentPageReport: options => {
                   return (
-                    <span style={{ color: 'var(--white)', marginLeft: '1.5rem', userSelect: 'none' }}>
+                    <span style={{ color: 'var(--c-white-color)', marginLeft: '1.5rem', userSelect: 'none' }}>
                       <label style={{ margin: '0 0.5rem' }}>{this.context.messages['goTo']}</label>
                       <InputText
                         data-for="pageInputTooltip"
@@ -557,9 +557,14 @@ export class DataTable extends Component {
   }
 
   onSort(event) {
-    let sortField = event.sortField;
-    let sortOrder = this.getSortField() === event.sortField ? this.getSortOrder() * -1 : this.props.defaultSortOrder;
+    let sortField = null;
+    let sortOrder = null;
     let multiSortMeta;
+
+    if (this.getSortOrder() >= 0) {
+      sortField = event.sortField;
+      sortOrder = this.getSortField() === event.sortField ? this.getSortOrder() * -1 : this.props.defaultSortOrder;
+    }
 
     this.columnSortable = event.sortable;
     this.columnSortFunction = event.sortFunction;

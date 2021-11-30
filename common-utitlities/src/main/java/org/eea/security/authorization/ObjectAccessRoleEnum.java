@@ -107,6 +107,9 @@ public enum ObjectAccessRoleEnum {
   /** The testdataset steward. */
   TESTDATASET_STEWARD("ROLE_TESTDATASET-%s-DATA_STEWARD"),
 
+  /** The testdataset observer. */
+  TESTDATASET_OBSERVER("ROLE_TESTDATASET-%s-DATA_OBSERVER"),
+
   /** The referencedataset observer. */
   REFERENCEDATASET_OBSERVER("ROLE_REFERENCEDATASET-%s-DATA_OBSERVER"),
 

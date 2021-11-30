@@ -22,6 +22,7 @@ import { SystemNotificationsList } from './_components/SystemNotificationsList';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
+import { SystemNotificationService } from 'services/SystemNotificationService';
 import { UserService } from 'services/UserService';
 
 import { useSocket } from 'views/_components/Layout/MainLayout/_hooks';
@@ -29,7 +30,7 @@ import { useSocket } from 'views/_components/Layout/MainLayout/_hooks';
 export const MainLayout = withRouter(({ children, isPublic = false, history }) => {
   const element = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
   const leftSideBarContext = useContext(LeftSideBarContext);
-  const notifications = useContext(NotificationContext);
+  const notificationContext = useContext(NotificationContext);
 
   const themeContext = useContext(ThemeContext);
   const userContext = useContext(UserContext);
@@ -100,6 +101,18 @@ export const MainLayout = withRouter(({ children, isPublic = false, history }) =
     );
   });
 
+  const checkSystemNotificationsEnabled = async () => {
+    try {
+      const { data } = await SystemNotificationService.checkEnabled();
+      if (data) {
+        notificationContext.refreshedPage();
+      }
+    } catch (error) {
+      console.error('MainLayout - checkSystemNotificationsEnabled.', error);
+      notificationContext.add({ type: 'CHECK_ENABLED_SYSTEM_NOTIFICATIONS_ERROR' }, true);
+    }
+  };
+
   const getUserConfiguration = async () => {
     try {
       const userConfiguration = await UserService.getConfiguration();
@@ -119,7 +132,7 @@ export const MainLayout = withRouter(({ children, isPublic = false, history }) =
     } catch (error) {
       console.error('MainLayout - getUserConfiguration.', error);
       userContext.onToggleSettingsLoaded(false);
-      notifications.add({
+      notificationContext.add({
         type: 'GET_CONFIGURATION_USER_SERVICE_ERROR'
       });
     }
@@ -128,6 +141,7 @@ export const MainLayout = withRouter(({ children, isPublic = false, history }) =
   useEffect(() => {
     if (!userContext.userProps.settingsLoaded) {
       getUserConfiguration();
+      checkSystemNotificationsEnabled();
     }
   }, []);
 
@@ -139,7 +153,7 @@ export const MainLayout = withRouter(({ children, isPublic = false, history }) =
           userContext.onTokenRefresh(userObject);
         } catch (error) {
           console.error('MainLayout - fetchData.', error);
-          notifications.add({
+          notificationContext.add({
             key: 'TOKEN_REFRESH_ERROR',
             content: {}
           });

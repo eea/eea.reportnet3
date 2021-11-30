@@ -47,7 +47,6 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
-import org.hibernate.exception.SQLGrammarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -229,7 +228,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * Retrieve table data.
    *
    * @param query the query
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the data set metabase VO
    * @param rule the rule
    * @param ischeckDC the ischeck DC
    * @return the table value
@@ -354,9 +353,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * Validate rule.
    *
    * @param query the query
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the data set metabase VO
    * @param rule the rule
-   * @param ischeckDC the ischeck DC
    * @return the boolean
    */
   private String validateRule(String query, DataSetMetabaseVO dataSetMetabaseVO, Rule rule) {
@@ -376,9 +374,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           try {
             checkQueryTestExecution(query.replace(";", ""), dataSetMetabaseVO, rule);
           } catch (EEAInvalidSQLException e) {
-            LOG_ERROR.error("SQL is not correct: {}",
-                ((SQLGrammarException) e.getCause()).getSQLException().getMessage(), e);
-            isSQLCorrect = ((SQLGrammarException) e.getCause()).getSQLException().getMessage();
+            LOG_ERROR.error("SQL is not correct: {}", e.getCause().getCause().getMessage());
+            isSQLCorrect = e.getMessage();
           }
         } else {
           isSQLCorrect = "Datasets " + ids.toString() + " not from this dataflow";
@@ -419,7 +416,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * Check query test execution.
    *
    * @param query the query
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the data set metabase VO
    * @param rule the rule
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
@@ -634,7 +631,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /**
    * Proccess query.
    *
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the data set metabase VO
    * @param query the query
    * @return the string
    */
@@ -872,7 +869,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
-   * Gets a list with the id of the query datasets
+   * Gets a list with the id of the query datasets.
    *
    * @param query the query
    * @return Gets a list with the id of the query datasets
@@ -893,7 +890,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /**
    * Check dataset from same dataflow.
    *
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the data set metabase VO
    * @param ids the ids
    * @return the list
    */

@@ -37,8 +37,23 @@ public interface DocumentController {
    * @param language the language
    * @param isPublic the is public
    */
-  @PostMapping(value = "/upload/{dataflowId}")
+  @PostMapping(value = "/v1/upload/{dataflowId}")
   void uploadDocument(MultipartFile file, @PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("description") String description, @RequestParam("language") String language,
+      @RequestParam("isPublic") Boolean isPublic);
+
+
+  /**
+   * Upload document legacy.
+   *
+   * @param file the file
+   * @param dataflowId the dataflow id
+   * @param description the description
+   * @param language the language
+   * @param isPublic the is public
+   */
+  @PostMapping(value = "/upload/{dataflowId}")
+  void uploadDocumentLegacy(MultipartFile file, @PathVariable("dataflowId") Long dataflowId,
       @RequestParam("description") String description, @RequestParam("language") String language,
       @RequestParam("isPublic") Boolean isPublic);
 
@@ -49,8 +64,19 @@ public interface DocumentController {
    * @param dataflowId the dataflow id
    * @return the document
    */
-  @GetMapping(value = "/{documentId}/dataflow/{dataflowId}")
+  @GetMapping(value = "/v1/{documentId}/dataflow/{dataflowId}")
   Resource getDocument(@PathVariable("documentId") Long documentId,
+      @PathVariable("dataflowId") final Long dataflowId);
+
+  /**
+   * Gets the document legacy.
+   *
+   * @param documentId the document id
+   * @param dataflowId the dataflow id
+   * @return the document legacy
+   */
+  @GetMapping(value = "/{documentId}/dataflow/{dataflowId}")
+  Resource getDocumentLegacy(@PathVariable("documentId") Long documentId,
       @PathVariable("dataflowId") final Long dataflowId);
 
   /**
@@ -62,8 +88,21 @@ public interface DocumentController {
    * @param deleteMetabase the delete metabase
    * @throws Exception the exception
    */
-  @DeleteMapping(value = "/{documentId}/dataflow/{dataflowId}")
+  @DeleteMapping(value = "/v1/{documentId}/dataflow/{dataflowId}")
   void deleteDocument(@PathVariable("documentId") Long documentId,
+      @PathVariable("dataflowId") final Long dataflowId,
+      @RequestParam("deleteMetabase") Boolean deleteMetabase) throws Exception;
+
+  /**
+   * Delete document legacy.
+   *
+   * @param documentId the document id
+   * @param dataflowId the dataflow id
+   * @param deleteMetabase the delete metabase
+   * @throws Exception the exception
+   */
+  @DeleteMapping(value = "/{documentId}/dataflow/{dataflowId}")
+  void deleteDocumentLegacy(@PathVariable("documentId") Long documentId,
       @PathVariable("dataflowId") final Long dataflowId,
       @RequestParam("deleteMetabase") Boolean deleteMetabase) throws Exception;
 
@@ -78,12 +117,47 @@ public interface DocumentController {
    * @param idDocument the id document
    * @param isPublic the is public
    */
-  @PutMapping(value = "/update/{idDocument}/dataflow/{dataflowId}")
+  @PutMapping(value = "/v1/update/{idDocument}/dataflow/{dataflowId}")
   void updateDocument(@RequestPart(name = "file", required = false) MultipartFile file,
       @PathVariable("dataflowId") Long dataflowId,
       @RequestParam(name = "description", required = false) String description,
       @RequestParam(name = "language", required = false) String language,
       @PathVariable("idDocument") Long idDocument, @RequestParam("isPublic") Boolean isPublic);
+
+  /**
+   * Update document legacy.
+   *
+   * @param file the file
+   * @param dataflowId the dataflow id
+   * @param description the description
+   * @param language the language
+   * @param idDocument the id document
+   * @param isPublic the is public
+   */
+  @PutMapping(value = "/update/{idDocument}/dataflow/{dataflowId}")
+  void updateDocumentLegacy(@RequestPart(name = "file", required = false) MultipartFile file,
+      @PathVariable("dataflowId") Long dataflowId,
+      @RequestParam(name = "description", required = false) String description,
+      @RequestParam(name = "language", required = false) String language,
+      @PathVariable("idDocument") Long idDocument, @RequestParam("isPublic") Boolean isPublic);
+
+  /**
+   * Gets the all documents by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow
+   */
+  @GetMapping(value = "/v1/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Gets the all documents by dataflow legacy.
+   *
+   * @param dataflowId the dataflow id
+   * @return the all documents by dataflow legacy
+   */
+  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DocumentVO> getAllDocumentsByDataflowLegacy(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Upload schema snapshot document.
@@ -92,7 +166,7 @@ public interface DocumentController {
    * @param designDatasetId the design dataset id
    * @param fileName the file name
    */
-  @PostMapping(value = "/upload/{designDatasetId}/snapshot")
+  @PostMapping(value = "/private/upload/{designDatasetId}/snapshot")
   void uploadSchemaSnapshotDocument(@RequestBody byte[] file,
       @PathVariable("designDatasetId") Long designDatasetId,
       @RequestParam("fileName") String fileName);
@@ -104,7 +178,7 @@ public interface DocumentController {
    * @param fileName the file name
    * @return the snapshot document
    */
-  @GetMapping(value = "/{idDesignDataset}/snapshot")
+  @GetMapping(value = "/private/{idDesignDataset}/snapshot")
   byte[] getSnapshotDocument(@PathVariable("idDesignDataset") Long idDesignDataset,
       @RequestParam("fileName") String fileName);
 
@@ -116,18 +190,9 @@ public interface DocumentController {
    * @param fileName the file name
    * @throws Exception the exception
    */
-  @DeleteMapping(value = "/{idDesignDataset}/snapshot")
+  @DeleteMapping(value = "/private/{idDesignDataset}/snapshot")
   void deleteSnapshotSchemaDocument(@PathVariable("idDesignDataset") Long idDesignDataset,
       @RequestParam("fileName") String fileName) throws Exception;
-
-  /**
-   * Gets the all documents by dataflow.
-   *
-   * @param dataflowId the dataflow id
-   * @return the all documents by dataflow
-   */
-  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Gets the document.
