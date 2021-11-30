@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router';
 
 import logo from 'views/_assets/images/logos/logo.png';
 import styles from './Navigation.module.css';
@@ -12,7 +12,9 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-const Navigation = withRouter(({ history }) => {
+const Navigation = () => {
+  const history = useHistory();
+
   const resourcesContext = useContext(ResourcesContext);
 
   return (
@@ -31,6 +33,6 @@ const Navigation = withRouter(({ history }) => {
       <UserCard />
     </div>
   );
-});
+};
 
 export { Navigation };

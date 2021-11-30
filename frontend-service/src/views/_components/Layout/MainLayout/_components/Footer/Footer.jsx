@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router';
 
 import styles from './Footer.module.scss';
 
@@ -15,7 +15,9 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-export const Footer = withRouter(({ history }) => {
+export const Footer = () => {
+  const history = useHistory();
+
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
@@ -56,4 +58,4 @@ export const Footer = withRouter(({ history }) => {
       </div>
     </div>
   );
-});
+};
