@@ -111,7 +111,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const internalExtensions = internalExtensionsList.map(type => {
     const extensionsTypes = type.code.split('+');
     return {
-      label: type.text,
+      label: resourcesContext.messages[type.key],
       icon: extensionsTypes[0],
       command: () => onExportDataInternalExtension(type.code)
     };
