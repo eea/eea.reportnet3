@@ -217,7 +217,7 @@ export const ManageReferenceDataflow = ({
   return (
     <Fragment>
       <Dialog
-        className={'responsiveDialog'}
+        className="responsiveDialog"
         footer={renderDialogFooter()}
         header={
           isEditing
