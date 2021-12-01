@@ -151,7 +151,7 @@ export const EUDataset = () => {
       return {
         command: () => onExportDataInternalExtension(type.code),
         icon: extensionsTypes[0],
-        label: type.text
+        label: resourcesContext.messages[type.key]
       };
     });
 
