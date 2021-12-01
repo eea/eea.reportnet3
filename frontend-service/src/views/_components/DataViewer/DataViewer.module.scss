@@ -26,9 +26,7 @@
     max-width: 60%;
   }
 }
-.fieldDisabled {
-  cursor: default;
-}
+
 .chips {
   display: flex !important;
   justify-content: center;
@@ -70,9 +68,6 @@
   flex-direction: row;
   justify-content: center;
 }
-.invisibleHeader {
-  display: none;
-}
 
 .itemTable {
   > div {
@@ -88,9 +83,6 @@
   }
 }
 
-.readOnlyFields div {
-  opacity: 0.5;
-}
 .requiredTemplateCheck {
   float: center;
   color: var(--treeview-table-icon-color);
