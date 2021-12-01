@@ -2,6 +2,8 @@ package org.eea.dataset.service.helper;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.transaction.Transactional;
+import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
@@ -14,6 +16,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +58,11 @@ public class DeleteHelper {
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  /** The record repository. */
+  @Autowired
+  private RecordRepository recordRepository;
+
 
   /**
    * Instantiates a new file loader helper.
@@ -168,6 +176,20 @@ public class DeleteHelper {
     value.put(LiteralConstants.INTEGRATION_ID, integrationId);
     value.put(LiteralConstants.OPERATION, operation);
     kafkaSenderUtils.releaseKafkaEvent(EventType.DATA_DELETE_TO_REPLACE_COMPLETED_EVENT, value);
+  }
+
+
+  /**
+   * Delete record values by provider.
+   *
+   * @param datasetId the dataset id
+   * @param providerCode the provider code
+   */
+  @Transactional
+  public void deleteRecordValuesByProvider(Long datasetId, String providerCode) {
+    LOG.info("Deleting data with providerCode: {} ", providerCode);
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+    recordRepository.deleteByDataProviderCode(providerCode);
   }
 
 }

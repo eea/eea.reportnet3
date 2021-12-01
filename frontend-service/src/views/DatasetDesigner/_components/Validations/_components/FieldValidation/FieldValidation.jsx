@@ -104,8 +104,8 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
             onExpressionFieldUpdate={onExpressionFieldUpdate}
             onExpressionGroup={onExpressionGroup}
             onExpressionMarkToGroup={onExpressionMarkToGroup}
-            onExpressionTypeToggle={onExpressionTypeToggle}
             onExpressionsErrors={onExpressionsErrors}
+            onExpressionTypeToggle={onExpressionTypeToggle}
             onGetFieldType={onGetFieldType}
             onSetSqlSentence={onSetSqlSentence}
             tabsChanges={tabsChanges}

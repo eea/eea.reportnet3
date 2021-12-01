@@ -249,8 +249,8 @@ const DocumentFileUpload = ({
               if (e.which === 13 && !checkInputForErrors('lang')) onConfirm();
             }}
             optionLabel="label"
-            optionValue="value"
             options={getOptionTypes()}
+            optionValue="value"
             placeholder={resourcesContext.messages['selectLang']}
             value={inputs.lang}
           />

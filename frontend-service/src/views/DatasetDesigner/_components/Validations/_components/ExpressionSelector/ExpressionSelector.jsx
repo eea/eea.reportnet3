@@ -167,11 +167,11 @@ export const ExpressionSelector = ({
           onExpressionIfFieldUpdate={onExpressionIfFieldUpdate}
           onExpressionIfGroup={onExpressionIfGroup}
           onExpressionIfMarkToGroup={onExpressionIfMarkToGroup}
+          onExpressionsErrors={onExpressionsErrors}
           onExpressionThenDelete={onExpressionThenDelete}
           onExpressionThenFieldUpdate={onExpressionThenFieldUpdate}
           onExpressionThenGroup={onExpressionThenGroup}
           onExpressionThenMarkToGroup={onExpressionThenMarkToGroup}
-          onExpressionsErrors={onExpressionsErrors}
           onGetFieldType={onGetFieldType}
           tabsChanges={tabsChanges}
         />

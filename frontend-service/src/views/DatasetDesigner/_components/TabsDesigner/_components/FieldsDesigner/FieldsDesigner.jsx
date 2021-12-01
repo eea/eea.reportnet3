@@ -596,9 +596,9 @@ export const FieldsDesigner = ({
           fieldName=""
           fieldReadOnly={false}
           fieldRequired={false}
+          fields={fields}
           fieldType=""
           fieldValue=""
-          fields={fields}
           hasPK={!isNil(fields) && fields.filter(field => field.pk).length > 0}
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
@@ -660,9 +660,9 @@ export const FieldsDesigner = ({
                 fieldPKReferenced={field.pkReferenced}
                 fieldReadOnly={Boolean(field.readOnly)}
                 fieldRequired={Boolean(field.required)}
+                fields={fields}
                 fieldType={field.type}
                 fieldValue={field.value}
-                fields={fields}
                 hasPK={fields.filter(field => field.pk).length > 0}
                 index={index}
                 initialFieldIndexDragged={initialFieldIndexDragged}

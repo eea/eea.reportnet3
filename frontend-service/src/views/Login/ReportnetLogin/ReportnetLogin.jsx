@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { useHistory } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
@@ -19,7 +19,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 
 const ReportnetLogin = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -61,7 +61,7 @@ const ReportnetLogin = () => {
       try {
         const userObject = await UserService.oldLogin(userName, password);
         userContext.onLogin(userObject);
-        history.push(getUrl(routes.DATAFLOWS));
+        navigate(getUrl(routes.DATAFLOWS));
       } catch (error) {
         console.error('ReportnetLogin - onLogin.', error);
         notificationContext.add(
