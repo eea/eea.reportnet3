@@ -25,9 +25,9 @@ export const BigButtonListRepresentative = ({
   handleRedirect,
   isLeadReporterOfCountry,
   manageDialogs,
-  match,
   onCleanUpReceipt,
   onOpenReleaseConfirmDialog,
+  representativeId,
   setIsReceiptLoading,
   uniqRepresentatives
 }) => {
@@ -74,7 +74,7 @@ export const BigButtonListRepresentative = ({
   const onLoadReceiptData = async () => {
     try {
       setIsReceiptLoading(true);
-      const response = await ConfirmationReceiptService.download(dataflowState.id, match.params.representativeId);
+      const response = await ConfirmationReceiptService.download(dataflowState.id, representativeId);
       downloadPdf(response.data);
       onCleanUpReceipt();
     } catch (error) {
@@ -109,11 +109,11 @@ export const BigButtonListRepresentative = ({
               getDataHistoricReleases,
               handleRedirect,
               isLeadReporterOfCountry,
-              match,
               onLoadReceiptData,
               onOpenReleaseConfirmDialog,
               onShowHistoricReleases,
-              uniqRepresentatives
+              uniqRepresentatives,
+              representativeId: representativeId
             })
               .filter(button => button.visibility)
               .map(button => (

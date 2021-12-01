@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import logo from 'views/_assets/images/logos/logo.png';
 import styles from './Navigation.module.css';
@@ -12,7 +12,9 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-const Navigation = withRouter(({ history }) => {
+const Navigation = () => {
+  const navigate = useNavigate();
+
   const resourcesContext = useContext(ResourcesContext);
 
   return (
@@ -22,7 +24,7 @@ const Navigation = withRouter(({ history }) => {
         href={getUrl(routes.ACCESS_POINT)}
         onClick={e => {
           e.preventDefault();
-          history.push(getUrl(routes.ACCESS_POINT));
+          navigate(getUrl(routes.ACCESS_POINT));
         }}
         title={resourcesContext.messages['titleHeader']}>
         <img alt="Reportnet" className={styles.appLogo} height="50px" src={logo} />
@@ -31,6 +33,6 @@ const Navigation = withRouter(({ history }) => {
       <UserCard />
     </div>
   );
-});
+};
 
 export { Navigation };
