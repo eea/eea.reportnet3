@@ -1168,7 +1168,7 @@ const Dataflow = () => {
 
         {dataflowState.isCustodian && dataflowState.isManageRolesDialogVisible && (
           <Dialog
-            className={styles.leadReportersDialog}
+            className={'responsiveDialog'}
             contentStyle={{ maxHeight: '60vh' }}
             footer={manageRoleDialogFooter}
             header={resourcesContext.messages['manageRolesDialogTitle']}
@@ -1196,6 +1196,7 @@ const Dataflow = () => {
 
         {dataflowState.isManageRequestersDialogVisible && (
           <Dialog
+            className={'responsiveDialog'}
             footer={shareRightsFooterDialogFooter(usersTypes.REQUESTERS)}
             header={resourcesContext.messages['manageRequestersRights']}
             onHide={() => {
@@ -1233,6 +1234,7 @@ const Dataflow = () => {
 
         {dataflowState.isManageReportersDialogVisible && (
           <Dialog
+            className={'responsiveDialog'}
             footer={shareRightsFooterDialogFooter(usersTypes.REPORTERS)}
             header={resourcesContext.messages['manageReportersRights']}
             onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
@@ -1418,6 +1420,7 @@ const Dataflow = () => {
 
         {dataflowState.isUserListVisible && (
           <Dialog
+            className={'responsiveDialog'}
             footer={
               ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
@@ -1462,6 +1465,7 @@ const Dataflow = () => {
 
         {dataflowState.isBusinessDataflowDialogVisible && (
           <ManageBusinessDataflow
+            className={'responsiveDialog'}
             dataflowId={dataflowId}
             hasRepresentatives={dataflowState.data.representatives.length !== 0}
             isAdmin={dataflowState.isAdmin}

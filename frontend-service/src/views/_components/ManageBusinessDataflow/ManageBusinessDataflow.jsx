@@ -301,6 +301,7 @@ export const ManageBusinessDataflow = ({
   return (
     <Fragment>
       <Dialog
+        className={'responsiveDialog'}
         footer={renderDialogFooter()}
         header={
           isEditing
