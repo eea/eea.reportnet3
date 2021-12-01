@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import { useContext, useEffect, useReducer } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -40,7 +40,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 
 const ReferenceDataflow = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { referenceDataflowId } = useParams();
 
   const notificationContext = useContext(NotificationContext);
@@ -129,7 +129,7 @@ const ReferenceDataflow = () => {
   }
 
   function goToDataflowsPage() {
-    history.push(getUrl(routes.DATAFLOWS));
+    navigate(getUrl(routes.DATAFLOWS));
   }
 
   const onRefreshToken = async () => {
@@ -245,7 +245,7 @@ const ReferenceDataflow = () => {
     } catch (error) {
       console.error('ReferenceDataflow - onLoadReferenceDataflow.', error);
       notificationContext.add({ type: 'LOADING_REFERENCE_DATAFLOW_ERROR', error }, true);
-      history.push(getUrl(routes.DATAFLOWS));
+      navigate(getUrl(routes.DATAFLOWS));
     } finally {
       setIsLoading(false);
     }

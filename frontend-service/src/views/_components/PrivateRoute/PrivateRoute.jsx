@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { Redirect, useLocation } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
 
@@ -21,7 +21,7 @@ export const PrivateRoute = ({ component: Component, componentProps = {} }) => {
       LocalUserStorageUtils.setPropertyToSessionStorage({ redirectUrl: window.location.href });
       window.location.href = AccessPointConfig.euloginUrl;
     } else {
-      return <Redirect to={{ pathname: routes.ACCESS_POINT, state: { from: location } }} />;
+      return <Navigate to={{ pathname: routes.ACCESS_POINT, state: { from: location } }} />;
     }
   } else {
     if (isEuLogin) {

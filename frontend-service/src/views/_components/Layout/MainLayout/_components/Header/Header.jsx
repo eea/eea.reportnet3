@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
@@ -36,7 +36,7 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -139,7 +139,7 @@ const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
       href={getUrl(routes.ACCESS_POINT)}
       onClick={e => {
         e.preventDefault();
-        history.push(getUrl(routes.ACCESS_POINT));
+        navigate(getUrl(routes.ACCESS_POINT));
       }}
       title={resourcesContext.messages['titleHeader']}>
       {isPublic ? (
@@ -222,7 +222,7 @@ const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
       href={getUrl(routes.SETTINGS)}
       onClick={async e => {
         e.preventDefault();
-        history.push(getUrl(routes.SETTINGS));
+        navigate(getUrl(routes.SETTINGS));
       }}
       title="User profile details">
       <img
@@ -284,7 +284,7 @@ const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
           if (window.env.REACT_APP_EULOGIN.toString() === 'true') {
             window.location.href = AccessPointConfig.euloginUrl;
           } else {
-            history.push(getUrl(routes.LOGIN));
+            navigate(getUrl(routes.LOGIN));
           }
         }}></Button>
     </div>

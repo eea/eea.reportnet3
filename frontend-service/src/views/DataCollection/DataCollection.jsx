@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
@@ -34,7 +34,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
 
 export const DataCollection = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { dataflowId, datasetId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -104,7 +104,7 @@ export const DataCollection = () => {
   const internalExtensions = internalExtensionsList.map(type => {
     const extensionsTypes = type.code.split('+');
     return {
-      label: type.text,
+      label: resourcesContext.messages[type.key],
       icon: extensionsTypes[0],
       command: () => onExportDataInternalExtension(type.code)
     };
@@ -161,7 +161,7 @@ export const DataCollection = () => {
         true
       );
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
-        history.push(getUrl(routes.DATAFLOWS));
+        navigate(getUrl(routes.DATAFLOWS));
       }
     } finally {
       setLoading(false);
@@ -225,7 +225,7 @@ export const DataCollection = () => {
       }
       notificationContext.add(datasetError, true);
       if (!isUndefined(response) && (response.status === 401 || response.status === 403)) {
-        history.push(getUrl(routes.DATAFLOW, { dataflowId }));
+        navigate(getUrl(routes.DATAFLOW, { dataflowId }));
       }
     }
     setLoading(false);

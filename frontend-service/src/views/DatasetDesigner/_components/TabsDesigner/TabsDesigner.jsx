@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -57,7 +57,7 @@ export const TabsDesigner = ({
   tableSchemaId,
   viewType
 }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { dataflowId, datasetId } = useParams();
 
   const notificationContext = useContext(NotificationContext);
@@ -139,7 +139,7 @@ export const TabsDesigner = ({
     } catch (error) {
       console.error('TabsDesigner - onLoadSchema.', error);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
-        history.push(getUrl(routes.DATAFLOWS, true));
+        navigate(getUrl(routes.DATAFLOWS, true));
       }
     }
   };
@@ -347,7 +347,6 @@ export const TabsDesigner = ({
         activeIndex={idx !== -1 ? idx : 0}
         checkEditingTabs={checkEditingTabs}
         designMode={true}
-        history={history}
         initialTabIndexDrag={initialTabIndexDrag}
         isDataflowOpen={isDataflowOpen}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}

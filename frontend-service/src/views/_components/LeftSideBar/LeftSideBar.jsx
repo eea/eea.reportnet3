@@ -1,5 +1,5 @@
 import { Fragment, useContext, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -21,7 +21,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -57,7 +57,7 @@ const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible 
       label: 'dataflows',
       onClick: e => {
         e.preventDefault();
-        history.push(getUrl(routes['DATAFLOWS']));
+        navigate(getUrl(routes['DATAFLOWS']));
       },
       title: 'dataflows'
     };
@@ -72,7 +72,7 @@ const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible 
       label: 'userSettings',
       onClick: e => {
         e.preventDefault();
-        history.push(getUrl(routes['SETTINGS']));
+        navigate(getUrl(routes['SETTINGS']));
       },
       title: 'userSettings'
     };

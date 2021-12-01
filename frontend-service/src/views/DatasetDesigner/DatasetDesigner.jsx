@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
@@ -64,7 +64,6 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DatasetDesigner = ({ isReferenceDataset = false }) => {
-  const history = useHistory();
   const { dataflowId, datasetId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -1626,7 +1625,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             editable={!isDataflowOpen && !isDesignDatasetEditorRead}
             getIsTableCreated={setIsTableCreated}
             getUpdatedTabs={onUpdateTabs}
-            history={history}
             isDataflowOpen={isDataflowOpen}
             isDesignDatasetEditorRead={isDesignDatasetEditorRead}
             isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
