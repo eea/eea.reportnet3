@@ -315,9 +315,9 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
             className={'dataflowsListFilters'}
             data={dataToFilter['reporting']}
             getFilteredData={onLoadFilteredData}
-            options={FILTER_OPTIONS}
-            sortCategory={'pinned'}
+            options={filterOptions['reporting'].filter(Boolean)}
             sortable={true}
+            sortCategory={'pinned'}
             viewType="REPORTING"
           />
         )} */}
@@ -328,8 +328,8 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
             data={dataToFilter['business']}
             getFilteredData={onLoadFilteredData}
             options={filterOptions['business'].filter(Boolean)}
-            sortCategory={'pinned'}
             sortable={true}
+            sortCategory={'pinned'}
           />
         )}
 
@@ -339,8 +339,8 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
             data={dataToFilter['citizenScience']}
             getFilteredData={onLoadFilteredData}
             options={filterOptions['citizenScience'].filter(Boolean)}
-            sortCategory={'pinned'}
             sortable={true}
+            sortCategory={'pinned'}
           />
         )}
 
@@ -350,8 +350,8 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
             data={dataToFilter['reference']}
             getFilteredData={onLoadFilteredData}
             options={filterOptions['reference']}
-            sortCategory={'pinned'}
             sortable={true}
+            sortCategory={'pinned'}
           />
         )}
       </div>
