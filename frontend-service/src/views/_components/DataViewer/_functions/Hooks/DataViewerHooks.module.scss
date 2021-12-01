@@ -15,7 +15,11 @@
   font-weight: bold;
 }
 
-.resourceMessage {
+.fieldTextPaddingTop {
+  padding-top: 1rem;
+}
+
+.propertyLabel {
   color: var(--success-color-lighter);
   font-weight: 600;
 }

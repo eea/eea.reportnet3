@@ -21,7 +21,6 @@ import { MapUtils } from 'views/_functions/Utils/MapUtils';
 import { RecordUtils } from 'views/_functions/Utils/RecordUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
-import { stubFalse } from 'lodash';
 
 export const useLoadColsSchemasAndColumnOptions = tableSchemaColumns => {
   const [colsSchema, setColsSchema] = useState(tableSchemaColumns);
@@ -204,8 +203,9 @@ export const useSetColumns = (
     const renderColumnType = () => {
       return (
         <div className={styles.fieldText}>
-          <span>{resources.messages['type']}: </span> <br />
-          <span className={styles.resourceMessage}>{RecordUtils.getFieldTypeValue(column.type)?.value}</span>
+          <span>{resources.messages['type']}: </span>
+          <br />
+          <span className={styles.propertyLabel}>{RecordUtils.getFieldTypeValue(column.type)?.value}</span>
         </div>
       );
     };
@@ -213,8 +213,8 @@ export const useSetColumns = (
     const renderColumnPK = () => {
       if (column.pk) {
         return (
-          <div className={styles.fieldText}>
-            <span>{resources.messages['primaryKey']}</span>
+          <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+            <span className={styles.propertyLabel}>{resources.messages['primaryKey']}</span>
           </div>
         );
       }
@@ -223,8 +223,8 @@ export const useSetColumns = (
     const renderColumnRequired = () => {
       if (column.required) {
         return (
-          <div className={styles.fieldText}>
-            <span>{resources.messages['required']}</span>
+          <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+            <span className={styles.propertyLabel}>{resources.messages['required']}</span>
           </div>
         );
       }
@@ -242,10 +242,10 @@ export const useSetColumns = (
       };
 
       return (
-        <div className={styles.fieldText}>
+        <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
           <span>{resources.messages['description']}: </span>
           <br />
-          <span className={styles.resourceMessage}>{columnDescription()}</span>
+          <span className={styles.propertyLabel}>{columnDescription()}</span>
         </div>
       );
     };
@@ -253,7 +253,7 @@ export const useSetColumns = (
     const renderColumnCodeLists = () => {
       if (!isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)) {
         return (
-          <div className={styles.fieldText}>
+          <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
             <span>
               {column.type === 'CODELIST'
                 ? resources.messages['codelists']
@@ -261,7 +261,7 @@ export const useSetColumns = (
               :{' '}
             </span>
             <br />
-            <span className={styles.resourceMessage}>
+            <span className={styles.propertyLabel}>
               {column.codelistItems
                 .map(codelistItem =>
                   !isEmpty(codelistItem) && codelistItem.length > 15
@@ -287,16 +287,18 @@ export const useSetColumns = (
       if (column.type === 'ATTACHMENT') {
         return (
           <Fragment>
-            <br />
-            <span className={styles.fieldText}>{resources.messages['validExtensions']} </span>
-            <span className={styles.resourceMessage}>
+            <span className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+              {resources.messages['validExtensions']}{' '}
+            </span>
+            <span className={styles.propertyLabel}>
               {!isEmpty(column.validExtensions)
                 ? column.validExtensions.map(extension => `.${extension}`).join(', ')
                 : '*'}
             </span>
-            <br />
-            <span className={styles.fieldText}>{resources.messages['maxFileSize']}</span>
-            <span className={styles.resourceMessage}>{columMaxSize()}</span>
+            <span className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+              {resources.messages['maxFileSize']}
+            </span>
+            <span className={styles.propertyLabel}>{columMaxSize()}</span>
           </Fragment>
         );
       }
