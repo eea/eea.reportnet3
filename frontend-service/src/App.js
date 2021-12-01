@@ -150,7 +150,7 @@ const App = () => {
                                 path={routes.REFERENCE_DATASET}
                               />
                               <Route element={<PublicFrontpage />} exact path={routes.ACCESS_POINT_ERROR} />
-                              <Route element={<Navigate to={'/error/notFound'} />} />
+                              <Route element={<Navigate to={'/error/notFound'} />} path="*" />
                             </Routes>
                           </Router>
                         </BreadCrumbProvider>
