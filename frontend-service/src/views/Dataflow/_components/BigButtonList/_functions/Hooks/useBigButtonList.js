@@ -330,10 +330,7 @@ const useBigButtonList = ({
           }
         ],
         onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true),
-        restrictFromPublicAccess:
-          restrictFromPublicAccess &&
-          !dataflowState.restrictFromPublicIsUpdating.value &&
-          datasetRepresentative?.restrictFromPublic,
+        restrictFromPublicAccess: restrictFromPublicAccess && !dataflowState.restrictFromPublicIsUpdating.value,
         restrictFromPublicInfo:
           dataset.isReleased && (dataflowState.data.showPublicInfo || dataflowState.isShowPublicInfoUpdating),
         restrictFromPublicIsUpdating: releasedShowPublicInfoUpdating || representativeRestrictFromPublicUpdating,
@@ -515,7 +512,7 @@ const useBigButtonList = ({
         infoStatusIcon: true,
         layout: 'defaultBigButton',
         tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
-        restrictFromPublicAccess: restrictFromPublicAccess && !isReleasing && dataflowState.restrictFromPublic,
+        restrictFromPublicAccess: restrictFromPublicAccess && !isReleasing,
         restrictFromPublicInfo: dataflowState.data.showPublicInfo && isReleased,
         restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
         restrictFromPublicStatus: representative?.restrictFromPublic,

@@ -206,10 +206,7 @@ const useBigButtonListRepresentative = ({
         infoStatusIcon: isReleased,
         layout: 'defaultBigButton',
         restrictFromPublicAccess:
-          isLeadReporterOfCountry &&
-          !TextUtils.areEquals(dataflowState.status, 'business') &&
-          !getIsReleasing() &&
-          dataflowState.restrictFromPublic,
+          isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business') && !getIsReleasing(),
         restrictFromPublicInfo: dataflowState.data.showPublicInfo && isReleased,
         restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
         restrictFromPublicStatus: representative?.restrictFromPublic,
