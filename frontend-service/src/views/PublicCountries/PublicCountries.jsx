@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -20,7 +20,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { EuroFlag } from './_components/EuroFlag';
 
 export const PublicCountries = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
@@ -48,7 +48,7 @@ export const PublicCountries = () => {
       e.preventDefault();
       const url = getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true);
       if (e.button === 0) {
-        history.push(url);
+        navigate(url);
       } else if (e.button === 1) {
         window.open(url, 'blank');
       }

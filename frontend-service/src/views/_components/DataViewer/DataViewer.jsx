@@ -87,6 +87,7 @@ const DataViewer = ({
   tableSchemaColumns
 }) => {
   const { datasetId, dataflowId } = useParams();
+
   const levelErrorAllTypes = ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'];
 
   const setSelectedLine = useSetRecoilState(geoJSONListStore);

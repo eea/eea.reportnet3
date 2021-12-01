@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
@@ -36,7 +36,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const DataflowHelp = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { dataflowId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -203,7 +203,7 @@ export const DataflowHelp = () => {
       console.error('DataflowHelp - onLoadDocuments.', error);
       notificationContext.add({ type: 'LOAD_DOCUMENTS_ERROR', content: {} }, true);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
-        history.push(getUrl(routes.DATAFLOWS));
+        navigate(getUrl(routes.DATAFLOWS));
       }
     } finally {
       setIsLoadingDocuments(false);

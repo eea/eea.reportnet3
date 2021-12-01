@@ -1,5 +1,5 @@
 import { useContext, useEffect } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -25,7 +25,7 @@ export const useBreadCrumbs = ({
   referenceDataflowId,
   representativeId
 }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const params = useParams();
 
   const breadCrumbContext = useContext(BreadCrumbContext);
@@ -50,7 +50,7 @@ export const useBreadCrumbs = ({
 
   const getDataflowCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.DATAFLOW, { dataflowId }, true)),
+      command: () => navigate(getUrl(routes.DATAFLOW, { dataflowId }, true)),
       href: getUrl(routes.DATAFLOW, { dataflowId }, true),
       icon: 'clone',
       label: TextByDataflowTypeUtils.getLabelByDataflowType(resourcesContext.messages, dataflowType, 'breadCrumbs')
@@ -59,7 +59,7 @@ export const useBreadCrumbs = ({
 
   const getReferenceDataflowCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true)),
+      command: () => navigate(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true)),
       href: getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true),
       icon: 'clone',
       label: resourcesContext.messages['referenceDataflowCrumbLabel']
@@ -68,7 +68,7 @@ export const useBreadCrumbs = ({
 
   const getDataflowsCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.DATAFLOWS)),
+      command: () => navigate(getUrl(routes.DATAFLOWS)),
       href: getUrl(routes.DATAFLOWS),
       icon: 'home',
       label: resourcesContext.messages['dataflows']
@@ -111,7 +111,7 @@ export const useBreadCrumbs = ({
 
   const getHomeCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.ACCESS_POINT)),
+      command: () => navigate(getUrl(routes.ACCESS_POINT)),
       href: getUrl(routes.ACCESS_POINT),
       label: resourcesContext.messages['homeBreadcrumb']
     };
@@ -137,7 +137,7 @@ export const useBreadCrumbs = ({
       }
 
       return {
-        command: () => history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
+        command: () => navigate(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true)),
         href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),
         label: representativeCrumbLabel,
         icon: 'representative'
@@ -146,7 +146,7 @@ export const useBreadCrumbs = ({
 
     return {
       command: () =>
-        history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
+        navigate(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
       href: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId }, true),
       icon: 'representative',
       label: dataProviderName
@@ -155,7 +155,7 @@ export const useBreadCrumbs = ({
 
   const getPublicCountriesCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.PUBLIC_COUNTRIES, {}, true)),
+      command: () => navigate(getUrl(routes.PUBLIC_COUNTRIES, {}, true)),
       href: getUrl(routes.PUBLIC_COUNTRIES, {}, true),
       label: resourcesContext.messages['publicCountriesBreadcrumbs']
     };
@@ -163,7 +163,7 @@ export const useBreadCrumbs = ({
 
   const getPublicCountryCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.PUBLIC_COUNTY_INFORMATION, { countryCode }, true)),
+      command: () => navigate(getUrl(routes.PUBLIC_COUNTY_INFORMATION, { countryCode }, true)),
       href: getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true),
       label: resourcesContext.messages['publicCountryBreadcrumbs']
     };
@@ -171,7 +171,7 @@ export const useBreadCrumbs = ({
 
   const getPublicDataflowCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true)),
+      command: () => navigate(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true)),
       href: getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true),
       label: resourcesContext.messages['publicDataflowBreadcrumbs']
     };
@@ -179,7 +179,7 @@ export const useBreadCrumbs = ({
 
   const getPublicDataflowsCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.PUBLIC_DATAFLOWS, {}, true)),
+      command: () => navigate(getUrl(routes.PUBLIC_DATAFLOWS, {}, true)),
       href: getUrl(routes.PUBLIC_DATAFLOWS, {}, true),
       label: resourcesContext.messages['publicDataflowsBreadcrumbs']
     };
@@ -187,7 +187,7 @@ export const useBreadCrumbs = ({
 
   const getPublicHomeCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.ACCESS_POINT, {}, true)),
+      command: () => navigate(getUrl(routes.ACCESS_POINT, {}, true)),
       href: getUrl(routes.ACCESS_POINT, {}, true),
       label: resourcesContext.messages['homeBreadcrumb']
     };
@@ -195,7 +195,7 @@ export const useBreadCrumbs = ({
 
   const getSettingsCrumb = () => {
     return {
-      command: () => history.push(getUrl(routes.SETTINGS)),
+      command: () => navigate(getUrl(routes.SETTINGS)),
       href: getUrl(routes.SETTINGS),
       icon: 'user-profile',
       label: resourcesContext.messages['userSettingsBreadcrumbs']
@@ -205,7 +205,7 @@ export const useBreadCrumbs = ({
   const getTestDatasetsCrumb = () => {
     return {
       command: () =>
-        history.push(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
+        navigate(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
       href: getUrl(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
       icon: 'representative',
       label: resourcesContext.messages['testDatasetBreadcrumbs']

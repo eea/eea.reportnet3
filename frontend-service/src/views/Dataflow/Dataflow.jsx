@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
@@ -63,10 +63,8 @@ import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTy
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const Dataflow = () => {
-  const history = useHistory();
-  const params = useParams();
-
-  const { dataflowId, representativeId } = params;
+  const navigate = useNavigate();
+  const { dataflowId, representativeId } = useParams();
 
   const exportImportMenuRef = useRef(null);
 
@@ -359,7 +357,7 @@ const Dataflow = () => {
     </div>
   );
 
-  const handleRedirect = target => history.push(target);
+  const handleRedirect = target => navigate(target);
 
   const setRightPermissionsChange = isRightPermissionsChanged => {
     dataflowDispatch({
@@ -788,7 +786,7 @@ const Dataflow = () => {
     } catch (error) {
       console.error('Dataflow - onLoadReportingDataflow.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOW_DATA_ERROR' }, true);
-      history.push(getUrl(routes.DATAFLOWS));
+      navigate(getUrl(routes.DATAFLOWS));
     } finally {
       setIsPageLoading(false);
       setIsShowPublicInfoUpdating(false);
@@ -847,7 +845,7 @@ const Dataflow = () => {
   };
 
   function goToDataflowsPage() {
-    history.push(getUrl(routes.DATAFLOWS));
+    navigate(getUrl(routes.DATAFLOWS));
   }
 
   const onSaveName = async (value, index) => {

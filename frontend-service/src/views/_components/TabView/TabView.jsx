@@ -1,5 +1,5 @@
 import { Children, useContext, useEffect, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 import isNil from 'lodash/isNil';
@@ -47,7 +47,7 @@ const TabView = ({
   totalTabs,
   viewType
 }) => {
-  const history = useHistory();
+  const location = useLocation();
 
   const [activeIdx, setActiveIdx] = useState(activeIndex);
   const [idx] = useState(name);
@@ -73,7 +73,7 @@ const TabView = ({
   }, [children]);
 
   useEffect(() => {
-    if (!isNil(onTabClick) && history.location.search !== '') {
+    if (!isNil(onTabClick) && location.search !== '') {
       onTabClick({ index: QuerystringUtils.getUrlParamValue('tab') });
     } else {
       if (!isNil(onTabChange)) {
