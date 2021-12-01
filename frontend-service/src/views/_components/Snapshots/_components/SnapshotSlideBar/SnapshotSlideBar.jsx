@@ -1,6 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect, useState } from 'react';
 
+import { useRecoilValue } from 'recoil';
+
 import styles from './SnapshotSliderBar.module.scss';
 
 import { config } from 'conf';
@@ -13,12 +15,14 @@ import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'views/_components/Spinner';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 
-import { DialogContext } from 'views/_functions/Contexts/DialogContext';
+import { dialogsStore } from 'views/_components/Dialog/_functions/Stores/dialogsStore';
+
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
 
 const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, snapshotListData }) => {
-  const dialogContext = useContext(DialogContext);
+  const openedDialogs = useRecoilValue(dialogsStore);
+
   const resourcesContext = useContext(ResourcesContext);
   const snapshotContext = useContext(SnapshotContext);
 
@@ -59,7 +63,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
     if (isVisible) {
       bodySelector.style.overflow = 'hidden';
     } else {
-      if (dialogContext.open.length === 0) {
+      if (openedDialogs.length === 0) {
         bodySelector.style.overflow = 'hidden auto';
       }
     }
