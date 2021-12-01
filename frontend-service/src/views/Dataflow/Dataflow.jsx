@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
@@ -62,10 +62,11 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const Dataflow = withRouter(({ history, match }) => {
-  const {
-    params: { dataflowId, representativeId }
-  } = match;
+const Dataflow = () => {
+  const history = useHistory();
+  const params = useParams();
+
+  const { dataflowId, representativeId } = params;
 
   const exportImportMenuRef = useRef(null);
 
@@ -233,8 +234,6 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowId,
     dataflowStateData: dataflowState.data,
     dataflowType: dataflowState.dataflowType,
-    history,
-    matchParams: match.params,
     representativeId
   });
 
@@ -1091,9 +1090,9 @@ const Dataflow = withRouter(({ history, match }) => {
       return (
         <BigButtonList
           className="dataflow-big-buttons-help-step"
-          dataProviderId={dataProviderId}
           dataflowState={dataflowState}
           dataflowType={dataflowState.dataflowType}
+          dataProviderId={dataProviderId}
           handleRedirect={handleRedirect}
           isLeadReporter={isLeadReporter}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
@@ -1113,14 +1112,14 @@ const Dataflow = withRouter(({ history, match }) => {
     } else {
       return (
         <BigButtonListRepresentative
-          dataProviderId={dataProviderId}
           dataflowState={dataflowState}
+          dataProviderId={dataProviderId}
           handleRedirect={handleRedirect}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           manageDialogs={manageDialogs}
-          match={match}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
+          representativeId={representativeId}
           setIsReceiptLoading={setIsReceiptLoading}
         />
       );
@@ -1214,8 +1213,8 @@ const Dataflow = withRouter(({ history, match }) => {
               addConfirmHeader={resourcesContext.messages['addRequesterConfirmHeader']}
               addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
               columnHeader={resourcesContext.messages['requestersEmailColumn']}
-              dataProviderId={dataProviderId}
               dataflowId={dataflowId}
+              dataProviderId={dataProviderId}
               deleteConfirmHeader={resourcesContext.messages['requestersRightsDialogConfirmDeleteHeader']}
               deleteConfirmMessage={resourcesContext.messages['requestersRightsDialogConfirmDeleteQuestion']}
               deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
@@ -1244,8 +1243,8 @@ const Dataflow = withRouter(({ history, match }) => {
               addConfirmHeader={resourcesContext.messages['addReporterConfirmHeader']}
               addErrorNotificationKey={'ADD_REPORTER_ERROR'}
               columnHeader={resourcesContext.messages['reportersEmailColumn']}
-              dataProviderId={dataProviderId}
               dataflowId={dataflowId}
+              dataProviderId={dataProviderId}
               deleteConfirmHeader={resourcesContext.messages['reportersRightsDialogConfirmDeleteHeader']}
               deleteConfirmMessage={resourcesContext.messages['reportersRightsDialogConfirmDeleteQuestion']}
               deleteErrorNotificationKey={'DELETE_REPORTER_ERROR'}
@@ -1500,12 +1499,11 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isApiKeyDialogVisible && (
           <ApiKeyDialog
-            dataProviderId={dataProviderId}
             dataflowId={dataflowId}
+            dataProviderId={dataProviderId}
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
             isCustodian={dataflowState.isCustodian}
             manageDialogs={manageDialogs}
-            match={match}
           />
         )}
 
@@ -1521,6 +1519,6 @@ const Dataflow = withRouter(({ history, match }) => {
       </div>
     </div>
   );
-});
+};
 
 export { Dataflow };

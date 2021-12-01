@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -52,10 +52,9 @@ import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
-  const {
-    params: { dataflowId, datasetId }
-  } = match;
+export const Dataset = ({ isReferenceDataset }) => {
+  const history = useHistory();
+  const { dataflowId, datasetId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -132,7 +131,6 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
     dataflowType,
     dataProviderId: metadata?.dataset.dataProviderId,
     dataProviderName: metadata?.dataset.name,
-    history,
     isLoading,
     metaData: metadata,
     referenceDataflowId: dataflowId
@@ -623,7 +621,7 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
 
   const onLoadDataflow = async () => {
     try {
-      const data = await DataflowService.get(match.params.dataflowId);
+      const data = await DataflowService.get(dataflowId);
       setDataflowType(data.type);
       let dataset = [];
       if (isTestDataset) {
@@ -1139,14 +1137,14 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
           selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
           selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
           selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
+          tables={tableSchema}
           tableSchemaColumns={tableSchemaColumns}
           tableSchemaId={dataViewerOptions.tableSchemaId}
-          tables={tableSchema}
         />
       ) : (
         <Webforms
-          dataProviderId={metadata?.dataset.dataProviderId}
           dataflowId={dataflowId}
+          dataProviderId={metadata?.dataset.dataProviderId}
           datasetId={datasetId}
           isReleasing={dataset.isReleasing}
           isReporting
@@ -1332,4 +1330,4 @@ export const Dataset = withRouter(({ match, history, isReferenceDataset }) => {
       />
     </SnapshotContext.Provider>
   );
-});
+};

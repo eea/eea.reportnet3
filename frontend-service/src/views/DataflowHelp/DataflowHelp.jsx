@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
@@ -35,10 +35,9 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-export const DataflowHelp = withRouter(({ history, match }) => {
-  const {
-    params: { dataflowId }
-  } = match;
+export const DataflowHelp = () => {
+  const history = useHistory();
+  const { dataflowId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -85,13 +84,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
     }
   }, [userContext]);
 
-  useBreadCrumbs({
-    currentPage: CurrentPage.DATAFLOW_HELP,
-    dataflowId,
-    dataflowType,
-    history,
-    isLoading
-  });
+  useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_HELP, dataflowId, dataflowType, isLoading });
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(
@@ -296,4 +289,4 @@ export const DataflowHelp = withRouter(({ history, match }) => {
   } else {
     return null;
   }
-});
+};

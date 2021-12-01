@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
@@ -35,7 +35,9 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPublic = false }) => {
+const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
+  const history = useHistory();
+
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -325,5 +327,5 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       </div>
     </div>
   );
-});
+};
 export { Header };

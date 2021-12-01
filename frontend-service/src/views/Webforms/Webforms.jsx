@@ -61,8 +61,8 @@ export const Webforms = ({
     case 'MMR-ART13':
       return (
         <Article13
-          dataProviderId={dataProviderId}
           dataflowId={dataflowId}
+          dataProviderId={dataProviderId}
           datasetId={datasetId}
           isReleasing={isReleasing}
           isReporting={isReporting}
@@ -73,8 +73,8 @@ export const Webforms = ({
     case 'MMR-ART15':
       return (
         <Article15
-          dataProviderId={dataProviderId}
           dataflowId={dataflowId}
+          dataProviderId={dataProviderId}
           datasetId={datasetId}
           isReporting={isReporting}
           state={state}
@@ -84,8 +84,8 @@ export const Webforms = ({
     case 'NATIONAL-SYSTEMS':
       return (
         <NationalSystems
-          dataProviderId={dataProviderId}
           dataflowId={dataflowId}
+          dataProviderId={dataProviderId}
           datasetId={datasetId}
           isReporting={isReporting}
           state={state}

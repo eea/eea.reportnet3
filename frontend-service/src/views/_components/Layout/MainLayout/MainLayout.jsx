@@ -1,5 +1,5 @@
 import { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -27,7 +27,8 @@ import { UserService } from 'services/UserService';
 
 import { useSocket } from 'views/_components/Layout/MainLayout/_hooks';
 
-export const MainLayout = withRouter(({ children, isPublic = false, history }) => {
+export const MainLayout = ({ children, isPublic = false }) => {
+  const history = useHistory();
   const element = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -223,4 +224,4 @@ export const MainLayout = withRouter(({ children, isPublic = false, history }) =
       </div>
     </ErrorBoundary>
   );
-});
+};

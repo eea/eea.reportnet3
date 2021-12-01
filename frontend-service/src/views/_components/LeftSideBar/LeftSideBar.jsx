@@ -1,5 +1,5 @@
 import { Fragment, useContext, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -20,7 +20,9 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystemNotificationVisible }) => {
+const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible }) => {
+  const history = useHistory();
+
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -237,6 +239,6 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
       </div>
     </Fragment>
   );
-});
+};
 
 export { LeftSideBar };

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -21,7 +21,9 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-export const PublicDataflows = withRouter(({ history }) => {
+export const PublicDataflows = () => {
+  const history = useHistory();
+
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
@@ -29,7 +31,7 @@ export const PublicDataflows = withRouter(({ history }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [publicDataflows, setPublicDataflows] = useState([]);
 
-  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOWS, history });
+  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOWS });
 
   useEffect(() => {
     onLoadPublicDataflows();
@@ -97,4 +99,4 @@ export const PublicDataflows = withRouter(({ history }) => {
       </div>
     </PublicLayout>
   );
-});
+};
