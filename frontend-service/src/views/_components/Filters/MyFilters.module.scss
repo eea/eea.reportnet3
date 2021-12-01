@@ -1,3 +1,56 @@
+@import '_styles/mixins';
+
 .filters {
-  margin: 1rem 0;
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  margin: 2rem 0;
+  width: 100%;
+
+  > span {
+    display: flex;
+    flex-direction: row;
+    font-size: 10pt;
+    width: 100%;
+  }
+
+  @include for-phone-only {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+
+    .input {
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  @include for-tablet-portrait-up {
+    flex-wrap: wrap;
+
+    .input,
+    .inputCheckbox {
+      margin-bottom: 1.5rem;
+      width: 50%;
+    }
+  }
+
+  @include for-desktop-up {
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    .input,
+    .inputCheckbox {
+      width: 25%;
+    }
+  }
+
+  @include for-big-desktop-up {
+    flex-wrap: nowrap;
+
+    .input,
+    .inputCheckbox {
+      margin-bottom: 0;
+      width: 100%;
+    }
+  }
 }

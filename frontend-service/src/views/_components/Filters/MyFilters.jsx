@@ -20,33 +20,46 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
 
   const { filterBy, filteredData, loadingStatus } = filters;
 
-  console.log('filterBy :>> ', filterBy);
-
   const resourcesContext = useContext(ResourcesContext);
 
   useLayoutEffect(() => {
-    loadFilters();
-  }, []);
+    // setLoadingStatus('PENDING');
+
+    if (!isEmpty(data)) loadFilters();
+  }, [data]);
 
   useEffect(() => {
     if (getFilteredData) getFilteredData(filteredData);
   }, [filteredData]);
 
-  const applyFilters = () => {
-    if (isEmpty(filterBy)) return data;
+  const applyIncludes = ({ filterItem, value }) => filterItem.toLowerCase().includes(value.toLowerCase());
 
-    return data.filter(item => {
-      return Object.keys(filterBy).map(filterKey =>
-        item[filterKey].toLowerCase().includes(filterBy[filterKey].toLowerCase())
-      );
-    });
+  const checkFilters = ({ filteredKeys, item }) => {
+    for (let index = 0; index < filteredKeys.length; index++) {
+      const filteredKey = filteredKeys[index];
+
+      return applyIncludes({ filterItem: item[filteredKey], value: filterBy[filteredKey] });
+    }
+
+    return true;
   };
 
-  const loadFilters = () => {
-    setLoadingStatus('PENDING');
-    const filteredData = applyFilters();
-
+  const applyFilters = () => {
     try {
+      if (isEmpty(filterBy)) return data;
+
+      return data.filter(item => checkFilters({ filteredKeys: Object.keys(filterBy), item }));
+
+      // return data.filter(item => applyIncludes({ filterItem: item['name'], value: filterBy['name'] }));
+    } catch (error) {
+      console.log('error :>> ', error);
+    }
+  };
+
+  const loadFilters = async () => {
+    try {
+      const filteredData = await applyFilters();
+
       setFilters({ ...filters, data: data, filteredData, loadingStatus: 'SUCCESS' });
     } catch (error) {
       setLoadingStatus('FAILED');
@@ -101,6 +114,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
 
     return (
       <InputText
+        className={styles.input}
         key={option.key}
         onChange={event => onChange({ key: option.key, value: event.target.value })}
         placeholder={option.label}

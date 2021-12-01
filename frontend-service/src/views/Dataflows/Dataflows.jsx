@@ -444,7 +444,7 @@ const Dataflows = withRouter(({ history, match }) => {
     reporting: [
       {
         options: [
-          // { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
+          { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
           // { key: 'legalInstrument', label: 'This is inside a array -- INSTRUMENT', order: 2 },
           { key: 'name', label: 'This is inside a array -- NAME', order: 0 }
           // { key: 'obligationId', label: 'This is inside a array -- OBLIGATION ID', order: 4 },

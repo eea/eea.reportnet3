@@ -20,7 +20,7 @@ export const dataflowsReducer = (state, { type, payload }) => {
       return {
         ...state,
         [payload.type]: payload.data,
-        filteredData: { ...state.filteredData, [payload.type]: payload.data },
+        // filteredData: { ...state.filteredData, [payload.type]: payload.data },
         dataflowsCountFirstLoad: false,
         dataflowsCount: { ...state.dataflowsCount, [payload.type]: payload.data.length },
         activeIndex:

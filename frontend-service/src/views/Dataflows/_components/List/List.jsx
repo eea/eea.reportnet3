@@ -1,8 +1,11 @@
+import { isEmpty } from 'lodash';
 import React from 'react';
 import { DataflowsItem } from '../DataflowsList/_components/DataflowsItem';
 
 export const List = ({ dataflows }) => {
-  console.log('dataflows :>> ', dataflows);
+  if (isEmpty(dataflows)) {
+    return <div style={{ margin: '5rem' }}>LOADING</div>;
+  }
 
   return (
     <div>
