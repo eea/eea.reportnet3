@@ -42,3 +42,12 @@
   user-select: none;
   width: auto !important;
 }
+
+.disabledLabel {
+  color: var(--c-gray-65);
+}
+
+.restrictFromPublicNote {
+  font-style: italic;
+  margin-top: 1.5em;
+}
