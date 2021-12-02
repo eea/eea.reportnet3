@@ -15,7 +15,7 @@ import { MultiSelect } from 'views/_components/MultiSelect';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { filtersStateFamily } from './_functions/Stores/filtersStores';
+import { filterByKeysFamily, filtersStateFamily } from './_functions/Stores/filtersStores';
 
 import { MyFiltersUtils } from './_functions/Utils/MyFiltersUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -24,13 +24,30 @@ const { getEndOfDay, getStartOfDay, parseDateValues } = MyFiltersUtils;
 
 export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode, onFilter, options, viewType }) => {
   const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
+  const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysFamily(viewType));
 
   const { filterBy, filteredData, loadingStatus } = filters;
 
   const resourcesContext = useContext(ResourcesContext);
 
+  useEffect(() => {
+    getFilterByKeys();
+  }, []);
+
+  const getFilterByKeys = () => {
+    const filterKeys = { CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [] };
+
+    options.forEach(option => {
+      filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption.key) || [option.key];
+    });
+
+    setFilterByKeys(filterKeys);
+  };
+
   useLayoutEffect(() => {
-    if (!isEmpty(data)) loadFilters();
+    if (!isEmpty(data)) {
+      loadFilters();
+    }
   }, [data]);
 
   useEffect(() => {
@@ -50,7 +67,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
   // };
 
   const checkFilters = ({ item, filterBy }) => {
-    const filteredKeys = Object.keys(filterBy);
+    const filteredKeys = filterByKeys.INPUT.filter(key => Object.keys(filterBy).includes(key));
 
     for (let index = 0; index < filteredKeys.length; index++) {
       const filteredKey = filteredKeys[index];
@@ -66,7 +83,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
   };
 
   const checkDates = ({ item, filterBy }) => {
-    const filteredKeys = Object.keys(filterBy);
+    const filteredKeys = filterByKeys.DATE.filter(key => Object.keys(filterBy).includes(key));
 
     for (let index = 0; index < filteredKeys.length; index++) {
       const filteredKey = filteredKeys[index];
@@ -94,7 +111,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     try {
       if (isEmpty(filterBy)) return data;
 
-      return data.filter(item => checkFilters({ filteredKeys: Object.keys(filterBy), item, filterBy }));
+      return onApplyFilters({ filterBy });
     } catch (error) {
       console.log('error :>> ', error);
     }
@@ -112,19 +129,14 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
   };
 
   const onChange = ({ key, value }) => {
-    const filteredData = onApplyFilters({ key, value, filterBy: { ...filters.filterBy, [key]: value } });
+    const filteredData = onApplyFilters({ filterBy: { ...filters.filterBy, [key]: value } });
 
     setFilters({ ...filters, filterBy: { ...filters.filterBy, [key]: value }, filteredData });
   };
 
-  const onApplyFilters = ({ key, value, filterBy }) => {
-    if (Array.isArray(value)) return data.filter(item => checkDates({ filterBy, item }));
-
+  const onApplyFilters = ({ filterBy }) => {
     return data.filter(item => {
-      return (
-        // applyIncludes({ filterItem: item[key], value }) &&
-        checkFilters({ filteredKeys: Object.keys(filterBy), item, filterBy })
-      );
+      return checkFilters({ filteredKeys: Object.keys(filterBy), item, filterBy }) && checkDates({ filterBy, item });
     });
   };
 

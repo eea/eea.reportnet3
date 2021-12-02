@@ -5,7 +5,13 @@ export const filtersStateFamily = atomFamily({
   default: () => ({
     data: [],
     filterBy: {},
+    filterByTypes: {},
     filteredData: [],
     loadingStatus: 'IDLE'
   })
+});
+
+export const filterByKeysFamily = atomFamily({
+  key: 'FilterByKeys',
+  default: () => ({ CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [] })
 });
