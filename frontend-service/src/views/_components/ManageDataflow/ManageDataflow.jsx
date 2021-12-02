@@ -217,7 +217,7 @@ export const ManageDataflow = ({
     <Fragment>
       {isVisible && (
         <Dialog
-          className={styles.dialog}
+          className="responsiveDialog"
           footer={renderDataflowDialog()}
           header={getModalHeader()}
           onHide={() => onHideDataflowDialog()}

@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
@@ -33,10 +33,9 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
 
-export const DataCollection = withRouter(({ match, history }) => {
-  const {
-    params: { dataflowId, datasetId }
-  } = match;
+export const DataCollection = () => {
+  const navigate = useNavigate();
+  const { dataflowId, datasetId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -59,13 +58,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   let exportMenuRef = useRef();
   let growlRef = useRef();
 
-  useBreadCrumbs({
-    currentPage: CurrentPage.DATA_COLLECTION,
-    dataflowId,
-    dataflowType,
-    history,
-    isLoading
-  });
+  useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, dataflowType, isLoading });
 
   useCheckNotifications(
     ['DOWNLOAD_EXPORT_DATASET_FILE_ERROR', 'EXPORT_DATA_BY_ID_ERROR', 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD'],
@@ -111,7 +104,7 @@ export const DataCollection = withRouter(({ match, history }) => {
   const internalExtensions = internalExtensionsList.map(type => {
     const extensionsTypes = type.code.split('+');
     return {
-      label: type.text,
+      label: resourcesContext.messages[type.key],
       icon: extensionsTypes[0],
       command: () => onExportDataInternalExtension(type.code)
     };
@@ -142,7 +135,7 @@ export const DataCollection = withRouter(({ match, history }) => {
 
   const onLoadDataflowData = async () => {
     try {
-      const data = await DataflowService.get(match.params.dataflowId);
+      const data = await DataflowService.get(dataflowId);
       const dataCollection = data
         ? data.dataCollections.filter(dataset => dataset.dataCollectionId.toString() === datasetId)
         : [];
@@ -168,7 +161,7 @@ export const DataCollection = withRouter(({ match, history }) => {
         true
       );
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
-        history.push(getUrl(routes.DATAFLOWS));
+        navigate(getUrl(routes.DATAFLOWS));
       }
     } finally {
       setLoading(false);
@@ -232,7 +225,7 @@ export const DataCollection = withRouter(({ match, history }) => {
       }
       notificationContext.add(datasetError, true);
       if (!isUndefined(response) && (response.status === 401 || response.status === 403)) {
-        history.push(getUrl(routes.DATAFLOW, { dataflowId }));
+        navigate(getUrl(routes.DATAFLOW, { dataflowId }));
       }
     }
     setLoading(false);
@@ -249,9 +242,9 @@ export const DataCollection = withRouter(({ match, history }) => {
       levelErrorTypes={levelErrorTypes}
       onTabChange={table => onTabChange(table)}
       showWriteButtons={false}
+      tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}
       tableSchemaId={dataViewerOptions.tableSchemaId}
-      tables={tableSchema}
     />
   );
 
@@ -296,4 +289,4 @@ export const DataCollection = withRouter(({ match, history }) => {
       {onRenderTabsSchema}
     </Fragment>
   );
-});
+};

@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
@@ -62,10 +62,9 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const Dataflow = withRouter(({ history, match }) => {
-  const {
-    params: { dataflowId, representativeId }
-  } = match;
+const Dataflow = () => {
+  const navigate = useNavigate();
+  const { dataflowId, representativeId } = useParams();
 
   const exportImportMenuRef = useRef(null);
 
@@ -233,8 +232,6 @@ const Dataflow = withRouter(({ history, match }) => {
     dataflowId,
     dataflowStateData: dataflowState.data,
     dataflowType: dataflowState.dataflowType,
-    history,
-    matchParams: match.params,
     representativeId
   });
 
@@ -360,7 +357,7 @@ const Dataflow = withRouter(({ history, match }) => {
     </div>
   );
 
-  const handleRedirect = target => history.push(target);
+  const handleRedirect = target => navigate(target);
 
   const setRightPermissionsChange = isRightPermissionsChanged => {
     dataflowDispatch({
@@ -789,7 +786,7 @@ const Dataflow = withRouter(({ history, match }) => {
     } catch (error) {
       console.error('Dataflow - onLoadReportingDataflow.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOW_DATA_ERROR' }, true);
-      history.push(getUrl(routes.DATAFLOWS));
+      navigate(getUrl(routes.DATAFLOWS));
     } finally {
       setIsPageLoading(false);
       setIsShowPublicInfoUpdating(false);
@@ -848,7 +845,7 @@ const Dataflow = withRouter(({ history, match }) => {
   };
 
   function goToDataflowsPage() {
-    history.push(getUrl(routes.DATAFLOWS));
+    navigate(getUrl(routes.DATAFLOWS));
   }
 
   const onSaveName = async (value, index) => {
@@ -1091,9 +1088,9 @@ const Dataflow = withRouter(({ history, match }) => {
       return (
         <BigButtonList
           className="dataflow-big-buttons-help-step"
-          dataProviderId={dataProviderId}
           dataflowState={dataflowState}
           dataflowType={dataflowState.dataflowType}
+          dataProviderId={dataProviderId}
           handleRedirect={handleRedirect}
           isLeadReporter={isLeadReporter}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
@@ -1113,14 +1110,14 @@ const Dataflow = withRouter(({ history, match }) => {
     } else {
       return (
         <BigButtonListRepresentative
-          dataProviderId={dataProviderId}
           dataflowState={dataflowState}
+          dataProviderId={dataProviderId}
           handleRedirect={handleRedirect}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           manageDialogs={manageDialogs}
-          match={match}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
+          representativeId={representativeId}
           setIsReceiptLoading={setIsReceiptLoading}
         />
       );
@@ -1171,7 +1168,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isCustodian && dataflowState.isManageRolesDialogVisible && (
           <Dialog
-            className={styles.leadReportersDialog}
+            className="responsiveDialog"
             contentStyle={{ maxHeight: '60vh' }}
             footer={manageRoleDialogFooter}
             header={resourcesContext.messages['manageRolesDialogTitle']}
@@ -1199,6 +1196,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isManageRequestersDialogVisible && (
           <Dialog
+            className="responsiveDialog"
             footer={shareRightsFooterDialogFooter(usersTypes.REQUESTERS)}
             header={resourcesContext.messages['manageRequestersRights']}
             onHide={() => {
@@ -1214,8 +1212,8 @@ const Dataflow = withRouter(({ history, match }) => {
               addConfirmHeader={resourcesContext.messages['addRequesterConfirmHeader']}
               addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
               columnHeader={resourcesContext.messages['requestersEmailColumn']}
-              dataProviderId={dataProviderId}
               dataflowId={dataflowId}
+              dataProviderId={dataProviderId}
               deleteConfirmHeader={resourcesContext.messages['requestersRightsDialogConfirmDeleteHeader']}
               deleteConfirmMessage={resourcesContext.messages['requestersRightsDialogConfirmDeleteQuestion']}
               deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
@@ -1236,6 +1234,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isManageReportersDialogVisible && (
           <Dialog
+            className="responsiveDialog"
             footer={shareRightsFooterDialogFooter(usersTypes.REPORTERS)}
             header={resourcesContext.messages['manageReportersRights']}
             onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
@@ -1244,8 +1243,8 @@ const Dataflow = withRouter(({ history, match }) => {
               addConfirmHeader={resourcesContext.messages['addReporterConfirmHeader']}
               addErrorNotificationKey={'ADD_REPORTER_ERROR'}
               columnHeader={resourcesContext.messages['reportersEmailColumn']}
-              dataProviderId={dataProviderId}
               dataflowId={dataflowId}
+              dataProviderId={dataProviderId}
               deleteConfirmHeader={resourcesContext.messages['reportersRightsDialogConfirmDeleteHeader']}
               deleteConfirmMessage={resourcesContext.messages['reportersRightsDialogConfirmDeleteQuestion']}
               deleteErrorNotificationKey={'DELETE_REPORTER_ERROR'}
@@ -1330,6 +1329,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isRestrictFromPublicDialogVisible && (
           <ConfirmDialog
+            confirmTooltip={resourcesContext.messages['restrictFromPublicTooltip']}
             disabledConfirm={
               dataflowState.restrictFromPublic === dataflowState.representative.restrictFromPublic ||
               dataflowState.isFetchingData
@@ -1348,16 +1348,28 @@ const Dataflow = withRouter(({ history, match }) => {
             visible={dataflowState.isRestrictFromPublicDialogVisible}>
             <Checkbox
               checked={dataflowState.restrictFromPublic}
+              disabled={!dataflowState.representative.restrictFromPublic}
               id="restrictFromPublicCheckbox"
               inputId="restrictFromPublicCheckbox"
               onChange={() => setRestrictFromPublic(!dataflowState.restrictFromPublic)}
               role="checkbox"
             />
             <label className={styles.restrictFromPublic} htmlFor="restrictFromPublicCheckbox">
-              <span className={styles.pointer} onClick={() => setRestrictFromPublic(!dataflowState.restrictFromPublic)}>
+              <span
+                className={`${dataflowState.restrictFromPublic ? styles.pointer : styles.disabledLabel}`}
+                onClick={() => {
+                  if (dataflowState.representative.restrictFromPublic) {
+                    setRestrictFromPublic(!dataflowState.restrictFromPublic);
+                  }
+                }}>
                 {resourcesContext.messages['restrictFromPublicCheckboxLabel']}
               </span>
             </label>
+            {!dataflowState.representative.restrictFromPublic && (
+              <div className={styles.restrictFromPublicNote}>
+                {resourcesContext.messages['restrictFromPublicDisabledLabel']}
+              </div>
+            )}
           </ConfirmDialog>
         )}
 
@@ -1421,6 +1433,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isUserListVisible && (
           <Dialog
+            className="responsiveDialog"
             footer={
               ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
@@ -1465,6 +1478,7 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isBusinessDataflowDialogVisible && (
           <ManageBusinessDataflow
+            className="responsiveDialog"
             dataflowId={dataflowId}
             hasRepresentatives={dataflowState.data.representatives.length !== 0}
             isAdmin={dataflowState.isAdmin}
@@ -1500,12 +1514,11 @@ const Dataflow = withRouter(({ history, match }) => {
 
         {dataflowState.isApiKeyDialogVisible && (
           <ApiKeyDialog
-            dataProviderId={dataProviderId}
             dataflowId={dataflowId}
+            dataProviderId={dataProviderId}
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
             isCustodian={dataflowState.isCustodian}
             manageDialogs={manageDialogs}
-            match={match}
           />
         )}
 
@@ -1521,6 +1534,6 @@ const Dataflow = withRouter(({ history, match }) => {
       </div>
     </div>
   );
-});
+};
 
 export { Dataflow };
