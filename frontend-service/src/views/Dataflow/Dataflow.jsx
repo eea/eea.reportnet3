@@ -1372,6 +1372,8 @@ const Dataflow = () => {
           </ConfirmDialog>
         )}
 
+        {console.log(`dataflowState.representative`, dataflowState.representative)}
+
         {dataflowState.isShowPublicInfoDialogVisible && (
           <ConfirmDialog
             disabledConfirm={
