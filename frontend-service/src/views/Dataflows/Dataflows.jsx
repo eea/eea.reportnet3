@@ -1,6 +1,7 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 
+import { useResetRecoilState } from 'recoil';
 import isNil from 'lodash/isNil';
 
 import styles from './Dataflows.module.scss';
@@ -29,6 +30,8 @@ import { DataflowService } from 'services/DataflowService';
 import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { UserService } from 'services/UserService';
 
+import { dialogsStore } from 'views/_components/Dialog/_functions/Stores/dialogsStore';
+
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -49,6 +52,9 @@ import { MyFilters } from 'views/_components/Filters/MyFilters';
 
 const Dataflows = () => {
   const { errorType: dataflowsErrorType } = useParams();
+
+  const resetDialogsStore = useResetRecoilState(dialogsStore);
+
   const { permissions } = config;
 
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -133,6 +139,7 @@ const Dataflows = () => {
 
   useEffect(() => {
     getDataflowsCount();
+    resetDialogsStore();
 
     if (!isNil(dataflowsErrorType)) {
       notificationContext.add({ type: ErrorUtils.parseErrorType(dataflowsErrorType) }, true);

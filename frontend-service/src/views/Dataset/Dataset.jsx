@@ -365,7 +365,7 @@ export const Dataset = ({ isReferenceDataset }) => {
     {
       label: resourcesContext.messages['customExports'],
       items: externalOperationsList.export.map(type => ({
-        label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`,
+        label: `${type.name} (.${type.fileExtension})`,
         icon: type.fileExtension,
         command: () => onExportDataExternalIntegration(type.id)
       }))
