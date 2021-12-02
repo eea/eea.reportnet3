@@ -120,6 +120,8 @@ export const ValidationService = {
 
   generateShowValidationsFile: async datasetId => await ValidationRepository.generateShowValidationsFile(datasetId),
 
+  runSqlRule: async (datasetId, sqlSentence) => await ValidationRepository.runSqlRule(datasetId, sqlSentence),
+
   updateFieldRule: async (datasetId, validationRule) => {
     const { expressions } = validationRule;
     const validation = {

@@ -6,6 +6,7 @@ export const ValidationConfig = {
   generateQCRulesFile: '/rules/exportQC/{:datasetId}',
   generateShowValidationsFile: '/validation/export/{:datasetId}',
   getAll: '/rules/{:datasetSchemaId}/dataflow/{:dataflowId}',
+  runSqlRule: '/rules/runSqlRule',
   update: '/rules/updateRule?datasetId={:datasetId}',
   updateAutomatic: '/rules/updateAutomaticRule/{:datasetId}'
 };
