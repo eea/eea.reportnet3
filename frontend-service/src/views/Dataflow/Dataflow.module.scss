@@ -43,20 +43,10 @@
   width: auto !important;
 }
 
-.leadReportersDialog {
-  @include for-phone-landscape-up {
-    width: 90vw !important;
-  }
+.disabledLabel {
+  color: var(--c-gray-65);
+}
 
-  @include for-tablet-landscape-up {
-    width: 80vw !important;
-  }
-
-  @include for-desktop-up {
-    width: 60vw !important;
-  }
-
-  @include for-big-desktop-up {
-    width: 50vw !important;
-  }
+.restrictFromPublicNote {
+  font-style: italic;
 }
