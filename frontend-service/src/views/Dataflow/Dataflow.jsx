@@ -1168,7 +1168,7 @@ const Dataflow = () => {
 
         {dataflowState.isCustodian && dataflowState.isManageRolesDialogVisible && (
           <Dialog
-            className={styles.leadReportersDialog}
+            className="responsiveDialog"
             contentStyle={{ maxHeight: '60vh' }}
             footer={manageRoleDialogFooter}
             header={resourcesContext.messages['manageRolesDialogTitle']}
@@ -1196,6 +1196,7 @@ const Dataflow = () => {
 
         {dataflowState.isManageRequestersDialogVisible && (
           <Dialog
+            className="responsiveDialog"
             footer={shareRightsFooterDialogFooter(usersTypes.REQUESTERS)}
             header={resourcesContext.messages['manageRequestersRights']}
             onHide={() => {
@@ -1233,6 +1234,7 @@ const Dataflow = () => {
 
         {dataflowState.isManageReportersDialogVisible && (
           <Dialog
+            className="responsiveDialog"
             footer={shareRightsFooterDialogFooter(usersTypes.REPORTERS)}
             header={resourcesContext.messages['manageReportersRights']}
             onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
@@ -1327,6 +1329,7 @@ const Dataflow = () => {
 
         {dataflowState.isRestrictFromPublicDialogVisible && (
           <ConfirmDialog
+            confirmTooltip={resourcesContext.messages['restrictFromPublicTooltip']}
             disabledConfirm={
               dataflowState.restrictFromPublic === dataflowState.representative.restrictFromPublic ||
               dataflowState.isFetchingData
@@ -1345,16 +1348,28 @@ const Dataflow = () => {
             visible={dataflowState.isRestrictFromPublicDialogVisible}>
             <Checkbox
               checked={dataflowState.restrictFromPublic}
+              disabled={!dataflowState.representative.restrictFromPublic}
               id="restrictFromPublicCheckbox"
               inputId="restrictFromPublicCheckbox"
               onChange={() => setRestrictFromPublic(!dataflowState.restrictFromPublic)}
               role="checkbox"
             />
             <label className={styles.restrictFromPublic} htmlFor="restrictFromPublicCheckbox">
-              <span className={styles.pointer} onClick={() => setRestrictFromPublic(!dataflowState.restrictFromPublic)}>
+              <span
+                className={`${dataflowState.restrictFromPublic ? styles.pointer : styles.disabledLabel}`}
+                onClick={() => {
+                  if (dataflowState.representative.restrictFromPublic) {
+                    setRestrictFromPublic(!dataflowState.restrictFromPublic);
+                  }
+                }}>
                 {resourcesContext.messages['restrictFromPublicCheckboxLabel']}
               </span>
             </label>
+            {!dataflowState.representative.restrictFromPublic && (
+              <div className={styles.restrictFromPublicNote}>
+                {resourcesContext.messages['restrictFromPublicDisabledLabel']}
+              </div>
+            )}
           </ConfirmDialog>
         )}
 
@@ -1418,6 +1433,7 @@ const Dataflow = () => {
 
         {dataflowState.isUserListVisible && (
           <Dialog
+            className="responsiveDialog"
             footer={
               ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
@@ -1462,6 +1478,7 @@ const Dataflow = () => {
 
         {dataflowState.isBusinessDataflowDialogVisible && (
           <ManageBusinessDataflow
+            className="responsiveDialog"
             dataflowId={dataflowId}
             hasRepresentatives={dataflowState.data.representatives.length !== 0}
             isAdmin={dataflowState.isAdmin}

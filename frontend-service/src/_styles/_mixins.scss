@@ -36,3 +36,21 @@
 @mixin shadow-0em {
   box-shadow: 0 0 0 0em var(--c-blue-120) !important;
 }
+
+@mixin responsiveDialog {
+  @include for-phone-landscape-up {
+    width: 90vw !important;
+  }
+
+  @include for-tablet-landscape-up {
+    width: 80vw !important;
+  }
+
+  @include for-desktop-up {
+    width: 60vw !important;
+  }
+
+  @include for-big-desktop-up {
+    width: 50vw !important;
+  }
+}
