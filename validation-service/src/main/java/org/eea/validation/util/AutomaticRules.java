@@ -379,7 +379,7 @@ public class AutomaticRules {
     }
     ObjectId ruleId = new ObjectId();
     return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isGeometry(this)", error,
-        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description, null);
+        ErrorTypeEnum.BLOCKER.getValue(), shortCode, automaticType, description, null);
   }
 
   /**
@@ -398,7 +398,7 @@ public class AutomaticRules {
       AutomaticRuleTypeEnum automaticType, String description) {
     ObjectId ruleId = new ObjectId();
     return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "checkEPSGSRID(this)",
-        "Unsupported SRID", ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description,
+        "Unsupported SRID", ErrorTypeEnum.BLOCKER.getValue(), shortCode, automaticType, description,
         null);
   }
 
@@ -440,7 +440,43 @@ public class AutomaticRules {
     String sqlResult = String.format(sql, fieldName, datasetId, datasetId);
 
     return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, whenCondition, message,
-        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description, sqlResult);
+        ErrorTypeEnum.BLOCKER.getValue(), shortCode, automaticType, description, sqlResult);
+  }
+
+
+
+  /**
+   * Creates the geometry automatic rule check S ttransform.
+   *
+   * @param datasetId the dataset id
+   * @param document the document
+   * @param typeData the type data
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param automaticType the automatic type
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createGeometryAutomaticRuleCheckSTtransform(Long datasetId, Document document,
+      DataType typeData, String referenceId, EntityTypeEnum typeEntityEnum, String nameRule,
+      String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
+    ObjectId ruleId = new ObjectId();
+
+    String message = "The transformation of the geometry has not worked because of: {%reason%}";
+
+    String whenCondition = "isSQLSentenceWithCode(this.datasetId.id, '" + ruleId.toString()
+        + "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX')";
+
+    String fieldName = document.getString("headerName");
+
+    String sql =
+        "select rv.id as record_id , fv.id as %s_id , fv.geometry_error as reason from dataset_%s.field_value fv inner join dataset_%s.record_value rv on rv.id = fv.id_record where fv.geometry_error is not null and fv.id_field_schema = '%s'";
+    String sqlResult = String.format(sql, fieldName, datasetId, datasetId, referenceId);
+
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, whenCondition, message,
+        ErrorTypeEnum.BLOCKER.getValue(), shortCode, automaticType, description, sqlResult);
   }
 
 
