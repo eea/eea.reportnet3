@@ -1,5 +1,6 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import ReactTooltip from 'react-tooltip';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -42,7 +43,7 @@ import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTy
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const PublicDataflowInformation = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { dataflowId } = useParams();
 
   const resourcesContext = useContext(ResourcesContext);
@@ -221,7 +222,7 @@ export const PublicDataflowInformation = () => {
               icon={AwesomeIcons('externalUrl')}
               onClick={e => {
                 e.preventDefault();
-                history.push(
+                navigate(
                   getUrl(
                     routes.PUBLIC_COUNTRY_INFORMATION,
                     { countryCode: getCountryCode(rowData.dataProviderName) },

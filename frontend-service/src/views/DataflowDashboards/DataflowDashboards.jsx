@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 
@@ -24,7 +24,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const DataflowDashboards = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { dataflowId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -65,7 +65,7 @@ export const DataflowDashboards = () => {
     } catch (error) {
       console.error('DataflowDashboards - onLoadDataSchemas.', error);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
-        history.push(getUrl(routes.DATAFLOWS));
+        navigate(getUrl(routes.DATAFLOWS));
       }
     }
   };

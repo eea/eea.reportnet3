@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
@@ -39,7 +39,7 @@ const BigButtonListReference = ({
   setIsCreatingReferenceDatasets,
   setUpdatedDatasetSchema
 }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const { showLoading, hideLoading } = useContext(LoadingContext);
   const [referenceBigButtonsState, referenceBigButtonsDispatch] = useReducer(referenceBigButtonsReducer, {
@@ -143,7 +143,7 @@ const BigButtonListReference = ({
 
   const onToggleNewDatasetDialog = isVisible => handleDialogs({ dialog: 'isNewDataset', isVisible });
 
-  const onRedirect = ({ params, route }) => history.push(getUrl(route, params, true));
+  const onRedirect = ({ params, route }) => navigate(getUrl(route, params, true));
 
   const getMetadata = async ids => {
     try {

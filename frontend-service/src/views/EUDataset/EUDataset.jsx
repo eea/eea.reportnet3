@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 
@@ -33,7 +33,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
 
 export const EUDataset = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { dataflowId, datasetId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -254,7 +254,7 @@ export const EUDataset = () => {
       console.error('EUDataset - onLoadDatasetSchema.', error);
       notificationContext.add({ type: 'ERROR_LOADING_EU_DATASET_SCHEMA' }, true);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
-        history.push(getUrl(routes.DATAFLOW, { dataflowId }));
+        navigate(getUrl(routes.DATAFLOW, { dataflowId }));
       }
     } finally {
       setIsLoading(false);

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -26,7 +26,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
 
 export const PublicFrontpage = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { errorType: urlErrorType } = useParams();
 
   const notificationContext = useContext(NotificationContext);
@@ -51,7 +51,7 @@ export const PublicFrontpage = () => {
 
   const handleRedirect = (e, target) => {
     if (e.button === 0) {
-      return history.push(target);
+      return navigate(target);
     } else if (e.button === 1) {
       window.open(target, '_blank');
     }

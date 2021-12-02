@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -53,7 +53,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const Dataset = ({ isReferenceDataset }) => {
-  const history = useHistory();
+  const navigate = useNavigate();
   const { dataflowId, datasetId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -656,7 +656,7 @@ export const Dataset = ({ isReferenceDataset }) => {
         true
       );
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
-        history.push(getUrl(routes.DATAFLOWS));
+        navigate(getUrl(routes.DATAFLOWS));
       }
     } finally {
       setIsLoading(false);
@@ -764,7 +764,7 @@ export const Dataset = ({ isReferenceDataset }) => {
       };
       notificationContext.add(datasetError, true);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
-        history.push(getUrl(routes.DATAFLOW, { dataflowId }));
+        navigate(getUrl(routes.DATAFLOW, { dataflowId }));
       }
     } finally {
       setIsLoading(false);
@@ -862,7 +862,7 @@ export const Dataset = ({ isReferenceDataset }) => {
 
   const layout = children => {
     return (
-      <MainLayout history={history}>
+      <MainLayout>
         <div className="rep-container">{children}</div>
       </MainLayout>
     );

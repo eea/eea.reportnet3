@@ -1,20 +1,12 @@
-import { Fragment, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
-const ScrollToTop = ({ children }) => {
-  const history = useHistory();
+export const ScrollToTop = () => {
+  const { pathname } = useLocation();
 
   useEffect(() => {
-    const unlisten = history.listen(() => {
-      window.scrollTo(0, 0);
-    });
-    return () => {
-      unlisten();
-    };
-  }, []);
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
-  // eslint-disable-next-line react/jsx-no-useless-fragment
-  return <Fragment>{children}</Fragment>;
+  return null;
 };
-
-export { ScrollToTop };

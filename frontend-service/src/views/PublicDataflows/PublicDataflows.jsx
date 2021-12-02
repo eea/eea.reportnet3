@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -22,7 +22,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const PublicDataflows = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
@@ -59,7 +59,7 @@ export const PublicDataflows = () => {
   const onOpenDataflow = (dataflowId, newTab) => {
     const url = getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true);
     if (!newTab) {
-      return history.push(url);
+      return navigate(url);
     } else {
       window.open(url, '_blank');
     }
