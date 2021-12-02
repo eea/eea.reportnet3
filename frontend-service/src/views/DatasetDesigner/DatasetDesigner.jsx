@@ -340,7 +340,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               return {
                 command: () => onExportDataExternalIntegration(type.id),
                 icon: type.fileExtension,
-                label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+                label: `${type.name} (.${type.fileExtension})`
               };
             })
           }
