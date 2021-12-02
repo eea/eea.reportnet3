@@ -373,8 +373,8 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
       {view === resourcesContext.messages['details'] ? (
         <WebformView
           data={article13State.data}
-          dataProviderId={dataProviderId}
           dataflowId={dataflowId}
+          dataProviderId={dataProviderId}
           datasetId={datasetId}
           datasetSchemaId={datasetSchema.datasetSchemaId}
           getFieldSchemaId={getFieldSchemaId}

@@ -6,7 +6,6 @@ export { MapUtils } from './MapUtils';
 export { MetadataUtils } from './MetadataUtils';
 export { QuerystringUtils } from './QuerystringUtils';
 export { RecordUtils } from './RecordUtils';
-export { RouteUtils } from './RouteUtils';
 export { TabsUtils } from './TabsUtils';
 export { TextByDataflowTypeUtils } from './TextByDataflowTypeUtils';
 export { TooltipUtils } from './TooltipUtils';

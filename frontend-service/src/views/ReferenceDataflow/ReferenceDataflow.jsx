@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import { useContext, useEffect, useReducer } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -39,10 +39,9 @@ import { Dialog } from 'views/_components/Dialog';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 
-const ReferenceDataflow = withRouter(({ history, match }) => {
-  const {
-    params: { referenceDataflowId }
-  } = match;
+const ReferenceDataflow = () => {
+  const navigate = useNavigate();
+  const { referenceDataflowId } = useParams();
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -105,12 +104,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     if (!isNil(userContext.contextRoles)) onLoadPermissions();
   }, [userContext]);
 
-  useBreadCrumbs({
-    currentPage: CurrentPage.REFERENCE_DATAFLOW,
-    referenceDataflowId,
-    history,
-    matchParams: match.params
-  });
+  useBreadCrumbs({ currentPage: CurrentPage.REFERENCE_DATAFLOW, referenceDataflowId });
 
   useLeftSideBar(dataflowState, getLeftSidebarButtonsVisibility, manageDialogs);
 
@@ -135,7 +129,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
   }
 
   function goToDataflowsPage() {
-    history.push(getUrl(routes.DATAFLOWS));
+    navigate(getUrl(routes.DATAFLOWS));
   }
 
   const onRefreshToken = async () => {
@@ -251,7 +245,7 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
     } catch (error) {
       console.error('ReferenceDataflow - onLoadReferenceDataflow.', error);
       notificationContext.add({ type: 'LOADING_REFERENCE_DATAFLOW_ERROR', error }, true);
-      history.push(getUrl(routes.DATAFLOWS));
+      navigate(getUrl(routes.DATAFLOWS));
     } finally {
       setIsLoading(false);
     }
@@ -366,7 +360,6 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
           isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
           isCustodian={true}
           manageDialogs={manageDialogs}
-          match={match}
         />
       )}
 
@@ -418,6 +411,6 @@ const ReferenceDataflow = withRouter(({ history, match }) => {
       )}
     </div>
   );
-});
+};
 
 export { ReferenceDataflow };
