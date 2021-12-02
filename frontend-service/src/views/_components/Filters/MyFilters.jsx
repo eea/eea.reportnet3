@@ -2,7 +2,6 @@ import { useContext, useEffect, useLayoutEffect } from 'react';
 import { useRecoilState } from 'recoil';
 import PropTypes from 'prop-types';
 
-import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -21,7 +20,7 @@ import { filtersStateFamily } from './_functions/Stores/filtersStores';
 import { MyFiltersUtils } from './_functions/Utils/MyFiltersUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const { parseDateValues } = MyFiltersUtils;
+const { getEndOfDay, getStartOfDay, parseDateValues } = MyFiltersUtils;
 
 export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode, onFilter, options, viewType }) => {
   const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
@@ -91,9 +90,6 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     return true;
   };
 
-  const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getTime();
-  const getEndOfDay = date => new Date(dayjs(date).endOf('day').format()).getTime();
-
   const applyFilters = () => {
     try {
       if (isEmpty(filterBy)) return data;
@@ -159,7 +155,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
   };
 
   const renderDate = option => {
-    if (option.nestedFilters) return option.nestedFilters.map(option => renderDate(option));
+    if (option.nestedOptions) return option.nestedOptions.map(option => renderDate(option));
 
     return (
       <Calendar
@@ -184,7 +180,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
   };
 
   const renderDropdown = option => {
-    if (option.nestedFilters) return option.nestedFilters.map(option => renderDropdown(option));
+    if (option.nestedOptions) return option.nestedOptions.map(option => renderDropdown(option));
 
     return <Dropdown />;
   };
