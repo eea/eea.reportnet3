@@ -440,7 +440,7 @@ const Dataflows = () => {
   const options = {
     reporting: [
       {
-        options: [
+        nestedOptions: [
           { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
           // { key: 'legalInstrument', label: 'This is inside a array -- INSTRUMENT', order: 2 },
           { key: 'name', label: 'This is inside a array -- NAME', order: 0 }
@@ -448,16 +448,16 @@ const Dataflows = () => {
           // { key: 'obligationTitle', label: 'This is inside a array -- OBLIGATION TITLE', order: 3 }
         ],
         type: 'INPUT'
-      }
+      },
       // {
       //   type: 'MULTI_SELECT',
-      //   options: [
+      //   nestedOptions: [
       //     { key: 'status', label: 'This is inside a array -- STATUS', order: 0 },
       //     { key: 'userRole', label: 'This is inside a array -- ROLES', order: 1 },
       //     { key: 'pinned', label: 'This is inside a array -- PINNED', order: 2 }
       //   ]
       // },
-      // { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' }
+      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' }
       // (isCustodian || isAdmin) && {
       //   key: 'creationDate',
       //   label: resourcesContext.messages['creationDateFilterLabel'],
@@ -466,14 +466,14 @@ const Dataflows = () => {
     ],
     reference: [
       {
-        options: [
+        nestedOptions: [
           { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
           { key: 'name', label: 'This is inside a array -- NAME', order: 0 }
         ],
         type: 'INPUT'
       },
       {
-        options: [
+        nestedOptions: [
           { key: 'status', label: 'This is inside a array -- STATUS', order: 0 },
           { key: 'pinned', label: 'This is inside a array -- PINNED', order: 1 }
         ],

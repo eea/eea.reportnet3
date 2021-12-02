@@ -2,18 +2,26 @@ import { useContext, useEffect, useLayoutEffect } from 'react';
 import { useRecoilState } from 'recoil';
 import PropTypes from 'prop-types';
 
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './MyFilters.module.scss';
 
 import { Button } from 'views/_components/Button';
+import { Calendar } from 'views/_components/Calendar';
+import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { MultiSelect } from 'views/_components/MultiSelect';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { filtersStateFamily } from './_functions/Stores/filtersStores';
+
+import { MyFiltersUtils } from './_functions/Utils/MyFiltersUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
+const { parseDateValues } = MyFiltersUtils;
 
 export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode, onFilter, options, viewType }) => {
   const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
@@ -23,8 +31,6 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
   const resourcesContext = useContext(ResourcesContext);
 
   useLayoutEffect(() => {
-    // setLoadingStatus('PENDING');
-
     if (!isEmpty(data)) loadFilters();
   }, [data]);
 
@@ -34,23 +40,65 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
 
   const applyIncludes = ({ filterItem, value }) => filterItem.toLowerCase().includes(value.toLowerCase());
 
-  const checkFilters = ({ filteredKeys, item }) => {
+  // const checkFilters = ({ filteredKeys, item }) => {
+  //   for (let index = 0; index < filteredKeys.length; index++) {
+  //     const filteredKey = filteredKeys[index];
+
+  //     return applyIncludes({ filterItem: item[filteredKey], value: filterBy[filteredKey] });
+  //   }
+
+  //   return true;
+  // };
+
+  const checkFilters = ({ item, filterBy }) => {
+    const filteredKeys = Object.keys(filterBy);
+
     for (let index = 0; index < filteredKeys.length; index++) {
       const filteredKey = filteredKeys[index];
 
-      return applyIncludes({ filterItem: item[filteredKey], value: filterBy[filteredKey] });
+      if (!TextUtils.areEquals(filterBy[filteredKey], '')) {
+        if (!item[filteredKey].toLowerCase().includes(filterBy[filteredKey].toLowerCase())) {
+          return false;
+        }
+      }
     }
 
     return true;
   };
 
+  const checkDates = ({ item, filterBy }) => {
+    const filteredKeys = Object.keys(filterBy);
+
+    for (let index = 0; index < filteredKeys.length; index++) {
+      const filteredKey = filteredKeys[index];
+      const dates = filterBy[filteredKey];
+
+      if (dates[0] && !dates[1]) {
+        const value = new Date(item[filteredKey]).getTime();
+        const is = value >= getStartOfDay(dates[0]) && getEndOfDay(dates[0]) >= value;
+
+        return is;
+      }
+
+      if (dates[0] && dates[1]) {
+        const value = new Date(item[filteredKey]).getTime();
+        const is = value >= getStartOfDay(dates[0]) && getEndOfDay(dates[1]) >= value;
+
+        return is;
+      }
+    }
+
+    return true;
+  };
+
+  const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getTime();
+  const getEndOfDay = date => new Date(dayjs(date).endOf('day').format()).getTime();
+
   const applyFilters = () => {
     try {
       if (isEmpty(filterBy)) return data;
 
-      return data.filter(item => checkFilters({ filteredKeys: Object.keys(filterBy), item }));
-
-      // return data.filter(item => applyIncludes({ filterItem: item['name'], value: filterBy['name'] }));
+      return data.filter(item => checkFilters({ filteredKeys: Object.keys(filterBy), item, filterBy }));
     } catch (error) {
       console.log('error :>> ', error);
     }
@@ -68,13 +116,20 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
   };
 
   const onChange = ({ key, value }) => {
-    const test = doFilter({ key, value });
+    const filteredData = onApplyFilters({ key, value, filterBy: { ...filters.filterBy, [key]: value } });
 
-    setFilters({ ...filters, filterBy: { ...filters.filterBy, [key]: value }, filteredData: test });
+    setFilters({ ...filters, filterBy: { ...filters.filterBy, [key]: value }, filteredData });
   };
 
-  const doFilter = ({ key, value }) => {
-    return filteredData.filter(item => item[key].toLowerCase().includes(value.toLowerCase()));
+  const onApplyFilters = ({ key, value, filterBy }) => {
+    if (Array.isArray(value)) return data.filter(item => checkDates({ filterBy, item }));
+
+    return data.filter(item => {
+      return (
+        // applyIncludes({ filterItem: item[key], value }) &&
+        checkFilters({ filteredKeys: Object.keys(filterBy), item, filterBy })
+      );
+    });
   };
 
   const setLoadingStatus = status => setFilters({ ...filters, loadingStatus: status });
@@ -86,10 +141,10 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
           return [];
 
         case 'DATE':
-          return [];
+          return renderDate(option);
 
         case 'DROPDOWN':
-          return [];
+          return renderDropdown(option);
 
         case 'INPUT':
           return renderInput(option);
@@ -103,13 +158,40 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     });
   };
 
-  //   const renderDate = () => {};
+  const renderDate = option => {
+    if (option.nestedFilters) return option.nestedFilters.map(option => renderDate(option));
 
-  //   const renderDropdown = () => {};
+    return (
+      <Calendar
+        baseZIndex={9999}
+        className={styles.calendarFilter}
+        // dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
+        inputClassName={styles.inputFilter}
+        key={option.key}
+        // inputId={inputId}
+        monthNavigator={true}
+        onChange={event => onChange({ key: option.key, value: parseDateValues(event.value) })}
+        // onChange={event => onFilterData(property, event.value)}
+        // onFocus={() => onAnimateLabel(property, true)}
+        placeholder={option.label}
+        readOnlyInput={true}
+        selectionMode="range"
+        value={parseDateValues(filterBy[option.key])}
+        yearNavigator={true}
+        yearRange="2015:2030"
+      />
+    );
+  };
+
+  const renderDropdown = option => {
+    if (option.nestedFilters) return option.nestedFilters.map(option => renderDropdown(option));
+
+    return <Dropdown />;
+  };
 
   const renderInput = option => {
-    if (option.options) {
-      return option.options.map(option => renderInput(option));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(option => renderInput(option));
     }
 
     return (
@@ -124,8 +206,8 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
   };
 
   const renderMultiSelect = option => {
-    if (option.options) {
-      return option.options.map(option => renderMultiSelect(option));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(option => renderMultiSelect(option));
     }
 
     return <MultiSelect key={option.key} />;
@@ -164,7 +246,20 @@ MyFilters.propTypes = {
   isSearchVisible: PropTypes.bool,
   isStrictMode: PropTypes.bool,
   onFilter: PropTypes.func,
-  options: PropTypes.object,
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      category: PropTypes.string | undefined,
+      nestedOptions: PropTypes.arrayOf(
+        PropTypes.shape({
+          isInputVisible: PropTypes.bool,
+          key: PropTypes.string,
+          label: PropTypes.string,
+          order: PropTypes.number
+        })
+      ),
+      type: PropTypes.oneOf('CHECKBOX' | 'DATE' | 'DROPDOWN' | 'INPUT' | 'MULTI_SELECT').isRequired
+    })
+  ),
   viewType: PropTypes.string
 };
 
