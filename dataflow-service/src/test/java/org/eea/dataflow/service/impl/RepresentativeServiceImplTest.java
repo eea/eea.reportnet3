@@ -665,4 +665,43 @@ public class RepresentativeServiceImplTest {
         .findRepresentativesByDataflowIdAndDataproviderList(1L, Arrays.asList(1L)));
   }
 
+  @Test(expected = EEAException.class)
+  public void checkRestrictFromPublicExceptionTest() throws EEAException {
+    try {
+      Mockito.when(representativeRepository.findAllByDataflow_Id(Mockito.anyLong()))
+          .thenReturn(null);
+      Mockito.when(representativeMapper.entityListToClass(Mockito.anyList())).thenReturn(null);
+      Mockito.when(representativeServiceImpl.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+          .thenReturn(null);
+      representativeServiceImpl.checkRestrictFromPublic(1L, 1L);
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test
+  public void checkRestrictFromPublicTest() throws EEAException {
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setId(1L);
+    representativeVO.setRestrictFromPublic(true);
+    representativeVO.setDataProviderId(1L);
+    List<RepresentativeVO> representativesVO = new ArrayList<>();
+    List<Representative> representatives = new ArrayList<>();
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representative.setRestrictFromPublic(true);
+    representatives.add(representative);
+    representativesVO.add(representativeVO);
+    Mockito.when(representativeRepository.findAllByDataflow_Id(Mockito.anyLong()))
+        .thenReturn(representatives);
+    Mockito.when(representativeMapper.entityListToClass(Mockito.anyList()))
+        .thenReturn(representativesVO);
+    Mockito.when(representativeServiceImpl.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(representativesVO);
+    representativeServiceImpl.checkRestrictFromPublic(1L, 1L);
+    assertEquals(representativeServiceImpl.checkRestrictFromPublic(1L, 1L),
+        representative.isRestrictFromPublic());
+  }
+
 }
