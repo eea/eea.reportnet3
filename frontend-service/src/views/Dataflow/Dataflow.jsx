@@ -1357,10 +1357,11 @@ const Dataflow = () => {
             <label className={styles.restrictFromPublic} htmlFor="restrictFromPublicCheckbox">
               <span
                 className={`${dataflowState.restrictFromPublic ? styles.pointer : styles.disabledLabel}`}
-                onClick={() =>
-                  dataflowState.representative.restrictFromPublic &&
-                  setRestrictFromPublic(!dataflowState.restrictFromPublic)
-                }>
+                onClick={() => {
+                  if (dataflowState.representative.restrictFromPublic) {
+                    setRestrictFromPublic(!dataflowState.restrictFromPublic);
+                  }
+                }}>
                 {resourcesContext.messages['restrictFromPublicCheckboxLabel']}
               </span>
             </label>
@@ -1371,8 +1372,6 @@ const Dataflow = () => {
             )}
           </ConfirmDialog>
         )}
-
-        {console.log(`dataflowState.representative`, dataflowState.representative)}
 
         {dataflowState.isShowPublicInfoDialogVisible && (
           <ConfirmDialog
