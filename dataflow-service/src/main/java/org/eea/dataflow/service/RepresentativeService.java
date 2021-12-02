@@ -213,4 +213,6 @@ public interface RepresentativeService {
    */
   List<FMEUserVO> findFmeUsers();
 
+  boolean checkRestrictFromPublic(Long dataflowId, Long dataProviderId) throws EEAException;
+
 }

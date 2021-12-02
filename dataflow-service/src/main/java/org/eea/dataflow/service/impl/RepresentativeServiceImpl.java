@@ -800,6 +800,30 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
   /**
+   * Check restrict from public.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public boolean checkRestrictFromPublic(Long dataflowId, Long dataProviderId) throws EEAException {
+    boolean restrict = true;
+    List<RepresentativeVO> representatives = getRepresetativesByIdDataFlow(dataflowId);
+    if (null == representatives) {
+      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+    }
+    for (RepresentativeVO representative : representatives) {
+      if (representative.getDataProviderId().equals(dataProviderId)) {
+        restrict = representative.isRestrictFromPublic();
+      }
+    }
+    return restrict;
+
+  }
+
+  /**
    * Modify lead reporter permissions.
    *
    * @param email the email
@@ -882,5 +906,4 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     }
     return countryCode;
   }
-
 }
