@@ -43,14 +43,6 @@
   width: auto !important;
 }
 
-.disabledLabel {
-  color: var(--c-gray-65);
-}
-
-.restrictFromPublicNote {
-  font-style: italic;
-}
-
 .leadReportersDialog {
   @include for-phone-landscape-up {
     width: 90vw !important;
