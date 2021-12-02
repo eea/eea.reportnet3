@@ -1365,13 +1365,9 @@ const Dataflow = () => {
               </span>
             </label>
             {!dataflowState.representative.restrictFromPublic && (
-              <Fragment>
-                <br />
-                <br />
-                <div className={styles.restrictFromPublicNote}>
-                  {resourcesContext.messages['restrictFromPublicDisabledLabel']}
-                </div>
-              </Fragment>
+              <div className={styles.restrictFromPublicNote}>
+                {resourcesContext.messages['restrictFromPublicDisabledLabel']}
+              </div>
             )}
           </ConfirmDialog>
         )}
