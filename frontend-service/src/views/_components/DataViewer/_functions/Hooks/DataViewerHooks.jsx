@@ -232,22 +232,21 @@ export const useSetColumns = (
 
     const renderColumnDescription = () => {
       const columnDescription = () => {
-        if (!isNil(column.description) && column.description.length > 35) {
+        if (column.description.length > 35) {
           return `${column.description.substring(0, 35)}...`;
-        } else if (isNil(column.description) || column.description === '') {
-          return resources.messages['noDescription'];
         } else {
           return column.description;
         }
       };
-
-      return (
-        <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
-          <span>{resources.messages['description']}: </span>
-          <br />
-          <span className={styles.propertyLabel}>{columnDescription()}</span>
-        </div>
-      );
+      if (!isNil(column.description) && column.description.trim() !== '') {
+        return (
+          <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+            <span>{resources.messages['description']}: </span>
+            <br />
+            <span className={styles.propertyLabel}>{columnDescription()}</span>
+          </div>
+        );
+      }
     };
 
     const renderColumnCodeLists = () => {
@@ -318,92 +317,69 @@ export const useSetColumns = (
 
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
-    if (!isNil(field) && !isNil(field.fieldData) && !isNil(field.fieldValidations)) {
-      const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
-      const message = DataViewerUtils.formatValidations(validations);
-      const levelError = DataViewerUtils.getLevelError(validations);
 
-      return (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent:
-              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
-            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre-wrap' : 'none'
-          }}>
-          {field
-            ? Array.isArray(field.fieldData[column.field]) &&
-              !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
-                field.fieldData.type
-              )
-              ? field.fieldData[column.field].sort().join(field.fieldData.type === 'ATTACHMENT' ? ', ' : '; ')
-              : (!isNil(field.fieldData[column.field]) &&
-                  field.fieldData[column.field] !== '' &&
-                  field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (!isNil(field.fieldData[column.field]) &&
-                  (field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK'))
-              ? !Array.isArray(field.fieldData[column.field])
-                ? splitByChar(field.fieldData[column.field], ';')
-                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                    .join('; ')
-                : field.fieldData[column.field]
-                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                    .join('; ')
-              : field.fieldData.type === 'ATTACHMENT'
-              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
-              : field.fieldData.type === 'POINT'
-              ? renderPoint(field.fieldData[column.field])
-              : ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
-                  field.fieldData.type
-                )
-              ? renderComplexGeometries(field.fieldData[column.field], field.fieldData.type)
-              : field.fieldData[column.field]
-            : null}
-          <IconTooltip levelError={levelError} message={message} />
-        </div>
-      );
-    } else {
-      return (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent:
-              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
-            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre-wrap' : 'none'
-          }}>
-          {field
-            ? Array.isArray(field.fieldData[column.field]) &&
-              !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
-                field.fieldData.type
-              )
-              ? field.fieldData[column.field].join(field.fieldData.type === 'ATTACHMENT' ? ', ' : '; ')
-              : (!isNil(field.fieldData[column.field]) &&
-                  field.fieldData[column.field] !== '' &&
-                  field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (!isNil(field.fieldData[column.field]) &&
-                  (field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK'))
-              ? !Array.isArray(field.fieldData[column.field])
-                ? splitByChar(field.fieldData[column.field], ';')
-                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                    .join('; ')
-                : field.fieldData[column.field]
-                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                    .join('; ')
-              : field.fieldData.type === 'ATTACHMENT'
-              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
-              : field.fieldData.type === 'POINT'
-              ? renderPoint(field.fieldData[column.field])
-              : ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
-                  field.fieldData.type
-                )
-              ? renderComplexGeometries(field.fieldData[column.field])
-              : field.fieldData[column.field]
-            : null}
-        </div>
-      );
-    }
+    const renderField = () => {
+      if (!isNil(field)) {
+        if (
+          Array.isArray(field.fieldData[column.field]) &&
+          !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+            field.fieldData.type
+          )
+        ) {
+          return field.fieldData[column.field].sort().join(field.fieldData.type === 'ATTACHMENT' ? ', ' : '; ');
+        } else if (
+          (!isNil(field.fieldData[column.field]) &&
+            field.fieldData[column.field] !== '' &&
+            field.fieldData.type === 'MULTISELECT_CODELIST') ||
+          (!isNil(field.fieldData[column.field]) &&
+            (field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK'))
+        ) {
+          if (!Array.isArray(field.fieldData[column.field])) {
+            return splitByChar(field.fieldData[column.field], ';')
+              .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+              .join('; ');
+          } else {
+            return field.fieldData[column.field]
+              .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+              .join('; ');
+          }
+        } else if (field.fieldData.type === 'ATTACHMENT') {
+          return renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field);
+        } else if (field.fieldData.type === 'POINT') {
+          return renderPoint(field.fieldData[column.field]);
+        } else if (
+          ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(field.fieldData.type)
+        ) {
+          return renderComplexGeometries(field.fieldData[column.field], field.fieldData.type);
+        } else {
+          return field.fieldData[column.field];
+        }
+      }
+    };
+
+    const renderFieldValidations = () => {
+      if (!isNil(field) && !isNil(field.fieldData) && !isNil(field.fieldValidations)) {
+        const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
+        const message = DataViewerUtils.formatValidations(validations);
+        const levelError = DataViewerUtils.getLevelError(validations);
+
+        return <IconTooltip levelError={levelError} message={message} />;
+      }
+    };
+
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent:
+            field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
+          whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre-wrap' : 'none'
+        }}>
+        {renderField()}
+        {renderFieldValidations()}
+      </div>
+    );
   };
 
   useEffect(() => {

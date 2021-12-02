@@ -738,6 +738,7 @@ export const Dataset = ({ isReferenceDataset }) => {
               readOnly: field['readOnly'],
               recordId: field['recordId'],
               referencedField: field['referencedField'],
+              required: field['required'],
               table: table['tableSchemaName'],
               type: field['type'],
               validExtensions: field['validExtensions']
