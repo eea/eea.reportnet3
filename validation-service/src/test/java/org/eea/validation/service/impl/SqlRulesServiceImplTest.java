@@ -771,7 +771,7 @@ public class SqlRulesServiceImplTest {
     Mockito.verify(datasetRepository, Mockito.times(1)).runSqlRule(Mockito.any(), Mockito.any());
   }
 
-  @Test
+  @Test(expected = EEAInvalidSQLException.class)
   public void runSQLRuleInvalidSQLExceptionTest() throws EEAException {
 
     String sqlRule = "WRONG SQL RULE";
@@ -787,10 +787,11 @@ public class SqlRulesServiceImplTest {
       sqlRulesServiceImpl.runSqlRule(1L, sqlRule);
     } catch (EEAInvalidSQLException e) {
       assertEquals("Couldn't execute the SQL Rule: " + sqlRule, e.getMessage());
+      throw e;
     }
   }
 
-  @Test
+  @Test(expected = EEAForbiddenSQLCommandException.class)
   public void runSQLRuleForbiddenSQLCommandExceptionTest() throws EEAException {
 
     String sqlRule = "DELETE * from dataset_1.table_value";
@@ -804,6 +805,7 @@ public class SqlRulesServiceImplTest {
       sqlRulesServiceImpl.runSqlRule(1L, sqlRule);
     } catch (EEAForbiddenSQLCommandException e) {
       assertEquals("SQL Command not allowed in SQL Rule: " + sqlRule, e.getMessage());
+      throw e;
     }
   }
 }
