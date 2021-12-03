@@ -1,3 +1,5 @@
+@import '_styles/mixins';
+
 body .p-component {
   font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
   font-size: 14px;
@@ -3221,4 +3223,8 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
   position: relative;
   background-color: var(--chart-bg);
   color: var(--chart-color);
+}
+
+.responsiveDialog {
+  @include responsiveDialog;
 }

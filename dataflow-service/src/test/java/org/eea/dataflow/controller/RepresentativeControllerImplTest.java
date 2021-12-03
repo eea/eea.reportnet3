@@ -583,9 +583,32 @@ public class RepresentativeControllerImplTest {
   }
 
   @Test
-  public void updateRestrictFromPublicTest() {
+  public void updateRestrictFromPublicTest() throws EEAException {
+    Mockito.when(representativeService.checkRestrictFromPublic(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(true);
     representativeControllerImpl.updateRestrictFromPublic(1L, 1L, true);
     Mockito.verify(representativeService, times(1)).updateRepresentativeVisibilityRestrictions(
         Mockito.anyLong(), Mockito.anyLong(), Mockito.anyBoolean());
+  }
+
+  @Test
+  public void updateRestrictFromPublicFalseTest() throws EEAException {
+    Mockito.when(representativeService.checkRestrictFromPublic(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(false);
+    representativeControllerImpl.updateRestrictFromPublic(1L, 1L, true);
+    Mockito.verify(representativeService, times(1)).checkRestrictFromPublic(Mockito.anyLong(),
+        Mockito.anyLong());
+  }
+
+  @Test
+  public void updateRestrictFromPublicExceptionTest() throws EEAException {
+    try {
+      Mockito.doThrow(new EEAException()).when(representativeService)
+          .checkRestrictFromPublic(Mockito.anyLong(), Mockito.any());
+      representativeControllerImpl.updateRestrictFromPublic(1L, 1L, true);
+    } catch (EEAException e) {
+      assertEquals(e.getMessage(), EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+      throw e;
+    }
   }
 }

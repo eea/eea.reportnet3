@@ -13,8 +13,8 @@ export const NationalSystemsRecord = ({ dataProviderId, dataflowId, datasetId, g
       return (
         <Fragment key={uniqueId()}>
           <NationalSystemsField
-            dataProviderId={dataProviderId}
             dataflowId={dataflowId}
+            dataProviderId={dataProviderId}
             datasetId={datasetId}
             getTableErrors={getTableErrors}
             nationalField={name}

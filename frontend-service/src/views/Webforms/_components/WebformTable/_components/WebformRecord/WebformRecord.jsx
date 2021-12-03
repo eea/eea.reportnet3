@@ -247,8 +247,8 @@ export const WebformRecord = ({
                   ) : (
                     <WebformField
                       columnsSchema={columnsSchema}
-                      dataProviderId={dataProviderId}
                       dataflowId={dataflowId}
+                      dataProviderId={dataProviderId}
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
                       element={element}
@@ -363,8 +363,8 @@ export const WebformRecord = ({
                         addingOnTableSchemaId={addingOnTableSchemaId}
                         calculateSingle={calculateSingle}
                         columnsSchema={columnsSchema}
-                        dataProviderId={dataProviderId}
                         dataflowId={dataflowId}
+                        dataProviderId={dataProviderId}
                         datasetId={datasetId}
                         datasetSchemaId={datasetSchemaId}
                         isAddingMultiple={isAddingMultiple}
