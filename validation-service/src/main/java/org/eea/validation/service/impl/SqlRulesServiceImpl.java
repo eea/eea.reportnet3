@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -32,6 +34,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.validation.exception.EEAForbiddenSQLCommandException;
 import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -67,7 +70,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant KEYWORDS: {@value}. */
-  private static final String KEYWORDS = "DELETE,INSERT,DROP";
+  private static final String KEYWORDS = "DELETE,INSERT,DROP,UPDATE,TRUNCATE";
 
   /** The dataset repository. */
   @Autowired
@@ -104,6 +107,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /** The test dataset controller zuul. */
   @Autowired
   private TestDatasetControllerZuul testDatasetControllerZuul;
+
+  /** The entity manager. */
+  @PersistenceContext
+  private EntityManager entityManager;
 
   /** The dataflow controller. */
   @Autowired
@@ -333,6 +340,52 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         releaseNotification(EventType.VALIDATE_RULES_COMPLETED_EVENT, notificationVO);
       }
     }
+  }
+
+  /**
+   * Run SQL rule with limited results.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be run
+   * @return the string formatted as JSON
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public String runSqlRule(Long datasetId, String sqlRule) throws EEAException {
+
+    StringBuilder sb = new StringBuilder("");
+    String result = "";
+    DataSetMetabaseVO dataSetMetabaseVO =
+        datasetMetabaseController.findDatasetMetabaseById(datasetId);
+
+    if (checkQuerySyntax(sqlRule)) {
+      List<String> ids = getListOfDatasetsOnQuery(sqlRule);
+      checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
+      if (!ids.isEmpty()) {
+        checkDatasetFromReferenceDataflow(ids);
+      }
+
+      try {
+        if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
+          throw new EEAException();
+        } else {
+          sb.append(
+              "select cast(json_agg(row_to_json(table_aux)) as text) as result FROM (SELECT * FROM (");
+          sb.append(sqlRule);
+          sb.append(") as userSelect OFFSET 0 LIMIT 10) as table_aux");
+          result = datasetRepository.runSqlRule(datasetId, sb.toString());
+        }
+      } catch (EEAInvalidSQLException e) {
+        throw new EEAInvalidSQLException("Couldn't execute the SQL Rule: " + sqlRule);
+      } catch (EEAException e) {
+        throw new EEAException(
+            "User doesn't have access to one of the datasets: " + ids.toString());
+      }
+    } else {
+      throw new EEAForbiddenSQLCommandException("SQL Command not allowed in SQL Rule: " + sqlRule);
+    }
+
+    return result;
   }
 
   /**

@@ -23,6 +23,8 @@ import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.validation.exception.EEAForbiddenSQLCommandException;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
@@ -45,9 +47,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 /**
  * The Class RulesControllerImpl.
@@ -814,5 +818,48 @@ public class RulesControllerImpl implements RulesController {
           "Trying to download a file generated during the export QC Rules process but the file is not found, datasetID: %s + filename: %s + message: %s ",
           datasetId, fileName, e.getMessage()), e);
     }
+  }
+
+  /**
+   * Run SQL rule with limited results.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be run
+   * @return the string formatted as JSON
+   */
+  @Override
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+      name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Runs a SQL rule obtaining a limited amount of records", hidden = true)
+  @ApiResponses(value = {
+      @ApiResponse(code = 400,
+          message = "There was an error trying to execute the SQL Rule. Check your SQL Syntax."),
+      @ApiResponse(code = 401, message = "The user doesn't have access to one of the datasets"),
+      @ApiResponse(code = 422, message = "Forbidden command used in the SQL sentence.")})
+  public String runSqlRule(
+      @ApiParam(value = "Dataset id used on the validation process",
+          example = "1") @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "SQL rule that is going to be executed") @RequestParam String sqlRule) {
+    String obtainedTableValues = "";
+    try {
+      obtainedTableValues = sqlRulesService.runSqlRule(datasetId, sqlRule);
+
+    } catch (EEAInvalidSQLException e) {
+      LOG_ERROR.error(
+          "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.", sqlRule,
+          e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    } catch (EEAForbiddenSQLCommandException e) {
+      LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}", sqlRule,
+          e.getMessage());
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+    } catch (EEAException e) {
+      LOG_ERROR.error("User doesn't have access to one of the datasets: ", e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+    }
+
+    return obtainedTableValues;
   }
 }
