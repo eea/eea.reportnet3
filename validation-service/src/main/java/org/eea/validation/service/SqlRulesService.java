@@ -1,5 +1,6 @@
 package org.eea.validation.service;
 
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.exception.EEAInvalidSQLException;
@@ -60,4 +61,14 @@ public interface SqlRulesService {
    * @param showNotification the show notification
    */
   void validateSQLRules(Long datasetId, String datasetSchemaId, Boolean showNotification);
+
+  /**
+   * Run SQL rule with limited results.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be run
+   * @return the string formatted as JSON
+   * @throws EEAException the EEA exception
+   */
+  String runSqlRule(Long datasetId, String sqlRule) throws EEAException;
 }
