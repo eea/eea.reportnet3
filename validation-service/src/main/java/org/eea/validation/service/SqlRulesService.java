@@ -70,5 +70,5 @@ public interface SqlRulesService {
    * @return the string formatted as JSON
    * @throws EEAException the EEA exception
    */
-  String runSqlRule(Long datasetId, String sqlRule) throws EEAException;
+  String runSqlRule(Long datasetId, String sqlRule, boolean runSQL) throws EEAException;
 }

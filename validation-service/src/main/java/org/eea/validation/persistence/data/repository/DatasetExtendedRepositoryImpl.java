@@ -376,7 +376,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
    */
   @Override
   @Transactional
-  public String runSqlRule(Long datasetId, String sqlRule) throws EEAInvalidSQLException {
+  public String runSqlRule(Long datasetId, String sqlRule, boolean runSQL)
+      throws EEAInvalidSQLException {
 
     String result = "";
 
@@ -390,7 +391,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
           try (PreparedStatement stmt = conn.prepareStatement(sqlRule);
               ResultSet rs = stmt.executeQuery();) {
             while (rs.next()) {
-              resultObject = rs.getString("result");
+              resultObject = runSQL ? rs.getString("result") : rs.getString(1);
             }
             LOG.info("executing query: {}", sqlRule);
             return resultObject;

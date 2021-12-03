@@ -28,6 +28,10 @@ import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -839,12 +843,12 @@ public class RulesControllerImpl implements RulesController {
       @ApiResponse(code = 401, message = "The user doesn't have access to one of the datasets"),
       @ApiResponse(code = 422, message = "Forbidden command used in the SQL sentence.")})
   public String runSqlRule(
-      @ApiParam(value = "Dataset id used on the validation process",
+      @ApiParam(value = "Dataset id used on the run process",
           example = "1") @RequestParam("datasetId") Long datasetId,
       @ApiParam(value = "SQL rule that is going to be executed") @RequestParam String sqlRule) {
     String obtainedTableValues = "";
     try {
-      obtainedTableValues = sqlRulesService.runSqlRule(datasetId, sqlRule);
+      obtainedTableValues = sqlRulesService.runSqlRule(datasetId, sqlRule, true);
 
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error(
@@ -861,5 +865,61 @@ public class RulesControllerImpl implements RulesController {
     }
 
     return obtainedTableValues;
+  }
+
+
+  /**
+   * Evaluate sql rule.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule
+   * @return the string containing the SQL total cost
+   */
+  @Override
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+      name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PostMapping(value = "/evaluateSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Evaluates an SQL Rule obtaining its cost from its explain plan.",
+      hidden = false)
+  @ApiResponses(value = {@ApiResponse(code = 400,
+      message = "There was an error trying to execute the SQL Rule or the explain plan. Check your SQL Syntax."),
+      @ApiResponse(code = 401, message = "The user doesn't have access to one of the datasets"),
+      @ApiResponse(code = 422, message = "Forbidden command used in the SQL sentence.")})
+  public String evaluateSqlRule(
+      @ApiParam(value = "Dataset id used on the evaluation process",
+          example = "1") @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "SQL rule that is going to be evaluated") @RequestParam String sqlRule) {
+    String sqlCost = "";
+    try {
+      String result = sqlRulesService.runSqlRule(datasetId, sqlRule, false);
+      JSONParser parser = new JSONParser();
+      JSONArray jsonArray = (JSONArray) parser.parse(result);
+      JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+      JSONObject plan = (JSONObject) jsonObject.get("Plan");
+      sqlCost = String.valueOf(plan.get("Total Cost"));
+
+    } catch (ParseException e) {
+      LOG_ERROR.error("There was an error trying to parse the explain plan: {}", sqlRule, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+
+    } catch (EEAInvalidSQLException e) {
+      LOG_ERROR.error(
+          "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.", sqlRule,
+          e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    } catch (EEAForbiddenSQLCommandException e) {
+      LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}", sqlRule,
+          e.getMessage());
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+    } catch (EEAException e) {
+      LOG_ERROR.error("User doesn't have access to one of the datasets: ", e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+    } catch (StringIndexOutOfBoundsException e) {
+      LOG_ERROR.error("SQL sentence has wrong format, please check: {}", sqlRule, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+
+    return sqlCost;
   }
 }

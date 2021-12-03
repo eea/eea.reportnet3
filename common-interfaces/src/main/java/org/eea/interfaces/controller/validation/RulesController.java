@@ -409,4 +409,15 @@ public interface RulesController {
   String runSqlRule(@RequestParam("datasetId") Long datasetId, @RequestParam String sqlRule);
 
 
+  /**
+   * Evaluates the sql rule and returns its total cost using the query plan.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule
+   * @return the string containing the SQL total cost
+   */
+  @PostMapping(value = "/evaluateSqlRule")
+  String evaluateSqlRule(@RequestParam("datasetId") Long datasetId, @RequestParam String sqlRule);
+
+
 }
