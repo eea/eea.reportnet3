@@ -881,7 +881,7 @@ public class RulesControllerImpl implements RulesController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PostMapping(value = "/evaluateSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Evaluates an SQL Rule obtaining its cost from its explain plan.",
-      hidden = false)
+      hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400,
       message = "There was an error trying to execute the SQL Rule or the explain plan. Check your SQL Syntax."),
       @ApiResponse(code = 401, message = "The user doesn't have access to one of the datasets"),
