@@ -60,4 +60,14 @@ public interface DatasetExtendedRepository {
    */
   void validateQuery(String query, Long datasetId) throws EEAInvalidSQLException;
 
+  /**
+   * Run sql rule.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule
+   * @return the string formatted as JSON
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
+   */
+  String runSqlRule(Long datasetId, String sqlRule) throws EEAInvalidSQLException;
+
 }

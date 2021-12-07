@@ -181,6 +181,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (dataflow == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
+
+    Representative repre =
+        representativeRepository.findOneByDataflow_IdAndDataProvider_Id(dataflowId, dataProviderId);
+    if (repre != null) {
+      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
+    }
+
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(dataProviderId);
     Representative representative = representativeMapper.classToEntity(representativeVO);

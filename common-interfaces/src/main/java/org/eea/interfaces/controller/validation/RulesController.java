@@ -398,4 +398,15 @@ public interface RulesController {
   void downloadQCCSV(@PathVariable Long datasetId, @RequestParam String fileName,
       HttpServletResponse response);
 
+  /**
+   * Run SQL rule with limited results.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be run
+   * @return the string formatted as JSON
+   */
+  @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  String runSqlRule(@RequestParam("datasetId") Long datasetId, @RequestParam String sqlRule);
+
+
 }
