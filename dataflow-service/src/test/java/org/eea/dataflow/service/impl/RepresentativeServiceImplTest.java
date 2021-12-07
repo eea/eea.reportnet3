@@ -1,7 +1,9 @@
 package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -29,6 +31,7 @@ import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -37,6 +40,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.EeaUserDetails;
@@ -97,6 +101,9 @@ public class RepresentativeServiceImplTest {
 
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseController;
+
+  @Mock
+  private DataSetSnapshotControllerZuul datasetSnapshotController;
 
   private Representative representative;
 
@@ -702,6 +709,53 @@ public class RepresentativeServiceImplTest {
     representativeServiceImpl.checkRestrictFromPublic(1L, 1L);
     assertEquals(representativeServiceImpl.checkRestrictFromPublic(1L, 1L),
         representative.isRestrictFromPublic());
+  }
+
+  @Test
+  public void checkIfDataHaveBeenReleaseTest() throws EEAException {
+    List<ReportingDatasetVO> reportings = new ArrayList<>();
+    ReportingDatasetVO reporting = new ReportingDatasetVO();
+    reporting.setId(1L);
+    reporting.setDataProviderId(1L);
+    reporting.setIsReleased(true);
+    reportings.add(reporting);
+    List<SnapshotVO> snapshots = new ArrayList<>();
+    SnapshotVO snapshot = new SnapshotVO();
+    snapshot.setId(1L);
+    snapshots.add(snapshot);
+    Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong()))
+        .thenReturn(reportings);
+    Mockito.when(datasetSnapshotController.getSnapshotsByIdDataset(Mockito.anyLong()))
+        .thenReturn(snapshots);
+    assertTrue(representativeServiceImpl.checkDataHaveBeenRelease(1L, 1L));
+  }
+
+  @Test(expected = EEAException.class)
+  public void checkIfDataHaveBeenReleaseExceptionTest() throws EEAException {
+    try {
+      Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong()))
+          .thenReturn(null);
+      representativeServiceImpl.checkDataHaveBeenRelease(1L, 1L);
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test
+  public void checkIfDataHaveBeenReleaseFalseTest() throws EEAException {
+    List<ReportingDatasetVO> reportings = new ArrayList<>();
+    ReportingDatasetVO reporting = new ReportingDatasetVO();
+    reporting.setId(1L);
+    reporting.setDataProviderId(1L);
+    reporting.setIsReleased(true);
+    reportings.add(reporting);
+    List<SnapshotVO> snapshots = new ArrayList<>();
+    Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong()))
+        .thenReturn(reportings);
+    Mockito.when(datasetSnapshotController.getSnapshotsByIdDataset(Mockito.anyLong()))
+        .thenReturn(snapshots);
+    assertFalse(representativeServiceImpl.checkDataHaveBeenRelease(1L, 1L));
   }
 
 }

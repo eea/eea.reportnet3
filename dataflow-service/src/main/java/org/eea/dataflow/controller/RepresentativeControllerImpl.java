@@ -636,7 +636,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
           defaultValue = "false") @RequestParam(value = "restrictFromPublic", required = true,
               defaultValue = "true") Boolean restrictFromPublic) {
     try {
-      if (representativeService.checkRestrictFromPublic(dataflowId, dataProviderId)) {
+      if (representativeService.checkDataHaveBeenRelease(dataflowId, dataProviderId)
+          && representativeService.checkRestrictFromPublic(dataflowId, dataProviderId)
+          && representativeService.checkLastReleaseBeforeActual(dataflowId, dataProviderId)) {
         representativeService.updateRepresentativeVisibilityRestrictions(dataflowId, dataProviderId,
             restrictFromPublic);
       } else {

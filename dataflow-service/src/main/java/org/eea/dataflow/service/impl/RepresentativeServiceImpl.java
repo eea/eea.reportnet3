@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
@@ -137,6 +139,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  @Autowired
+  private DataSetSnapshotControllerZuul datasetSnapshotController;
+
   /**
    * The delimiter.
    */
@@ -240,6 +245,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /**
    * Gets the all data provider types.
    *
+   * @param providerType the provider type
    * @return the all data provider types
    */
   @Override
@@ -682,6 +688,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    * Validate lead reporters.
    *
    * @param dataflowId the dataflow id
+   * @param sendNotification the send notification
    * @throws EEAException the EEA exception
    */
   @Transactional
@@ -820,7 +827,59 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
     }
     return restrict;
+  }
 
+  /**
+   * Check if data have been release.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public boolean checkDataHaveBeenRelease(Long dataflowId, Long dataProviderId)
+      throws EEAException {
+    boolean isReleased = true;
+    List<ReportingDatasetVO> reportings =
+        datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
+    if (null == reportings) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    for (ReportingDatasetVO reporting : reportings) {
+      if (reporting.getDataProviderId().equals(dataProviderId)
+          && (Boolean.FALSE.equals(reporting.getIsReleased())
+              || reporting.getIsReleased() == null)) {
+        isReleased = false;
+      }
+    }
+    return isReleased;
+  }
+
+  /**
+   * Check last release.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  public boolean checkLastReleaseBeforeActual(Long dataflowId, Long dataProviderId)
+      throws EEAException {
+    boolean isLastReleaseBeforeActual = false;
+    List<ReportingDatasetVO> reportings =
+        datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
+    if (null == reportings) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    for (ReportingDatasetVO reporting : reportings) {
+      if (reporting.getDataProviderId().equals(dataProviderId)) {
+        if (reporting.getDateReleased().before(new Date())) {
+          isLastReleaseBeforeActual = true;
+        }
+      }
+    }
+    return isLastReleaseBeforeActual;
   }
 
   /**
@@ -906,4 +965,5 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     }
     return countryCode;
   }
+
 }
