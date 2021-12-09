@@ -33,6 +33,8 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.validation.exception.EEAForbiddenSQLCommandException;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.data.domain.FieldValidation;
 import org.eea.validation.persistence.data.domain.FieldValue;
@@ -752,5 +754,93 @@ public class SqlRulesServiceImplTest {
 
     sqlRulesServiceImpl.validateSQLRules(1L, "5ce524fad31fc52540abae73", true);
     Mockito.verify(rulesRepository, Mockito.times(1)).updateRule(Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void runSQLRuleTest() throws EEAException {
+
+    String sqlRule = "SELECT * from dataset_1.table_value";
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
+
+    sqlRulesServiceImpl.runSqlRule(1L, sqlRule);
+
+    Mockito.verify(datasetRepository, Mockito.times(1)).runSqlRule(1L,
+        "SELECT * FROM (SELECT * from dataset_1.table_value) as userSelect OFFSET 0 LIMIT 10");
+  }
+
+  @Test(expected = EEAInvalidSQLException.class)
+  public void runSQLRuleInvalidSQLExceptionTest() throws EEAException {
+
+    String sqlRule = "WRONG SQL RULE";
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
+    Mockito.when(sqlRulesServiceImpl.runSqlRule(datasetId, sqlRule))
+        .thenThrow(new EEAInvalidSQLException());
+
+    try {
+      sqlRulesServiceImpl.runSqlRule(1L, sqlRule);
+    } catch (EEAInvalidSQLException e) {
+      assertEquals("Couldn't execute the SQL Rule: " + sqlRule, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAForbiddenSQLCommandException.class)
+  public void runSQLRuleForbiddenSQLCommandExceptionTest() throws EEAException {
+
+    String sqlRule = "DELETE * from dataset_1.table_value WHERE VALUE > 5";
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
+
+    try {
+      sqlRulesServiceImpl.runSqlRule(1L, sqlRule);
+    } catch (EEAForbiddenSQLCommandException e) {
+      assertEquals("SQL Command not allowed in SQL Rule: " + sqlRule, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void evaluateSQLRuleTest() throws EEAException {
+
+    String sqlRule = "SELECT * FROM dataset_1.table_value";
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
+
+    sqlRulesServiceImpl.evaluateSqlRule(1L, sqlRule);
+
+    Mockito.verify(datasetRepository, Mockito.times(1)).evaluateSqlRule(1L,
+        "EXPLAIN (FORMAT JSON) SELECT * FROM dataset_1.table_value");
+  }
+
+  @Test(expected = StringIndexOutOfBoundsException.class)
+  public void evaluateSQLStringIndexOutOfBoundsExceptionExceptionTest() throws EEAException {
+
+    String sqlRule = "SELECT * from dataset_1";
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
+
+    try {
+      sqlRulesServiceImpl.runSqlRule(1L, sqlRule);
+    } catch (StringIndexOutOfBoundsException e) {
+      assertEquals("SQL sentence has wrong format, please check: " + sqlRule, e.getMessage());
+      throw e;
+    }
   }
 }

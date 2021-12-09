@@ -101,7 +101,9 @@ public class KieBaseManager {
           .filter(rule -> !rule.getWhenCondition().startsWith("isSQL"))
           .collect(Collectors.toList());
     } else {
-      filteredRules.add(sqlRule);
+      if (sqlRule.isEnabled()) {
+        filteredRules.add(sqlRule);
+      }
       schemaRules = new RulesSchema();
     }
     schemaRules.setRules(filteredRules);
@@ -110,7 +112,7 @@ public class KieBaseManager {
     // we bring the datasetschema
     DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(datasetSchemaOId);
 
-    // here we have the mothod who compose the field in template
+    // here we have the method who compose the field in template
     if (null != schemaRules.getRules() && !schemaRules.getRules().isEmpty()) {
       schemaRules.getRules().stream().forEach(rule -> {
         String schemasDrools = "";

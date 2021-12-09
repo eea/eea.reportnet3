@@ -15,6 +15,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
@@ -584,6 +585,8 @@ public class RepresentativeControllerImplTest {
 
   @Test
   public void updateRestrictFromPublicTest() throws EEAException {
+    Mockito.when(representativeService.checkDataHaveBeenRelease(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(true);
     Mockito.when(representativeService.checkRestrictFromPublic(Mockito.anyLong(), Mockito.any()))
         .thenReturn(true);
     representativeControllerImpl.updateRestrictFromPublic(1L, 1L, true);
@@ -593,6 +596,8 @@ public class RepresentativeControllerImplTest {
 
   @Test
   public void updateRestrictFromPublicFalseTest() throws EEAException {
+    Mockito.when(representativeService.checkDataHaveBeenRelease(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(true);
     Mockito.when(representativeService.checkRestrictFromPublic(Mockito.anyLong(), Mockito.any()))
         .thenReturn(false);
     representativeControllerImpl.updateRestrictFromPublic(1L, 1L, true);
@@ -604,11 +609,54 @@ public class RepresentativeControllerImplTest {
   public void updateRestrictFromPublicExceptionTest() throws EEAException {
     try {
       Mockito.doThrow(new EEAException()).when(representativeService)
-          .checkRestrictFromPublic(Mockito.anyLong(), Mockito.any());
+          .checkDataHaveBeenRelease(Mockito.anyLong(), Mockito.any());
       representativeControllerImpl.updateRestrictFromPublic(1L, 1L, true);
     } catch (EEAException e) {
       assertEquals(e.getMessage(), EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
       throw e;
     }
+  }
+
+  @Test
+  public void findAllDataProviderCompanyTypeTest() {
+    List<DataProviderCodeVO> dataProviders = new ArrayList<>();
+    DataProviderCodeVO dataProviderCodeVO = new DataProviderCodeVO();
+    dataProviderCodeVO.setDataProviderGroupId(1L);
+    dataProviderCodeVO.setLabel("LABEL");
+    Mockito.when(representativeService.getDataProviderGroupByType(Mockito.any()))
+        .thenReturn(dataProviders);
+    assertEquals(dataProviders, representativeControllerImpl.findAllDataProviderCompanyType());
+  }
+
+  @Test
+  public void findAllDataProviderOrganizationTypeTest() {
+    List<DataProviderCodeVO> dataProviders = new ArrayList<>();
+    DataProviderCodeVO dataProviderCodeVO = new DataProviderCodeVO();
+    dataProviderCodeVO.setDataProviderGroupId(1L);
+    dataProviderCodeVO.setLabel("LABEL");
+    Mockito.when(representativeService.getDataProviderGroupByType(Mockito.any()))
+        .thenReturn(dataProviders);
+    assertEquals(dataProviders, representativeControllerImpl.findAllDataProviderOrganizationType());
+  }
+
+  @Test
+  public void findAllDataProviderCountryTypeTest() {
+    List<DataProviderCodeVO> dataProviders = new ArrayList<>();
+    DataProviderCodeVO dataProviderCodeVO = new DataProviderCodeVO();
+    dataProviderCodeVO.setDataProviderGroupId(1L);
+    dataProviderCodeVO.setLabel("LABEL");
+    Mockito.when(representativeService.getDataProviderGroupByType(Mockito.any()))
+        .thenReturn(dataProviders);
+    assertEquals(dataProviders, representativeControllerImpl.findAllDataProviderCountryType());
+  }
+
+  @Test
+  public void findFmeUsersTest() {
+    FMEUserVO user = new FMEUserVO();
+    user.setId(1L);
+    List<FMEUserVO> users = new ArrayList<>();
+    users.add(user);
+    Mockito.when(representativeService.findFmeUsers()).thenReturn(users);
+    assertEquals(users, representativeControllerImpl.findFmeUsers());
   }
 }

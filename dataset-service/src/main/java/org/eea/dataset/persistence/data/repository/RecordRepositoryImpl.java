@@ -511,7 +511,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     List<String> illegalwords = Arrays.asList(RESERVED_SQL_WORDS);
     boolean isAllowed = false;
     if (null != text && !text.isEmpty()) {
-      if (illegalwords.contains(text.toUpperCase())) {
+      if (!illegalwords.contains(text.toUpperCase())) {
         isAllowed = true;
       } else {
         LOG_ERROR.error("Param {} is illegal.", text);

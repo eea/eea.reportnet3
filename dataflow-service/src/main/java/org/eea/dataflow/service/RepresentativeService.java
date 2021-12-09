@@ -223,4 +223,13 @@ public interface RepresentativeService {
    */
   boolean checkRestrictFromPublic(Long dataflowId, Long dataProviderId) throws EEAException;
 
+  /**
+   * Check if data have been release.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  boolean checkDataHaveBeenRelease(Long dataflowId, Long dataProviderId) throws EEAException;
 }

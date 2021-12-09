@@ -247,6 +247,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /**
    * Gets the all data provider types.
    *
+   * @param providerType the provider type
    * @return the all data provider types
    */
   @Override
@@ -689,6 +690,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    * Validate lead reporters.
    *
    * @param dataflowId the dataflow id
+   * @param sendNotification the send notification
    * @throws EEAException the EEA exception
    */
   @Transactional
@@ -827,7 +829,33 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
     }
     return restrict;
+  }
 
+  /**
+   * Check if data have been release.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public boolean checkDataHaveBeenRelease(Long dataflowId, Long dataProviderId)
+      throws EEAException {
+    boolean isReleased = true;
+    List<ReportingDatasetVO> reportings =
+        datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
+    if (null == reportings) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    for (ReportingDatasetVO reporting : reportings) {
+      if (reporting.getDataProviderId().equals(dataProviderId)
+          && (Boolean.FALSE.equals(reporting.getIsReleased())
+              || reporting.getIsReleased() == null)) {
+        isReleased = false;
+      }
+    }
+    return isReleased;
   }
 
   /**
@@ -913,4 +941,5 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     }
     return countryCode;
   }
+
 }

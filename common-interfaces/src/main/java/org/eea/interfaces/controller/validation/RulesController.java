@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
@@ -397,5 +398,27 @@ public interface RulesController {
   @GetMapping("/downloadQC/{datasetId}")
   void downloadQCCSV(@PathVariable Long datasetId, @RequestParam String fileName,
       HttpServletResponse response);
+
+  /**
+   * Run SQL rule with limited results.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be run
+   * @return the string formatted as JSON
+   */
+  @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ValueVO> runSqlRule(@RequestParam("datasetId") Long datasetId, @RequestParam String sqlRule);
+
+
+  /**
+   * Evaluates the sql rule and returns its total cost using the query plan.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule
+   * @return the string containing the SQL total cost
+   */
+  @PostMapping(value = "/evaluateSqlRule")
+  String evaluateSqlRule(@RequestParam("datasetId") Long datasetId, @RequestParam String sqlRule);
+
 
 }
