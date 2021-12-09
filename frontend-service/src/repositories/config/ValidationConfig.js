@@ -7,5 +7,6 @@ export const ValidationConfig = {
   generateShowValidationsFile: '/validation/export/{:datasetId}',
   getAll: '/rules/{:datasetSchemaId}/dataflow/{:dataflowId}',
   update: '/rules/updateRule?datasetId={:datasetId}',
-  updateAutomatic: '/rules/updateAutomaticRule/{:datasetId}'
+  updateAutomatic: '/rules/updateAutomaticRule/{:datasetId}',
+  validateSqlSentence: 'rules/evaluateSqlRule'
 };

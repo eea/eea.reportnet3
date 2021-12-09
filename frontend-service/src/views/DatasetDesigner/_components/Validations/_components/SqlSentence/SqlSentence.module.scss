@@ -48,6 +48,15 @@
           padding: 0.37rem 0.45rem;
           float: right;
         }
+        .sqlCalculated {
+          border: 1px solid var(--c-custom-gray) !important;
+          float: right;
+          margin-top: -0.9em;
+          margin-left: 0.4rem !important;
+          span:first-child {
+            font-size: 1.1rem !important;
+          }
+        }
       }
       textarea {
         flex: auto;
