@@ -217,12 +217,12 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
       switch (nestedOption?.category) {
         case 'LEVEL_ERROR':
           if (!isNil(optionMultiSelect.type)) {
-            return <LevelError type={optionMultiSelect.type} value={optionMultiSelect.value} />;
+            return <LevelError type={optionMultiSelect.type} />;
           }
           break;
 
         default:
-          return <LevelError type={''} value={optionMultiSelect.value} />;
+          return <span className={`${styles.statusBox}`}>{optionMultiSelect.value.toString().toUpperCase()}</span>;
       }
     };
 
