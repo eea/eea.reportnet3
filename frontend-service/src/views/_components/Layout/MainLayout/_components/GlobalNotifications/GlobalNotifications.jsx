@@ -281,20 +281,17 @@ const GlobalNotifications = () => {
       dataset: { name: datasetName }
     } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
-    notificationContext.add(
-      {
-        type: 'VALIDATE_DATA_INIT',
-        content: {
-          customContent: { origin: 'DESIGN' },
-          dataflowId,
-          dataflowName,
-          datasetId,
-          datasetName,
-          type: 'DESIGN'
-        }
-      },
-      true
-    );
+    notificationContext.add({
+      type: 'VALIDATE_DATA_INIT',
+      content: {
+        customContent: { origin: 'DESIGN' },
+        dataflowId,
+        dataflowName,
+        datasetId,
+        datasetName,
+        type: 'DESIGN'
+      }
+    });
   };
 
   useCheckNotifications(
