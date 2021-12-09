@@ -391,7 +391,6 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
               ResultSet rs = stmt.executeQuery();) {
             while (rs.next()) {
               ValueVO valueToAdd = new ValueVO();
-              // valueToAdd.setValue(rs.getString(rs.findColumn("number")));
               values.add(valueToAdd);
             }
             LOG.info("executing query: {}", sqlRule);
