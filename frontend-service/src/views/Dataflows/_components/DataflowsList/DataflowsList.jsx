@@ -322,6 +322,17 @@ const DataflowsList = ({ className, content = {}, isAdmin, isCustodian, isLoadin
           />
         )} */}
 
+        {/* {visibleTab === 'reporting' && (
+          <Filters
+            className={'dataflowsListFilters'}
+            data={dataToFilter['reporting']}
+            getFilteredData={onLoadFilteredData}
+            options={filterOptions['reporting'].filter(Boolean)}
+            sortable={true}
+            sortCategory={'pinned'}
+          />
+        )} */}
+
         {visibleTab === 'business' && (
           <Filters
             className={'dataflowsListFilters'}
