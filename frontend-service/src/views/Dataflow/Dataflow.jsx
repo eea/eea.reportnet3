@@ -221,6 +221,10 @@ const Dataflow = () => {
       : uniqDataProviders[0]
     : null;
 
+  const isReleased =
+    !isNil(dataflowState.data.datasets) &&
+    dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
+
   useEffect(() => {
     if (!Number(dataflowId)) {
       window.location.href = '/dataflows/error/loadDataflowData';
@@ -314,7 +318,8 @@ const Dataflow = () => {
       manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
-      restrictFromPublicBtn: isLeadReporterOfCountry && dataflowState.showPublicInfo && !isBusinessDataflow,
+      restrictFromPublicBtn:
+        isLeadReporterOfCountry && dataflowState.showPublicInfo && isReleased && !isBusinessDataflow,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
         isLeadReporterOfCountry || isNationalCoordinatorOfCountry || isReporterOfCountry || isLeadDesigner || isObserver
