@@ -236,7 +236,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
         id={options.key}
         inputClassName={`p-float-label ${styles.label}`}
         inputId={`${options.key}_input`}
-        //isFilter
+        isFilter
         itemTemplate={op => selectTemplate(op, option)}
         key={option.key}
         label={option.label || ''}
