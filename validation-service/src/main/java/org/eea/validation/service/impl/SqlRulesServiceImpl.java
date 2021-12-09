@@ -352,8 +352,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<ValueVO> runSqlRule(Long datasetId, String sqlRule, boolean runSQL)
-      throws EEAException {
+  public List<ValueVO> runSqlRule(Long datasetId, String sqlRule) throws EEAException {
 
     StringBuilder sb = new StringBuilder("");
     List<ValueVO> result = new ArrayList<>();

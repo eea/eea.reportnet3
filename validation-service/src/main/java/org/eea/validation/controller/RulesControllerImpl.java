@@ -850,7 +850,7 @@ public class RulesControllerImpl implements RulesController {
       @ApiParam(value = "SQL rule that is going to be executed") @RequestParam String sqlRule) {
     List<ValueVO> obtainedTableValues = new ArrayList<>();
     try {
-      obtainedTableValues = sqlRulesService.runSqlRule(datasetId, sqlRule, true);
+      obtainedTableValues = sqlRulesService.runSqlRule(datasetId, sqlRule);
 
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error(
