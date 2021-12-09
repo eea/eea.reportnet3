@@ -456,14 +456,14 @@ const Dataflows = () => {
         ],
         type: 'INPUT'
       },
-      // {
-      //   type: 'MULTI_SELECT',
-      //   nestedOptions: [
-      //     { key: 'status', label: 'This is inside a array -- STATUS', order: 0 },
-      //     { key: 'userRole', label: 'This is inside a array -- ROLES', order: 1 },
-      //     { key: 'pinned', label: 'This is inside a array -- PINNED', order: 2 }
-      //   ]
-      // },
+      {
+        type: 'MULTI_SELECT',
+        nestedOptions: [
+          { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
+          { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1 },
+          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
+        ]
+      },
       { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' }
       // (isCustodian || isAdmin) && {
       //   key: 'creationDate',
