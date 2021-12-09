@@ -260,7 +260,10 @@ export const useSetColumns = (
               :{' '}
             </span>
             <br />
-            <span className={styles.propertyLabel}>
+            <span
+              className={`${styles.propertyLabel} ${
+                column.codelistItems.length > 15 ? styles.propertyLabelListItems : ''
+              }`}>
               {column.codelistItems
                 .map(codelistItem =>
                   !isEmpty(codelistItem) && codelistItem.length > 15
