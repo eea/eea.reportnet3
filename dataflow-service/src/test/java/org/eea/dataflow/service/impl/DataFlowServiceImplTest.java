@@ -19,7 +19,6 @@ import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPrivateMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.mapper.DocumentMapper;
-import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Document;
 import org.eea.dataflow.persistence.domain.Representative;
@@ -451,33 +450,6 @@ public class DataFlowServiceImplTest {
     when(dataflowRepository.findCompleted(Mockito.any(), Mockito.any())).thenReturn(dataflows);
     dataflowServiceImpl.getCompleted("1L", pageable);
     assertEquals("fail", new ArrayList<>(), dataflowServiceImpl.getCompleted("1L", pageable));
-  }
-
-
-  /**
-   * Adds the contributor.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void addContributor() throws EEAException {
-    when(contributorRepository.save(Mockito.any())).thenReturn(new Contributor());
-    dataflowServiceImpl.addContributorToDataflow(1L, "");
-    Mockito.verify(contributorRepository, times(1)).save(Mockito.any());
-  }
-
-  /**
-   * Removes the contributor.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void removeContributor() throws EEAException {
-    Mockito.doNothing().when(contributorRepository).removeContributorFromDataset(Mockito.any(),
-        Mockito.any());
-    dataflowServiceImpl.removeContributorFromDataflow(1L, "");
-    Mockito.verify(contributorRepository, times(1)).removeContributorFromDataset(Mockito.any(),
-        Mockito.any());
   }
 
   /**
