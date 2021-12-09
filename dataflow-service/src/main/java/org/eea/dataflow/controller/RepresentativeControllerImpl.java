@@ -637,8 +637,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
               defaultValue = "true") Boolean restrictFromPublic) {
     try {
       if (representativeService.checkDataHaveBeenRelease(dataflowId, dataProviderId)
-          && representativeService.checkRestrictFromPublic(dataflowId, dataProviderId)
-          && representativeService.checkLastReleaseBeforeActual(dataflowId, dataProviderId)) {
+          && representativeService.checkRestrictFromPublic(dataflowId, dataProviderId)) {
         representativeService.updateRepresentativeVisibilityRestrictions(dataflowId, dataProviderId,
             restrictFromPublic);
       } else {

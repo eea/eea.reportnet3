@@ -5,7 +5,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -861,32 +860,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
     }
     return isReleased;
-  }
-
-  /**
-   * Check last release.
-   *
-   * @param dataflowId the dataflow id
-   * @param dataProviderId the data provider id
-   * @return true, if successful
-   * @throws EEAException the EEA exception
-   */
-  public boolean checkLastReleaseBeforeActual(Long dataflowId, Long dataProviderId)
-      throws EEAException {
-    boolean isLastReleaseBeforeActual = false;
-    List<ReportingDatasetVO> reportings =
-        datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
-    if (null == reportings) {
-      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
-    }
-    for (ReportingDatasetVO reporting : reportings) {
-      if (reporting.getDataProviderId().equals(dataProviderId)) {
-        if (reporting.getDateReleased().before(new Date())) {
-          isLastReleaseBeforeActual = true;
-        }
-      }
-    }
-    return isLastReleaseBeforeActual;
   }
 
   /**

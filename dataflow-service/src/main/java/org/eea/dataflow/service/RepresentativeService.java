@@ -232,15 +232,4 @@ public interface RepresentativeService {
    * @throws EEAException the EEA exception
    */
   boolean checkDataHaveBeenRelease(Long dataflowId, Long dataProviderId) throws EEAException;
-
-  /**
-   * Check last release.
-   *
-   * @param dataflowId the dataflow id
-   * @param dataProviderId the data provider id
-   * @return true, if successful
-   * @throws EEAException the EEA exception
-   */
-  boolean checkLastReleaseBeforeActual(Long dataflowId, Long dataProviderId) throws EEAException;
-
 }
