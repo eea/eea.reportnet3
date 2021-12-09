@@ -769,8 +769,7 @@ public class SqlRulesServiceImplTest {
     sqlRulesServiceImpl.runSqlRule(1L, sqlRule, true);
 
     Mockito.verify(datasetRepository, Mockito.times(1)).runSqlRule(1L,
-        "select cast(json_agg(row_to_json(table_aux)) as text) as result FROM (SELECT * FROM (SELECT * from dataset_1.table_value) as userSelect OFFSET 0 LIMIT 10) as table_aux",
-        true);
+        "SELECT * FROM (SELECT * from dataset_1.table_value) as userSelect OFFSET 0 LIMIT 10");
   }
 
   @Test(expected = EEAInvalidSQLException.class)
@@ -821,10 +820,10 @@ public class SqlRulesServiceImplTest {
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabaseVO);
 
-    sqlRulesServiceImpl.runSqlRule(1L, sqlRule, false);
+    sqlRulesServiceImpl.evaluateSqlRule(1L, sqlRule);
 
-    Mockito.verify(datasetRepository, Mockito.times(1)).runSqlRule(1L,
-        "EXPLAIN (FORMAT JSON) SELECT * FROM dataset_1.table_value", false);
+    Mockito.verify(datasetRepository, Mockito.times(1)).evaluateSqlRule(1L,
+        "EXPLAIN (FORMAT JSON) SELECT * FROM dataset_1.table_value");
   }
 
   @Test(expected = StringIndexOutOfBoundsException.class)

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
@@ -406,7 +407,7 @@ public interface RulesController {
    * @return the string formatted as JSON
    */
   @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
-  String runSqlRule(@RequestParam("datasetId") Long datasetId, @RequestParam String sqlRule);
+  List<ValueVO> runSqlRule(@RequestParam("datasetId") Long datasetId, @RequestParam String sqlRule);
 
 
   /**

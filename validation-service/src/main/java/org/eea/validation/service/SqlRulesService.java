@@ -1,7 +1,9 @@
 package org.eea.validation.service;
 
+import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.TableValue;
@@ -70,5 +72,15 @@ public interface SqlRulesService {
    * @return the string formatted as JSON
    * @throws EEAException the EEA exception
    */
-  String runSqlRule(Long datasetId, String sqlRule, boolean runSQL) throws EEAException;
+  List<ValueVO> runSqlRule(Long datasetId, String sqlRule, boolean runSQL) throws EEAException;
+
+  /**
+   * Evaluates the SQL rule and returns its total cost.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be evaluated
+   * @return the string containing the total cost
+   * @throws EEAException the EEA exception
+   */
+  String evaluateSqlRule(Long datasetId, String sqlRule) throws EEAException;
 }

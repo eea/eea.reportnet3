@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
@@ -15,6 +16,7 @@ import org.eea.interfaces.controller.communication.NotificationController.Notifi
 import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
@@ -842,11 +844,11 @@ public class RulesControllerImpl implements RulesController {
           message = "There was an error trying to execute the SQL Rule. Check your SQL Syntax."),
       @ApiResponse(code = 401, message = "The user doesn't have access to one of the datasets"),
       @ApiResponse(code = 422, message = "Forbidden command used in the SQL sentence.")})
-  public String runSqlRule(
+  public List<ValueVO> runSqlRule(
       @ApiParam(value = "Dataset id used on the run process",
           example = "1") @RequestParam("datasetId") Long datasetId,
       @ApiParam(value = "SQL rule that is going to be executed") @RequestParam String sqlRule) {
-    String obtainedTableValues = "";
+    List<ValueVO> obtainedTableValues = new ArrayList<>();
     try {
       obtainedTableValues = sqlRulesService.runSqlRule(datasetId, sqlRule, true);
 
@@ -892,7 +894,7 @@ public class RulesControllerImpl implements RulesController {
       @ApiParam(value = "SQL rule that is going to be evaluated") @RequestParam String sqlRule) {
     String sqlCost = "";
     try {
-      String result = sqlRulesService.runSqlRule(datasetId, sqlRule, false);
+      String result = sqlRulesService.evaluateSqlRule(datasetId, sqlRule);
       JSONParser parser = new JSONParser();
       JSONArray jsonArray = (JSONArray) parser.parse(result);
       JSONObject jsonObject = (JSONObject) jsonArray.get(0);
