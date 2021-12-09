@@ -11,6 +11,7 @@ import { Button } from 'views/_components/Button';
 import { Calendar } from 'views/_components/Calendar';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
+import { LevelError } from 'views/_components/LevelError';
 import { MultiSelect } from 'views/_components/MultiSelect';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -19,8 +20,9 @@ import { filterByKeysFamily, filtersStateFamily } from './_functions/Stores/filt
 
 import { MyFiltersUtils } from './_functions/Utils/MyFiltersUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { ErrorUtils } from 'views/_functions/Utils';
 
-const { getEndOfDay, getStartOfDay, parseDateValues } = MyFiltersUtils;
+const { getEndOfDay, getStartOfDay, parseDateValues, getOptionsTypes } = MyFiltersUtils;
 
 export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode, onFilter, options, viewType }) => {
   const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
@@ -50,6 +52,19 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     } catch (error) {
       console.log('error :>> ', error);
     }
+  };
+
+  const checkMultiSelect = ({ filterBy, item }) => {
+    const filteredKeys = filterByKeys.MULTI_SELECT.filter(key => Object.keys(filterBy).includes(key));
+    for (let index = 0; index < filteredKeys.length; index++) {
+      const filteredKey = filteredKeys[index];
+      if (!TextUtils.areEquals(filterBy[filteredKey], '') && filterBy[filteredKey].length > 0) {
+        if (!filterBy[filteredKey].includes(item[filteredKey].toUpperCase())) {
+          return false;
+        }
+      }
+    }
+    return true;
   };
 
   const checkFilters = ({ item, filterBy }) => {
@@ -107,7 +122,10 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
 
   const onApplyFilters = ({ filterBy }) => {
     return data.filter(
-      item => checkFilters({ filteredKeys: Object.keys(filterBy), item, filterBy }) && checkDates({ filterBy, item })
+      item =>
+        checkFilters({ filteredKeys: Object.keys(filterBy), item, filterBy }) &&
+        checkDates({ filterBy, item }) &&
+        checkMultiSelect({ filterBy, item })
     );
   };
 
@@ -192,10 +210,36 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
 
   const renderMultiSelect = option => {
     if (option.nestedOptions) {
-      return option.nestedOptions.map(option => renderMultiSelect(option));
+      return option.nestedOptions.map(netedOption => renderMultiSelect(netedOption));
     }
 
-    return <MultiSelect key={option.key} />;
+    const selectTemplate = (optionMultiSelect, nestedOption) => {
+      if (!isNil(optionMultiSelect.type)) {
+        return <LevelError category={nestedOption?.category} type={optionMultiSelect.type} />;
+      }
+    };
+
+    return (
+      <MultiSelect
+        ariaLabelledBy={`${option.key}_input`}
+        checkAllHeader={resourcesContext.messages['checkAllFilter']}
+        className={styles.multiselectFilter}
+        filter={option?.showInput}
+        headerClassName={styles.selectHeader}
+        id={options.key}
+        inputClassName={`p-float-label ${styles.label}`}
+        inputId={`${options.key}_input`}
+        //isFilter
+        itemTemplate={op => selectTemplate(op, option)}
+        key={option.key}
+        label={option.label || ''}
+        notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
+        onChange={event => onChange({ key: option.key, value: event.target.value })}
+        optionLabel="type"
+        options={getOptionsTypes(data, option.key, undefined, ErrorUtils.orderLevelErrors)}
+        value={filterBy[option.key]}
+      />
+    );
   };
 
   if (loadingStatus === 'PENDING') return <div>LOADING</div>;
