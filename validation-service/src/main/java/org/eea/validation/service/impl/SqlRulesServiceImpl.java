@@ -27,6 +27,7 @@ import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.TestDatasetVO;
+import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -343,7 +344,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
-   * Run SQL rule with limited results.
+   * Run SQL rule with limited results
    *
    * @param datasetId the dataset id
    * @param sqlRule the sql rule about to be run
@@ -351,40 +352,99 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public String runSqlRule(Long datasetId, String sqlRule) throws EEAException {
+  public List<ValueVO> runSqlRule(Long datasetId, String sqlRule) throws EEAException {
+
+    StringBuilder sb = new StringBuilder("");
+    List<ValueVO> result = new ArrayList<>();
+    DataSetMetabaseVO dataSetMetabaseVO =
+        datasetMetabaseController.findDatasetMetabaseById(datasetId);
+    List<String> ids = new ArrayList<>();
+
+    try {
+
+      if (checkQuerySyntax(sqlRule)) {
+        ids = getListOfDatasetsOnQuery(sqlRule);
+        checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
+        if (!ids.isEmpty()) {
+          checkDatasetFromReferenceDataflow(ids);
+        }
+      } else {
+        throw new EEAForbiddenSQLCommandException(
+            "SQL Command not allowed in SQL Rule: " + sqlRule);
+      }
+
+      if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
+        throw new EEAException();
+      } else {
+        sb.append("SELECT * FROM (");
+        sb.append(sqlRule);
+        sb.append(") as userSelect OFFSET 0 LIMIT 10");
+        result = datasetRepository.runSqlRule(datasetId, sb.toString());
+      }
+    } catch (StringIndexOutOfBoundsException e) {
+      throw new StringIndexOutOfBoundsException(
+          String.format("SQL sentence has wrong format, please check: %s", sqlRule));
+    } catch (EEAForbiddenSQLCommandException e) {
+      throw new EEAForbiddenSQLCommandException(
+          String.format("SQL Command not allowed in SQL Rule: %s", sqlRule), e);
+    } catch (EEAInvalidSQLException e) {
+      throw new EEAInvalidSQLException(String.format("Couldn't execute the SQL Rule: %s", sqlRule),
+          e);
+    } catch (EEAException e) {
+      throw new EEAException("User doesn't have access to one of the datasets", e);
+    }
+    return result;
+  }
+
+  /**
+   * Evaluates the SQL rule and returns its total cost
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be evaluated
+   * @return the string containing the total cost
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public String evaluateSqlRule(Long datasetId, String sqlRule) throws EEAException {
 
     StringBuilder sb = new StringBuilder("");
     String result = "";
     DataSetMetabaseVO dataSetMetabaseVO =
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
+    List<String> ids = new ArrayList<>();
 
-    if (checkQuerySyntax(sqlRule)) {
-      List<String> ids = getListOfDatasetsOnQuery(sqlRule);
-      checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
-      if (!ids.isEmpty()) {
-        checkDatasetFromReferenceDataflow(ids);
-      }
+    try {
 
-      try {
-        if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
-          throw new EEAException();
-        } else {
-          sb.append(
-              "select cast(json_agg(row_to_json(table_aux)) as text) as result FROM (SELECT * FROM (");
-          sb.append(sqlRule);
-          sb.append(") as userSelect OFFSET 0 LIMIT 10) as table_aux");
-          result = datasetRepository.runSqlRule(datasetId, sb.toString());
+      if (checkQuerySyntax(sqlRule)) {
+        ids = getListOfDatasetsOnQuery(sqlRule);
+        checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
+        if (!ids.isEmpty()) {
+          checkDatasetFromReferenceDataflow(ids);
         }
-      } catch (EEAInvalidSQLException e) {
-        throw new EEAInvalidSQLException("Couldn't execute the SQL Rule: " + sqlRule);
-      } catch (EEAException e) {
-        throw new EEAException(
-            "User doesn't have access to one of the datasets: " + ids.toString());
+      } else {
+        throw new EEAForbiddenSQLCommandException(
+            "SQL Command not allowed in SQL Rule: " + sqlRule);
       }
-    } else {
-      throw new EEAForbiddenSQLCommandException("SQL Command not allowed in SQL Rule: " + sqlRule);
-    }
 
+      if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
+        throw new EEAException();
+      } else {
+        sb.append("EXPLAIN (FORMAT JSON) ");
+        sb.append(sqlRule);
+        result = datasetRepository.evaluateSqlRule(datasetId, sb.toString());
+      }
+    } catch (StringIndexOutOfBoundsException e) {
+      throw new StringIndexOutOfBoundsException(
+          String.format("SQL sentence has wrong format, please check: %s", sqlRule));
+    } catch (EEAForbiddenSQLCommandException e) {
+      throw new EEAForbiddenSQLCommandException(
+          String.format("SQL Command not allowed in SQL Rule: %s", sqlRule), e);
+    } catch (EEAInvalidSQLException e) {
+      throw new EEAInvalidSQLException(String.format("Couldn't execute the SQL Rule: %s", sqlRule),
+          e);
+    } catch (EEAException e) {
+      throw new EEAException("User doesn't have access to one of the datasets", e);
+    }
     return result;
   }
 

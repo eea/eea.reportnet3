@@ -1,6 +1,7 @@
 package org.eea.validation.persistence.data.repository;
 
 import java.util.List;
+import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -68,6 +69,16 @@ public interface DatasetExtendedRepository {
    * @return the string formatted as JSON
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
-  String runSqlRule(Long datasetId, String sqlRule) throws EEAInvalidSQLException;
+  List<ValueVO> runSqlRule(Long datasetId, String sqlRule) throws EEAInvalidSQLException;
+
+  /**
+   * Evaluate sql rule.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule
+   * @return the string formatted as JSON
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
+   */
+  String evaluateSqlRule(Long datasetId, String sqlRule) throws EEAInvalidSQLException;
 
 }
