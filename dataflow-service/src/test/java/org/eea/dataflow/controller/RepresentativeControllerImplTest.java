@@ -584,6 +584,8 @@ public class RepresentativeControllerImplTest {
 
   @Test
   public void updateRestrictFromPublicTest() throws EEAException {
+    Mockito.when(representativeService.checkDataHaveBeenRelease(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(true);
     Mockito.when(representativeService.checkRestrictFromPublic(Mockito.anyLong(), Mockito.any()))
         .thenReturn(true);
     representativeControllerImpl.updateRestrictFromPublic(1L, 1L, true);
@@ -593,6 +595,8 @@ public class RepresentativeControllerImplTest {
 
   @Test
   public void updateRestrictFromPublicFalseTest() throws EEAException {
+    Mockito.when(representativeService.checkDataHaveBeenRelease(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(true);
     Mockito.when(representativeService.checkRestrictFromPublic(Mockito.anyLong(), Mockito.any()))
         .thenReturn(false);
     representativeControllerImpl.updateRestrictFromPublic(1L, 1L, true);
@@ -604,7 +608,7 @@ public class RepresentativeControllerImplTest {
   public void updateRestrictFromPublicExceptionTest() throws EEAException {
     try {
       Mockito.doThrow(new EEAException()).when(representativeService)
-          .checkRestrictFromPublic(Mockito.anyLong(), Mockito.any());
+          .checkDataHaveBeenRelease(Mockito.anyLong(), Mockito.any());
       representativeControllerImpl.updateRestrictFromPublic(1L, 1L, true);
     } catch (EEAException e) {
       assertEquals(e.getMessage(), EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);

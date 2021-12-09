@@ -106,6 +106,7 @@ public class RepresentativeServiceImplTest {
   @Mock
   private DataSetSnapshotControllerZuul datasetSnapshotController;
 
+  @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
   private Representative representative;
@@ -881,13 +882,10 @@ public class RepresentativeServiceImplTest {
     ReportingDatasetVO reporting = new ReportingDatasetVO();
     reporting.setId(1L);
     reporting.setDataProviderId(1L);
-    reporting.setIsReleased(true);
+    reporting.setIsReleased(false);
     reportings.add(reporting);
-    List<SnapshotVO> snapshots = new ArrayList<>();
     Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong()))
         .thenReturn(reportings);
-    Mockito.when(datasetSnapshotController.getSnapshotsByIdDataset(Mockito.anyLong()))
-        .thenReturn(snapshots);
     assertFalse(representativeServiceImpl.checkDataHaveBeenRelease(1L, 1L));
   }
 
