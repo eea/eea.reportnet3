@@ -214,8 +214,15 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     }
 
     const selectTemplate = (optionMultiSelect, nestedOption) => {
-      if (!isNil(optionMultiSelect.type)) {
-        return <LevelError category={nestedOption?.category} type={optionMultiSelect.type} />;
+      switch (nestedOption?.category) {
+        case 'LEVEL_ERROR':
+          if (!isNil(optionMultiSelect.type)) {
+            return <LevelError type={optionMultiSelect.type} value={optionMultiSelect.value} />;
+          }
+          break;
+
+        default:
+          return <LevelError type={''} value={optionMultiSelect.value} />;
       }
     };
 

@@ -1,10 +1,11 @@
 import styles from './LevelError.module.scss';
 
-export const LevelError = ({ type, category = undefined }) => {
-  const getClassName = (type, category) => {
-    const className = category === 'LEVEL_ERROR' ? styles[type.toString().toLowerCase()] : '';
-    return className;
+export const LevelError = ({ type, value = '' }) => {
+  const getOption = (type, value) => {
+    return value.length > 0 ? value.toUpperCase() : type.toString().toUpperCase();
   };
 
-  return <span className={`${getClassName(type, category)} ${styles.statusBox}`}>{type.toString().toUpperCase()}</span>;
+  return (
+    <span className={`${styles[type.toString().toLowerCase()]} ${styles.statusBox}`}>{getOption(type, value)}</span>
+  );
 };
