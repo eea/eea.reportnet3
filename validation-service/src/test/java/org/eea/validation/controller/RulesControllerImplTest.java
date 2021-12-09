@@ -610,15 +610,13 @@ public class RulesControllerImplTest {
   @Test
   public void runSqlTest() throws EEAException {
     rulesControllerImpl.runSqlRule(1L, "SELECT * from dataset_1.table_value");
-    Mockito.verify(sqlRulesService, times(1)).runSqlRule(1L, "SELECT * from dataset_1.table_value",
-        true);
+    Mockito.verify(sqlRulesService, times(1)).runSqlRule(1L, "SELECT * from dataset_1.table_value");
   }
 
   @Test(expected = ResponseStatusException.class)
   public void runSqlEEAInvalidSQLExceptionTest() throws EEAException {
     String sqlRule = "SELECTq *a WRONG SQL";
-    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule, true))
-        .thenThrow(new EEAInvalidSQLException());
+    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule)).thenThrow(new EEAInvalidSQLException());
     try {
       rulesControllerImpl.runSqlRule(1L, sqlRule);
     } catch (ResponseStatusException e) {
@@ -633,7 +631,7 @@ public class RulesControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void runSqlEEAForbiddenSQLCommandExceptionTest() throws EEAException {
     String sqlRule = "DELETE * FROM DATASET_396.TABLE1";
-    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule, true))
+    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule))
         .thenThrow(new EEAForbiddenSQLCommandException());
     try {
       rulesControllerImpl.runSqlRule(1L, sqlRule);
@@ -649,7 +647,7 @@ public class RulesControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void runSqlEEAExceptionTest() throws EEAException {
     String sqlRule = "DELETE * FROM DATASET_111.TABLE1";
-    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule, true)).thenThrow(new EEAException());
+    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule)).thenThrow(new EEAException());
     try {
       rulesControllerImpl.runSqlRule(1L, sqlRule);
     } catch (ResponseStatusException e) {
