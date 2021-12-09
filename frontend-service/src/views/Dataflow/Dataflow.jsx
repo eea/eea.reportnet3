@@ -221,6 +221,10 @@ const Dataflow = () => {
       : uniqDataProviders[0]
     : null;
 
+  const isReleased =
+    !isNil(dataflowState.data.datasets) &&
+    dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
+
   useEffect(() => {
     if (!Number(dataflowId)) {
       window.location.href = '/dataflows/error/loadDataflowData';
@@ -314,7 +318,8 @@ const Dataflow = () => {
       manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
-      restrictFromPublicBtn: isLeadReporterOfCountry && dataflowState.showPublicInfo && !isBusinessDataflow,
+      restrictFromPublicBtn:
+        isLeadReporterOfCountry && dataflowState.showPublicInfo && isReleased && !isBusinessDataflow,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
         isLeadReporterOfCountry || isNationalCoordinatorOfCountry || isReporterOfCountry || isLeadDesigner || isObserver
@@ -1329,6 +1334,7 @@ const Dataflow = () => {
 
         {dataflowState.isRestrictFromPublicDialogVisible && (
           <ConfirmDialog
+            confirmTooltip={resourcesContext.messages['restrictFromPublicTooltip']}
             disabledConfirm={
               dataflowState.restrictFromPublic === dataflowState.representative.restrictFromPublic ||
               dataflowState.isFetchingData
@@ -1347,16 +1353,28 @@ const Dataflow = () => {
             visible={dataflowState.isRestrictFromPublicDialogVisible}>
             <Checkbox
               checked={dataflowState.restrictFromPublic}
+              disabled={!dataflowState.representative.restrictFromPublic}
               id="restrictFromPublicCheckbox"
               inputId="restrictFromPublicCheckbox"
               onChange={() => setRestrictFromPublic(!dataflowState.restrictFromPublic)}
               role="checkbox"
             />
             <label className={styles.restrictFromPublic} htmlFor="restrictFromPublicCheckbox">
-              <span className={styles.pointer} onClick={() => setRestrictFromPublic(!dataflowState.restrictFromPublic)}>
+              <span
+                className={`${dataflowState.restrictFromPublic ? styles.pointer : styles.disabledLabel}`}
+                onClick={() => {
+                  if (dataflowState.representative.restrictFromPublic) {
+                    setRestrictFromPublic(!dataflowState.restrictFromPublic);
+                  }
+                }}>
                 {resourcesContext.messages['restrictFromPublicCheckboxLabel']}
               </span>
             </label>
+            {!dataflowState.representative.restrictFromPublic && (
+              <div className={styles.restrictFromPublicNote}>
+                {resourcesContext.messages['restrictFromPublicDisabledLabel']}
+              </div>
+            )}
           </ConfirmDialog>
         )}
 
