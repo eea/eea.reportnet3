@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 
 import isNil from 'lodash/isNil';
+import isEmpty from 'lodash/isEmpty';
 
 import styles from './SqlSentence.module.scss';
 
@@ -9,11 +10,15 @@ import { Dialog } from 'views/_components/Dialog';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { SqlHelp } from './_components/SqlHelp';
 
+import { ValidationService } from 'services/ValidationService';
+
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
-export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence, level }) => {
+export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level, onSetSqlSentence }) => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
@@ -30,6 +35,8 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
       setIsSqlErrorVisible(false);
     }
   }, [creationFormState.candidateRule.sqlSentence]);
+
+  console.log(`object`, creationFormState.candidateRule.sqlSentence);
 
   const levelTypes = {
     FIELD: 'field',
@@ -64,6 +71,19 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
     );
   };
 
+  const onValidateSqlSentence = async () => {
+    try {
+      const sqlSentenceCost = await ValidationService.validateSqlSentence(
+        datasetId,
+        creationFormState.candidateRule.sqlSentence
+      );
+      console.log(`sql`, sqlSentenceCost);
+    } catch (error) {
+      console.error('SqlSentence - onValidateSqlSentence.', error);
+      notificationContext.add({ type: 'VALIDATE_SQL_SENTENCE_ERROR' }, true);
+    }
+  };
+
   return (
     <div className={styles.section}>
       <div className={styles.content}>
@@ -94,6 +114,13 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
                 'qcCodeAcronymButtonTooltip'
               )}
               tooltipOptions={{ position: 'top' }}
+            />
+            <Button
+              className={`${styles.sqlCalculated} p-button-rounded p-button-secondary-transparent`}
+              disabled={isEmpty(creationFormState.candidateRule.sqlSentence)}
+              icon="clock"
+              label={'Validate SQL'}
+              onClick={onValidateSqlSentence}
             />
           </h3>
           <InputTextarea
