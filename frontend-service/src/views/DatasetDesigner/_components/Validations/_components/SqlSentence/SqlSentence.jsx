@@ -5,6 +5,8 @@ import isEmpty from 'lodash/isEmpty';
 
 import styles from './SqlSentence.module.scss';
 
+import { config } from 'conf';
+
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { InputTextarea } from 'views/_components/InputTextarea';
@@ -23,6 +25,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
 
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
+  const [sqlSentenceCost, setSqlSentenceCost] = useState(0);
 
   useEffect(() => {
     if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
@@ -35,8 +38,6 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       setIsSqlErrorVisible(false);
     }
   }, [creationFormState.candidateRule.sqlSentence]);
-
-  console.log(`object`, creationFormState.candidateRule.sqlSentence);
 
   const levelTypes = {
     FIELD: 'field',
@@ -73,11 +74,11 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
 
   const onValidateSqlSentence = async () => {
     try {
-      const sqlSentenceCost = await ValidationService.validateSqlSentence(
+      const { data } = await ValidationService.validateSqlSentence(
         datasetId,
         creationFormState.candidateRule.sqlSentence
       );
-      console.log(`sql`, sqlSentenceCost);
+      setSqlSentenceCost(data);
     } catch (error) {
       console.error('SqlSentence - onValidateSqlSentence.', error);
       notificationContext.add({ type: 'VALIDATE_SQL_SENTENCE_ERROR' }, true);
@@ -122,6 +123,24 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
               label={'Validate SQL'}
               onClick={onValidateSqlSentence}
             />
+            {sqlSentenceCost !== 0 && (
+              <div className={`${styles.ccButton} ${styles.trafficLight}`}>
+                <div
+                  className={`${styles.lightSignal} ${
+                    sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''
+                  }`}></div>
+                <div
+                  className={`${styles.lightSignal} ${
+                    sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST && sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
+                      ? styles.yellowLightSignal
+                      : ''
+                  }`}></div>
+                <div
+                  className={`${styles.lightSignal} ${
+                    sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''
+                  }`}></div>
+              </div>
+            )}
           </h3>
           <InputTextarea
             className={`p-inputtextarea`}

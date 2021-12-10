@@ -87,3 +87,34 @@
   margin-top: 0.5rem;
   height: 1.2rem;
 }
+
+.trafficLight {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: var(--traffic-light-bg);
+  width: 5rem;
+  height: 2rem;
+  border-radius: 30px;
+  position: relative;
+  top: 10%;
+}
+
+.lightSignal {
+  height: 1rem;
+  width: 1rem;
+  border-radius: 50%;
+  background-color: var(--traffic-light-radius);
+}
+
+.redLightSignal {
+  background: var(--traffic-light-red-active);
+}
+
+.yellowLightSignal {
+  background: var(--traffic-light-yellow-active);
+}
+
+.greenLightSignal {
+  background: var(--traffic-light-green-active);
+}
