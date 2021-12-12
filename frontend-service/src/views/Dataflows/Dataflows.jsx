@@ -420,7 +420,7 @@ const Dataflows = () => {
     }
   };
 
-  const onReorderPinnedDataflows = async ({ isPinned, pinnedItem }) => {
+  const onReorderPinnedDataflows = async (pinnedItem, isPinned) => {
     const inmUserProperties = { ...userContext.userProps };
     const inmPinnedDataflows = intersection(
       inmUserProperties.pinnedDataflows,
@@ -442,12 +442,14 @@ const Dataflows = () => {
 
     await onUpdateUserProperties(inmUserProperties);
 
-    const inmfilteredData = [...filteredData];
+    const inmfilteredData = [...filteredData[tabId]];
     const changedFilteredData = inmfilteredData.map(item => {
-      if (item.id === pinnedItem.id) {
-        item.pinned = isPinned ? 'pinned' : 'unpinned';
+      let itemToUpdate = { ...item };
+
+      if (itemToUpdate.id === pinnedItem.id) {
+        itemToUpdate.pinned = isPinned ? 'pinned' : 'unpinned';
       }
-      return item;
+      return itemToUpdate;
     });
 
     if (isPinned) {
@@ -470,7 +472,7 @@ const Dataflows = () => {
 
     const orderedPinned = orderedFilteredData.map(el => el.pinned);
 
-    setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+    setPinnedSeparatorIndex(orderedPinned.lastIndexOf('pinned'));
 
     const inmDataToFilter = {
       reporting: dataflowsState.reporting,
@@ -479,10 +481,11 @@ const Dataflows = () => {
       citizenScience: dataflowsState.citizenScience
     };
     const changedInitialData = inmDataToFilter[tabId].map(item => {
-      if (item.id === pinnedItem.id) {
-        item.pinned = isPinned ? 'pinned' : 'unpinned';
+      let itemToUpdate = { ...item };
+      if (itemToUpdate.id === pinnedItem.id) {
+        itemToUpdate.pinned = isPinned ? 'pinned' : 'unpinned';
       }
-      return item;
+      return itemToUpdate;
     });
 
     dataflowsDispatch({
@@ -565,11 +568,11 @@ const Dataflows = () => {
     reporting: [
       {
         nestedOptions: [
+          { key: 'name', label: 'This is inside a array -- NAME', order: 0 },
           { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
-          // { key: 'legalInstrument', label: 'This is inside a array -- INSTRUMENT', order: 2 },
-          { key: 'name', label: 'This is inside a array -- NAME', order: 0 }
-          // { key: 'obligationId', label: 'This is inside a array -- OBLIGATION ID', order: 4 },
-          // { key: 'obligationTitle', label: 'This is inside a array -- OBLIGATION TITLE', order: 3 }
+          { key: 'legalInstrument', label: 'This is inside a array -- INSTRUMENT', order: 2 },
+          { key: 'obligationTitle', label: 'This is inside a array -- OBLIGATION TITLE', order: 3 },
+          { key: 'obligationId', label: 'This is inside a array -- OBLIGATION ID', order: 4 }
         ],
         type: 'INPUT'
       },
@@ -591,8 +594,8 @@ const Dataflows = () => {
     reference: [
       {
         nestedOptions: [
-          { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
-          { key: 'name', label: 'This is inside a array -- NAME', order: 0 }
+          { key: 'name', label: 'This is inside a array -- NAME', order: 0 },
+          { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 }
         ],
         type: 'INPUT'
       },
@@ -627,13 +630,13 @@ const Dataflows = () => {
           options={options[tabId]}
           viewType={tabId}
         />
-        <List
+        {/* <List
           dataflows={filteredData[tabId]}
           isAdmin={isAdmin}
           isCustodian={isCustodian}
           isLoading={loadingStatus[tabId]}
-        />
-        {/* <DataflowsList
+        /> */}
+        <DataflowsList
           className="dataflowList-accepted-help-step"
           content={{
             reporting: filteredData['reporting'],
@@ -641,11 +644,14 @@ const Dataflows = () => {
             citizenScience: filteredData['citizenScience'],
             reference: filteredData['reference']
           }}
+          filteredData={filteredData[tabId]}
           isAdmin={isAdmin}
           isCustodian={isCustodian}
           isLoading={loadingStatus[tabId]}
+          pinnedSeparatorIndex={pinnedSeparatorIndex}
+          reorderDataflows={onReorderPinnedDataflows}
           visibleTab={tabId}
-        /> */}
+        />
       </div>
 
       <GoTopButton parentRef={containerRef} referenceMargin={70} />

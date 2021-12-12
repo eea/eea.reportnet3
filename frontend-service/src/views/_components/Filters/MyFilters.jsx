@@ -15,21 +15,28 @@ import { LevelError } from 'views/_components/LevelError';
 import { MultiSelect } from 'views/_components/MultiSelect';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-import { filterByKeysFamily, filtersStateFamily } from './_functions/Stores/filtersStores';
+import { filterByKeysFamily, filtersStateFamily, sortByStateFamily } from './_functions/Stores/filtersStores';
 
-import { MyFiltersUtils } from './_functions/Utils/MyFiltersUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
+import { MyFiltersUtils } from './_functions/Utils/MyFiltersUtils';
+import { MySortUtils } from './_functions/Utils/MySortUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
+const SORT_CATEGORY = 'pinned';
 
 const { getEndOfDay, getStartOfDay, parseDateValues, getOptionsTypes } = MyFiltersUtils;
+const { switchSortByIcon, switchSortByOption } = MySortUtils;
 
 export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode, onFilter, options, viewType }) => {
-  const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysFamily(viewType));
+  const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
+  const [sortBy, setSortBy] = useRecoilState(sortByStateFamily(viewType));
 
   const { filterBy, filteredData, loadingStatus } = filters;
 
+  const { userProps } = useContext(UserContext);
   const resourcesContext = useContext(ResourcesContext);
 
   useLayoutEffect(() => {
@@ -165,24 +172,27 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     if (option.nestedOptions) return option.nestedOptions.map(option => renderDate(option));
 
     return (
-      <Calendar
-        baseZIndex={9999}
-        className={styles.calendarFilter}
-        // dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
-        inputClassName={styles.inputFilter}
-        key={option.key}
-        // inputId={inputId}
-        monthNavigator={true}
-        onChange={event => onChange({ key: option.key, value: parseDateValues(event.value) })}
-        // onChange={event => onFilterData(property, event.value)}
-        // onFocus={() => onAnimateLabel(property, true)}
-        placeholder={option.label}
-        readOnlyInput={true}
-        selectionMode="range"
-        value={parseDateValues(filterBy[option.key])}
-        yearNavigator={true}
-        yearRange="2015:2030"
-      />
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {renderSortButton({ key: option.key })}
+        <Calendar
+          baseZIndex={9999}
+          className={styles.calendarFilter}
+          dateFormat={userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
+          inputClassName={styles.inputFilter}
+          key={option.key}
+          // inputId={inputId}
+          monthNavigator={true}
+          onChange={event => onChange({ key: option.key, value: parseDateValues(event.value) })}
+          // onChange={event => onFilterData(property, event.value)}
+          // onFocus={() => onAnimateLabel(property, true)}
+          placeholder={option.label}
+          readOnlyInput={true}
+          selectionMode="range"
+          value={parseDateValues(filterBy[option.key])}
+          yearNavigator={true}
+          yearRange="2015:2030"
+        />
+      </div>
     );
   };
 
@@ -198,14 +208,52 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     }
 
     return (
-      <InputText
-        className={styles.input}
-        key={option.key}
-        onChange={event => onChange({ key: option.key, value: event.target.value })}
-        placeholder={option.label}
-        value={filterBy[option.key] || ''}
-      />
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {renderSortButton({ key: option.key })}
+        <InputText
+          className={styles.input}
+          key={option.key}
+          onChange={event => onChange({ key: option.key, value: event.target.value })}
+          placeholder={option.label}
+          value={filterBy[option.key] || ''}
+        />
+      </div>
     );
+  };
+
+  const onSortData = key => {
+    const sortOption = switchSortByOption(sortBy[key]);
+    const arrayForSort = [...filteredData];
+
+    const sortedData = arrayForSort.sort((a, b) => {
+      if (!isNil(SORT_CATEGORY) && a[SORT_CATEGORY] !== b[SORT_CATEGORY]) {
+        return a[SORT_CATEGORY] < b[SORT_CATEGORY] ? -2 : 2;
+      }
+
+      const optionA = a[key].toUpperCase();
+      const optionB = b[key].toUpperCase();
+
+      switch (sortOption) {
+        case 'asc':
+          return optionA > optionB ? 1 : -1;
+
+        case 'desc':
+          return optionA < optionB ? 1 : -1;
+
+        case 'idle':
+          return 0;
+
+        default:
+          return 0;
+      }
+    });
+
+    setSortBy({ [key]: sortOption });
+    setFilters({ ...filters, filteredData: sortedData });
+  };
+
+  const renderSortButton = ({ key }) => {
+    return <Button icon={switchSortByIcon(sortBy[key])} onClick={() => onSortData(key)} />;
   };
 
   const renderMultiSelect = option => {
@@ -227,25 +275,28 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     };
 
     return (
-      <MultiSelect
-        ariaLabelledBy={`${option.key}_input`}
-        checkAllHeader={resourcesContext.messages['checkAllFilter']}
-        className={styles.multiselectFilter}
-        filter={option?.showInput}
-        headerClassName={styles.selectHeader}
-        id={options.key}
-        inputClassName={`p-float-label ${styles.label}`}
-        inputId={`${options.key}_input`}
-        //isFilter
-        itemTemplate={op => selectTemplate(op, option)}
-        key={option.key}
-        label={option.label || ''}
-        notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
-        onChange={event => onChange({ key: option.key, value: event.target.value })}
-        optionLabel="type"
-        options={getOptionsTypes(data, option.key, undefined, ErrorUtils.orderLevelErrors)}
-        value={filterBy[option.key]}
-      />
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {renderSortButton({ key: option.key })}
+        <MultiSelect
+          ariaLabelledBy={`${option.key}_input`}
+          checkAllHeader={resourcesContext.messages['checkAllFilter']}
+          className={styles.multiselectFilter}
+          filter={option?.showInput}
+          headerClassName={styles.selectHeader}
+          id={options.key}
+          inputClassName={`p-float-label ${styles.label}`}
+          inputId={`${options.key}_input`}
+          //isFilter
+          itemTemplate={op => selectTemplate(op, option)}
+          key={option.key}
+          label={option.label || ''}
+          notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
+          onChange={event => onChange({ key: option.key, value: event.target.value })}
+          optionLabel="type"
+          options={getOptionsTypes(data, option.key, undefined, ErrorUtils.orderLevelErrors)}
+          value={filterBy[option.key]}
+        />
+      </div>
     );
   };
 
