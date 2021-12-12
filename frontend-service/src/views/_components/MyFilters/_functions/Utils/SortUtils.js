@@ -30,4 +30,4 @@ const switchSortByOption = sortByKey => {
   }
 };
 
-export const MySortUtils = { switchSortByIcon, switchSortByOption };
+export const SortUtils = { switchSortByIcon, switchSortByOption };

@@ -24,6 +24,7 @@ import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
+import { MyFilters } from 'views/_components/MyFilters';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
@@ -50,7 +51,6 @@ import { useReportingObligations } from 'views/_components/ReportingObligations/
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
-import { MyFilters } from 'views/_components/Filters/MyFilters';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const { parseDataToFilter } = DataflowsUtils;

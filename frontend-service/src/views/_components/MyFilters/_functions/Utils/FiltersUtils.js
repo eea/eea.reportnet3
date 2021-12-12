@@ -31,9 +31,9 @@ const getOptionsByKeyNestedOption = (filteredOptions, key) => {
 
 const onFilterBooleanOptions = option => (typeof option !== 'boolean' ? !isNil(option) && !isEmpty(option) : true);
 
-const getOptionsTypes = (data, nestedOptionKey, list, sortErrors) => {
+const getOptionsTypes = (data, nestedOptionKey) => {
   const options = uniq(data.map(item => item[nestedOptionKey])).filter(onFilterBooleanOptions);
   return getOptionsByKeyNestedOption(options, nestedOptionKey);
 };
 
-export const MyFiltersUtils = { deepIncludes, getEndOfDay, getStartOfDay, parseDateValues, getOptionsTypes };
+export const FiltersUtils = { deepIncludes, getEndOfDay, getOptionsTypes, getStartOfDay, parseDateValues };

@@ -19,15 +19,14 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { filterByKeysFamily, filtersStateFamily, sortByStateFamily } from './_functions/Stores/filtersStores';
 
-import { ErrorUtils } from 'views/_functions/Utils';
-import { MyFiltersUtils } from './_functions/Utils/MyFiltersUtils';
-import { MySortUtils } from './_functions/Utils/MySortUtils';
+import { FiltersUtils } from './_functions/Utils/FiltersUtils';
+import { SortUtils } from './_functions/Utils/SortUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const SORT_CATEGORY = 'pinned';
 
-const { getEndOfDay, getStartOfDay, parseDateValues, getOptionsTypes } = MyFiltersUtils;
-const { switchSortByIcon, switchSortByOption } = MySortUtils;
+const { getEndOfDay, getOptionsTypes, getStartOfDay, parseDateValues } = FiltersUtils;
+const { switchSortByIcon, switchSortByOption } = SortUtils;
 
 export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode, onFilter, options, viewType }) => {
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysFamily(viewType));
@@ -129,10 +128,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
 
   const onApplyFilters = ({ filterBy }) => {
     return data.filter(
-      item =>
-        checkFilters({ filteredKeys: Object.keys(filterBy), item, filterBy }) &&
-        checkDates({ filterBy, item }) &&
-        checkMultiSelect({ filterBy, item })
+      item => checkFilters({ filterBy, item }) && checkDates({ filterBy, item }) && checkMultiSelect({ filterBy, item })
     );
   };
 
@@ -253,7 +249,13 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
   };
 
   const renderSortButton = ({ key }) => {
-    return <Button icon={switchSortByIcon(sortBy[key])} onClick={() => onSortData(key)} />;
+    return (
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={switchSortByIcon(sortBy[key])}
+        onClick={() => onSortData(key)}
+      />
+    );
   };
 
   const renderMultiSelect = option => {
@@ -293,7 +295,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
           notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
           onChange={event => onChange({ key: option.key, value: event.target.value })}
           optionLabel="type"
-          options={getOptionsTypes(data, option.key, undefined, ErrorUtils.orderLevelErrors)}
+          options={getOptionsTypes(data, option.key)}
           value={filterBy[option.key]}
         />
       </div>
