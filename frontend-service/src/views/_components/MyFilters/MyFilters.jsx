@@ -19,14 +19,13 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { filterByKeysFamily, filtersStateFamily, sortByStateFamily } from './_functions/Stores/filtersStores';
 
+import { ApplyFiltersUtils } from './_functions/Utils/ApplyFiltersUtils';
 import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const SORT_CATEGORY = 'pinned';
-
-const { getEndOfDay, getOptionsTypes, getStartOfDay, parseDateValues } = FiltersUtils;
-const { switchSortByIcon, switchSortByOption } = SortUtils;
+const { applyDates, applyInputs, applyMultiSelects } = ApplyFiltersUtils;
+const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
+const { getOptionsTypes, parseDateValues } = FiltersUtils;
 
 export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode, onFilter, options, viewType }) => {
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysFamily(viewType));
@@ -44,7 +43,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
 
   useEffect(() => {
     getFilterByKeys();
-  }, []);
+  }, [viewType]);
 
   useEffect(() => {
     if (getFilteredData) getFilteredData(filteredData);
@@ -60,51 +59,6 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     }
   };
 
-  const checkMultiSelect = ({ filterBy, item }) => {
-    const filteredKeys = filterByKeys.MULTI_SELECT.filter(key => Object.keys(filterBy).includes(key));
-    for (let index = 0; index < filteredKeys.length; index++) {
-      const filteredKey = filteredKeys[index];
-      if (!TextUtils.areEquals(filterBy[filteredKey], '') && filterBy[filteredKey].length > 0) {
-        if (!filterBy[filteredKey].includes(item[filteredKey].toUpperCase())) {
-          return false;
-        }
-      }
-    }
-    return true;
-  };
-
-  const checkFilters = ({ item, filterBy }) => {
-    const filteredKeys = filterByKeys.INPUT.filter(key => Object.keys(filterBy).includes(key));
-
-    for (let index = 0; index < filteredKeys.length; index++) {
-      const filteredKey = filteredKeys[index];
-
-      if (!TextUtils.areEquals(filterBy[filteredKey], '')) {
-        if (!item[filteredKey].toLowerCase().includes(filterBy[filteredKey].toLowerCase())) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  };
-
-  const checkDates = ({ item, filterBy }) => {
-    const filteredKeys = filterByKeys.DATE.filter(key => Object.keys(filterBy).includes(key));
-
-    for (let index = 0; index < filteredKeys.length; index++) {
-      const filteredKey = filteredKeys[index];
-      const dates = filterBy[filteredKey];
-      const value = new Date(item[filteredKey]).getTime();
-
-      if (dates[0] && !dates[1]) return value >= getStartOfDay(dates[0]) && getEndOfDay(dates[0]) >= value;
-
-      if (dates[0] && dates[1]) return value >= getStartOfDay(dates[0]) && getEndOfDay(dates[1]) >= value;
-    }
-
-    return true;
-  };
-
   const getFilterByKeys = () => {
     const filterKeys = { CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [] };
 
@@ -117,7 +71,12 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
 
   const loadFilters = async () => {
     try {
-      const filteredData = await applyFilters();
+      let filteredData = await applyFilters();
+
+      if (!isEmpty(sortBy)) {
+        const key = Object.keys(sortBy)[0];
+        filteredData = applySort({ filteredData, itemKey: key, sortOption: sortBy[key] });
+      }
 
       setFilters({ ...filters, data: data, filteredData, loadingStatus: 'SUCCESS' });
     } catch (error) {
@@ -128,7 +87,10 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
 
   const onApplyFilters = ({ filterBy }) => {
     return data.filter(
-      item => checkFilters({ filterBy, item }) && checkDates({ filterBy, item }) && checkMultiSelect({ filterBy, item })
+      item =>
+        applyInputs({ filterBy, filterByKeys, item }) &&
+        applyDates({ filterBy, filterByKeys, item }) &&
+        applyMultiSelects({ filterBy, filterByKeys, item })
     );
   };
 
@@ -136,6 +98,16 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     const filteredData = onApplyFilters({ filterBy: { ...filters.filterBy, [key]: value } });
 
     setFilters({ ...filters, filterBy: { ...filters.filterBy, [key]: value }, filteredData });
+  };
+
+  const onResetFilters = () => setFilters({ data, filteredData: data, filterBy: {} });
+
+  const onSortData = key => {
+    const sortOption = switchSortByOption(sortBy[key]);
+    const sortedData = applySort({ filteredData, itemKey: key, sortOption });
+
+    setSortBy({ [key]: sortOption });
+    setFilters({ ...filters, filteredData: sortedData });
   };
 
   const setLoadingStatus = status => setFilters({ ...filters, loadingStatus: status });
@@ -217,47 +189,6 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     );
   };
 
-  const onSortData = key => {
-    const sortOption = switchSortByOption(sortBy[key]);
-    const arrayForSort = [...filteredData];
-
-    const sortedData = arrayForSort.sort((a, b) => {
-      if (!isNil(SORT_CATEGORY) && a[SORT_CATEGORY] !== b[SORT_CATEGORY]) {
-        return a[SORT_CATEGORY] < b[SORT_CATEGORY] ? -2 : 2;
-      }
-
-      const optionA = a[key].toUpperCase();
-      const optionB = b[key].toUpperCase();
-
-      switch (sortOption) {
-        case 'asc':
-          return optionA > optionB ? 1 : -1;
-
-        case 'desc':
-          return optionA < optionB ? 1 : -1;
-
-        case 'idle':
-          return 0;
-
-        default:
-          return 0;
-      }
-    });
-
-    setSortBy({ [key]: sortOption });
-    setFilters({ ...filters, filteredData: sortedData });
-  };
-
-  const renderSortButton = ({ key }) => {
-    return (
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon={switchSortByIcon(sortBy[key])}
-        onClick={() => onSortData(key)}
-      />
-    );
-  };
-
   const renderMultiSelect = option => {
     if (option.nestedOptions) {
       return option.nestedOptions.map(netedOption => renderMultiSelect(netedOption));
@@ -302,6 +233,16 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     );
   };
 
+  const renderSortButton = ({ key }) => {
+    return (
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={switchSortByIcon(sortBy[key])}
+        onClick={() => onSortData(key)}
+      />
+    );
+  };
+
   if (loadingStatus === 'PENDING') return <div>LOADING</div>;
 
   return (
@@ -323,7 +264,7 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
         className="p-button-secondary p-button-rounded p-button-animated-blink"
         icon="undo"
         label={resourcesContext.messages['reset']}
-        onClick={loadFilters}
+        onClick={onResetFilters}
       />
     </div>
   );

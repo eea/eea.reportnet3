@@ -1,14 +1,9 @@
-import dayjs from 'dayjs';
 import isDate from 'lodash/isDate';
 import uniq from 'lodash/uniq';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 const deepIncludes = ({ entries, value }) => entries.toLowerCase().includes(value.toLowerCase());
-
-const getEndOfDay = date => new Date(dayjs(date).endOf('day').format()).getTime();
-
-const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getTime();
 
 const parseDateValues = values => {
   if (!values) return [];
@@ -36,4 +31,4 @@ const getOptionsTypes = (data, nestedOptionKey) => {
   return getOptionsByKeyNestedOption(options, nestedOptionKey);
 };
 
-export const FiltersUtils = { deepIncludes, getEndOfDay, getOptionsTypes, getStartOfDay, parseDateValues };
+export const FiltersUtils = { deepIncludes, getOptionsTypes, parseDateValues };

@@ -288,6 +288,7 @@ const Dataflows = () => {
       if (TextUtils.areEquals(tabId, 'reporting')) {
         const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
+
         const parsedDataflows = orderBy(
           parseDataToFilter(data, userContext.userProps.pinnedDataflows),
           ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
@@ -329,17 +330,55 @@ const Dataflows = () => {
       } else if (TextUtils.areEquals(tabId, 'business')) {
         const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
+
+        const parsedDataflows = orderBy(
+          parseDataToFilter(data, userContext.userProps.pinnedDataflows),
+          ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+          ['asc', 'asc', 'asc', 'asc', 'asc']
+        );
+        const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
+
+        setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+
         dataflowsDispatch({
           type: 'SET_DATAFLOWS',
-          payload: { data, type: 'business', contextCurrentDataflowType: userContext.currentDataflowType }
+          payload: {
+            contextCurrentDataflowType: userContext.currentDataflowType,
+            data: parsedDataflows,
+            type: 'business'
+          }
         });
+
+        // dataflowsDispatch({
+        //   type: 'SET_DATAFLOWS',
+        //   payload: { data, type: 'business', contextCurrentDataflowType: userContext.currentDataflowType }
+        // });
       } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
         const data = await CitizenScienceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
+
+        const parsedDataflows = orderBy(
+          parseDataToFilter(data, userContext.userProps.pinnedDataflows),
+          ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+          ['asc', 'asc', 'asc', 'asc', 'asc']
+        );
+        const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
+
+        setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+
         dataflowsDispatch({
           type: 'SET_DATAFLOWS',
-          payload: { data, type: 'citizenScience', contextCurrentDataflowType: userContext.currentDataflowType }
+          payload: {
+            contextCurrentDataflowType: userContext.currentDataflowType,
+            data: parsedDataflows,
+            type: 'citizenScience'
+          }
         });
+
+        // dataflowsDispatch({
+        //   type: 'SET_DATAFLOWS',
+        //   payload: { data, type: 'citizenScience', contextCurrentDataflowType: userContext.currentDataflowType }
+        // });
       }
     } catch (error) {
       console.error('Dataflows - getDataflows.', error);
@@ -568,11 +607,63 @@ const Dataflows = () => {
     reporting: [
       {
         nestedOptions: [
-          { key: 'name', label: 'This is inside a array -- NAME', order: 0 },
-          { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
-          { key: 'legalInstrument', label: 'This is inside a array -- INSTRUMENT', order: 2 },
-          { key: 'obligationTitle', label: 'This is inside a array -- OBLIGATION TITLE', order: 3 },
-          { key: 'obligationId', label: 'This is inside a array -- OBLIGATION ID', order: 4 }
+          { key: 'name', label: resourcesContext.messages['name'], order: 0 },
+          { key: 'description', label: resourcesContext.messages['description'], order: 1 },
+          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2 },
+          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3 },
+          { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4 }
+        ],
+        type: 'INPUT'
+      },
+      {
+        type: 'MULTI_SELECT',
+        nestedOptions: [
+          { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
+          { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1 },
+          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
+        ]
+      },
+      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' }
+      // (isCustodian || isAdmin) && {
+      //   key: 'creationDate',
+      //   label: resourcesContext.messages['creationDateFilterLabel'],
+      //   type: 'DATE'
+      // }
+    ],
+    citizenScience: [
+      {
+        nestedOptions: [
+          { key: 'name', label: resourcesContext.messages['name'], order: 0 },
+          { key: 'description', label: resourcesContext.messages['description'], order: 1 },
+          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2 },
+          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3 },
+          { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4 }
+        ],
+        type: 'INPUT'
+      },
+      {
+        type: 'MULTI_SELECT',
+        nestedOptions: [
+          { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
+          { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1 },
+          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
+        ]
+      },
+      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' }
+      // (isCustodian || isAdmin) && {
+      //   key: 'creationDate',
+      //   label: resourcesContext.messages['creationDateFilterLabel'],
+      //   type: 'DATE'
+      // }
+    ],
+    business: [
+      {
+        nestedOptions: [
+          { key: 'name', label: resourcesContext.messages['name'], order: 0 },
+          { key: 'description', label: resourcesContext.messages['description'], order: 1 },
+          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2 },
+          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3 },
+          { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4 }
         ],
         type: 'INPUT'
       },
@@ -594,15 +685,15 @@ const Dataflows = () => {
     reference: [
       {
         nestedOptions: [
-          { key: 'name', label: 'This is inside a array -- NAME', order: 0 },
-          { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 }
+          { key: 'name', label: resourcesContext.messages['name'], order: 0 },
+          { key: 'description', label: resourcesContext.messages['description'], order: 1 }
         ],
         type: 'INPUT'
       },
       {
         nestedOptions: [
-          { key: 'status', label: 'This is inside a array -- STATUS', order: 0 },
-          { key: 'pinned', label: 'This is inside a array -- PINNED', order: 1 }
+          { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
+          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
         ],
         type: 'MULTI_SELECT'
       }
@@ -638,12 +729,6 @@ const Dataflows = () => {
         /> */}
         <DataflowsList
           className="dataflowList-accepted-help-step"
-          content={{
-            reporting: filteredData['reporting'],
-            business: filteredData['business'],
-            citizenScience: filteredData['citizenScience'],
-            reference: filteredData['reference']
-          }}
           filteredData={filteredData[tabId]}
           isAdmin={isAdmin}
           isCustodian={isCustodian}

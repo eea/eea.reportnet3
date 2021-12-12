@@ -1,7 +1,7 @@
 import { atomFamily } from 'recoil';
 
 export const filtersStateFamily = atomFamily({
-  key: 'FiltersState',
+  key: 'filtersState',
   default: () => ({
     data: [],
     filterBy: {},
@@ -12,11 +12,11 @@ export const filtersStateFamily = atomFamily({
 });
 
 export const filterByKeysFamily = atomFamily({
-  key: 'FilterByKeys',
+  key: 'filterByKeys',
   default: () => ({ CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [] })
 });
 
 export const sortByStateFamily = atomFamily({
-  key: 'SortByStateFamily',
+  key: 'sortByStateFamily',
   default: () => ({})
 });
