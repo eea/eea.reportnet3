@@ -1,8 +1,12 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-
 import { useResetRecoilState } from 'recoil';
+
 import isNil from 'lodash/isNil';
+import intersection from 'lodash/intersection';
+import isEmpty from 'lodash/isEmpty';
+import orderBy from 'lodash/orderBy';
+import pull from 'lodash/pull';
 
 import styles from './Dataflows.module.scss';
 
@@ -39,16 +43,17 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
-import { CurrentPage } from 'views/_functions/Utils';
-import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
-import { ErrorUtils } from 'views/_functions/Utils';
-
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
-import { TextUtils } from 'repositories/_utils/TextUtils';
+import { CurrentPage } from 'views/_functions/Utils';
+import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
+import { ErrorUtils } from 'views/_functions/Utils';
 import { MyFilters } from 'views/_components/Filters/MyFilters';
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
+const { parseDataToFilter } = DataflowsUtils;
 
 const Dataflows = () => {
   const { errorType: dataflowsErrorType } = useParams();
@@ -82,13 +87,10 @@ const Dataflows = () => {
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     reference: [],
     reporting: [],
-    filteredData: {
-      business: [],
-      citizenScience: [],
-      reference: [],
-      reporting: []
-    }
+    filteredData: { business: [], citizenScience: [], reference: [], reporting: [] }
   });
+
+  const [pinnedSeparatorIndex, setPinnedSeparatorIndex] = useState(-1);
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
     useReportingObligations();
@@ -286,16 +288,43 @@ const Dataflows = () => {
       if (TextUtils.areEquals(tabId, 'reporting')) {
         const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
+        const parsedDataflows = orderBy(
+          parseDataToFilter(data, userContext.userProps.pinnedDataflows),
+          ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+          ['asc', 'asc', 'asc', 'asc', 'asc']
+        );
+        const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
+
+        setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+
         dataflowsDispatch({
           type: 'SET_DATAFLOWS',
-          payload: { data, type: 'reporting', contextCurrentDataflowType: userContext.currentDataflowType }
+          payload: {
+            contextCurrentDataflowType: userContext.currentDataflowType,
+            data: parsedDataflows,
+            type: 'reporting'
+          }
         });
       } else if (TextUtils.areEquals(tabId, 'reference')) {
         const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
+
+        const parsedDataflows = orderBy(
+          parseDataToFilter(data, userContext.userProps.pinnedDataflows),
+          ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+          ['asc', 'asc', 'asc', 'asc', 'asc']
+        );
+        const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
+
+        setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+
         dataflowsDispatch({
           type: 'SET_DATAFLOWS',
-          payload: { data, type: 'reference', contextCurrentDataflowType: userContext.currentDataflowType }
+          payload: {
+            data: parsedDataflows,
+            type: 'reference',
+            contextCurrentDataflowType: userContext.currentDataflowType
+          }
         });
       } else if (TextUtils.areEquals(tabId, 'business')) {
         const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
@@ -388,6 +417,94 @@ const Dataflows = () => {
       console.error('Dataflows - onRefreshToken.', error);
       await UserService.logout();
       userContext.onLogout();
+    }
+  };
+
+  const onReorderPinnedDataflows = async ({ isPinned, pinnedItem }) => {
+    const inmUserProperties = { ...userContext.userProps };
+    const inmPinnedDataflows = intersection(
+      inmUserProperties.pinnedDataflows,
+      [
+        ...dataflowsState.reporting,
+        ...dataflowsState.reference,
+        ...dataflowsState.business,
+        ...dataflowsState.citizenScience
+      ].map(data => data.id.toString())
+    );
+
+    if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
+      pull(inmPinnedDataflows, pinnedItem.id.toString());
+    } else {
+      inmPinnedDataflows.push(pinnedItem.id.toString());
+    }
+
+    inmUserProperties.pinnedDataflows = inmPinnedDataflows;
+
+    await onUpdateUserProperties(inmUserProperties);
+
+    const inmfilteredData = [...filteredData];
+    const changedFilteredData = inmfilteredData.map(item => {
+      if (item.id === pinnedItem.id) {
+        item.pinned = isPinned ? 'pinned' : 'unpinned';
+      }
+      return item;
+    });
+
+    if (isPinned) {
+      notificationContext.add(
+        { type: 'DATAFLOW_PINNED_INIT', content: { customContent: { dataflowName: pinnedItem.name } } },
+        true
+      );
+    } else {
+      notificationContext.add(
+        { type: 'DATAFLOW_UNPINNED_INIT', content: { customContent: { dataflowName: pinnedItem.name } } },
+        true
+      );
+    }
+
+    const orderedFilteredData = orderBy(
+      changedFilteredData,
+      ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+      ['asc', 'asc', 'asc', 'asc', 'asc']
+    );
+
+    const orderedPinned = orderedFilteredData.map(el => el.pinned);
+
+    setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+
+    const inmDataToFilter = {
+      reporting: dataflowsState.reporting,
+      reference: dataflowsState.reference,
+      business: dataflowsState.business,
+      citizenScience: dataflowsState.citizenScience
+    };
+    const changedInitialData = inmDataToFilter[tabId].map(item => {
+      if (item.id === pinnedItem.id) {
+        item.pinned = isPinned ? 'pinned' : 'unpinned';
+      }
+      return item;
+    });
+
+    dataflowsDispatch({
+      type: 'SET_DATAFLOWS',
+      payload: {
+        data: orderBy(
+          changedInitialData,
+          ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+          ['asc', 'asc', 'asc', 'asc', 'asc']
+        ),
+        type: tabId,
+        contextCurrentDataflowType: userContext.currentDataflowType
+      }
+    });
+  };
+
+  const onUpdateUserProperties = async userProperties => {
+    try {
+      return await UserService.updateConfiguration(userProperties);
+    } catch (error) {
+      console.error('DataflowsList - changeUserProperties.', error);
+      notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' }, true);
     }
   };
 
@@ -505,12 +622,17 @@ const Dataflows = () => {
         </div>
         <MyFilters
           className={'dataflowsListFilters'}
-          data={dataflowsState['reporting']}
+          data={dataflowsState[tabId]}
           getFilteredData={getFilteredData}
           options={options[tabId]}
           viewType={tabId}
         />
-        <List dataflows={filteredData['reporting']} />
+        <List
+          dataflows={filteredData[tabId]}
+          isAdmin={isAdmin}
+          isCustodian={isCustodian}
+          isLoading={loadingStatus[tabId]}
+        />
         {/* <DataflowsList
           className="dataflowList-accepted-help-step"
           content={{
