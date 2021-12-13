@@ -259,9 +259,10 @@ export const MyFilters = ({
   const renderSortButton = ({ key }) => {
     return (
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary-transparent ${styles.sortButton}`}
         icon={switchSortByIcon(sortBy[key])}
         onClick={() => onSortData(key)}
+        style={{ fontSize: '0.12rem' }}
       />
     );
   };
@@ -269,7 +270,7 @@ export const MyFilters = ({
   if (loadingStatus === 'PENDING') return <div>LOADING</div>;
 
   return (
-    <div className={className ? styles[className] : styles.header}>
+    <div className={className ? styles[className] : styles.default}>
       {isSearchVisible ? <InputText placeholder="Search" /> : null}
       {renderFilters()}
       {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
@@ -283,12 +284,14 @@ export const MyFilters = ({
         />
       )}
 
-      <Button
-        className="p-button-secondary p-button-rounded p-button-animated-blink"
-        icon="undo"
-        label={resourcesContext.messages['reset']}
-        onClick={onResetFilters}
-      />
+      <div className={`${styles.resetButton}`}>
+        <Button
+          className={`p-button-secondary p-button-rounded p-button-animated-blink`}
+          icon="undo"
+          label={resourcesContext.messages['reset']}
+          onClick={onResetFilters}
+        />
+      </div>
     </div>
   );
 };

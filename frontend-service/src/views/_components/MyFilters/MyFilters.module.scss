@@ -26,9 +26,10 @@
   /*Hide border to inputText*/
   .inputFilter {
     background: transparent;
-    border: 0;
-    border-bottom: var(--inputtext-border);
-    width: 100;
+    border: 0px;
+    border-radius: 0px;
+    border-bottom: var(--inputtext-border) !important;
+    width: 100%;
 
     &:focus,
     &:enabled:focus {
@@ -42,16 +43,18 @@
 
   /*Hide borders to multiSelect*/
   .multiselectFilter {
-    border: 0;
-    border-bottom: var(--inputtext-border);
+    border: 0px;
+    border-radius: 0px;
+    border-bottom: var(--inputtext-border) !important;
     color: var(--floating-label-color) !important;
     font-size: 0.8333rem !important;
     height: 2rem;
     padding-left: 0em;
-    width: 85% !important;
+    width: 90% !important;
 
     label {
       color: var(--font-filters);
+      margin-left: 0.1rem;
     }
 
     li {
@@ -80,23 +83,54 @@
   // }
 }
 
-.header {
+.resetButton {
+  margin-left: auto;
+  margin-bottom: auto;
+}
+
+.sortButton {
+  background-color: transparent;
+  border: none;
+  color: var(--button-secondary-transparent-color-hover);
+  cursor: pointer;
+  font-size: 16pt !important;
+  height: 1.6em !important;
+  opacity: 0.7;
+  width: 3.1rem !important;
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  &:enabled:focus {
+    box-shadow: 0 0 0 0 var(--c-white-color) !important;
+    outline: none;
+  }
+
+  &:enabled:active,
+  &:enabled:hover {
+    background-color: transparent !important;
+    border-color: transparent !important;
+  }
+}
+
+.default {
   align-items: center;
   display: flex;
   flex-direction: row;
   margin: 2rem 0;
   width: 100%;
   align-items: baseline;
+  flex-wrap: wrap;
 
   @include for-phone-only {
     justify-content: flex-start;
-    flex-wrap: wrap;
     .input {
       margin-bottom: 1.5rem;
+      width: 100%;
     }
   }
   @include for-tablet-portrait-up {
-    flex-wrap: wrap;
     .input,
     .inputCheckbox {
       width: 50%;
@@ -104,51 +138,16 @@
     }
   }
   @include for-desktop-up {
-    justify-content: space-between;
-    flex-wrap: wrap;
     .input,
     .inputCheckbox {
       width: 25%;
     }
   }
   @include for-big-desktop-up {
-    flex-wrap: nowrap;
     .input,
     .inputCheckbox {
       width: 100%;
       margin-bottom: 0;
-    }
-  }
-}
-
-.dataflowsListFilters {
-  @extend .header;
-
-  .multiselectFilter {
-    width: 100% !important;
-  }
-
-  @include for-phone-only {
-    .buttonWrapper {
-      width: 100%;
-    }
-  }
-  @include for-tablet-portrait-up {
-    .buttonWrapper {
-      width: 50%;
-    }
-  }
-
-  @include for-big-desktop-up {
-    flex-wrap: wrap;
-    .input,
-    .inputCheckbox {
-      width: 20%;
-      margin-bottom: 1.5rem;
-    }
-
-    .buttonWrapper {
-      width: 20%;
     }
   }
 }

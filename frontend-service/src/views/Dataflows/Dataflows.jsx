@@ -715,7 +715,6 @@ const Dataflows = () => {
           />
         </div>
         <MyFilters
-          className={'dataflowsListFilters'}
           data={dataflowsState[tabId]}
           getFilteredData={getFilteredData}
           options={options[tabId]}
