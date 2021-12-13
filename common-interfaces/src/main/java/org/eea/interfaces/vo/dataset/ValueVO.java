@@ -22,7 +22,7 @@ public class ValueVO implements Serializable {
   private static final long serialVersionUID = -7417626227682871271L;
 
   /**
-   * The type.
+   * The table.
    */
   private String table;
 
@@ -35,7 +35,7 @@ public class ValueVO implements Serializable {
   /** The label. */
   private String label;
 
-  /** The label. */
+  /** The result row. */
   private int row;
 
   /**
