@@ -623,12 +623,12 @@ const Dataflows = () => {
           { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
         ]
       },
-      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' }
-      // (isCustodian || isAdmin) && {
-      //   key: 'creationDate',
-      //   label: resourcesContext.messages['creationDateFilterLabel'],
-      //   type: 'DATE'
-      // }
+      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' },
+      (isCustodian || isAdmin) && {
+        key: 'creationDate',
+        label: resourcesContext.messages['creationDateFilterLabel'],
+        type: 'DATE'
+      }
     ],
     citizenScience: [
       {
@@ -649,12 +649,12 @@ const Dataflows = () => {
           { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
         ]
       },
-      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' }
-      // (isCustodian || isAdmin) && {
-      //   key: 'creationDate',
-      //   label: resourcesContext.messages['creationDateFilterLabel'],
-      //   type: 'DATE'
-      // }
+      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' },
+      (isCustodian || isAdmin) && {
+        key: 'creationDate',
+        label: resourcesContext.messages['creationDateFilterLabel'],
+        type: 'DATE'
+      }
     ],
     business: [
       {
@@ -675,12 +675,12 @@ const Dataflows = () => {
           { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
         ]
       },
-      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' }
-      // (isCustodian || isAdmin) && {
-      //   key: 'creationDate',
-      //   label: resourcesContext.messages['creationDateFilterLabel'],
-      //   type: 'DATE'
-      // }
+      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' },
+      (isCustodian || isAdmin) && {
+        key: 'creationDate',
+        label: resourcesContext.messages['creationDateFilterLabel'],
+        type: 'DATE'
+      }
     ],
     reference: [
       {

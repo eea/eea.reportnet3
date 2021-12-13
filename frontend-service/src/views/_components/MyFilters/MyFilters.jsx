@@ -63,6 +63,8 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     const filterKeys = { CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [] };
 
     options.forEach(option => {
+      if (!option) return;
+
       filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption.key) || [option.key];
     });
 
@@ -114,6 +116,8 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
 
   const renderFilters = () => {
     return options.map(option => {
+      if (option == null) return [];
+
       switch (option.type) {
         case 'CHECKBOX':
           return [];
