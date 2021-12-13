@@ -7,8 +7,10 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './InfoTable.module.scss';
 
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DataTable } from 'views/_components/DataTable';
 import { IconTooltip } from 'views/_components/IconTooltip';
 import { InfoTableMessages } from './_components/InfoTableMessages';
@@ -256,6 +258,13 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
           filterMaxLength={fieldMaxLength}
           header={
             <Fragment>
+              {column.readOnly && (
+                <FontAwesomeIcon
+                  aria-hidden={false}
+                  className={`p-breadcrumb-home ${styles.iconSize}`}
+                  icon={AwesomeIcons('lock')}
+                />
+              )}
               {column.header}
               <TooltipButton
                 getContent={() =>
