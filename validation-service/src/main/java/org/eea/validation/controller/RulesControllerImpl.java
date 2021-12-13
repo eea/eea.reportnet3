@@ -847,10 +847,13 @@ public class RulesControllerImpl implements RulesController {
   public List<List<ValueVO>> runSqlRule(
       @ApiParam(value = "Dataset id used on the run process",
           example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "SQL rule that is going to be executed") @RequestParam String sqlRule) {
+      @ApiParam(value = "SQL rule that is going to be executed") @RequestParam String sqlRule,
+      @ApiParam(value = "Show internal fields in query results",
+          defaultValue = "false") @RequestParam(
+              defaultValue = "false") boolean showInternalFields) {
     List<List<ValueVO>> obtainedTableValues = new ArrayList<>();
     try {
-      obtainedTableValues = sqlRulesService.runSqlRule(datasetId, sqlRule);
+      obtainedTableValues = sqlRulesService.runSqlRule(datasetId, sqlRule, showInternalFields);
 
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error(

@@ -34,7 +34,6 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.kafka.domain.EventType;
@@ -363,7 +362,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule) throws EEAException {
+  public List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule, boolean showInternalFields)
+      throws EEAException {
 
     StringBuilder sb = new StringBuilder("");
     List<List<ValueVO>> result = new ArrayList<>();
@@ -371,7 +371,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
     List<String> ids = new ArrayList<>();
     List<String> datasetIds;
-    List<String> fieldNames = new ArrayList<>();
 
     try {
 
@@ -390,11 +389,16 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
         throw new EEAException();
       } else {
-        fieldNames = retrieveTableFields(datasetIds);
-        sb.append("SELECT * FROM (");
-        sb.append(sqlRule);
-        sb.append(") as userSelect OFFSET 0 LIMIT 10");
-        result = datasetRepository.runSqlRule(datasetId, sb.toString(), fieldNames);
+
+        if (showInternalFields) {
+          sb.append("SELECT * FROM (");
+          sb.append(sqlRule);
+          sb.append(") as userSelect OFFSET 0 LIMIT 10");
+        } else {
+          sb = buildWithTableQuery(datasetIds, sb, sqlRule);
+        }
+
+        result = datasetRepository.runSqlRule(datasetId, sb.toString());
       }
     } catch (StringIndexOutOfBoundsException e) {
       throw new StringIndexOutOfBoundsException(
@@ -666,12 +670,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     });
   }
 
-  public List<String> retrieveTableFields(List<String> datasetIds) {
+  public List<TableSchemaVO> retrieveTables(List<String> datasetIds) {
 
     List<TableSchemaVO> tables = new ArrayList<>();
-    List<RecordSchemaVO> records = new ArrayList<>();
-    List<FieldSchemaVO> fields = new ArrayList<>();
-    List<String> fieldNames = new ArrayList<>();
 
     for (String id : datasetIds) {
       DataSetSchemaVO schema =
@@ -680,17 +681,51 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         tables.addAll(schema.getTableSchemas());
       }
     }
-    for (TableSchemaVO table : tables) {
-      records.add(table.getRecordSchema());
-    }
-    for (RecordSchemaVO recordValue : records) {
-      fields.addAll(recordValue.getFieldSchema());
-    }
-    for (FieldSchemaVO field : fields) {
-      fieldNames.add(field.getName().toLowerCase());
-    }
-    return fieldNames;
+    return tables;
 
+  }
+
+  /**
+   * Builds the with table query.
+   *
+   * @param datasetIds the dataset ids
+   * @param sb the sb
+   * @param sqlRule the sql rule
+   * @return the string builder
+   */
+  private StringBuilder buildWithTableQuery(List<String> datasetIds, StringBuilder sb,
+      String sqlRule) {
+    List<TableSchemaVO> tables = new ArrayList<>();
+
+    for (String dataset : datasetIds) {
+      sqlRule = sqlRule.replace(DATASET + dataset + ".", "");
+    }
+
+    tables = retrieveTables(datasetIds);
+    sb.append("WITH ");
+    for (int i = 0; i < tables.size(); i++) {
+      sb.append(tables.get(i).getNameTableSchema() + " AS ");
+      sb.append("(SELECT ");
+
+      List<FieldSchemaVO> fields = tables.get(i).getRecordSchema().getFieldSchema();
+      for (int j = 0; j < fields.size(); j++) {
+        sb.append(fields.get(j).getName());
+        if (j < fields.size() - 1) {
+          sb.append(",");
+        }
+      }
+      sb.append(" FROM ");
+      sb.append(tables.get(i).getNameTableSchema() + ")");
+
+      if (i < tables.size() - 1) {
+        sb.append(",");
+      }
+    }
+    sb.append(" SELECT * FROM (");
+    sb.append(sqlRule);
+    sb.append(") as userSelect OFFSET 0 LIMIT 10");
+
+    return sb;
   }
 
   /**

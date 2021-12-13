@@ -377,7 +377,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
    */
   @Override
   @Transactional
-  public List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule, List<String> fields)
+  public List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule)
       throws EEAInvalidSQLException {
     List<List<ValueVO>> tableValues = new ArrayList<>();
 
@@ -395,14 +395,12 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             while (rs.next()) {
               List<ValueVO> values = new ArrayList<>();
               for (int i = 1; i <= rsmt.getColumnCount(); i++) {
-                if (fields.contains(rsmt.getColumnLabel(i)) || rsmt.getTableName(i).equals("")) {
-                  ValueVO valueToAdd = new ValueVO();
-                  valueToAdd.setValue(rs.getString(i));
-                  valueToAdd.setLabel(rsmt.getColumnLabel(i));
-                  valueToAdd.setTable(rsmt.getTableName(i));
-                  valueToAdd.setRow(index);
-                  values.add(valueToAdd);
-                }
+                ValueVO valueToAdd = new ValueVO();
+                valueToAdd.setValue(rs.getString(i));
+                valueToAdd.setLabel(rsmt.getColumnLabel(i));
+                valueToAdd.setTable(rsmt.getTableName(i));
+                valueToAdd.setRow(index);
+                values.add(valueToAdd);
               }
               tableRows.add(values);
               index++;
