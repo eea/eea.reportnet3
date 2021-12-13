@@ -160,7 +160,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
               }
               icon="clock"
               iconClasses={styles.validateSqlSentenceIcon}
-              label={'Validate SQL'}
+              label={resourcesContext.messages['validateSql']}
               onClick={onValidateSqlSentence}
             />
             {renderSqlSentenceCost()}
