@@ -695,7 +695,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    */
   private StringBuilder buildWithTableQuery(List<String> datasetIds, StringBuilder sb,
       String sqlRule) {
-    List<TableSchemaVO> tables = new ArrayList<>();
+    List<TableSchemaVO> tables;
 
     for (String dataset : datasetIds) {
       sqlRule = sqlRule.replace(DATASET + dataset + ".", "");
