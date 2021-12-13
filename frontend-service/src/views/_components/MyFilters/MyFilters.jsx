@@ -15,14 +15,17 @@ import { LevelError } from 'views/_components/LevelError';
 import { MultiSelect } from 'views/_components/MultiSelect';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-import { filterByKeysFamily, filtersStateFamily } from './_functions/Stores/filtersStores';
+import { filterByKeysFamily, filtersStateFamily, sortByStateFamily } from './_functions/Stores/filtersStores';
 
-import { MyFiltersUtils } from './_functions/Utils/MyFiltersUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
-import { ErrorUtils } from 'views/_functions/Utils';
+import { ApplyFiltersUtils } from './_functions/Utils/ApplyFiltersUtils';
+import { FiltersUtils } from './_functions/Utils/FiltersUtils';
+import { SortUtils } from './_functions/Utils/SortUtils';
 
-const { getEndOfDay, getStartOfDay, parseDateValues, getOptionsTypes } = MyFiltersUtils;
+const { applyDates, applyInputs, applyMultiSelects } = ApplyFiltersUtils;
+const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
+const { getOptionsTypes, parseDateValues } = FiltersUtils;
 
 export const MyFilters = ({
   className,
@@ -34,11 +37,13 @@ export const MyFilters = ({
   options,
   viewType
 }) => {
-  const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysFamily(viewType));
+  const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
+  const [sortBy, setSortBy] = useRecoilState(sortByStateFamily(viewType));
 
   const { filterBy, filteredData, loadingStatus } = filters;
 
+  const { userProps } = useContext(UserContext);
   const resourcesContext = useContext(ResourcesContext);
 
   useLayoutEffect(() => {
@@ -47,7 +52,7 @@ export const MyFilters = ({
 
   useEffect(() => {
     getFilterByKeys();
-  }, []);
+  }, [viewType]);
 
   useEffect(() => {
     if (getFilteredData) getFilteredData(filteredData);
@@ -63,55 +68,12 @@ export const MyFilters = ({
     }
   };
 
-  const checkMultiSelect = ({ filterBy, item }) => {
-    const filteredKeys = filterByKeys.MULTI_SELECT.filter(key => Object.keys(filterBy).includes(key));
-    for (let index = 0; index < filteredKeys.length; index++) {
-      const filteredKey = filteredKeys[index];
-      if (!TextUtils.areEquals(filterBy[filteredKey], '') && filterBy[filteredKey].length > 0) {
-        if (!filterBy[filteredKey].includes(item[filteredKey].toUpperCase())) {
-          return false;
-        }
-      }
-    }
-    return true;
-  };
-
-  const checkFilters = ({ item, filterBy }) => {
-    const filteredKeys = filterByKeys.INPUT.filter(key => Object.keys(filterBy).includes(key));
-
-    for (let index = 0; index < filteredKeys.length; index++) {
-      const filteredKey = filteredKeys[index];
-
-      if (!TextUtils.areEquals(filterBy[filteredKey], '')) {
-        if (!item[filteredKey].toLowerCase().includes(filterBy[filteredKey].toLowerCase())) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  };
-
-  const checkDates = ({ item, filterBy }) => {
-    const filteredKeys = filterByKeys.DATE.filter(key => Object.keys(filterBy).includes(key));
-
-    for (let index = 0; index < filteredKeys.length; index++) {
-      const filteredKey = filteredKeys[index];
-      const dates = filterBy[filteredKey];
-      const value = new Date(item[filteredKey]).getTime();
-
-      if (dates[0] && !dates[1]) return value >= getStartOfDay(dates[0]) && getEndOfDay(dates[0]) >= value;
-
-      if (dates[0] && dates[1]) return value >= getStartOfDay(dates[0]) && getEndOfDay(dates[1]) >= value;
-    }
-
-    return true;
-  };
-
   const getFilterByKeys = () => {
     const filterKeys = { CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [] };
 
     options.forEach(option => {
+      if (!option) return;
+
       filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption.key) || [option.key];
     });
 
@@ -120,7 +82,12 @@ export const MyFilters = ({
 
   const loadFilters = async () => {
     try {
-      const filteredData = await applyFilters();
+      let filteredData = await applyFilters();
+
+      if (!isEmpty(sortBy)) {
+        const key = Object.keys(sortBy)[0];
+        filteredData = applySort({ filteredData, itemKey: key, sortOption: sortBy[key] });
+      }
 
       setFilters({ ...filters, data: data, filteredData, loadingStatus: 'SUCCESS' });
     } catch (error) {
@@ -132,9 +99,9 @@ export const MyFilters = ({
   const onApplyFilters = ({ filterBy }) => {
     return data.filter(
       item =>
-        checkFilters({ filteredKeys: Object.keys(filterBy), item, filterBy }) &&
-        checkDates({ filterBy, item }) &&
-        checkMultiSelect({ filterBy, item })
+        applyInputs({ filterBy, filterByKeys, item }) &&
+        applyDates({ filterBy, filterByKeys, item }) &&
+        applyMultiSelects({ filterBy, filterByKeys, item })
     );
   };
 
@@ -144,10 +111,22 @@ export const MyFilters = ({
     setFilters({ ...filters, filterBy: { ...filters.filterBy, [key]: value }, filteredData });
   };
 
+  const onResetFilters = () => setFilters({ data, filteredData: data, filterBy: {} });
+
+  const onSortData = key => {
+    const sortOption = switchSortByOption(sortBy[key]);
+    const sortedData = applySort({ filteredData, itemKey: key, sortOption });
+
+    setSortBy({ [key]: sortOption });
+    setFilters({ ...filters, filteredData: sortedData });
+  };
+
   const setLoadingStatus = status => setFilters({ ...filters, loadingStatus: status });
 
   const renderFilters = () => {
     return options.map(option => {
+      if (option == null) return [];
+
       switch (option.type) {
         case 'CHECKBOX':
           return [];
@@ -175,11 +154,12 @@ export const MyFilters = ({
 
     return (
       <div className={styles.input} key={option.key}>
+        {renderSortButton({ key: option.key })}
         <div className={`p-float-label ${styles.label}`}>
           <Calendar
             baseZIndex={9999}
             // className={styles.calendarFilter}
-            // dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
+            dateFormat={userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
             inputClassName={styles.inputFilter}
             key={option.key}
             // inputId={inputId}
@@ -215,6 +195,7 @@ export const MyFilters = ({
 
     return (
       <div className={styles.input} key={option.key}>
+        {renderSortButton({ key: option.key })}
         <div className={`p-float-label ${styles.label}`}>
           <InputText
             className={styles.inputFilter}
@@ -251,6 +232,7 @@ export const MyFilters = ({
 
     return (
       <div className={`${styles.input}`} key={option.key}>
+        {renderSortButton({ key: option.key })}
         <MultiSelect
           ariaLabelledBy={`${option.key}_input`}
           checkAllHeader={resourcesContext.messages['checkAllFilter']}
@@ -260,45 +242,53 @@ export const MyFilters = ({
           id={options.key}
           inputClassName={`p-float-label ${styles.label}`}
           inputId={`${options.key}_input`}
-          isFilter
+          isFilter={true}
           itemTemplate={op => selectTemplate(op, option)}
           key={option.key}
           label={option.label || ''}
           notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
           onChange={event => onChange({ key: option.key, value: event.target.value })}
           optionLabel="type"
-          options={getOptionsTypes(data, option.key, undefined, ErrorUtils.orderLevelErrors)}
+          options={getOptionsTypes(data, option.key)}
           value={filterBy[option.key]}
         />
       </div>
     );
   };
 
+  const renderSortButton = ({ key }) => {
+    return (
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon={switchSortByIcon(sortBy[key])}
+        onClick={() => onSortData(key)}
+      />
+    );
+  };
+
   if (loadingStatus === 'PENDING') return <div>LOADING</div>;
 
   return (
-    <div className={styles.filtersWrapped}>
-      <div className={className ? styles[className] : styles.header}>
-        {isSearchVisible ? <InputText placeholder="Search" /> : null}
-        {renderFilters()}
-        {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
+    <div className={className ? styles[className] : styles.header}>
+      {isSearchVisible ? <InputText placeholder="Search" /> : null}
+      {renderFilters()}
+      {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
-        {!isNil(onFilter) && (
-          <Button
-            className="p-button-primary p-button-rounded p-button-animated-blink"
-            icon="filter"
-            label={resourcesContext.messages['filter']}
-            onClick={onFilter}
-          />
-        )}
-
+      {!isNil(onFilter) && (
         <Button
-          className="p-button-secondary p-button-rounded p-button-animated-blink"
-          icon="undo"
-          label={resourcesContext.messages['reset']}
-          onClick={loadFilters}
+          className="p-button-primary p-button-rounded p-button-animated-blink"
+          icon="filter"
+          label={resourcesContext.messages['filter']}
+          onClick={onFilter}
         />
-      </div>
+      )}
+
+      <Button
+        className="p-button-secondary p-button-rounded p-button-animated-blink"
+        icon="undo"
+        label={resourcesContext.messages['reset']}
+        onClick={onResetFilters}
+      />
     </div>
   );
 };

@@ -1,8 +1,12 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-
 import { useResetRecoilState } from 'recoil';
+
 import isNil from 'lodash/isNil';
+import intersection from 'lodash/intersection';
+import isEmpty from 'lodash/isEmpty';
+import orderBy from 'lodash/orderBy';
+import pull from 'lodash/pull';
 
 import styles from './Dataflows.module.scss';
 
@@ -20,6 +24,7 @@ import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
+import { MyFilters } from 'views/_components/MyFilters';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
@@ -39,16 +44,16 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
-import { CurrentPage } from 'views/_functions/Utils';
-import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
-import { ErrorUtils } from 'views/_functions/Utils';
-
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
+import { CurrentPage } from 'views/_functions/Utils';
+import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
+import { ErrorUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
-import { MyFilters } from 'views/_components/Filters/MyFilters';
+
+const { parseDataToFilter } = DataflowsUtils;
 
 const Dataflows = () => {
   const { errorType: dataflowsErrorType } = useParams();
@@ -82,13 +87,10 @@ const Dataflows = () => {
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     reference: [],
     reporting: [],
-    filteredData: {
-      business: [],
-      citizenScience: [],
-      reference: [],
-      reporting: []
-    }
+    filteredData: { business: [], citizenScience: [], reference: [], reporting: [] }
   });
+
+  const [pinnedSeparatorIndex, setPinnedSeparatorIndex] = useState(-1);
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
     useReportingObligations();
@@ -286,31 +288,97 @@ const Dataflows = () => {
       if (TextUtils.areEquals(tabId, 'reporting')) {
         const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
+
+        const parsedDataflows = orderBy(
+          parseDataToFilter(data, userContext.userProps.pinnedDataflows),
+          ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+          ['asc', 'asc', 'asc', 'asc', 'asc']
+        );
+        const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
+
+        setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+
         dataflowsDispatch({
           type: 'SET_DATAFLOWS',
-          payload: { data, type: 'reporting', contextCurrentDataflowType: userContext.currentDataflowType }
+          payload: {
+            contextCurrentDataflowType: userContext.currentDataflowType,
+            data: parsedDataflows,
+            type: 'reporting'
+          }
         });
       } else if (TextUtils.areEquals(tabId, 'reference')) {
         const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
+
+        const parsedDataflows = orderBy(
+          parseDataToFilter(data, userContext.userProps.pinnedDataflows),
+          ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+          ['asc', 'asc', 'asc', 'asc', 'asc']
+        );
+        const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
+
+        setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+
         dataflowsDispatch({
           type: 'SET_DATAFLOWS',
-          payload: { data, type: 'reference', contextCurrentDataflowType: userContext.currentDataflowType }
+          payload: {
+            data: parsedDataflows,
+            type: 'reference',
+            contextCurrentDataflowType: userContext.currentDataflowType
+          }
         });
       } else if (TextUtils.areEquals(tabId, 'business')) {
         const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
+
+        const parsedDataflows = orderBy(
+          parseDataToFilter(data, userContext.userProps.pinnedDataflows),
+          ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+          ['asc', 'asc', 'asc', 'asc', 'asc']
+        );
+        const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
+
+        setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+
         dataflowsDispatch({
           type: 'SET_DATAFLOWS',
-          payload: { data, type: 'business', contextCurrentDataflowType: userContext.currentDataflowType }
+          payload: {
+            contextCurrentDataflowType: userContext.currentDataflowType,
+            data: parsedDataflows,
+            type: 'business'
+          }
         });
+
+        // dataflowsDispatch({
+        //   type: 'SET_DATAFLOWS',
+        //   payload: { data, type: 'business', contextCurrentDataflowType: userContext.currentDataflowType }
+        // });
       } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
         const data = await CitizenScienceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
+
+        const parsedDataflows = orderBy(
+          parseDataToFilter(data, userContext.userProps.pinnedDataflows),
+          ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+          ['asc', 'asc', 'asc', 'asc', 'asc']
+        );
+        const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
+
+        setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+
         dataflowsDispatch({
           type: 'SET_DATAFLOWS',
-          payload: { data, type: 'citizenScience', contextCurrentDataflowType: userContext.currentDataflowType }
+          payload: {
+            contextCurrentDataflowType: userContext.currentDataflowType,
+            data: parsedDataflows,
+            type: 'citizenScience'
+          }
         });
+
+        // dataflowsDispatch({
+        //   type: 'SET_DATAFLOWS',
+        //   payload: { data, type: 'citizenScience', contextCurrentDataflowType: userContext.currentDataflowType }
+        // });
       }
     } catch (error) {
       console.error('Dataflows - getDataflows.', error);
@@ -391,6 +459,97 @@ const Dataflows = () => {
     }
   };
 
+  const onReorderPinnedDataflows = async (pinnedItem, isPinned) => {
+    const inmUserProperties = { ...userContext.userProps };
+    const inmPinnedDataflows = intersection(
+      inmUserProperties.pinnedDataflows,
+      [
+        ...dataflowsState.reporting,
+        ...dataflowsState.reference,
+        ...dataflowsState.business,
+        ...dataflowsState.citizenScience
+      ].map(data => data.id.toString())
+    );
+
+    if (!isEmpty(inmPinnedDataflows) && inmPinnedDataflows.includes(pinnedItem.id.toString())) {
+      pull(inmPinnedDataflows, pinnedItem.id.toString());
+    } else {
+      inmPinnedDataflows.push(pinnedItem.id.toString());
+    }
+
+    inmUserProperties.pinnedDataflows = inmPinnedDataflows;
+
+    await onUpdateUserProperties(inmUserProperties);
+
+    const inmfilteredData = [...filteredData[tabId]];
+    const changedFilteredData = inmfilteredData.map(item => {
+      let itemToUpdate = { ...item };
+
+      if (itemToUpdate.id === pinnedItem.id) {
+        itemToUpdate.pinned = isPinned ? 'pinned' : 'unpinned';
+      }
+      return itemToUpdate;
+    });
+
+    if (isPinned) {
+      notificationContext.add(
+        { type: 'DATAFLOW_PINNED_INIT', content: { customContent: { dataflowName: pinnedItem.name } } },
+        true
+      );
+    } else {
+      notificationContext.add(
+        { type: 'DATAFLOW_UNPINNED_INIT', content: { customContent: { dataflowName: pinnedItem.name } } },
+        true
+      );
+    }
+
+    const orderedFilteredData = orderBy(
+      changedFilteredData,
+      ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+      ['asc', 'asc', 'asc', 'asc', 'asc']
+    );
+
+    const orderedPinned = orderedFilteredData.map(el => el.pinned);
+
+    setPinnedSeparatorIndex(orderedPinned.lastIndexOf('pinned'));
+
+    const inmDataToFilter = {
+      reporting: dataflowsState.reporting,
+      reference: dataflowsState.reference,
+      business: dataflowsState.business,
+      citizenScience: dataflowsState.citizenScience
+    };
+    const changedInitialData = inmDataToFilter[tabId].map(item => {
+      let itemToUpdate = { ...item };
+      if (itemToUpdate.id === pinnedItem.id) {
+        itemToUpdate.pinned = isPinned ? 'pinned' : 'unpinned';
+      }
+      return itemToUpdate;
+    });
+
+    dataflowsDispatch({
+      type: 'SET_DATAFLOWS',
+      payload: {
+        data: orderBy(
+          changedInitialData,
+          ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+          ['asc', 'asc', 'asc', 'asc', 'asc']
+        ),
+        type: tabId,
+        contextCurrentDataflowType: userContext.currentDataflowType
+      }
+    });
+  };
+
+  const onUpdateUserProperties = async userProperties => {
+    try {
+      return await UserService.updateConfiguration(userProperties);
+    } catch (error) {
+      console.error('DataflowsList - changeUserProperties.', error);
+      notificationContext.add({ type: 'UPDATE_ATTRIBUTES_USER_SERVICE_ERROR' }, true);
+    }
+  };
+
   const setLoading = status => dataflowsDispatch({ type: 'SET_LOADING', payload: { tab: tabId, status } });
 
   const renderLayout = children => (
@@ -448,11 +607,11 @@ const Dataflows = () => {
     reporting: [
       {
         nestedOptions: [
-          { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
-          // { key: 'legalInstrument', label: 'This is inside a array -- INSTRUMENT', order: 2 },
-          { key: 'name', label: 'This is inside a array -- NAME', order: 0 }
-          // { key: 'obligationId', label: 'This is inside a array -- OBLIGATION ID', order: 4 },
-          // { key: 'obligationTitle', label: 'This is inside a array -- OBLIGATION TITLE', order: 3 }
+          { key: 'name', label: resourcesContext.messages['name'], order: 0 },
+          { key: 'description', label: resourcesContext.messages['description'], order: 1 },
+          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2 },
+          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3 },
+          { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4 }
         ],
         type: 'INPUT'
       },
@@ -464,25 +623,77 @@ const Dataflows = () => {
           { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
         ]
       },
-      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' }
-      // (isCustodian || isAdmin) && {
-      //   key: 'creationDate',
-      //   label: resourcesContext.messages['creationDateFilterLabel'],
-      //   type: 'DATE'
-      // }
+      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' },
+      (isCustodian || isAdmin) && {
+        key: 'creationDate',
+        label: resourcesContext.messages['creationDateFilterLabel'],
+        type: 'DATE'
+      }
+    ],
+    citizenScience: [
+      {
+        nestedOptions: [
+          { key: 'name', label: resourcesContext.messages['name'], order: 0 },
+          { key: 'description', label: resourcesContext.messages['description'], order: 1 },
+          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2 },
+          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3 },
+          { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4 }
+        ],
+        type: 'INPUT'
+      },
+      {
+        type: 'MULTI_SELECT',
+        nestedOptions: [
+          { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
+          { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1 },
+          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
+        ]
+      },
+      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' },
+      (isCustodian || isAdmin) && {
+        key: 'creationDate',
+        label: resourcesContext.messages['creationDateFilterLabel'],
+        type: 'DATE'
+      }
+    ],
+    business: [
+      {
+        nestedOptions: [
+          { key: 'name', label: resourcesContext.messages['name'], order: 0 },
+          { key: 'description', label: resourcesContext.messages['description'], order: 1 },
+          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2 },
+          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3 },
+          { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4 }
+        ],
+        type: 'INPUT'
+      },
+      {
+        type: 'MULTI_SELECT',
+        nestedOptions: [
+          { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
+          { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1 },
+          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
+        ]
+      },
+      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' },
+      (isCustodian || isAdmin) && {
+        key: 'creationDate',
+        label: resourcesContext.messages['creationDateFilterLabel'],
+        type: 'DATE'
+      }
     ],
     reference: [
       {
         nestedOptions: [
-          { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
-          { key: 'name', label: 'This is inside a array -- NAME', order: 0 }
+          { key: 'name', label: resourcesContext.messages['name'], order: 0 },
+          { key: 'description', label: resourcesContext.messages['description'], order: 1 }
         ],
         type: 'INPUT'
       },
       {
         nestedOptions: [
-          { key: 'status', label: 'This is inside a array -- STATUS', order: 0 },
-          { key: 'pinned', label: 'This is inside a array -- PINNED', order: 1 }
+          { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
+          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
         ],
         type: 'MULTI_SELECT'
       }
@@ -505,25 +716,27 @@ const Dataflows = () => {
         </div>
         <MyFilters
           className={'dataflowsListFilters'}
-          data={dataflowsState['reporting']}
+          data={dataflowsState[tabId]}
           getFilteredData={getFilteredData}
           options={options[tabId]}
           viewType={tabId}
         />
-        <List dataflows={filteredData['reporting']} />
-        {/* <DataflowsList
-          className="dataflowList-accepted-help-step"
-          content={{
-            reporting: filteredData['reporting'],
-            business: filteredData['business'],
-            citizenScience: filteredData['citizenScience'],
-            reference: filteredData['reference']
-          }}
+        {/* <List
+          dataflows={filteredData[tabId]}
           isAdmin={isAdmin}
           isCustodian={isCustodian}
           isLoading={loadingStatus[tabId]}
-          visibleTab={tabId}
         /> */}
+        <DataflowsList
+          className="dataflowList-accepted-help-step"
+          filteredData={filteredData[tabId]}
+          isAdmin={isAdmin}
+          isCustodian={isCustodian}
+          isLoading={loadingStatus[tabId]}
+          pinnedSeparatorIndex={pinnedSeparatorIndex}
+          reorderDataflows={onReorderPinnedDataflows}
+          visibleTab={tabId}
+        />
       </div>
 
       <GoTopButton parentRef={containerRef} referenceMargin={70} />

@@ -128,77 +128,122 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
   };
 
   const getTooltipMessage = column => {
-    if (!isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)) {
+    const renderColumnType = () => {
       return (
-        <Fragment>
-          <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['type']}: </span>{' '}
-          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {RecordUtils.getFieldTypeValue(column.type)?.value}
-          </span>
+        <div className={styles.fieldText}>
+          <span>{resourcesContext.messages['type']}: </span>
           <br />
-          <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['description']}: </span>
-          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {!isNil(column.description) && column.description !== ''
-              ? column.description
-              : resourcesContext.messages['noDescription']}
-          </span>
-          <br />
-          <span style={{ fontWeight: 'bold' }}>
-            {column.type === 'CODELIST'
-              ? resourcesContext.messages['codelists']
-              : resourcesContext.messages['multiselectCodelists']}
-            :{' '}
-          </span>
-          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {column.codelistItems
-              .map(codelistItem =>
-                !isEmpty(codelistItem) && codelistItem.length > 15
-                  ? `${codelistItem.substring(0, 15)}...`
-                  : codelistItem
-              )
-              .join('; ')}
-          </span>
-        </Fragment>
+          <span className={styles.propertyLabel}>{RecordUtils.getFieldTypeValue(column.type)?.value}</span>
+        </div>
       );
-    } else {
-      return (
-        <Fragment>
-          <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['type']}: </span>{' '}
-          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {RecordUtils.getFieldTypeValue(column.type)?.value}
-          </span>
-          <br />
-          <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['description']}: </span>
-          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {!isNil(column.description) && column.description !== '' && column.description.length > 35
-              ? `${column.description.substring(0, 35)}...`
-              : isNil(column.description) || column.description === ''
-              ? resourcesContext.messages['noDescription']
-              : column.description}
-          </span>
-          {column.type === 'ATTACHMENT' ? (
-            <Fragment>
-              <br />
-              <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['validExtensions']} </span>
-              <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-                {!isEmpty(column.validExtensions)
-                  ? column.validExtensions.map(extension => `.${extension}`).join(', ')
-                  : '*'}
-              </span>
-              <br />
-              <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['maxFileSize']}</span>
-              <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-                {!isNil(column.maxSize) && column.maxSize.toString() !== '0'
-                  ? ` ${column.maxSize} ${resourcesContext.messages['MB']}`
-                  : resourcesContext.messages['maxSizeNotDefined']}
-              </span>
-            </Fragment>
-          ) : (
-            ''
-          )}
-        </Fragment>
-      );
-    }
+    };
+
+    const renderColumnPK = () => {
+      if (column.pk) {
+        return (
+          <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+            <span className={styles.propertyLabel}>{resourcesContext.messages['primaryKey']}</span>
+          </div>
+        );
+      }
+    };
+
+    const renderColumnRequired = () => {
+      if (column.required) {
+        return (
+          <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+            <span className={styles.propertyLabel}>{resourcesContext.messages['required']}</span>
+          </div>
+        );
+      }
+    };
+
+    const renderColumnDescription = () => {
+      const columnDescription = () => {
+        if (column.description.length > 35) {
+          return `${column.description.substring(0, 35)}...`;
+        } else {
+          return column.description;
+        }
+      };
+      if (!isNil(column.description) && column.description.trim() !== '') {
+        return (
+          <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+            <span>{resourcesContext.messages['description']}: </span>
+            <br />
+            <span className={styles.propertyLabel}>{columnDescription()}</span>
+          </div>
+        );
+      }
+    };
+
+    const renderColumnCodeLists = () => {
+      if (!isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)) {
+        return (
+          <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+            <span>
+              {column.type === 'CODELIST'
+                ? resourcesContext.messages['codelists']
+                : resourcesContext.messages['multiselectCodelists']}
+              :{' '}
+            </span>
+            <br />
+            <span
+              className={`${styles.propertyLabel} ${
+                column.codelistItems.length > 15 ? styles.propertyLabelListItems : ''
+              }`}>
+              {column.codelistItems
+                .map(codelistItem =>
+                  !isEmpty(codelistItem) && codelistItem.length > 15
+                    ? `${codelistItem.substring(0, 15)}...`
+                    : codelistItem
+                )
+                .join('; ')}
+            </span>
+          </div>
+        );
+      }
+    };
+
+    const renderColumnAttachment = () => {
+      const columMaxSize = () => {
+        if (!isNil(column.maxSize) && column.maxSize.toString() !== '0') {
+          return `${column.maxSize} ${resourcesContext.messages['MB']}`;
+        } else {
+          return resourcesContext.messages['maxSizeNotDefined'];
+        }
+      };
+
+      if (column.type === 'ATTACHMENT') {
+        return (
+          <Fragment>
+            <span className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+              {resourcesContext.messages['validExtensions']}{' '}
+            </span>
+            <span className={styles.propertyLabel}>
+              {!isEmpty(column.validExtensions)
+                ? column.validExtensions.map(extension => `.${extension}`).join(', ')
+                : '*'}
+            </span>
+            <span className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+              {resourcesContext.messages['maxFileSize']}
+            </span>
+            <span className={styles.propertyLabel}>{columMaxSize()}</span>
+          </Fragment>
+        );
+      }
+    };
+
+    return (
+      <Fragment>
+        {renderColumnType()}
+        {renderColumnDescription()}
+        {renderColumnAttachment()}
+        {renderColumnCodeLists()}
+        {renderColumnPK()}
+        {renderColumnRequired()}
+      </Fragment>
+    );
   };
 
   const getColumns = () => {
