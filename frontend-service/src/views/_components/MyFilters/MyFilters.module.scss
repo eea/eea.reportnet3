@@ -4,7 +4,7 @@
 .statusBox {
   border-radius: 3px;
   color: var(--main-font-color);
-  font-size: 10pt;
+  font-size: 0.833rem;
   font-weight: 600;
   padding: 4px;
 }
@@ -12,8 +12,8 @@
 .input {
   display: flex;
   color: var(--font-filters);
-  height: 2.5em;
-  font-size: 10pt;
+  height: 2rem;
+  font-size: 0.8333rem;
 
   /*Show the label from multiSelect*/
   .label {
@@ -37,7 +37,7 @@
   }
   .inputFilter::placeholder {
     font-style: normal;
-    font-size: 10pt;
+    font-size: 0.8333rem;
   }
 
   /*Hide borders to multiSelect*/
@@ -45,8 +45,8 @@
     border: 0;
     border-bottom: var(--inputtext-border);
     color: var(--floating-label-color) !important;
-    font-size: 10pt !important;
-    height: 2.1rem;
+    font-size: 0.8333rem !important;
+    height: 2rem;
     padding-left: 0em;
     width: 85% !important;
 
@@ -65,12 +65,12 @@
   .selectHeader {
     border-radius: 3px;
     color: var(--floating-label-color);
-    font-size: 9pt;
+    font-size: 0.75rem;
     font-weight: 500;
     padding: 4px;
   }
   // .labelDown {
-  //   font-size: 10pt !important;
+  //   font-size: 0.8333rem !important;
   //   top: 50% !important;
   //   color: var(--font-filters);
   // }
