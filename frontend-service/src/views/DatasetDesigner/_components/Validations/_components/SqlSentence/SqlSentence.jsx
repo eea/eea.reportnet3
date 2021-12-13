@@ -84,37 +84,35 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       setSqlSentenceCost(data);
     } catch (error) {
       console.error('SqlSentence - onValidateSqlSentence.', error);
-      notificationContext.add({ type: 'VALIDATE_SQL_SENTENCE_ERROR' }, true);
+      if (error.response.status === 400) {
+        notificationContext.add({ type: 'SQL_SENTENCE_FORMAT_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'VALIDATE_SQL_SENTENCE_ERROR' }, true);
+      }
     } finally {
       setIsValidateSqlSentenceLoading(false);
     }
   };
 
   const renderSqlSentenceCost = () => {
-    if (isValidateSqlSentenceLoading) {
-      return (
-        <div className={`${styles.validateSqlSentenceCost} ${styles.spinner}`}>
-          <Spinner style={{ top: 3, width: '25px', height: '25px' }} />
-        </div>
-      );
-    } else {
-      if (sqlSentenceCost !== 0) {
+    if (sqlSentenceCost !== 0) {
+      if (isValidateSqlSentenceLoading) {
         return (
-          <div className={`${styles.validateSqlSentenceCost} ${styles.trafficLight}`}>
+          <div className={`${styles.sqlSentenceCostWrapper} ${styles.spinner}`}>
+            <Spinner style={{ top: 3, width: '25px', height: '25px' }} />
+          </div>
+        );
+      } else {
+        return (
+          <div className={`${styles.sqlSentenceCostWrapper} ${styles.trafficLight}`}>
+            <div className={`${sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''}`}></div>
             <div
-              className={`${styles.lightSignal} ${
-                sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''
-              }`}></div>
-            <div
-              className={`${styles.lightSignal} ${
+              className={`${
                 sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST && sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
                   ? styles.yellowLightSignal
                   : ''
               }`}></div>
-            <div
-              className={`${styles.lightSignal} ${
-                sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''
-              }`}></div>
+            <div className={`${sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''}`}></div>
           </div>
         );
       }
@@ -153,7 +151,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
               tooltipOptions={{ position: 'top' }}
             />
             <Button
-              className={`${styles.validateSqlSentenceButton} p-button-rounded p-button-secondary-transparent`}
+              className={`${styles.validateButton} p-button-rounded p-button-secondary-transparent`}
               disabled={
                 isNil(creationFormState.candidateRule.sqlSentence) ||
                 isEmpty(creationFormState.candidateRule.sqlSentence)
