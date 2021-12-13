@@ -42,9 +42,12 @@ import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -875,9 +878,11 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             datasetMetabaseController.findReportingDataSetIdByDataflowIdAndProviderId(
                 representative.getDataflow().getId(), representative.getDataProvider().getId());
         // assign resource to lead reporter
+        List<Long> datasetsIds = new ArrayList<>();
         for (ReportingDatasetVO dataset : datasets) {
           assignments.add(
               createAssignments(dataset.getId(), email, ResourceGroupEnum.DATASET_LEAD_REPORTER));
+          datasetsIds.add(dataset.getId());
         }
         // assign reference to lead reporter
         List<ReferenceDatasetVO> references = referenceDatasetControllerZuul
@@ -888,8 +893,11 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         }
 
         // Assign Dataflow-%s-LEAD_REPORTER
-        assignments.add(createAssignments(representative.getDataflow().getId(), email,
-            ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
+        if (!remove || !hasOtherReportingsByDataflow(email, representative, datasetsIds)) {
+          assignments.add(createAssignments(representative.getDataflow().getId(), email,
+              ResourceGroupEnum.DATAFLOW_LEAD_REPORTER));
+        }
+
         if (!remove) {
           userManagementControllerZull.addContributorsToResources(assignments);
         } else {
@@ -901,6 +909,36 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           "Permissions were not assigned or deleted because the email pertains to a temporary Lead Reporter. Email: {}",
           email);
     }
+  }
+
+  /**
+   * Checks for other reportings by dataflow.
+   *
+   * @param email the email
+   * @param representative the representative
+   * @param datasetIds the dataset ids
+   * @return true, if successful
+   */
+  private boolean hasOtherReportingsByDataflow(String email, Representative representative,
+      List<Long> datasetIds) {
+    boolean result = false;
+    List<ResourceAccessVO> resources = userManagementControllerZull.getResourcesByUserEmail(email);
+    List<ReportingDatasetVO> reportings = datasetMetabaseController
+        .findReportingDataSetIdByDataflowId(representative.getDataflow().getId());
+    if (!CollectionUtils.isEmpty(resources) && !CollectionUtils.isEmpty(reportings)) {
+      for (ReportingDatasetVO reportingDatasetVO : reportings) {
+        if (!datasetIds.contains(reportingDatasetVO.getId())) {
+          for (ResourceAccessVO resourceAccessVO : resources) {
+            if (ResourceTypeEnum.DATASET.equals(resourceAccessVO.getResource())
+                && SecurityRoleEnum.LEAD_REPORTER.equals(resourceAccessVO.getRole())
+                && reportingDatasetVO.getId().equals(resourceAccessVO.getId())) {
+              result = true;
+            }
+          }
+        }
+      }
+    }
+    return result;
   }
 
 
