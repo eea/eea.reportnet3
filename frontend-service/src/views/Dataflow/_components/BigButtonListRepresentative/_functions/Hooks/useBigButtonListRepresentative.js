@@ -59,6 +59,34 @@ const useBigButtonListRepresentative = ({
     };
   };
 
+  const getReferenceDatasetModels = () => {
+    if (
+      isNil(dataflowState.data.referenceDatasets) ||
+      dataflowState.data.representatives.length > 1 ||
+      dataflowState.isCustodian
+    ) {
+      return [];
+    }
+
+    return dataflowState.data.referenceDatasets.map(referenceDataset => {
+      return {
+        layout: 'defaultBigButton',
+        buttonClass: 'referenceDataset',
+        buttonIcon: 'howTo',
+        caption: referenceDataset.datasetSchemaName,
+        handleRedirect: () => {
+          handleRedirect(
+            getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }, true)
+          );
+        },
+        helpClassName: 'dataflow-dataset-container-help-step',
+        model: [],
+        onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }, true),
+        visibility: true
+      };
+    });
+  };
+
   const feedbackButton = {
     layout: 'defaultBigButton',
     buttonClass: 'technicalFeedback',
@@ -221,6 +249,7 @@ const useBigButtonListRepresentative = ({
   return [
     helpButton,
     feedbackButton,
+    ...getReferenceDatasetModels(),
     ...groupByRepresentativeModels,
     ...receiptBigButton,
     ...releaseBigButton,
