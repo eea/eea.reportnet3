@@ -564,7 +564,7 @@
     "exportUsersByCountryFailedEvent": "Failed generating validations file",
     "exportXlsx": "XLSX (.xlsx)",
     "exportXlsxValidations": "XLSX (.xlsx with validations)",
-    "exportZipAttachments": "ZIP (XLSX + attachments)",
+    "exportZipAttachments": "ZIP (.xlsx + attachments)",
     "expressionText": "Expression",
     "expressionTypeDropdownPlaceholder": "Select type",
     "extension": "Extension",
@@ -1410,6 +1410,8 @@
     "x": "X",
     "y": "Y",
     "yes": "Yes",
-    "zipCsvTable": "ZIP (CSV for each table)"
+    "zipCsvTable": "ZIP (.csv for each table)",
+    "restrictFromPublicDisabledLabel": "Released data has already been publicly available, now it's not possible to restrict data from public view. Please release new data to change visibility.",
+    "restrictFromPublicTooltip": "Release new data to restrict from public view"
   }
 }

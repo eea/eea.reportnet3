@@ -365,7 +365,7 @@ export const Dataset = ({ isReferenceDataset }) => {
     {
       label: resourcesContext.messages['customExports'],
       items: externalOperationsList.export.map(type => ({
-        label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`,
+        label: `${type.name} (.${type.fileExtension})`,
         icon: type.fileExtension,
         command: () => onExportDataExternalIntegration(type.id)
       }))
@@ -738,6 +738,7 @@ export const Dataset = ({ isReferenceDataset }) => {
               readOnly: field['readOnly'],
               recordId: field['recordId'],
               referencedField: field['referencedField'],
+              required: field['required'],
               table: table['tableSchemaName'],
               type: field['type'],
               validExtensions: field['validExtensions']
