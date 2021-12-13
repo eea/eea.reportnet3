@@ -1,11 +1,13 @@
+import { orderBy } from 'lodash';
+
 const getActiveTab = (tabMenuItems, activeIndex) => {
   const { id, label } = tabMenuItems[activeIndex];
 
   return { activeTab: tabMenuItems[activeIndex], tabId: id, tabLabel: label };
 };
 
-const parseDataToFilter = (data, pinnedDataflows) => {
-  return data?.map(dataflow => ({
+const parseDataflows = (data, pinnedDataflows) => {
+  const dataflows = data?.map(dataflow => ({
     id: dataflow.id,
     creationDate: dataflow.creationDate,
     description: dataflow.description,
@@ -21,6 +23,16 @@ const parseDataToFilter = (data, pinnedDataflows) => {
     statusKey: dataflow.statusKey,
     userRole: dataflow.userRole
   }));
+
+  return sortDataflows(dataflows);
 };
 
-export const DataflowsUtils = { getActiveTab, parseDataToFilter };
+const sortDataflows = (dataflows = []) => {
+  return orderBy(
+    dataflows,
+    ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
+    ['asc', 'asc', 'asc', 'asc', 'asc']
+  );
+};
+
+export const DataflowsUtils = { getActiveTab, parseDataflows, sortDataflows };

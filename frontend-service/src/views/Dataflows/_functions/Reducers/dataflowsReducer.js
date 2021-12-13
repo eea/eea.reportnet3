@@ -68,6 +68,9 @@ export const dataflowsReducer = (state, { type, payload }) => {
     case 'GET_FILTERED_DATA':
       return { ...state, filteredData: { ...state.filteredData, [payload.type]: payload.data } };
 
+    case 'SET_PINNED_INDEX':
+      return { ...state, pinnedSeparatorIndex: payload.index };
+
     default:
       return state;
   }
