@@ -19,9 +19,9 @@ export const SqlSentenceValidation = ({
   setIsVisibleSqlSentenceValidationDialog,
   sqlSentence
 }) => {
+  const [columns, setColumns] = useState();
   const [isLoading, setIsLoading] = useState(true);
   const [sqlResponse, setSqlResponse] = useState();
-  const [columns, setColumns] = useState();
 
   const resourcesContext = useContext(ResourcesContext);
 
