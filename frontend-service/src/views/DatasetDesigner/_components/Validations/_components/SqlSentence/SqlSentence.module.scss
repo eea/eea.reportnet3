@@ -41,12 +41,15 @@
             box-shadow: none !important;
           }
         }
-        .ccButton {
+        .ccButton,
+        .runButton {
           margin-top: -0.9em;
           margin-left: 0.4rem !important;
           border: 1px solid var(--c-custom-gray) !important;
-          padding: 0.37rem 0.45rem;
           float: right;
+        }
+        .ccButton {
+          padding: 0.37rem 0.45rem;
         }
       }
       textarea {
