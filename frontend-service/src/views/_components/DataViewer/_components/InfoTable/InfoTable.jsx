@@ -251,7 +251,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
   const getColumns = () => {
     const columnsArr = filteredColumns.map((column, i) => {
       const fieldMaxLength = getMaxCharactersValueByFieldType(column.type);
-      const readOnlyColumn = () => {
+      const getReadOnlyColumn = () => {
         if (column.readOnly) {
           return (
             <FontAwesomeIcon
@@ -269,7 +269,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
           filterMaxLength={fieldMaxLength}
           header={
             <Fragment>
-              {readOnlyColumn()}
+              {getReadOnlyColumn()}
               {column.header}
               <TooltipButton
                 getContent={() =>
