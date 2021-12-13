@@ -1,0 +1,16 @@
+.wrapper {
+  width: 100%;
+}
+
+.errorMessageWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  height: 60vh;
+  p {
+    margin: 0;
+    padding: 0;
+  }
+}
