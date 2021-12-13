@@ -16,6 +16,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
@@ -31,6 +32,10 @@ import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -120,6 +125,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /** The reference dataset controller. */
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetController;
+
+  /** The dataset schema controller zuul. */
+  @Autowired
+  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
+
+
 
   /** The rule mapper. */
   @Autowired
@@ -352,18 +363,21 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<ValueVO> runSqlRule(Long datasetId, String sqlRule) throws EEAException {
+  public List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule) throws EEAException {
 
     StringBuilder sb = new StringBuilder("");
-    List<ValueVO> result = new ArrayList<>();
+    List<List<ValueVO>> result = new ArrayList<>();
     DataSetMetabaseVO dataSetMetabaseVO =
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
     List<String> ids = new ArrayList<>();
+    List<String> datasetIds;
+    List<String> fieldNames = new ArrayList<>();
 
     try {
 
       if (checkQuerySyntax(sqlRule)) {
         ids = getListOfDatasetsOnQuery(sqlRule);
+        datasetIds = new ArrayList<>(ids);
         checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
         if (!ids.isEmpty()) {
           checkDatasetFromReferenceDataflow(ids);
@@ -376,10 +390,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
         throw new EEAException();
       } else {
+        fieldNames = retrieveTableFields(datasetIds);
         sb.append("SELECT * FROM (");
         sb.append(sqlRule);
         sb.append(") as userSelect OFFSET 0 LIMIT 10");
-        result = datasetRepository.runSqlRule(datasetId, sb.toString());
+        result = datasetRepository.runSqlRule(datasetId, sb.toString(), fieldNames);
       }
     } catch (StringIndexOutOfBoundsException e) {
       throw new StringIndexOutOfBoundsException(
@@ -414,7 +429,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     List<String> ids = new ArrayList<>();
 
     try {
-
       if (checkQuerySyntax(sqlRule)) {
         ids = getListOfDatasetsOnQuery(sqlRule);
         checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
@@ -650,6 +664,33 @@ public class SqlRulesServiceImpl implements SqlRulesService {
                 .orElse(ErrorTypeEnum.WARNING));
       }
     });
+  }
+
+  public List<String> retrieveTableFields(List<String> datasetIds) {
+
+    List<TableSchemaVO> tables = new ArrayList<>();
+    List<RecordSchemaVO> records = new ArrayList<>();
+    List<FieldSchemaVO> fields = new ArrayList<>();
+    List<String> fieldNames = new ArrayList<>();
+
+    for (String id : datasetIds) {
+      DataSetSchemaVO schema =
+          datasetSchemaControllerZuul.findDataSchemaByDatasetId(Long.parseLong(id));
+      if (schema.getTableSchemas() != null) {
+        tables.addAll(schema.getTableSchemas());
+      }
+    }
+    for (TableSchemaVO table : tables) {
+      records.add(table.getRecordSchema());
+    }
+    for (RecordSchemaVO recordValue : records) {
+      fields.addAll(recordValue.getFieldSchema());
+    }
+    for (FieldSchemaVO field : fields) {
+      fieldNames.add(field.getName().toLowerCase());
+    }
+    return fieldNames;
+
   }
 
   /**

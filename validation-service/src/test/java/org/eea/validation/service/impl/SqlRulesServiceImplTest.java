@@ -109,6 +109,10 @@ public class SqlRulesServiceImplTest {
   @Mock
   private ReferenceDatasetControllerZuul referenceDatasetController;
 
+  /** The dataset schema controller zuul. */
+  @Mock
+  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
+
 
 
   /** The sql rules service impl. */
@@ -760,16 +764,28 @@ public class SqlRulesServiceImplTest {
   public void runSQLRuleTest() throws EEAException {
 
     String sqlRule = "SELECT * from dataset_1.table_value";
+    List<String> datasetIds = new ArrayList<>();
+    List<String> fields = new ArrayList<>();
+
+
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
     datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
+    DataSetSchemaVO datasetSchemaVO = new DataSetSchemaVO();
+    datasetSchemaVO.setIdDataSetSchema("dsId");
+    datasetSchemaVO.setTableSchemas(new ArrayList<>());
+
+
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabaseVO);
+    Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetId(1L))
+        .thenReturn(datasetSchemaVO);
 
     sqlRulesServiceImpl.runSqlRule(1L, sqlRule);
 
     Mockito.verify(datasetRepository, Mockito.times(1)).runSqlRule(1L,
-        "SELECT * FROM (SELECT * from dataset_1.table_value) as userSelect OFFSET 0 LIMIT 10");
+        "SELECT * FROM (SELECT * from dataset_1.table_value) as userSelect OFFSET 0 LIMIT 10",
+        new ArrayList<>());
   }
 
   @Test(expected = EEAInvalidSQLException.class)
@@ -837,9 +853,47 @@ public class SqlRulesServiceImplTest {
         .thenReturn(datasetMetabaseVO);
 
     try {
-      sqlRulesServiceImpl.runSqlRule(1L, sqlRule);
+      sqlRulesServiceImpl.evaluateSqlRule(1L, sqlRule);
     } catch (StringIndexOutOfBoundsException e) {
       assertEquals("SQL sentence has wrong format, please check: " + sqlRule, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAForbiddenSQLCommandException.class)
+  public void evaluateSQLEEAForbiddenSQLCommandExceptionTest() throws EEAException {
+
+    String sqlRule = "DELETE * from dataset_1";
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
+
+    try {
+      sqlRulesServiceImpl.evaluateSqlRule(1L, sqlRule);
+    } catch (EEAForbiddenSQLCommandException e) {
+      assertEquals("SQL Command not allowed in SQL Rule: " + sqlRule, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAInvalidSQLException.class)
+  public void evaluateSQLEEAInvalidSQLExceptionTest() throws EEAException {
+
+    String sqlRule = "SELECT ME AS";
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataflowId(1L);
+    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
+    Mockito.when(sqlRulesServiceImpl.evaluateSqlRule(1L, sqlRule))
+        .thenThrow(new EEAInvalidSQLException());
+
+    try {
+      sqlRulesServiceImpl.evaluateSqlRule(1L, sqlRule);
+    } catch (EEAInvalidSQLException e) {
+      assertEquals("Couldn't execute the SQL Rule: " + sqlRule, e.getMessage());
       throw e;
     }
   }

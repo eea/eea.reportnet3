@@ -2,7 +2,6 @@ package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
 import java.util.Objects;
-import org.eea.interfaces.vo.dataset.enums.DataType;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -25,7 +24,7 @@ public class ValueVO implements Serializable {
   /**
    * The type.
    */
-  private DataType type;
+  private String table;
 
   /**
    * The value.
@@ -36,6 +35,9 @@ public class ValueVO implements Serializable {
   /** The label. */
   private String label;
 
+  /** The label. */
+  private int row;
+
   /**
    * Hash code.
    *
@@ -43,7 +45,7 @@ public class ValueVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(type, value);
+    return Objects.hash(table, value);
   }
 
   /**
@@ -62,7 +64,7 @@ public class ValueVO implements Serializable {
       return false;
     }
     ValueVO other = (ValueVO) obj;
-    return Objects.equals(type, other.type) && Objects.equals(value, other.value);
+    return Objects.equals(table, other.table) && Objects.equals(value, other.value);
   }
 
 }

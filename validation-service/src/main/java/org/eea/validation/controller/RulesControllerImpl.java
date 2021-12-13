@@ -844,11 +844,11 @@ public class RulesControllerImpl implements RulesController {
           message = "There was an error trying to execute the SQL Rule. Check your SQL Syntax."),
       @ApiResponse(code = 401, message = "The user doesn't have access to one of the datasets"),
       @ApiResponse(code = 422, message = "Forbidden command used in the SQL sentence.")})
-  public List<ValueVO> runSqlRule(
+  public List<List<ValueVO>> runSqlRule(
       @ApiParam(value = "Dataset id used on the run process",
           example = "1") @RequestParam("datasetId") Long datasetId,
       @ApiParam(value = "SQL rule that is going to be executed") @RequestParam String sqlRule) {
-    List<ValueVO> obtainedTableValues = new ArrayList<>();
+    List<List<ValueVO>> obtainedTableValues = new ArrayList<>();
     try {
       obtainedTableValues = sqlRulesService.runSqlRule(datasetId, sqlRule);
 

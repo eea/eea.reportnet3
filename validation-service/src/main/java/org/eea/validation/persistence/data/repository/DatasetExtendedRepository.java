@@ -69,7 +69,8 @@ public interface DatasetExtendedRepository {
    * @return the string formatted as JSON
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
-  List<ValueVO> runSqlRule(Long datasetId, String sqlRule) throws EEAInvalidSQLException;
+  List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule, List<String> fields)
+      throws EEAInvalidSQLException;
 
   /**
    * Evaluate sql rule.

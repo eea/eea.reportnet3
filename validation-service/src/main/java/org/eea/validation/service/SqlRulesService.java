@@ -72,7 +72,7 @@ public interface SqlRulesService {
    * @return the string formatted as JSON
    * @throws EEAException the EEA exception
    */
-  List<ValueVO> runSqlRule(Long datasetId, String sqlRule) throws EEAException;
+  List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule) throws EEAException;
 
   /**
    * Evaluates the SQL rule and returns its total cost.

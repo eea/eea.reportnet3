@@ -407,7 +407,8 @@ public interface RulesController {
    * @return the string formatted as JSON
    */
   @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<ValueVO> runSqlRule(@RequestParam("datasetId") Long datasetId, @RequestParam String sqlRule);
+  List<List<ValueVO>> runSqlRule(@RequestParam("datasetId") Long datasetId,
+      @RequestParam String sqlRule);
 
 
   /**
