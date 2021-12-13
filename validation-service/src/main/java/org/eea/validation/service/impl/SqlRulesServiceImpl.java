@@ -670,7 +670,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     });
   }
 
-  public List<TableSchemaVO> retrieveTables(List<String> datasetIds) {
+  /**
+   * Retrieve tables.
+   *
+   * @param datasetIds the dataset ids
+   * @return the list
+   */
+  private List<TableSchemaVO> retrieveTables(List<String> datasetIds) {
 
     List<TableSchemaVO> tables = new ArrayList<>();
 
