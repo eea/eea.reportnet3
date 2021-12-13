@@ -98,8 +98,8 @@ export const NationalSystemsTable = ({
     return data.map(record => (
       <Fragment key={uniqueId()}>
         <NationalSystemsRecord
-          dataProviderId={dataProviderId}
           dataflowId={dataflowId}
+          dataProviderId={dataProviderId}
           datasetId={datasetId}
           getTableErrors={getTableErrors}
           record={record}

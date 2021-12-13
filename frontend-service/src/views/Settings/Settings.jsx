@@ -1,5 +1,4 @@
 import { Fragment, useContext, useEffect } from 'react';
-import { withRouter } from 'react-router-dom';
 
 import { SettingsHelpConfig } from 'conf/help/settings';
 
@@ -16,11 +15,11 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { CurrentPage } from 'views/_functions/Utils';
 
-const Settings = withRouter(({ history }) => {
+const Settings = () => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  useBreadCrumbs({ currentPage: CurrentPage.USER_SETTINGS, history });
+  useBreadCrumbs({ currentPage: CurrentPage.USER_SETTINGS });
 
   useEffect(() => {
     leftSideBarContext.addModels([]);
@@ -70,6 +69,6 @@ const Settings = withRouter(({ history }) => {
     );
 
   return userConfigurations();
-});
+};
 
 export { Settings };

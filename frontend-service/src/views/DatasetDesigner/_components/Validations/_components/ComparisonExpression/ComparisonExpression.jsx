@@ -330,8 +330,8 @@ const ComparisonExpression = ({
           disabled={disabledFields.valueTypeSelector}
           onChange={e => onUpdateExpressionField('valueTypeSelector', e.value.value)}
           optionLabel="label"
-          optionValue="value"
           options={valueTypeSelectorOptions}
+          optionValue="value"
           placeholder={resourcesContext.messages.comparisonValueFieldSelector}
           value={first(valueTypeSelectorOptions.filter(option => option.value === expressionValues.valueTypeSelector))}
         />
@@ -644,8 +644,8 @@ const ComparisonExpression = ({
           disabled={disabledFields.operatorValue}
           onChange={e => onUpdateExpressionField('operatorValue', e.value.value)}
           optionLabel="label"
-          optionValue="value"
           options={operatorValues}
+          optionValue="value"
           placeholder={resourcesContext.messages.operator}
           value={first(operatorValues.filter(option => option.value === expressionValues.operatorValue))}
         />

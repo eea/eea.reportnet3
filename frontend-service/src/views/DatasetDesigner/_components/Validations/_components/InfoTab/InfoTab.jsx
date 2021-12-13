@@ -221,8 +221,8 @@ export const InfoTab = ({
             id={`${componentName}__errorType`}
             onChange={e => onInfoFieldChange('errorLevel', e.target.value)}
             optionLabel="label"
-            optionValue="value"
             options={config.validations.errorLevels}
+            optionValue="value"
             placeholder={resourcesContext.messages['errorTypePlaceholder']}
             value={creationFormState.candidateRule.errorLevel}
           />

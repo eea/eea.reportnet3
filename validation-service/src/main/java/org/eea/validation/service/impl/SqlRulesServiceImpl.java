@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -25,6 +27,7 @@ import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.TestDatasetVO;
+import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -32,6 +35,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.validation.exception.EEAForbiddenSQLCommandException;
 import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -67,7 +71,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant KEYWORDS: {@value}. */
-  private static final String KEYWORDS = "DELETE,INSERT,DROP";
+  private static final String KEYWORDS = "DELETE,INSERT,DROP,UPDATE,TRUNCATE";
 
   /** The dataset repository. */
   @Autowired
@@ -104,6 +108,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /** The test dataset controller zuul. */
   @Autowired
   private TestDatasetControllerZuul testDatasetControllerZuul;
+
+  /** The entity manager. */
+  @PersistenceContext
+  private EntityManager entityManager;
 
   /** The dataflow controller. */
   @Autowired
@@ -333,6 +341,111 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         releaseNotification(EventType.VALIDATE_RULES_COMPLETED_EVENT, notificationVO);
       }
     }
+  }
+
+  /**
+   * Run SQL rule with limited results
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be run
+   * @return the string formatted as JSON
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<ValueVO> runSqlRule(Long datasetId, String sqlRule) throws EEAException {
+
+    StringBuilder sb = new StringBuilder("");
+    List<ValueVO> result = new ArrayList<>();
+    DataSetMetabaseVO dataSetMetabaseVO =
+        datasetMetabaseController.findDatasetMetabaseById(datasetId);
+    List<String> ids = new ArrayList<>();
+
+    try {
+
+      if (checkQuerySyntax(sqlRule)) {
+        ids = getListOfDatasetsOnQuery(sqlRule);
+        checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
+        if (!ids.isEmpty()) {
+          checkDatasetFromReferenceDataflow(ids);
+        }
+      } else {
+        throw new EEAForbiddenSQLCommandException(
+            "SQL Command not allowed in SQL Rule: " + sqlRule);
+      }
+
+      if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
+        throw new EEAException();
+      } else {
+        sb.append("SELECT * FROM (");
+        sb.append(sqlRule);
+        sb.append(") as userSelect OFFSET 0 LIMIT 10");
+        result = datasetRepository.runSqlRule(datasetId, sb.toString());
+      }
+    } catch (StringIndexOutOfBoundsException e) {
+      throw new StringIndexOutOfBoundsException(
+          String.format("SQL sentence has wrong format, please check: %s", sqlRule));
+    } catch (EEAForbiddenSQLCommandException e) {
+      throw new EEAForbiddenSQLCommandException(
+          String.format("SQL Command not allowed in SQL Rule: %s", sqlRule), e);
+    } catch (EEAInvalidSQLException e) {
+      throw new EEAInvalidSQLException(String.format("Couldn't execute the SQL Rule: %s", sqlRule),
+          e);
+    } catch (EEAException e) {
+      throw new EEAException("User doesn't have access to one of the datasets", e);
+    }
+    return result;
+  }
+
+  /**
+   * Evaluates the SQL rule and returns its total cost
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be evaluated
+   * @return the string containing the total cost
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public String evaluateSqlRule(Long datasetId, String sqlRule) throws EEAException {
+
+    StringBuilder sb = new StringBuilder("");
+    String result = "";
+    DataSetMetabaseVO dataSetMetabaseVO =
+        datasetMetabaseController.findDatasetMetabaseById(datasetId);
+    List<String> ids = new ArrayList<>();
+
+    try {
+
+      if (checkQuerySyntax(sqlRule)) {
+        ids = getListOfDatasetsOnQuery(sqlRule);
+        checkDatasetFromSameDataflow(dataSetMetabaseVO, ids);
+        if (!ids.isEmpty()) {
+          checkDatasetFromReferenceDataflow(ids);
+        }
+      } else {
+        throw new EEAForbiddenSQLCommandException(
+            "SQL Command not allowed in SQL Rule: " + sqlRule);
+      }
+
+      if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
+        throw new EEAException();
+      } else {
+        sb.append("EXPLAIN (FORMAT JSON) ");
+        sb.append(sqlRule);
+        result = datasetRepository.evaluateSqlRule(datasetId, sb.toString());
+      }
+    } catch (StringIndexOutOfBoundsException e) {
+      throw new StringIndexOutOfBoundsException(
+          String.format("SQL sentence has wrong format, please check: %s", sqlRule));
+    } catch (EEAForbiddenSQLCommandException e) {
+      throw new EEAForbiddenSQLCommandException(
+          String.format("SQL Command not allowed in SQL Rule: %s", sqlRule), e);
+    } catch (EEAInvalidSQLException e) {
+      throw new EEAInvalidSQLException(String.format("Couldn't execute the SQL Rule: %s", sqlRule),
+          e);
+    } catch (EEAException e) {
+      throw new EEAException("User doesn't have access to one of the datasets", e);
+    }
+    return result;
   }
 
   /**

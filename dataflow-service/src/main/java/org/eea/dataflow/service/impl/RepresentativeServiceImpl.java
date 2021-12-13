@@ -176,6 +176,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (dataflow == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
+
+    Representative repre =
+        representativeRepository.findOneByDataflow_IdAndDataProvider_Id(dataflowId, dataProviderId);
+    if (repre != null) {
+      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_DUPLICATED);
+    }
+
     DataProvider dataProvider = new DataProvider();
     dataProvider.setId(dataProviderId);
     Representative representative = representativeMapper.classToEntity(representativeVO);
@@ -240,6 +247,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /**
    * Gets the all data provider types.
    *
+   * @param providerType the provider type
    * @return the all data provider types
    */
   @Override
@@ -682,6 +690,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    * Validate lead reporters.
    *
    * @param dataflowId the dataflow id
+   * @param sendNotification the send notification
    * @throws EEAException the EEA exception
    */
   @Transactional
@@ -797,6 +806,56 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Override
   public List<FMEUserVO> findFmeUsers() {
     return fmeUserMapper.entityListToClass(fmeUserRepository.findAll());
+  }
+
+  /**
+   * Check restrict from public.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public boolean checkRestrictFromPublic(Long dataflowId, Long dataProviderId) throws EEAException {
+    boolean restrict = true;
+    List<RepresentativeVO> representatives = getRepresetativesByIdDataFlow(dataflowId);
+    if (null == representatives) {
+      throw new EEAException(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+    }
+    for (RepresentativeVO representative : representatives) {
+      if (representative.getDataProviderId().equals(dataProviderId)) {
+        restrict = representative.isRestrictFromPublic();
+      }
+    }
+    return restrict;
+  }
+
+  /**
+   * Check if data have been release.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public boolean checkDataHaveBeenRelease(Long dataflowId, Long dataProviderId)
+      throws EEAException {
+    boolean isReleased = true;
+    List<ReportingDatasetVO> reportings =
+        datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
+    if (null == reportings) {
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    for (ReportingDatasetVO reporting : reportings) {
+      if (reporting.getDataProviderId().equals(dataProviderId)
+          && (Boolean.FALSE.equals(reporting.getIsReleased())
+              || reporting.getIsReleased() == null)) {
+        isReleased = false;
+      }
+    }
+    return isReleased;
   }
 
   /**
