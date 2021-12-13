@@ -48,14 +48,19 @@
           padding: 0.37rem 0.45rem;
           float: right;
         }
-        .sqlCalculated {
+        .validateSqlSentenceButton {
           border: 1px solid var(--c-custom-gray) !important;
           float: right;
           margin-top: -0.9em;
           margin-left: 0.4rem !important;
-          span:first-child {
-            font-size: 1.1rem !important;
-          }
+        }
+        .validateSqlSentenceCost {
+          float: right;
+          margin-top: -0.9em;
+          margin-left: 0.4rem !important;
+        }
+        .validateSqlSentenceIcon {
+          padding-top: 1px;
         }
       }
       textarea {
@@ -92,12 +97,13 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background-color: var(--traffic-light-bg);
   width: 5rem;
   height: 2rem;
   border-radius: 30px;
   position: relative;
   top: 10%;
+  margin-right: 0.1rem;
+  background-color: var(--traffic-light-bg);
 }
 
 .lightSignal {
@@ -117,4 +123,12 @@
 
 .greenLightSignal {
   background: var(--traffic-light-green-active);
+}
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 5rem;
+  height: 2rem;
 }
