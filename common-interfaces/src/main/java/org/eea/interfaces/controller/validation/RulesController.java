@@ -404,6 +404,7 @@ public interface RulesController {
    *
    * @param datasetId the dataset id
    * @param sqlRule the sql rule about to be run
+   * @param showInternalFields the show internal fields
    * @return the string formatted as JSON
    */
   @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)

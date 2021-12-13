@@ -354,10 +354,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   }
 
   /**
-   * Run SQL rule with limited results
+   * Run SQL rule with limited results.
    *
    * @param datasetId the dataset id
    * @param sqlRule the sql rule about to be run
+   * @param showInternalFields the show internal fields
    * @return the string formatted as JSON
    * @throws EEAException the EEA exception
    */

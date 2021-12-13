@@ -831,6 +831,7 @@ public class RulesControllerImpl implements RulesController {
    *
    * @param datasetId the dataset id
    * @param sqlRule the sql rule about to be run
+   * @param showInternalFields the show internal fields
    * @return the string formatted as JSON
    */
   @Override
