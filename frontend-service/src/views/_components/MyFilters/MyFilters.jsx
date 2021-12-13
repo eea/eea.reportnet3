@@ -52,7 +52,8 @@ export const MyFilters = ({
 
   useEffect(() => {
     getFilterByKeys();
-  }, [viewType]);
+    getSortDefaultValues(options);
+  }, [data, viewType]);
 
   useEffect(() => {
     if (getFilteredData) getFilteredData(filteredData);
@@ -66,6 +67,20 @@ export const MyFilters = ({
     } catch (error) {
       console.log('error :>> ', error);
     }
+  };
+
+  const getSortDefaultValues = options => {
+    options.forEach(option => {
+      if (!option) return;
+
+      if (option.isSortable && option.defaultOrder) {
+        setSortBy({ ...sortBy, [option.key]: option.defaultOrder });
+      }
+
+      if (option.nestedOptions) {
+        getSortDefaultValues(option.nestedOptions);
+      }
+    });
   };
 
   const getFilterByKeys = () => {
@@ -85,8 +100,7 @@ export const MyFilters = ({
       let filteredData = await applyFilters();
 
       if (!isEmpty(sortBy)) {
-        const key = Object.keys(sortBy)[0];
-        filteredData = applySort({ filteredData, itemKey: key, sortOption: sortBy[key] });
+        filteredData = applySort({ filteredData, sortBy });
       }
 
       setFilters({ ...filters, data: data, filteredData, loadingStatus: 'SUCCESS' });
@@ -115,9 +129,9 @@ export const MyFilters = ({
 
   const onSortData = key => {
     const sortOption = switchSortByOption(sortBy[key]);
-    const sortedData = applySort({ filteredData, itemKey: key, sortOption });
+    const sortedData = applySort({ filteredData, sortBy: { ...sortBy, [key]: sortOption } });
 
-    setSortBy({ [key]: sortOption });
+    setSortBy({ ...sortBy, [key]: sortOption });
     setFilters({ ...filters, filteredData: sortedData });
   };
 
@@ -154,7 +168,7 @@ export const MyFilters = ({
 
     return (
       <div className={styles.input} key={option.key}>
-        {renderSortButton({ key: option.key })}
+        {option.isSortable ? renderSortButton({ key: option.key }) : null}
         <div className={`p-float-label ${styles.label}`}>
           <Calendar
             baseZIndex={9999}
@@ -195,7 +209,7 @@ export const MyFilters = ({
 
     return (
       <div className={styles.input} key={option.key}>
-        {renderSortButton({ key: option.key })}
+        {option.isSortable ? renderSortButton({ key: option.key }) : null}
         <div className={`p-float-label ${styles.label}`}>
           <InputText
             className={styles.inputFilter}
@@ -232,7 +246,7 @@ export const MyFilters = ({
 
     return (
       <div className={`${styles.input}`} key={option.key}>
-        {renderSortButton({ key: option.key })}
+        {option.isSortable ? renderSortButton({ key: option.key }) : null}
         <MultiSelect
           ariaLabelledBy={`${option.key}_input`}
           checkAllHeader={resourcesContext.messages['checkAllFilter']}

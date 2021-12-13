@@ -1,34 +1,41 @@
 import isNil from 'lodash/isNil';
+import orderBy from 'lodash/orderBy';
 
 const SORT_CATEGORY = 'pinned';
 
-const applySort = ({ filteredData, itemKey, sortOption }) => {
-  const arrayForSort = [...filteredData];
+const applySort = ({ filteredData, sortBy }) => {
+  const _filteredData = [...filteredData];
+  const sortByKeys = Object.keys(sortBy).filter(sortByOption => sortBy[sortByOption] !== 'idle');
+  const order = Object.values(sortBy).filter(orderOption => orderOption !== 'idle');
 
-  const sortedData = arrayForSort.sort((a, b) => {
-    if (!isNil(SORT_CATEGORY) && a[SORT_CATEGORY] !== b[SORT_CATEGORY]) {
-      return a[SORT_CATEGORY] < b[SORT_CATEGORY] ? -2 : 2;
-    }
+  return orderBy(_filteredData, sortByKeys, order);
 
-    const optionA = a[itemKey].toUpperCase();
-    const optionB = b[itemKey].toUpperCase();
+  // const sortedData = arrayForSort.sort((a, b) => {
+  //   if (isNil(a[itemKey])) return null;
 
-    switch (sortOption) {
-      case 'asc':
-        return optionA > optionB ? 1 : -1;
+  //   if (!isNil(SORT_CATEGORY) && a[SORT_CATEGORY] !== b[SORT_CATEGORY]) {
+  //     return a[SORT_CATEGORY] < b[SORT_CATEGORY] ? -2 : 2;
+  //   }
 
-      case 'desc':
-        return optionA < optionB ? 1 : -1;
+  //   const optionA = a[itemKey].toUpperCase();
+  //   const optionB = b[itemKey].toUpperCase();
 
-      case 'idle':
-        return 0;
+  //   switch (sortOption) {
+  //     case 'asc':
+  //       return optionA > optionB ? 1 : -1;
 
-      default:
-        return 0;
-    }
-  });
+  //     case 'desc':
+  //       return optionA < optionB ? 1 : -1;
 
-  return sortedData;
+  //     case 'idle':
+  //       return 0;
+
+  //     default:
+  //       return 0;
+  //   }
+  // });
+
+  // return sortedData;
 };
 
 const switchSortByIcon = sortByKey => {

@@ -524,101 +524,62 @@ const Dataflows = () => {
     }
   ];
 
+  const _dataflowsOptions = [
+    {
+      nestedOptions: [
+        { key: 'name', label: resourcesContext.messages['name'], order: 0, isSortable: true },
+        { key: 'description', label: resourcesContext.messages['description'], order: 1, isSortable: true },
+        { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2, isSortable: true },
+        { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3, isSortable: true },
+        { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4, isSortable: true }
+      ],
+      type: 'INPUT'
+    },
+    {
+      nestedOptions: [
+        { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
+        { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1 },
+        { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
+      ],
+      type: 'MULTI_SELECT'
+    },
+    {
+      isSortable: true,
+      key: 'expirationDate',
+      label: resourcesContext.messages['expirationDateFilterLabel'],
+      type: 'DATE'
+    },
+    (isCustodian || isAdmin) && {
+      defaultOrder: 'asc',
+      isSortable: true,
+      key: 'creationDate',
+      label: resourcesContext.messages['creationDateFilterLabel'],
+      type: 'DATE'
+    }
+  ];
+
+  const _referencesOptions = [
+    {
+      nestedOptions: [
+        { key: 'name', label: resourcesContext.messages['name'] },
+        { key: 'description', label: resourcesContext.messages['description'] }
+      ],
+      type: 'INPUT'
+    },
+    {
+      nestedOptions: [
+        { key: 'status', label: resourcesContext.messages['status'], category: 'LEVEL_ERROR' },
+        { key: 'pinned', label: resourcesContext.messages['pinned'] }
+      ],
+      type: 'MULTI_SELECT'
+    }
+  ];
+
   const options = {
-    reporting: [
-      {
-        nestedOptions: [
-          { key: 'name', label: resourcesContext.messages['name'], order: 0 },
-          { key: 'description', label: resourcesContext.messages['description'], order: 1 },
-          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2 },
-          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3 },
-          { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4 }
-        ],
-        type: 'INPUT'
-      },
-      {
-        type: 'MULTI_SELECT',
-        nestedOptions: [
-          { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
-          { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1 },
-          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
-        ]
-      },
-      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' },
-      (isCustodian || isAdmin) && {
-        key: 'creationDate',
-        label: resourcesContext.messages['creationDateFilterLabel'],
-        type: 'DATE'
-      }
-    ],
-    citizenScience: [
-      {
-        nestedOptions: [
-          { key: 'name', label: resourcesContext.messages['name'], order: 0 },
-          { key: 'description', label: resourcesContext.messages['description'], order: 1 },
-          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2 },
-          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3 },
-          { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4 }
-        ],
-        type: 'INPUT'
-      },
-      {
-        type: 'MULTI_SELECT',
-        nestedOptions: [
-          { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
-          { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1 },
-          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
-        ]
-      },
-      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' },
-      (isCustodian || isAdmin) && {
-        key: 'creationDate',
-        label: resourcesContext.messages['creationDateFilterLabel'],
-        type: 'DATE'
-      }
-    ],
-    business: [
-      {
-        nestedOptions: [
-          { key: 'name', label: resourcesContext.messages['name'], order: 0 },
-          { key: 'description', label: resourcesContext.messages['description'], order: 1 },
-          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2 },
-          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3 },
-          { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4 }
-        ],
-        type: 'INPUT'
-      },
-      {
-        type: 'MULTI_SELECT',
-        nestedOptions: [
-          { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
-          { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1 },
-          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
-        ]
-      },
-      { key: 'expirationDate', label: resourcesContext.messages['expirationDateFilterLabel'], type: 'DATE' },
-      (isCustodian || isAdmin) && {
-        key: 'creationDate',
-        label: resourcesContext.messages['creationDateFilterLabel'],
-        type: 'DATE'
-      }
-    ],
-    reference: [
-      {
-        nestedOptions: [
-          { key: 'name', label: resourcesContext.messages['name'], order: 0 },
-          { key: 'description', label: resourcesContext.messages['description'], order: 1 }
-        ],
-        type: 'INPUT'
-      },
-      {
-        nestedOptions: [
-          { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
-          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
-        ],
-        type: 'MULTI_SELECT'
-      }
-    ]
+    business: _dataflowsOptions,
+    citizenScience: _dataflowsOptions,
+    reference: _referencesOptions,
+    reporting: _dataflowsOptions
   };
 
   return renderLayout(
@@ -640,12 +601,6 @@ const Dataflows = () => {
           options={options[tabId]}
           viewType={tabId}
         />
-        {/* <List
-          dataflows={filteredData[tabId]}
-          isAdmin={isAdmin}
-          isCustodian={isCustodian}
-          isLoading={loadingStatus[tabId]}
-        /> */}
         <DataflowsList
           className="dataflowList-accepted-help-step"
           filteredData={filteredData[tabId]}
