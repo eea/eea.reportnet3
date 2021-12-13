@@ -11,18 +11,9 @@
 
 .input {
   display: flex;
-  color: var(--font-filters) !important;
+  color: var(--font-filters);
   height: 2.5em;
   font-size: 10pt;
-
-  /*Give border bottom to inputText*/
-  > div {
-    border-bottom: var(--inputtext-border) !important;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
-  }
 
   /*Show the label from multiSelect*/
   .label {
@@ -34,13 +25,10 @@
 
   /*Hide border to inputText*/
   .inputFilter {
-    background: transparent !important;
-    border-bottom: 0 !important;
-    border-left: 0 !important;
-    border-radius: 0 !important;
-    border-right: 0 !important;
-    border-top: 0 !important;
-    width: 100% !important;
+    background: transparent;
+    border: 0;
+    border-bottom: var(--inputtext-border);
+    width: 100;
 
     &:focus,
     &:enabled:focus {
@@ -54,11 +42,8 @@
 
   /*Hide borders to multiSelect*/
   .multiselectFilter {
-    border-bottom: var(--inputtext-border) !important;
-    border-left: 0 !important;
-    border-radius: 0 !important;
-    border-right: 0 !important;
-    border-top: 0 !important;
+    border: 0;
+    border-bottom: var(--inputtext-border);
     color: var(--floating-label-color) !important;
     font-size: 10pt !important;
     height: 2.1rem;
@@ -102,13 +87,6 @@
   margin: 2rem 0;
   width: 100%;
   align-items: baseline;
-
-  // > span {
-  //   display: flex;
-  //   flex-direction: row;
-  //   font-size: 10pt;
-  //   width: 100%;
-  // }
 
   @include for-phone-only {
     justify-content: flex-start;
