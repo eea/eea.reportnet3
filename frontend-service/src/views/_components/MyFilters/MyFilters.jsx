@@ -167,7 +167,7 @@ export const MyFilters = ({
             onChange={event => onChange({ key: option.key, value: parseDateValues(event.value) })}
             // onChange={event => onFilterData(property, event.value)}
             // onFocus={() => onAnimateLabel(property, true)}
-            //placeholder={option.label}
+            placeholder={option.label}
             readOnlyInput={true}
             selectionMode="range"
             value={parseDateValues(filterBy[option.key])}
