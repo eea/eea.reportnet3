@@ -18,6 +18,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
 
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
+  const [isVisibleSqlSentenceValidationDialog, setIsVisibleSqlSentenceValidationDialog] = useState(false);
 
   useEffect(() => {
     if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
@@ -94,6 +95,18 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
                 'qcCodeAcronymButtonTooltip'
               )}
               tooltipOptions={{ position: 'top' }}
+            />
+            <Button
+              className={`${styles.runButton} p-button-rounded p-button-secondary-transparent`}
+              disabled={
+                isNil(creationFormState.candidateRule.sqlSentence) ||
+                isEmpty(creationFormState.candidateRule.sqlSentence)
+              }
+              icon="play"
+              label={'Run SQL'}
+              onClick={() => {
+                setIsVisibleSqlSentenceValidationDialog(true);
+              }}
             />
           </h3>
           <InputTextarea
