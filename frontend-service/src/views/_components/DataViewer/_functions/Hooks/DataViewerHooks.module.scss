@@ -1,4 +1,4 @@
-.readOnlyFields div {
+.readOnlyFields > div {
   opacity: 0.5;
 }
 
@@ -22,6 +22,11 @@
 .propertyLabel {
   color: var(--success-color-lighter);
   font-weight: 600;
+}
+
+.propertyLabelListItems {
+  width: 16rem;
+  display: block;
 }
 
 .validationColWidth {
