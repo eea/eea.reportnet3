@@ -71,6 +71,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * @return the long
    */
   @Override
+  @LockMethod
   @HystrixCommand
   @PostMapping("/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
