@@ -105,7 +105,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
                 isEmpty(creationFormState.candidateRule.sqlSentence)
               }
               icon="play"
-              label={'Run SQL'}
+              label={resourcesContext.messages['runSql']}
               onClick={() => {
                 setIsVisibleSqlSentenceValidationDialog(true);
               }}
