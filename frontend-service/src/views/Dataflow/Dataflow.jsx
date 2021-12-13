@@ -193,17 +193,24 @@ const Dataflow = () => {
 
   const isBusinessDataflow = TextUtils.areEquals(dataflowState.dataflowType, config.dataflowType.BUSINESS.value);
 
-  const country =
-    uniqDataProviders.length === 1
-      ? uniq(map(dataflowState.data.datasets, 'datasetSchemaName'))
-      : isNil(representativeId)
-      ? null
-      : uniq(
+  const getCountry = () => {
+    if (uniqDataProviders.length === 1) {
+      return uniq(map(dataflowState.data.datasets, 'datasetSchemaName'));
+    } else {
+      if (isNil(representativeId)) {
+        return null;
+      } else {
+        return uniq(
           map(
             dataflowState.data?.datasets?.filter(d => d.dataProviderId?.toString() === representativeId),
             'datasetSchemaName'
           )
         );
+      }
+    }
+  };
+
+  const country = getCountry();
 
   const isLeadReporterOfCountry =
     isLeadReporter &&
@@ -220,6 +227,10 @@ const Dataflow = () => {
       ? parseInt(representativeId)
       : uniqDataProviders[0]
     : null;
+
+  const isReleased =
+    !isNil(dataflowState.data.datasets) &&
+    dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
 
   useEffect(() => {
     if (!Number(dataflowId)) {
@@ -314,7 +325,8 @@ const Dataflow = () => {
       manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
       propertiesBtn: true,
       releaseableBtn: !isDesign && isLeadDesigner,
-      restrictFromPublicBtn: isLeadReporterOfCountry && dataflowState.showPublicInfo && !isBusinessDataflow,
+      restrictFromPublicBtn:
+        isLeadReporterOfCountry && dataflowState.showPublicInfo && isReleased && !isBusinessDataflow,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
         isLeadReporterOfCountry || isNationalCoordinatorOfCountry || isReporterOfCountry || isLeadDesigner || isObserver
@@ -1132,19 +1144,34 @@ const Dataflow = () => {
 
   if (dataflowState.isPageLoading || isNil(dataflowState.data)) return layout(<Spinner />);
 
+  const getSubtitle = () => {
+    if (parseInt(representativeId) === 0) {
+      return dataflowState.data.name;
+    } else {
+      if (isInsideACountry && !isNil(country) && country.length > 0) {
+        return dataflowState.data.name;
+      } else {
+        return resourcesContext.messages['dataflow'];
+      }
+    }
+  };
+
+  const getTitle = () => {
+    if (parseInt(representativeId) !== 0) {
+      if (isInsideACountry && !isNil(country) && country.length > 0) {
+        return `${resourcesContext.messages['dataflow']} - ${country}`;
+      } else {
+        return dataflowState.data.name;
+      }
+    } else {
+      return resourcesContext.messages['testDataset'];
+    }
+  };
+
   return layout(
     <div className="rep-row">
       <div className={`${styles.pageContent} rep-col-12 rep-col-sm-12`}>
-        <Title
-          icon="clone"
-          iconSize="4rem"
-          subtitle={
-            isInsideACountry && !isNil(country) && country.length > 0
-              ? `${resourcesContext.messages['dataflow']} - ${country}`
-              : resourcesContext.messages['dataflow']
-          }
-          title={dataflowState.name}
-        />
+        <Title icon="clone" iconSize="4rem" subtitle={getSubtitle()} title={getTitle()} />
 
         {getBigButtonList()}
 
@@ -1329,6 +1356,7 @@ const Dataflow = () => {
 
         {dataflowState.isRestrictFromPublicDialogVisible && (
           <ConfirmDialog
+            confirmTooltip={resourcesContext.messages['restrictFromPublicTooltip']}
             disabledConfirm={
               dataflowState.restrictFromPublic === dataflowState.representative.restrictFromPublic ||
               dataflowState.isFetchingData
@@ -1347,16 +1375,28 @@ const Dataflow = () => {
             visible={dataflowState.isRestrictFromPublicDialogVisible}>
             <Checkbox
               checked={dataflowState.restrictFromPublic}
+              disabled={!dataflowState.representative.restrictFromPublic}
               id="restrictFromPublicCheckbox"
               inputId="restrictFromPublicCheckbox"
               onChange={() => setRestrictFromPublic(!dataflowState.restrictFromPublic)}
               role="checkbox"
             />
             <label className={styles.restrictFromPublic} htmlFor="restrictFromPublicCheckbox">
-              <span className={styles.pointer} onClick={() => setRestrictFromPublic(!dataflowState.restrictFromPublic)}>
+              <span
+                className={`${dataflowState.restrictFromPublic ? styles.pointer : styles.disabledLabel}`}
+                onClick={() => {
+                  if (dataflowState.representative.restrictFromPublic) {
+                    setRestrictFromPublic(!dataflowState.restrictFromPublic);
+                  }
+                }}>
                 {resourcesContext.messages['restrictFromPublicCheckboxLabel']}
               </span>
             </label>
+            {!dataflowState.representative.restrictFromPublic && (
+              <div className={styles.restrictFromPublicNote}>
+                {resourcesContext.messages['restrictFromPublicDisabledLabel']}
+              </div>
+            )}
           </ConfirmDialog>
         )}
 
