@@ -108,7 +108,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
             <div className={`${sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''}`}></div>
             <div
               className={`${
-                sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST && sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
+                sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST || sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
                   ? styles.yellowLightSignal
                   : ''
               }`}></div>
