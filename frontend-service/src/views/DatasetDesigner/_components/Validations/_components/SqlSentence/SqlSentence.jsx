@@ -154,7 +154,10 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
             />
             <Button
               className={`${styles.validateSqlSentenceButton} p-button-rounded p-button-secondary-transparent`}
-              disabled={isEmpty(creationFormState.candidateRule.sqlSentence)}
+              disabled={
+                isNil(creationFormState.candidateRule.sqlSentence) ||
+                isEmpty(creationFormState.candidateRule.sqlSentence)
+              }
               icon="clock"
               iconClasses={styles.validateSqlSentenceIcon}
               label={'Validate SQL'}
