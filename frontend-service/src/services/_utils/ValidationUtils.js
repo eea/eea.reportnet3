@@ -549,6 +549,15 @@ const parseRowExpressionFromDTO = expression => {
 const createValidation = (entityType, id, levelError, message) =>
   new Validation({ date: new Date(Date.now()).toString(), entityType, id, levelError, message });
 
+const parseSqlValidation = rows => {
+  return rows.map(row =>
+    row.reduce((prev, curr) => {
+      prev[`${curr.table}*${curr.label}`] = curr.value;
+      return prev;
+    }, {})
+  );
+};
+
 export const ValidationUtils = {
   createValidation,
   getComparisonExpression,
