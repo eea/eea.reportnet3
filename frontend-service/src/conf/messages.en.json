@@ -1413,6 +1413,8 @@
     "zipCsvTable": "ZIP (.csv for each table)",
     "restrictFromPublicDisabledLabel": "Released data has already been publicly available, now it's not possible to restrict data from public view. Please release new data to change visibility.",
     "restrictFromPublicTooltip": "Release new data to restrict from public view",
-    "validateSqlSentenceError": "Error validating SQL sentence"
+    "validateSqlSentenceError": "Error validating SQL sentence",
+    "sqlSentenceCost": "SQL sentence cost",
+    "validateSql": "Validate SQL"
   }
 }

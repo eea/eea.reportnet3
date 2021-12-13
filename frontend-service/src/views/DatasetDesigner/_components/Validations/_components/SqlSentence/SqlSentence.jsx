@@ -10,6 +10,7 @@ import { config } from 'conf';
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { InputTextarea } from 'views/_components/InputTextarea';
+import { Spinner } from 'views/_components/Spinner';
 import { SqlHelp } from './_components/SqlHelp';
 
 import { ValidationService } from 'services/ValidationService';
@@ -24,6 +25,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   const resourcesContext = useContext(ResourcesContext);
 
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
+  const [isValidateSqlSentenceLoading, setIsValidateSqlSentenceLoading] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
   const [sqlSentenceCost, setSqlSentenceCost] = useState(0);
 
@@ -74,6 +76,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
 
   const onValidateSqlSentence = async () => {
     try {
+      setIsValidateSqlSentenceLoading(true);
       const { data } = await ValidationService.validateSqlSentence(
         datasetId,
         creationFormState.candidateRule.sqlSentence
@@ -82,6 +85,39 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     } catch (error) {
       console.error('SqlSentence - onValidateSqlSentence.', error);
       notificationContext.add({ type: 'VALIDATE_SQL_SENTENCE_ERROR' }, true);
+    } finally {
+      setIsValidateSqlSentenceLoading(false);
+    }
+  };
+
+  const renderSqlSentenceCost = () => {
+    if (isValidateSqlSentenceLoading) {
+      return (
+        <div className={`${styles.validateSqlSentenceCost} ${styles.spinner}`}>
+          <Spinner style={{ top: 3, width: '25px', height: '25px' }} />
+        </div>
+      );
+    } else {
+      if (sqlSentenceCost !== 0) {
+        return (
+          <div className={`${styles.validateSqlSentenceCost} ${styles.trafficLight}`}>
+            <div
+              className={`${styles.lightSignal} ${
+                sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''
+              }`}></div>
+            <div
+              className={`${styles.lightSignal} ${
+                sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST && sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
+                  ? styles.yellowLightSignal
+                  : ''
+              }`}></div>
+            <div
+              className={`${styles.lightSignal} ${
+                sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''
+              }`}></div>
+          </div>
+        );
+      }
     }
   };
 
@@ -117,30 +153,14 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
               tooltipOptions={{ position: 'top' }}
             />
             <Button
-              className={`${styles.sqlCalculated} p-button-rounded p-button-secondary-transparent`}
+              className={`${styles.validateSqlSentenceButton} p-button-rounded p-button-secondary-transparent`}
               disabled={isEmpty(creationFormState.candidateRule.sqlSentence)}
               icon="clock"
+              iconClasses={styles.validateSqlSentenceIcon}
               label={'Validate SQL'}
               onClick={onValidateSqlSentence}
             />
-            {sqlSentenceCost !== 0 && (
-              <div className={`${styles.ccButton} ${styles.trafficLight}`}>
-                <div
-                  className={`${styles.lightSignal} ${
-                    sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''
-                  }`}></div>
-                <div
-                  className={`${styles.lightSignal} ${
-                    sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST && sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
-                      ? styles.yellowLightSignal
-                      : ''
-                  }`}></div>
-                <div
-                  className={`${styles.lightSignal} ${
-                    sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''
-                  }`}></div>
-              </div>
-            )}
+            {renderSqlSentenceCost()}
           </h3>
           <InputTextarea
             className={`p-inputtextarea`}
