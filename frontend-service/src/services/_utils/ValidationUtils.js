@@ -572,5 +572,6 @@ export const ValidationUtils = {
   parseDatasetRelationFromDTO,
   parseDataValidationRulesDTO,
   parseExpressionFromDTO,
-  parseRowExpressionFromDTO
+  parseRowExpressionFromDTO,
+  parseSqlValidation
 };
