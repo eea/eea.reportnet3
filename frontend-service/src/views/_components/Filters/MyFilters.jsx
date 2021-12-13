@@ -24,7 +24,16 @@ import { ErrorUtils } from 'views/_functions/Utils';
 
 const { getEndOfDay, getStartOfDay, parseDateValues, getOptionsTypes } = MyFiltersUtils;
 
-export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode, onFilter, options, viewType }) => {
+export const MyFilters = ({
+  className,
+  data,
+  getFilteredData,
+  isSearchVisible,
+  isStrictMode,
+  onFilter,
+  options,
+  viewType
+}) => {
   const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysFamily(viewType));
 
@@ -165,24 +174,31 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     if (option.nestedOptions) return option.nestedOptions.map(option => renderDate(option));
 
     return (
-      <Calendar
-        baseZIndex={9999}
-        className={styles.calendarFilter}
-        // dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
-        inputClassName={styles.inputFilter}
-        key={option.key}
-        // inputId={inputId}
-        monthNavigator={true}
-        onChange={event => onChange({ key: option.key, value: parseDateValues(event.value) })}
-        // onChange={event => onFilterData(property, event.value)}
-        // onFocus={() => onAnimateLabel(property, true)}
-        placeholder={option.label}
-        readOnlyInput={true}
-        selectionMode="range"
-        value={parseDateValues(filterBy[option.key])}
-        yearNavigator={true}
-        yearRange="2015:2030"
-      />
+      <div className={styles.input} key={option.key}>
+        <div className={`p-float-label ${styles.label}`}>
+          <Calendar
+            baseZIndex={9999}
+            // className={styles.calendarFilter}
+            // dateFormat={userContext.userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
+            inputClassName={styles.inputFilter}
+            key={option.key}
+            // inputId={inputId}
+            monthNavigator={true}
+            onChange={event => onChange({ key: option.key, value: parseDateValues(event.value) })}
+            // onChange={event => onFilterData(property, event.value)}
+            // onFocus={() => onAnimateLabel(property, true)}
+            //placeholder={option.label}
+            readOnlyInput={true}
+            selectionMode="range"
+            value={parseDateValues(filterBy[option.key])}
+            yearNavigator={true}
+            yearRange="2015:2030"
+          />
+          {/* <label className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label} htmlFor={inputId}>
+            {option.label || ''}
+          </label> */}
+        </div>
+      </div>
     );
   };
 
@@ -198,13 +214,20 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     }
 
     return (
-      <InputText
-        className={styles.input}
-        key={option.key}
-        onChange={event => onChange({ key: option.key, value: event.target.value })}
-        placeholder={option.label}
-        value={filterBy[option.key] || ''}
-      />
+      <div className={styles.input} key={option.key}>
+        <div className={`p-float-label ${styles.label}`}>
+          <InputText
+            className={styles.inputFilter}
+            id={`${option.key}_input`}
+            key={option.key}
+            onChange={event => onChange({ key: option.key, value: event.target.value })}
+            value={filterBy[option.key] || ''}
+          />
+          <label className={styles.label} htmlFor={`${option.key}_input`}>
+            {option.label || ''}
+          </label>
+        </div>
+      </div>
     );
   };
 
@@ -227,56 +250,61 @@ export const MyFilters = ({ data, getFilteredData, isSearchVisible, isStrictMode
     };
 
     return (
-      <MultiSelect
-        ariaLabelledBy={`${option.key}_input`}
-        checkAllHeader={resourcesContext.messages['checkAllFilter']}
-        className={styles.multiselectFilter}
-        filter={option?.showInput}
-        headerClassName={styles.selectHeader}
-        id={options.key}
-        inputClassName={`p-float-label ${styles.label}`}
-        inputId={`${options.key}_input`}
-        isFilter
-        itemTemplate={op => selectTemplate(op, option)}
-        key={option.key}
-        label={option.label || ''}
-        notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
-        onChange={event => onChange({ key: option.key, value: event.target.value })}
-        optionLabel="type"
-        options={getOptionsTypes(data, option.key, undefined, ErrorUtils.orderLevelErrors)}
-        value={filterBy[option.key]}
-      />
+      <div className={`${styles.input}`} key={option.key}>
+        <MultiSelect
+          ariaLabelledBy={`${option.key}_input`}
+          checkAllHeader={resourcesContext.messages['checkAllFilter']}
+          className={styles.multiselectFilter}
+          filter={option?.showInput}
+          headerClassName={styles.selectHeader}
+          id={options.key}
+          inputClassName={`p-float-label ${styles.label}`}
+          inputId={`${options.key}_input`}
+          isFilter
+          itemTemplate={op => selectTemplate(op, option)}
+          key={option.key}
+          label={option.label || ''}
+          notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
+          onChange={event => onChange({ key: option.key, value: event.target.value })}
+          optionLabel="type"
+          options={getOptionsTypes(data, option.key, undefined, ErrorUtils.orderLevelErrors)}
+          value={filterBy[option.key]}
+        />
+      </div>
     );
   };
 
   if (loadingStatus === 'PENDING') return <div>LOADING</div>;
 
   return (
-    <div className={styles.filters}>
-      {isSearchVisible ? <InputText placeholder="Search" /> : null}
-      {renderFilters()}
-      {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
+    <div className={styles.filtersWrapped}>
+      <div className={className ? styles[className] : styles.header}>
+        {isSearchVisible ? <InputText placeholder="Search" /> : null}
+        {renderFilters()}
+        {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
-      {!isNil(onFilter) && (
+        {!isNil(onFilter) && (
+          <Button
+            className="p-button-primary p-button-rounded p-button-animated-blink"
+            icon="filter"
+            label={resourcesContext.messages['filter']}
+            onClick={onFilter}
+          />
+        )}
+
         <Button
-          className="p-button-primary p-button-rounded p-button-animated-blink"
-          icon="filter"
-          label={resourcesContext.messages['filter']}
-          onClick={onFilter}
+          className="p-button-secondary p-button-rounded p-button-animated-blink"
+          icon="undo"
+          label={resourcesContext.messages['reset']}
+          onClick={loadFilters}
         />
-      )}
-
-      <Button
-        className="p-button-secondary p-button-rounded p-button-animated-blink"
-        icon="undo"
-        label={resourcesContext.messages['reset']}
-        onClick={loadFilters}
-      />
+      </div>
     </div>
   );
 };
 
 MyFilters.propTypes = {
+  className: PropTypes.string,
   data: PropTypes.array,
   getFilteredData: PropTypes.func,
   isSearchVisible: PropTypes.bool,
