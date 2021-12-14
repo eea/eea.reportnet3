@@ -22,7 +22,7 @@ export const SqlSentenceValidation = ({
 }) => {
   const [columns, setColumns] = useState();
   const [isLoading, setIsLoading] = useState(true);
-  const [sqlResponse, setSqlResponse] = useState();
+  const [sqlResponse, setSqlResponse] = useState(null);
 
   const resourcesContext = useContext(ResourcesContext);
 
@@ -33,8 +33,10 @@ export const SqlSentenceValidation = ({
   }, []);
 
   useEffect(() => {
-    if (sqlResponse) {
+    if (!isNil(sqlResponse) && sqlResponse.length > 0) {
       setColumns(generateColumns());
+    } else if (!isNil(sqlResponse) && sqlResponse.length === 0) {
+      setColumns(sqlResponse);
     }
   }, [sqlResponse]);
 
@@ -77,7 +79,13 @@ export const SqlSentenceValidation = ({
   };
 
   const renderDialogContent = () => {
-    if (sqlResponse) {
+    if (!isNil(sqlResponse) && sqlResponse.length === 0) {
+      return (
+        <div className={styles.messageWrapper}>
+          <p>{resourcesContext.messages['noData']}</p>
+        </div>
+      );
+    } else if (!isNil(sqlResponse) && sqlResponse.length > 0) {
       return renderTable();
     } else {
       return (
