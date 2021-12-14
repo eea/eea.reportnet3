@@ -9,11 +9,43 @@
   padding: 4px;
 }
 
+.icon {
+  background-color: transparent;
+  border: none;
+  color: var(--button-secondary-transparent-color-hover);
+  cursor: pointer;
+  font-size: 16pt !important;
+  height: 1.6em !important;
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  &:enabled:focus {
+    box-shadow: 0 0 0 0 var(--c-white-color) !important;
+    outline: none;
+  }
+
+  &:enabled:active,
+  &:enabled:hover {
+    background-color: transparent !important;
+    border-color: transparent !important;
+  }
+}
+
+.cancelIcon {
+  font-size: 12pt !important;
+  height: 2.1rem !important;
+}
+
 .input {
   display: flex;
   color: var(--font-filters);
   height: 2rem;
   font-size: 0.8333rem;
+  //width: 100% !important;
+  //border-bottom: var(--inputtext-border) !important;
 
   /*Show the label from multiSelect*/
   .label {
@@ -21,6 +53,7 @@
     height: auto;
     overflow: visible;
     width: 90%;
+    //display: flex;
   }
 
   /*Hide border to inputText*/
@@ -29,7 +62,7 @@
     border: 0px;
     border-radius: 0px;
     border-bottom: var(--inputtext-border) !important;
-    width: 100%;
+    width: 100% !important;
 
     &:focus,
     &:enabled:focus {
@@ -116,8 +149,9 @@
   flex-direction: row;
   margin: 2rem 0;
   width: 100%;
-  align-items: baseline;
+  //align-items: baseline;
   flex-wrap: wrap;
+  gap: 0.25rem;
 
   @include for-phone-only {
     justify-content: flex-start;
@@ -136,13 +170,13 @@
   @include for-desktop-up {
     .input,
     .inputCheckbox {
-      width: 25% !important;
+      width: 24% !important;
     }
   }
   @include for-big-desktop-up {
     .input,
     .inputCheckbox {
-      width: 25% !important;
+      width: 24% !important;
       margin-bottom: 1.5rem;
     }
   }
