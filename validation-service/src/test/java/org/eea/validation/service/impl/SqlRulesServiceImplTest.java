@@ -784,19 +784,18 @@ public class SqlRulesServiceImplTest {
     sqlRulesServiceImpl.runSqlRule(1L, sqlRule, false);
 
     Mockito.verify(datasetRepository, Mockito.times(1)).runSqlRule(1L,
-        "WITH  SELECT * FROM (select * from table_value) as userSelect OFFSET 0 LIMIT 10");
+        "WITH  SELECT * FROM (SELECT * from table_value) as userSelect OFFSET 0 LIMIT 10");
 
     sqlRulesServiceImpl.runSqlRule(1L, sqlRule, true);
 
     Mockito.verify(datasetRepository, Mockito.times(1)).runSqlRule(1L,
-        "WITH  SELECT * FROM (select * from table_value) as userSelect OFFSET 0 LIMIT 10");
+        "WITH  SELECT * FROM (SELECT * from table_value) as userSelect OFFSET 0 LIMIT 10");
   }
 
   @Test(expected = EEAInvalidSQLException.class)
   public void runSQLRuleInvalidSQLExceptionTest() throws EEAException {
 
     String sqlRule = "WRONG SQL RULE";
-    sqlRule = sqlRule.toLowerCase();
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
     datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
@@ -817,7 +816,6 @@ public class SqlRulesServiceImplTest {
   public void runSQLRuleForbiddenSQLCommandExceptionTest() throws EEAException {
 
     String sqlRule = "DELETE * from dataset_111.table_value WHERE VALUE > 5";
-    sqlRule = sqlRule.toLowerCase();
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
     datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
