@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
+import isNil from 'lodash/isNil';
 
 import styles from './SqlSentenceValidation.module.scss';
-
-import { useParams } from 'react-router-dom';
 
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
@@ -90,10 +91,10 @@ export const SqlSentenceValidation = ({
   return (
     <Dialog
       contentStyle={{ height: '78vh' }}
-      style={{ width: '90%' }}
       footer={footer}
       header={resourcesContext.messages['sqlSentenceValidationDialogTitle']}
       onHide={() => setIsVisibleSqlSentenceValidationDialog(false)}
+      style={{ width: '90%' }}
       visible={isVisibleSqlSentenceValidationDialog}>
       {isLoading ? <Spinner /> : renderDialogContent()}
     </Dialog>
