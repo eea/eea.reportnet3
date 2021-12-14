@@ -224,7 +224,7 @@ export const MyFilters = ({
 
     return (
       <div className={styles.input} key={option.key}>
-        {option.isSortable ? renderSortButton({ key: option.key }) : null}
+        {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div
           className={`p-float-label ${styles.label}`}
           id={`calendar_${option.key}`}
@@ -234,8 +234,8 @@ export const MyFilters = ({
             // className={styles.calendarFilter}
             dateFormat={userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
             inputClassName={styles.inputFilter}
+            inputId={inputId}
             key={option.key}
-            // inputId={inputId}
             monthNavigator={true}
             onChange={event => {
               onChange({ key: option.key, value: parseDateValues(event.value) });
@@ -251,10 +251,22 @@ export const MyFilters = ({
             yearNavigator={true}
             yearRange="2015:2030"
           />
+
           <label className={getClassNameLabelCalendar()} htmlFor={inputId}>
             {option.label || ''}
           </label>
         </div>
+        {!isEmpty(filterBy[option.key]) && (
+          <Button
+            className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+            icon="cancel"
+            onClick={() => {
+              onChange({ key: option.key, value: [] });
+              updateValueLabelsAnimationDate(labelsAnimationDate, positionLabelAnimationDate, option.key, false);
+              //document.getElementById(inputId).value = '';
+            }}
+          />
+        )}
       </div>
     );
   };
@@ -272,7 +284,7 @@ export const MyFilters = ({
 
     return (
       <div className={styles.input} key={option.key}>
-        {option.isSortable ? renderSortButton({ key: option.key }) : null}
+        {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div className={`p-float-label ${styles.label}`}>
           <InputText
             className={styles.inputFilter}
@@ -309,7 +321,7 @@ export const MyFilters = ({
 
     return (
       <div className={`${styles.input}`} key={option.key}>
-        {option.isSortable ? renderSortButton({ key: option.key }) : null}
+        {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <MultiSelect
           ariaLabelledBy={`${option.key}_input`}
           checkAllHeader={resourcesContext.messages['checkAllFilter']}
@@ -342,6 +354,10 @@ export const MyFilters = ({
         style={{ fontSize: '0.12rem' }}
       />
     );
+  };
+
+  const renderSortButtonEmpty = () => {
+    return <div className={`p-button-secondary-transparent ${styles.sortButton}`} />;
   };
 
   if (loadingStatus === 'PENDING') return <div>LOADING</div>;
