@@ -75,9 +75,7 @@ export const Dialog = ({
 
   const onDialogUnmount = () => {
     const filteredDialogs = openedDialogs.filter(dialog => dialog !== dialogId);
-
     setOpenedDialogs(filteredDialogs);
-
     restoreBodyScroll();
   };
 
