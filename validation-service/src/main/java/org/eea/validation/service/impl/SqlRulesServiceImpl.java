@@ -372,7 +372,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
     List<String> ids = new ArrayList<>();
     List<String> datasetIds;
-    sqlRule = sqlRule.toLowerCase();
 
     try {
 
