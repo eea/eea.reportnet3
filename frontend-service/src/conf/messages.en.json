@@ -1418,10 +1418,10 @@
     "notValidSql": "This is not a valid SQL sentence",
     "runSql": "Run SQL",
     "validateSqlError": "Error validating SQL sentence",
-    "validateSqlSentenceError": "Error validating SQL sentence",
     "sqlSentenceCost": "SQL cost",
     "validateSql": "Validate SQL",
-    "validateSqlSentenceFormatError": "Error validating SQL sentence: format not allowed. Please check SQL sentence",
-    "validateSqlSentenceCommandsNotAllowedError": "Error validating SQL sentence: there are commands not allowed in the sentence"
+    "evaluateSqlSentenceError": "Error evaluating SQL sentence",
+    "evaluateSqlSentenceFormatError": "Error evaluating SQL sentence: format not allowed. Please check SQL sentence",
+    "evaluateSqlSentenceCommandsNotAllowedError": "Error evaluating SQL sentence: there are commands not allowed in the sentence"
   }
 }
