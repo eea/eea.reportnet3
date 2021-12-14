@@ -876,7 +876,7 @@ public class RulesControllerImpl implements RulesController {
    *
    * @param datasetId the dataset id
    * @param sqlRule the sql rule
-   * @return the string containing the SQL total cost
+   * @return the double containing the SQL Cost
    */
   @Override
   @HystrixCommand(commandProperties = {@HystrixProperty(

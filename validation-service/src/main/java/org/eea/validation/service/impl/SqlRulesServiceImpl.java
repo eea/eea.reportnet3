@@ -425,7 +425,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    *
    * @param datasetId the dataset id
    * @param sqlRule the sql rule about to be evaluated
-   * @return the string containing the total cost
+   * @return the double containing the total cost
    * @throws EEAException the EEA exception
    */
   @Override
