@@ -1415,7 +1415,9 @@
     "restrictFromPublicTooltip": "Release new data to restrict from public view",
     "noReferencingDataflowsMoreInfo": "However, dataset references from QC checks could be linking to it indirectly.",
     "validateSqlSentenceError": "Error validating SQL sentence",
-    "sqlSentenceCost": "SQL sentence cost",
-    "validateSql": "Validate SQL"
+    "sqlSentenceCost": "SQL cost",
+    "validateSql": "Validate SQL",
+    "validateSqlSentenceFormatError": "Error validating SQL sentence: format not allowed. Please check SQL sentence",
+    "validateSqlSentenceCommandsNotAllowedError": "Error validating SQL sentence: there are commands not allowed in the sentence"
   }
 }

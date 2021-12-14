@@ -87,6 +87,8 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       console.error('SqlSentence - onValidateSqlSentence.', error);
       if (error.response.status === 400) {
         notificationContext.add({ type: 'SQL_SENTENCE_FORMAT_ERROR' }, true);
+      } else if (error.response.status === 422) {
+        notificationContext.add({ type: 'VALIDATE_SQL_SENTENCE_COMMANDS_NOT_ALLOWED_ERROR' }, true);
       } else {
         notificationContext.add({ type: 'VALIDATE_SQL_SENTENCE_ERROR' }, true);
       }
