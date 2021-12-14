@@ -609,16 +609,18 @@ public class RulesControllerImplTest {
 
   @Test
   public void runSqlTest() throws EEAException {
-    rulesControllerImpl.runSqlRule(1L, "SELECT * from dataset_1.table_value");
-    Mockito.verify(sqlRulesService, times(1)).runSqlRule(1L, "SELECT * from dataset_1.table_value");
+    rulesControllerImpl.runSqlRule(1L, "SELECT * from dataset_1.table_value", true);
+    Mockito.verify(sqlRulesService, times(1)).runSqlRule(1L, "SELECT * from dataset_1.table_value",
+        true);
   }
 
   @Test(expected = ResponseStatusException.class)
   public void runSqlEEAInvalidSQLExceptionTest() throws EEAException {
     String sqlRule = "SELECTq *a WRONG SQL";
-    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule)).thenThrow(new EEAInvalidSQLException());
+    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule, true))
+        .thenThrow(new EEAInvalidSQLException());
     try {
-      rulesControllerImpl.runSqlRule(1L, sqlRule);
+      rulesControllerImpl.runSqlRule(1L, sqlRule, true);
     } catch (ResponseStatusException e) {
       assertEquals(
           "400 BAD_REQUEST; nested exception is org.eea.validation.exception.EEAInvalidSQLException",
@@ -631,10 +633,10 @@ public class RulesControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void runSqlEEAForbiddenSQLCommandExceptionTest() throws EEAException {
     String sqlRule = "DELETE * FROM DATASET_396.TABLE1";
-    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule))
+    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule, true))
         .thenThrow(new EEAForbiddenSQLCommandException());
     try {
-      rulesControllerImpl.runSqlRule(1L, sqlRule);
+      rulesControllerImpl.runSqlRule(1L, sqlRule, true);
     } catch (ResponseStatusException e) {
       assertEquals(
           "422 UNPROCESSABLE_ENTITY; nested exception is org.eea.validation.exception.EEAForbiddenSQLCommandException",
@@ -647,9 +649,9 @@ public class RulesControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void runSqlEEAExceptionTest() throws EEAException {
     String sqlRule = "DELETE * FROM DATASET_111.TABLE1";
-    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule)).thenThrow(new EEAException());
+    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule, true)).thenThrow(new EEAException());
     try {
-      rulesControllerImpl.runSqlRule(1L, sqlRule);
+      rulesControllerImpl.runSqlRule(1L, sqlRule, true);
     } catch (ResponseStatusException e) {
       assertEquals("403 FORBIDDEN; nested exception is org.eea.exception.EEAException",
           e.getMessage());

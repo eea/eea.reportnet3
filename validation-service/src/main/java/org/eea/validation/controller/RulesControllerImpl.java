@@ -831,6 +831,7 @@ public class RulesControllerImpl implements RulesController {
    *
    * @param datasetId the dataset id
    * @param sqlRule the sql rule about to be run
+   * @param showInternalFields the show internal fields
    * @return the string formatted as JSON
    */
   @Override
@@ -844,13 +845,16 @@ public class RulesControllerImpl implements RulesController {
           message = "There was an error trying to execute the SQL Rule. Check your SQL Syntax."),
       @ApiResponse(code = 401, message = "The user doesn't have access to one of the datasets"),
       @ApiResponse(code = 422, message = "Forbidden command used in the SQL sentence.")})
-  public List<ValueVO> runSqlRule(
+  public List<List<ValueVO>> runSqlRule(
       @ApiParam(value = "Dataset id used on the run process",
           example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "SQL rule that is going to be executed") @RequestParam String sqlRule) {
-    List<ValueVO> obtainedTableValues = new ArrayList<>();
+      @ApiParam(value = "SQL rule that is going to be executed") @RequestParam String sqlRule,
+      @ApiParam(value = "Show internal fields in query results",
+          defaultValue = "false") @RequestParam(
+              defaultValue = "false") boolean showInternalFields) {
+    List<List<ValueVO>> obtainedTableValues = new ArrayList<>();
     try {
-      obtainedTableValues = sqlRulesService.runSqlRule(datasetId, sqlRule);
+      obtainedTableValues = sqlRulesService.runSqlRule(datasetId, sqlRule, showInternalFields);
 
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error(
