@@ -81,7 +81,7 @@ export const SqlSentenceValidation = ({
       return renderTable();
     } else {
       return (
-        <div className={styles.errorMessageWrapper}>
+        <div className={styles.messageWrapper}>
           <p>{resourcesContext.messages['notValidSql']}</p>
         </div>
       );
