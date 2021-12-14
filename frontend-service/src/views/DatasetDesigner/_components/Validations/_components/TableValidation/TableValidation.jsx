@@ -95,6 +95,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
             componentName={componentName}
             creationFormState={creationFormState}
             dataflowType={dataflowType}
+            datasetId={datasetId}
             onAddNewRelation={onAddNewRelation}
             onDatasetSchemaChange={onDatasetSchemaChange}
             onDoubleReferencedChange={onDoubleReferencedChange}
