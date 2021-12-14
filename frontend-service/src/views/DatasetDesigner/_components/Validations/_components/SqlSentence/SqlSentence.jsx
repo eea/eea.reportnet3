@@ -176,7 +176,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       );
       setSqlResponse(response);
     } catch (error) {
-      console.error('SqlSentenceValidation - validateSqlSentence.', error);
+      console.error('SqlSentence - runSqlSentence.', error);
       if (error.response.status === 400 || error.response.status === 422) {
         setHasError(true);
       } else {
