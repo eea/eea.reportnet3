@@ -5,22 +5,31 @@ import isNil from 'lodash/isNil';
 
 import styles from './SqlSentence.module.scss';
 
+import { config } from 'conf';
+
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { InputTextarea } from 'views/_components/InputTextarea';
+import { Spinner } from 'views/_components/Spinner';
 import { SqlHelp } from './_components/SqlHelp';
 import { SqlSentenceValidation } from './_components/SqlSentenceValidation/SqlSentenceValidation';
 
+import { ValidationService } from 'services/ValidationService';
+
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
-export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence, level }) => {
+export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level, onSetSqlSentence }) => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
+  const [isValidateSqlSentenceLoading, setIsValidateSqlSentenceLoading] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
   const [isVisibleSqlSentenceValidationDialog, setIsVisibleSqlSentenceValidationDialog] = useState(false);
+  const [sqlSentenceCost, setSqlSentenceCost] = useState(0);
 
   useEffect(() => {
     if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
@@ -67,6 +76,54 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
     );
   };
 
+  const onValidateSqlSentence = async () => {
+    try {
+      setIsValidateSqlSentenceLoading(true);
+      const { data } = await ValidationService.validateSqlSentence(
+        datasetId,
+        creationFormState.candidateRule.sqlSentence
+      );
+      setSqlSentenceCost(data);
+    } catch (error) {
+      setSqlSentenceCost(0);
+      console.error('SqlSentence - onValidateSqlSentence.', error);
+      if (error.response.status === 400) {
+        notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_FORMAT_ERROR' }, true);
+      } else if (error.response.status === 422) {
+        notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_COMMANDS_NOT_ALLOWED_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_ERROR' }, true);
+      }
+    } finally {
+      setIsValidateSqlSentenceLoading(false);
+    }
+  };
+
+  const renderSqlSentenceCost = () => {
+    if (isValidateSqlSentenceLoading) {
+      return (
+        <div className={`${styles.sqlSentenceCostWrapper} ${styles.spinnerWrapper}`}>
+          <Spinner className={styles.spinner} />
+        </div>
+      );
+    } else {
+      if (sqlSentenceCost !== 0) {
+        return (
+          <div className={`${styles.sqlSentenceCostWrapper} ${styles.trafficLight}`}>
+            <div className={`${sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''}`}></div>
+            <div
+              className={`${
+                sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST && sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
+                  ? styles.yellowLightSignal
+                  : ''
+              }`}></div>
+            <div className={`${sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''}`}></div>
+          </div>
+        );
+      }
+    }
+  };
+
   return (
     <div className={styles.section}>
       <div className={styles.content}>
@@ -110,6 +167,18 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
                 setIsVisibleSqlSentenceValidationDialog(true);
               }}
             />
+            <Button
+              className={`${styles.validateButton} p-button-rounded p-button-secondary-transparent`}
+              disabled={
+                isNil(creationFormState.candidateRule.sqlSentence) ||
+                isEmpty(creationFormState.candidateRule.sqlSentence)
+              }
+              icon="clock"
+              iconClasses={styles.validateSqlSentenceIcon}
+              label={resourcesContext.messages['validateSql']}
+              onClick={onValidateSqlSentence}
+            />
+            {renderSqlSentenceCost()}
           </h3>
           <InputTextarea
             className={`p-inputtextarea`}
