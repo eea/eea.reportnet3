@@ -1,9 +1,10 @@
-import { useContext, useEffect, useLayoutEffect } from 'react';
+import { useContext, useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { useRecoilState } from 'recoil';
 import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './MyFilters.module.scss';
 
@@ -25,7 +26,7 @@ import { SortUtils } from './_functions/Utils/SortUtils';
 
 const { applyDates, applyInputs, applyMultiSelects } = ApplyFiltersUtils;
 const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
-const { getOptionsTypes, parseDateValues } = FiltersUtils;
+const { getOptionsTypes, parseDateValues, getLabelsAnimationDateInitial, getPositionLabelAnimationDate } = FiltersUtils;
 
 export const MyFilters = ({
   className,
@@ -41,14 +42,50 @@ export const MyFilters = ({
   const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
   const [sortBy, setSortBy] = useRecoilState(sortByStateFamily(viewType));
 
+  const [labelsAnimationDate, setLabelsAnimationDate] = useState([]);
+
+  console.log('object :>> ', labelsAnimationDate);
+
   const { filterBy, filteredData, loadingStatus } = filters;
 
   const { userProps } = useContext(UserContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const calendarRefs = useRef([]);
+
   useLayoutEffect(() => {
     if (!isEmpty(data)) loadFilters();
   }, [data]);
+
+  useEffect(() => {
+    setLabelsAnimationDate(getLabelsAnimationDateInitial(options));
+    return () => {
+      setLabelsAnimationDate([]);
+    };
+  }, [data]);
+
+  useEffect(() => {
+    const listener = event => {
+      for (const position in labelsAnimationDate) {
+        const key = Object.keys(labelsAnimationDate[position])[0];
+        if (!calendarRefs.current[key] || calendarRefs.current[key].contains(event.target)) {
+          return;
+        }
+        if (!isEmpty(filterBy[key])) {
+          updateValueLabelsAnimationDate(labelsAnimationDate, position, key, true);
+        } else {
+          updateValueLabelsAnimationDate(labelsAnimationDate, position, key, false);
+        }
+      }
+    };
+    document.addEventListener('mousedown', listener);
+    document.addEventListener('touchstart', listener);
+
+    return () => {
+      document.removeEventListener('mousedown', listener);
+      document.removeEventListener('touchstart', listener);
+    };
+  }, [calendarRefs, labelsAnimationDate, filterBy]);
 
   useEffect(() => {
     getFilterByKeys();
@@ -140,6 +177,14 @@ export const MyFilters = ({
 
   const setLoadingStatus = status => setFilters({ ...filters, loadingStatus: status });
 
+  const updateValueLabelsAnimationDate = (labelsAnimationDate, position, key, value) => {
+    if (position !== undefined && labelsAnimationDate.length > 0) {
+      const copyLabelsAnimationDate = [...labelsAnimationDate];
+      copyLabelsAnimationDate[position][key] = value;
+      setLabelsAnimationDate(copyLabelsAnimationDate);
+    }
+  };
+
   const renderFilters = () => {
     return options.map(option => {
       if (option == null) return [];
@@ -167,12 +212,25 @@ export const MyFilters = ({
   };
 
   const renderDate = option => {
+    const positionLabelAnimationDate = getPositionLabelAnimationDate(labelsAnimationDate, option.key);
+    const getClassNameLabelCalendar = () => {
+      if (positionLabelAnimationDate && labelsAnimationDate[positionLabelAnimationDate][option.key] === false) {
+        return styles.labelDown;
+      } else {
+        return styles.label;
+      }
+    };
+
+    const inputId = uniqueId();
     if (option.nestedOptions) return option.nestedOptions.map(option => renderDate(option));
 
     return (
       <div className={styles.input} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : null}
-        <div className={`p-float-label ${styles.label}`}>
+        <div
+          className={`p-float-label ${styles.label}`}
+          id={`calendar_${option.key}`}
+          ref={el => (calendarRefs.current[option.key] = el)}>
           <Calendar
             baseZIndex={9999}
             // className={styles.calendarFilter}
@@ -181,9 +239,13 @@ export const MyFilters = ({
             key={option.key}
             // inputId={inputId}
             monthNavigator={true}
-            onChange={event => onChange({ key: option.key, value: parseDateValues(event.value) })}
+            onChange={event => {
+              onChange({ key: option.key, value: parseDateValues(event.value) });
+            }}
+            onFocus={() =>
+              updateValueLabelsAnimationDate(labelsAnimationDate, positionLabelAnimationDate, option.key, true)
+            }
             // onChange={event => onFilterData(property, event.value)}
-            // onFocus={() => onAnimateLabel(property, true)}
             //placeholder={option.label}
             readOnlyInput={true}
             selectionMode="range"
@@ -191,9 +253,9 @@ export const MyFilters = ({
             yearNavigator={true}
             yearRange="2015:2030"
           />
-          {/* <label className={!filterState.labelAnimations[property] ? styles.labelDown : styles.label} htmlFor={inputId}>
+          <label className={getClassNameLabelCalendar()} htmlFor={inputId}>
             {option.label || ''}
-          </label> */}
+          </label>
         </div>
       </div>
     );
@@ -276,9 +338,10 @@ export const MyFilters = ({
   const renderSortButton = ({ key }) => {
     return (
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary-transparent ${styles.sortButton}`}
         icon={switchSortByIcon(sortBy[key])}
         onClick={() => onSortData(key)}
+        style={{ fontSize: '0.12rem' }}
       />
     );
   };
@@ -286,7 +349,7 @@ export const MyFilters = ({
   if (loadingStatus === 'PENDING') return <div>LOADING</div>;
 
   return (
-    <div className={className ? styles[className] : styles.header}>
+    <div className={className ? styles[className] : styles.default}>
       {isSearchVisible ? <InputText placeholder="Search" /> : null}
       {renderFilters()}
       {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
@@ -300,12 +363,17 @@ export const MyFilters = ({
         />
       )}
 
-      <Button
-        className="p-button-secondary p-button-rounded p-button-animated-blink"
-        icon="undo"
-        label={resourcesContext.messages['reset']}
-        onClick={onResetFilters}
-      />
+      <div className={`${styles.resetButton}`}>
+        <Button
+          className={`p-button-secondary p-button-rounded p-button-animated-blink`}
+          icon="undo"
+          label={resourcesContext.messages['reset']}
+          onClick={() => {
+            onResetFilters();
+            setLabelsAnimationDate(getLabelsAnimationDateInitial(options));
+          }}
+        />
+      </div>
     </div>
   );
 };

@@ -1383,7 +1383,7 @@ const Dataflow = () => {
             />
             <label className={styles.restrictFromPublic} htmlFor="restrictFromPublicCheckbox">
               <span
-                className={`${dataflowState.restrictFromPublic ? styles.pointer : styles.disabledLabel}`}
+                className={dataflowState.representative.restrictFromPublic ? styles.pointer : styles.disabledLabel}
                 onClick={() => {
                   if (dataflowState.representative.restrictFromPublic) {
                     setRestrictFromPublic(!dataflowState.restrictFromPublic);

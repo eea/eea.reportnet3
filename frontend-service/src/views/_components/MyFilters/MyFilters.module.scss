@@ -4,25 +4,16 @@
 .statusBox {
   border-radius: 3px;
   color: var(--main-font-color);
-  font-size: 10pt;
+  font-size: 0.833rem;
   font-weight: 600;
   padding: 4px;
 }
 
 .input {
   display: flex;
-  color: var(--font-filters) !important;
-  height: 2.5em;
-  font-size: 10pt;
-
-  /*Give border bottom to inputText*/
-  > div {
-    border-bottom: var(--inputtext-border) !important;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    width: 100%;
-  }
+  color: var(--font-filters);
+  height: 2rem;
+  font-size: 0.8333rem;
 
   /*Show the label from multiSelect*/
   .label {
@@ -34,13 +25,11 @@
 
   /*Hide border to inputText*/
   .inputFilter {
-    background: transparent !important;
-    border-bottom: 0 !important;
-    border-left: 0 !important;
-    border-radius: 0 !important;
-    border-right: 0 !important;
-    border-top: 0 !important;
-    width: 100% !important;
+    background: transparent;
+    border: 0px;
+    border-radius: 0px;
+    border-bottom: var(--inputtext-border) !important;
+    width: 100%;
 
     &:focus,
     &:enabled:focus {
@@ -49,24 +38,23 @@
   }
   .inputFilter::placeholder {
     font-style: normal;
-    font-size: 10pt;
+    font-size: 0.8333rem;
   }
 
   /*Hide borders to multiSelect*/
   .multiselectFilter {
+    border: 0px;
+    border-radius: 0px;
     border-bottom: var(--inputtext-border) !important;
-    border-left: 0 !important;
-    border-radius: 0 !important;
-    border-right: 0 !important;
-    border-top: 0 !important;
     color: var(--floating-label-color) !important;
-    font-size: 10pt !important;
-    height: 2.1rem;
+    font-size: 0.8333rem !important;
+    height: 2rem;
     padding-left: 0em;
-    width: 85% !important;
+    width: 90% !important;
 
     label {
       color: var(--font-filters);
+      margin-left: 0.1rem;
     }
 
     li {
@@ -80,97 +68,82 @@
   .selectHeader {
     border-radius: 3px;
     color: var(--floating-label-color);
-    font-size: 9pt;
+    font-size: 0.75rem;
     font-weight: 500;
     padding: 4px;
   }
-  // .labelDown {
-  //   font-size: 10pt !important;
-  //   top: 50% !important;
-  //   color: var(--font-filters);
-  // }
-
-  // .label {
-  //   color: var(--font-filters);
-  // }
+  .labelDown {
+    font-size: 0.8333rem !important;
+    top: 50% !important;
+    color: var(--font-filters);
+  }
 }
 
-.header {
+.resetButton {
+  margin-left: auto;
+  margin-bottom: auto;
+}
+
+.sortButton {
+  background-color: transparent;
+  border: none;
+  color: var(--button-secondary-transparent-color-hover);
+  cursor: pointer;
+  font-size: 16pt !important;
+  height: 1.6em !important;
+  opacity: 0.7;
+  width: 3.1rem !important;
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  &:enabled:focus {
+    box-shadow: 0 0 0 0 var(--c-white-color) !important;
+    outline: none;
+  }
+
+  &:enabled:active,
+  &:enabled:hover {
+    background-color: transparent !important;
+    border-color: transparent !important;
+  }
+}
+
+.default {
   align-items: center;
   display: flex;
   flex-direction: row;
   margin: 2rem 0;
   width: 100%;
   align-items: baseline;
-
-  // > span {
-  //   display: flex;
-  //   flex-direction: row;
-  //   font-size: 10pt;
-  //   width: 100%;
-  // }
+  flex-wrap: wrap;
 
   @include for-phone-only {
     justify-content: flex-start;
-    flex-wrap: wrap;
     .input {
       margin-bottom: 1.5rem;
+      width: 100% !important;
     }
   }
   @include for-tablet-portrait-up {
-    flex-wrap: wrap;
     .input,
     .inputCheckbox {
-      width: 50%;
+      width: 50% !important;
       margin-bottom: 1.5rem;
     }
   }
   @include for-desktop-up {
-    justify-content: space-between;
-    flex-wrap: wrap;
     .input,
     .inputCheckbox {
-      width: 25%;
+      width: 25% !important;
     }
   }
   @include for-big-desktop-up {
-    flex-wrap: nowrap;
     .input,
     .inputCheckbox {
-      width: 100%;
-      margin-bottom: 0;
-    }
-  }
-}
-
-.dataflowsListFilters {
-  @extend .header;
-
-  .multiselectFilter {
-    width: 100% !important;
-  }
-
-  @include for-phone-only {
-    .buttonWrapper {
-      width: 100%;
-    }
-  }
-  @include for-tablet-portrait-up {
-    .buttonWrapper {
-      width: 50%;
-    }
-  }
-
-  @include for-big-desktop-up {
-    flex-wrap: wrap;
-    .input,
-    .inputCheckbox {
-      width: 20%;
+      width: 25% !important;
       margin-bottom: 1.5rem;
-    }
-
-    .buttonWrapper {
-      width: 20%;
     }
   }
 }

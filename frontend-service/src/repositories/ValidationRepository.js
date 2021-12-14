@@ -31,11 +31,21 @@ export const ValidationRepository = {
   getAll: async (dataflowId, datasetSchemaId) =>
     await HTTPRequester.get({ url: getUrl(ValidationConfig.getAll, { dataflowId, datasetSchemaId }) }),
 
+  runSqlRule: async (datasetId, sqlSentence, showInternalFields) =>
+    await HTTPRequester.post({
+      url: getUrl(ValidationConfig.runSqlRule, { datasetId, sqlSentence, showInternalFields })
+    }),
+
   update: async (datasetId, validationRule) => {
     let url = getUrl(ValidationConfig.update, { datasetId });
     if (validationRule.automatic) {
       url = getUrl(ValidationConfig.updateAutomatic, { datasetId });
     }
     return await HTTPRequester.update({ url: url, data: validationRule });
-  }
+  },
+
+  validateSqlSentence: async (datasetId, sqlSentence) =>
+    await HTTPRequester.post({
+      url: getUrl(ValidationConfig.validateSqlSentence, { datasetId, sqlSentence })
+    })
 };
