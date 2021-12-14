@@ -68,6 +68,7 @@
   --c-red-200: #e40046;
   --c-red-100: #ee2737;
   --c-red-100-rgb: 238, 39, 55;
+  --c-red-50: #ff0000;
   /* purple */
   --c-purple-400: #5c068c;
   --c-purple-300: #8246af;
@@ -613,4 +614,9 @@
   --go-top-button-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
   --go-top-button-color-hover: var(--c-corporate-yellow);
   --go-top-button-color: var(--c-white-color);
+
+  /* Traffic light*/
+  --traffic-light-red-active: var(--c-red-50);
+  --traffic-light-yellow-active: var(--c-orange-200);
+  --traffic-light-green-active: var(--c-chart-correct);
 }

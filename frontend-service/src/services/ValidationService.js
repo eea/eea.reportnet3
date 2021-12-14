@@ -120,6 +120,12 @@ export const ValidationService = {
 
   generateShowValidationsFile: async datasetId => await ValidationRepository.generateShowValidationsFile(datasetId),
 
+  runSqlRule: async (datasetId, sqlSentence, showInternalFields) => {
+    const { data } = await ValidationRepository.runSqlRule(datasetId, sqlSentence, showInternalFields);
+
+    return ValidationUtils.parseSqlValidation(data);
+  },
+
   updateFieldRule: async (datasetId, validationRule) => {
     const { expressions } = validationRule;
     const validation = {
@@ -209,5 +215,8 @@ export const ValidationService = {
     }
 
     return await ValidationRepository.update(datasetId, validation);
-  }
+  },
+
+  validateSqlSentence: async (datasetId, sqlSentence) =>
+    await ValidationRepository.validateSqlSentence(datasetId, sqlSentence)
 };
