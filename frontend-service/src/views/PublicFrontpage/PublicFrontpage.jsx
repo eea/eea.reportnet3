@@ -123,7 +123,7 @@ export const PublicFrontpage = () => {
                     <ul>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/howto_login_reportnet3.0`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/howto_login_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           Login
@@ -131,7 +131,7 @@ export const PublicFrontpage = () => {
                       </li>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/reporter_howto_reportnet3.0`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/reporter_howto_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           Reporter
@@ -139,7 +139,7 @@ export const PublicFrontpage = () => {
                       </li>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/requester_howto_reportnet3.0`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/requester_howto_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           Requester
@@ -147,7 +147,7 @@ export const PublicFrontpage = () => {
                       </li>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/webforms_howto_reportnet3.0`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/webforms_howto_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           Webforms
