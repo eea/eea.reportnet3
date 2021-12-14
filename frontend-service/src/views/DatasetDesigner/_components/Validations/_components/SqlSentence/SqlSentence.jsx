@@ -26,7 +26,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   const resourcesContext = useContext(ResourcesContext);
 
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
-  const [isValidateSqlSentenceLoading, setIsValidateSqlSentenceLoading] = useState(false);
+  const [isEvaluateSqlSentenceLoading, setIsEvaluateSqlSentenceLoading] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
   const [isVisibleSqlSentenceValidationDialog, setIsVisibleSqlSentenceValidationDialog] = useState(false);
   const [sqlSentenceCost, setSqlSentenceCost] = useState(0);
@@ -76,17 +76,17 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     );
   };
 
-  const onValidateSqlSentence = async () => {
+  const onEvaluateSqlSentence = async () => {
     try {
-      setIsValidateSqlSentenceLoading(true);
-      const { data } = await ValidationService.validateSqlSentence(
+      setIsEvaluateSqlSentenceLoading(true);
+      const { data } = await ValidationService.evaluateSqlSentence(
         datasetId,
         creationFormState.candidateRule.sqlSentence
       );
       setSqlSentenceCost(data);
     } catch (error) {
       setSqlSentenceCost(0);
-      console.error('SqlSentence - onValidateSqlSentence.', error);
+      console.error('SqlSentence - onEvaluateSqlSentence.', error);
       if (error.response.status === 400) {
         notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_FORMAT_ERROR' }, true);
       } else if (error.response.status === 422) {
@@ -95,12 +95,12 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
         notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_ERROR' }, true);
       }
     } finally {
-      setIsValidateSqlSentenceLoading(false);
+      setIsEvaluateSqlSentenceLoading(false);
     }
   };
 
   const renderSqlSentenceCost = () => {
-    if (isValidateSqlSentenceLoading) {
+    if (isEvaluateSqlSentenceLoading) {
       return (
         <div className={`${styles.sqlSentenceCostWrapper} ${styles.spinnerWrapper}`}>
           <Spinner className={styles.spinner} />
@@ -175,8 +175,8 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
               }
               icon="clock"
               iconClasses={styles.validateSqlSentenceIcon}
-              label={resourcesContext.messages['validateSql']}
-              onClick={onValidateSqlSentence}
+              label={resourcesContext.messages['evaluateSql']}
+              onClick={onEvaluateSqlSentence}
             />
             {renderSqlSentenceCost()}
           </h3>
