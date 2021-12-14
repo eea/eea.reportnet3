@@ -137,3 +137,16 @@
     width: 25px;
   }
 }
+
+.hasError {
+  border-color: var(--errors) !important;
+  box-shadow: var(--inputtext-box-shadow-error) !important;
+}
+
+.validationDialogMaxWidth {
+  width: 90% !important;
+}
+
+.noDataMessage {
+  text-align: center;
+}
