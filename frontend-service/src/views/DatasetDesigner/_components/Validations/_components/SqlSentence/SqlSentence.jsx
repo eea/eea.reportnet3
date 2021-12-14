@@ -141,18 +141,6 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
               tooltip={resourcesContext.messages['sqlSentenceInfoTooltip']}
             />
             <Button
-              className={`${styles.runButton} p-button-rounded p-button-secondary-transparent`}
-              disabled={
-                isNil(creationFormState.candidateRule.sqlSentence) ||
-                isEmpty(creationFormState.candidateRule.sqlSentence)
-              }
-              icon="play"
-              label={resourcesContext.messages['runSql']}
-              onClick={() => {
-                setIsVisibleSqlSentenceValidationDialog(true);
-              }}
-            />
-            <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
               label={TextByDataflowTypeUtils.getLabelByDataflowType(
                 resourcesContext.messages,
@@ -166,6 +154,18 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
                 'qcCodeAcronymButtonTooltip'
               )}
               tooltipOptions={{ position: 'top' }}
+            />
+            <Button
+              className={`${styles.runButton} p-button-rounded p-button-secondary-transparent`}
+              disabled={
+                isNil(creationFormState.candidateRule.sqlSentence) ||
+                isEmpty(creationFormState.candidateRule.sqlSentence)
+              }
+              icon="play"
+              label={resourcesContext.messages['runSql']}
+              onClick={() => {
+                setIsVisibleSqlSentenceValidationDialog(true);
+              }}
             />
             <Button
               className={`${styles.validateButton} p-button-rounded p-button-secondary-transparent`}
