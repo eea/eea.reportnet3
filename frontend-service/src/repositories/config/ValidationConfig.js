@@ -8,5 +8,5 @@ export const ValidationConfig = {
   getAll: '/rules/{:datasetSchemaId}/dataflow/{:dataflowId}',
   update: '/rules/updateRule?datasetId={:datasetId}',
   updateAutomatic: '/rules/updateAutomaticRule/{:datasetId}',
-  validateSqlSentence: '/rules/evaluateSqlRule?datasetId={:datasetId}&sqlRule={:sqlRule}'
+  validateSqlSentence: '/rules/evaluateSqlRule?datasetId={:datasetId}&sqlRule={:sqlSentence}'
 };
