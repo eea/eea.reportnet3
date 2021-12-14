@@ -15,6 +15,25 @@ const parseDateValues = values => {
   });
 };
 
+const getPositionLabelAnimationDate = (labelsAnimationDate, key) => {
+  for (const position in labelsAnimationDate) {
+    const keyLabelAnimation = Object.keys(labelsAnimationDate[position])[0];
+    if (keyLabelAnimation === key) {
+      return position;
+    }
+  }
+  return undefined;
+};
+
+const getLabelsAnimationDateInitial = options => {
+  const result = options
+    .filter(option => option?.type === 'DATE')
+    .map(option => {
+      return { [option.key]: false };
+    });
+  return result;
+};
+
 const getOptionsByKeyNestedOption = (filteredOptions, key) => {
   const template = [];
   filteredOptions.forEach(option =>
@@ -31,4 +50,10 @@ const getOptionsTypes = (data, nestedOptionKey) => {
   return getOptionsByKeyNestedOption(options, nestedOptionKey);
 };
 
-export const FiltersUtils = { deepIncludes, getOptionsTypes, parseDateValues };
+export const FiltersUtils = {
+  deepIncludes,
+  getOptionsTypes,
+  parseDateValues,
+  getLabelsAnimationDateInitial,
+  getPositionLabelAnimationDate
+};
