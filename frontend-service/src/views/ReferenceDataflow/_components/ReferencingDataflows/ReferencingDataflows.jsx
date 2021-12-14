@@ -70,7 +70,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
     return renderDialogLayout(
       <div className={styles.noReferencingWrap}>
         <h3>{resourcesContext.messages['noReferencingDataflows']}</h3>
-        <h3>{resourcesContext.messages['noReferencingDataflows2']}</h3>
+        <h3>{resourcesContext.messages['noReferencingDataflowsMoreInfo']}</h3>
       </div>
     );
   }
