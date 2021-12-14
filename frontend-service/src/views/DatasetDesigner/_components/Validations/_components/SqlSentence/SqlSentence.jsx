@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './SqlSentence.module.scss';
@@ -8,6 +9,7 @@ import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { SqlHelp } from './_components/SqlHelp';
+import { SqlSentenceValidation } from './_components/SqlSentenceValidation/SqlSentenceValidation';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -18,6 +20,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
 
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
+  const [isVisibleSqlSentenceValidationDialog, setIsVisibleSqlSentenceValidationDialog] = useState(false);
 
   useEffect(() => {
     if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
@@ -95,6 +98,18 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
               )}
               tooltipOptions={{ position: 'top' }}
             />
+            <Button
+              className={`${styles.runButton} p-button-rounded p-button-secondary-transparent`}
+              disabled={
+                isNil(creationFormState.candidateRule.sqlSentence) ||
+                isEmpty(creationFormState.candidateRule.sqlSentence)
+              }
+              icon="play"
+              label={resourcesContext.messages['runSql']}
+              onClick={() => {
+                setIsVisibleSqlSentenceValidationDialog(true);
+              }}
+            />
           </h3>
           <InputTextarea
             className={`p-inputtextarea`}
@@ -148,6 +163,14 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
             }}
           />
         </Dialog>
+      )}
+
+      {isVisibleSqlSentenceValidationDialog && (
+        <SqlSentenceValidation
+          isVisibleSqlSentenceValidationDialog={isVisibleSqlSentenceValidationDialog}
+          setIsVisibleSqlSentenceValidationDialog={setIsVisibleSqlSentenceValidationDialog}
+          sqlSentence={creationFormState.candidateRule.sqlSentence}
+        />
       )}
     </div>
   );
