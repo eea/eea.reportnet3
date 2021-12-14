@@ -29,7 +29,6 @@ import { ScrollToTop } from 'views/_components/ScrollToTop';
 import { Settings } from 'views/Settings';
 
 import { BreadCrumbProvider } from 'views/_functions/Providers/BreadCrumbProvider';
-
 import { LeftSideBarProvider } from 'views/_functions/Providers/LeftSideBarProvider';
 import { LoadingProvider } from 'views/_functions/Providers/LoadingProvider';
 import { NotificationProvider } from 'views/_functions/Providers/NotificationProvider';

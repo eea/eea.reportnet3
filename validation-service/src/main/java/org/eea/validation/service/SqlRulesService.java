@@ -69,10 +69,12 @@ public interface SqlRulesService {
    *
    * @param datasetId the dataset id
    * @param sqlRule the sql rule about to be run
+   * @param showInternalFields the show internal fields
    * @return the string formatted as JSON
    * @throws EEAException the EEA exception
    */
-  List<ValueVO> runSqlRule(Long datasetId, String sqlRule) throws EEAException;
+  List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule, boolean showInternalFields)
+      throws EEAException;
 
   /**
    * Evaluates the SQL rule and returns its total cost.
