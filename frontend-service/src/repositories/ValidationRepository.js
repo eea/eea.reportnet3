@@ -42,5 +42,10 @@ export const ValidationRepository = {
       url = getUrl(ValidationConfig.updateAutomatic, { datasetId });
     }
     return await HTTPRequester.update({ url: url, data: validationRule });
-  }
+  },
+
+  validateSqlSentence: async (datasetId, sqlSentence) =>
+    await HTTPRequester.post({
+      url: getUrl(ValidationConfig.validateSqlSentence, { datasetId, sqlSentence })
+    })
 };
