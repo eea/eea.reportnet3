@@ -89,9 +89,19 @@ export const SqlSentenceValidation = ({
   };
 
   const renderDialogContent = () => {
+    if (isLoading) {
+      return (
+        <div className={styles.contentWrapper}>
+          <div className={styles.loadingSpinner}>
+            <Spinner className={styles.spinnerPosition} />
+          </div>
+        </div>
+      );
+    }
+
     if (!isNil(sqlResponse) && sqlResponse.length === 0) {
       return (
-        <div className={styles.messageWrapper}>
+        <div className={styles.contentWrapper}>
           <p>{resourcesContext.messages['noData']}</p>
         </div>
       );
@@ -99,7 +109,7 @@ export const SqlSentenceValidation = ({
       return renderTable();
     } else {
       return (
-        <div className={styles.messageWrapper}>
+        <div className={styles.contentWrapper}>
           <p>{errorMessage}</p>
         </div>
       );
@@ -114,7 +124,7 @@ export const SqlSentenceValidation = ({
       onHide={() => setIsVisibleSqlSentenceValidationDialog(false)}
       style={{ width: '90%' }}
       visible={isVisibleSqlSentenceValidationDialog}>
-      {isLoading ? <Spinner /> : renderDialogContent()}
+      {renderDialogContent()}
     </Dialog>
   );
 };
