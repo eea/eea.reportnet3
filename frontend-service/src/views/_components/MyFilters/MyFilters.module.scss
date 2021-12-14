@@ -127,27 +127,27 @@
     justify-content: flex-start;
     .input {
       margin-bottom: 1.5rem;
-      width: 100%;
+      width: 100% !important;
     }
   }
   @include for-tablet-portrait-up {
     .input,
     .inputCheckbox {
-      width: 50%;
+      width: 50% !important;
       margin-bottom: 1.5rem;
     }
   }
   @include for-desktop-up {
     .input,
     .inputCheckbox {
-      width: 25%;
+      width: 25% !important;
     }
   }
   @include for-big-desktop-up {
     .input,
     .inputCheckbox {
-      width: 100%;
-      margin-bottom: 0;
+      width: 25% !important;
+      margin-bottom: 1.5rem;
     }
   }
 }
