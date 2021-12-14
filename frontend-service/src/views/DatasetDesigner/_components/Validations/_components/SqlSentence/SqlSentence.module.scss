@@ -43,6 +43,7 @@
         }
 
         .ccButton,
+        .runButton,
         .validateButton,
         .sqlSentenceCostWrapper {
           margin-top: -0.9em;
@@ -50,14 +51,15 @@
           float: right;
         }
         .ccButton,
+        .runButton,
         .validateButton {
           border: 1px solid var(--c-custom-gray) !important;
         }
-        .validateSqlSentenceIcon {
-          padding-top: 1px;
-        }
         .ccButton {
           padding: 0.37rem 0.45rem;
+        }
+        .validateSqlSentenceIcon {
+          padding-top: 1px;
         }
       }
       textarea {

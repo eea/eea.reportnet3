@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 
-import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './SqlSentence.module.scss';
 
@@ -12,6 +12,7 @@ import { Dialog } from 'views/_components/Dialog';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { Spinner } from 'views/_components/Spinner';
 import { SqlHelp } from './_components/SqlHelp';
+import { SqlSentenceValidation } from './_components/SqlSentenceValidation/SqlSentenceValidation';
 
 import { ValidationService } from 'services/ValidationService';
 
@@ -27,6 +28,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isValidateSqlSentenceLoading, setIsValidateSqlSentenceLoading] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
+  const [isVisibleSqlSentenceValidationDialog, setIsVisibleSqlSentenceValidationDialog] = useState(false);
   const [sqlSentenceCost, setSqlSentenceCost] = useState(0);
 
   useEffect(() => {
@@ -139,6 +141,18 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
               tooltip={resourcesContext.messages['sqlSentenceInfoTooltip']}
             />
             <Button
+              className={`${styles.runButton} p-button-rounded p-button-secondary-transparent`}
+              disabled={
+                isNil(creationFormState.candidateRule.sqlSentence) ||
+                isEmpty(creationFormState.candidateRule.sqlSentence)
+              }
+              icon="play"
+              label={resourcesContext.messages['runSql']}
+              onClick={() => {
+                setIsVisibleSqlSentenceValidationDialog(true);
+              }}
+            />
+            <Button
               className={`${styles.ccButton} p-button-rounded p-button-secondary-transparent`}
               label={TextByDataflowTypeUtils.getLabelByDataflowType(
                 resourcesContext.messages,
@@ -218,6 +232,14 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
             }}
           />
         </Dialog>
+      )}
+
+      {isVisibleSqlSentenceValidationDialog && (
+        <SqlSentenceValidation
+          isVisibleSqlSentenceValidationDialog={isVisibleSqlSentenceValidationDialog}
+          setIsVisibleSqlSentenceValidationDialog={setIsVisibleSqlSentenceValidationDialog}
+          sqlSentence={creationFormState.candidateRule.sqlSentence}
+        />
       )}
     </div>
   );
