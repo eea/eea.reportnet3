@@ -8,7 +8,13 @@ const applySort = ({ filteredData, sortBy }) => {
   const sortByKeys = Object.keys(sortBy).filter(sortByOption => sortBy[sortByOption] !== 'idle');
   const order = Object.values(sortBy).filter(orderOption => orderOption !== 'idle');
 
-  return orderBy(_filteredData, sortByKeys, order);
+  const pinnedDataflows = _filteredData.filter(dataflow => dataflow.pinned === 'pinned');
+  const dataflows = _filteredData.filter(dataflow => dataflow.pinned !== 'pinned');
+
+  const sortPinnedDataflows = orderBy(pinnedDataflows, sortByKeys, order);
+  const sortDataflows = orderBy(dataflows, sortByKeys, order);
+
+  return [...sortPinnedDataflows, ...sortDataflows];
 
   // const sortedData = arrayForSort.sort((a, b) => {
   //   if (isNil(a[itemKey])) return null;

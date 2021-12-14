@@ -326,7 +326,13 @@ const Dataflows = () => {
     }
   };
 
-  const getFilteredData = data => dataflowsDispatch({ type: 'GET_FILTERED_DATA', payload: { type: tabId, data } });
+  const getFilteredData = data => {
+    const orderedFilteredData = sortDataflows(data);
+    const orderedPinned = orderedFilteredData.map(el => el.pinned);
+
+    setPinnedSeparatorIndex(orderedPinned.lastIndexOf('pinned'));
+    dataflowsDispatch({ type: 'GET_FILTERED_DATA', payload: { type: tabId, data } });
+  };
 
   const manageDialogs = (dialog, value) => {
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
@@ -396,6 +402,7 @@ const Dataflows = () => {
     const userProperties = updateUserPropertiesPinnedDataflows({ pinnedItem, data: _data });
 
     await onUpdateUserProperties(userProperties);
+    userContext.onChangePinnedDataflows(userProperties.pinnedDataflows);
 
     const changedInitialData = onUpdatePinnedStatus({ dataflows: dataflowsState[tabId], isPinned, pinnedItem });
     const changedFilteredData = onUpdatePinnedStatus({ dataflows: _filteredData, isPinned, pinnedItem });

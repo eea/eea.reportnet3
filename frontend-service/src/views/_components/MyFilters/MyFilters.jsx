@@ -89,7 +89,10 @@ export const MyFilters = ({
     options.forEach(option => {
       if (!option) return;
 
-      filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption.key) || [option.key];
+      filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption.key) || [
+        ...filterKeys[option.type],
+        option.key
+      ];
     });
 
     setFilterByKeys(filterKeys);
