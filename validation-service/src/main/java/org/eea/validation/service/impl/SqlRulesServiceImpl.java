@@ -55,6 +55,10 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -425,10 +429,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public String evaluateSqlRule(Long datasetId, String sqlRule) throws EEAException {
+  public Double evaluateSqlRule(Long datasetId, String sqlRule)
+      throws EEAException, ParseException {
 
     StringBuilder sb = new StringBuilder("");
-    String result = "";
+    Double sqlCost = 0.0;
     DataSetMetabaseVO dataSetMetabaseVO =
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
     List<String> ids = new ArrayList<>();
@@ -450,7 +455,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       } else {
         sb.append("EXPLAIN (FORMAT JSON) ");
         sb.append(sqlRule);
-        result = datasetRepository.evaluateSqlRule(datasetId, sb.toString());
+        String result = datasetRepository.evaluateSqlRule(datasetId, sb.toString());
+        JSONParser parser = new JSONParser();
+        JSONArray jsonArray = (JSONArray) parser.parse(result);
+        JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+        JSONObject plan = (JSONObject) jsonObject.get("Plan");
+        sqlCost = Double.parseDouble(String.valueOf(plan.get("Total Cost")));
       }
     } catch (StringIndexOutOfBoundsException e) {
       throw new StringIndexOutOfBoundsException(
@@ -463,8 +473,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           e);
     } catch (EEAException e) {
       throw new EEAException("User doesn't have access to one of the datasets", e);
+    } catch (ParseException e) {
+      throw new ParseException(e.getErrorType(), e.getPosition());
     }
-    return result;
+    return sqlCost;
   }
 
   /**

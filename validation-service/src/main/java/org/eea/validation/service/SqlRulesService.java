@@ -8,6 +8,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.schemas.rule.Rule;
+import org.json.simple.parser.ParseException;
 
 /**
  * The Interface SqlRulesService.
@@ -84,5 +85,5 @@ public interface SqlRulesService {
    * @return the string containing the total cost
    * @throws EEAException the EEA exception
    */
-  String evaluateSqlRule(Long datasetId, String sqlRule) throws EEAException;
+  Double evaluateSqlRule(Long datasetId, String sqlRule) throws EEAException, ParseException;
 }
