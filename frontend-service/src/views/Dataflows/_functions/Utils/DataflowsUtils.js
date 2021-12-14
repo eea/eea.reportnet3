@@ -1,4 +1,4 @@
-import { orderBy } from 'lodash';
+import orderBy from 'lodash/orderBy';
 
 const getActiveTab = (tabMenuItems, activeIndex) => {
   const { id, label } = tabMenuItems[activeIndex];

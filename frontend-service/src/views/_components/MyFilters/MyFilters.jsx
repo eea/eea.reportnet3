@@ -44,8 +44,6 @@ export const MyFilters = ({
 
   const [labelsAnimationDate, setLabelsAnimationDate] = useState([]);
 
-  console.log('object :>> ', labelsAnimationDate);
-
   const { filterBy, filteredData, loadingStatus } = filters;
 
   const { userProps } = useContext(UserContext);
@@ -62,7 +60,7 @@ export const MyFilters = ({
     return () => {
       setLabelsAnimationDate([]);
     };
-  }, [data]);
+  }, []);
 
   useEffect(() => {
     const listener = event => {
