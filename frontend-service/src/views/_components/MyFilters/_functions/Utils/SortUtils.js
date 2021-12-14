@@ -1,4 +1,4 @@
-import isNil from 'lodash/isNil';
+import groupBy from 'lodash/groupBy';
 import orderBy from 'lodash/orderBy';
 
 const SORT_CATEGORY = 'pinned';
@@ -8,13 +8,18 @@ const applySort = ({ filteredData, sortBy }) => {
   const sortByKeys = Object.keys(sortBy).filter(sortByOption => sortBy[sortByOption] !== 'idle');
   const order = Object.values(sortBy).filter(orderOption => orderOption !== 'idle');
 
-  const pinnedDataflows = _filteredData.filter(dataflow => dataflow.pinned === 'pinned');
-  const dataflows = _filteredData.filter(dataflow => dataflow.pinned !== 'pinned');
+  const groupedCategories = groupBy(_filteredData, SORT_CATEGORY);
 
-  const sortPinnedDataflows = orderBy(pinnedDataflows, sortByKeys, order);
-  const sortDataflows = orderBy(dataflows, sortByKeys, order);
+  return Object.keys(groupedCategories).flatMap(key => orderBy(groupedCategories[key], sortByKeys, order));
 
-  return [...sortPinnedDataflows, ...sortDataflows];
+  // console.log(`test2`, test2);
+  // const pinnedDataflows = _filteredData.filter(dataflow => dataflow.pinned === 'pinned');
+  // const dataflows = _filteredData.filter(dataflow => dataflow.pinned !== 'pinned');
+
+  // const sortPinnedDataflows = orderBy(pinnedDataflows, sortByKeys, order);
+  // const sortDataflows = orderBy(dataflows, sortByKeys, order);
+
+  // return [...sortPinnedDataflows, ...sortDataflows];
 
   // const sortedData = arrayForSort.sort((a, b) => {
   //   if (isNil(a[itemKey])) return null;
