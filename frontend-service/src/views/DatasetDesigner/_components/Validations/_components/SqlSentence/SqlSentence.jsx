@@ -102,8 +102,8 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   const renderSqlSentenceCost = () => {
     if (isValidateSqlSentenceLoading) {
       return (
-        <div className={`${styles.sqlSentenceCostWrapper} ${styles.spinner}`}>
-          <Spinner style={{ top: 3, width: '25px', height: '25px' }} />
+        <div className={`${styles.sqlSentenceCostWrapper} ${styles.spinnerWrapper}`}>
+          <Spinner className={styles.spinner} />
         </div>
       );
     } else {

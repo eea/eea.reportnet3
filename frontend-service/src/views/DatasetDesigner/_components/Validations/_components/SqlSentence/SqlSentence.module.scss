@@ -125,10 +125,15 @@
   }
 }
 
-.spinner {
+.spinnerWrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 5rem;
   height: 2rem;
+  .spinner {
+    top: 3px;
+    height: 25px;
+    width: 25px;
+  }
 }
