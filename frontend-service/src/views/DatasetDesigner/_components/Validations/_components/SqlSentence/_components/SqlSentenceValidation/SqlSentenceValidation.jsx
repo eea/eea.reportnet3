@@ -11,6 +11,7 @@ import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Spinner } from 'views/_components/Spinner';
 
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { ValidationService } from 'services/ValidationService';
@@ -20,11 +21,13 @@ export const SqlSentenceValidation = ({
   setIsVisibleSqlSentenceValidationDialog,
   sqlSentence
 }) => {
+  const notificationContext = useContext(NotificationContext);
+  const resourcesContext = useContext(ResourcesContext);
+
   const [columns, setColumns] = useState();
+  const [errorMessage, setErrorMessage] = useState(resourcesContext.messages['notValidSql']);
   const [isLoading, setIsLoading] = useState(true);
   const [sqlResponse, setSqlResponse] = useState(null);
-
-  const resourcesContext = useContext(ResourcesContext);
 
   const { datasetId } = useParams();
 
@@ -50,6 +53,7 @@ export const SqlSentenceValidation = ({
 
   const validateSqlSentence = async () => {
     setIsLoading(true);
+
     try {
       const showInternalFields = true;
       const response = await ValidationService.runSqlRule(datasetId, sqlSentence, showInternalFields);
@@ -57,6 +61,12 @@ export const SqlSentenceValidation = ({
       setSqlResponse(response);
     } catch (error) {
       console.error('SqlSentenceValidation - validateSqlSentence.', error);
+      if (error.response.status === 400 || error.response.status === 422) {
+        setErrorMessage(error.response.data.message);
+      } else {
+        notificationContext.add({ type: 'VALIDATE_SQL_ERROR' }, true);
+        setIsVisibleSqlSentenceValidationDialog(false);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +100,7 @@ export const SqlSentenceValidation = ({
     } else {
       return (
         <div className={styles.messageWrapper}>
-          <p>{resourcesContext.messages['notValidSql']}</p>
+          <p>{errorMessage}</p>
         </div>
       );
     }

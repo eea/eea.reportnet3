@@ -1415,6 +1415,7 @@
     "restrictFromPublicTooltip": "Release new data to restrict from public view",
     "sqlSentenceValidationDialogTitle": "SQL sentence validation",
     "notValidSql": "This is not a valid SQL sentence",
-    "runSql": "Run SQL"
+    "runSql": "Run SQL",
+    "validateSqlError": "Error validating SQL sentence"
   }
 }
