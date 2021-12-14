@@ -387,6 +387,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         @Override
         public List<List<ValueVO>> execute(Connection conn) throws SQLException {
           List<List<ValueVO>> tableRows = new ArrayList<>();
+          conn.setReadOnly(true);
           conn.setSchema("dataset_" + datasetId);
           try (PreparedStatement stmt = conn.prepareStatement(sqlRule);
               ResultSet rs = stmt.executeQuery();) {
@@ -436,6 +437,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         @Override
         public String execute(Connection conn) throws SQLException {
           String resultObject = "";
+          conn.setReadOnly(true);
           conn.setSchema("dataset_" + datasetId);
           try (PreparedStatement stmt = conn.prepareStatement(sqlRule);
               ResultSet rs = stmt.executeQuery();) {
