@@ -1410,6 +1410,7 @@
     "newPointErrorMessage": "In the EPSG:3035, the new point must be between -16.1 and 40.18 (longitude) and 32.88 and 84.17 (latitude)",
     "newPointErrorTitle": "Coordinate error",
     "addSystemNotification": "Add system notification",
-    "coordsOutOfBoundsTooltipGeographicalProjectedValues": " - Projected: "
+    "coordsOutOfBoundsTooltipGeographicalProjectedValues": " - Projected: ",
+    "maxWebsocketReconnectAttempsError": "Error connecting with the server. Please log out and log in to try again."
   }
 }
