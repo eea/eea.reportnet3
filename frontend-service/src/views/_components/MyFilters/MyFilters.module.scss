@@ -39,13 +39,18 @@
   height: 2.1rem !important;
 }
 
-.input {
+.block .elementFilter {
+  display: flex;
+  border-bottom: var(--inputtext-border) !important;
+}
+
+/*Each filter block*/
+.block {
   display: flex;
   color: var(--font-filters);
   height: 2rem;
   font-size: 0.8333rem;
   //width: 100% !important;
-  //border-bottom: var(--inputtext-border) !important;
 
   /*Show the label from multiSelect*/
   .label {
@@ -53,10 +58,9 @@
     height: auto;
     overflow: visible;
     width: 90%;
-    //display: flex;
   }
 
-  /*Hide border to inputText*/
+  /*Hide border to inputText and calendar*/
   .inputFilter {
     background: transparent;
     border: 0px;
@@ -149,34 +153,32 @@
   flex-direction: row;
   margin: 2rem 0;
   width: 100%;
-  //align-items: baseline;
   flex-wrap: wrap;
-  gap: 0.25rem;
 
   @include for-phone-only {
     justify-content: flex-start;
-    .input {
+    .block {
       margin-bottom: 1.5rem;
       width: 100% !important;
     }
   }
   @include for-tablet-portrait-up {
-    .input,
+    .block,
     .inputCheckbox {
       width: 50% !important;
       margin-bottom: 1.5rem;
     }
   }
   @include for-desktop-up {
-    .input,
+    .block,
     .inputCheckbox {
-      width: 24% !important;
+      width: 25% !important;
     }
   }
   @include for-big-desktop-up {
-    .input,
+    .block,
     .inputCheckbox {
-      width: 24% !important;
+      width: 25% !important;
       margin-bottom: 1.5rem;
     }
   }
