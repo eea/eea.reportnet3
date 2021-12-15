@@ -36,6 +36,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.annotations.QueryHints;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -466,10 +467,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     if (null != filterValue || null != columnName) {
       stringQuery.append(
           " where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
-          .append(null != columnName ? String.format(" x.o ->> 'fieldName' = '%s' and ", columnName)
-              : "")
-          .append(null != filterValue ? String.format(" x.o ->> 'value' = '%s' and ", filterValue)
-              : "");
+          .append(null != columnName ? " x.o ->> 'fieldName' = ? and " : "")
+          .append(null != filterValue ? " x.o ->> 'value' = ? and " : "");
       stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
       stringQuery.append(" ) ");
     }
@@ -485,10 +484,31 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     stringQuery.append(" group by id_table_schema ) as json ");
     LOG.info("Query: {} ", stringQuery);
     Query query = entityManager.createNativeQuery(stringQuery.toString());
+
+    if (null != columnName && null != filterValue) {
+      query.setParameter(1, columnName);
+      query.setParameter(2, filterValue);
+      query.setParameter(3, columnName);
+      query.setParameter(4, filterValue);
+      query.setParameter(5, columnName);
+      query.setParameter(6, filterValue);
+      query.setParameter(7, columnName);
+      query.setParameter(8, filterValue);
+    } else if (null != columnName && null == filterValue) {
+      query.setParameter(1, columnName);
+      query.setParameter(2, columnName);
+      query.setParameter(3, columnName);
+      query.setParameter(4, columnName);
+    } else if (null == columnName && null != filterValue) {
+      query.setParameter(1, filterValue);
+      query.setParameter(2, filterValue);
+      query.setParameter(3, filterValue);
+      query.setParameter(4, filterValue);
+    }
+
     Object result = null;
     try {
-
-      result = query.getSingleResult();
+      result = query.setHint(QueryHints.READ_ONLY, true).getSingleResult();
     } catch (NoResultException nre) {
       LOG.info("no result, ignore message");
     }
@@ -511,7 +531,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     List<String> illegalwords = Arrays.asList(RESERVED_SQL_WORDS);
     boolean isAllowed = false;
     if (null != text && !text.isEmpty()) {
-      if (illegalwords.contains(text.toUpperCase())) {
+      if (!illegalwords.contains(text.toUpperCase())) {
         isAllowed = true;
       } else {
         LOG_ERROR.error("Param {} is illegal.", text);
@@ -892,9 +912,19 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     LOG.info("Query Count: {} ", totalRecords);
     Query query = entityManager.createNativeQuery(totalRecords);
+
+    if (null != columnName && null != filterValue) {
+      query.setParameter(1, columnName);
+      query.setParameter(2, filterValue);
+    } else if (null != columnName && null == filterValue) {
+      query.setParameter(1, columnName);
+    } else if (null == columnName && null != filterValue) {
+      query.setParameter(1, filterValue);
+    }
+
     Object result = null;
     try {
-      result = query.getSingleResult();
+      result = query.setHint(QueryHints.READ_ONLY, true).getSingleResult();
     } catch (NoResultException nre) {
       LOG.info("no result, ignore message");
       result = "0";
@@ -941,10 +971,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     if (null != filterValue || null != columnName) {
       stringQuery.append(
           " where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
-          .append(null != columnName ? String.format(" x.o ->> 'fieldName' = '%s' and ", columnName)
-              : "")
-          .append(null != filterValue ? String.format(" x.o ->> 'value' = '%s' and ", filterValue)
-              : "");
+          .append(null != columnName ? " x.o ->> 'fieldName' = ? and " : "")
+          .append(null != filterValue ? " x.o ->> 'value' = ? and " : "");
       stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
       stringQuery.append(" ) ");
     }
@@ -1029,11 +1057,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       if (null != filterValue || null != columnName) {
         stringQuery.append(
             " where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
-            .append(
-                null != columnName ? String.format(" x.o ->> 'fieldName' = '%s' and ", columnName)
-                    : "")
-            .append(null != filterValue ? String.format(" x.o ->> 'value' = '%s' and ", filterValue)
-                : "");
+            .append(null != columnName ? " x.o ->> 'fieldName' = ? and " : "")
+            .append(null != filterValue ? " x.o ->> 'value' = ? and " : "");
         stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
         stringQuery.append(" )) ");
       }

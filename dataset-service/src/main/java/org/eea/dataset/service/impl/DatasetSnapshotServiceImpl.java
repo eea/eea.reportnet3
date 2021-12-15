@@ -1126,6 +1126,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
 
+      Map<String, Object> restoreSnapshots = new HashMap<>();
+      restoreSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RESTORE_SNAPSHOT.getValue());
+      restoreSnapshots.put(LiteralConstants.DATASETID, datasetId);
+
+
       Map<String, Object> insertRecordsMultitable = new HashMap<>();
       insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
           LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
@@ -1138,6 +1143,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       lockService.removeLockByCriteria(deleteDatasetValues);
       lockService.removeLockByCriteria(importFileData);
       lockService.removeLockByCriteria(insertRecordsMultitable);
+      lockService.removeLockByCriteria(restoreSnapshots);
 
       // Delete tables and import tables
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
@@ -1165,6 +1171,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     releaseSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
     releaseSnapshots.put(LiteralConstants.DATAFLOWID, dataflowId);
     releaseSnapshots.put(LiteralConstants.DATAPROVIDERID, dataProviderId);
+
 
     lockService.removeLockByCriteria(populateEuDataset);
     lockService.removeLockByCriteria(releaseSnapshots);

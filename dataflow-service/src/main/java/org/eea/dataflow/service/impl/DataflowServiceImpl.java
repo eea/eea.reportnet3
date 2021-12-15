@@ -16,7 +16,6 @@ import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPrivateMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
-import org.eea.dataflow.persistence.domain.Contributor;
 import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
@@ -412,37 +411,6 @@ public class DataflowServiceImpl implements DataflowService {
         pageable.getPageSize(), pageable.getPageNumber());
 
     return dataflowVOs;
-  }
-
-  /**
-   * Adds the contributor to dataflow.
-   *
-   * @param idDataflow the id dataflow
-   * @param idContributor the id contributor
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public void addContributorToDataflow(Long idDataflow, String idContributor) throws EEAException {
-
-    Contributor contributor = new Contributor();
-    contributor.setUserId(idContributor);
-    Dataflow dataflow = dataflowRepository.findById(idDataflow).orElse(new Dataflow());
-    contributor.setDataflow(dataflow);
-
-    contributorRepository.save(contributor);
-  }
-
-  /**
-   * Removes the contributor from dataflow.
-   *
-   * @param idDataflow the id dataflow
-   * @param idContributor the id contributor
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public void removeContributorFromDataflow(Long idDataflow, String idContributor)
-      throws EEAException {
-    contributorRepository.removeContributorFromDataset(idDataflow, idContributor);
   }
 
   /**

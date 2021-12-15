@@ -105,6 +105,10 @@ public class Rule implements Serializable {
   @Field(value = "expressionText")
   private String expressionText;
 
+  /** The sql cost. */
+  @Field(value = "sqlCost")
+  private Double sqlCost;
+
 
   /**
    * Hash code.
@@ -115,7 +119,7 @@ public class Rule implements Serializable {
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, activationGroup, type,
         whenCondition, thenCondition, description, shortCode, uniqueConstraintId,
-        integrityConstraintId, sqlSentence);
+        integrityConstraintId, sqlSentence, sqlCost);
   }
 
   /**
@@ -143,6 +147,6 @@ public class Rule implements Serializable {
         && Objects.equals(shortCode, other.shortCode)
         && Objects.equals(uniqueConstraintId, other.uniqueConstraintId)
         && Objects.equals(integrityConstraintId, other.integrityConstraintId)
-        && Objects.equals(sqlSentence, other.sqlSentence);
+        && Objects.equals(sqlSentence, other.sqlSentence) && Objects.equals(sqlCost, other.sqlCost);
   }
 }
