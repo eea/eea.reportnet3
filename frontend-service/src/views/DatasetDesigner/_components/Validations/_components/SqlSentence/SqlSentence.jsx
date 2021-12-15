@@ -76,9 +76,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
 
   const generateColumns = () => {
     const [firstRow] = sqlResponse;
-
     const columnData = Object.keys(firstRow).map(key => ({ field: key, header: key.replace('*', '.') }));
-
     return columnData.map(col => <Column field={col.field} header={col.header} key={col.field} />);
   };
 
