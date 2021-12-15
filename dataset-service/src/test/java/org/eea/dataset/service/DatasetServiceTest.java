@@ -2348,63 +2348,12 @@ public class DatasetServiceTest {
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     when(designDatasetRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(designDataset));
-
-    List<RecordValue> recordDesignValues = new ArrayList<>();
-    RecordValue record = new RecordValue();
-    TableValue table = new TableValue();
-    table.setId(1L);
-    record.setTableValue(table);
-    record.setId("record1");
-    record.setIdRecordSchema("0A07FD45F1CD7965A2B0F13E57948A12");
-    recordDesignValues.add(record);
-    table.setIdTableSchema(recordSchema.getIdTableSchema().toString());
-    DatasetValue datasetValue = new DatasetValue();
-    datasetValue.setId(1l);
-    table.setDatasetId(datasetValue);
-
-    when(this.tableRepository.findByIdTableSchema(Mockito.anyString())).thenReturn(table);
-    List<FieldValue> fieldValues = new ArrayList<>();
-    FieldValue field = new FieldValue();
-    field.setType(DataType.ATTACHMENT);
-    field.setId("0A07FD45F1CD7965A2B0F13E57948A13");
-    field.setRecord(record);
-    fieldValues.add(field);
-
-    when(fieldRepository.findByRecord_IdRecordSchema(Mockito.anyString(),
-        Mockito.any(Pageable.class))).then(new Answer<List<FieldValue>>() {
-
-          @Override
-          public List<FieldValue> answer(InvocationOnMock invocation) throws Throwable {
-            List<FieldValue> result;
-            if (((Pageable) invocation.getArgument(1)).getPageNumber() == 0) {
-              result = fieldValues;
-            } else {
-              result = new ArrayList<>();
-            }
-            return result;
-          }
-        });
-    AttachmentValue attachment = new AttachmentValue();
-    attachment.setFieldValue(field);
-    when(attachmentRepository.findAll()).thenReturn(Arrays.asList(attachment));
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
 
-
-    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
-        .thenReturn(new ConnectionDataVO());
-    Mockito
-        .when(recordValueIdGenerator
-            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
-        .thenReturn("recordId");
-    Mockito
-        .when(fieldValueIdGenerator
-            .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
-        .thenReturn("fieldId");
-
-
     datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
-    Mockito.verify(attachmentRepository, times(1)).saveAll(Mockito.any());
+    Mockito.verify(recordStoreControllerZuul, times(1)).cloneData(Mockito.any(), Mockito.anyLong(),
+        Mockito.anyLong(), Mockito.any(), Mockito.any());
   }
 
 
