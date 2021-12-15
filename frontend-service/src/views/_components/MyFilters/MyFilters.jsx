@@ -60,7 +60,7 @@ export const MyFilters = ({
     return () => {
       setLabelsAnimationDate([]);
     };
-  }, [filterBy]);
+  }, [filterBy, options]);
 
   useEffect(() => {
     const listener = event => {
