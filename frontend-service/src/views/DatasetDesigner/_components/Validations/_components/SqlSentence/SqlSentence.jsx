@@ -122,12 +122,10 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       );
       setSqlSentenceCost(data);
     } catch (error) {
-      setSqlSentenceCost(0);
       console.error('SqlSentence - onEvaluateSqlSentence.', error);
-      if (error.response.status === 400) {
-        notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_FORMAT_ERROR' }, true);
-      } else if (error.response.status === 422) {
-        notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_COMMANDS_NOT_ALLOWED_ERROR' }, true);
+      if (error.response.status === 400 || error.response.status === 422) {
+        setValidationErrorMessage(error.response.data.message);
+        setHasValidationError(true);
       } else {
         notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_ERROR' }, true);
       }

@@ -1420,8 +1420,6 @@
     "sqlSentenceCost": "SQL evaluation",
     "evaluateSql": "Evaluate SQL",
     "evaluateSqlSentenceError": "Error evaluating SQL sentence",
-    "evaluateSqlSentenceFormatError": "Error evaluating SQL sentence: format not allowed. Please check SQL sentence",
-    "evaluateSqlSentenceCommandsNotAllowedError": "Error evaluating SQL sentence: there are commands not allowed in the sentence",
     "maxWebsocketReconnectAttemptsError": "Error connecting with the server. Please log out and log in to try again."
   }
 }
