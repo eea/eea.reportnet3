@@ -24,16 +24,11 @@ const getPositionLabelAnimationDate = (labelsAnimationDate, key) => {
 };
 
 const getLabelsAnimationDateInitial = (options, filterBy) => {
-  const result = options
+  return options
     .filter(option => option?.type === 'DATE')
-    .map(option => {
-      if (!isEmpty(filterBy[option.key])) {
-        return { [option.key]: true };
-      } else {
-        return { [option.key]: false };
-      }
-    });
-  return result;
+    .map(option => ({
+      [option.key]: !isEmpty(filterBy[option.key])
+    }));
 };
 
 const getOptionsByKeyNestedOption = (filteredOptions, key) => {
