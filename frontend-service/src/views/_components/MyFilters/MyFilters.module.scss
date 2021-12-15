@@ -39,6 +39,10 @@
   height: 2.1rem !important;
 }
 
+.iconActive {
+  color: var(--filter-sort-icon-color) !important;
+}
+
 .block .elementFilter {
   display: flex;
   border-bottom: var(--inputtext-border) !important;

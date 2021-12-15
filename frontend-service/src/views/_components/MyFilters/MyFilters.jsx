@@ -353,9 +353,18 @@ export const MyFilters = ({
   };
 
   const renderSortButton = ({ key }) => {
+    const getClassName = () => {
+      const inactive = `p-button-secondary-transparent ${styles.sortButton}`;
+      const active = `p-button-secondary-transparent ${styles.sortButton} ${styles.iconActive}`;
+      if (sortBy[key] === undefined || sortBy[key] === 'idle') {
+        return inactive;
+      } else {
+        return active;
+      }
+    };
     return (
       <Button
-        className={`p-button-secondary-transparent ${styles.sortButton}`}
+        className={getClassName()}
         icon={switchSortByIcon(sortBy[key])}
         onClick={() => onSortData(key)}
         style={{ fontSize: '0.12rem' }}
