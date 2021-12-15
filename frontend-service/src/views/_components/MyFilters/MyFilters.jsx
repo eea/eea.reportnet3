@@ -1,4 +1,4 @@
-import { useContext, useEffect, useLayoutEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import PropTypes from 'prop-types';
 
@@ -26,7 +26,7 @@ import { SortUtils } from './_functions/Utils/SortUtils';
 
 const { applyDates, applyInputs, applyMultiSelects } = ApplyFiltersUtils;
 const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
-const { getOptionsTypes, parseDateValues, getLabelsAnimationDateInitial, getPositionLabelAnimationDate } = FiltersUtils;
+const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
 export const MyFilters = ({
   className,
@@ -42,12 +42,12 @@ export const MyFilters = ({
   const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
   const [sortBy, setSortBy] = useRecoilState(sortByStateFamily(viewType));
 
-  const [labelsAnimationDate, setLabelsAnimationDate] = useState([]);
-
-  const { filterBy, filteredData, loadingStatus } = filters;
+  const { filterBy, filteredData } = filters;
 
   const { userProps } = useContext(UserContext);
   const resourcesContext = useContext(ResourcesContext);
+
+  const [labelsAnimationDate, setLabelsAnimationDate] = useState([]);
 
   const calendarRefs = useRef([]);
 
@@ -143,10 +143,9 @@ export const MyFilters = ({
         filteredData = applySort({ filteredData, order: value, prevSortState: applyFilters(), sortByKey: key });
       }
 
-      setFilters({ ...filters, data: data, filteredData, loadingStatus: 'SUCCESS' });
+      setFilters({ ...filters, data: data, filteredData });
     } catch (error) {
-      setLoadingStatus('FAILED');
-      console.log('error :>> ', error);
+      console.error('Filters - loadFilters :>> ', error);
     }
   };
 
@@ -175,8 +174,6 @@ export const MyFilters = ({
     setFilters({ ...filters, filteredData: sortedData });
   };
 
-  const setLoadingStatus = status => setFilters({ ...filters, loadingStatus: status });
-
   const updateValueLabelsAnimationDate = (labelsAnimationDate, position, key, value) => {
     if (position !== undefined && labelsAnimationDate.length > 0) {
       const copyLabelsAnimationDate = [...labelsAnimationDate];
@@ -187,7 +184,7 @@ export const MyFilters = ({
 
   const renderFilters = () => {
     return options.map(option => {
-      if (option == null) return [];
+      if (isNil(option)) return [];
 
       switch (option.type) {
         case 'CHECKBOX':
@@ -238,9 +235,7 @@ export const MyFilters = ({
             inputId={inputId}
             key={option.key}
             monthNavigator={true}
-            onChange={event => {
-              onChange({ key: option.key, value: parseDateValues(event.value) });
-            }}
+            onChange={event => onChange({ key: option.key, value: parseDateValues(event.value) })}
             onFocus={() =>
               updateValueLabelsAnimationDate(labelsAnimationDate, positionLabelAnimationDate, option.key, true)
             }
@@ -262,7 +257,6 @@ export const MyFilters = ({
               onClick={() => {
                 onChange({ key: option.key, value: [] });
                 updateValueLabelsAnimationDate(labelsAnimationDate, positionLabelAnimationDate, option.key, false);
-                //document.getElementById(inputId).value = '';
               }}
             />
           )}
@@ -278,9 +272,7 @@ export const MyFilters = ({
   };
 
   const renderInput = option => {
-    if (option.nestedOptions) {
-      return option.nestedOptions.map(option => renderInput(option));
-    }
+    if (option.nestedOptions) return option.nestedOptions.map(option => renderInput(option));
 
     return (
       <div className={styles.block} key={option.key}>
@@ -301,9 +293,7 @@ export const MyFilters = ({
             <Button
               className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
               icon="cancel"
-              onClick={() => {
-                onChange({ key: option.key, value: '' });
-              }}
+              onClick={() => onChange({ key: option.key, value: '' })}
             />
           )}
         </div>
@@ -312,9 +302,7 @@ export const MyFilters = ({
   };
 
   const renderMultiSelect = option => {
-    if (option.nestedOptions) {
-      return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
-    }
+    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
 
     const selectTemplate = (optionMultiSelect, nestedOption) => {
       switch (nestedOption?.category) {
@@ -375,11 +363,7 @@ export const MyFilters = ({
     );
   };
 
-  const renderSortButtonEmpty = () => {
-    return <div className={styles.sortButtonEmpty} />;
-  };
-
-  if (loadingStatus === 'PENDING') return <div>LOADING</div>;
+  const renderSortButtonEmpty = () => <div className={styles.sortButtonEmpty} />;
 
   return (
     <div className={className ? styles[className] : styles.default}>

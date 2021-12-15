@@ -2,13 +2,7 @@ import { atomFamily } from 'recoil';
 
 export const filtersStateFamily = atomFamily({
   key: 'filtersState',
-  default: () => ({
-    data: [],
-    filterBy: {},
-    filterByTypes: {},
-    filteredData: [],
-    loadingStatus: 'IDLE'
-  })
+  default: () => ({ filterBy: {}, filteredData: [] })
 });
 
 export const filterByKeysFamily = atomFamily({
