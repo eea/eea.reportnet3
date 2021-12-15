@@ -589,19 +589,6 @@ export const QCList = ({
     if (rowData.sqlSentenceCost !== 0 && !isNil(rowData.sqlSentenceCost)) {
       return (
         <div className={`${styles.sqlSentenceCostTemplate}`}>
-          {/* <div
-            className={`${
-              rowData.sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''
-            }`}></div>
-          <div
-            className={`${
-              rowData.sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST &&
-              rowData.sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
-                ? styles.yellowLightSignal
-                : ''
-            }`}></div>
-          <div
-            className={`${rowData.sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''}`}></div> */}
           <div className={styles.trafficLight}>{renderLightSignals()}</div>
         </div>
       );
