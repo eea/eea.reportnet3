@@ -813,7 +813,7 @@ public class SqlRulesServiceImplTest {
     try {
       sqlRulesServiceImpl.runSqlRule(1L, sqlRule, false);
     } catch (EEAInvalidSQLException e) {
-      assertEquals("Couldn't execute the SQL Rule: " + sqlRule, e.getMessage());
+      assertEquals("Couldn't execute the SQL Rule", e.getMessage());
       throw e;
     }
   }
