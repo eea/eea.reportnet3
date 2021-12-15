@@ -355,7 +355,7 @@ export const MyFilters = ({
   };
 
   const renderSortButtonEmpty = () => {
-    return <div className={`p-button-secondary-transparent ${styles.sortButton}`} />;
+    return <div className={styles.sortButtonEmpty} />;
   };
 
   if (loadingStatus === 'PENDING') return <div>LOADING</div>;
