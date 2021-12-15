@@ -13,6 +13,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
+import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -365,4 +366,93 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     }
 
   }
+
+  /**
+   * Run SQL rule with limited results.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be run
+   * @return the string formatted as JSON
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
+   */
+  @Override
+  @Transactional
+  public List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule)
+      throws EEAInvalidSQLException {
+    List<List<ValueVO>> tableValues = new ArrayList<>();
+
+    try {
+      Session session = (Session) entityManager.getDelegate();
+      tableValues = session.doReturningWork(new ReturningWork<List<List<ValueVO>>>() {
+        @Override
+        public List<List<ValueVO>> execute(Connection conn) throws SQLException {
+          List<List<ValueVO>> tableRows = new ArrayList<>();
+          conn.setReadOnly(true);
+          conn.setSchema("dataset_" + datasetId);
+          try (PreparedStatement stmt = conn.prepareStatement(sqlRule);
+              ResultSet rs = stmt.executeQuery();) {
+            ResultSetMetaData rsmt = rs.getMetaData();
+            int index = 1;
+            while (rs.next()) {
+              List<ValueVO> values = new ArrayList<>();
+              for (int i = 1; i <= rsmt.getColumnCount(); i++) {
+                ValueVO valueToAdd = new ValueVO();
+                valueToAdd.setValue(rs.getString(i));
+                valueToAdd.setLabel(rsmt.getColumnLabel(i));
+                valueToAdd.setTable(rsmt.getTableName(i));
+                valueToAdd.setRow(index);
+                values.add(valueToAdd);
+              }
+              tableRows.add(values);
+              index++;
+
+            }
+            LOG.info("executing query: {}", sqlRule);
+            return tableRows;
+          }
+        }
+      });
+    } catch (HibernateException e) {
+      throw new EEAInvalidSQLException("SQL not valid: " + sqlRule, e);
+    }
+    return tableValues;
+  }
+
+  /**
+   * Evaluates the SQL Rule and returns its total cost
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be evaluated
+   * @return the string formatted as JSON
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
+   */
+  @Override
+  @Transactional
+  public String evaluateSqlRule(Long datasetId, String sqlRule) throws EEAInvalidSQLException {
+    String result = "";
+
+    try {
+      Session session = (Session) entityManager.getDelegate();
+      result = session.doReturningWork(new ReturningWork<String>() {
+        @Override
+        public String execute(Connection conn) throws SQLException {
+          String resultObject = "";
+          conn.setReadOnly(true);
+          conn.setSchema("dataset_" + datasetId);
+          try (PreparedStatement stmt = conn.prepareStatement(sqlRule);
+              ResultSet rs = stmt.executeQuery();) {
+            while (rs.next()) {
+              resultObject = rs.getString(1);
+            }
+            LOG.info("executing query: {}", sqlRule);
+            return resultObject;
+          }
+        }
+      });
+    } catch (HibernateException e) {
+      throw new EEAInvalidSQLException("SQL not valid: " + sqlRule, e);
+    }
+    return result;
+  }
+
 }

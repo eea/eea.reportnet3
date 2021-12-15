@@ -182,7 +182,7 @@ export const useSetColumns = (
     if (
       !isNil(value) &&
       value !== '' &&
-      !areEquals(JSON.parse(value).geometry.type, type) &&
+      areEquals(JSON.parse(value).geometry.type, type) &&
       MapUtils.checkValidJSONMultipleCoordinates(value)
     ) {
       const parsedGeoJson = JSON.parse(value);

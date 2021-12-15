@@ -665,10 +665,22 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
             restrictFromPublic);
       } catch (EEAException e) {
         LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
+        try {
+          datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
+        } catch (EEAException e1) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR,
+              e1);
+        }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR,
             e);
       }
     } else {
+      try {
+        datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
+      } catch (EEAException e) {
+        throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED,
+            String.format(EEAErrorMessage.DATAFLOW_NOT_RELEASABLE, dataflowId));
+      }
       throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED,
           String.format(EEAErrorMessage.DATAFLOW_NOT_RELEASABLE, dataflowId));
     }
