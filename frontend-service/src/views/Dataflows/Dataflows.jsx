@@ -544,8 +544,14 @@ const Dataflows = () => {
     },
     {
       nestedOptions: [
-        { key: 'status', label: resourcesContext.messages['status'], order: 0, category: 'LEVEL_ERROR' },
-        { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1 },
+        {
+          key: 'status',
+          label: resourcesContext.messages['status'],
+          order: 0,
+          category: 'LEVEL_ERROR',
+          isSortable: true
+        },
+        { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1, isSortable: true },
         { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
       ],
       type: 'MULTI_SELECT'
@@ -557,7 +563,6 @@ const Dataflows = () => {
       type: 'DATE'
     },
     (isCustodian || isAdmin) && {
-      defaultOrder: 'asc',
       isSortable: true,
       key: 'creationDate',
       label: resourcesContext.messages['creationDateFilterLabel'],

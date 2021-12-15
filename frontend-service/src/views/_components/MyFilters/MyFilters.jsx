@@ -291,6 +291,7 @@ export const MyFilters = ({
             id={`${option.key}_input`}
             key={option.key}
             onChange={event => onChange({ key: option.key, value: event.target.value })}
+            type="search"
             value={filterBy[option.key] || ''}
           />
           <label className={styles.label} htmlFor={`${option.key}_input`}>

@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import isEmpty from 'lodash/isEmpty';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -27,33 +28,19 @@ const applyDates = ({ filterBy, filterByKeys, item }) => {
 const applyInputs = ({ filterBy, filterByKeys, item }) => {
   const filteredKeys = filterByKeys.INPUT.filter(key => Object.keys(filterBy).includes(key));
 
-  for (let index = 0; index < filteredKeys.length; index++) {
-    const filteredKey = filteredKeys[index];
-
-    if (!areEquals(filterBy[filteredKey], '')) {
-      if (!item[filteredKey].toLowerCase().includes(filterBy[filteredKey].toLowerCase())) {
-        return false;
-      }
-    }
-  }
-
-  return true;
+  return filteredKeys.every(
+    filteredKey =>
+      areEquals(filterBy[filteredKey], '') ||
+      item[filteredKey].toLowerCase().includes(filterBy[filteredKey].toLowerCase())
+  );
 };
 
 const applyMultiSelects = ({ filterBy, filterByKeys, item }) => {
   const filteredKeys = filterByKeys.MULTI_SELECT.filter(key => Object.keys(filterBy).includes(key));
 
-  for (let index = 0; index < filteredKeys.length; index++) {
-    const filteredKey = filteredKeys[index];
-
-    if (!areEquals(filterBy[filteredKey], '') && filterBy[filteredKey].length > 0) {
-      if (!filterBy[filteredKey].includes(item[filteredKey].toUpperCase())) {
-        return false;
-      }
-    }
-  }
-
-  return true;
+  return filteredKeys.every(
+    filteredKey => isEmpty(filterBy[filteredKey]) || filterBy[filteredKey].includes(item[filteredKey].toUpperCase())
+  );
 };
 
 export const ApplyFiltersUtils = { applyDates, applyInputs, applyMultiSelects };
