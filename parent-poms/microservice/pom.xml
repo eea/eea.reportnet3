@@ -23,7 +23,7 @@
 		<mapstruct.version>1.3.0.Final</mapstruct.version>
 		<projectlombok.version>1.18.0</projectlombok.version>
 		<mockito.version>3.11.2</mockito.version>
-		<json.version>2.10.3</json.version>
+		<json.version>2.13.0</json.version>
 		<log4j2.version>2.16.0</log4j2.version>
 	</properties>
 	<dependencies>
