@@ -8,6 +8,9 @@ public enum AutomaticRuleTypeEnum {
   /** The field type. Default short code:FT */
   FIELD_TYPE("FIELD_TYPE"),
 
+  /** The field sql type. Default short code:FT */
+  FIELD_SQL_TYPE("FIELD_SQL_TYPE"),
+
   /** The field cardinality. Default short code:FC */
   FIELD_CARDINALITY("FIELD_CARDINALITY"),
 
