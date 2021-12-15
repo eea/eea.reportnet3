@@ -283,7 +283,7 @@ export const MyFilters = ({
     return (
       <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
-        <div className={`p-float-label ${styles.label}`}>
+        <div className={`p-float-label ${styles.label} ${styles.elementFilter}`}>
           <InputText
             className={styles.inputFilter}
             id={`${option.key}_input`}
@@ -294,6 +294,15 @@ export const MyFilters = ({
           <label className={styles.label} htmlFor={`${option.key}_input`}>
             {option.label || ''}
           </label>
+          {!isEmpty(filterBy[option.key]) && (
+            <Button
+              className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+              icon="cancel"
+              onClick={() => {
+                onChange({ key: option.key, value: '' });
+              }}
+            />
+          )}
         </div>
       </div>
     );
