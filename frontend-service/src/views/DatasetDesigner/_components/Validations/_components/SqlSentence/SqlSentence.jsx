@@ -35,7 +35,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   const [isVisibleSqlSentenceValidationDialog, setIsVisibleSqlSentenceValidationDialog] = useState(false);
   const [sqlResponse, setSqlResponse] = useState(null);
   const [sqlSentenceCost, setSqlSentenceCost] = useState(0);
-  const [validationErrorMessage, setErrorMessage] = useState('');
+  const [validationErrorMessage, setValidationErrorMessage] = useState('');
 
   useEffect(() => {
     if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
@@ -177,7 +177,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     } catch (error) {
       console.error('SqlSentence - runSqlSentence.', error);
       if (error.response.status === 400 || error.response.status === 422) {
-        setErrorMessage(error.response.data.message);
+        setValidationErrorMessage(error.response.data.message);
         setHasValidationError(true);
       } else {
         notificationContext.add({ type: 'VALIDATE_SQL_ERROR' }, true);
