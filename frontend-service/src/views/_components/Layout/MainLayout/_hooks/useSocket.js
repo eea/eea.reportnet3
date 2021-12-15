@@ -17,7 +17,7 @@ const useSocket = () => {
 
   useEffect(() => {
     if (isUndefined(userContext.socket)) {
-      let maxConnectionAttempts = 10;
+      const maxConnectionAttempts = 10;
       let currentTry = 0;
 
       const stompClient = new Client({
