@@ -10,5 +10,5 @@ export const ValidationConfig = {
     '/rules/runSqlRule?datasetId={:datasetId}&sqlRule={:sqlSentence}&showInternalFields={:showInternalFields}',
   update: '/rules/updateRule?datasetId={:datasetId}',
   updateAutomatic: '/rules/updateAutomaticRule/{:datasetId}',
-  evaluateSqlSentence: '/rules/evaluateSqlRule?datasetId={:datasetId}&sqlRule={:sqlSentence}'
+  evaluateSqlSentence: '/rules/evaluateSqlRule?datasetId={:datasetId}'
 };
