@@ -2,9 +2,9 @@ import { memo } from 'react';
 
 import styles from './ErrorMessage.module.scss';
 
-const ErrorMessage = memo(({ message, classNames }) => {
+const ErrorMessage = memo(({ message }) => {
   return (
-    <div className={`${classNames} ${styles.wrapper}`}>
+    <div className={styles.wrapper}>
       <span>{message}</span>
     </div>
   );
