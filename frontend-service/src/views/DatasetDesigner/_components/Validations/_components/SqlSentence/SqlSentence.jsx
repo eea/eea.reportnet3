@@ -125,7 +125,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
         </div>
       );
     } else {
-      if (sqlSentenceCost !== 0) {
+      if (sqlSentenceCost !== 0 && !isNil(sqlSentenceCost)) {
         return <div className={`${styles.sqlSentenceCostWrapper} ${styles.trafficLight}`}>{renderLightSignals()}</div>;
       }
     }
