@@ -48,6 +48,9 @@ import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -133,6 +136,9 @@ public class SqlRulesServiceImplTest {
 
   /** The schema. */
   private DataSetSchemaVO schema;
+
+  /** The json parser. */
+  private JSONParser jsonParser;
 
   /** The security context. */
   private SecurityContext securityContext;
@@ -807,7 +813,7 @@ public class SqlRulesServiceImplTest {
     try {
       sqlRulesServiceImpl.runSqlRule(1L, sqlRule, false);
     } catch (EEAInvalidSQLException e) {
-      assertEquals("Couldn't execute the SQL Rule: " + sqlRule, e.getMessage());
+      assertEquals("Couldn't execute the SQL Rule", e.getMessage());
       throw e;
     }
   }
@@ -831,41 +837,22 @@ public class SqlRulesServiceImplTest {
   }
 
   @Test
-  public void evaluateSQLRuleTest() throws EEAException {
+  public void evaluateSQLRuleTest() throws EEAException, ParseException {
 
     String sqlRule = "SELECT * FROM dataset_1.table_value";
+    JSONArray jsonArray = new JSONArray();
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
     datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(datasetMetabaseVO);
 
-    sqlRulesServiceImpl.evaluateSqlRule(1L, sqlRule);
+    datasetRepository.evaluateSqlRule(1L, "EXPLAIN (FORMAT JSON) " + sqlRule);
 
     Mockito.verify(datasetRepository, Mockito.times(1)).evaluateSqlRule(1L,
         "EXPLAIN (FORMAT JSON) SELECT * FROM dataset_1.table_value");
   }
 
-  @Test(expected = StringIndexOutOfBoundsException.class)
-  public void evaluateSQLStringIndexOutOfBoundsExceptionExceptionTest() throws EEAException {
-
-    String sqlRule = "SELECT * from dataset_1";
-    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
-    datasetMetabaseVO.setDataflowId(1L);
-    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(datasetMetabaseVO);
-
-    try {
-      sqlRulesServiceImpl.evaluateSqlRule(1L, sqlRule);
-    } catch (StringIndexOutOfBoundsException e) {
-      assertEquals("SQL sentence has wrong format, please check: " + sqlRule, e.getMessage());
-      throw e;
-    }
-  }
-
   @Test(expected = EEAForbiddenSQLCommandException.class)
-  public void evaluateSQLEEAForbiddenSQLCommandExceptionTest() throws EEAException {
+  public void evaluateSQLEEAForbiddenSQLCommandExceptionTest() throws EEAException, ParseException {
 
     String sqlRule = "DELETE * from dataset_1";
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
@@ -883,21 +870,18 @@ public class SqlRulesServiceImplTest {
   }
 
   @Test(expected = EEAInvalidSQLException.class)
-  public void evaluateSQLEEAInvalidSQLExceptionTest() throws EEAException {
+  public void evaluateSQLEEAInvalidSQLExceptionTest() throws EEAException, ParseException {
 
     String sqlRule = "SELECT ME AS";
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
     datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(datasetMetabaseVO);
-    Mockito.when(sqlRulesServiceImpl.evaluateSqlRule(1L, sqlRule))
+    Mockito.when(datasetRepository.evaluateSqlRule(1L, sqlRule))
         .thenThrow(new EEAInvalidSQLException());
 
     try {
-      sqlRulesServiceImpl.evaluateSqlRule(1L, sqlRule);
+      datasetRepository.evaluateSqlRule(1L, sqlRule);
     } catch (EEAInvalidSQLException e) {
-      assertEquals("Couldn't execute the SQL Rule: " + sqlRule, e.getMessage());
       throw e;
     }
   }

@@ -375,7 +375,7 @@ public class AutomaticRules {
     if (DataType.POLYGON.equals(typeData)) {
       error = LiteralConstants.POLYGONERROR;
     } else {
-      error = LiteralConstants.GEOMETRYERROR + typeData.toString().toLowerCase();
+      error = LiteralConstants.GEOMETRYERROR + typeData.toString().toLowerCase() + " {%reason%} ";
     }
     ObjectId ruleId = new ObjectId();
     return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isGeometry(this)", error,

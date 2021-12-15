@@ -1,23 +1,40 @@
 import { useContext, useEffect, useState } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './SqlSentence.module.scss';
 
+import { config } from 'conf';
+
 import { Button } from 'views/_components/Button';
+import { Column } from 'primereact/column';
+import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { InputTextarea } from 'views/_components/InputTextarea';
+import { Spinner } from 'views/_components/Spinner';
 import { SqlHelp } from './_components/SqlHelp';
 
+import { ValidationService } from 'services/ValidationService';
+
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
-export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence, level }) => {
+export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level, onSetSqlSentence }) => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const [columns, setColumns] = useState();
+  const [hasError, setHasError] = useState(false);
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
+  const [isValidateSqlSentenceLoading, setIsValidateSqlSentenceLoading] = useState(false);
+  const [isValidatingQuery, setIsValidatingQuery] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
+  const [isVisibleSqlSentenceValidationDialog, setIsVisibleSqlSentenceValidationDialog] = useState(false);
+  const [sqlResponse, setSqlResponse] = useState(null);
+  const [sqlSentenceCost, setSqlSentenceCost] = useState(0);
 
   useEffect(() => {
     if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
@@ -30,6 +47,16 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
       setIsSqlErrorVisible(false);
     }
   }, [creationFormState.candidateRule.sqlSentence]);
+
+  useEffect(() => {
+    if (!isNil(sqlResponse) && sqlResponse.length > 0) {
+      setColumns(generateColumns());
+      setIsVisibleSqlSentenceValidationDialog(true);
+    } else if (!isNil(sqlResponse) && sqlResponse.length === 0) {
+      setColumns(sqlResponse);
+      setIsVisibleSqlSentenceValidationDialog(true);
+    }
+  }, [sqlResponse]);
 
   const levelTypes = {
     FIELD: 'field',
@@ -47,6 +74,22 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
     }
   };
 
+  const generateColumns = () => {
+    const [firstRow] = sqlResponse;
+    const columnData = Object.keys(firstRow).map(key => ({ field: key, header: key.replace('*', '.') }));
+
+    return columnData.map(col => <Column field={col.field} header={col.header} key={col.field} />);
+  };
+
+  const sqlSentenceValidationDialogFooter = (
+    <Button
+      className="p-button-secondary p-button-right-aligned"
+      icon={'cancel'}
+      label={resourcesContext.messages['close']}
+      onClick={() => setIsVisibleSqlSentenceValidationDialog(false)}
+    />
+  );
+
   const onClickInfoButton = () => {
     setIsVisibleInfoDialog(true);
   };
@@ -62,6 +105,85 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
         'sqlSentenceCodeKeyWord'
       )}`
     );
+  };
+
+  const onValidateSqlSentence = async () => {
+    try {
+      setIsValidateSqlSentenceLoading(true);
+      const { data } = await ValidationService.validateSqlSentence(
+        datasetId,
+        creationFormState.candidateRule.sqlSentence
+      );
+      setSqlSentenceCost(data);
+    } catch (error) {
+      setSqlSentenceCost(0);
+      console.error('SqlSentence - onValidateSqlSentence.', error);
+      if (error.response.status === 400) {
+        notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_FORMAT_ERROR' }, true);
+      } else if (error.response.status === 422) {
+        notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_COMMANDS_NOT_ALLOWED_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_ERROR' }, true);
+      }
+    } finally {
+      setIsValidateSqlSentenceLoading(false);
+    }
+  };
+
+  const renderSqlSentenceCost = () => {
+    if (isValidateSqlSentenceLoading) {
+      return (
+        <div className={`${styles.sqlSentenceCostWrapper} ${styles.spinnerWrapper}`}>
+          <Spinner className={styles.spinner} />
+        </div>
+      );
+    } else {
+      if (sqlSentenceCost !== 0) {
+        return (
+          <div className={`${styles.sqlSentenceCostWrapper} ${styles.trafficLight}`}>
+            <div className={`${sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''}`}></div>
+            <div
+              className={`${
+                sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST && sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
+                  ? styles.yellowLightSignal
+                  : ''
+              }`}></div>
+            <div className={`${sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''}`}></div>
+          </div>
+        );
+      }
+    }
+  };
+
+  const generateValidationDialogContent = () => {
+    if (columns.length === 0) {
+      return <h3 className={styles.noDataMessage}>{resourcesContext.messages['noData']}</h3>;
+    }
+
+    return <DataTable value={sqlResponse}>{columns}</DataTable>;
+  };
+
+  const runSqlSentence = async () => {
+    setIsValidatingQuery(true);
+    try {
+      const showInternalFields = true;
+      const response = await ValidationService.runSqlRule(
+        datasetId,
+        creationFormState.candidateRule.sqlSentence,
+        showInternalFields
+      );
+      setSqlResponse(response);
+    } catch (error) {
+      console.error('SqlSentence - runSqlSentence.', error);
+      if (error.response.status === 400 || error.response.status === 422) {
+        setHasError(true);
+      } else {
+        notificationContext.add({ type: 'VALIDATE_SQL_ERROR' }, true);
+        setIsVisibleSqlSentenceValidationDialog(false);
+      }
+    } finally {
+      setIsValidatingQuery(false);
+    }
   };
 
   return (
@@ -95,13 +217,40 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
               )}
               tooltipOptions={{ position: 'top' }}
             />
+            <Button
+              className={`${styles.runButton} p-button-rounded p-button-secondary-transparent`}
+              disabled={
+                isNil(creationFormState.candidateRule.sqlSentence) ||
+                isEmpty(creationFormState.candidateRule.sqlSentence) ||
+                isValidatingQuery
+              }
+              icon={isValidatingQuery ? 'spinnerAnimate' : 'play'}
+              label={resourcesContext.messages['runSql']}
+              onClick={runSqlSentence}
+            />
+            <Button
+              className={`${styles.validateButton} p-button-rounded p-button-secondary-transparent`}
+              disabled={
+                isNil(creationFormState.candidateRule.sqlSentence) ||
+                isEmpty(creationFormState.candidateRule.sqlSentence)
+              }
+              icon="clock"
+              iconClasses={styles.validateSqlSentenceIcon}
+              label={resourcesContext.messages['validateSql']}
+              onClick={onValidateSqlSentence}
+            />
+            {renderSqlSentenceCost()}
           </h3>
           <InputTextarea
-            className={`p-inputtextarea`}
+            className={`p-inputtextarea ${hasError ? styles.hasError : ''}`}
             id="sqlSentenceText"
             name=""
-            onChange={event => onSetSqlSentence(event.target.value)}
-            value={creationFormState.candidateRule.sqlSentence}></InputTextarea>
+            onChange={event => {
+              onSetSqlSentence(event.target.value);
+            }}
+            onFocus={() => setHasError(false)}
+            value={creationFormState.candidateRule.sqlSentence}
+          />
         </div>
       </div>
 
@@ -147,6 +296,17 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
               )
             }}
           />
+        </Dialog>
+      )}
+
+      {isVisibleSqlSentenceValidationDialog && (
+        <Dialog
+          className={columns.length > 0 ? styles.validationDialogMaxWidth : ''}
+          footer={sqlSentenceValidationDialogFooter}
+          header={resourcesContext.messages['sqlSentenceValidationDialogTitle']}
+          onHide={() => setIsVisibleSqlSentenceValidationDialog(false)}
+          visible={isVisibleSqlSentenceValidationDialog}>
+          {generateValidationDialogContent()}
         </Dialog>
       )}
     </div>

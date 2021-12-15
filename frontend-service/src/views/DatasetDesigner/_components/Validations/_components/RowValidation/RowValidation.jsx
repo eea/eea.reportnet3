@@ -96,6 +96,7 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
             componentName={componentName}
             creationFormState={creationFormState}
             dataflowType={dataflowType}
+            datasetId={datasetId}
             onAddNewExpression={onAddNewExpression}
             onAddNewExpressionIf={onAddNewExpressionIf}
             onAddNewExpressionThen={onAddNewExpressionThen}
