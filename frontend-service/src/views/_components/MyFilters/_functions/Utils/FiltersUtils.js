@@ -1,9 +1,7 @@
 import isDate from 'lodash/isDate';
-import uniq from 'lodash/uniq';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-
-const deepIncludes = ({ entries, value }) => entries.toLowerCase().includes(value.toLowerCase());
+import uniq from 'lodash/uniq';
 
 const parseDateValues = values => {
   if (!values) return [];
@@ -39,12 +37,10 @@ const getLabelsAnimationDateInitial = (options, filterBy) => {
 };
 
 const getOptionsByKeyNestedOption = (filteredOptions, key) => {
-  const template = [];
-  filteredOptions.forEach(option =>
-    template.push({ type: option?.toString().toUpperCase(), value: option?.toString().toUpperCase() })
-  );
-
-  return template;
+  return filteredOptions.map(option => ({
+    type: option?.toString().toUpperCase(),
+    value: option?.toString().toUpperCase()
+  }));
 };
 
 const onFilterBooleanOptions = option => (typeof option !== 'boolean' ? !isNil(option) && !isEmpty(option) : true);
@@ -55,9 +51,8 @@ const getOptionsTypes = (data, nestedOptionKey) => {
 };
 
 export const FiltersUtils = {
-  deepIncludes,
-  getOptionsTypes,
-  parseDateValues,
   getLabelsAnimationDateInitial,
-  getPositionLabelAnimationDate
+  getOptionsTypes,
+  getPositionLabelAnimationDate,
+  parseDateValues
 };

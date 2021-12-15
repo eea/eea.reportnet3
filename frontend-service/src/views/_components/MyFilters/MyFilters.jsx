@@ -313,7 +313,7 @@ export const MyFilters = ({
 
   const renderMultiSelect = option => {
     if (option.nestedOptions) {
-      return option.nestedOptions.map(netedOption => renderMultiSelect(netedOption));
+      return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
     }
 
     const selectTemplate = (optionMultiSelect, nestedOption) => {
