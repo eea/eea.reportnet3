@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { useResetRecoilState } from 'recoil';
 
@@ -516,20 +516,6 @@ const Dataflows = () => {
       />
     </Fragment>
   );
-
-  const FILTER_OPTIONS = [
-    { category: 'LEVEL_ERROR', key: 'obligation', label: 'Obligation', order: 0, type: 'INPUT' },
-    { category: undefined, key: 'operationName', label: 'Another label', order: 1, type: 'INPUT', options: undefined },
-    { category: 'BOOLEAN', key: 'anotherKeyName', label: 'Bool type', options: [], order: 2, type: 'MULTI_SELECT' },
-    {
-      category: undefined,
-      options: [
-        { key: 'description', label: 'This is inside a array -- DESCRIPTION', order: 1 },
-        { key: 'name', label: 'This is inside a array -- NAME', order: 0 }
-      ],
-      type: 'INPUT'
-    }
-  ];
 
   const _dataflowsOptions = [
     {

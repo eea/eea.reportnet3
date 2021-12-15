@@ -140,7 +140,7 @@ export const MyFilters = ({
       if (!isEmpty(sortBy)) {
         const [key, value] = Object.entries(sortBy)[0];
 
-        filteredData = applySort({ filteredData, order: value, prevSortState: data, sortByKey: key });
+        filteredData = applySort({ filteredData, order: value, prevSortState: applyFilters(), sortByKey: key });
       }
 
       setFilters({ ...filters, data: data, filteredData, loadingStatus: 'SUCCESS' });
@@ -169,7 +169,7 @@ export const MyFilters = ({
 
   const onSortData = key => {
     const sortOption = switchSortByOption(sortBy[key]);
-    const sortedData = applySort({ filteredData, order: sortOption, prevSortState: data, sortByKey: key });
+    const sortedData = applySort({ filteredData, order: sortOption, prevSortState: applyFilters(), sortByKey: key });
 
     setSortBy({ [key]: sortOption });
     setFilters({ ...filters, filteredData: sortedData });

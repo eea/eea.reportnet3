@@ -10,42 +10,6 @@ const applySort = ({ filteredData, order, prevSortState, sortByKey }) => {
   if (order === 'idle') return prevSortState;
 
   return Object.keys(groupedCategories).flatMap(key => orderBy(groupedCategories[key], [sortByKey], [order]));
-
-  // console.log(`test2`, test2);
-  // const pinnedDataflows = _filteredData.filter(dataflow => dataflow.pinned === 'pinned');
-  // const dataflows = _filteredData.filter(dataflow => dataflow.pinned !== 'pinned');
-
-  // const sortPinnedDataflows = orderBy(pinnedDataflows, sortByKeys, order);
-  // const sortDataflows = orderBy(dataflows, sortByKeys, order);
-
-  // return [...sortPinnedDataflows, ...sortDataflows];
-
-  // const sortedData = arrayForSort.sort((a, b) => {
-  //   if (isNil(a[itemKey])) return null;
-
-  //   if (!isNil(SORT_CATEGORY) && a[SORT_CATEGORY] !== b[SORT_CATEGORY]) {
-  //     return a[SORT_CATEGORY] < b[SORT_CATEGORY] ? -2 : 2;
-  //   }
-
-  //   const optionA = a[itemKey].toUpperCase();
-  //   const optionB = b[itemKey].toUpperCase();
-
-  //   switch (sortOption) {
-  //     case 'asc':
-  //       return optionA > optionB ? 1 : -1;
-
-  //     case 'desc':
-  //       return optionA < optionB ? 1 : -1;
-
-  //     case 'idle':
-  //       return 0;
-
-  //     default:
-  //       return 0;
-  //   }
-  // });
-
-  // return sortedData;
 };
 
 const switchSortByIcon = sortByKey => {
