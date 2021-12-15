@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -71,10 +72,11 @@ public class UserManagementControllerImplTest {
   @Mock
   private NotificationControllerZuul notificationController;
 
+  @Mock
+  HttpServletResponse httpServletResponse;
 
   @Before
   public void setUp() throws Exception {
-
     MockitoAnnotations.openMocks(this);
   }
 
@@ -735,6 +737,83 @@ public class UserManagementControllerImplTest {
         .createUserNotificationPrivate("EVENT", notification);
     userManagementController.exportUsersByCountry(1L);
     Mockito.verify(userRoleService, times(1)).exportUsersByCountry(1L);
+  }
+
+  @Test
+  public void exportUsersByCountryExceptionTest() throws IOException, EEAException {
+    Mockito.doThrow(IOException.class).when(userRoleService)
+        .exportUsersByCountry(Mockito.anyLong());
+    userManagementController.exportUsersByCountry(1L);
+    Mockito.verify(userRoleService, times(1)).exportUsersByCountry(Mockito.anyLong());
+  }
+
+  @Test
+  public void getApiKeyTest() throws EEAException {
+    when(securityProviderInterfaceService.getApiKey(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn("uuid");
+    assertEquals("uuid", userManagementController.getApiKey("uuid", 1L, 1L));
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void addUserToResourcesExceptionTest() throws EEAException {
+    try {
+      UsernamePasswordAuthenticationToken authenticationToken =
+          new UsernamePasswordAuthenticationToken("user1", null, null);
+      Map<String, String> details = new HashMap<>();
+      details.put(AuthenticationDetails.USER_ID, "userId_123");
+      authenticationToken.setDetails(details);
+      SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+      ResourceAssignationVO resource = new ResourceAssignationVO();
+      resource.setEmail("test@reportnet.net");
+      resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+      resource.setResourceId(1L);
+      List<ResourceAssignationVO> resources = new ArrayList<>();
+      resources.add(resource);
+      Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
+          .addUserToUserGroup(Mockito.anyString(), Mockito.anyString());
+      userManagementController.addUserToResources(resources);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createUsersExceptionTest() throws IOException {
+    MockMultipartFile file = new MockMultipartFile("files", "filename.txt", "text/plain",
+        "hello".getBytes(StandardCharsets.UTF_8));
+    try {
+      Mockito.doThrow(IOException.class).when(backupManagmentService)
+          .readAndSaveUsers(Mockito.any());
+      userManagementController.createUsers(file);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void addUserToResourceExceptionTest() throws EEAException {
+    try {
+      UsernamePasswordAuthenticationToken authenticationToken =
+          new UsernamePasswordAuthenticationToken("user1", null, null);
+      Map<String, String> details = new HashMap<>();
+      details.put(AuthenticationDetails.USER_ID, "userId_123");
+      authenticationToken.setDetails(details);
+      SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+      ResourceAssignationVO resource = new ResourceAssignationVO();
+      resource.setEmail("test@reportnet.net");
+      resource.setResourceGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN);
+      resource.setResourceId(1L);
+      List<ResourceAssignationVO> resources = new ArrayList<>();
+      resources.add(resource);
+      Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
+          .addUserToUserGroup(Mockito.anyString(), Mockito.anyString());
+      userManagementController.addUserToResource(1L, ResourceGroupEnum.DATACOLLECTION_CUSTODIAN);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
   }
 
 }
