@@ -1,6 +1,6 @@
 @import '_styles/mixins';
 
-/*Default css for options from MultiSelect when nestedOptions hasn't category*/
+/* Default css for options from MultiSelect when nestedOptions hasn't category */
 .statusBox {
   border-radius: 3px;
   color: var(--main-font-color);
@@ -48,15 +48,12 @@
   border-bottom: var(--inputtext-border) !important;
 }
 
-/*Each filter block*/
 .block {
   display: flex;
   color: var(--font-filters);
   height: 2rem;
   font-size: 0.8333rem;
-  //width: 100% !important;
 
-  /*Show the label from multiSelect*/
   .label {
     clip: auto;
     height: auto;
@@ -64,7 +61,6 @@
     width: 90%;
   }
 
-  /*Hide border to inputText and calendar*/
   .inputFilter {
     background: transparent;
     border: 0px;
@@ -81,7 +77,6 @@
     font-size: 0.8333rem;
   }
 
-  /*Hide borders to multiSelect*/
   .multiselectFilter {
     border: 0px;
     border-radius: 0px;
