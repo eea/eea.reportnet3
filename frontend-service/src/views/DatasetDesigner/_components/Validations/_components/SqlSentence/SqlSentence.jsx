@@ -141,14 +141,14 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       if (sqlSentenceCost !== 0) {
         return (
           <div className={`${styles.sqlSentenceCostWrapper} ${styles.trafficLight}`}>
-            <div className={`${sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''}`}> </div>
+            <div className={`${sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''}`}></div>
             <div
               className={`${
                 sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST && sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
                   ? styles.yellowLightSignal
                   : ''
               }`}></div>
-            <div className={`${sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''}`}> </div>
+            <div className={`${sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''}`}></div>
           </div>
         );
       }
