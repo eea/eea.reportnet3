@@ -317,15 +317,16 @@ export const QCList = ({
       { id: 'description', index: 5 },
       { id: 'message', index: 6 },
       { id: 'expressionText', index: 7 },
-      { id: 'entityType', index: 8 },
-      { id: 'levelError', index: 9 },
-      { id: 'automatic', index: 10 },
-      { id: 'enabled', index: 11 },
-      { id: 'referenceId', index: 12 },
-      { id: 'activationGroup', index: 13 },
-      { id: 'date', index: 14 },
-      { id: 'actionButtons', index: 15 },
-      { id: 'isCorrect', index: 16 }
+      { id: 'sqlSentenceCost', index: 8 },
+      { id: 'entityType', index: 9 },
+      { id: 'levelError', index: 10 },
+      { id: 'automatic', index: 11 },
+      { id: 'enabled', index: 12 },
+      { id: 'referenceId', index: 13 },
+      { id: 'activationGroup', index: 14 },
+      { id: 'date', index: 15 },
+      { id: 'actionButtons', index: 16 },
+      { id: 'isCorrect', index: 17 }
     ];
 
     return validations
@@ -566,27 +567,71 @@ export const QCList = ({
     </div>
   );
 
-  const renderColumns = validations => {
-    const fieldColumns = getOrderedValidations(Object.keys(validations[0])).map(field => {
-      let template = null;
-      if (field === 'automatic') template = automaticTemplate;
-      if (field === 'enabled') template = enabledTemplate;
-      if (field === 'isCorrect') template = correctTemplate;
-      if (field === 'levelError') template = rowData => levelErrorTemplate(rowData, false);
-      if (field === 'expressionText') template = expressionsTemplate;
+  const sqlSentenceCostTemplate = rowData => {
+    const costColors = ['green', 'yellow', 'red'];
+
+    const getCostColor = color => {
+      if (color === 'green' && rowData.sqlSentenceCost <= config.SQL_SENTENCE_LOW_COST) {
+        return styles.greenLightSignal;
+      } else if (
+        color === 'yellow' &&
+        rowData.sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST &&
+        rowData.sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
+      ) {
+        return styles.yellowLightSignal;
+      } else if (color === 'red' && rowData.sqlSentenceCost >= config.SQL_SENTENCE_HIGH_COST) {
+        return styles.redLightSignal;
+      }
+    };
+
+    const renderLightSignals = () => costColors.map(color => <div className={getCostColor(color)} key={color}></div>);
+
+    if (rowData.sqlSentenceCost !== 0 && !isNil(rowData.sqlSentenceCost)) {
       return (
-        <Column
-          body={template}
-          columnResizeMode="expand"
-          editor={getEditor(field)}
-          field={field}
-          header={getHeader(field)}
-          key={field}
-          sortable={tabsValidationsState.editingRows.length === 0}
-          style={columnStyles(field)}
-        />
+        <div className={`${styles.sqlSentenceCostTemplate}`}>
+          {/* <div
+            className={`${
+              rowData.sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''
+            }`}></div>
+          <div
+            className={`${
+              rowData.sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST &&
+              rowData.sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
+                ? styles.yellowLightSignal
+                : ''
+            }`}></div>
+          <div
+            className={`${rowData.sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''}`}></div> */}
+          <div className={styles.trafficLight}>{renderLightSignals()}</div>
+        </div>
       );
-    });
+    }
+  };
+
+  const renderColumns = validations => {
+    const fieldColumns = getOrderedValidations(Object.keys(validations[0]))
+      .filter(key => !key.includes('Id') && !key.includes('filter'))
+      .map(field => {
+        let template = null;
+        if (field === 'automatic') template = automaticTemplate;
+        if (field === 'enabled') template = enabledTemplate;
+        if (field === 'isCorrect') template = correctTemplate;
+        if (field === 'levelError') template = rowData => levelErrorTemplate(rowData, false);
+        if (field === 'expressionText') template = expressionsTemplate;
+        if (field === 'sqlSentenceCost') template = sqlSentenceCostTemplate;
+        return (
+          <Column
+            body={template}
+            columnResizeMode="expand"
+            editor={getEditor(field)}
+            field={field}
+            header={getHeader(field)}
+            key={field}
+            sortable={tabsValidationsState.editingRows.length === 0}
+            style={columnStyles(field)}
+          />
+        );
+      });
     if (!reporting) {
       fieldColumns.push(actionButtonsColumn);
     }
