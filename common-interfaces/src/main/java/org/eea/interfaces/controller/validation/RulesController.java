@@ -420,7 +420,7 @@ public interface RulesController {
    * @return the double containing the SQL total cost
    */
   @PostMapping(value = "/evaluateSqlRule")
-  Double evaluateSqlRule(@RequestParam("datasetId") Long datasetId, @RequestParam String sqlRule);
+  Double evaluateSqlRule(@RequestParam("datasetId") Long datasetId, @RequestBody String sqlRule);
 
 
 }
