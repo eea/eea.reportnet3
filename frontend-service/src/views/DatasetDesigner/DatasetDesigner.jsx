@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
@@ -63,10 +63,8 @@ import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false, match }) => {
-  const {
-    params: { dataflowId, datasetId }
-  } = match;
+export const DatasetDesigner = ({ isReferenceDataset = false }) => {
+  const { dataflowId, datasetId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -197,7 +195,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   useBreadCrumbs({
     currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET_DESIGNER : CurrentPage.DATASET_DESIGNER,
     dataflowId,
-    history,
     dataflowType: designerState.dataflowType,
     isLoading: designerState.isLoading,
     referenceDataflowId: dataflowId
@@ -343,7 +340,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               return {
                 command: () => onExportDataExternalIntegration(type.id),
                 icon: type.fileExtension,
-                label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+                label: `${type.name} (.${type.fileExtension})`
               };
             })
           }
@@ -1628,7 +1625,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             editable={!isDataflowOpen && !isDesignDatasetEditorRead}
             getIsTableCreated={setIsTableCreated}
             getUpdatedTabs={onUpdateTabs}
-            history={history}
             isDataflowOpen={isDataflowOpen}
             isDesignDatasetEditorRead={isDesignDatasetEditorRead}
             isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
@@ -1857,4 +1853,4 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       </div>
     </SnapshotContext.Provider>
   );
-});
+};

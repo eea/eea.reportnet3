@@ -5,7 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from '../../DataViewer.module.scss';
+import styles from './DataViewerHooks.module.scss';
 
 import { config } from 'conf';
 
@@ -119,13 +119,13 @@ export const useSetColumns = (
   };
 
   const providerCodeTemplate = rowData => (
-    <div style={{ display: 'flex', alignItems: 'center' }}>{!isUndefined(rowData) ? rowData.providerCode : null}</div>
+    <div className={styles.providerCode}>{!isUndefined(rowData) ? rowData.providerCode : null}</div>
   );
 
   const renderAttachment = (value = '', fieldId, fieldSchemaId) => {
     const colSchema = colsSchema.filter(colSchema => colSchema.field === fieldSchemaId)[0];
     return (
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <div className={styles.attachment}>
         {!isNil(value) && value !== '' && (
           <Button
             className={`${value === '' && 'p-button-animated-blink'} p-button-secondary-transparent`}
@@ -188,12 +188,9 @@ export const useSetColumns = (
       const parsedGeoJson = JSON.parse(value);
       if (!isEmpty(parsedGeoJson.geometry.coordinates)) {
         return (
-          <span
-            style={{
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}>{`${parsedGeoJson.geometry.coordinates.join(', ')} - ${parsedGeoJson.properties.srid}`}</span>
+          <span className={styles.complexGeometries}>{`${parsedGeoJson.geometry.coordinates.join(', ')} - ${
+            parsedGeoJson.properties.srid
+          }`}</span>
         );
       } else {
         return '';
@@ -203,164 +200,189 @@ export const useSetColumns = (
   };
 
   const getTooltipMessage = column => {
-    if (!isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)) {
+    const renderColumnType = () => {
       return (
-        <Fragment>
-          <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
-          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {RecordUtils.getFieldTypeValue(column.type)?.value}
-          </span>
+        <div className={styles.fieldText}>
+          <span>{resources.messages['type']}: </span>
           <br />
-          <span style={{ fontWeight: 'bold' }}>{resources.messages['description']}: </span>
-          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {!isNil(column.description) && column.description !== ''
-              ? column.description
-              : resources.messages['noDescription']}
-          </span>
-          <br />
-          <span style={{ fontWeight: 'bold' }}>
-            {column.type === 'CODELIST' ? resources.messages['codelists'] : resources.messages['multiselectCodelists']}:{' '}
-          </span>
-          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {column.codelistItems
-              .map(codelistItem =>
-                !isEmpty(codelistItem) && codelistItem.length > 15
-                  ? `${codelistItem.substring(0, 15)}...`
-                  : codelistItem
-              )
-              .join('; ')}
-          </span>
-        </Fragment>
+          <span className={styles.propertyLabel}>{RecordUtils.getFieldTypeValue(column.type)?.value}</span>
+        </div>
       );
-    } else {
-      return (
-        <Fragment>
-          <span style={{ fontWeight: 'bold' }}>{resources.messages['type']}: </span>{' '}
-          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {RecordUtils.getFieldTypeValue(column.type)?.value}
-          </span>
-          <br />
-          <span style={{ fontWeight: 'bold' }}>{resources.messages['description']}: </span>
-          <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {!isNil(column.description) && column.description !== '' && column.description.length > 35
-              ? `${column.description.substring(0, 35)}...`
-              : isNil(column.description) || column.description === ''
-              ? resources.messages['noDescription']
-              : column.description}
-          </span>
-          {column.type === 'ATTACHMENT' ? (
-            <Fragment>
-              <br />
-              <span style={{ fontWeight: 'bold' }}>{resources.messages['validExtensions']} </span>
-              <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-                {!isEmpty(column.validExtensions)
-                  ? column.validExtensions.map(extension => `.${extension}`).join(', ')
-                  : '*'}
-              </span>
-              <br />
-              <span style={{ fontWeight: 'bold' }}>{resources.messages['maxFileSize']}</span>
-              <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-                {!isNil(column.maxSize) && column.maxSize.toString() !== '0'
-                  ? ` ${column.maxSize} ${resources.messages['MB']}`
-                  : resources.messages['maxSizeNotDefined']}
-              </span>
-            </Fragment>
-          ) : (
-            ''
-          )}
-        </Fragment>
-      );
-    }
+    };
+
+    const renderColumnPK = () => {
+      if (column.pk) {
+        return (
+          <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+            <span className={styles.propertyLabel}>{resources.messages['primaryKey']}</span>
+          </div>
+        );
+      }
+    };
+
+    const renderColumnRequired = () => {
+      if (column.required) {
+        return (
+          <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+            <span className={styles.propertyLabel}>{resources.messages['required']}</span>
+          </div>
+        );
+      }
+    };
+
+    const renderColumnDescription = () => {
+      const columnDescription = () => {
+        if (column.description.length > 35) {
+          return `${column.description.substring(0, 35)}...`;
+        } else {
+          return column.description;
+        }
+      };
+      if (!isNil(column.description) && column.description.trim() !== '') {
+        return (
+          <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+            <span>{resources.messages['description']}: </span>
+            <br />
+            <span className={styles.propertyLabel}>{columnDescription()}</span>
+          </div>
+        );
+      }
+    };
+
+    const renderColumnCodeLists = () => {
+      if (!isNil(column) && !isNil(column.codelistItems) && !isEmpty(column.codelistItems)) {
+        return (
+          <div className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+            <span>
+              {column.type === 'CODELIST'
+                ? resources.messages['codelists']
+                : resources.messages['multiselectCodelists']}
+              :{' '}
+            </span>
+            <br />
+            <span
+              className={`${styles.propertyLabel} ${
+                column.codelistItems.length > 15 ? styles.propertyLabelListItems : ''
+              }`}>
+              {column.codelistItems
+                .map(codelistItem =>
+                  !isEmpty(codelistItem) && codelistItem.length > 15
+                    ? `${codelistItem.substring(0, 15)}...`
+                    : codelistItem
+                )
+                .join('; ')}
+            </span>
+          </div>
+        );
+      }
+    };
+
+    const renderColumnAttachment = () => {
+      const columMaxSize = () => {
+        if (!isNil(column.maxSize) && column.maxSize.toString() !== '0') {
+          return `${column.maxSize} ${resources.messages['MB']}`;
+        } else {
+          return resources.messages['maxSizeNotDefined'];
+        }
+      };
+
+      if (column.type === 'ATTACHMENT') {
+        return (
+          <Fragment>
+            <span className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+              {resources.messages['validExtensions']}{' '}
+            </span>
+            <span className={styles.propertyLabel}>
+              {!isEmpty(column.validExtensions)
+                ? column.validExtensions.map(extension => `.${extension}`).join(', ')
+                : '*'}
+            </span>
+            <span className={`${styles.fieldText} ${styles.fieldTextPaddingTop}`}>
+              {resources.messages['maxFileSize']}
+            </span>
+            <span className={styles.propertyLabel}>{columMaxSize()}</span>
+          </Fragment>
+        );
+      }
+    };
+
+    return (
+      <Fragment>
+        {renderColumnType()}
+        {renderColumnDescription()}
+        {renderColumnAttachment()}
+        {renderColumnCodeLists()}
+        {renderColumnPK()}
+        {renderColumnRequired()}
+      </Fragment>
+    );
   };
 
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
-    if (!isNil(field) && !isNil(field.fieldData) && !isNil(field.fieldValidations)) {
-      const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
-      const message = DataViewerUtils.formatValidations(validations);
-      const levelError = DataViewerUtils.getLevelError(validations);
 
-      return (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent:
-              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
-            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre-wrap' : 'none'
-          }}>
-          {field
-            ? Array.isArray(field.fieldData[column.field]) &&
-              !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
-                field.fieldData.type
-              )
-              ? field.fieldData[column.field].sort().join(field.fieldData.type === 'ATTACHMENT' ? ', ' : '; ')
-              : (!isNil(field.fieldData[column.field]) &&
-                  field.fieldData[column.field] !== '' &&
-                  field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (!isNil(field.fieldData[column.field]) &&
-                  (field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK'))
-              ? !Array.isArray(field.fieldData[column.field])
-                ? splitByChar(field.fieldData[column.field], ';')
-                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                    .join('; ')
-                : field.fieldData[column.field]
-                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                    .join('; ')
-              : field.fieldData.type === 'ATTACHMENT'
-              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
-              : field.fieldData.type === 'POINT'
-              ? renderPoint(field.fieldData[column.field])
-              : ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
-                  field.fieldData.type
-                )
-              ? renderComplexGeometries(field.fieldData[column.field], field.fieldData.type)
-              : field.fieldData[column.field]
-            : null}
-          <IconTooltip levelError={levelError} message={message} />
-        </div>
-      );
-    } else {
-      return (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent:
-              field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
-            whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre-wrap' : 'none'
-          }}>
-          {field
-            ? Array.isArray(field.fieldData[column.field]) &&
-              !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
-                field.fieldData.type
-              )
-              ? field.fieldData[column.field].join(field.fieldData.type === 'ATTACHMENT' ? ', ' : '; ')
-              : (!isNil(field.fieldData[column.field]) &&
-                  field.fieldData[column.field] !== '' &&
-                  field.fieldData.type === 'MULTISELECT_CODELIST') ||
-                (!isNil(field.fieldData[column.field]) &&
-                  (field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK'))
-              ? !Array.isArray(field.fieldData[column.field])
-                ? splitByChar(field.fieldData[column.field], ';')
-                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                    .join('; ')
-                : field.fieldData[column.field]
-                    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-                    .join('; ')
-              : field.fieldData.type === 'ATTACHMENT'
-              ? renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field)
-              : field.fieldData.type === 'POINT'
-              ? renderPoint(field.fieldData[column.field])
-              : ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
-                  field.fieldData.type
-                )
-              ? renderComplexGeometries(field.fieldData[column.field])
-              : field.fieldData[column.field]
-            : null}
-        </div>
-      );
-    }
+    const renderField = () => {
+      if (!isNil(field)) {
+        if (
+          Array.isArray(field.fieldData[column.field]) &&
+          !['POINT', 'LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(
+            field.fieldData.type
+          )
+        ) {
+          return field.fieldData[column.field].sort().join(field.fieldData.type === 'ATTACHMENT' ? ', ' : '; ');
+        } else if (
+          (!isNil(field.fieldData[column.field]) &&
+            field.fieldData[column.field] !== '' &&
+            field.fieldData.type === 'MULTISELECT_CODELIST') ||
+          (!isNil(field.fieldData[column.field]) &&
+            (field.fieldData.type === 'LINK' || field.fieldData.type === 'EXTERNAL_LINK'))
+        ) {
+          if (!Array.isArray(field.fieldData[column.field])) {
+            return splitByChar(field.fieldData[column.field], ';')
+              .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+              .join('; ');
+          } else {
+            return field.fieldData[column.field]
+              .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
+              .join('; ');
+          }
+        } else if (field.fieldData.type === 'ATTACHMENT') {
+          return renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field);
+        } else if (field.fieldData.type === 'POINT') {
+          return renderPoint(field.fieldData[column.field]);
+        } else if (
+          ['LINESTRING', 'POLYGON', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(field.fieldData.type)
+        ) {
+          return renderComplexGeometries(field.fieldData[column.field], field.fieldData.type);
+        } else {
+          return field.fieldData[column.field];
+        }
+      }
+    };
+
+    const renderFieldValidations = () => {
+      if (!isNil(field) && !isNil(field.fieldData) && !isNil(field.fieldValidations)) {
+        const validations = DataViewerUtils.orderValidationsByLevelError([...field.fieldValidations]);
+        const message = DataViewerUtils.formatValidations(validations);
+        const levelError = DataViewerUtils.getLevelError(validations);
+
+        return <IconTooltip levelError={levelError} message={message} />;
+      }
+    };
+
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent:
+            field && field.fieldData && field.fieldData.type === 'ATTACHMENT' ? 'flex-end' : 'space-between',
+          whiteSpace: field && field.fieldData && field.fieldData.type === 'TEXTAREA' ? 'pre-wrap' : 'none'
+        }}>
+        {renderField()}
+        {renderFieldValidations()}
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -392,24 +414,15 @@ export const useSetColumns = (
               {column.readOnly && (
                 <FontAwesomeIcon
                   aria-hidden={false}
-                  className="p-breadcrumb-home"
+                  className={`p-breadcrumb-home ${styles.iconSize}`}
                   icon={AwesomeIcons('lock')}
-                  style={{ fontSize: '8pt' }}
                 />
               )}
               {column.header}
               <TooltipButton
                 getContent={() =>
                   ReactDOMServer.renderToStaticMarkup(
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-start',
-                        opacity: '0.9'
-                      }}>
-                      {getTooltipMessage(column)}
-                    </div>
+                    <div className={styles.tooltipTitle}>{getTooltipMessage(column)}</div>
                   )
                 }
                 onClick={() => {
@@ -434,7 +447,7 @@ export const useSetColumns = (
     let providerCode = (
       <Column
         body={providerCodeTemplate}
-        className={styles.providerCode}
+        className={styles.colWidth}
         header={TextByDataflowTypeUtils.getLabelByDataflowType(
           resources.messages,
           dataflowType,
@@ -442,30 +455,29 @@ export const useSetColumns = (
         )}
         key="providerCode"
         sortable={false}
-        style={{ width: '100px' }}
       />
     );
 
     let editCol = (
       <Column
         body={row => actionTemplate(row)}
-        className={isDataflowOpen && isDesignDatasetEditorRead ? styles.fieldDisabled : null}
+        className={`${styles.colWidth} ${isDataflowOpen && isDesignDatasetEditorRead ? styles.fieldDisabled : ''}`}
         header={resources.messages['actions']}
         key="actions"
         sortable={false}
-        style={{ width: '100px' }}
       />
     );
 
     let validationCol = (
       <Column
         body={validationsTemplate}
-        className={isDataflowOpen && isDesignDatasetEditorRead ? styles.fieldDisabled : null}
+        className={`${styles.validationColWidth} ${
+          isDataflowOpen && isDesignDatasetEditorRead ? styles.fieldDisabled : null
+        } `}
         field="validations"
         header={resources.messages['validationsDataColumn']}
         key="recordValidation"
         sortable={false}
-        style={{ width: '125px' }}
       />
     );
 

@@ -1130,6 +1130,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       restoreSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RESTORE_SNAPSHOT.getValue());
       restoreSnapshots.put(LiteralConstants.DATASETID, datasetId);
 
+
       Map<String, Object> insertRecordsMultitable = new HashMap<>();
       insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
           LockSignature.INSERT_RECORDS_MULTITABLE.getValue());

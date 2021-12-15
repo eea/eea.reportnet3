@@ -266,8 +266,8 @@ export const WebformView = ({
     return (
       <WebformTable
         calculateSingle={calculateSingle}
-        dataProviderId={dataProviderId}
         dataflowId={dataflowId}
+        dataProviderId={dataProviderId}
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}
         getFieldSchemaId={getFieldSchemaId}

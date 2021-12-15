@@ -1,5 +1,6 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -34,10 +35,8 @@ import { feedbackReducer } from './_functions/Reducers/feedbackReducer';
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-export const Feedback = withRouter(({ match, history }) => {
-  const {
-    params: { dataflowId, representativeId }
-  } = match;
+export const Feedback = () => {
+  const { dataflowId, representativeId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -149,7 +148,6 @@ export const Feedback = withRouter(({ match, history }) => {
     dataflowStateData: feedbackState.dataflowStateData,
     dataflowId,
     dataflowType,
-    history,
     isLoading,
     representativeId
   });
@@ -497,4 +495,4 @@ export const Feedback = withRouter(({ match, history }) => {
       )}
     </Fragment>
   );
-});
+};
