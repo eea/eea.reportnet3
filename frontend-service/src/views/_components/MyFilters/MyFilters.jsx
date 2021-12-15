@@ -109,7 +109,7 @@ export const MyFilters = ({
       if (!option) return;
 
       if (option.isSortable && option.defaultOrder) {
-        setSortBy({ ...sortBy, [option.key]: option.defaultOrder });
+        setSortBy({ [option.key]: option.defaultOrder });
       }
 
       if (option.nestedOptions) {
@@ -138,7 +138,9 @@ export const MyFilters = ({
       let filteredData = await applyFilters();
 
       if (!isEmpty(sortBy)) {
-        filteredData = applySort({ filteredData, sortBy });
+        const [key, value] = Object.entries(sortBy)[0];
+
+        filteredData = applySort({ filteredData, order: value, prevSortState: data, sortByKey: key });
       }
 
       setFilters({ ...filters, data: data, filteredData, loadingStatus: 'SUCCESS' });
@@ -167,9 +169,9 @@ export const MyFilters = ({
 
   const onSortData = key => {
     const sortOption = switchSortByOption(sortBy[key]);
-    const sortedData = applySort({ filteredData, sortBy: { ...sortBy, [key]: sortOption } });
+    const sortedData = applySort({ filteredData, order: sortOption, prevSortState: data, sortByKey: key });
 
-    setSortBy({ ...sortBy, [key]: sortOption });
+    setSortBy({ [key]: sortOption });
     setFilters({ ...filters, filteredData: sortedData });
   };
 

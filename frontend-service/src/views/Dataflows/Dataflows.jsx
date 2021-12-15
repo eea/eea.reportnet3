@@ -573,15 +573,15 @@ const Dataflows = () => {
   const _referencesOptions = [
     {
       nestedOptions: [
-        { key: 'name', label: resourcesContext.messages['name'] },
-        { key: 'description', label: resourcesContext.messages['description'] }
+        { key: 'name', label: resourcesContext.messages['name'], isSortable: true },
+        { key: 'description', label: resourcesContext.messages['description'], isSortable: true }
       ],
       type: 'INPUT'
     },
     {
       nestedOptions: [
-        { key: 'status', label: resourcesContext.messages['status'], category: 'LEVEL_ERROR' },
-        { key: 'pinned', label: resourcesContext.messages['pinned'] }
+        { key: 'status', label: resourcesContext.messages['status'], category: 'LEVEL_ERROR', isSortable: true },
+        { key: 'pinned', label: resourcesContext.messages['pinned'], isSortable: true }
       ],
       type: 'MULTI_SELECT'
     }

@@ -3,14 +3,13 @@ import orderBy from 'lodash/orderBy';
 
 const SORT_CATEGORY = 'pinned';
 
-const applySort = ({ filteredData, sortBy }) => {
+const applySort = ({ filteredData, order, prevSortState, sortByKey }) => {
   const _filteredData = [...filteredData];
-  const sortByKeys = Object.keys(sortBy).filter(sortByOption => sortBy[sortByOption] !== 'idle');
-  const order = Object.values(sortBy).filter(orderOption => orderOption !== 'idle');
-
   const groupedCategories = groupBy(_filteredData, SORT_CATEGORY);
 
-  return Object.keys(groupedCategories).flatMap(key => orderBy(groupedCategories[key], sortByKeys, order));
+  if (order === 'idle') return prevSortState;
+
+  return Object.keys(groupedCategories).flatMap(key => orderBy(groupedCategories[key], [sortByKey], [order]));
 
   // console.log(`test2`, test2);
   // const pinnedDataflows = _filteredData.filter(dataflow => dataflow.pinned === 'pinned');
