@@ -56,11 +56,11 @@ export const MyFilters = ({
   }, [data]);
 
   useEffect(() => {
-    setLabelsAnimationDate(getLabelsAnimationDateInitial(options));
+    setLabelsAnimationDate(getLabelsAnimationDateInitial(options, filterBy));
     return () => {
       setLabelsAnimationDate([]);
     };
-  }, []);
+  }, [filterBy]);
 
   useEffect(() => {
     const listener = event => {
@@ -391,7 +391,7 @@ export const MyFilters = ({
           label={resourcesContext.messages['reset']}
           onClick={() => {
             onResetFilters();
-            setLabelsAnimationDate(getLabelsAnimationDateInitial(options));
+            setLabelsAnimationDate(getLabelsAnimationDateInitial(options, filterBy));
           }}
         />
       </div>
