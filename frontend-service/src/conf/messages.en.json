@@ -873,7 +873,7 @@
     "noQCRulesWithSelectedParameters": "There are no QC rules with the selected parameters",
     "noQCs": "No QCs to show",
     "noQuotesQCTooltip": "Double quotes (\"\") cannot be used",
-    "noReferencingDataflows": "There are no referencing dataflows",
+    "noReferencingDataflows": "No reporting dataflows directly linking to this reference dataflow.",
     "noSelectablePK": "No selectable PK",
     "noSound": "No sound",
     "noSystemNotifications": "There are no system notifications yet",
@@ -1412,6 +1412,17 @@
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
     "restrictFromPublicDisabledLabel": "Released data has already been publicly available, now it's not possible to restrict data from public view. Please release new data to change visibility.",
-    "restrictFromPublicTooltip": "Release new data to restrict from public view"
+    "restrictFromPublicTooltip": "Release new data to restrict from public view",
+    "noReferencingDataflowsMoreInfo": "However, dataset references from QC checks could be linking to it indirectly.",
+    "sqlSentenceValidationDialogTitle": "SQL sentence validation",
+    "notValidSql": "This is not a valid SQL sentence",
+    "runSql": "Run SQL",
+    "validateSqlError": "Error validating SQL sentence",
+    "sqlSentenceCost": "SQL cost",
+    "validateSql": "Validate SQL",
+    "evaluateSqlSentenceError": "Error evaluating SQL sentence",
+    "evaluateSqlSentenceFormatError": "Error evaluating SQL sentence: format not allowed. Please check SQL sentence",
+    "evaluateSqlSentenceCommandsNotAllowedError": "Error evaluating SQL sentence: there are commands not allowed in the sentence",
+    "maxWebsocketReconnectAttempsError": "Error connecting with the server. Please log out and log in to try again."
   }
 }

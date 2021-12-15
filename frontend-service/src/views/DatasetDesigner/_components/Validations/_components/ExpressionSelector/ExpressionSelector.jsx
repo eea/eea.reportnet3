@@ -19,6 +19,7 @@ export const ExpressionSelector = ({
   componentName,
   creationFormState,
   dataflowType,
+  datasetId,
   onAddNewExpression,
   onAddNewExpressionIf,
   onAddNewExpressionThen,
@@ -183,6 +184,7 @@ export const ExpressionSelector = ({
         <SqlSentence
           creationFormState={creationFormState}
           dataflowType={dataflowType}
+          datasetId={datasetId}
           level={validationContext.level}
           onSetSqlSentence={onSetSqlSentence}
         />

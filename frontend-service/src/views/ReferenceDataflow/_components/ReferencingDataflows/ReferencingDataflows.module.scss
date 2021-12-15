@@ -1,5 +1,8 @@
 .modalSize {
   min-height: 50vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .noReferencingWrap {
   width: 100%;
@@ -7,6 +10,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  text-align: center;
+  flex-direction: column;
+
+  h3 {
+    &:first-child {
+      margin-bottom: 0;
+    }
+    &:last-child {
+      margin: 0;
+    }
+  }
 }
 .notMatchingWrap {
   width: 100%;

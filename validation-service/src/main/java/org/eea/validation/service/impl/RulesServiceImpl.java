@@ -54,6 +54,7 @@ import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -421,6 +422,14 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
     rule.setVerified(null);
 
+    if (rule.getSqlSentence() != null) {
+      try {
+        rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
+      } catch (ParseException | EEAException e) {
+        rule.setSqlCost(null);
+      }
+    }
+
     if (null == ruleVO.getWhenCondition()) {
       rulesWhenConditionNull(datasetId, ruleVO, datasetSchemaId, rule);
     } else {
@@ -768,6 +777,14 @@ public class RulesServiceImpl implements RulesService {
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
+
+    if (rule.getSqlSentence() != null) {
+      try {
+        rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
+      } catch (ParseException | EEAException e) {
+        rule.setSqlCost(null);
+      }
+    }
 
     if (null == ruleVO.getWhenCondition()) {
       ruleWhenCondtionUpdateNull(datasetId, ruleVO, datasetSchemaId, rule);

@@ -377,24 +377,38 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
    */
   @Override
   @Transactional
-  public List<ValueVO> runSqlRule(Long datasetId, String sqlRule) throws EEAInvalidSQLException {
-    List<ValueVO> tableValues = new ArrayList<>();
+  public List<List<ValueVO>> runSqlRule(Long datasetId, String sqlRule)
+      throws EEAInvalidSQLException {
+    List<List<ValueVO>> tableValues = new ArrayList<>();
 
     try {
       Session session = (Session) entityManager.getDelegate();
-      tableValues = session.doReturningWork(new ReturningWork<List<ValueVO>>() {
+      tableValues = session.doReturningWork(new ReturningWork<List<List<ValueVO>>>() {
         @Override
-        public List<ValueVO> execute(Connection conn) throws SQLException {
-          List<ValueVO> values = new ArrayList<>();
+        public List<List<ValueVO>> execute(Connection conn) throws SQLException {
+          List<List<ValueVO>> tableRows = new ArrayList<>();
+          conn.setReadOnly(true);
           conn.setSchema("dataset_" + datasetId);
           try (PreparedStatement stmt = conn.prepareStatement(sqlRule);
               ResultSet rs = stmt.executeQuery();) {
+            ResultSetMetaData rsmt = rs.getMetaData();
+            int index = 1;
             while (rs.next()) {
-              ValueVO valueToAdd = new ValueVO();
-              values.add(valueToAdd);
+              List<ValueVO> values = new ArrayList<>();
+              for (int i = 1; i <= rsmt.getColumnCount(); i++) {
+                ValueVO valueToAdd = new ValueVO();
+                valueToAdd.setValue(rs.getString(i));
+                valueToAdd.setLabel(rsmt.getColumnLabel(i));
+                valueToAdd.setTable(rsmt.getTableName(i));
+                valueToAdd.setRow(index);
+                values.add(valueToAdd);
+              }
+              tableRows.add(values);
+              index++;
+
             }
             LOG.info("executing query: {}", sqlRule);
-            return values;
+            return tableRows;
           }
         }
       });
@@ -423,6 +437,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         @Override
         public String execute(Connection conn) throws SQLException {
           String resultObject = "";
+          conn.setReadOnly(true);
           conn.setSchema("dataset_" + datasetId);
           try (PreparedStatement stmt = conn.prepareStatement(sqlRule);
               ResultSet rs = stmt.executeQuery();) {

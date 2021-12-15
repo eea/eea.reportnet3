@@ -334,4 +334,29 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     recordStoreService.refreshMaterializedQuery(Arrays.asList(datasetId), false, false, null);
   }
 
+  /**
+   * Clone data.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param originDataset the origin dataset
+   * @param targetDataset the target dataset
+   * @param partitionDatasetTarget the partition dataset target
+   * @param tableSchemasIdPrefill the table schemas id prefill
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/cloneData/origin/{originDataset}/target/{targetDataset}")
+  @ApiOperation(value = "Private operation to copy data between two datasets", hidden = true)
+  public void cloneData(@RequestBody Map<String, String> dictionaryOriginTargetObjectId,
+      @PathVariable("originDataset") Long originDataset,
+      @PathVariable("targetDataset") Long targetDataset,
+      @RequestParam("partitionDatasetTarget") Long partitionDatasetTarget,
+      @RequestParam("tableSchemasId") List<String> tableSchemasIdPrefill) {
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    recordStoreService.createSnapshotToClone(originDataset, targetDataset,
+        dictionaryOriginTargetObjectId, partitionDatasetTarget, tableSchemasIdPrefill);
+  }
+
+
 }
