@@ -35,6 +35,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.validation.exception.EEAForbiddenSQLCommandException;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
@@ -54,6 +55,7 @@ import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -421,6 +423,21 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
     rule.setVerified(null);
 
+    if (rule.getSqlSentence() != null) {
+      try {
+        rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
+      } catch (EEAForbiddenSQLCommandException e) {
+        throw new EEAForbiddenSQLCommandException(
+            String.format("SQL Command not allowed in SQL Rule: %s", rule.getSqlSentence()), e);
+      } catch (EEAException e) {
+        throw new EEAException(
+            "There was an error trying to evaluate the rule with the explain plan.", e);
+      } catch (ParseException e) {
+        throw new EEAException("There was an error trying to parse the explain plan.", e);
+
+      }
+    }
+
     if (null == ruleVO.getWhenCondition()) {
       rulesWhenConditionNull(datasetId, ruleVO, datasetSchemaId, rule);
     } else {
@@ -768,6 +785,21 @@ public class RulesServiceImpl implements RulesService {
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
+
+    if (rule.getSqlSentence() != null) {
+      try {
+        rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
+      } catch (EEAForbiddenSQLCommandException e) {
+        throw new EEAForbiddenSQLCommandException(
+            String.format("SQL Command not allowed in SQL Rule: %s", rule.getSqlSentence()), e);
+      } catch (EEAException e) {
+        throw new EEAException(
+            "There was an error trying to evaluate the rule with the explain plan.", e);
+      } catch (ParseException e) {
+        throw new EEAException("There was an error trying to parse the explain plan.", e);
+
+      }
+    }
 
     if (null == ruleVO.getWhenCondition()) {
       ruleWhenCondtionUpdateNull(datasetId, ruleVO, datasetSchemaId, rule);

@@ -30,9 +30,6 @@ import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -848,7 +845,7 @@ public class RulesControllerImpl implements RulesController {
   public List<List<ValueVO>> runSqlRule(
       @ApiParam(value = "Dataset id used on the run process",
           example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "SQL rule that is going to be executed") @RequestParam String sqlRule,
+      @ApiParam(value = "SQL rule that is going to be executed") @RequestBody String sqlRule,
       @ApiParam(value = "Show internal fields in query results",
           defaultValue = "false") @RequestParam(
               defaultValue = "false") boolean showInternalFields) {
@@ -860,7 +857,8 @@ public class RulesControllerImpl implements RulesController {
       LOG_ERROR.error(
           "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.", sqlRule,
           e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          e.getMessage() + ". " + e.getCause().getCause().getCause().getMessage(), e);
     } catch (EEAForbiddenSQLCommandException e) {
       LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}", sqlRule,
           e.getMessage());
@@ -879,7 +877,7 @@ public class RulesControllerImpl implements RulesController {
    *
    * @param datasetId the dataset id
    * @param sqlRule the sql rule
-   * @return the string containing the SQL total cost
+   * @return the double containing the SQL Cost
    */
   @Override
   @HystrixCommand(commandProperties = {@HystrixProperty(
@@ -892,18 +890,14 @@ public class RulesControllerImpl implements RulesController {
       message = "There was an error trying to execute the SQL Rule or the explain plan. Check your SQL Syntax."),
       @ApiResponse(code = 401, message = "The user doesn't have access to one of the datasets"),
       @ApiResponse(code = 422, message = "Forbidden command used in the SQL sentence.")})
-  public String evaluateSqlRule(
+  public Double evaluateSqlRule(
       @ApiParam(value = "Dataset id used on the evaluation process",
           example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "SQL rule that is going to be evaluated") @RequestParam String sqlRule) {
-    String sqlCost = "";
+      @ApiParam(value = "SQL rule that is going to be evaluated") @RequestBody String sqlRule) {
+    double sqlCost = 0;
     try {
-      String result = sqlRulesService.evaluateSqlRule(datasetId, sqlRule);
-      JSONParser parser = new JSONParser();
-      JSONArray jsonArray = (JSONArray) parser.parse(result);
-      JSONObject jsonObject = (JSONObject) jsonArray.get(0);
-      JSONObject plan = (JSONObject) jsonObject.get("Plan");
-      sqlCost = String.valueOf(plan.get("Total Cost"));
+      sqlCost = sqlRulesService.evaluateSqlRule(datasetId, sqlRule);
+
 
     } catch (ParseException e) {
       LOG_ERROR.error("There was an error trying to parse the explain plan: {}", sqlRule, e);
