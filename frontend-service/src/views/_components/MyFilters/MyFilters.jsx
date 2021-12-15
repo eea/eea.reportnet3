@@ -243,7 +243,6 @@ export const MyFilters = ({
             selectionMode="range"
             value={parseDateValues(filterBy[option.key])}
             yearNavigator={true}
-            yearRange="2015:2030"
           />
 
           <label className={getClassNameLabelCalendar()} htmlFor={inputId}>
