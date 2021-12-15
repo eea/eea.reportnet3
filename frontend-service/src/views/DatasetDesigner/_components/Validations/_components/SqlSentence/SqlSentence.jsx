@@ -21,15 +21,13 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
-import { ErrorMessage } from 'views/_components/ErrorMessage';
 
 export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level, onSetSqlSentence }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [columns, setColumns] = useState();
-  const [errorMessage, setErrorMessage] = useState('');
-  const [hasError, setHasError] = useState(false);
+  const [hasValidationError, setHasValidationError] = useState(false);
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isValidateSqlSentenceLoading, setIsValidateSqlSentenceLoading] = useState(false);
   const [isValidatingQuery, setIsValidatingQuery] = useState(false);
@@ -37,6 +35,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   const [isVisibleSqlSentenceValidationDialog, setIsVisibleSqlSentenceValidationDialog] = useState(false);
   const [sqlResponse, setSqlResponse] = useState(null);
   const [sqlSentenceCost, setSqlSentenceCost] = useState(0);
+  const [validationErrorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
@@ -179,7 +178,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       console.error('SqlSentence - runSqlSentence.', error);
       if (error.response.status === 400 || error.response.status === 422) {
         setErrorMessage(error.response.data.message);
-        setHasError(true);
+        setHasValidationError(true);
       } else {
         notificationContext.add({ type: 'VALIDATE_SQL_ERROR' }, true);
         setIsVisibleSqlSentenceValidationDialog(false);
@@ -187,6 +186,15 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     } finally {
       setIsValidatingQuery(false);
     }
+  };
+
+  const renderErrorMessage = () => {
+    if (hasValidationError) {
+      return <p className={styles.sqlErrorMessage}>{validationErrorMessage}</p>;
+    } else if (isSqlErrorVisible) {
+      return <p className={styles.sqlErrorMessage}>{creationFormState.candidateRule.sqlError}</p>;
+    }
+    return <p className={styles.emptySqlErrorMessage}></p>;
   };
 
   return (
@@ -245,27 +253,19 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
             {renderSqlSentenceCost()}
           </h3>
           <InputTextarea
-            className={`p-inputtextarea ${hasError ? styles.hasError : ''}`}
+            className={`p-inputtextarea ${hasValidationError || isSqlErrorVisible ? styles.hasError : ''}`}
             id="sqlSentenceText"
             name=""
             onChange={event => {
               onSetSqlSentence(event.target.value);
             }}
-            onFocus={() => setHasError(false)}
+            onFocus={() => setHasValidationError(false)}
             value={creationFormState.candidateRule.sqlSentence}
           />
-          {hasError && <ErrorMessage classNames={styles.errorMessage} message={errorMessage} />}
         </div>
       </div>
 
-      {isSqlErrorVisible ? (
-        <p
-          className={
-            styles.sqlErrorMessage
-          }>{`${resourcesContext.messages['sqlErrorMessage']} ${creationFormState.candidateRule.sqlError}`}</p>
-      ) : (
-        <p className={styles.emptySqlErrorMessage}></p>
-      )}
+      {renderErrorMessage()}
 
       {isVisibleInfoDialog && (
         <Dialog
