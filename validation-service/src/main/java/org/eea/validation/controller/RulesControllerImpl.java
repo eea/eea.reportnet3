@@ -893,7 +893,7 @@ public class RulesControllerImpl implements RulesController {
   public Double evaluateSqlRule(
       @ApiParam(value = "Dataset id used on the evaluation process",
           example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "SQL rule that is going to be evaluated") @RequestParam String sqlRule) {
+      @ApiParam(value = "SQL rule that is going to be evaluated") @RequestBody String sqlRule) {
     double sqlCost = 0;
     try {
       sqlCost = sqlRulesService.evaluateSqlRule(datasetId, sqlRule);

@@ -409,7 +409,7 @@ public interface RulesController {
    */
   @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
   List<List<ValueVO>> runSqlRule(@RequestParam("datasetId") Long datasetId,
-      @RequestParam String sqlRule, @RequestParam boolean showInternalFields);
+      @RequestBody String sqlRule, @RequestParam boolean showInternalFields);
 
 
   /**
