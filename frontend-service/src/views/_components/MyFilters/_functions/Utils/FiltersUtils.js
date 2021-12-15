@@ -25,11 +25,15 @@ const getPositionLabelAnimationDate = (labelsAnimationDate, key) => {
   return undefined;
 };
 
-const getLabelsAnimationDateInitial = options => {
+const getLabelsAnimationDateInitial = (options, filterBy) => {
   const result = options
     .filter(option => option?.type === 'DATE')
     .map(option => {
-      return { [option.key]: false };
+      if (!isEmpty(filterBy[option.key])) {
+        return { [option.key]: true };
+      } else {
+        return { [option.key]: false };
+      }
     });
   return result;
 };

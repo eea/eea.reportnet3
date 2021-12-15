@@ -56,11 +56,11 @@ export const MyFilters = ({
   }, [data]);
 
   useEffect(() => {
-    setLabelsAnimationDate(getLabelsAnimationDateInitial(options));
+    setLabelsAnimationDate(getLabelsAnimationDateInitial(options, filterBy));
     return () => {
       setLabelsAnimationDate([]);
     };
-  }, []);
+  }, [filterBy, options]);
 
   useEffect(() => {
     const listener = event => {
@@ -225,15 +225,14 @@ export const MyFilters = ({
     if (option.nestedOptions) return option.nestedOptions.map(option => renderDate(option));
 
     return (
-      <div className={styles.input} key={option.key}>
+      <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div
-          className={`p-float-label ${styles.label}`}
+          className={`p-float-label ${styles.label} ${styles.elementFilter}`}
           id={`calendar_${option.key}`}
           ref={el => (calendarRefs.current[option.key] = el)}>
           <Calendar
             baseZIndex={9999}
-            // className={styles.calendarFilter}
             dateFormat={userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
             inputClassName={styles.inputFilter}
             inputId={inputId}
@@ -245,8 +244,6 @@ export const MyFilters = ({
             onFocus={() =>
               updateValueLabelsAnimationDate(labelsAnimationDate, positionLabelAnimationDate, option.key, true)
             }
-            // onChange={event => onFilterData(property, event.value)}
-            //placeholder={option.label}
             readOnlyInput={true}
             selectionMode="range"
             value={parseDateValues(filterBy[option.key])}
@@ -257,18 +254,19 @@ export const MyFilters = ({
           <label className={getClassNameLabelCalendar()} htmlFor={inputId}>
             {option.label || ''}
           </label>
+
+          {!isEmpty(filterBy[option.key]) && (
+            <Button
+              className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+              icon="cancel"
+              onClick={() => {
+                onChange({ key: option.key, value: [] });
+                updateValueLabelsAnimationDate(labelsAnimationDate, positionLabelAnimationDate, option.key, false);
+                //document.getElementById(inputId).value = '';
+              }}
+            />
+          )}
         </div>
-        {!isEmpty(filterBy[option.key]) && (
-          <Button
-            className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
-            icon="cancel"
-            onClick={() => {
-              onChange({ key: option.key, value: [] });
-              updateValueLabelsAnimationDate(labelsAnimationDate, positionLabelAnimationDate, option.key, false);
-              //document.getElementById(inputId).value = '';
-            }}
-          />
-        )}
       </div>
     );
   };
@@ -285,9 +283,9 @@ export const MyFilters = ({
     }
 
     return (
-      <div className={styles.input} key={option.key}>
+      <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
-        <div className={`p-float-label ${styles.label}`}>
+        <div className={`p-float-label ${styles.label} ${styles.elementFilter}`}>
           <InputText
             className={styles.inputFilter}
             id={`${option.key}_input`}
@@ -299,6 +297,15 @@ export const MyFilters = ({
           <label className={styles.label} htmlFor={`${option.key}_input`}>
             {option.label || ''}
           </label>
+          {!isEmpty(filterBy[option.key]) && (
+            <Button
+              className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+              icon="cancel"
+              onClick={() => {
+                onChange({ key: option.key, value: '' });
+              }}
+            />
+          )}
         </div>
       </div>
     );
@@ -323,7 +330,7 @@ export const MyFilters = ({
     };
 
     return (
-      <div className={`${styles.input}`} key={option.key}>
+      <div className={`${styles.block}`} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <MultiSelect
           ariaLabelledBy={`${option.key}_input`}
@@ -349,9 +356,18 @@ export const MyFilters = ({
   };
 
   const renderSortButton = ({ key }) => {
+    const getClassName = () => {
+      const inactive = `p-button-secondary-transparent ${styles.sortButton}`;
+      const active = `p-button-secondary-transparent ${styles.sortButton} ${styles.iconActive}`;
+      if (sortBy[key] === undefined || sortBy[key] === 'idle') {
+        return inactive;
+      } else {
+        return active;
+      }
+    };
     return (
       <Button
-        className={`p-button-secondary-transparent ${styles.sortButton}`}
+        className={getClassName()}
         icon={switchSortByIcon(sortBy[key])}
         onClick={() => onSortData(key)}
         style={{ fontSize: '0.12rem' }}
@@ -360,7 +376,7 @@ export const MyFilters = ({
   };
 
   const renderSortButtonEmpty = () => {
-    return <div className={`p-button-secondary-transparent ${styles.sortButton}`} />;
+    return <div className={styles.sortButtonEmpty} />;
   };
 
   if (loadingStatus === 'PENDING') return <div>LOADING</div>;
@@ -387,7 +403,7 @@ export const MyFilters = ({
           label={resourcesContext.messages['reset']}
           onClick={() => {
             onResetFilters();
-            setLabelsAnimationDate(getLabelsAnimationDateInitial(options));
+            setLabelsAnimationDate(getLabelsAnimationDateInitial(options, filterBy));
           }}
         />
       </div>
