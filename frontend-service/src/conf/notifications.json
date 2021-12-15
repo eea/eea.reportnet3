@@ -814,7 +814,7 @@
         { "key": "EVALUATE_SQL_SENTENCE_ERROR" },
         { "key": "EVALUATE_SQL_SENTENCE_FORMAT_ERROR" },
         { "key": "EVALUATE_SQL_SENTENCE_COMMANDS_NOT_ALLOWED_ERROR" },
-        { "key": "MAX_WEBSOCKET_RECONNECT_ATTEMPS_ERROR", "fixed": true }
+        { "key": "MAX_WEBSOCKET_RECONNECT_ATTEMPTS_ERROR", "fixed": true }
       ]
     },
     {
