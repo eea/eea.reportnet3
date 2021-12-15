@@ -1,6 +1,7 @@
 package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -14,6 +15,7 @@ import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.Weblink;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
 import org.eea.dataflow.service.DataflowWebLinkService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -474,4 +476,35 @@ public class DataflowWebLinkControllerImplTest {
         dataflowWebLinkControllerImpl.getAllWeblinksByDataflowLegacy(1L));
   }
 
+  @Test
+  public void getAllWeblinksByDataflowEEAExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(dataflowWebLinkService)
+        .getAllWeblinksByDataflowId(Mockito.anyLong());
+    dataflowWebLinkControllerImpl.getAllWeblinksByDataflow(1L);
+    Mockito.verify(dataflowWebLinkService, times(1)).getAllWeblinksByDataflowId(Mockito.anyLong());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void updateLinkEEAExceptionTest() throws EEAException {
+    try {
+      Mockito.doThrow(new EEAException(EEAErrorMessage.WEBLINK_ALREADY_EXIST))
+          .when(dataflowWebLinkService).updateWebLink(Mockito.any());
+      dataflowWebLinkControllerImpl.updateLink(weblinkVO, 1L);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void saveLinkEEAExceptionTest() throws EEAException {
+    try {
+      Mockito.doThrow(new EEAException(EEAErrorMessage.WEBLINK_ALREADY_EXIST))
+          .when(dataflowWebLinkService).saveWebLink(Mockito.anyLong(), Mockito.any());
+      dataflowWebLinkControllerImpl.saveLink(1L, weblinkVO);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
 }
