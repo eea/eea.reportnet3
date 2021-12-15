@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.eea.exception.EEAErrorMessage;
@@ -226,6 +227,12 @@ public class UserManagementControllerImplTest {
     userVO.setEmail("provider@reportnet.net");
     Mockito.when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(user);
     Mockito.when(userRepresentationMapper.entityToClass(Mockito.any())).thenReturn(userVO);
+    UsernamePasswordAuthenticationToken authentication =
+        new UsernamePasswordAuthenticationToken("userId", "123", new HashSet<>());
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "userId");
+    authentication.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
     Assert.assertEquals("provider@reportnet.net",
         userManagementController.getUserByUserId("userId").getEmail());
   }
@@ -233,6 +240,12 @@ public class UserManagementControllerImplTest {
   @Test
   public void getEmailByUserIdNullTest() {
     Mockito.when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(null);
+    UsernamePasswordAuthenticationToken authentication =
+        new UsernamePasswordAuthenticationToken("userId", "123", new HashSet<>());
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "userId");
+    authentication.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
     Assert.assertNull(userManagementController.getUserByUserId("userId"));
   }
 

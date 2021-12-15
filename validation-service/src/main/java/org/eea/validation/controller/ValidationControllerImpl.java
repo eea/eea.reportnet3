@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
@@ -321,8 +322,10 @@ public class ValidationControllerImpl implements ValidationController {
     try {
       LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
           datasetId, fileName);
-      File file = validationService.downloadExportedFile(datasetId, fileName);
-      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      File file =
+          validationService.downloadExportedFile(datasetId, FilenameUtils.getName(fileName));
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+          "attachment; filename=" + FilenameUtils.getName(fileName));
 
       OutputStream out = response.getOutputStream();
       FileInputStream in = new FileInputStream(file);

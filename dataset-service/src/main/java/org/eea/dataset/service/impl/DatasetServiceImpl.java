@@ -26,6 +26,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -2973,9 +2974,10 @@ public class DatasetServiceImpl implements DatasetService {
     if (dataProviderId != null) {
       checkRestrictFromPublic(dataflowId, dataProviderId);
       file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-          "dataProvider-" + dataProviderId.toString()), fileName);
+          "dataProvider-" + dataProviderId.toString()), FilenameUtils.getName(fileName));
     } else {
-      file = new File(new File(pathPublicFile, "dataflow-" + dataflowId), fileName);
+      file = new File(new File(pathPublicFile, "dataflow-" + dataflowId),
+          FilenameUtils.getName(fileName));
     }
     if (!file.exists()) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
@@ -2998,7 +3000,8 @@ public class DatasetServiceImpl implements DatasetService {
   public File downloadExportedFile(Long datasetId, String fileName)
       throws IOException, EEAException {
     // we compound the route and create the file
-    File file = new File(new File(pathPublicFile, "dataset-" + datasetId), fileName);
+    File file =
+        new File(new File(pathPublicFile, "dataset-" + datasetId), FilenameUtils.getName(fileName));
     if (!file.exists()) {
       LOG_ERROR.error(
           "Trying to download a file generated during the export dataset data process but the file is not found");
