@@ -132,26 +132,6 @@ public interface DataFlowController {
   List<DataflowCountVO> getDataflowsCount();
 
   /**
-   * Adds the contributor.
-   *
-   * @param dataflowId the dataflow id
-   * @param idContributor the id contributor
-   */
-  @PostMapping("/{dataflowId}/contributor/add")
-  void addContributor(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("idContributor") String idContributor);
-
-  /**
-   * Removes the contributor.
-   *
-   * @param dataflowId the dataflow id
-   * @param idContributor the id contributor
-   */
-  @DeleteMapping("{dataflowId}/contributor/remove")
-  void removeContributor(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("idContributor") String idContributor);
-
-  /**
    * Creates the data flow.
    *
    * @param dataFlowVO the data flow VO

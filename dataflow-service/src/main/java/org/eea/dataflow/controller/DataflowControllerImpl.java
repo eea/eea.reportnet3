@@ -356,55 +356,6 @@ public class DataflowControllerImpl implements DataFlowController {
     return dataflows;
   }
 
-
-  /**
-   * Adds the contributor.
-   *
-   * @param dataflowId the dataflow id
-   * @param idContributor the id contributor
-   */
-  @Override
-  @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
-  @PostMapping("/{dataflowId}/contributor/add")
-  @ApiOperation(value = "Add one Contributor to a Dataflow", hidden = true)
-  @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
-  public void addContributor(
-      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
-      @ApiParam(value = "Contributor Id",
-          example = "0") @RequestParam("idContributor") String idContributor) {
-    try {
-      dataflowService.addContributorToDataflow(dataflowId, idContributor);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
-    }
-  }
-
-  /**
-   * Removes the contributor.
-   *
-   * @param dataflowId the dataflow id
-   * @param idContributor the id contributor
-   */
-  @Override
-  @HystrixCommand
-  @PreAuthorize("hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD','ADMIN')")
-  @DeleteMapping("{dataflowId}/contributor/remove")
-  @ApiOperation(value = "Remove one Contributor from a Dataflow", hidden = true)
-  @ApiResponse(code = 400, message = EEAErrorMessage.USER_REQUEST_NOTFOUND)
-  public void removeContributor(
-      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
-      @ApiParam(value = "Contributor Id",
-          example = "0") @RequestParam("idContributor") String idContributor) {
-    try {
-      dataflowService.removeContributorFromDataflow(dataflowId, idContributor);
-    } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND);
-    }
-  }
-
   /**
    * Creates the data flow.
    *
