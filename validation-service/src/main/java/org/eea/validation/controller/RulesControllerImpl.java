@@ -835,7 +835,8 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand(commandProperties = {@HystrixProperty(
       name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
-  @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.TEXT_PLAIN_VALUE)
   @ApiOperation(value = "Runs a SQL rule obtaining a limited amount of records", hidden = true)
   @ApiResponses(value = {
       @ApiResponse(code = 400,
@@ -857,8 +858,11 @@ public class RulesControllerImpl implements RulesController {
       LOG_ERROR.error(
           "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.", sqlRule,
           e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          e.getMessage() + ". " + e.getCause().getCause().getCause().getMessage(), e);
+      String sqlError = e.getCause().getCause().getCause().getMessage() != null
+          ? e.getCause().getCause().getCause().getMessage()
+          : "";
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage() + ". " + sqlError,
+          e);
     } catch (EEAForbiddenSQLCommandException e) {
       LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}", sqlRule,
           e.getMessage());
@@ -883,7 +887,8 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand(commandProperties = {@HystrixProperty(
       name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
-  @PostMapping(value = "/evaluateSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/evaluateSqlRule", produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.TEXT_PLAIN_VALUE)
   @ApiOperation(value = "Evaluates an SQL Rule obtaining its cost from its explain plan.",
       hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400,

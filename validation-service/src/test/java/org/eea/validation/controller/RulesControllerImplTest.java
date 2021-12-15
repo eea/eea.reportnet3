@@ -11,7 +11,6 @@ import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.exception.EEAForbiddenSQLCommandException;
-import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.RulesService;
@@ -51,6 +50,7 @@ public class RulesControllerImplTest {
 
   @Mock
   private SqlRulesService sqlRulesService;
+
   /** The security context. */
   SecurityContext securityContext;
 
@@ -612,22 +612,6 @@ public class RulesControllerImplTest {
     rulesControllerImpl.runSqlRule(1L, "SELECT * from dataset_1.table_value", true);
     Mockito.verify(sqlRulesService, times(1)).runSqlRule(1L, "SELECT * from dataset_1.table_value",
         true);
-  }
-
-  @Test(expected = ResponseStatusException.class)
-  public void runSqlEEAInvalidSQLExceptionTest() throws EEAException {
-    String sqlRule = "SELECTq *a WRONG SQL";
-    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule, true))
-        .thenThrow(new EEAInvalidSQLException());
-    try {
-      rulesControllerImpl.runSqlRule(1L, sqlRule, true);
-    } catch (ResponseStatusException e) {
-      assertEquals(
-          "400 BAD_REQUEST; nested exception is org.eea.validation.exception.EEAInvalidSQLException",
-          e.getMessage());
-      throw e;
-    }
-
   }
 
   @Test(expected = ResponseStatusException.class)
