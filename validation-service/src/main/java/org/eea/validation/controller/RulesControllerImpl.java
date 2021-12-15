@@ -845,7 +845,7 @@ public class RulesControllerImpl implements RulesController {
   public List<List<ValueVO>> runSqlRule(
       @ApiParam(value = "Dataset id used on the run process",
           example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "SQL rule that is going to be executed") @RequestParam String sqlRule,
+      @ApiParam(value = "SQL rule that is going to be executed") @RequestBody String sqlRule,
       @ApiParam(value = "Show internal fields in query results",
           defaultValue = "false") @RequestParam(
               defaultValue = "false") boolean showInternalFields) {
@@ -857,7 +857,8 @@ public class RulesControllerImpl implements RulesController {
       LOG_ERROR.error(
           "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.", sqlRule,
           e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          e.getMessage() + ". " + e.getCause().getCause().getCause().getMessage(), e);
     } catch (EEAForbiddenSQLCommandException e) {
       LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}", sqlRule,
           e.getMessage());

@@ -412,8 +412,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       throw new EEAForbiddenSQLCommandException(
           String.format("SQL Command not allowed in SQL Rule: %s", sqlRule), e);
     } catch (EEAInvalidSQLException e) {
-      throw new EEAInvalidSQLException(String.format("Couldn't execute the SQL Rule: %s", sqlRule),
-          e);
+      throw new EEAInvalidSQLException("Couldn't execute the SQL Rule", e);
     } catch (EEAException e) {
       throw new EEAException("User doesn't have access to one of the datasets", e);
     }

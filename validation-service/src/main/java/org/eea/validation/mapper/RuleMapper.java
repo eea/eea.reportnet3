@@ -65,7 +65,6 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
     String referenceId = ruleVO.getReferenceId();
     RuleExpressionDTO ruleExpressionDTO = ruleVO.getWhenCondition();
     String sqlSentence = ruleVO.getSqlSentence();
-    Double sqlCost = ruleVO.getSqlCost();
     if (ruleId != null && !ruleId.isEmpty()) {
       rule.setRuleId(new ObjectId(ruleId));
     }
@@ -77,9 +76,6 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
     }
     if (ruleExpressionDTO != null) {
       rule.setWhenCondition(ruleExpressionService.convertToString(ruleExpressionDTO));
-    }
-    if (sqlCost != null) {
-      rule.setSqlCost(sqlCost);
     }
   }
 
