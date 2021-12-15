@@ -43,6 +43,11 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     }
   }, [creationFormState.candidateRule.sqlSentence]);
 
+  useEffect(() => {
+    if (creationFormState.candidateRule.sqlSentenceCost !== 0)
+      setSqlSentenceCost(creationFormState.candidateRule.sqlSentenceCost);
+  }, [creationFormState.candidateRule.sqlSentenceCost]);
+
   const levelTypes = {
     FIELD: 'field',
     ROW: 'row',
