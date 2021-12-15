@@ -100,6 +100,24 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   };
 
   const renderSqlSentenceCost = () => {
+    const costColors = ['green', 'yellow', 'red'];
+
+    const getCostColor = color => {
+      if (color === 'green' && sqlSentenceCost <= config.SQL_SENTENCE_LOW_COST) {
+        return styles.greenLightSignal;
+      } else if (
+        color === 'yellow' &&
+        sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST &&
+        sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
+      ) {
+        return styles.yellowLightSignal;
+      } else if (color === 'red' && sqlSentenceCost >= config.SQL_SENTENCE_HIGH_COST) {
+        return styles.redLightSignal;
+      }
+    };
+
+    const renderLightSignals = () => costColors.map(color => <div className={getCostColor(color)} key={color}></div>);
+
     if (isEvaluateSqlSentenceLoading) {
       return (
         <div className={`${styles.sqlSentenceCostWrapper} ${styles.spinnerWrapper}`}>
@@ -108,18 +126,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       );
     } else {
       if (sqlSentenceCost !== 0) {
-        return (
-          <div className={`${styles.sqlSentenceCostWrapper} ${styles.trafficLight}`}>
-            <div className={`${sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''}`}></div>
-            <div
-              className={`${
-                sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST && sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
-                  ? styles.yellowLightSignal
-                  : ''
-              }`}></div>
-            <div className={`${sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''}`}></div>
-          </div>
-        );
+        return <div className={`${styles.sqlSentenceCostWrapper} ${styles.trafficLight}`}>{renderLightSignals()}</div>;
       }
     }
   };
