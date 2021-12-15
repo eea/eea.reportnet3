@@ -1172,6 +1172,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     releaseSnapshots.put(LiteralConstants.DATAFLOWID, dataflowId);
     releaseSnapshots.put(LiteralConstants.DATAPROVIDERID, dataProviderId);
 
+
     lockService.removeLockByCriteria(populateEuDataset);
     lockService.removeLockByCriteria(releaseSnapshots);
   }
