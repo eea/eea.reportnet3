@@ -21,12 +21,14 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+import { ErrorMessage } from 'views/_components/ErrorMessage';
 
 export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level, onSetSqlSentence }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [columns, setColumns] = useState();
+  const [errorMessage, setErrorMessage] = useState('');
   const [hasError, setHasError] = useState(false);
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isValidateSqlSentenceLoading, setIsValidateSqlSentenceLoading] = useState(false);
@@ -176,6 +178,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     } catch (error) {
       console.error('SqlSentence - runSqlSentence.', error);
       if (error.response.status === 400 || error.response.status === 422) {
+        setErrorMessage(error.response.data.message);
         setHasError(true);
       } else {
         notificationContext.add({ type: 'VALIDATE_SQL_ERROR' }, true);
@@ -251,6 +254,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
             onFocus={() => setHasError(false)}
             value={creationFormState.candidateRule.sqlSentence}
           />
+          {hasError && <ErrorMessage classNames={styles.errorMessage} message={errorMessage} />}
         </div>
       </div>
 
