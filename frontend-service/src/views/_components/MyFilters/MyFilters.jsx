@@ -187,9 +187,7 @@ export const MyFilters = ({
 
   const renderFilters = () => {
     return options.map(option => {
-      if (isNil(option)) return [];
-
-      switch (option?.type) {
+      switch (option.type) {
         case 'CHECKBOX':
           return [];
 
@@ -206,7 +204,7 @@ export const MyFilters = ({
           return renderMultiSelect(option);
 
         default:
-          return [];
+          throw new Error('The option type is not correct.');
       }
     });
   };

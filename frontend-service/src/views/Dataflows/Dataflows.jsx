@@ -517,17 +517,6 @@ const Dataflows = () => {
     </Fragment>
   );
 
-  const checkPermissionsToAddCreateDate = () => {
-    if (isCustodian || isAdmin) {
-      return {
-        isSortable: true,
-        key: 'creationDate',
-        label: resourcesContext.messages['creationDateFilterLabel'],
-        type: 'DATE'
-      };
-    }
-  };
-
   const dataflowsFilterOptions = [
     {
       nestedOptions: [
@@ -558,9 +547,16 @@ const Dataflows = () => {
       key: 'expirationDate',
       label: resourcesContext.messages['expirationDateFilterLabel'],
       type: 'DATE'
-    },
-    checkPermissionsToAddCreateDate()
+    }
   ];
+  if (isCustodian || isAdmin) {
+    dataflowsFilterOptions.push({
+      isSortable: true,
+      key: 'creationDate',
+      label: resourcesContext.messages['creationDateFilterLabel'],
+      type: 'DATE'
+    });
+  }
 
   const referenceDataflowFilterOptions = [
     {
