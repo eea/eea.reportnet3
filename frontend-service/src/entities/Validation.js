@@ -25,7 +25,8 @@ export class Validation {
     ruleId,
     shortCode,
     sqlError,
-    sqlSentence
+    sqlSentence,
+    sqlSentenceCost
   } = {}) {
     this.activationGroup = activationGroup;
     this.allExpressions = allExpressions;
@@ -53,5 +54,6 @@ export class Validation {
     this.shortCode = shortCode;
     this.sqlError = sqlError;
     this.sqlSentence = sqlSentence;
+    this.sqlSentenceCost = sqlSentenceCost;
   }
 }
