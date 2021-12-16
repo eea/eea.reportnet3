@@ -875,6 +875,9 @@ public class RulesControllerImpl implements RulesController {
       LOG_ERROR.error("Wrong id for dataset in SQL Rule execution: {}", sqlRule.getSqlRule(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Wrong id for dataset in SQL Rule execution");
+    } catch (StringIndexOutOfBoundsException e) {
+      LOG_ERROR.error("SQL sentence has wrong format, please check: {}", sqlRule.getSqlRule(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
 
     return obtainedTableValues;
