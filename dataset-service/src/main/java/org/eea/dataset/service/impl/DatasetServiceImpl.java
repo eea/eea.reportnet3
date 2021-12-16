@@ -26,6 +26,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -1476,30 +1477,20 @@ public class DatasetServiceImpl implements DatasetService {
         List<TableSchema> listOfTablesFiltered = getTablesFromSchema(schema);
         // if there are tables of the origin dataset with tables ToPrefill, then we'll copy the data
         if (!listOfTablesFiltered.isEmpty()) {
+          Map<String, String> dictionary =
+              filterDictionary(dictionaryOriginTargetObjectId, listOfTablesFiltered);
+          List<String> tableSchemasIdPrefill = new ArrayList<>();
+          listOfTablesFiltered.stream()
+              .forEach(t -> tableSchemasIdPrefill.add(t.getIdTableSchema().toString()));
+          Optional<PartitionDataSetMetabase> datasetPartition =
+              partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(targetDataset);
+          final Long datasetPartitionTarget =
+              datasetPartition.isPresent() ? datasetPartition.get().getId() : null;
+
           LOG.info("There are data to copy. Copy data from datasetId {} to datasetId {}",
               originDataset, targetDataset);
-          List<RecordValue> recordDesignValuesList = new ArrayList<>();
-          List<AttachmentValue> attachments = new ArrayList<>();
-          recordDesignValuesList = replaceData(schema, originDataset, targetDataset,
-              listOfTablesFiltered, dictionaryOriginTargetObjectId, attachments);
-
-          if (!recordDesignValuesList.isEmpty()) {
-            // save values
-            TenantResolver
-                .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset));
-            try {
-              storeRecords(targetDataset, recordDesignValuesList);
-            } catch (IOException | SQLException e) {
-              LOG_ERROR.error(
-                  "Error saving the list of records into the dataset {} when copying data",
-                  targetDataset);
-            }
-
-            // copy attachments too
-            if (!attachments.isEmpty()) {
-              attachmentRepository.saveAll(attachments);
-            }
-          }
+          recordStoreControllerZuul.cloneData(dictionary, originDataset, targetDataset,
+              datasetPartitionTarget, tableSchemasIdPrefill);
         }
       }
     });
@@ -2973,9 +2964,10 @@ public class DatasetServiceImpl implements DatasetService {
     if (dataProviderId != null) {
       checkRestrictFromPublic(dataflowId, dataProviderId);
       file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-          "dataProvider-" + dataProviderId.toString()), fileName);
+          "dataProvider-" + dataProviderId.toString()), FilenameUtils.getName(fileName));
     } else {
-      file = new File(new File(pathPublicFile, "dataflow-" + dataflowId), fileName);
+      file = new File(new File(pathPublicFile, "dataflow-" + dataflowId),
+          FilenameUtils.getName(fileName));
     }
     if (!file.exists()) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
@@ -2998,7 +2990,8 @@ public class DatasetServiceImpl implements DatasetService {
   public File downloadExportedFile(Long datasetId, String fileName)
       throws IOException, EEAException {
     // we compound the route and create the file
-    File file = new File(new File(pathPublicFile, "dataset-" + datasetId), fileName);
+    File file =
+        new File(new File(pathPublicFile, "dataset-" + datasetId), FilenameUtils.getName(fileName));
     if (!file.exists()) {
       LOG_ERROR.error(
           "Trying to download a file generated during the export dataset data process but the file is not found");
@@ -3666,4 +3659,38 @@ public class DatasetServiceImpl implements DatasetService {
       }
     }
   }
+
+  /**
+   * Filter dictionary.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param listOfTablesFiltered the list of tables filtered
+   * @return the map
+   */
+  private Map<String, String> filterDictionary(Map<String, String> dictionaryOriginTargetObjectId,
+      List<TableSchema> listOfTablesFiltered) {
+    Map<String, String> dictionary = new HashMap<>();
+    for (TableSchema table : listOfTablesFiltered) {
+      if (dictionaryOriginTargetObjectId.containsKey(table.getIdTableSchema().toString())) {
+        dictionary.put(table.getIdTableSchema().toString(),
+            dictionaryOriginTargetObjectId.get(table.getIdTableSchema().toString()));
+      }
+      if (table.getRecordSchema() != null && dictionaryOriginTargetObjectId
+          .containsKey(table.getRecordSchema().getIdRecordSchema().toString())) {
+        dictionary.put(table.getRecordSchema().getIdRecordSchema().toString(),
+            dictionaryOriginTargetObjectId
+                .get(table.getRecordSchema().getIdRecordSchema().toString()));
+      }
+      if (!CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema())) {
+        for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+          if (dictionaryOriginTargetObjectId.containsKey(field.getIdFieldSchema().toString())) {
+            dictionary.put(field.getIdFieldSchema().toString(),
+                dictionaryOriginTargetObjectId.get(field.getIdFieldSchema().toString()));
+          }
+        }
+      }
+    }
+    return dictionary;
+  }
+
 }

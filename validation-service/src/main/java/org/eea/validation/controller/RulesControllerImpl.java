@@ -24,6 +24,7 @@ import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.SqlRuleVO;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.exception.EEAForbiddenSQLCommandException;
 import org.eea.validation.exception.EEAInvalidSQLException;
@@ -835,8 +836,7 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand(commandProperties = {@HystrixProperty(
       name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
-  @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.TEXT_PLAIN_VALUE)
+  @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Runs a SQL rule obtaining a limited amount of records", hidden = true)
   @ApiResponses(value = {
       @ApiResponse(code = 400,
@@ -846,30 +846,38 @@ public class RulesControllerImpl implements RulesController {
   public List<List<ValueVO>> runSqlRule(
       @ApiParam(value = "Dataset id used on the run process",
           example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "SQL rule that is going to be executed") @RequestBody String sqlRule,
+      @ApiParam(value = "SQL rule that is going to be executed") @RequestBody SqlRuleVO sqlRule,
       @ApiParam(value = "Show internal fields in query results",
           defaultValue = "false") @RequestParam(
               defaultValue = "false") boolean showInternalFields) {
     List<List<ValueVO>> obtainedTableValues = new ArrayList<>();
     try {
-      obtainedTableValues = sqlRulesService.runSqlRule(datasetId, sqlRule, showInternalFields);
+      obtainedTableValues =
+          sqlRulesService.runSqlRule(datasetId, sqlRule.getSqlRule(), showInternalFields);
 
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error(
-          "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.", sqlRule,
-          e);
+          "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.",
+          sqlRule.getSqlRule(), e);
       String sqlError = e.getCause().getCause().getCause().getMessage() != null
           ? e.getCause().getCause().getCause().getMessage()
           : "";
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage() + ". " + sqlError,
-          e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, sqlError, e);
     } catch (EEAForbiddenSQLCommandException e) {
-      LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}", sqlRule,
-          e.getMessage());
+      LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}",
+          sqlRule.getSqlRule(), e.getMessage());
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error("User doesn't have access to one of the datasets: ", e);
+      LOG_ERROR.error("User doesn't have access to one of the datasets: {}", sqlRule.getSqlRule(),
+          e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+    } catch (NumberFormatException e) {
+      LOG_ERROR.error("Wrong id for dataset in SQL Rule execution: {}", sqlRule.getSqlRule(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          "Wrong id for dataset in SQL Rule execution");
+    } catch (StringIndexOutOfBoundsException e) {
+      LOG_ERROR.error("SQL sentence has wrong format, please check: {}", sqlRule.getSqlRule(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
 
     return obtainedTableValues;
@@ -887,8 +895,7 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand(commandProperties = {@HystrixProperty(
       name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
-  @PostMapping(value = "/evaluateSqlRule", produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.TEXT_PLAIN_VALUE)
+  @PostMapping(value = "/evaluateSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Evaluates an SQL Rule obtaining its cost from its explain plan.",
       hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400,
@@ -898,30 +905,32 @@ public class RulesControllerImpl implements RulesController {
   public Double evaluateSqlRule(
       @ApiParam(value = "Dataset id used on the evaluation process",
           example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "SQL rule that is going to be evaluated") @RequestBody String sqlRule) {
+      @ApiParam(value = "SQL rule that is going to be evaluated") @RequestBody SqlRuleVO sqlRule) {
     double sqlCost = 0;
     try {
-      sqlCost = sqlRulesService.evaluateSqlRule(datasetId, sqlRule);
+      sqlCost = sqlRulesService.evaluateSqlRule(datasetId, sqlRule.getSqlRule());
 
 
     } catch (ParseException e) {
-      LOG_ERROR.error("There was an error trying to parse the explain plan: {}", sqlRule, e);
+      LOG_ERROR.error("There was an error trying to parse the explain plan: {}",
+          sqlRule.getSqlRule(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
 
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error(
-          "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.", sqlRule,
-          e);
+          "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.",
+          sqlRule.getSqlRule(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAForbiddenSQLCommandException e) {
-      LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}", sqlRule,
-          e.getMessage());
+      LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}",
+          sqlRule.getSqlRule(), e.getMessage());
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error("User doesn't have access to one of the datasets: ", e);
+      LOG_ERROR.error("User doesn't have access to one of the datasets: {}", sqlRule.getSqlRule(),
+          e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (StringIndexOutOfBoundsException e) {
-      LOG_ERROR.error("SQL sentence has wrong format, please check: {}", sqlRule, e);
+      LOG_ERROR.error("SQL sentence has wrong format, please check: {}", sqlRule.getSqlRule(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
 

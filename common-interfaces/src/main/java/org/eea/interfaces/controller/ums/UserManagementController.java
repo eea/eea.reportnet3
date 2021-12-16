@@ -153,7 +153,7 @@ public interface UserManagementController {
    *
    * @return the users
    */
-  @GetMapping("/getUsers")
+  @GetMapping("/private/getUsers")
   List<UserRepresentationVO> getUsers();
 
   /**

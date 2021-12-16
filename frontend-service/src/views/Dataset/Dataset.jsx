@@ -1001,7 +1001,9 @@ export const Dataset = ({ isReferenceDataset }) => {
         icon={isReferenceDataset ? 'howTo' : 'dataset'}
         iconSize={isReferenceDataset ? '4rem' : '3.5rem'}
         insideTitle={`${datasetInsideTitle()}`}
-        subtitle={`${metadata?.dataflow.name} - ${datasetName}`}
+        subtitle={`${metadata?.dataflow.name} - ${
+          isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
+        }`}
         title={datasetSchemaName}
       />
       <div className={styles.ButtonsBar}>

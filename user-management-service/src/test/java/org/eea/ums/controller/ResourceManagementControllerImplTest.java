@@ -1,10 +1,15 @@
 package org.eea.ums.controller;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,6 +22,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The Class ResourceManagementControllerImplTest.
@@ -107,4 +113,51 @@ public class ResourceManagementControllerImplTest {
     resourceManagementControllerImpl.createResources(resourceList);
     Mockito.verify(securityProviderInterfaceService, times(1)).createResourceInstance(resourceList);
   }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createResourcesExceptionTest() throws EEAException {
+    try {
+      ArrayList<ResourceInfoVO> resourceList = new ArrayList<>();
+      Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
+          .createResourceInstance(Mockito.anyList());
+      resourceManagementControllerImpl.createResources(resourceList);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test
+  public void getGroupsByResourceTypeTest() {
+    List<ResourceInfoVO> resources = new ArrayList<>();
+    ResourceInfoVO resource = new ResourceInfoVO();
+    resource.setResourceId(1L);
+    resources.add(resource);
+    Mockito.when(securityProviderInterfaceService.getGroupsByIdResourceType(Mockito.anyLong(),
+        Mockito.any())).thenReturn(resources);
+    assertEquals(resources,
+        resourceManagementControllerImpl.getGroupsByIdResourceType(1L, ResourceTypeEnum.DASHBOARD));
+  }
+
+  @Test
+  public void deleteResourceByDatasetIdTest() {
+    resourceManagementControllerImpl.deleteResourceByDatasetId(Arrays.asList(1L));
+    Mockito.verify(securityProviderInterfaceService, times(1))
+        .deleteResourceInstancesByDatasetId(Mockito.anyList());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createResourceExceptionTest() throws EEAException {
+    try {
+      ResourceInfoVO resource = new ResourceInfoVO();
+      resource.setResourceId(1L);
+      Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
+          .createResourceInstance(resource);
+      resourceManagementControllerImpl.createResource(resource);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
 }
