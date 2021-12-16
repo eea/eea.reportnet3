@@ -868,10 +868,11 @@ public class RulesControllerImpl implements RulesController {
           sqlRule.getSqlRule(), e.getMessage());
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error("User doesn't have access to one of the datasets: ", e);
+      LOG_ERROR.error("User doesn't have access to one of the datasets: {}", sqlRule.getSqlRule(),
+          e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (NumberFormatException e) {
-      LOG_ERROR.error("Wrong id for dataset in SQL Rule execution: ", e);
+      LOG_ERROR.error("Wrong id for dataset in SQL Rule execution: {}", sqlRule.getSqlRule(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           "Wrong id for dataset in SQL Rule execution");
     }
@@ -908,23 +909,25 @@ public class RulesControllerImpl implements RulesController {
 
 
     } catch (ParseException e) {
-      LOG_ERROR.error("There was an error trying to parse the explain plan: {}", sqlRule, e);
+      LOG_ERROR.error("There was an error trying to parse the explain plan: {}",
+          sqlRule.getSqlRule(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
 
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error(
-          "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.", sqlRule,
-          e);
+          "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.",
+          sqlRule.getSqlRule(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     } catch (EEAForbiddenSQLCommandException e) {
-      LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}", sqlRule,
-          e.getMessage());
+      LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}",
+          sqlRule.getSqlRule(), e.getMessage());
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
     } catch (EEAException e) {
-      LOG_ERROR.error("User doesn't have access to one of the datasets: ", e);
+      LOG_ERROR.error("User doesn't have access to one of the datasets: {}", sqlRule.getSqlRule(),
+          e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
     } catch (StringIndexOutOfBoundsException e) {
-      LOG_ERROR.error("SQL sentence has wrong format, please check: {}", sqlRule, e);
+      LOG_ERROR.error("SQL sentence has wrong format, please check: {}", sqlRule.getSqlRule(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
     }
 
