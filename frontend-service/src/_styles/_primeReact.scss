@@ -11,7 +11,7 @@ body .p-component:disabled {
   filter: alpha(opacity=50);
 }
 body .pi {
-  font-size: 1.2em;
+  font-size: 1.25em;
 }
 body .p-link {
   font-size: 14px;
@@ -2344,6 +2344,10 @@ body .p-dialog .p-dialog-titlebar .p-dialog-titlebar-icon {
   border-radius: 50%;
   padding: 5px;
   background-color: var(--dialog-header-bg-icon-color);
+
+  span {
+    font-size: 1.2em;
+  }
 }
 body .p-dialog .p-dialog-titlebar .p-dialog-titlebar-icon:hover {
   color: var(--dialog-header-icon-color-hover);
