@@ -831,7 +831,7 @@ public class SqlRulesServiceImplTest {
     try {
       sqlRulesServiceImpl.runSqlRule(1L, sqlRule, false);
     } catch (EEAForbiddenSQLCommandException e) {
-      assertEquals("SQL Command not allowed in SQL Rule: " + sqlRule, e.getMessage());
+      assertEquals("SQL Command not allowed in SQL Rule.", e.getMessage());
       throw e;
     }
   }
@@ -864,7 +864,7 @@ public class SqlRulesServiceImplTest {
     try {
       sqlRulesServiceImpl.evaluateSqlRule(1L, sqlRule);
     } catch (EEAForbiddenSQLCommandException e) {
-      assertEquals("SQL Command not allowed in SQL Rule: " + sqlRule, e.getMessage());
+      assertEquals("SQL Command not allowed in SQL Rule.", e.getMessage());
       throw e;
     }
   }
