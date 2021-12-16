@@ -514,9 +514,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           try {
             checkQueryTestExecution(query.replace(";", ""), dataSetMetabaseVO, rule);
           } catch (EEAInvalidSQLException e) {
-            LOG_ERROR.error(String.format("SQL is not correct: %s.  %s", "a",
+            LOG_ERROR.error(String.format("SQL is not correct: %s.  %s", rule.getSqlSentence(),
                 e.getCause().getCause().getMessage()));
-            isSQLCorrect = e.getCause().getMessage();
+            isSQLCorrect = e.getCause().getCause().getMessage();
           }
         } else {
           isSQLCorrect = "Datasets " + ids.toString() + " not from this dataflow";
