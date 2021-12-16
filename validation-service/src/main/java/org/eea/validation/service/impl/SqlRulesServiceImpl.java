@@ -387,8 +387,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           checkDatasetFromReferenceDataflow(ids);
         }
       } else {
-        throw new EEAForbiddenSQLCommandException(
-            "SQL Command not allowed in SQL Rule: " + sqlRule);
+        throw new EEAForbiddenSQLCommandException("SQL Command not allowed in SQL Rule.");
       }
 
       if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
@@ -406,13 +405,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         result = datasetRepository.runSqlRule(datasetId, sb.toString());
       }
     } catch (StringIndexOutOfBoundsException e) {
-      throw new StringIndexOutOfBoundsException(
-          String.format("SQL sentence has wrong format, please check: %s", sqlRule));
+      throw new StringIndexOutOfBoundsException("SQL sentence has wrong format, please check.");
     } catch (EEAForbiddenSQLCommandException e) {
-      throw new EEAForbiddenSQLCommandException(
-          String.format("SQL Command not allowed in SQL Rule: %s", sqlRule), e);
+      throw new EEAForbiddenSQLCommandException("SQL Command not allowed in SQL Rule.", e);
     } catch (EEAInvalidSQLException e) {
       throw new EEAInvalidSQLException("Couldn't execute the SQL Rule", e);
+    } catch (NumberFormatException e) {
+      throw new NumberFormatException("Wrong id for dataset in SQL Rule execution");
     } catch (EEAException e) {
       throw new EEAException("User doesn't have access to one of the datasets", e);
     }
@@ -445,8 +444,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           checkDatasetFromReferenceDataflow(ids);
         }
       } else {
-        throw new EEAForbiddenSQLCommandException(
-            "SQL Command not allowed in SQL Rule: " + sqlRule);
+        throw new EEAForbiddenSQLCommandException("SQL Command not allowed in SQL Rule.");
       }
 
       if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
@@ -462,14 +460,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         sqlCost = Double.parseDouble(String.valueOf(plan.get("Total Cost")));
       }
     } catch (StringIndexOutOfBoundsException e) {
-      throw new StringIndexOutOfBoundsException(
-          String.format("SQL sentence has wrong format, please check: %s", sqlRule));
+      throw new StringIndexOutOfBoundsException("SQL sentence has wrong format, please check it");
     } catch (EEAForbiddenSQLCommandException e) {
-      throw new EEAForbiddenSQLCommandException(
-          String.format("SQL Command not allowed in SQL Rule: %s", sqlRule), e);
+      throw new EEAForbiddenSQLCommandException("SQL Command not allowed in SQL Rule.", e);
     } catch (EEAInvalidSQLException e) {
-      throw new EEAInvalidSQLException(String.format("Couldn't execute the SQL Rule: %s", sqlRule),
-          e);
+      throw new EEAInvalidSQLException(e.getCause().getCause().getMessage(), e);
+    } catch (NumberFormatException e) {
+      throw new EEAInvalidSQLException("Wrong id for dataset in SQL Rule execution");
     } catch (EEAException e) {
       throw new EEAException("User doesn't have access to one of the datasets", e);
     } catch (ParseException e) {
@@ -517,8 +514,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           try {
             checkQueryTestExecution(query.replace(";", ""), dataSetMetabaseVO, rule);
           } catch (EEAInvalidSQLException e) {
-            LOG_ERROR.error("SQL is not correct: {}", e.getCause().getCause().getMessage());
-            isSQLCorrect = e.getMessage();
+            LOG_ERROR.error(String.format("SQL is not correct: %s.  %s", "a",
+                e.getCause().getCause().getMessage()));
+            isSQLCorrect = e.getCause().getMessage();
           }
         } else {
           isSQLCorrect = "Datasets " + ids.toString() + " not from this dataflow";

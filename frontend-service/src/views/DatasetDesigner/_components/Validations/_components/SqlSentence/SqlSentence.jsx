@@ -29,7 +29,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   const [columns, setColumns] = useState();
   const [hasValidationError, setHasValidationError] = useState(false);
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
-  const [isValidateSqlSentenceLoading, setIsValidateSqlSentenceLoading] = useState(false);
+  const [isEvaluateSqlSentenceLoading, setIsEvaluateSqlSentenceLoading] = useState(false);
   const [isValidatingQuery, setIsValidatingQuery] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
   const [isVisibleSqlSentenceValidationDialog, setIsVisibleSqlSentenceValidationDialog] = useState(false);
@@ -58,6 +58,11 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       setIsVisibleSqlSentenceValidationDialog(true);
     }
   }, [sqlResponse]);
+
+  useEffect(() => {
+    if (creationFormState.candidateRule.sqlSentenceCost !== 0)
+      setSqlSentenceCost(creationFormState.candidateRule.sqlSentenceCost);
+  }, [creationFormState.candidateRule.sqlSentenceCost]);
 
   const levelTypes = {
     FIELD: 'field',
@@ -108,50 +113,56 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     );
   };
 
-  const onValidateSqlSentence = async () => {
+  const onEvaluateSqlSentence = async () => {
     try {
-      setIsValidateSqlSentenceLoading(true);
-      const { data } = await ValidationService.validateSqlSentence(
+      setSqlSentenceCost(0);
+      setIsEvaluateSqlSentenceLoading(true);
+      const { data } = await ValidationService.evaluateSqlSentence(
         datasetId,
         creationFormState.candidateRule.sqlSentence
       );
       setSqlSentenceCost(data);
     } catch (error) {
-      setSqlSentenceCost(0);
-      console.error('SqlSentence - onValidateSqlSentence.', error);
-      if (error.response.status === 400) {
-        notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_FORMAT_ERROR' }, true);
-      } else if (error.response.status === 422) {
-        notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_COMMANDS_NOT_ALLOWED_ERROR' }, true);
+      console.error('SqlSentence - onEvaluateSqlSentence.', error);
+      if (error.response.status === 400 || error.response.status === 422) {
+        setValidationErrorMessage(error.response.data.message);
+        setHasValidationError(true);
       } else {
         notificationContext.add({ type: 'EVALUATE_SQL_SENTENCE_ERROR' }, true);
       }
     } finally {
-      setIsValidateSqlSentenceLoading(false);
+      setIsEvaluateSqlSentenceLoading(false);
     }
   };
 
   const renderSqlSentenceCost = () => {
-    if (isValidateSqlSentenceLoading) {
+    const costColors = ['green', 'yellow', 'red'];
+
+    const getCostColor = color => {
+      if (color === 'green' && sqlSentenceCost <= config.SQL_SENTENCE_LOW_COST) {
+        return styles.greenLightSignal;
+      } else if (
+        color === 'yellow' &&
+        sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST &&
+        sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
+      ) {
+        return styles.yellowLightSignal;
+      } else if (color === 'red' && sqlSentenceCost >= config.SQL_SENTENCE_HIGH_COST) {
+        return styles.redLightSignal;
+      }
+    };
+
+    const renderLightSignals = () => costColors.map(color => <div className={getCostColor(color)} key={color}></div>);
+
+    if (isEvaluateSqlSentenceLoading) {
       return (
         <div className={`${styles.sqlSentenceCostWrapper} ${styles.spinnerWrapper}`}>
           <Spinner className={styles.spinner} />
         </div>
       );
     } else {
-      if (sqlSentenceCost !== 0) {
-        return (
-          <div className={`${styles.sqlSentenceCostWrapper} ${styles.trafficLight}`}>
-            <div className={`${sqlSentenceCost < config.SQL_SENTENCE_LOW_COST ? styles.greenLightSignal : ''}`}></div>
-            <div
-              className={`${
-                sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST && sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
-                  ? styles.yellowLightSignal
-                  : ''
-              }`}></div>
-            <div className={`${sqlSentenceCost > config.SQL_SENTENCE_HIGH_COST ? styles.redLightSignal : ''}`}></div>
-          </div>
-        );
+      if (sqlSentenceCost !== 0 && !isNil(sqlSentenceCost)) {
+        return <div className={`${styles.sqlSentenceCostWrapper} ${styles.trafficLight}`}>{renderLightSignals()}</div>;
       }
     }
   };
@@ -247,8 +258,8 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
               }
               icon="clock"
               iconClasses={styles.validateSqlSentenceIcon}
-              label={resourcesContext.messages['validateSql']}
-              onClick={onValidateSqlSentence}
+              label={resourcesContext.messages['evaluateSql']}
+              onClick={onEvaluateSqlSentence}
             />
             {renderSqlSentenceCost()}
           </h3>

@@ -1135,7 +1135,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowIdDestination,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowIdDestination,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') && secondLevelAuthorize(#dataflowIdOrigin,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @LockMethod(removeWhenFinish = false)
   @ApiOperation(value = "Copy designs from dataflow", hidden = true)
   @PostMapping(value = "/copy", produces = MediaType.APPLICATION_JSON_VALUE)
