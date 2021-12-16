@@ -517,46 +517,53 @@ const Dataflows = () => {
     </Fragment>
   );
 
-  const dataflowsFilterOptions = [
-    {
-      nestedOptions: [
-        { key: 'name', label: resourcesContext.messages['name'], order: 0, isSortable: true },
-        { key: 'description', label: resourcesContext.messages['description'], order: 1, isSortable: true },
-        { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2, isSortable: true },
-        { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3, isSortable: true },
-        { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4, isSortable: true }
-      ],
-      type: 'INPUT'
-    },
-    {
-      nestedOptions: [
-        {
-          key: 'status',
-          label: resourcesContext.messages['status'],
-          order: 0,
-          category: 'LEVEL_ERROR',
-          isSortable: true
-        },
-        { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1, isSortable: true },
-        { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
-      ],
-      type: 'MULTI_SELECT'
-    },
-    {
-      isSortable: true,
-      key: 'expirationDate',
-      label: resourcesContext.messages['expirationDateFilterLabel'],
-      type: 'DATE'
+  const getFilterOptions = () => {
+    const filters = [
+      {
+        nestedOptions: [
+          { key: 'name', label: resourcesContext.messages['name'], order: 0, isSortable: true },
+          { key: 'description', label: resourcesContext.messages['description'], order: 1, isSortable: true },
+          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2, isSortable: true },
+          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3, isSortable: true },
+          { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4, isSortable: true }
+        ],
+        type: 'INPUT'
+      },
+      {
+        nestedOptions: [
+          {
+            key: 'status',
+            label: resourcesContext.messages['status'],
+            order: 0,
+            category: 'LEVEL_ERROR',
+            isSortable: true
+          },
+          { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1, isSortable: true },
+          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
+        ],
+        type: 'MULTI_SELECT'
+      },
+      {
+        isSortable: true,
+        key: 'expirationDate',
+        label: resourcesContext.messages['expirationDateFilterLabel'],
+        type: 'DATE'
+      }
+    ];
+
+    if (isCustodian || isAdmin) {
+      filters.push({
+        isSortable: true,
+        key: 'creationDate',
+        label: resourcesContext.messages['creationDateFilterLabel'],
+        type: 'DATE'
+      });
     }
-  ];
-  if (isCustodian || isAdmin) {
-    dataflowsFilterOptions.push({
-      isSortable: true,
-      key: 'creationDate',
-      label: resourcesContext.messages['creationDateFilterLabel'],
-      type: 'DATE'
-    });
-  }
+
+    return filters;
+  };
+
+  const dataflowsFilterOptions = getFilterOptions();
 
   const referenceDataflowFilterOptions = [
     {

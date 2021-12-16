@@ -1,6 +1,5 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRecoilState } from 'recoil';
-import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -31,12 +30,12 @@ const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimatio
 
 export const MyFilters = ({
   className,
-  data,
+  data = [],
   getFilteredData,
   isSearchVisible,
   isStrictMode,
   onFilter,
-  options,
+  options = [],
   viewType
 }) => {
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysFamily(viewType));
@@ -219,8 +218,9 @@ export const MyFilters = ({
       }
     };
 
-    const inputId = uniqueId();
     if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderDate(nestedOption));
+
+    const inputId = uniqueId();
 
     return (
       <div className={styles.block} key={option.key}>
@@ -234,7 +234,6 @@ export const MyFilters = ({
             dateFormat={userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
             inputClassName={styles.inputFilter}
             inputId={inputId}
-            key={option.key}
             monthNavigator={true}
             onChange={event => onChange({ key: option.key, value: parseDateValues(event.value) })}
             onFocus={() =>
@@ -392,37 +391,4 @@ export const MyFilters = ({
       </div>
     </div>
   );
-};
-
-MyFilters.propTypes = {
-  className: PropTypes.string,
-  data: PropTypes.array,
-  getFilteredData: PropTypes.func,
-  isSearchVisible: PropTypes.bool,
-  isStrictMode: PropTypes.bool,
-  onFilter: PropTypes.func,
-  options: PropTypes.arrayOf(
-    PropTypes.shape({
-      category: PropTypes.string | undefined,
-      nestedOptions: PropTypes.arrayOf(
-        PropTypes.shape({
-          isInputVisible: PropTypes.bool,
-          key: PropTypes.string,
-          label: PropTypes.string,
-          order: PropTypes.number
-        })
-      ),
-      type: PropTypes.oneOf('CHECKBOX' | 'DATE' | 'DROPDOWN' | 'INPUT' | 'MULTI_SELECT').isRequired
-    })
-  ),
-  viewType: PropTypes.string
-};
-
-MyFilters.defaultProps = {
-  data: [],
-  getFilteredData: null,
-  isSearchVisible: false,
-  isStrictMode: false,
-  onFilter: null,
-  options: []
 };
