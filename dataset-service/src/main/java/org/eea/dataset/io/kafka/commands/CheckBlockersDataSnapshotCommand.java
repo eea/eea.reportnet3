@@ -127,7 +127,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       createSnapshotVO.setDescription("Release " + formateador.format(ahora) + " CET");
       Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now());
       datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
-          dateRelease.toString());
+          dateRelease.toString(), false);
     }
   }
 

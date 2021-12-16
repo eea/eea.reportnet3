@@ -15,11 +15,13 @@ import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPrivateMapper;
 import org.eea.dataflow.mapper.DataflowPublicMapper;
-import org.eea.dataflow.persistence.domain.Contributor;
+import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.dataflow.persistence.domain.DataflowStatusDataset;
 import org.eea.dataflow.persistence.domain.FMEUser;
+import org.eea.dataflow.persistence.domain.Representative;
+import org.eea.dataflow.persistence.domain.TempUser;
 import org.eea.dataflow.persistence.repository.ContributorRepository;
 import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
@@ -27,6 +29,8 @@ import org.eea.dataflow.persistence.repository.DataflowRepository.IDataflowCount
 import org.eea.dataflow.persistence.repository.DataflowRepository.IDatasetStatus;
 import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
+import org.eea.dataflow.persistence.repository.TempUserRepository;
+import org.eea.dataflow.service.ContributorService;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
@@ -134,6 +138,10 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private RepresentativeRepository representativeRepository;
 
+  /** The temp user repository. */
+  @Autowired
+  private TempUserRepository tempUserRepository;
+
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
@@ -163,6 +171,10 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private RepresentativeService representativeService;
 
+  /** The contributor service. */
+  @Autowired
+  private ContributorService contributorService;
+
   /** The dataset controller zuul. */
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
@@ -186,6 +198,10 @@ public class DataflowServiceImpl implements DataflowService {
   /** The dataflow private mapper. */
   @Autowired
   private DataflowPrivateMapper dataflowPrivateMapper;
+
+  /** The representative mapper. */
+  @Autowired
+  private RepresentativeMapper representativeMapper;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -395,37 +411,6 @@ public class DataflowServiceImpl implements DataflowService {
         pageable.getPageSize(), pageable.getPageNumber());
 
     return dataflowVOs;
-  }
-
-  /**
-   * Adds the contributor to dataflow.
-   *
-   * @param idDataflow the id dataflow
-   * @param idContributor the id contributor
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public void addContributorToDataflow(Long idDataflow, String idContributor) throws EEAException {
-
-    Contributor contributor = new Contributor();
-    contributor.setUserId(idContributor);
-    Dataflow dataflow = dataflowRepository.findById(idDataflow).orElse(new Dataflow());
-    contributor.setDataflow(dataflow);
-
-    contributorRepository.save(contributor);
-  }
-
-  /**
-   * Removes the contributor from dataflow.
-   *
-   * @param idDataflow the id dataflow
-   * @param idContributor the id contributor
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public void removeContributorFromDataflow(Long idDataflow, String idContributor)
-      throws EEAException {
-    contributorRepository.removeContributorFromDataset(idDataflow, idContributor);
   }
 
   /**
@@ -1477,16 +1462,6 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
-   * Removes the web links and documents.
-   *
-   * @param result the result
-   */
-  private void removeWebLinksAndDocuments(DataFlowVO result) {
-    result.setWeblinks(null);
-    result.setDocuments(null);
-  }
-
-  /**
    * Gets the dataset summary.
    *
    * @param dataflowId the dataflow id
@@ -1569,4 +1544,56 @@ public class DataflowServiceImpl implements DataflowService {
 
     return dataflowCountVOList;
   }
+
+  /**
+   * Validate all reporters.
+   *
+   * @param userId the user id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Async
+  @Transactional
+  public void validateAllReporters(String userId) throws EEAException {
+
+    try {
+      List<Representative> representativeList = representativeRepository.findAllByInvalid(true);
+      List<TempUser> tempUserList = tempUserRepository.findAll();
+
+      for (Representative representative : representativeList) {
+        representativeService.validateLeadReporters(representative.getDataflow().getId(), false);
+      }
+
+      for (TempUser tempuser : tempUserList) {
+        contributorService.validateReporters(tempuser.getDataflowId(), tempuser.getDataProviderId(),
+            false);
+      }
+
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+          EventType.VALIDATE_ALL_REPORTERS_COMPLETED_EVENT, null, notificationVO);
+
+    } catch (EEAException e) {
+      LOG.error(
+          "An error was produced while validating reporters and lead reporters for all dataflows");
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_ALL_REPORTERS_FAILED_EVENT,
+          null, notificationVO);
+    }
+  }
+
+  /**
+   * Removes the web links and documents.
+   *
+   * @param result the result
+   */
+  private void removeWebLinksAndDocuments(DataFlowVO result) {
+    result.setWeblinks(null);
+    result.setDocuments(null);
+  }
+
 }

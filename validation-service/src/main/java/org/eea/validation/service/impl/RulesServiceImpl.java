@@ -1,6 +1,7 @@
 package org.eea.validation.service.impl;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -34,6 +35,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.validation.exception.EEAForbiddenSQLCommandException;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
@@ -53,6 +55,7 @@ import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -215,8 +218,18 @@ public class RulesServiceImpl implements RulesService {
   public RulesSchemaVO getRulesSchemaByDatasetId(String datasetSchemaId) {
     RulesSchema rulesSchema =
         rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), false);
-    RulesSchemaVO rulesVO =
-        rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
+    RulesSchemaVO rulesVO = null;
+    if (null == rulesSchema) {
+      rulesSchema = null;
+    } else {
+      for (Rule rule : rulesSchema.getRules()) {
+        if (null != rule.getAutomaticType()
+            && AutomaticRuleTypeEnum.FIELD_SQL_TYPE.equals(rule.getAutomaticType())) {
+          rule.setSqlSentence(null);
+        }
+      }
+      rulesVO = rulesSchemaMapper.entityToClass(rulesSchema);
+    }
     setIntegrityIntoVO(rulesSchema, rulesVO);
     return rulesVO;
   }
@@ -231,6 +244,7 @@ public class RulesServiceImpl implements RulesService {
   public RulesSchemaVO getActiveRulesSchemaByDatasetId(String datasetSchemaId) {
     RulesSchema rulesSchema =
         rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), true);
+
     RulesSchemaVO rulesVO =
         rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
     setIntegrityIntoVO(rulesSchema, rulesVO);
@@ -408,6 +422,21 @@ public class RulesServiceImpl implements RulesService {
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
+
+    if (rule.getSqlSentence() != null) {
+      try {
+        rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
+      } catch (EEAForbiddenSQLCommandException e) {
+        throw new EEAForbiddenSQLCommandException(
+            String.format("SQL Command not allowed in SQL Rule: %s", rule.getSqlSentence()), e);
+      } catch (EEAException e) {
+        throw new EEAException(
+            "There was an error trying to evaluate the rule with the explain plan.", e);
+      } catch (ParseException e) {
+        throw new EEAException("There was an error trying to parse the explain plan.", e);
+
+      }
+    }
 
     if (null == ruleVO.getWhenCondition()) {
       rulesWhenConditionNull(datasetId, ruleVO, datasetSchemaId, rule);
@@ -623,9 +652,15 @@ public class RulesServiceImpl implements RulesService {
               new ObjectId(referenceId)) == null) {
             shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
             document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
+            // Validate Geometry
             ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckGeometries(datasetId,
                 document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
-                "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
+                "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData));
+            // ST_Transform
+            shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
+            ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckSTtransform(datasetId,
+                document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
+                "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData));
           }
           break;
         default:
@@ -750,6 +785,21 @@ public class RulesServiceImpl implements RulesService {
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
+
+    if (rule.getSqlSentence() != null) {
+      try {
+        rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
+      } catch (EEAForbiddenSQLCommandException e) {
+        throw new EEAForbiddenSQLCommandException(
+            String.format("SQL Command not allowed in SQL Rule: %s", rule.getSqlSentence()), e);
+      } catch (EEAException e) {
+        throw new EEAException(
+            "There was an error trying to evaluate the rule with the explain plan.", e);
+      } catch (ParseException e) {
+        throw new EEAException("There was an error trying to parse the explain plan.", e);
+
+      }
+    }
 
     if (null == ruleVO.getWhenCondition()) {
       ruleWhenCondtionUpdateNull(datasetId, ruleVO, datasetSchemaId, rule);
@@ -1456,10 +1506,11 @@ public class RulesServiceImpl implements RulesService {
     DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId);
 
     // Sets the validation file name and it's root directory
-    String composedFileName = "dataset-" + datasetId + "-QCS-"
+    String folderName = "dataset-" + datasetId + "-QCS";
+    String composedFileName = folderName + "-"
         + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss"));
     String fileNameWithExtension = composedFileName + "." + FileTypeEnum.CSV.getValue();
-    File fileFolder = new File(pathPublicFile, composedFileName);
+    File fileFolder = new File(pathPublicFile, folderName);
 
     String creatingFileError =
         String.format("Failed generating CSV file with name %s using datasetID %s",
@@ -1506,7 +1557,9 @@ public class RulesServiceImpl implements RulesService {
     catch (IOException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_FAILED_EVENT, null,
           notificationVO);
-      LOG_ERROR.error(String.format(EEAErrorMessage.CSV_FILE_ERROR, e, "DatasetId: " + datasetId));
+      LOG_ERROR
+          .error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
+              datasetId, e.getMessage(), e));
       return;
     }
 
@@ -1514,7 +1567,7 @@ public class RulesServiceImpl implements RulesService {
     String csv = stringWriter.getBuffer().toString();
     byte[] file = csv.getBytes();
 
-    File fileWrite = new File(new File(pathPublicFile, composedFileName), fileNameWithExtension);
+    File fileWrite = new File(new File(pathPublicFile, folderName), fileNameWithExtension);
 
     // Tries to write the data obtained into the file, if it's successful, throws a notification
     // event completed
@@ -1522,6 +1575,12 @@ public class RulesServiceImpl implements RulesService {
       out.write(file);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_COMPLETED_EVENT, null,
           notificationVO);
+    } catch (FileNotFoundException e) {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_FAILED_EVENT, null,
+          notificationVO);
+      LOG_ERROR
+          .error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
+              datasetId, e.getMessage(), e));
     }
   }
 
@@ -1539,7 +1598,7 @@ public class RulesServiceImpl implements RulesService {
   public File downloadQCCSV(Long datasetId, String fileName)
       throws IOException, ResponseStatusException {
 
-    String folderName = fileName.replace(".csv", "");
+    String folderName = "dataset-" + datasetId + "-QCS";
     // we compound the route and create the file
     File file = new File(new File(pathPublicFile, folderName), fileName);
     if (!file.exists()) {
@@ -1735,7 +1794,8 @@ public class RulesServiceImpl implements RulesService {
       fieldsToWrite[3] = rule.getRuleName();
       fieldsToWrite[4] = rule.getDescription();
       fieldsToWrite[5] = rule.getThenCondition().get(0); // Message
-      fieldsToWrite[6] = rule.getExpressionText();
+      fieldsToWrite[6] =
+          rule.getSqlSentence() != null ? rule.getSqlSentence() : rule.getExpressionText();
       fieldsToWrite[7] = rule.getType().toString(); // Type of QC
       fieldsToWrite[8] = rule.getThenCondition().get(1); // Level Error
       fieldsToWrite[9] = Boolean.toString(rule.isAutomatic()); // Creation Mode

@@ -1,7 +1,8 @@
 import { Fragment, useContext, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+
 import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
 
 import styles from './LeftSideBar.module.scss';
@@ -19,7 +20,9 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystemNotificationVisible }) => {
+const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible }) => {
+  const navigate = useNavigate();
+
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -54,7 +57,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
       label: 'dataflows',
       onClick: e => {
         e.preventDefault();
-        history.push(getUrl(routes['DATAFLOWS']));
+        navigate(getUrl(routes['DATAFLOWS']));
       },
       title: 'dataflows'
     };
@@ -69,7 +72,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
       label: 'userSettings',
       onClick: e => {
         e.preventDefault();
-        history.push(getUrl(routes['SETTINGS']));
+        navigate(getUrl(routes['SETTINGS']));
       },
       title: 'userSettings'
     };
@@ -92,20 +95,21 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
     return <LeftSideBarButton {...userNotificationsProps} />;
   };
 
-  // const renderManageSystemNotifications = () => {
-  //   const manageSystemNotificationsProps = {
-  //     className: 'dataflowList-left-side-bar-system-notifications-help-step',
-  //     href: '#',
-  //     icon: 'comment',
-  //     label: 'systemNotifications',
-  //     onClick: async e => {
-  //       e.preventDefault();
-  //       setIsSystemNotificationVisible(true);
-  //     },
-  //     title: 'systemNotifications'
-  //   };
-  //   return <LeftSideBarButton {...manageSystemNotificationsProps} />;
-  // };
+  const renderManageSystemNotifications = () => {
+    const manageSystemNotificationsProps = {
+      buttonType: 'systemNotifications',
+      className: 'dataflowList-left-side-bar-system-notifications-help-step',
+      href: '#',
+      icon: 'comment',
+      label: 'systemNotifications',
+      onClick: async e => {
+        e.preventDefault();
+        setIsSystemNotificationVisible(true);
+      },
+      title: 'systemNotifications'
+    };
+    return <LeftSideBarButton {...manageSystemNotificationsProps} />;
+  };
 
   const renderHelp = () => {
     const userHelpProps = {
@@ -203,7 +207,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
               {renderUserProfile()}
               {renderHelp()}
               {renderUserNotifications()}
-              {/* {renderManageSystemNotifications()} */}
+              {renderManageSystemNotifications()}
             </div>
             {!isEmpty(renderSectionButtons()) && (
               <Fragment>
@@ -235,6 +239,6 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
       </div>
     </Fragment>
   );
-});
+};
 
 export { LeftSideBar };

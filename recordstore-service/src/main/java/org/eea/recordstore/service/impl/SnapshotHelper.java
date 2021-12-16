@@ -80,13 +80,14 @@ public class SnapshotHelper implements DisposableBean {
    * @param datasetType the dataset type
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
+   * @param prefillingReference the prefilling reference
    * @throws EEAException the eea exception
    */
   public void processRestoration(Long datasetId, Long idSnapshot, Long idPartition,
-      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData)
-      throws EEAException {
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
+      boolean prefillingReference) throws EEAException {
     RestorationTask restorationTask = new RestorationTask(datasetId, idSnapshot, idPartition,
-        datasetType, isSchemaSnapshot, deleteData);
+        datasetType, isSchemaSnapshot, deleteData, prefillingReference);
 
     // first every task is always queued up to ensure the order
 
@@ -130,6 +131,9 @@ public class SnapshotHelper implements DisposableBean {
 
     /** The delete data. */
     Boolean deleteData;
+
+    /** The prefilling reference. */
+    Boolean prefillingReference;
   }
 
   /**
@@ -168,7 +172,8 @@ public class SnapshotHelper implements DisposableBean {
       try {
         recordStoreService.restoreDataSnapshot(restorationTask.datasetId,
             restorationTask.idSnapshot, restorationTask.idPartition, restorationTask.datasetType,
-            restorationTask.isSchemaSnapshot, restorationTask.deleteData);
+            restorationTask.isSchemaSnapshot, restorationTask.deleteData,
+            restorationTask.prefillingReference);
       } catch (SQLException | IOException | RecordStoreAccessException e) {
         LOG_ERROR.error("Error restoring snapshot for dataset {}", restorationTask.datasetId, e);
       } finally {

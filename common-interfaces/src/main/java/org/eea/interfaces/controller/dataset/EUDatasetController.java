@@ -38,7 +38,15 @@ public interface EUDatasetController {
    *
    * @param idDataflow the id dataflow
    */
-  @PostMapping("/populateData/dataflow/{dataflowId}")
+  @PostMapping("/v1/populateData/dataflow/{dataflowId}")
   void populateDataFromDataCollection(@PathVariable("dataflowId") Long idDataflow);
+
+  /**
+   * Populate data from data collection legacy.
+   *
+   * @param idDataflow the id dataflow
+   */
+  @PostMapping("/populateData/dataflow/{dataflowId}")
+  void populateDataFromDataCollectionLegacy(@PathVariable("dataflowId") Long idDataflow);
 
 }

@@ -25,6 +25,11 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
   private RecordStoreService recordStoreService;
 
   /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
    * Gets the event type.
    *
    * @return the event type
@@ -34,10 +39,6 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
     return EventType.UPDATE_MATERIALIZED_VIEW_EVENT;
   }
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Execute.

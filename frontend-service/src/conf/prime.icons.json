@@ -45,6 +45,7 @@
   "openFolder": "pi pi-folder-open",
   "palette": "pi pi-palette",
   "pencil": "pi pi-pencil",
+  "play": "pi pi-play",
   "plus": "pi pi-plus",
   "refresh": "pi pi-refresh",
   "replay": "pi pi-replay",
@@ -72,5 +73,6 @@
   "warning": "pi pi-exclamation-triangle",
   "warningCircle": "pi pi-exclamation-circle",
   "marker": "pi pi-map-marker",
-  "compass": "pi pi-compass"
+  "compass": "pi pi-compass",
+  "bell": "pi pi-bell"
 }

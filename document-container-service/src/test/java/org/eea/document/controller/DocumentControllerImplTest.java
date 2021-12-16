@@ -6,6 +6,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
+import java.util.ArrayList;
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
@@ -13,6 +14,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
@@ -203,6 +206,26 @@ public class DocumentControllerImplTest {
   }
 
   /**
+   * Upload document legacy success test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void uploadDocumentLegacySuccessTest() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doNothing().when(documentService).uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+    documentController.uploadDocumentLegacy(fileMock, 1L, "ES", "desc", true);
+    Mockito.verify(documentService, times(1)).uploadDocument(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  /**
    * Gets the document exception null test.
    *
    * @return the document exception null test
@@ -271,6 +294,24 @@ public class DocumentControllerImplTest {
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
     when(documentService.getDocument(Mockito.any(), Mockito.any())).thenReturn(content);
     documentController.getDocument(1L, 1L);
+    Mockito.verify(documentService, times(1)).getDocument(Mockito.any(), Mockito.any());
+  }
+
+
+  /**
+   * Gets the document legacy success test.
+   *
+   * @return the document legacy success test
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void getDocumentLegacySuccessTest() throws EEAException, IOException {
+    FileResponse content = new FileResponse();
+    content.setBytes(fileMock.getBytes());
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    when(documentService.getDocument(Mockito.any(), Mockito.any())).thenReturn(content);
+    documentController.getDocumentLegacy(1L, 1L);
     Mockito.verify(documentService, times(1)).getDocument(Mockito.any(), Mockito.any());
   }
 
@@ -364,6 +405,27 @@ public class DocumentControllerImplTest {
   }
 
   /**
+   * Delete document legacy success test.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void deleteDocumentLegacySuccessTest() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    FileResponse content = new FileResponse();
+    content.setBytes(fileMock.getBytes());
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    doNothing().when(documentService).deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.deleteDocumentLegacy(1L, 1L, null);
+    Mockito.verify(documentService, times(1)).deleteDocument(Mockito.any(), Mockito.any(),
+        Mockito.any());
+  }
+
+  /**
    * Update document exception test.
    *
    * @throws EEAException the EEA exception
@@ -447,6 +509,28 @@ public class DocumentControllerImplTest {
     doNothing().when(documentService).uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
     documentController.updateDocument(fileMock, 1L, "ES", "desc", 1L, null);
+    Mockito.verify(documentService, times(1)).uploadDocument(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+
+  /**
+   * Update document legacy success test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void updateDocumentLegacySuccessTest() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    doNothing().when(documentService).uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any());
+    documentController.updateDocumentLegacy(fileMock, 1L, "ES", "desc", 1L, null);
     Mockito.verify(documentService, times(1)).uploadDocument(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
   }
@@ -799,6 +883,93 @@ public class DocumentControllerImplTest {
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
         .deleteCollaborationDocument(Mockito.any(), Mockito.any(), Mockito.any());
     documentController.deleteCollaborationDocument(1L, "test", 1L);
+  }
+
+
+  @Test
+  public void getAllDocumentsByDataflowTest() {
+    Mockito.when(dataflowController.getAllDocumentsByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Assert.assertNotNull(documentController.getAllDocumentsByDataflow(1L));
+  }
+
+  @Test
+  public void getPublicDocumentTest() throws EEAException, IOException {
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    document.setIsPublic(true);
+    FileResponse content = new FileResponse();
+    content.setBytes(fileMock.getBytes());
+    Mockito.when(dataflowController.getDocumentInfoById(Mockito.anyLong())).thenReturn(document);
+    when(documentService.getDocument(Mockito.any(), Mockito.any())).thenReturn(content);
+    Assert.assertNotNull(documentController.getPublicDocument(1L));
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getPublicDocumentExceptionTest() {
+    try {
+      Resource resource = documentController.getPublicDocument(null);
+    } catch (ResponseStatusException e) {
+      assertEquals(e.getStatus(), HttpStatus.NOT_FOUND);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getPublicDocumentBadRequestException() {
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    document.setIsPublic(false);
+    Mockito.when(dataflowController.getDocumentInfoById(Mockito.anyLong())).thenReturn(document);
+    try {
+      Resource resource = documentController.getPublicDocument(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(e.getStatus(), HttpStatus.BAD_REQUEST);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getPublicDocumentDocumentInternalServerErrorExceptionTest()
+      throws EEAException, IOException {
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    document.setIsPublic(true);
+    FileResponse content = new FileResponse();
+    content.setBytes(fileMock.getBytes());
+    Mockito.when(dataflowController.getDocumentInfoById(Mockito.anyLong())).thenReturn(document);
+    when(documentService.getDocument(Mockito.any(), Mockito.any())).thenThrow(EEAException.class);
+    try {
+      Resource resource = documentController.getPublicDocument(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(e.getStatus(), HttpStatus.INTERNAL_SERVER_ERROR);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getPublicDocumentDocumentNotFoundExceptionTest() throws EEAException, IOException {
+    DocumentVO document = new DocumentVO();
+    document.setId(1L);
+    document.setIsPublic(true);
+    FileResponse content = new FileResponse();
+    content.setBytes(fileMock.getBytes());
+    Mockito.when(dataflowController.getDocumentInfoById(Mockito.anyLong())).thenReturn(document);
+    when(documentService.getDocument(Mockito.any(), Mockito.any()))
+        .thenThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND));
+    try {
+      Resource resource = documentController.getPublicDocument(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(e.getStatus(), HttpStatus.NOT_FOUND);
+      throw e;
+    }
+  }
+
+  @Test
+  public void getAllDocumentsByDataflowLegacyTest() {
+    Mockito.when(dataflowController.getAllDocumentsByDataflowId(Mockito.anyLong()))
+        .thenReturn(new ArrayList<>());
+    Assert.assertNotNull(documentController.getAllDocumentsByDataflowLegacy(1L));
   }
 
 

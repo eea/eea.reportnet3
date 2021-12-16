@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
@@ -63,10 +63,8 @@ import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false, match }) => {
-  const {
-    params: { dataflowId, datasetId }
-  } = match;
+export const DatasetDesigner = ({ isReferenceDataset = false }) => {
+  const { dataflowId, datasetId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -197,7 +195,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   useBreadCrumbs({
     currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET_DESIGNER : CurrentPage.DATASET_DESIGNER,
     dataflowId,
-    history,
     dataflowType: designerState.dataflowType,
     isLoading: designerState.isLoading,
     referenceDataflowId: dataflowId
@@ -343,7 +340,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               return {
                 command: () => onExportDataExternalIntegration(type.id),
                 icon: type.fileExtension,
-                label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+                label: `${type.name} (.${type.fileExtension})`
               };
             })
           }
@@ -714,13 +711,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   );
 
   useCheckNotifications(
-    ['AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE', 'DOWNLOAD_QC_RULES_FILE_ERROR'],
+    ['AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE', 'DOWNLOAD_QC_RULES_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
     setIsDownloadingQCRules,
     false
   );
 
   useCheckNotifications(
-    ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR'],
+    ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
     setIsDownloadingValidations,
     false
   );
@@ -1076,27 +1073,32 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
   const onDownloadQCRules = async () => {
     setIsDownloadingQCRules(true);
-    notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
 
     try {
       await ValidationService.generateQCRulesFile(datasetId);
+      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
     } catch (error) {
-      console.error('DatasetDesigner - onDownloadQCRules.', error);
-      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
+      }
       setIsDownloadingQCRules(false);
     }
   };
 
   const onDownloadValidations = async () => {
     setIsDownloadingValidations(true);
-    notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
-
     try {
       await ValidationService.generateShowValidationsFile(datasetId);
+      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_START' });
     } catch (error) {
       console.error('DatasetDesigner - onDownloadValidations.', error);
-      notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' }, true);
-
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' }, true);
+      }
       setIsDownloadingValidations(false);
     }
   };
@@ -1623,7 +1625,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             editable={!isDataflowOpen && !isDesignDatasetEditorRead}
             getIsTableCreated={setIsTableCreated}
             getUpdatedTabs={onUpdateTabs}
-            history={history}
             isDataflowOpen={isDataflowOpen}
             isDesignDatasetEditorRead={isDesignDatasetEditorRead}
             isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
@@ -1852,4 +1853,4 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       </div>
     </SnapshotContext.Provider>
   );
-});
+};

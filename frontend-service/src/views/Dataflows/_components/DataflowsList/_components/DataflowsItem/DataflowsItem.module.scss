@@ -75,10 +75,10 @@
         background-color: #6565a8;
       }
       .containerLink {
-        color: var(--white);
+        color: var(--c-white-color);
         background-image: url('/views/_assets/images/logos/logo-blanco.png');
         .dataflowDates {
-          color: var(--white);
+          color: var(--c-white-color);
           margin-left: auto;
         }
       }
@@ -89,10 +89,12 @@
   &.CLOSED {
     box-shadow: var(--card-item-box-shadow);
     transform: scale(1, 1);
+    box-shadow: var(--dataflow-item-box-shadow);
     transition: all 0.1s ease-in;
     &:hover {
-      box-shadow: var(--card-item-box-shadow-hover);
       transform: scale(1.01, 1.01);
+      transition: all 0.1s ease-in;
+      box-shadow: var(--dataflow-item-box-shadow-hover);
       transition: all 0.1s ease-in;
     }
   }
@@ -122,7 +124,7 @@
     font-size: 14pt;
     margin-left: 0.9rem;
     margin-top: 0.7rem;
-    color: var(--white);
+    color: var(--c-white-color);
     cursor: pointer;
     &.pinned {
       transform: rotate(0deg);
@@ -281,8 +283,8 @@
       }
     }
     .rep_button {
-      background-color: var(--blue-120);
-      color: var(--white);
+      background-color: var(--c-blue-120);
+      color: var(--c-white-color);
       border: 0px;
       margin: 0 0 0.5rem 0;
       -webkit-appearance: none;
@@ -300,9 +302,9 @@
 
       &:hover {
         cursor: pointer;
-        background-color: var(--white);
-        border: 2px solid var(--blue-120);
-        color: var(--blue-120);
+        background-color: var(--c-white-color);
+        border: 2px solid var(--c-blue-120);
+        color: var(--c-blue-120);
         padding: calc(0.75rem - 2px) calc(1rem - 2px);
       }
       &:last-child {
@@ -311,8 +313,8 @@
     }
     i {
       font-size: 3.5em !important;
-      color: var(--blue-120);
-      fill: var(--blue-120);
+      color: var(--c-blue-120);
+      fill: var(--c-blue-120);
     }
   }
   @media (max-width: 1024px) {

@@ -90,28 +90,6 @@ public interface DataflowService {
    */
   List<DataFlowVO> getCompleted(String userId, Pageable pageable) throws EEAException;
 
-
-  /**
-   * Adds the contributor to dataflow.
-   *
-   * @param idDataflow the id dataflow
-   * @param idContributor the id contributor
-   *
-   * @throws EEAException the EEA exception
-   */
-  void addContributorToDataflow(Long idDataflow, String idContributor) throws EEAException;
-
-  /**
-   * Removes the contributor from dataflow.
-   *
-   * @param idDataflow the id dataflow
-   * @param idContributor the id contributor
-   *
-   * @throws EEAException the EEA exception
-   */
-  void removeContributorFromDataflow(Long idDataflow, String idContributor) throws EEAException;
-
-
   /**
    * Creates the data flow.
    *
@@ -265,6 +243,14 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   List<DatasetsSummaryVO> getDatasetSummary(Long dataflowId) throws EEAException;
+
+  /**
+   * Validate all reporters.
+   *
+   * @param user the user
+   * @throws EEAException the EEA exception
+   */
+  void validateAllReporters(String userId) throws EEAException;
 
 
 

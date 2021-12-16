@@ -78,8 +78,18 @@ public interface RepresentativeController {
    * @param dataflowId the dataflow id
    * @return the list
    */
-  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/v1/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<RepresentativeVO> findRepresentativesByIdDataFlow(
+      @PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Find representatives by id data flow legacy.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<RepresentativeVO> findRepresentativesByIdDataFlowLegacy(
       @PathVariable("dataflowId") Long dataflowId);
 
   /**
@@ -203,6 +213,14 @@ public interface RepresentativeController {
   @DeleteMapping("/leadReporter/{leadReporterId}/dataflow/{dataflowId}")
   void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId,
       @PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Validate lead reporters checking if they are already registered in the system.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @PutMapping("/validateLeadReporters/dataflow/{dataflowId}")
+  void validateLeadReporters(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Find fme users.

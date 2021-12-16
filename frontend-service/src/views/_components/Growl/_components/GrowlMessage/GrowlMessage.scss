@@ -24,6 +24,10 @@
   border-style: solid;
   border-width: 0 0 0 5px;
   border-radius: 4px;
+  &:not(.p-growl-message-system-notification) {
+    max-width: 25em !important;
+    margin-left: auto !important;
+  }
 }
 
 .p-growl-title {
@@ -49,7 +53,7 @@
   padding: 1em;
 }
 .p-growl-item .p-growl-message {
-  margin: 0 0 0 4em;
+  margin: 0 1em 0 4em;
 }
 .p-growl-item .p-growl-image {
   font-size: 2.571em;
@@ -95,6 +99,24 @@
   .p-growl-image {
     color: var(--growl-error-icon-color);
   }
+}
+
+.p-growl-message-disabled-icons {
+  cursor: default;
+  pointer-events: none;
+}
+
+.p-growl-message-system-notification {
+  background-color: var(--growl-system-notification-bg);
+  border-width: 1px 1px 1px 5px;
+  width: 50rem;
+  margin-left: auto !important;
+}
+
+.p-growl-message-system-notification-icon {
+  transform: scaleX(-1);
+  font-size: 0.9em;
+  opacity: 0.8;
 }
 
 .p-growl-icon-close {

@@ -1,15 +1,23 @@
 package org.eea.ums.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -30,6 +38,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,6 +58,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The Class UserManagementControllerImpl.
@@ -56,6 +66,7 @@ import io.swagger.annotations.ApiResponse;
 @RestController
 @RequestMapping("/user")
 @Api(tags = "Users Management : Users Management  Manager")
+@ApiIgnore
 public class UserManagementControllerImpl implements UserManagementController {
 
   /**
@@ -85,10 +96,15 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Autowired
   private UserRoleService userRoleService;
 
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
+
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  private static final Logger LOG = LoggerFactory.getLogger(UserManagementControllerImpl.class);
 
   /**
    * The Constant ERROR_ADDING_CONTRIBUTOR.
@@ -809,4 +825,77 @@ public class UserManagementControllerImpl implements UserManagementController {
           EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
   }
+
+  /**
+   * Export users by country.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @PostMapping("/exportUsersByCountry/dataflow/{dataflowId}")
+  @ApiOperation(value = "Export all users by country into a CSV file", hidden = true)
+  public void exportUsersByCountry(@ApiParam(
+      value = "Dataflow id used in the export process.") @PathVariable("dataflowId") Long dataflowId) {
+    LOG.info("Export users by country from dataflow {}, with type csv.", dataflowId);
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_USERS_BY_COUNTRY_START",
+        userNotificationContentVO);
+    try {
+      userRoleService.exportUsersByCountry(dataflowId);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error("Error exporting users by country from dataflow {}. Message: {}", dataflowId,
+          e.getMessage());
+    }
+  }
+
+  /**
+   * Download users by country.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @GetMapping("/downloadUsersByCountry/{dataflowId}")
+  @ApiOperation(value = "Download the generated CSV file containing the users by country",
+      hidden = true)
+  @ApiResponse(code = 404, message = "Couldn't find a file with the specified name")
+  public void downloadUsersByCountry(
+      @ApiParam(value = "Dataflow id used in the export process.",
+          example = "10") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(
+          value = "The filename the export process asigned to the Users by country export file.",
+          example = "dataflow-10-UsersByCountry.csv") @RequestParam String fileName,
+      HttpServletResponse response) {
+    try {
+      LOG.info(
+          "Downloading file generared when exporting users by country. Dataflow Id {}. Filename {}.",
+          dataflowId, fileName);
+      File file = userRoleService.downloadUsersByCountry(dataflowId, fileName);
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
+      OutputStream out = response.getOutputStream();
+      FileInputStream in = new FileInputStream(file);
+
+      IOUtils.copyLarge(in, out);
+      out.close();
+      in.close();
+
+      FileUtils.forceDelete(file);
+
+    } catch (IOException | ResponseStatusException e) {
+      LOG_ERROR.error(
+          "Downloading file generated when exporting Users by country. Dataflow Id {}. Filename {}. Error message: {}",
+          dataflowId, fileName, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
+          "Trying to download a file generated during the export users by country process but the file is not found, dataflowId: %s + filename: %s + message: %s ",
+          dataflowId, fileName, e.getMessage()), e);
+    }
+  }
+
+
 }

@@ -44,9 +44,21 @@ public interface DataFlowController {
    * @param providerId the provider id
    * @return the data flow VO
    */
-  @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/v1/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataFlowVO findById(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
+
+  /**
+   * Find by id legacy.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return the data flow VO
+   */
+  @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataFlowVO findByIdLegacy(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
+
 
   /**
    * Find by status.
@@ -120,26 +132,6 @@ public interface DataFlowController {
   List<DataflowCountVO> getDataflowsCount();
 
   /**
-   * Adds the contributor.
-   *
-   * @param dataflowId the dataflow id
-   * @param idContributor the id contributor
-   */
-  @PostMapping("/{dataflowId}/contributor/add")
-  void addContributor(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("idContributor") String idContributor);
-
-  /**
-   * Removes the contributor.
-   *
-   * @param dataflowId the dataflow id
-   * @param idContributor the id contributor
-   */
-  @DeleteMapping("{dataflowId}/contributor/remove")
-  void removeContributor(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("idContributor") String idContributor);
-
-  /**
    * Creates the data flow.
    *
    * @param dataFlowVO the data flow VO
@@ -163,8 +155,18 @@ public interface DataFlowController {
    * @param dataflowId the dataflow id
    * @return the metabase by id
    */
-  @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/v1/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   DataFlowVO getMetabaseById(@PathVariable("dataflowId") Long dataflowId);
+
+
+  /**
+   * Gets the metabase by id legacy.
+   *
+   * @param dataflowId the dataflow id
+   * @return the metabase by id legacy
+   */
+  @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataFlowVO getMetabaseByIdLegacy(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Delete data flow.
@@ -314,4 +316,13 @@ public interface DataFlowController {
   @GetMapping("/downloadPublicSchemaInformation/{dataflowId}")
   ResponseEntity<byte[]> downloadPublicSchemaInformation(
       @PathVariable("dataflowId") Long dataflowId);
+
+
+  /**
+   * Validate all reporters.
+   *
+   * @return the response entity
+   */
+  @PutMapping("/validateAllReporters")
+  ResponseEntity validateAllReporters();
 }

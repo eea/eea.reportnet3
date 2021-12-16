@@ -74,8 +74,8 @@ export const Article15 = ({ dataflowId, dataProviderId, datasetId, isReporting, 
 
     return (
       <WebformTable
-        dataProviderId={dataProviderId}
         dataflowId={dataflowId}
+        dataProviderId={dataProviderId}
         datasetId={datasetId}
         isReporting={isReporting}
         onTabChange={article15State.isVisible}

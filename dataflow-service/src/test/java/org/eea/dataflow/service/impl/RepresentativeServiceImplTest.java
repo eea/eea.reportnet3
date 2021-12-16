@@ -1,7 +1,9 @@
 package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -29,6 +31,7 @@ import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -37,7 +40,9 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.thread.ThreadPropertiesManager;
@@ -98,6 +103,12 @@ public class RepresentativeServiceImplTest {
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseController;
 
+  @Mock
+  private DataSetSnapshotControllerZuul datasetSnapshotController;
+
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
+
   private Representative representative;
 
   private RepresentativeVO representativeVO;
@@ -145,7 +156,7 @@ public class RepresentativeServiceImplTest {
     representativeVO.setLeadReporters(leadReportersVO);
     arrayId = new ArrayList<>();
     arrayId.add(new Representative());
-    leadReporter = new LeadReporter(1L, "email@host.com", representative);
+    leadReporter = new LeadReporter(1L, "email@host.com", representative, null);
     leadReporters = new ArrayList<>();
     leadReporters.add(leadReporter);
     MockitoAnnotations.openMocks(this);
@@ -359,6 +370,37 @@ public class RepresentativeServiceImplTest {
   }
 
   /**
+   * Creates the representative duplicate test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void createRepresentativeDuplicateTest() throws EEAException {
+    Representative repre = new Representative();
+
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representative.setLeadReporters(leadReporters);
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setLeadReporters(leadReportersVO);
+    representativeVO.setDataProviderId(1L);
+
+    Mockito.when(dataflowRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new Dataflow()));
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+        .thenReturn(new UserRepresentationVO());
+    Mockito.when(representativeRepository.findOneByDataflow_IdAndDataProvider_Id(Mockito.any(),
+        Mockito.any())).thenReturn(repre);
+
+    try {
+      representativeServiceImpl.createRepresentative(1L, representativeVO);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.REPRESENTATIVE_DUPLICATED, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
    * Gets the data provider by id test.
    *
    * @return the data provider by id test
@@ -403,6 +445,19 @@ public class RepresentativeServiceImplTest {
     dataProvider.setId(1L);
     representative.setDataProvider(dataProvider);
     representative.setLeadReporters(leadReporters);
+    representatives.add(representative);
+    Mockito.when(representativeRepository.findAllByDataflow_Id(1L)).thenReturn(representatives);
+    byte[] expectedResult = "".getBytes();
+    Assert.assertNotEquals(expectedResult, representativeServiceImpl.exportFile(1L));
+  }
+
+  @Test
+  public void exportFileEmptyTest() throws EEAException, IOException {
+    List<Representative> representatives = new ArrayList<>();
+    Representative representative = new Representative();
+    DataProvider dataProvider = new DataProvider();
+    dataProvider.setId(1L);
+    representative.setDataProvider(dataProvider);
     representatives.add(representative);
     Mockito.when(representativeRepository.findAllByDataflow_Id(1L)).thenReturn(representatives);
     byte[] expectedResult = "".getBytes();
@@ -474,28 +529,8 @@ public class RepresentativeServiceImplTest {
   }
 
   @Test(expected = EEAException.class)
-  public void createLeadReporterNotFoundUserExceptionTest() throws EEAException {
-    Representative representative = new Representative();
-    representative.setId(1L);
-    representative.setLeadReporters(leadReporters);
-    RepresentativeVO representativeVO = new RepresentativeVO();
-    representativeVO.setLeadReporters(leadReportersVO);
-    representativeVO.setDataProviderId(1L);
-
-    Mockito.when(representativeRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(representative));
-    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
-    try {
-      representativeServiceImpl.createLeadReporter(1L, leadReporterVO);
-    } catch (EEAException e) {
-      Assert.assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getMessage());
-      throw e;
-    }
-  }
-
-  @Test(expected = EEAException.class)
   public void createLeadReporterDuplicatedUserExceptionTest() throws EEAException {
-    LeadReporter leadReporter2 = new LeadReporter(1L, "email@user.com", representative);
+    LeadReporter leadReporter2 = new LeadReporter(1L, "email@user.com", representative, null);
     leadReporters.add(leadReporter2);
     Representative representative = new Representative();
     representative.setId(1L);
@@ -591,29 +626,6 @@ public class RepresentativeServiceImplTest {
     }
   }
 
-  @Test(expected = EEAException.class)
-  public void updateLeadReporterUserNotFoundExceptionTest() throws EEAException {
-    Representative representative = new Representative();
-    representative.setId(1L);
-    representative.setLeadReporters(leadReporters);
-    representative.setHasDatasets(true);
-    representative.setDataflow(new Dataflow());
-    representative.setDataProvider(new DataProvider());
-    leadReporterVO.setRepresentativeId(1L);
-
-    Mockito.when(leadReporterRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(leadReporter));
-    Mockito.when(representativeRepository.findById(Mockito.any()))
-        .thenReturn(Optional.of(representative));
-    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any())).thenReturn(null);
-    try {
-      representativeServiceImpl.updateLeadReporter(leadReporterVO);
-    } catch (EEAException e) {
-      Assert.assertEquals(EEAErrorMessage.USER_NOTFOUND, e.getMessage());
-      throw e;
-    }
-  }
-
   @Test
   public void deleteLeadReporterTest() throws EEAException {
     Mockito.when(leadReporterRepository.findById(Mockito.any()))
@@ -688,6 +700,193 @@ public class RepresentativeServiceImplTest {
     Mockito.when(dataProviderMapper.entityListToClass(Mockito.any()))
         .thenReturn(dataProviderListVO);
     assertEquals(Arrays.asList(1L), representativeServiceImpl.getProviderIds());
+  }
+
+  @Test
+  public void findRepresentativesByDataflowIdAnDataproviderListTest() {
+    List<Representative> representatives = new ArrayList<>();
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representatives.add(representative);
+    List<RepresentativeVO> representativeVOs = new ArrayList<>();
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setId(1L);
+    representativeVOs.add(representativeVO);
+    Mockito.when(representativeRepository.findByDataflowIdAndDataProviderIdIn(Mockito.anyLong(),
+        Mockito.any())).thenReturn(representatives);
+    Mockito.when(representativeMapper.entityListToClass(Mockito.anyList()))
+        .thenReturn(representativeVOs);
+    assertEquals(representativeVOs, representativeServiceImpl
+        .findRepresentativesByDataflowIdAndDataproviderList(1L, Arrays.asList(1L)));
+  }
+
+  @Test
+  public void validateLeadReportersSendNotificationTest() throws EEAException, IOException {
+    List<LeadReporterVO> listLeadReporterVO = new ArrayList<>();
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setInvalid(true);
+    leadReporterVO.setRepresentativeId(1L);
+    leadReporterVO.setEmail("email");
+    leadReporterVO.setId(1L);
+    LeadReporter leadReporter = new LeadReporter();
+    leadReporter.setInvalid(true);
+    leadReporter.setRepresentative(representative);
+    leadReporter.setEmail("email");
+    leadReporter.setId(1L);
+    Representative repre = new Representative();
+    leadReporter.setRepresentative(repre);
+    leadReporter.setRepresentative(representative);
+    listLeadReporterVO.add(leadReporterVO);
+    List<RepresentativeVO> listRepresentativeVO = new ArrayList<>();
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setLeadReporters(listLeadReporterVO);
+    listRepresentativeVO.add(representativeVO);
+
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    Mockito.when(leadReporterRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(leadReporter));
+    Mockito.when(representativeRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(repre));
+    Mockito.when(leadReporterRepository.save(Mockito.any())).thenReturn(leadReporter);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+
+    Mockito.when(representativeServiceImpl.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(listRepresentativeVO);
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+
+    representativeServiceImpl.validateLeadReporters(1L, true);
+
+    Mockito.verify(leadReporterRepository, Mockito.atLeastOnce()).save(Mockito.any());
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test
+  public void validateLeadReportersExceptionTest() throws EEAException, IOException {
+    List<LeadReporterVO> listLeadReporterVO = new ArrayList<>();
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setInvalid(true);
+    leadReporterVO.setRepresentativeId(1L);
+    leadReporterVO.setEmail("email");
+    leadReporterVO.setId(1L);
+    LeadReporter leadReporter = new LeadReporter();
+    leadReporter.setInvalid(true);
+    leadReporter.setRepresentative(representative);
+    leadReporter.setEmail("email");
+    leadReporter.setId(1L);
+    Representative repre = new Representative();
+    leadReporter.setRepresentative(repre);
+    leadReporter.setRepresentative(representative);
+    listLeadReporterVO.add(leadReporterVO);
+    List<RepresentativeVO> listRepresentativeVO = new ArrayList<>();
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setLeadReporters(listLeadReporterVO);
+    listRepresentativeVO.add(representativeVO);
+
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    Mockito.when(leadReporterRepository.findById(Mockito.anyLong()))
+        .thenThrow(IllegalArgumentException.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+
+    Mockito.when(representativeServiceImpl.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(listRepresentativeVO);
+    representativeServiceImpl.validateLeadReporters(1L, true);
+    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void checkRestrictFromPublicExceptionTest() throws EEAException {
+    try {
+      Mockito.when(representativeRepository.findAllByDataflow_Id(Mockito.anyLong()))
+          .thenReturn(null);
+      Mockito.when(representativeMapper.entityListToClass(Mockito.anyList())).thenReturn(null);
+      Mockito.when(representativeServiceImpl.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+          .thenReturn(null);
+      representativeServiceImpl.checkRestrictFromPublic(1L, 1L);
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test
+  public void checkRestrictFromPublicTest() throws EEAException {
+    RepresentativeVO representativeVO = new RepresentativeVO();
+    representativeVO.setId(1L);
+    representativeVO.setRestrictFromPublic(true);
+    representativeVO.setDataProviderId(1L);
+    List<RepresentativeVO> representativesVO = new ArrayList<>();
+    List<Representative> representatives = new ArrayList<>();
+    Representative representative = new Representative();
+    representative.setId(1L);
+    representative.setRestrictFromPublic(true);
+    representatives.add(representative);
+    representativesVO.add(representativeVO);
+    Mockito.when(representativeRepository.findAllByDataflow_Id(Mockito.anyLong()))
+        .thenReturn(representatives);
+    Mockito.when(representativeMapper.entityListToClass(Mockito.anyList()))
+        .thenReturn(representativesVO);
+    Mockito.when(representativeServiceImpl.getRepresetativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(representativesVO);
+    representativeServiceImpl.checkRestrictFromPublic(1L, 1L);
+    assertEquals(representativeServiceImpl.checkRestrictFromPublic(1L, 1L),
+        representative.isRestrictFromPublic());
+  }
+
+  @Test
+  public void checkIfDataHaveBeenReleaseTest() throws EEAException {
+    List<ReportingDatasetVO> reportings = new ArrayList<>();
+    ReportingDatasetVO reporting = new ReportingDatasetVO();
+    reporting.setId(1L);
+    reporting.setDataProviderId(1L);
+    reporting.setIsReleased(true);
+    reportings.add(reporting);
+    List<SnapshotVO> snapshots = new ArrayList<>();
+    SnapshotVO snapshot = new SnapshotVO();
+    snapshot.setId(1L);
+    snapshots.add(snapshot);
+    Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong()))
+        .thenReturn(reportings);
+    Mockito.when(datasetSnapshotController.getSnapshotsByIdDataset(Mockito.anyLong()))
+        .thenReturn(snapshots);
+    assertTrue(representativeServiceImpl.checkDataHaveBeenRelease(1L, 1L));
+  }
+
+  @Test(expected = EEAException.class)
+  public void checkIfDataHaveBeenReleaseExceptionTest() throws EEAException {
+    try {
+      Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong()))
+          .thenReturn(null);
+      representativeServiceImpl.checkDataHaveBeenRelease(1L, 1L);
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test
+  public void checkIfDataHaveBeenReleaseFalseTest() throws EEAException {
+    List<ReportingDatasetVO> reportings = new ArrayList<>();
+    ReportingDatasetVO reporting = new ReportingDatasetVO();
+    reporting.setId(1L);
+    reporting.setDataProviderId(1L);
+    reporting.setIsReleased(false);
+    reportings.add(reporting);
+    Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong()))
+        .thenReturn(reportings);
+    assertFalse(representativeServiceImpl.checkDataHaveBeenRelease(1L, 1L));
   }
 
 }

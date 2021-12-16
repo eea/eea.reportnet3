@@ -184,16 +184,20 @@ public class SQLValidationUtils {
   private static TableValue getTableToEvaluate(Rule rule, String dataProviderCode,
       DataSetMetabaseVO dataSetMetabaseVO) {
     TableValue table = null;
-    String query = rule.getSqlSentence();
+    String query = rule != null ? rule.getSqlSentence() : null;
     try {
-      String preparedquery = query.contains(";") ? query.replace(";", "") : query;
-      if (dataProviderCode != null) {
-        preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", dataProviderCode);
-        preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", dataProviderCode);
-        preparedquery = preparedquery.replace("{%R3_ORGANIZATION_CODE%}", dataProviderCode);
+      if (query != null) {
+        String preparedquery = query.contains(";") ? query.replace(";", "") : query;
+        if (dataProviderCode != null) {
+          preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", dataProviderCode);
+          preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", dataProviderCode);
+          preparedquery = preparedquery.replace("{%R3_ORGANIZATION_CODE%}", dataProviderCode);
+        }
+        table = sqlRulesService.retrieveTableData(preparedquery, dataSetMetabaseVO, rule,
+            Boolean.FALSE);
+      } else {
+        throw new EEAInvalidSQLException("No sql found");
       }
-      table =
-          sqlRulesService.retrieveTableData(preparedquery, dataSetMetabaseVO, rule, Boolean.FALSE);
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
     }
@@ -453,9 +457,9 @@ public class SQLValidationUtils {
     String errorMessage = rule.getThenCondition().get(0);
     if (dataSetSchema.isPresent()) {
       String sql = rule.getSqlSentence();
-      LOG.info("SQL Rule for check: {}", sql);
-      LOG.info("Message Rule for check: {}", errorMessage);
       if (validateMessage(errorMessage)) {
+        LOG.info("SQL Rule for check: {}", sql);
+        LOG.info("Message Rule for check: {}", errorMessage);
         // get the fields from ruleMessage to replace later
         ArrayList<String> fieldsToReplace = getFieldsToReplace(errorMessage);
         errorMessage = rewriteMessage(object, errorMessage, fieldsToReplace, tableToEvaluate);

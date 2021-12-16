@@ -22,6 +22,7 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
 import { DataflowService } from 'services/DataflowService';
 import { RepresentativeService } from 'services/RepresentativeService';
+import { UserService } from 'services/UserService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -29,8 +30,6 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
-
-import { UserService } from 'services/UserService';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -302,6 +301,7 @@ export const ManageBusinessDataflow = ({
   return (
     <Fragment>
       <Dialog
+        className="responsiveDialog"
         footer={renderDialogFooter()}
         header={
           isEditing

@@ -379,7 +379,7 @@ const DatasetSchema = ({
         return (
           <a
             href="https://geojsonlint.com/"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             target="_blank"
             title={resourcesContext.messages['geomTypeHelpTooltip']}>
             <FontAwesomeIcon
@@ -492,13 +492,17 @@ const DatasetSchema = ({
 
   const onDownloadQCRules = async datasetId => {
     setIsDownloadingQCs(true);
-    notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
 
     try {
       await ValidationService.generateQCRulesFile(datasetId);
+      notificationContext.add({ type: 'DOWNLOAD_QC_RULES_START' });
     } catch (error) {
       console.error('DatasetSchema - onDownloadQCRules.', error);
-      notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_QC_RULES_FILE_ERROR' }, true);
+      }
       setIsDownloadingQCs(false);
     }
   };

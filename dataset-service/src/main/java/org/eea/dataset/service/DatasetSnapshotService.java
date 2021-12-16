@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -50,9 +51,10 @@ public interface DatasetSnapshotService {
    * @param createSnapshotVO the create snapshot VO
    * @param partitionIdDestination the partition id destination
    * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    */
   void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO, Long partitionIdDestination,
-      String dateRelease);
+      String dateRelease, boolean prefillingReference);
 
   /**
    * Removes the snapshot.
@@ -82,10 +84,12 @@ public interface DatasetSnapshotService {
    * @param idSnapshot the id snapshot
    * @param deleteData the delete data
    * @param datasetType the dataset type
+   * @param prefillingReference the prefilling reference
    * @throws EEAException the EEA exception
    */
   void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination, Long idSnapshot,
-      Boolean deleteData, DatasetTypeEnum datasetType) throws EEAException;
+      Boolean deleteData, DatasetTypeEnum datasetType, boolean prefillingReference)
+      throws EEAException;
 
   /**
    * Release snapshot.
@@ -220,4 +224,15 @@ public interface DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId) throws EEAException;
+
+  /**
+   * Obtain partition.
+   *
+   * @param datasetId the dataset id
+   * @param user the user
+   * @return the partition data set metabase
+   * @throws EEAException the EEA exception
+   */
+  PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
+      throws EEAException;
 }

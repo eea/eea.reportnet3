@@ -1,8 +1,10 @@
 package org.eea.validation.persistence.schemas.rule;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
@@ -17,7 +19,13 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Rule {
+public class Rule implements Serializable {
+
+
+  /** The Constant serialVersionUID. */
+  @Transient
+  private static final long serialVersionUID = -8466833976496437805L;
+
   /** The rule id. */
   @Id
   @Field(value = "_id")
@@ -97,6 +105,10 @@ public class Rule {
   @Field(value = "expressionText")
   private String expressionText;
 
+  /** The sql cost. */
+  @Field(value = "sqlCost")
+  private Double sqlCost;
+
 
   /**
    * Hash code.
@@ -107,7 +119,7 @@ public class Rule {
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, activationGroup, type,
         whenCondition, thenCondition, description, shortCode, uniqueConstraintId,
-        integrityConstraintId, sqlSentence);
+        integrityConstraintId, sqlSentence, sqlCost);
   }
 
   /**
@@ -135,6 +147,6 @@ public class Rule {
         && Objects.equals(shortCode, other.shortCode)
         && Objects.equals(uniqueConstraintId, other.uniqueConstraintId)
         && Objects.equals(integrityConstraintId, other.integrityConstraintId)
-        && Objects.equals(sqlSentence, other.sqlSentence);
+        && Objects.equals(sqlSentence, other.sqlSentence) && Objects.equals(sqlCost, other.sqlCost);
   }
 }

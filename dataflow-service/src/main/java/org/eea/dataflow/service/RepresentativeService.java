@@ -155,6 +155,14 @@ public interface RepresentativeService {
   void deleteLeadReporter(Long leadReporterId) throws EEAException;
 
   /**
+   * Validate lead reporters checking if they are already registered in the system.
+   *
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
+  void validateLeadReporters(Long dataflowId, boolean sendNotification) throws EEAException;
+
+  /**
    * Update representative visibility restrictions.
    *
    * @param dataflowId the dataflow id
@@ -205,4 +213,23 @@ public interface RepresentativeService {
    */
   List<FMEUserVO> findFmeUsers();
 
+  /**
+   * Check restrict from public.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  boolean checkRestrictFromPublic(Long dataflowId, Long dataProviderId) throws EEAException;
+
+  /**
+   * Check if data have been release.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  boolean checkDataHaveBeenRelease(Long dataflowId, Long dataProviderId) throws EEAException;
 }

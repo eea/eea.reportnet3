@@ -13,12 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The Class TestDatasetControllerImpl.
  */
 @RestController
 @RequestMapping("/testDataset")
+@ApiIgnore
 public class TestDatasetControllerImpl implements TestDatasetController {
 
 

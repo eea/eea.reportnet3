@@ -17,23 +17,40 @@ const useSocket = () => {
 
   useEffect(() => {
     if (isUndefined(userContext.socket)) {
+      const maxConnectionAttempts = 10;
+      let currentTry = 0;
+
       const stompClient = new Client({
         brokerURL: socket_url,
         // debug: function (str) {
         //   console.log(str);
         // },
-        reconnectDelay: 1000,
+        reconnectDelay: 30000,
         connectionTimeout: 30000,
         beforeConnect: () => {
+          currentTry++;
           const token = LocalUserStorageUtils?.getTokens()?.accessToken;
           stompClient.connectHeaders = { token };
+
+          if (currentTry > maxConnectionAttempts) {
+            notificationContext.add({ type: 'MAX_WEBSOCKET_RECONNECT_ATTEMPTS_ERROR' });
+            console.error(`Exceeds max attempts (${maxConnectionAttempts}), will not try to connect now`);
+            stompClient.deactivate();
+          }
         },
         onConnect: () => {
+          currentTry = 0;
           stompClient.subscribe('/user/queue/notifications', notification => {
             const { type, content } = JSON.parse(notification.body);
             config.notifications.hiddenNotifications.includes(type)
               ? notificationContext.hide({ type, content })
               : notificationContext.add({ type, content });
+          });
+          stompClient.subscribe('/user/queue/systemnotifications', notification => {
+            const { type, content } = JSON.parse(notification.body);
+            config.notifications.hiddenNotifications.includes(type)
+              ? notificationContext.hide({ type, content })
+              : notificationContext.add(JSON.parse(notification.body), false, true);
           });
         }
       });

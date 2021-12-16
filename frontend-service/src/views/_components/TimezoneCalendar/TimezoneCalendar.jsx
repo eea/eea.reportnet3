@@ -180,8 +180,8 @@ export const TimezoneCalendar = ({
         filterBy="label"
         onChange={e => setSelectedOffset(e.value)}
         optionLabel="label"
-        optionValue="value"
         options={offsetOptions}
+        optionValue="value"
         value={selectedOffset}
       />
     );

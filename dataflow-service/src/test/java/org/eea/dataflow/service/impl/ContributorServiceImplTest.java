@@ -2,10 +2,13 @@ package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.dataflow.persistence.domain.TempUser;
+import org.eea.dataflow.persistence.repository.TempUserRepository;
 import org.eea.dataflow.service.DataflowService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
@@ -24,6 +27,7 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +37,9 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -74,7 +81,19 @@ public class ContributorServiceImplTest {
   private DataflowService dataflowService;
 
   @Mock
+  private TempUserRepository tempUserRepository;
+
+  @Mock
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
+
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The security context. */
+  private SecurityContext securityContext;
+
+  /** The authentication. */
+  private Authentication authentication;
 
   /** The contributor VO write. */
   private ContributorVO contributorVOWrite;
@@ -120,6 +139,10 @@ public class ContributorServiceImplTest {
     reportingDatasetVO.setId(1L);
     reportingDatasets.add(reportingDatasetVO);
     listUserWrite.add(new UserRepresentationVO());
+    authentication = Mockito.mock(Authentication.class);
+    securityContext = Mockito.mock(SecurityContext.class);
+    securityContext.setAuthentication(authentication);
+    SecurityContextHolder.setContext(securityContext);
     MockitoAnnotations.openMocks(this);
   }
 
@@ -404,4 +427,265 @@ public class ContributorServiceImplTest {
     Mockito.verify(userManagementControllerZull, times(1))
         .addContributorsToResources(Mockito.any());
   }
+
+  /**
+   * Find contributors by resource id editor test.
+   */
+  @Test
+  public void findTempUserByRoleAndDataflowTest() {
+
+    ContributorVO contributor1 = new ContributorVO();
+    contributor1.setAccount("reporter_write@reportnet.net");
+    contributor1.setRole("REPORTER_WRITE");
+    contributor1.setDataProviderId(1L);
+    contributor1.setInvalid(true);
+
+    ContributorVO contributor2 = new ContributorVO();
+    contributor2.setAccount("reporter_read@reportnet.net");
+    contributor2.setRole("REPORTER_READ");
+    contributor2.setDataProviderId(2L);
+    contributor2.setInvalid(true);
+
+    List<ContributorVO> contributorList = new ArrayList<>();
+    contributorList.add(contributor1);
+    contributorList.add(contributor2);
+
+    List<ContributorVO> contributors = new ArrayList<>();
+
+    List<TempUser> tempUserList = new ArrayList<>();
+    TempUser tempUser1 = new TempUser();
+    tempUser1.setEmail("reporter_write@reportnet.net");
+    tempUser1.setRole("REPORTER_WRITE");
+    tempUser1.setDataProviderId(1L);
+    TempUser tempUser2 = new TempUser();
+    tempUser2.setEmail("reporter_read@reportnet.net");
+    tempUser2.setRole("REPORTER_READ");
+    tempUser2.setDataProviderId(2L);
+
+    tempUserList.add(tempUser1);
+    tempUserList.add(tempUser2);
+
+    for (TempUser tempuser : tempUserList) {
+      ContributorVO newContributor = new ContributorVO();
+      newContributor.setAccount(tempuser.getEmail());
+      newContributor.setRole(tempuser.getRole());
+      newContributor.setDataProviderId(tempuser.getDataProviderId());
+      newContributor.setInvalid(true);
+      contributors.add(newContributor);
+    }
+
+    when(tempUserRepository.findTempUserByRoleAndDataflow(Mockito.anyString(), Mockito.anyLong(),
+        Mockito.any())).thenReturn(tempUserList);
+
+    assertEquals(contributorServiceImpl.findTempUserByRoleAndDataflow("REPORTER_WRITE", 1L, 1L),
+        contributors);
+
+  }
+
+  /**
+   * Find temp user by account and dataflow test.
+   */
+  @Test
+  public void findTempUserByAccountAndDataflowTest() {
+
+    ContributorVO contributor = new ContributorVO();
+    contributor.setAccount("reporter_write@reportnet.net");
+    contributor.setRole("REPORTER_WRITE");
+    contributor.setDataProviderId(1L);
+
+    TempUser tempUser1 = new TempUser();
+    tempUser1.setEmail("reporter_write@reportnet.net");
+    tempUser1.setRole("REPORTER_WRITE");
+    tempUser1.setDataProviderId(1L);
+
+
+    when(tempUserRepository.findTempUserByAccountAndDataflow(Mockito.anyString(), Mockito.anyLong(),
+        Mockito.any())).thenReturn(tempUser1);
+
+    assertEquals(contributorServiceImpl.findTempUserByAccountAndDataflow("", 1L, 1L), contributor);
+
+  }
+
+  /**
+   * Create temporary user test.
+   */
+  @Test
+  public void createTemporaryUserTest() {
+
+    ContributorVO contributor = new ContributorVO();
+    contributor.setAccount("reporter_write@reportnet.net");
+    contributor.setRole("REPORTER_WRITE");
+    contributor.setDataProviderId(1L);
+
+    contributorServiceImpl.createTempUser(1L, contributor, 1L);
+
+    Mockito.verify(tempUserRepository, times(1)).save(Mockito.any());
+
+  }
+
+
+  /**
+   * Update temporary user test.
+   */
+  @Test
+  public void updateTemporaryUserTest() {
+
+    ContributorVO contributor = new ContributorVO();
+    contributor.setAccount("reporter_write@reportnet.net");
+    contributor.setRole("REPORTER_WRITE");
+    contributor.setDataProviderId(1L);
+
+    TempUser tempUser1 = new TempUser();
+    tempUser1.setEmail("reporter_write@reportnet.net");
+    tempUser1.setRole("REPORTER_WRITE");
+    tempUser1.setDataProviderId(1L);
+
+    when(tempUserRepository.findTempUserByAccountAndDataflow(Mockito.anyString(), Mockito.anyLong(),
+        Mockito.any())).thenReturn(tempUser1);
+
+    contributorServiceImpl.updateTemporaryUser(1L, contributor, 1L);
+
+    Mockito.verify(tempUserRepository, times(1)).save(Mockito.any());
+
+  }
+
+  /**
+   * Delete temporary user test.
+   */
+  @Test
+  public void deleteTemporaryUserTest() {
+
+    ContributorVO contributor = new ContributorVO();
+    contributor.setAccount("reporter_write@reportnet.net");
+    contributor.setRole("REPORTER_WRITE");
+    contributor.setDataProviderId(1L);
+
+    TempUser tempUser1 = new TempUser();
+    tempUser1.setEmail("reporter_write@reportnet.net");
+    tempUser1.setRole("REPORTER_WRITE");
+    tempUser1.setDataProviderId(1L);
+
+    when(tempUserRepository.findTempUserByAccountAndDataflow(Mockito.anyString(), Mockito.anyLong(),
+        Mockito.any())).thenReturn(tempUser1);
+
+    contributorServiceImpl.deleteTemporaryUser(1L, "reporter_write@reportnet.net", "REPORTER_WRITE",
+        1L);
+
+    Mockito.verify(tempUserRepository, times(1)).delete(Mockito.any());
+
+  }
+
+
+  /**
+   * Validate reporters test.
+   *
+   * @throws EEAException
+   */
+  @Test
+  public void validateReportersTest() throws EEAException {
+
+    ContributorVO contributor = new ContributorVO();
+    contributor.setAccount("reporter_write@reportnet.net");
+    contributor.setRole("REPORTER_WRITE");
+    contributor.setDataProviderId(1L);
+    contributor.setInvalid(true);
+    List<ContributorVO> contributors = new ArrayList<>();
+    contributors.add(contributor);
+
+    List<TempUser> tempUserList = new ArrayList<>();
+    TempUser tempUser1 = new TempUser();
+    tempUser1.setEmail("reporter_write@reportnet.net");
+    tempUser1.setRole("REPORTER_WRITE");
+    tempUser1.setDataProviderId(1L);
+    TempUser tempUser2 = new TempUser();
+    tempUser2.setEmail("reporter_read@reportnet.net");
+    tempUser2.setRole("REPORTER_READ");
+    tempUser2.setDataProviderId(2L);
+
+    tempUserList.add(tempUser1);
+    tempUserList.add(tempUser2);
+
+    UserRepresentationVO userRepresentationVORead = new UserRepresentationVO();
+    userRepresentationVORead.setEmail("reportnet@reportnet.net");
+
+    Mockito.lenient().when(contributorServiceImpl.findTempUserByRoleAndDataflow(Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(contributors);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("name");
+    when(userManagementControllerZull.getUserByEmail(Mockito.anyString()))
+        .thenReturn(userRepresentationVORead);
+
+    when(tempUserRepository.findTempUserByRoleAndDataflow(Mockito.anyString(), Mockito.anyLong(),
+        Mockito.any())).thenReturn(tempUserList);
+
+    Mockito.when(resourceManagementControllerZull.getResourceDetail(Mockito.any(), Mockito.any()))
+        .thenReturn(new ResourceInfoVO());
+    contributorServiceImpl.createContributor(1L, contributorVORead, 1L, false);
+
+    try {
+      contributorServiceImpl.validateReporters(1L, 1L, true);
+      Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+          Mockito.any(), Mockito.any());
+    } catch (ResponseStatusException e) {
+    }
+  }
+
+  /**
+   * Validate reporters test.
+   *
+   * @throws EEAException
+   */
+  @Test
+  public void validateReportersExceptionTest() throws EEAException {
+
+    ContributorVO contributor = new ContributorVO();
+    contributor.setAccount("reporter_write@reportnet.net");
+    contributor.setRole("REPORTER_WRITE");
+    contributor.setDataProviderId(1L);
+    contributor.setInvalid(true);
+    List<ContributorVO> contributors = new ArrayList<>();
+    contributors.add(contributor);
+
+    List<TempUser> tempUserList = new ArrayList<>();
+    TempUser tempUser1 = new TempUser();
+    tempUser1.setEmail("reporter_write@reportnet.net");
+    tempUser1.setRole("REPORTER_WRITE");
+    tempUser1.setDataProviderId(1L);
+    TempUser tempUser2 = new TempUser();
+    tempUser2.setEmail("reporter_read@reportnet.net");
+    tempUser2.setRole("REPORTER_READ");
+    tempUser2.setDataProviderId(2L);
+
+    tempUserList.add(tempUser1);
+    tempUserList.add(tempUser2);
+
+    UserRepresentationVO userRepresentationVORead = new UserRepresentationVO();
+    userRepresentationVORead.setEmail("reportnet@reportnet.net");
+
+    Mockito.lenient().when(contributorServiceImpl.findTempUserByRoleAndDataflow(Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(contributors);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(authentication.getName()).thenReturn("name");
+    when(userManagementControllerZull.getUserByEmail(Mockito.anyString()))
+        .thenReturn(userRepresentationVORead);
+
+    when(tempUserRepository.findTempUserByRoleAndDataflow(Mockito.anyString(), Mockito.anyLong(),
+        Mockito.any())).thenReturn(tempUserList);
+
+    try {
+      contributorServiceImpl.validateReporters(1L, 1L, true);
+    } catch (ResponseStatusException e) {
+      Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+          Mockito.any(), Mockito.any());
+    }
+  }
+
+  @Test
+  public void findTempUserByAccountAndDataflowTempUserNullTest() {
+    Mockito.when(tempUserRepository.findTempUserByAccountAndDataflow(Mockito.anyString(),
+        Mockito.anyLong(), Mockito.any())).thenReturn(null);
+    assertNull(contributorServiceImpl.findTempUserByAccountAndDataflow("account", 1L, 1L));
+  }
+
+
 }

@@ -278,12 +278,12 @@ public class IntegrationControllerImpl implements IntegrationController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') OR (checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD'))")
   @LockMethod
-  @PostMapping(value = "/executeEUDatasetExport")
-  @ApiOperation(value = "Execute EUDataset Export", response = ExecutionResultVO.class,
-      responseContainer = "List")
+  @PostMapping(value = "/v1/executeEUDatasetExport")
+  @ApiOperation(value = "Execute EU dataset export", response = ExecutionResultVO.class,
+      responseContainer = "List", notes = "Allowed roles: CUSTODIAN, STEWARD")
   @ApiResponse(code = 500, message = "Internal Server Error")
   public List<ExecutionResultVO> executeEUDatasetExport(
-      @ApiParam(value = "Dataflow Id", example = "0") @LockCriteria(
+      @ApiParam(value = "Dataflow id", example = "0") @LockCriteria(
           name = "dataflowId") @RequestParam("dataflowId") Long dataflowId) {
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
@@ -302,6 +302,26 @@ public class IntegrationControllerImpl implements IntegrationController {
       integrationService.releasePopulateEUDatasetLock(dataflowId);
     }
     return results;
+  }
+
+  /**
+   * Execute EU dataset export legacy.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') OR (checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD'))")
+  @LockMethod
+  @PostMapping(value = "/executeEUDatasetExport")
+  @ApiOperation(value = "Execute EUDataset Export", response = ExecutionResultVO.class,
+      hidden = true, responseContainer = "List", notes = "Allowed roles: CUSTODIAN, STEWARD")
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  public List<ExecutionResultVO> executeEUDatasetExportLegacy(
+      @ApiParam(value = "Dataflow Id", example = "0") @LockCriteria(
+          name = "dataflowId") @RequestParam("dataflowId") Long dataflowId) {
+    return this.executeEUDatasetExport(dataflowId);
   }
 
   /**

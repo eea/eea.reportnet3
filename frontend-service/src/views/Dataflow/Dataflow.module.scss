@@ -2,7 +2,7 @@
 
 .titleBar {
   display: flex;
-  border-bottom: 1px solid var(--gray-25);
+  border-bottom: 1px solid var(--c-gray-25);
   margin: 20px 0;
   justify-content: space-between;
   .title_wrapper {
@@ -43,20 +43,11 @@
   width: auto !important;
 }
 
-.leadReportersDialog {
-  @include for-phone-landscape-up {
-    width: 90vw !important;
-  }
+.disabledLabel {
+  color: var(--c-gray-65);
+}
 
-  @include for-tablet-landscape-up {
-    width: 80vw !important;
-  }
-
-  @include for-desktop-up {
-    width: 60vw !important;
-  }
-
-  @include for-big-desktop-up {
-    width: 50vw !important;
-  }
+.restrictFromPublicNote {
+  font-style: italic;
+  margin-top: 1.5em;
 }

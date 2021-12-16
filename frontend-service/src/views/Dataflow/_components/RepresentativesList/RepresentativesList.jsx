@@ -53,7 +53,7 @@ const RepresentativesList = ({
     allPossibleDataProvidersNoSelect: [],
     dataProvidersTypesList: [],
     deleteLeadReporterId: null,
-    focusedLeadReporterId: null,
+    focusedInputId: null,
     isDeleting: false,
     isLoading: false,
     isVisibleConfirmDeleteDialog: false,
@@ -333,11 +333,11 @@ const RepresentativesList = ({
 
   const setIsDeleting = value => formDispatcher({ type: 'SET_IS_DELETING', payload: { isDeleting: value } });
 
-  const setFocusedLeadReporterId = focusedLeadReporterId =>
-    formDispatcher({ type: 'SET_FOCUSED_LEAD_REPORTER_ID', payload: { focusedLeadReporterId } });
+  const setFocusedInputId = focusedInputId =>
+    formDispatcher({ type: 'SET_FOCUSED_INPUT_ID', payload: { focusedInputId } });
 
-  const renderIsValidUserIcon = (isNewLeadReporter, leadReporter) => {
-    if (!isNewLeadReporter && leadReporter.id !== formState.focusedLeadReporterId) {
+  const renderIsValidUserIcon = (isNewLeadReporter, leadReporter, currentInputId) => {
+    if (!isNewLeadReporter && formState.focusedInputId !== currentInputId) {
       return (
         <Fragment>
           <FontAwesomeIcon
@@ -365,34 +365,34 @@ const RepresentativesList = ({
       const reporters = formState.leadReporters[dataProviderId];
       const errors = formState.leadReportersErrors[dataProviderId];
       const isNewLeadReporter = TextUtils.areEquals(leadReporter.id, 'empty');
-
+      const uniqueInputId = `${leadReporter.id}-${representativeId}`;
       return (
         <div
           className={`${styles.inputWrapper} ${
             representative.leadReporters.length > 1 ? styles.inputWrapperMargin : undefined
           }`}
-          key={`${leadReporter.id}-${representativeId}`}>
+          key={uniqueInputId}>
           <InputText
             autoComplete={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
             autoFocus={isNewLeadReporter}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             disabled={representative.hasDatasets && reporters[leadReporter.id]?.isValid}
-            id={`${leadReporter.id}-${representativeId}`}
+            id={uniqueInputId}
             onBlur={event => {
               onSubmitLeadReporter(event.target.value, representativeId, dataProviderId, leadReporter);
-              setFocusedLeadReporterId(null);
+              setFocusedInputId(null);
             }}
             onChange={event => onChangeLeadReporter(dataProviderId, leadReporter.id, event.target.value)}
             onFocus={() => {
               onCleanErrors(dataProviderId, leadReporter.id);
-              setFocusedLeadReporterId(leadReporter.id);
+              setFocusedInputId(uniqueInputId);
             }}
             onKeyDown={event => onKeyDown(event, representativeId, dataProviderId, leadReporter)}
             placeholder={resourcesContext.messages['manageRolesDialogInputPlaceholder']}
             value={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
           />
 
-          {renderIsValidUserIcon(isNewLeadReporter, reporters[leadReporter.id])}
+          {renderIsValidUserIcon(isNewLeadReporter, reporters[leadReporter.id], uniqueInputId)}
 
           {!isNewLeadReporter && (
             <Button

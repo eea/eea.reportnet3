@@ -1,5 +1,4 @@
 import { useContext } from 'react';
-import { withRouter } from 'react-router-dom';
 
 import styles from './PrivacyStatement.module.scss';
 
@@ -8,7 +7,7 @@ import { Title } from 'views/_components/Title';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const PrivacyStatement = withRouter(() => {
+const PrivacyStatement = () => {
   const resourcesContext = useContext(ResourcesContext);
 
   const onClickAnchorLink = e => {
@@ -267,6 +266,6 @@ const PrivacyStatement = withRouter(() => {
       </div>
     </div>
   );
-});
+};
 
 export { PrivacyStatement };

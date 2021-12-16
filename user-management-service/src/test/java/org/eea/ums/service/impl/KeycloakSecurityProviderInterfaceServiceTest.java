@@ -715,39 +715,6 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
         Mockito.eq("group1"));
   }
 
-  @Test(expected = EEAException.class)
-  public void addContributorToUserGroupNotPresentUserError() throws EEAException {
-
-    String userMail = "test@reportnet.net";
-    String groupName = "group1";
-
-    UserRepresentation[] userRepresentations = new UserRepresentation[] {};
-    Mockito.when(keycloakConnectorService.getUsers()).thenReturn(userRepresentations);
-    Optional<UserRepresentation> contributor = Optional.empty();
-
-    ReflectionTestUtils.setField(keycloakSecurityProviderInterfaceService, "users",
-        new ArrayList<>());
-    GroupInfo[] groups = new GroupInfo[1];
-    GroupInfo groupInfo = new GroupInfo();
-    groupInfo.setName(groupName);
-    groupInfo.setId(groupName);
-    groups[0] = groupInfo;
-
-    Mockito.when(keycloakConnectorService.getGroups()).thenReturn(groups);
-
-    try {
-      keycloakSecurityProviderInterfaceService.addContributorToUserGroup(contributor, userMail,
-          groupName);
-    } catch (EEAException e) {
-      Assert.assertEquals(String.format(
-          "Error, user with mail %s not found and it was impossible to add it to the group %s",
-          userMail, groupName), e.getMessage());
-      throw e;
-    }
-
-    Mockito.verify(keycloakConnectorService, Mockito.times(1)).addUserToGroup(Mockito.eq("user1"),
-        Mockito.eq("group1"));
-  }
 
   @Test
   public void authenticateEmail() {
@@ -839,10 +806,65 @@ public class KeycloakSecurityProviderInterfaceServiceTest {
     groupInfo.setName("Dataflow-0-LEAD_REPORTER");
     groupInfo.setPath("/Dataflow-0-LEAD_REPORTER");
     groupInfos[0] = groupInfo;
-    when(keycloakConnectorService.getGroups()).thenReturn(groupInfos);
+    when(keycloakConnectorService.getGroupsWithSearch(Mockito.anyString())).thenReturn(groupInfos);
 
     assertNotNull("is null", keycloakSecurityProviderInterfaceService.getGroupsByIdResourceType(0L,
         ResourceTypeEnum.DATAFLOW));
+  }
+
+  @Test
+  public void deleteResourceInstancesByDatasetIdTest() {
+    GroupInfo[] groupInfos = new GroupInfo[1];
+    GroupInfo groupInfo = new GroupInfo();
+    groupInfo.setName("Dataflow-1-LEAD_REPORTER");
+    groupInfo.setPath("/Dataflow-1-LEAD_REPORTER");
+    groupInfos[0] = groupInfo;
+    Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.anyString()))
+        .thenReturn(groupInfos);
+    keycloakSecurityProviderInterfaceService.deleteResourceInstancesByDatasetId(Arrays.asList(1L));
+    Mockito.verify(keycloakConnectorService, Mockito.times(1))
+        .getGroupsWithSearch(Mockito.anyString());
+  }
+
+  @Test
+  public void createResourceInstanceTest() throws EEAException {
+    List<ResourceInfoVO> resources = new ArrayList<>();
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setResourceId(1l);
+    resourceInfoVO.setSecurityRoleEnum(SecurityRoleEnum.LEAD_REPORTER);
+    resourceInfoVO.setResourceTypeEnum(ResourceTypeEnum.DATAFLOW);
+    resources.add(resourceInfoVO);
+    keycloakSecurityProviderInterfaceService.createResourceInstance(resources);
+    Mockito.verify(keycloakConnectorService, Mockito.times(1)).createGroupDetail(Mockito.any());
+  }
+
+  @Test(expected = EEAException.class)
+  public void createResourceInstanceExceptionTest() throws EEAException {
+    List<ResourceInfoVO> resources = new ArrayList<>();
+    ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
+    resourceInfoVO.setResourceId(1l);
+    resourceInfoVO.setSecurityRoleEnum(SecurityRoleEnum.LEAD_REPORTER);
+    resourceInfoVO.setResourceTypeEnum(ResourceTypeEnum.DATAFLOW);
+    resources.add(resourceInfoVO);
+    try {
+      Mockito.doThrow(EEAException.class).when(keycloakConnectorService)
+          .createGroupDetail(Mockito.any());
+      keycloakSecurityProviderInterfaceService.createResourceInstance(resources);
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void getApiKeyExceptionTest() throws EEAException {
+    try {
+      Mockito.when(keycloakConnectorService.getUser(Mockito.anyString())).thenReturn(null);
+      keycloakSecurityProviderInterfaceService.getApiKey("id", 1L, 1L);
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
   }
 
 }

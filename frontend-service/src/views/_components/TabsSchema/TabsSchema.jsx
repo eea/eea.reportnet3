@@ -45,8 +45,8 @@ export const TabsSchema = ({
             <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
               <div className={styles.tabsSchema}>
                 <DataViewer
-                  dataProviderId={dataProviderId}
                   dataflowType={dataflowType}
+                  dataProviderId={dataProviderId}
                   datasetSchemaId={datasetSchemaId}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}

@@ -63,13 +63,14 @@ public interface RecordStoreService {
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
    * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
    * @throws EEAException the EEA exception
    */
   void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset,
-      String dateRelease)
+      String dateRelease, boolean prefillingReference)
       throws SQLException, IOException, RecordStoreAccessException, EEAException;
 
 
@@ -82,14 +83,14 @@ public interface RecordStoreService {
    * @param typeDataset the type dataset
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
-   *
+   * @param prefillingReference the prefilling reference
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
    */
   void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      DatasetTypeEnum typeDataset, Boolean isSchemaSnapshot, Boolean deleteData)
-      throws SQLException, IOException, RecordStoreAccessException;
+      DatasetTypeEnum typeDataset, Boolean isSchemaSnapshot, Boolean deleteData,
+      boolean prefillingReference) throws SQLException, IOException, RecordStoreAccessException;
 
   /**
    * Delete data snapshot.
@@ -157,5 +158,12 @@ public interface RecordStoreService {
    */
   void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException;
 
-
+  /**
+   * Refresh materialized query.
+   *
+   * @param datasetIds the dataset ids
+   * @param continueValidation the continue validation
+   */
+  void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation, boolean released,
+      Long datasetId);
 }
