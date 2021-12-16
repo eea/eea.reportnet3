@@ -84,7 +84,9 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     const [firstRow] = sqlResponse;
     const columnData = Object.keys(firstRow).map(key => ({ field: key, header: key.replace('*', '.') }));
 
-    return columnData.map(col => <Column field={col.field} header={col.header} key={col.field} />);
+    return columnData.map(col => (
+      <Column field={col.field} header={col.header} key={col.field} style={{ minWidth: '150px' }} />
+    ));
   };
 
   const sqlSentenceValidationDialogFooter = (
@@ -172,7 +174,11 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       return <h3 className={styles.noDataMessage}>{resourcesContext.messages['noData']}</h3>;
     }
 
-    return <DataTable value={sqlResponse}>{columns}</DataTable>;
+    return (
+      <DataTable scrollable value={sqlResponse}>
+        {columns}
+      </DataTable>
+    );
   };
 
   const runSqlSentence = async () => {
