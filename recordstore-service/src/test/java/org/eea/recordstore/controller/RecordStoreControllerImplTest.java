@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.eea.recordstore.service.impl.SnapshotHelper;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.thread.ThreadPropertiesManager;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -213,4 +215,70 @@ public class RecordStoreControllerImplTest {
     Mockito.verify(recordStoreService, times(1)).refreshMaterializedQuery(Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any());
   }
+
+  @Test
+  public void cloneDataTest() {
+    Map<String, String> dictionary = new HashMap<String, String>();
+    recordStoreControllerImpl.cloneData(dictionary, 1L, 1L, 1L, Arrays.asList("schema"));
+    Mockito.verify(recordStoreService, times(1)).createSnapshotToClone(Mockito.anyLong(),
+        Mockito.any(), Mockito.any(), Mockito.anyLong(), Mockito.anyList());
+  }
+
+  @Test
+  public void createUpdateQueryViewTest() {
+    recordStoreControllerImpl.createUpdateQueryView(1L, false);
+    Mockito.verify(recordStoreService, times(1)).createUpdateQueryView(Mockito.anyLong(),
+        Mockito.anyBoolean());
+  }
+
+  @Test
+  public void createSchemasTest() {
+    Map<Long, String> map = new HashMap<Long, String>();
+    recordStoreControllerImpl.createSchemas(map, 1L, false, false);
+    Mockito.verify(recordStoreService, times(1)).createSchemas(Mockito.anyMap(), Mockito.anyLong(),
+        Mockito.anyBoolean(), Mockito.anyBoolean());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteSnapshotDataExceptionTest() throws IOException {
+    try {
+      Mockito.doThrow(IOException.class).when(recordStoreService)
+          .deleteDataSnapshot(Mockito.anyLong(), Mockito.anyLong());
+      recordStoreControllerImpl.deleteSnapshotData(1L, 1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void restoreSnapshotDataExceptionTest() throws EEAException {
+    try {
+      Mockito.doThrow(EEAException.class).when(restoreSnapshotHelper).processRestoration(
+          Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(),
+          Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+      recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, DatasetTypeEnum.COLLECTION, false,
+          false, false);
+    } catch (ResponseStatusException e) {
+      Assert.assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void createSnapshotDataExceptionTest()
+      throws SQLException, IOException, RecordStoreAccessException, EEAException {
+    try {
+      Mockito.doThrow(SQLException.class).when(recordStoreService).createDataSnapshot(
+          Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyString(),
+          Mockito.anyBoolean());
+      recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L,
+          java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), false);
+    } catch (ResponseStatusException e) {
+      Assert.assertNotNull(e);
+      throw e;
+    }
+  }
+
+
 }

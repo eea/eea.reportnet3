@@ -35,7 +35,6 @@ import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.validation.exception.EEAForbiddenSQLCommandException;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
@@ -426,15 +425,8 @@ public class RulesServiceImpl implements RulesService {
     if (rule.getSqlSentence() != null) {
       try {
         rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
-      } catch (EEAForbiddenSQLCommandException e) {
-        throw new EEAForbiddenSQLCommandException(
-            String.format("SQL Command not allowed in SQL Rule: %s", rule.getSqlSentence()), e);
-      } catch (EEAException e) {
-        throw new EEAException(
-            "There was an error trying to evaluate the rule with the explain plan.", e);
-      } catch (ParseException e) {
-        throw new EEAException("There was an error trying to parse the explain plan.", e);
-
+      } catch (ParseException | EEAException e) {
+        rule.setSqlCost(null);
       }
     }
 
@@ -789,15 +781,8 @@ public class RulesServiceImpl implements RulesService {
     if (rule.getSqlSentence() != null) {
       try {
         rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
-      } catch (EEAForbiddenSQLCommandException e) {
-        throw new EEAForbiddenSQLCommandException(
-            String.format("SQL Command not allowed in SQL Rule: %s", rule.getSqlSentence()), e);
-      } catch (EEAException e) {
-        throw new EEAException(
-            "There was an error trying to evaluate the rule with the explain plan.", e);
-      } catch (ParseException e) {
-        throw new EEAException("There was an error trying to parse the explain plan.", e);
-
+      } catch (ParseException | EEAException e) {
+        rule.setSqlCost(null);
       }
     }
 

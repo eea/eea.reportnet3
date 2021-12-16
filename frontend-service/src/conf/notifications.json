@@ -812,7 +812,8 @@
         { "key": "CHECK_ENABLED_SYSTEM_NOTIFICATIONS_ERROR" },
         { "key": "VALIDATE_SQL_ERROR" },
         { "key": "EVALUATE_SQL_SENTENCE_ERROR" },
-        { "key": "MAX_WEBSOCKET_RECONNECT_ATTEMPTS_ERROR", "fixed": true }
+        { "key": "MAX_WEBSOCKET_RECONNECT_ATTEMPTS_ERROR", "fixed": true },
+        { "key": "FILTER_DATA_ERROR" }
       ]
     },
     {

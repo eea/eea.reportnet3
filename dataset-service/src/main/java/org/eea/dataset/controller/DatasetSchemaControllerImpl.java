@@ -1135,7 +1135,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowIdDestination,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowIdDestination,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') && secondLevelAuthorize(#dataflowIdOrigin,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @LockMethod(removeWhenFinish = false)
   @ApiOperation(value = "Copy designs from dataflow", hidden = true)
   @PostMapping(value = "/copy", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -1230,7 +1230,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the table schemas ids
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_STEWARD','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_STEWARD','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
   @GetMapping(value = "/v1/getTableSchemasIds/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get list of dataset table schemas by dataset id",
