@@ -396,16 +396,16 @@ const Dataflows = () => {
   const onReorderPinnedDataflows = async (pinnedItem, isPinned) => {
     const { business, citizenScience, reference, reporting } = dataflowsState;
 
-    const _data = [...reporting, ...reference, ...business, ...citizenScience];
-    const _filteredData = [...filteredData[tabId]];
+    const copyData = [...reporting, ...reference, ...business, ...citizenScience];
+    const copyFilteredData = [...filteredData[tabId]];
 
-    const userProperties = updateUserPropertiesPinnedDataflows({ pinnedItem, data: _data });
+    const userProperties = updateUserPropertiesPinnedDataflows({ pinnedItem, data: copyData });
 
     await onUpdateUserProperties(userProperties);
     userContext.onChangePinnedDataflows(userProperties.pinnedDataflows);
 
     const changedInitialData = onUpdatePinnedStatus({ dataflows: dataflowsState[tabId], isPinned, pinnedItem });
-    const changedFilteredData = onUpdatePinnedStatus({ dataflows: _filteredData, isPinned, pinnedItem });
+    const changedFilteredData = onUpdatePinnedStatus({ dataflows: copyFilteredData, isPinned, pinnedItem });
 
     const orderedFilteredData = sortDataflows(changedFilteredData);
     const orderedPinned = orderedFilteredData.map(el => el.pinned);
@@ -430,11 +430,11 @@ const Dataflows = () => {
 
   const onUpdatePinnedStatus = ({ dataflows = [], isPinned, pinnedItem }) => {
     return dataflows.map(dataflow => {
-      const _dataflow = { ...dataflow };
+      const copyDataflow = { ...dataflow };
 
-      if (_dataflow.id === pinnedItem.id) _dataflow.pinned = isPinned ? 'pinned' : 'unpinned';
+      if (copyDataflow.id === pinnedItem.id) copyDataflow.pinned = isPinned ? 'pinned' : 'unpinned';
 
-      return _dataflow;
+      return copyDataflow;
     });
   };
 
@@ -517,7 +517,7 @@ const Dataflows = () => {
     </Fragment>
   );
 
-  const _dataflowsOptions = [
+  const dataflowsFilterOptions = [
     {
       nestedOptions: [
         { key: 'name', label: resourcesContext.messages['name'], order: 0, isSortable: true },
@@ -556,7 +556,7 @@ const Dataflows = () => {
     }
   ];
 
-  const _referencesOptions = [
+  const referenceDataflowFilterOptions = [
     {
       nestedOptions: [
         { key: 'name', label: resourcesContext.messages['name'], isSortable: true },
@@ -574,10 +574,10 @@ const Dataflows = () => {
   ];
 
   const options = {
-    business: _dataflowsOptions,
-    citizenScience: _dataflowsOptions,
-    reference: _referencesOptions,
-    reporting: _dataflowsOptions
+    business: dataflowsFilterOptions,
+    citizenScience: dataflowsFilterOptions,
+    reference: referenceDataflowFilterOptions,
+    reporting: dataflowsFilterOptions
   };
 
   return renderLayout(
