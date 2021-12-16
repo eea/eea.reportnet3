@@ -11,7 +11,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
@@ -642,6 +644,38 @@ public class JdbcRecordStoreServiceImplTest {
   public void testDeleteDataset() throws SQLException, IOException {
     jdbcRecordStoreService.deleteDataset("schema");
     Mockito.verify(jdbcTemplate, times(1)).execute(Mockito.any(String.class));
+  }
+
+  @Test
+  public void createSnapshotToCloneTest() throws SQLException {
+    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<String, String>();
+    List<String> datasets = new ArrayList<>();
+    datasets.add("dataset_1");
+    Mockito
+        .lenient().when(jdbcTemplate.query(Mockito.anyString(),
+            Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class)))
+        .thenReturn(datasets);
+    final Connection connection = Mockito.mock(BaseConnection.class);
+    Mockito.when(((BaseConnection) connection).getEncoding())
+        .thenReturn(Encoding.defaultEncoding());
+    driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
+        Mockito.anyString())).thenReturn(connection);
+    QueryExecutor queryExector = Mockito.mock(QueryExecutor.class);
+    CopyOperation copyOut = Mockito.mock(CopyOut.class);
+    Mockito.when(copyOut.isActive()).thenReturn(true);
+    Mockito.when(queryExector.startCopy(Mockito.anyString(), Mockito.anyBoolean()))
+        .thenReturn(copyOut);
+    Mockito.when(((BaseConnection) connection).getQueryExecutor()).thenReturn(queryExector);
+    Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
+        Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
+    Mockito.when(((BaseConnection) connection).getEncoding())
+        .thenReturn(Encoding.defaultEncoding());
+    driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
+        Mockito.anyString())).thenReturn(connection);
+    jdbcRecordStoreService.createSnapshotToClone(1L, 1L, dictionaryOriginTargetObjectId, 1L,
+        datasets);
+    Mockito.verify(jdbcTemplate, times(2)).query(Mockito.anyString(),
+        Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
 
 
