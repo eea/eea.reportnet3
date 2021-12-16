@@ -90,12 +90,11 @@
     box-shadow: var(--card-item-box-shadow);
     transform: scale(1, 1);
     box-shadow: var(--dataflow-item-box-shadow);
-    transition: all 0.1s ease-in;
+    transition: var(--dataflow-item-transition);
     &:hover {
       transform: scale(1.01, 1.01);
-      transition: all 0.1s ease-in;
       box-shadow: var(--dataflow-item-box-shadow-hover);
-      transition: all 0.1s ease-in;
+      transition: var(--dataflow-item-transition);
     }
   }
   &:first-of-type {
