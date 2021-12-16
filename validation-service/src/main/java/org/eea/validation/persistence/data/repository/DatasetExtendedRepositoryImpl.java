@@ -362,7 +362,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         }
       });
     } catch (HibernateException e) {
-      throw new EEAInvalidSQLException("SQL not valid: " + query, e);
+      throw new EEAInvalidSQLException(e.getCause().getMessage(), e);
     }
 
   }
@@ -413,7 +413,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         }
       });
     } catch (HibernateException e) {
-      throw new EEAInvalidSQLException("SQL not valid: " + sqlRule, e);
+      throw new EEAInvalidSQLException(e);
     }
     return tableValues;
   }
