@@ -22,7 +22,7 @@ const applyDates = ({ filterBy, filterByKeys, item }) => {
 
     if (dates[0] && !dates[1]) result.push(value >= getStartOfDay(dates[0]) && getEndOfDay(dates[0]) >= value);
 
-    if (dates[0] && dates[1]) result = result.push(value >= getStartOfDay(dates[0]) && getEndOfDay(dates[1]) >= value);
+    if (dates[0] && dates[1]) result.push(value >= getStartOfDay(dates[0]) && getEndOfDay(dates[1]) >= value);
   }
 
   if (result.length > 0) {
