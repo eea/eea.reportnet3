@@ -393,7 +393,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
         throw new EEAException();
       } else {
-
+        datasetRepository.validateQuery("explain " + sqlRule, datasetId);
         if (showInternalFields) {
           sb.append("SELECT * FROM (");
           sb.append(sqlRule);
@@ -450,6 +450,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
         throw new EEAException();
       } else {
+        datasetRepository.validateQuery("explain " + sqlRule, datasetId);
         sb.append("EXPLAIN (FORMAT JSON) ");
         sb.append(sqlRule);
         String result = datasetRepository.evaluateSqlRule(datasetId, sb.toString());
