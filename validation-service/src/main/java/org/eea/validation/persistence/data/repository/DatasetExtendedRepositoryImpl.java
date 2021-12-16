@@ -362,7 +362,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         }
       });
     } catch (HibernateException e) {
-      throw new EEAInvalidSQLException("SQL not valid: " + query, e);
+      LOG_ERROR.error("SQL is invalid: {}. Exception: {}", query, e.getMessage());
+      throw new EEAInvalidSQLException(e.getCause().getMessage(), e);
     }
 
   }
@@ -387,6 +388,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         @Override
         public List<List<ValueVO>> execute(Connection conn) throws SQLException {
           List<List<ValueVO>> tableRows = new ArrayList<>();
+          conn.setReadOnly(true);
           conn.setSchema("dataset_" + datasetId);
           try (PreparedStatement stmt = conn.prepareStatement(sqlRule);
               ResultSet rs = stmt.executeQuery();) {
@@ -412,7 +414,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         }
       });
     } catch (HibernateException e) {
-      throw new EEAInvalidSQLException("SQL not valid: " + sqlRule, e);
+      throw new EEAInvalidSQLException(e);
     }
     return tableValues;
   }
@@ -436,6 +438,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         @Override
         public String execute(Connection conn) throws SQLException {
           String resultObject = "";
+          conn.setReadOnly(true);
           conn.setSchema("dataset_" + datasetId);
           try (PreparedStatement stmt = conn.prepareStatement(sqlRule);
               ResultSet rs = stmt.executeQuery();) {

@@ -16,6 +16,7 @@
   --c-yellow-25: #fff4bb;
   --c-black-color: #000000;
   --c-gray-110: #404040;
+  --c-gray-75-opacity-08: rgba(112, 112, 112, 0.8);
   --c-gray-75: #707070;
   --c-gray-65: #898989;
   --c-gray-50: #9f9f9f;
@@ -24,6 +25,7 @@
   --c-gray-10: #ebebeb;
   --c-gray-5: #f5f5f5;
   --c-white-color: #ffffff;
+  --c-white-color-opacity-08: rgba(255, 255, 255, 0.8);
   --c-white-font: #ffffffe7;
   --informative-color: #006fb4;
   --warning-color: #f29527;
@@ -68,6 +70,7 @@
   --c-red-200: #e40046;
   --c-red-100: #ee2737;
   --c-red-100-rgb: 238, 39, 55;
+  --c-red-50: #ff0000;
   /* purple */
   --c-purple-400: #5c068c;
   --c-purple-300: #8246af;
@@ -613,4 +616,9 @@
   --go-top-button-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
   --go-top-button-color-hover: var(--c-corporate-yellow);
   --go-top-button-color: var(--c-white-color);
+
+  /* Traffic light*/
+  --traffic-light-red-active: var(--c-red-50);
+  --traffic-light-yellow-active: var(--c-orange-200);
+  --traffic-light-green-active: var(--c-chart-correct);
 }

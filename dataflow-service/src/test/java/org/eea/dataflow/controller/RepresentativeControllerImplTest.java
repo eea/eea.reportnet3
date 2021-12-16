@@ -659,4 +659,24 @@ public class RepresentativeControllerImplTest {
     Mockito.when(representativeService.findFmeUsers()).thenReturn(users);
     assertEquals(users, representativeControllerImpl.findFmeUsers());
   }
+
+  @Test(expected = ResponseStatusException.class)
+  public void validateLeadReportersResponseStatusExceptionTest() throws EEAException {
+    try {
+      Mockito.doThrow(EEAException.class).when(representativeService)
+          .validateLeadReporters(Mockito.anyLong(), Mockito.anyBoolean());
+      representativeControllerImpl.validateLeadReporters(1L);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test
+  public void validateLeadReporterTest() throws EEAException {
+    representativeControllerImpl.validateLeadReporters(1L);
+    Mockito.verify(representativeService, times(1)).validateLeadReporters(Mockito.anyLong(),
+        Mockito.anyBoolean());
+  }
+
 }

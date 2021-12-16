@@ -71,6 +71,9 @@ public class RuleVO {
   /** The expression text. */
   private String expressionText;
 
+  /** The sql cost. */
+  private Double sqlCost;
+
 
   /**
    * Hash code.
@@ -81,7 +84,7 @@ public class RuleVO {
   public int hashCode() {
     return Objects.hash(ruleId, referenceId, ruleName, automatic, enabled, salience,
         activationGroup, type, whenCondition, thenCondition, description, shortCode, integrityVO,
-        sqlSentence);
+        sqlSentence, sqlCost);
   }
 
   /**
@@ -108,6 +111,6 @@ public class RuleVO {
         && Objects.equals(description, other.description)
         && Objects.equals(shortCode, other.shortCode)
         && Objects.equals(integrityVO, other.integrityVO)
-        && Objects.equals(sqlSentence, other.sqlSentence);
+        && Objects.equals(sqlSentence, other.sqlSentence) && Objects.equals(sqlCost, other.sqlCost);
   }
 }

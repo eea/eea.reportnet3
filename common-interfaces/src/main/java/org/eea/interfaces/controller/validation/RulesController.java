@@ -15,6 +15,7 @@ import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.SqlRuleVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -409,7 +410,7 @@ public interface RulesController {
    */
   @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
   List<List<ValueVO>> runSqlRule(@RequestParam("datasetId") Long datasetId,
-      @RequestParam String sqlRule, @RequestParam boolean showInternalFields);
+      @RequestBody SqlRuleVO sqlRule, @RequestParam boolean showInternalFields);
 
 
   /**
@@ -417,10 +418,9 @@ public interface RulesController {
    *
    * @param datasetId the dataset id
    * @param sqlRule the sql rule
-   * @return the string containing the SQL total cost
+   * @return the double containing the SQL total cost
    */
   @PostMapping(value = "/evaluateSqlRule")
-  String evaluateSqlRule(@RequestParam("datasetId") Long datasetId, @RequestParam String sqlRule);
-
+  Double evaluateSqlRule(@RequestParam("datasetId") Long datasetId, @RequestBody SqlRuleVO sqlRule);
 
 }

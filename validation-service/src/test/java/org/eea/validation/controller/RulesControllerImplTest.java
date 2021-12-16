@@ -10,8 +10,8 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.SqlRuleVO;
 import org.eea.validation.exception.EEAForbiddenSQLCommandException;
-import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.RulesService;
@@ -51,6 +51,7 @@ public class RulesControllerImplTest {
 
   @Mock
   private SqlRulesService sqlRulesService;
+
   /** The security context. */
   SecurityContext securityContext;
 
@@ -609,31 +610,18 @@ public class RulesControllerImplTest {
 
   @Test
   public void runSqlTest() throws EEAException {
-    rulesControllerImpl.runSqlRule(1L, "SELECT * from dataset_1.table_value", true);
+    SqlRuleVO sqlRule = new SqlRuleVO();
+    sqlRule.setSqlRule("SELECT * from dataset_1.table_value");
+    rulesControllerImpl.runSqlRule(1L, sqlRule, true);
     Mockito.verify(sqlRulesService, times(1)).runSqlRule(1L, "SELECT * from dataset_1.table_value",
         true);
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void runSqlEEAInvalidSQLExceptionTest() throws EEAException {
-    String sqlRule = "SELECTq *a WRONG SQL";
-    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule, true))
-        .thenThrow(new EEAInvalidSQLException());
-    try {
-      rulesControllerImpl.runSqlRule(1L, sqlRule, true);
-    } catch (ResponseStatusException e) {
-      assertEquals(
-          "400 BAD_REQUEST; nested exception is org.eea.validation.exception.EEAInvalidSQLException",
-          e.getMessage());
-      throw e;
-    }
-
-  }
-
-  @Test(expected = ResponseStatusException.class)
   public void runSqlEEAForbiddenSQLCommandExceptionTest() throws EEAException {
-    String sqlRule = "DELETE * FROM DATASET_396.TABLE1";
-    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule, true))
+    SqlRuleVO sqlRule = new SqlRuleVO();
+    sqlRule.setSqlRule("DELETE * FROM DATASET_396.TABLE1");
+    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule.getSqlRule(), true))
         .thenThrow(new EEAForbiddenSQLCommandException());
     try {
       rulesControllerImpl.runSqlRule(1L, sqlRule, true);
@@ -648,8 +636,10 @@ public class RulesControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void runSqlEEAExceptionTest() throws EEAException {
-    String sqlRule = "DELETE * FROM DATASET_111.TABLE1";
-    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule, true)).thenThrow(new EEAException());
+    SqlRuleVO sqlRule = new SqlRuleVO();
+    sqlRule.setSqlRule("DELETE * FROM DATASET_396.TABLE1");
+    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule.getSqlRule(), true))
+        .thenThrow(new EEAException());
     try {
       rulesControllerImpl.runSqlRule(1L, sqlRule, true);
     } catch (ResponseStatusException e) {
