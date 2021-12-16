@@ -433,6 +433,7 @@ public class DatasetSchemaControllerImplTest {
       dataSchemaControllerImpl.createEmptyDatasetSchema(1L, "datasetSchemaName");
     } catch (ResponseStatusException ex) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
+      Thread.interrupted();
       throw ex;
     }
   }
