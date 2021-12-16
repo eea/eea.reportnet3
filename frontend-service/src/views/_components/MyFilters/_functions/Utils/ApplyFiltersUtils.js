@@ -11,6 +11,10 @@ const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getT
 const applyDates = ({ filterBy, filterByKeys, item }) => {
   const filteredKeys = filterByKeys.DATE.filter(key => Object.keys(filterBy).includes(key));
 
+  if (isEmpty(filteredKeys)) {
+    return true;
+  }
+
   return filteredKeys
     .map(filteredKey => {
       const dates = filterBy[filteredKey];
