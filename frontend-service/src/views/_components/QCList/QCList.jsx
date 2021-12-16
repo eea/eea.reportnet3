@@ -568,28 +568,26 @@ export const QCList = ({
   );
 
   const sqlSentenceCostTemplate = rowData => {
-    const costColors = ['green', 'yellow', 'red'];
-
-    const getCostColor = color => {
-      if (color === 'green' && rowData.sqlSentenceCost <= config.SQL_SENTENCE_LOW_COST) {
-        return styles.greenLightSignal;
-      } else if (
-        color === 'yellow' &&
-        rowData.sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST &&
-        rowData.sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
-      ) {
-        return styles.yellowLightSignal;
-      } else if (color === 'red' && rowData.sqlSentenceCost >= config.SQL_SENTENCE_HIGH_COST) {
-        return styles.redLightSignal;
+    const getColor = cost => {
+      if (cost < config.SQL_SENTENCE_LOW_COST) {
+        return 'green';
+      } else if (cost < config.SQL_SENTENCE_HIGH_COST && cost > config.SQL_SENTENCE_LOW_COST) {
+        return 'yellow';
+      } else {
+        return 'red';
       }
     };
 
-    const renderLightSignals = () => costColors.map(color => <div className={getCostColor(color)} key={color}></div>);
-
     if (rowData.sqlSentenceCost !== 0 && !isNil(rowData.sqlSentenceCost)) {
+      const color = getColor(rowData.sqlSentenceCost);
+
       return (
         <div className={`${styles.sqlSentenceCostTemplate}`}>
-          <div className={styles.trafficLight}>{renderLightSignals()}</div>
+          <div className={styles.trafficLight}>
+            <div className={color === 'green' ? styles.greenLightSignal : ''} key="green"></div>
+            <div className={color === 'yellow' ? styles.yellowLightSignal : ''} key="yellow"></div>
+            <div className={color === 'red' ? styles.redLightSignal : ''} key="red"></div>
+          </div>
         </div>
       );
     }
