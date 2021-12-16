@@ -15,6 +15,7 @@ import { InputText } from 'views/_components/InputText';
 import { LevelError } from 'views/_components/LevelError';
 import { MultiSelect } from 'views/_components/MultiSelect';
 
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
@@ -45,6 +46,7 @@ export const MyFilters = ({
   const { filterBy, filteredData } = filters;
 
   const { userProps } = useContext(UserContext);
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [labelsAnimationDate, setLabelsAnimationDate] = useState([]);
@@ -100,7 +102,8 @@ export const MyFilters = ({
 
       return onApplyFilters({ filterBy });
     } catch (error) {
-      console.log('error :>> ', error);
+      console.error('MyFilters - applyFilters.', error);
+      notificationContext.add({ type: 'FILTER_DATA_ERROR' });
     }
   };
 
@@ -145,7 +148,7 @@ export const MyFilters = ({
 
       setFilters({ ...filters, data: data, filteredData });
     } catch (error) {
-      console.error('Filters - loadFilters :>> ', error);
+      console.error('MyFilters - loadFilters.', error);
     }
   };
 
@@ -219,7 +222,7 @@ export const MyFilters = ({
     };
 
     const inputId = uniqueId();
-    if (option.nestedOptions) return option.nestedOptions.map(option => renderDate(option));
+    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderDate(nestedOption));
 
     return (
       <div className={styles.block} key={option.key}>
@@ -265,13 +268,13 @@ export const MyFilters = ({
   };
 
   const renderDropdown = option => {
-    if (option.nestedOptions) return option.nestedOptions.map(option => renderDropdown(option));
+    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderDropdown(nestedOption));
 
     return <Dropdown />;
   };
 
   const renderInput = option => {
-    if (option.nestedOptions) return option.nestedOptions.map(option => renderInput(option));
+    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderInput(nestedOption));
 
     return (
       <div className={styles.block} key={option.key}>

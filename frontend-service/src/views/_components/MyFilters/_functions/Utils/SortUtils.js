@@ -4,8 +4,8 @@ import orderBy from 'lodash/orderBy';
 const SORT_CATEGORY = 'pinned';
 
 const applySort = ({ filteredData, order, prevSortState, sortByKey }) => {
-  const _filteredData = [...filteredData];
-  const groupedCategories = groupBy(_filteredData, SORT_CATEGORY);
+  const copyFilteredData = [...filteredData];
+  const groupedCategories = groupBy(copyFilteredData, SORT_CATEGORY);
 
   if (order === 'idle') return prevSortState;
 
