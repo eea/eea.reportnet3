@@ -115,6 +115,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
 
   const onEvaluateSqlSentence = async () => {
     try {
+      setSqlSentenceCost(0);
       setIsEvaluateSqlSentenceLoading(true);
       const { data } = await ValidationService.evaluateSqlSentence(
         datasetId,
