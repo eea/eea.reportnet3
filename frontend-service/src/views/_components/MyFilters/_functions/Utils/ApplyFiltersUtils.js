@@ -14,7 +14,6 @@ const applyDates = ({ filterBy, filterByKeys, item }) => {
   if (filteredKeys.length === 0) {
     return true;
   }
-
   return filteredKeys
     .map(filteredKey => {
       const dates = filterBy[filteredKey];
