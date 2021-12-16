@@ -362,6 +362,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         }
       });
     } catch (HibernateException e) {
+      LOG_ERROR.error("SQL is invalid: {}. Exception: {}", query, e.getMessage());
       throw new EEAInvalidSQLException(e.getCause().getMessage(), e);
     }
 
