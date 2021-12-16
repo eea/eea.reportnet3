@@ -80,18 +80,6 @@
   color: var(--main-font-color);
 }
 
-.sqlErrorMessage {
-  margin-top: 0.5rem;
-  text-align: right;
-  font-style: italic;
-  color: var(--errors);
-}
-
-.emptySqlErrorMessage {
-  margin-top: 0.5rem;
-  height: 1.2rem;
-}
-
 .trafficLight {
   display: flex;
   justify-content: space-around;
@@ -138,11 +126,6 @@
   }
 }
 
-.hasError {
-  border-color: var(--errors) !important;
-  box-shadow: var(--inputtext-box-shadow-error) !important;
-}
-
 .validationDialogMaxWidth {
   width: 90% !important;
 }
@@ -151,6 +134,32 @@
   text-align: center;
 }
 
-.errorMessage {
+.errorSectionWrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.hasError {
+  border-color: var(--errors) !important;
+  box-shadow: var(--inputtext-box-shadow-error) !important;
+}
+
+.emptySqlErrorMessage {
+  height: 1.2rem;
+}
+
+.errorSpacer {
+  min-width: 30%;
+}
+
+.sqlErrorMessage {
+  font-style: italic;
+  font-size: 0.9em;
+  color: var(--errors);
+}
+
+.emptySqlErrorMessage,
+.sqlErrorMessage {
   margin-top: 0.5em;
+  width: 66%;
 }

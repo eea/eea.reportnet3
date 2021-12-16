@@ -354,7 +354,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping("/getUsers")
+  @GetMapping("/private/getUsers")
   @ApiOperation(value = "Get all Users", response = UserRepresentationVO.class,
       responseContainer = "List", hidden = true)
   public List<UserRepresentationVO> getUsers() {
@@ -402,6 +402,11 @@ public class UserManagementControllerImpl implements UserManagementController {
   public UserRepresentationVO getUserByUserId(
       @ApiParam(value = "User id") @RequestParam("userId") String userId) {
     UserRepresentationVO userVO = null;
+    if (!(((Map<String, String>) SecurityContextHolder.getContext().getAuthentication()
+        .getDetails()).get(AuthenticationDetails.USER_ID).equals(userId))) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.USER_NOTFOUND);
+    }
     UserRepresentation user = keycloakConnectorService.getUser(userId);
     if (user != null) {
       userVO = userRepresentationMapper.entityToClass(user);

@@ -1417,11 +1417,10 @@
     "notValidSql": "This is not a valid SQL sentence",
     "runSql": "Run SQL",
     "validateSqlError": "Error validating SQL sentence",
-    "sqlSentenceCost": "SQL cost",
-    "validateSql": "Validate SQL",
+    "sqlSentenceCost": "SQL evaluation",
+    "evaluateSql": "Evaluate SQL",
     "evaluateSqlSentenceError": "Error evaluating SQL sentence",
-    "evaluateSqlSentenceFormatError": "Error evaluating SQL sentence: format not allowed. Please check SQL sentence",
-    "evaluateSqlSentenceCommandsNotAllowedError": "Error evaluating SQL sentence: there are commands not allowed in the sentence",
-    "maxWebsocketReconnectAttempsError": "Error connecting with the server. Please log out and log in to try again."
+    "maxWebsocketReconnectAttemptsError": "Error connecting with the server. Please log out and log in to try again.",
+    "filterDataError": "Error applying filters, please try again."
   }
 }
