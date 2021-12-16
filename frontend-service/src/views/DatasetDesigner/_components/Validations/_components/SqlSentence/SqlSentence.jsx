@@ -275,9 +275,10 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
           />
         </div>
       </div>
-
-      {renderErrorMessage()}
-
+      <div className={styles.errorSectionWrapper}>
+        <div className={styles.errorSpacer}></div>
+        {renderErrorMessage()}
+      </div>
       {isVisibleInfoDialog && (
         <Dialog
           header={resourcesContext.messages['sqlSentenceHelpDialogTitle']}
