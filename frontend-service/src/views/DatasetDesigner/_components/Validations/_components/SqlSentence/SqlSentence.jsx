@@ -175,7 +175,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     }
 
     return (
-      <DataTable value={sqlResponse} scrollable={true}>
+      <DataTable scrollable value={sqlResponse}>
         {columns}
       </DataTable>
     );
