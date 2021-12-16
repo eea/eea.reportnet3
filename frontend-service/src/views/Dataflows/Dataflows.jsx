@@ -430,7 +430,7 @@ const Dataflows = () => {
 
   const onUpdatePinnedStatus = ({ dataflows = [], isPinned, pinnedItem }) => {
     return dataflows.map(dataflow => {
-      let _dataflow = { ...dataflow };
+      const _dataflow = { ...dataflow };
 
       if (_dataflow.id === pinnedItem.id) _dataflow.pinned = isPinned ? 'pinned' : 'unpinned';
 
