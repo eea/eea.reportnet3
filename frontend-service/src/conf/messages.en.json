@@ -1421,6 +1421,6 @@
     "evaluateSql": "Evaluate SQL",
     "evaluateSqlSentenceError": "Error evaluating SQL sentence",
     "maxWebsocketReconnectAttemptsError": "Error connecting with the server. Please log out and log in to try again.",
-    "filterDataError": "Error applying filters, please consider applying them again."
+    "filterDataError": "Error applying filters, please try again."
   }
 }
