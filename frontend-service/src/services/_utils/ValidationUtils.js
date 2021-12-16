@@ -512,7 +512,8 @@ const parseDataValidationRulesDTO = validations => {
       relations: newRelations,
       shortCode: validationDTO.shortCode,
       sqlError: validationDTO.sqlError,
-      sqlSentence: validationDTO.sqlSentence === '' ? null : validationDTO.sqlSentence
+      sqlSentence: validationDTO.sqlSentence === '' ? null : validationDTO.sqlSentence,
+      sqlSentenceCost: validationDTO.sqlCost
     });
   });
 
