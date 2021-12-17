@@ -358,7 +358,7 @@ export const PublicCountryInformation = () => {
   const renderRedirectText = (text, url) => (
     <span>
       {text}{' '}
-      <a href={url} rel="noreferrer" target="_blank" title={text}>
+      <a href={url} rel="noopener noreferrer" target="_blank" title={text}>
         <FontAwesomeIcon
           aria-hidden={false}
           aria-label={text}
