@@ -27,6 +27,7 @@ export const createValidationReducerInitState = {
     },
     shortCode: '',
     sqlSentence: '',
+    sqlSentenceCost: 0,
     table: undefined
   },
   areRulesDisabled: true,
@@ -284,6 +285,7 @@ export const createValidationReducer = (state, { type, payload }) => {
           shortCode: payload.shortCode,
           sqlError: payload.sqlError,
           sqlSentence: payload.sqlSentence,
+          sqlSentenceCost: payload.sqlSentenceCost,
           tableFields: isNil(payload.sqlSentence) && !isNil(payload.relations) ? payload.relations.tableFields : null
         }
       };

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -25,14 +25,13 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 
 import { ErrorUtils } from 'views/_functions/Utils';
 
-export const PublicFrontpage = withRouter(({ history, match }) => {
+export const PublicFrontpage = () => {
+  const navigate = useNavigate();
+  const { errorType: urlErrorType } = useParams();
+
   const notificationContext = useContext(NotificationContext);
   const themeContext = useContext(ThemeContext);
   const [contentStyles, setContentStyles] = useState({});
-
-  const {
-    params: { errorType: urlErrorType }
-  } = match;
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_INDEX });
 
@@ -52,7 +51,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
 
   const handleRedirect = (e, target) => {
     if (e.button === 0) {
-      return history.push(target);
+      return navigate(target);
     } else if (e.button === 1) {
       window.open(target, '_blank');
     }
@@ -124,7 +123,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                     <ul>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/howto_login_reportnet3.0`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/howto_login_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           Login
@@ -132,7 +131,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                       </li>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/reporter_howto_reportnet3.0`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/reporter_howto_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           Reporter
@@ -140,7 +139,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                       </li>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/requester_howto_reportnet3.0`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/requester_howto_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           Requester
@@ -148,7 +147,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                       </li>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/webforms_howto_reportnet3.0`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/webforms_howto_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           Webforms
@@ -214,4 +213,4 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
       </div>
     </PublicLayout>
   );
-});
+};

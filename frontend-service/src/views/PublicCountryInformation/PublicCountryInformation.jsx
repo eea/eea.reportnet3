@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+
 import ReactTooltip from 'react-tooltip';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -33,10 +34,8 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
 
-export const PublicCountryInformation = withRouter(({ match, history }) => {
-  const {
-    params: { countryCode }
-  } = match;
+export const PublicCountryInformation = () => {
+  const { countryCode } = useParams();
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -54,7 +53,7 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
   const [sortField, setSortField] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
 
-  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode, history });
+  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode });
 
   useEffect(() => {
     onLoadPublicCountryInformation(sortOrder, sortField, firstRow, numberRows);
@@ -404,9 +403,9 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
               }
               rows={numberRows}
               rowsPerPageOptions={[5, 10, 15]}
+              sortable={true}
               sortField={sortField}
               sortOrder={sortOrder}
-              sortable={true}
               summary={resourcesContext.messages['dataflows']}
               totalRecords={totalRecords}
               value={dataflows}>
@@ -417,4 +416,4 @@ export const PublicCountryInformation = withRouter(({ match, history }) => {
       </div>
     </PublicLayout>
   );
-});
+};

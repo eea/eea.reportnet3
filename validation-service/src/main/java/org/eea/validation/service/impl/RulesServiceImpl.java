@@ -54,6 +54,7 @@ import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.AutomaticRules;
 import org.eea.validation.util.KieBaseManager;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,8 +217,18 @@ public class RulesServiceImpl implements RulesService {
   public RulesSchemaVO getRulesSchemaByDatasetId(String datasetSchemaId) {
     RulesSchema rulesSchema =
         rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), false);
-    RulesSchemaVO rulesVO =
-        rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
+    RulesSchemaVO rulesVO = null;
+    if (null == rulesSchema) {
+      rulesSchema = null;
+    } else {
+      for (Rule rule : rulesSchema.getRules()) {
+        if (null != rule.getAutomaticType()
+            && AutomaticRuleTypeEnum.FIELD_SQL_TYPE.equals(rule.getAutomaticType())) {
+          rule.setSqlSentence(null);
+        }
+      }
+      rulesVO = rulesSchemaMapper.entityToClass(rulesSchema);
+    }
     setIntegrityIntoVO(rulesSchema, rulesVO);
     return rulesVO;
   }
@@ -232,6 +243,7 @@ public class RulesServiceImpl implements RulesService {
   public RulesSchemaVO getActiveRulesSchemaByDatasetId(String datasetSchemaId) {
     RulesSchema rulesSchema =
         rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), true);
+
     RulesSchemaVO rulesVO =
         rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
     setIntegrityIntoVO(rulesSchema, rulesVO);
@@ -409,6 +421,14 @@ public class RulesServiceImpl implements RulesService {
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
+
+    if (rule.getSqlSentence() != null) {
+      try {
+        rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
+      } catch (ParseException | EEAException e) {
+        rule.setSqlCost(null);
+      }
+    }
 
     if (null == ruleVO.getWhenCondition()) {
       rulesWhenConditionNull(datasetId, ruleVO, datasetSchemaId, rule);
@@ -624,9 +644,15 @@ public class RulesServiceImpl implements RulesService {
               new ObjectId(referenceId)) == null) {
             shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
             document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
+            // Validate Geometry
             ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckGeometries(datasetId,
                 document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
-                "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
+                "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData));
+            // ST_Transform
+            shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
+            ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckSTtransform(datasetId,
+                document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
+                "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData));
           }
           break;
         default:
@@ -751,6 +777,14 @@ public class RulesServiceImpl implements RulesService {
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
+
+    if (rule.getSqlSentence() != null) {
+      try {
+        rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
+      } catch (ParseException | EEAException e) {
+        rule.setSqlCost(null);
+      }
+    }
 
     if (null == ruleVO.getWhenCondition()) {
       ruleWhenCondtionUpdateNull(datasetId, ruleVO, datasetSchemaId, rule);

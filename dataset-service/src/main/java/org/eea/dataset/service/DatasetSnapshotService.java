@@ -51,6 +51,7 @@ public interface DatasetSnapshotService {
    * @param createSnapshotVO the create snapshot VO
    * @param partitionIdDestination the partition id destination
    * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    */
   void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO, Long partitionIdDestination,
       String dateRelease, boolean prefillingReference);

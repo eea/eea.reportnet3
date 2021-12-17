@@ -17,10 +17,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -108,6 +111,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
   /** The Constant FILE_PATTERN_NAME: {@value}. */
   private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
+
+  /** The Constant FILE_CLONE_PATTERN_NAME: {@value}. */
+  private static final String FILE_CLONE_PATTERN_NAME = "clone_%s_to_%s%s";
 
   /** The Constant GRANT_ALL_PRIVILEGES_ON_SCHEMA: {@value}. */
   private static final String GRANT_ALL_PRIVILEGES_ON_SCHEMA =
@@ -561,6 +567,189 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
     }
   }
+
+  /**
+   * Creates the snapshot to clone.
+   *
+   * @param originDataset the origin dataset
+   * @param targetDataset the target dataset
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param partitionDatasetTarget the partition dataset target
+   * @param tableSchemasIdPrefill the table schemas id prefill
+   */
+  @Override
+  @Async
+  public void createSnapshotToClone(Long originDataset, Long targetDataset,
+      Map<String, String> dictionaryOriginTargetObjectId, Long partitionDatasetTarget,
+      List<String> tableSchemasIdPrefill) {
+
+    LOG.info(
+        "Copying the data from the dataset {} to dataset {} because this is a cloning process and there are tables to prefill",
+        originDataset, targetDataset);
+    String nameFileRecordValue = pathSnapshot + String.format(FILE_CLONE_PATTERN_NAME,
+        originDataset, targetDataset, LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
+
+    String nameFileFieldValue = pathSnapshot + String.format(FILE_CLONE_PATTERN_NAME, originDataset,
+        targetDataset, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+
+    String nameFileAttachmentValue = pathSnapshot + String.format(FILE_CLONE_PATTERN_NAME,
+        originDataset, targetDataset, LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+
+    ConnectionDataVO connectionDataVO =
+        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + originDataset);
+
+    // Extract the data from the prefilled tables in the origin dataset
+    try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+        connectionDataVO.getUser(), connectionDataVO.getPassword())) {
+
+      CopyManager cm = new CopyManager((BaseConnection) con);
+      StringBuilder builder = new StringBuilder();
+      String placeHolders = "";
+      for (int i = 0; i < tableSchemasIdPrefill.size(); i++) {
+        builder.append("'" + tableSchemasIdPrefill.get(i) + "',");
+      }
+      placeHolders = builder.deleteCharAt(builder.length() - 1).toString();
+
+      String copyQueryRecord = "COPY (SELECT rv.id, rv.id_record_schema, rv.id_table, "
+          + partitionDatasetTarget + ", rv.data_provider_code FROM dataset_" + originDataset
+          + ".record_value rv, dataset_" + originDataset + ".table_value tv "
+          + "WHERE rv.id_table=tv.id and tv.id_table_schema in (" + placeHolders + ")) to STDOUT";
+      String copyQueryField =
+          "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
+              + originDataset + ".field_value fv, dataset_" + originDataset
+              + ".record_value rv, dataset_" + originDataset + ".table_value tv"
+              + " WHERE fv.id_record = rv.id and rv.id_table=tv.id" + " and tv.id_table_schema in ("
+              + placeHolders + ")) to STDOUT";
+      String copyQueryAttachment =
+          "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
+              + originDataset + ".attachment_value at, dataset_" + originDataset
+              + ".field_value fv, dataset_" + originDataset + ".record_value rv, dataset_"
+              + originDataset + ".table_value tv "
+              + "WHERE at.field_value_id =fv.id and fv.id_record = rv.id and rv.id_table=tv.id"
+              + " and tv.id_table_schema in (" + placeHolders + ")) to STDOUT";
+
+      // Copy record_value
+      printToFile(nameFileRecordValue, copyQueryRecord, cm);
+      // Copy field_value
+      printToFile(nameFileFieldValue, copyQueryField, cm);
+      // Copy attachment_value
+      printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
+
+      modifySnapshotFile(dictionaryOriginTargetObjectId,
+          Arrays.asList(nameFileRecordValue, nameFileFieldValue, nameFileAttachmentValue));
+
+    } catch (SQLException | IOException e) {
+      LOG_ERROR.error("Error creating the data from the origin dataset {}", originDataset, e);
+      deleteFile(Arrays.asList(nameFileRecordValue, nameFileFieldValue, nameFileAttachmentValue));
+    }
+
+    // Copy the data from the snapshot file into the target dataset
+    ConnectionDataVO conexion =
+        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + targetDataset);
+    try (
+        Connection con = DriverManager.getConnection(conexion.getConnectionString(),
+            conexion.getUser(), conexion.getPassword());
+        Statement stmt = con.createStatement()) {
+      con.setAutoCommit(true);
+      CopyManager cm = new CopyManager((BaseConnection) con);
+
+      String copyQueryRecord = COPY_DATASET + targetDataset
+          + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
+      copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
+
+      String copyQueryField = COPY_DATASET + targetDataset
+          + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+      copyFromFile(copyQueryField, nameFileFieldValue, cm);
+
+      String copyQueryAttachment = COPY_DATASET + targetDataset
+          + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
+      copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
+
+    } catch (SQLException | IOException e) {
+      LOG_ERROR.error("Error restoring the data into the target dataset {}", targetDataset, e);
+    } finally {
+      // Deleting the snapshot files after copy
+      deleteFile(Arrays.asList(nameFileRecordValue, nameFileFieldValue, nameFileAttachmentValue));
+      LOG.info("Process copying the data prefilled from the dataset {} to dataset {} finished",
+          originDataset, targetDataset);
+    }
+  }
+
+
+  /**
+   * Modify snapshot file.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param nameFiles the name files
+   */
+  private void modifySnapshotFile(Map<String, String> dictionaryOriginTargetObjectId,
+      List<String> nameFiles) {
+
+    if (!CollectionUtils.isEmpty(nameFiles)) {
+      nameFiles.stream().forEach(f -> {
+
+        Path pathFile = Paths.get(f);
+        List<String> replaced = new ArrayList<>();
+
+        // for (Map.Entry<String, String> entry : dictionaryOriginTargetObjectId.entrySet()) {
+        try (Stream<String> lines = Files.lines(pathFile)) {
+          // replaced = lines.map(line -> line.replace(entry.getKey(), entry.getValue()))
+          // .collect(Collectors.toList());
+          replaced =
+              lines.map(line -> line = modifyingLine(dictionaryOriginTargetObjectId, line, f))
+                  .collect(Collectors.toList());
+          Files.write(pathFile, replaced);
+        } catch (IOException e) {
+          LOG_ERROR.error("Error modifying the file {} during the data copy in cloning process", f);
+        }
+        // }
+      });
+    }
+  }
+
+  /**
+   * Modifying line.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param line the line
+   * @param fileName the file name
+   * @return the string
+   */
+  private String modifyingLine(Map<String, String> dictionaryOriginTargetObjectId, String line,
+      String fileName) {
+
+    String[] lineSplitted = line.split("\t");
+
+    if (fileName.contains("RecordValue")) {
+      String recordSchema = lineSplitted[1];
+      line = line.replace(recordSchema, dictionaryOriginTargetObjectId.get(recordSchema));
+    }
+    if (fileName.contains("FieldValue")) {
+      String fieldSchema = lineSplitted[3];
+      line = line.replace(fieldSchema, dictionaryOriginTargetObjectId.get(fieldSchema));
+    }
+    return line;
+  }
+
+  /**
+   * Delete file.
+   *
+   * @param fileNames the file names
+   */
+  private void deleteFile(List<String> fileNames) {
+
+    if (!CollectionUtils.isEmpty(fileNames)) {
+      fileNames.stream().forEach(f -> {
+        try {
+          Path path1 = Paths.get(f);
+          Files.deleteIfExists(path1);
+        } catch (IOException e) {
+          LOG_ERROR.error("Error deleting the file {} during the data copy in cloning process", f);
+        }
+      });
+    }
+  }
+
 
   /**
    * Removes the locks related to populate EU.

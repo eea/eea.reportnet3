@@ -175,6 +175,62 @@ public class DataflowControllerImplTest {
     assertEquals("fail", dataflowVO, dataflowControllerImpl.findById(1L, null));
   }
 
+  @Test
+  public void testFindByIdObserver() throws EEAException {
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities
+        .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_OBSERVER.getAccessRole(1L)));
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    doReturn(authorities).when(authentication).getAuthorities();
+    when(dataflowService.getById(Mockito.anyLong(), Mockito.anyBoolean())).thenReturn(dataflowVO);
+    assertEquals("fail", dataflowVO, dataflowControllerImpl.findById(1L, null));
+  }
+
+  @Test
+  public void testFindByIdSteward() throws EEAException {
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities
+        .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(1L)));
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    doReturn(authorities).when(authentication).getAuthorities();
+    when(dataflowService.getById(Mockito.anyLong(), Mockito.anyBoolean())).thenReturn(dataflowVO);
+    assertEquals("fail", dataflowVO, dataflowControllerImpl.findById(1L, null));
+  }
+
+  @Test
+  public void testFindByIdAdmin() throws EEAException {
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    doReturn(authorities).when(authentication).getAuthorities();
+    when(dataflowService.getById(Mockito.anyLong(), Mockito.anyBoolean())).thenReturn(dataflowVO);
+    assertEquals("fail", dataflowVO, dataflowControllerImpl.findById(1L, null));
+  }
+
+  @Test
+  public void testFindByIdIsNotUserRequester() throws EEAException {
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("ROLE"));
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    doReturn(authorities).when(authentication).getAuthorities();
+    assertEquals("fail", null, dataflowControllerImpl.findById(1L, null));
+  }
 
   /**
    * Test find by id legacy.
@@ -301,78 +357,6 @@ public class DataflowControllerImplTest {
         dataflowService.getCompleted(Mockito.any(), Mockito.any()));
   }
 
-
-
-  /**
-   * Adds the contributor.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void addContributor() throws EEAException {
-    Mockito.doNothing().when(dataflowService).addContributorToDataflow(Mockito.any(),
-        Mockito.any());
-
-    dataflowControllerImpl.addContributor(Mockito.any(), Mockito.any());
-    Mockito.verify(dataflowService, times(1)).addContributorToDataflow(Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
-   * Adds the contributor throws.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void addContributorThrows() throws EEAException {
-
-    doThrow(new EEAException()).when(dataflowService).addContributorToDataflow(Mockito.any(),
-        Mockito.any());
-
-
-    try {
-      dataflowControllerImpl.addContributor(Mockito.any(), Mockito.any());
-    } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, ex.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-      throw ex;
-    }
-  }
-
-  /**
-   * Removes the contributor.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void removeContributor() throws EEAException {
-    Mockito.doNothing().when(dataflowService).removeContributorFromDataflow(Mockito.any(),
-        Mockito.any());
-
-    dataflowControllerImpl.removeContributor(Mockito.any(), Mockito.any());
-    Mockito.verify(dataflowService, times(1)).removeContributorFromDataflow(Mockito.any(),
-        Mockito.any());
-  }
-
-  /**
-   * Removes the contributor throws.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = ResponseStatusException.class)
-  public void removeContributorThrows() throws EEAException {
-    doThrow(new EEAException()).when(dataflowService).removeContributorFromDataflow(Mockito.any(),
-        Mockito.any());
-
-    try {
-      dataflowControllerImpl.removeContributor(Mockito.any(), Mockito.any());
-    } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, ex.getReason());
-      assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-      throw ex;
-    }
-  }
-
   /**
    * Creates the data flow throw.
    *
@@ -407,6 +391,48 @@ public class DataflowControllerImplTest {
     ResponseEntity<?> value = dataflowControllerImpl.createDataFlow(dataflowVO);
     assertEquals(EEAErrorMessage.UNAUTHORIZED, value.getBody());
     assertEquals(HttpStatus.UNAUTHORIZED, value.getStatusCode());
+  }
+
+  @Test
+  public void createDataFlowAdminThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setType(TypeDataflowEnum.BUSINESS);
+    Mockito.when(dataflowService.isAdmin()).thenReturn(true);
+    ResponseEntity<?> value = dataflowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+  }
+
+  @Test
+  public void createDataFlowReferenceThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    ResponseEntity<?> value = dataflowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+  }
+
+  @Test
+  public void createDataFlowEqualDateThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setType(TypeDataflowEnum.REPORTING);
+    Date date = new Date();
+    date.setTime(date.getTime());
+    dataflowVO.setDeadlineDate(date);
+    ResponseEntity<?> value = dataflowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.DATE_AFTER_INCORRECT, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+  }
+
+  @Test
+  public void createDataFlowDescriptionEmptyThrow() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setType(TypeDataflowEnum.REPORTING);
+    dataflowVO.setName("name");
+    // dataflowVO.setDescription("desc");
+    ResponseEntity<?> value = dataflowControllerImpl.createDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
   }
 
   /**
@@ -651,7 +677,22 @@ public class DataflowControllerImplTest {
     assertEquals(EEAErrorMessage.EXISTING_REPRESENTATIVES, value.getBody());
   }
 
-
+  @Test
+  public void updateFlowReferenceTest() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    dataflowVO.setObligation(obligation);
+    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    doNothing().when(dataflowService).updateDataFlow(dataflowVO);
+    dataflowControllerImpl.updateDataFlow(dataflowVO);
+    Mockito.verify(dataflowService, times(1)).updateDataFlow(dataflowVO);
+  }
 
   /**
    * Test get metabase by id.

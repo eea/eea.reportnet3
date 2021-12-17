@@ -19,6 +19,7 @@ export const ExpressionSelector = ({
   componentName,
   creationFormState,
   dataflowType,
+  datasetId,
   onAddNewExpression,
   onAddNewExpressionIf,
   onAddNewExpressionThen,
@@ -167,11 +168,11 @@ export const ExpressionSelector = ({
           onExpressionIfFieldUpdate={onExpressionIfFieldUpdate}
           onExpressionIfGroup={onExpressionIfGroup}
           onExpressionIfMarkToGroup={onExpressionIfMarkToGroup}
+          onExpressionsErrors={onExpressionsErrors}
           onExpressionThenDelete={onExpressionThenDelete}
           onExpressionThenFieldUpdate={onExpressionThenFieldUpdate}
           onExpressionThenGroup={onExpressionThenGroup}
           onExpressionThenMarkToGroup={onExpressionThenMarkToGroup}
-          onExpressionsErrors={onExpressionsErrors}
           onGetFieldType={onGetFieldType}
           tabsChanges={tabsChanges}
         />
@@ -183,6 +184,7 @@ export const ExpressionSelector = ({
         <SqlSentence
           creationFormState={creationFormState}
           dataflowType={dataflowType}
+          datasetId={datasetId}
           level={validationContext.level}
           onSetSqlSentence={onSetSqlSentence}
         />

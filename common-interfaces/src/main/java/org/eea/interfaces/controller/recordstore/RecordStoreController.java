@@ -151,4 +151,22 @@ public interface RecordStoreController {
    */
   @PutMapping("/private/refreshMaterializedView")
   void refreshMaterializedView(@RequestParam("datasetId") Long datasetId);
+
+
+  /**
+   * Clone data.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param originDataset the origin dataset
+   * @param targetDataset the target dataset
+   * @param partitionDatasetTarget the partition dataset target
+   * @param tableSchemasIdPrefill the table schemas id prefill
+   */
+  @PutMapping("/private/cloneData/origin/{originDataset}/target/{targetDataset}")
+  void cloneData(@RequestBody Map<String, String> dictionaryOriginTargetObjectId,
+      @PathVariable("originDataset") Long originDataset,
+      @PathVariable("targetDataset") Long targetDataset,
+      @RequestParam("partitionDatasetTarget") Long partitionDatasetTarget,
+      @RequestParam("tableSchemasId") List<String> tableSchemasIdPrefill);
+
 }

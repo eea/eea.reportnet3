@@ -1,3 +1,5 @@
+@import '_styles/mixins';
+
 body .p-component {
   font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
   font-size: 14px;
@@ -2306,38 +2308,56 @@ body .p-dialog {
   -webkit-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
   -moz-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
   box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
+  border-radius: 5px;
 }
 body .p-dialog .p-dialog-titlebar {
+  display: flex;
+  justify-content: space-between;
   border: var(--dialog-header-border);
   background-color: var(--dialog-header-bg);
-  color: var(--dialog-header-color);
-  padding: 1em;
+  color: var(--sidebar-title-color);
+  padding: 1.2rem 1.5em;
   font-weight: 700;
+  word-break: break-all;
   border-bottom: 0 none;
+  border-radius: 5px 5px 0 0;
 }
 body .p-dialog .p-dialog-titlebar .p-dialog-title {
   margin: 0;
   float: none;
   font-weight: 700;
+  color: var(--sidebar-title-color);
+  font-size: 1.2rem;
 }
 body .p-dialog .p-dialog-titlebar .p-dialog-titlebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--dialog-header-icon-color);
   border: 0 none;
   padding: 0;
-  margin-left: 0.5em;
+  margin-left: 1em;
   -moz-transition: color 0.2s, box-shadow 0.2s;
   -o-transition: color 0.2s, box-shadow 0.2s;
   -webkit-transition: color 0.2s, box-shadow 0.2s;
   transition: color 0.2s, box-shadow 0.2s;
+  border-radius: 50%;
+  padding: 5px;
+  background-color: var(--dialog-header-bg-icon-color);
+
+  span {
+    font-size: 1.2em;
+  }
 }
 body .p-dialog .p-dialog-titlebar .p-dialog-titlebar-icon:hover {
   color: var(--dialog-header-icon-color-hover);
+  background-color: var(--dialog-header-bg-icon-hover);
 }
 body .p-dialog .p-dialog-content {
   background-color: var(--dialog-content-bg);
   color: var(--dialog-content-color);
   border: var(--dialog-content-border);
-  padding: 1em;
+  padding: 1em 1.5em;
   max-height: 90vh;
   overflow: auto;
 }
@@ -2350,6 +2370,7 @@ body .p-dialog .p-dialog-footer {
   padding: 0.571em 1em;
   margin: 0;
   text-align: right;
+  border-radius: 0 0 5px 5px;
 }
 body .p-dialog .p-dialog-footer button {
   margin: 0 0.5em 0 0;
@@ -3221,4 +3242,8 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
   position: relative;
   background-color: var(--chart-bg);
   color: var(--chart-color);
+}
+
+.responsiveDialog {
+  @include responsiveDialog;
 }

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -19,13 +19,15 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { EuroFlag } from './_components/EuroFlag';
 
-export const PublicCountries = withRouter(({ history }) => {
+export const PublicCountries = () => {
+  const navigate = useNavigate();
+
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
   const [contentStyles, setContentStyles] = useState({});
 
-  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRIES, history });
+  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRIES });
 
   useEffect(() => {
     if (!themeContext.headerCollapse) {
@@ -46,7 +48,7 @@ export const PublicCountries = withRouter(({ history }) => {
       e.preventDefault();
       const url = getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true);
       if (e.button === 0) {
-        history.push(url);
+        navigate(url);
       } else if (e.button === 1) {
         window.open(url, 'blank');
       }
@@ -100,4 +102,4 @@ export const PublicCountries = withRouter(({ history }) => {
       </div>
     </PublicLayout>
   );
-});
+};

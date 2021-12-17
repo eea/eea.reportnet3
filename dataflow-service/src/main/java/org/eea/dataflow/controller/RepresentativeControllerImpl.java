@@ -71,6 +71,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * @return the long
    */
   @Override
+  @LockMethod
   @HystrixCommand
   @PostMapping("/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
@@ -634,9 +635,20 @@ public class RepresentativeControllerImpl implements RepresentativeController {
           required = true) Long dataProviderId,
       @ApiParam(value = "Should the representative be restricted to public view?", required = true,
           defaultValue = "false") @RequestParam(value = "restrictFromPublic", required = true,
-              defaultValue = "false") Boolean restrictFromPublic) {
-    representativeService.updateRepresentativeVisibilityRestrictions(dataflowId, dataProviderId,
-        restrictFromPublic);
+              defaultValue = "true") Boolean restrictFromPublic) {
+    try {
+      if (representativeService.checkDataHaveBeenRelease(dataflowId, dataProviderId)
+          && representativeService.checkRestrictFromPublic(dataflowId, dataProviderId)) {
+        representativeService.updateRepresentativeVisibilityRestrictions(dataflowId, dataProviderId,
+            restrictFromPublic);
+      } else {
+        LOG_ERROR.info(
+            "Error, you can't change the restrict from public value for the representative with dataflowId {} and dataProviderId {}",
+            dataflowId, dataProviderId);
+      }
+    } catch (EEAException e) {
+      LOG_ERROR.info("Error: {}", e.getMessage());
+    }
   }
 
 }

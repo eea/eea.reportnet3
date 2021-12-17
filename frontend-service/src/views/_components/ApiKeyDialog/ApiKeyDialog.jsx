@@ -11,16 +11,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { DataflowService } from 'services/DataflowService';
 import { TooltipUtils } from 'views/_functions/Utils/TooltipUtils';
 
-const ApiKeyDialog = ({
-  dataflowId,
-  dataProviderId,
-  isApiKeyDialogVisible,
-  isCustodian,
-  manageDialogs,
-  match: {
-    params: { representativeId }
-  }
-}) => {
+const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCustodian, manageDialogs }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [apiKey, setApiKey] = useState('');
@@ -138,8 +129,7 @@ const ApiKeyDialog = ({
                   {resourcesContext.messages['dataflow']}: <strong>{dataflowId} </strong>
                 </span>
                 <span className={styles.ids_label} style={{ display: isCustodian ? 'none' : '' }}>
-                  {resourcesContext.messages['apiKeyDataProviderIdLabel']}:{' '}
-                  <strong>{representativeId ? representativeId : dataProviderId} </strong>
+                  {resourcesContext.messages['apiKeyDataProviderIdLabel']}: <strong>{dataProviderId}</strong>
                 </span>
               </p>
             </div>

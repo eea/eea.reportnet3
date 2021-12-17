@@ -658,9 +658,9 @@ export const BigButtonList = ({
           onHide={() => setIsHistoricReleasesDialogVisible(false)}
           visible={isHistoricReleasesDialogVisible}>
           <HistoricReleases
-            dataProviderId={providerId}
             dataflowId={dataflowId}
             dataflowType={dataflowType}
+            dataProviderId={providerId}
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
           />

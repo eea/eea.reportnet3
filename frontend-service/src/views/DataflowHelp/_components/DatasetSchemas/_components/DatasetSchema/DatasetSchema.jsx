@@ -379,7 +379,7 @@ const DatasetSchema = ({
         return (
           <a
             href="https://geojsonlint.com/"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             target="_blank"
             title={resourcesContext.messages['geomTypeHelpTooltip']}>
             <FontAwesomeIcon

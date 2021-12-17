@@ -96,6 +96,7 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
             componentName={componentName}
             creationFormState={creationFormState}
             dataflowType={dataflowType}
+            datasetId={datasetId}
             onAddNewExpression={onAddNewExpression}
             onAddNewExpressionIf={onAddNewExpressionIf}
             onAddNewExpressionThen={onAddNewExpressionThen}
@@ -107,12 +108,12 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
             onExpressionIfGroup={onExpressionIfGroup}
             onExpressionIfMarkToGroup={onExpressionIfMarkToGroup}
             onExpressionMarkToGroup={onExpressionMarkToGroup}
+            onExpressionsErrors={onExpressionsErrors}
             onExpressionThenDelete={onExpressionThenDelete}
             onExpressionThenFieldUpdate={onExpressionThenFieldUpdate}
             onExpressionThenGroup={onExpressionThenGroup}
             onExpressionThenMarkToGroup={onExpressionThenMarkToGroup}
             onExpressionTypeToggle={onExpressionTypeToggle}
-            onExpressionsErrors={onExpressionsErrors}
             onGetFieldType={onGetFieldType}
             onSetSqlSentence={onSetSqlSentence}
             tabsChanges={tabsChanges}

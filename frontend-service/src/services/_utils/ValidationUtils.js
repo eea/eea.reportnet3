@@ -512,7 +512,8 @@ const parseDataValidationRulesDTO = validations => {
       relations: newRelations,
       shortCode: validationDTO.shortCode,
       sqlError: validationDTO.sqlError,
-      sqlSentence: validationDTO.sqlSentence === '' ? null : validationDTO.sqlSentence
+      sqlSentence: validationDTO.sqlSentence === '' ? null : validationDTO.sqlSentence,
+      sqlSentenceCost: validationDTO.sqlCost
     });
   });
 
@@ -549,6 +550,21 @@ const parseRowExpressionFromDTO = expression => {
 const createValidation = (entityType, id, levelError, message) =>
   new Validation({ date: new Date(Date.now()).toString(), entityType, id, levelError, message });
 
+const parseSqlValidation = rows => {
+  const flattenArray = rows.flat();
+
+  if (isNil(flattenArray) || isEmpty(flattenArray)) {
+    return flattenArray;
+  }
+
+  return rows.map(row =>
+    row.reduce((prev, curr) => {
+      prev[`${curr.table}*${curr.label}`] = curr.value;
+      return prev;
+    }, {})
+  );
+};
+
 export const ValidationUtils = {
   createValidation,
   getComparisonExpression,
@@ -563,5 +579,6 @@ export const ValidationUtils = {
   parseDatasetRelationFromDTO,
   parseDataValidationRulesDTO,
   parseExpressionFromDTO,
-  parseRowExpressionFromDTO
+  parseRowExpressionFromDTO,
+  parseSqlValidation
 };
