@@ -20,6 +20,8 @@ import { ValidationService } from 'services/ValidationService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { useWindowSize } from 'views/_functions/Hooks/useWindowSize';
+
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level, onSetSqlSentence }) => {
@@ -28,14 +30,18 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
 
   const [columns, setColumns] = useState();
   const [hasValidationError, setHasValidationError] = useState(false);
-  const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isEvaluateSqlSentenceLoading, setIsEvaluateSqlSentenceLoading] = useState(false);
+  const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isValidatingQuery, setIsValidatingQuery] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
   const [isVisibleSqlSentenceValidationDialog, setIsVisibleSqlSentenceValidationDialog] = useState(false);
   const [sqlResponse, setSqlResponse] = useState(null);
   const [sqlSentenceCost, setSqlSentenceCost] = useState(0);
   const [validationErrorMessage, setValidationErrorMessage] = useState('');
+
+  const [windowWidth] = useWindowSize();
+
+  const minimumColumnWidth = 200;
 
   useEffect(() => {
     if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
@@ -85,7 +91,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     const columnData = Object.keys(firstRow).map(key => ({ field: key, header: key.replace('*', '.') }));
 
     return columnData.map(col => (
-      <Column field={col.field} header={col.header} key={col.field} style={{ minWidth: '150px' }} />
+      <Column field={col.field} header={col.header} key={col.field} style={{ minWidth: `${minimumColumnWidth}px` }} />
     ));
   };
 
@@ -169,13 +175,24 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     }
   };
 
+  const getTableWidth = () => {
+    const minTableSize = windowWidth - 100;
+    const allColumnsWidth = columns.length * minimumColumnWidth;
+
+    if (allColumnsWidth < minTableSize) {
+      return '100%';
+    } else {
+      return `${allColumnsWidth}px`;
+    }
+  };
+
   const generateValidationDialogContent = () => {
     if (columns.length === 0) {
       return <h3 className={styles.noDataMessage}>{resourcesContext.messages['noData']}</h3>;
     }
 
     return (
-      <DataTable scrollable value={sqlResponse}>
+      <DataTable style={{ width: `${getTableWidth()}` }} value={sqlResponse}>
         {columns}
       </DataTable>
     );
