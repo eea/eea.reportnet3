@@ -1,15 +1,23 @@
 package org.eea.ums.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -30,6 +38,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -49,6 +58,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The Class UserManagementControllerImpl.
@@ -56,6 +66,7 @@ import io.swagger.annotations.ApiResponse;
 @RestController
 @RequestMapping("/user")
 @Api(tags = "Users Management : Users Management  Manager")
+@ApiIgnore
 public class UserManagementControllerImpl implements UserManagementController {
 
   /**
@@ -85,10 +96,15 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Autowired
   private UserRoleService userRoleService;
 
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
+
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  private static final Logger LOG = LoggerFactory.getLogger(UserManagementControllerImpl.class);
 
   /**
    * The Constant ERROR_ADDING_CONTRIBUTOR.
@@ -108,7 +124,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PostMapping("/generateToken")
   @ApiOperation(value = "Generate an Access Token (valid only for 5 minutes)",
-      response = TokenVO.class)
+      response = TokenVO.class, hidden = true)
   public TokenVO generateToken(
       @ApiParam(value = "User Name") @RequestParam("username") String username,
       @ApiParam(value = "User Password") @RequestParam("password") String password) {
@@ -126,7 +142,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PostMapping("/generateTokenByCode")
   @ApiOperation(value = "Generate an Access Token based on a Keycloak's Code",
-      response = TokenVO.class)
+      response = TokenVO.class, hidden = true)
   public TokenVO generateToken(@ApiParam(value = "Code") @RequestParam("code") String code) {
     return securityProviderInterfaceService.doLogin(code);
   }
@@ -141,7 +157,8 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @PostMapping("/refreshToken")
-  @ApiOperation(value = "Refresh an Access Token by Refresh Token", response = TokenVO.class)
+  @ApiOperation(value = "Refresh an Access Token by Refresh Token", response = TokenVO.class,
+      hidden = true)
   public TokenVO refreshToken(
       @ApiParam(value = "Refresh Token") @RequestParam("refreshToken") String refreshToken) {
     return securityProviderInterfaceService.refreshToken(refreshToken);
@@ -159,7 +176,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/checkAccess")
-  @ApiOperation(value = "Check Resource Permission", response = Boolean.class)
+  @ApiOperation(value = "Check Resource Permission", response = Boolean.class, hidden = true)
   public Boolean checkResourceAccessPermission(
       @ApiParam(value = "Resource Name") @RequestParam("resource") String resource, @ApiParam(
           value = "Access Scope Enum Array") @RequestParam("scopes") AccessScopeEnum[] scopes) {
@@ -176,7 +193,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources")
   @ApiOperation(value = "Get logged User's Resources", response = ResourceAccessVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<ResourceAccessVO> getResourcesByUser() {
     // Recover user id from Security context
     Map<String, String> details =
@@ -200,7 +217,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources_by_type")
   @ApiOperation(value = "Get logged User's Resources by their Types",
-      response = ResourceAccessVO.class, responseContainer = "List")
+      response = ResourceAccessVO.class, responseContainer = "List", hidden = true)
   public List<ResourceAccessVO> getResourcesByUser(@ApiParam(
       value = "Resource Type Enum") @RequestParam("resourceType") ResourceTypeEnum resourceType) {
     return getResourcesByUser().stream()
@@ -220,7 +237,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources_by_role")
   @ApiOperation(value = "Get logged User's Resources by User Security Role",
-      response = ResourceAccessVO.class, responseContainer = "List")
+      response = ResourceAccessVO.class, responseContainer = "List", hidden = true)
   public List<ResourceAccessVO> getResourcesByUser(@ApiParam(
       value = "Security Role Enum") @RequestParam("securityRole") SecurityRoleEnum securityRole) {
     return getResourcesByUser().stream().filter(resource -> resource.getRole().equals(securityRole))
@@ -240,7 +257,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources_by_type_role")
   @ApiOperation(value = "Get logged User's Resources by Type and Security Role",
-      response = ResourceAccessVO.class, responseContainer = "List")
+      response = ResourceAccessVO.class, responseContainer = "List", hidden = true)
   public List<ResourceAccessVO> getResourcesByUser(
       @ApiParam(
           value = "Resource Type Enum") @RequestParam("resourceType") ResourceTypeEnum resourceType,
@@ -257,7 +274,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @PostMapping("/logout")
-  @ApiOperation(value = "Logout a User")
+  @ApiOperation(value = "Logout a User", hidden = true)
   public void doLogOut(
       @ApiParam(value = "RefreshToken") @RequestParam("refreshToken") String refreshToken) {
     securityProviderInterfaceService.doLogout(refreshToken);
@@ -272,7 +289,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_user_to_resource")
-  @ApiOperation(value = "Add one Resource for the logged User")
+  @ApiOperation(value = "Add one Resource for the logged User", hidden = true)
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
   public void addUserToResource(@RequestParam("idResource") Long idResource,
       @RequestParam("resourceGroup") ResourceGroupEnum resourceGroupEnum) {
@@ -300,7 +317,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/test-security")
-  @ApiOperation(value = "Test Secured Service", response = String.class)
+  @ApiOperation(value = "Test Secured Service", response = String.class, hidden = true)
   public String testSecuredService(
       @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
       @ApiParam(value = "Data provider id",
@@ -317,10 +334,10 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @PostMapping("/createUsers")
-  @ApiOperation(value = "Create Users By File")
+  @ApiOperation(value = "Create Users By File", hidden = true)
   @ApiResponse(code = 500, message = "Internal Server Error")
-  public void createUsers(@ApiParam(value = "File with users",
-      type = "MultipartFile") @RequestBody MultipartFile file) {
+  public void createUsers(@ApiParam(value = "File with users", type = "MultipartFile",
+      hidden = true) @RequestBody MultipartFile file) {
     try {
       backupManagmentControlerService.readAndSaveUsers(file.getInputStream());
     } catch (IOException e) {
@@ -339,7 +356,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getUsers")
   @ApiOperation(value = "Get all Users", response = UserRepresentationVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<UserRepresentationVO> getUsers() {
     UserRepresentation[] a = keycloakConnectorService.getUsers();
     ArrayList<UserRepresentation> arrayList = new ArrayList<>(Arrays.asList(a));
@@ -357,7 +374,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getUserByEmail")
-  @ApiOperation(value = "Get Users by Email", response = UserRepresentationVO.class)
+  @ApiOperation(value = "Get Users by Email", response = UserRepresentationVO.class, hidden = true)
   public UserRepresentationVO getUserByEmail(
       @ApiParam(value = "User Email") @RequestParam("email") String email) {
     UserRepresentationVO user = null;
@@ -381,7 +398,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getUserByUserId")
-  @ApiOperation(value = "Get Users by Id", response = UserRepresentationVO.class)
+  @ApiOperation(value = "Get Users by Id", response = UserRepresentationVO.class, hidden = true)
   public UserRepresentationVO getUserByUserId(
       @ApiParam(value = "User id") @RequestParam("userId") String userId) {
     UserRepresentationVO userVO = null;
@@ -401,7 +418,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @PutMapping("/updateAttributes")
-  @ApiOperation(value = "Update User Attributes")
+  @ApiOperation(value = "Update User Attributes", hidden = true)
   @ApiResponse(code = 500, message = EEAErrorMessage.USER_NOTFOUND)
   public void updateUserAttributes(@ApiParam(value = "Map with Attributes",
       type = "Map<String, List<String>>") @RequestBody Map<String, List<String>> attributes) {
@@ -430,7 +447,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getAttributes")
   @ApiOperation(value = "Get logged User Attributes", response = String.class,
-      responseContainer = "Map<String, List<String>>")
+      responseContainer = "Map<String, List<String>>", hidden = true)
   @ApiResponse(code = 500, message = EEAErrorMessage.USER_NOTFOUND)
   public Map<String, List<String>> getUserAttributes() {
 
@@ -457,7 +474,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_contributor_to_resource")
-  @ApiOperation(value = "Add one Contributor to a Resource")
+  @ApiOperation(value = "Add one Contributor to a Resource", hidden = true)
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
   public void addContributorToResource(
       @ApiParam(value = "Resource id", example = "0") @RequestParam("idResource") Long idResource,
@@ -485,7 +502,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/remove_contributor_from_resource")
-  @ApiOperation(value = "Remove one Contributor from a Resource")
+  @ApiOperation(value = "Remove one Contributor from a Resource", hidden = true)
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
   public void removeContributorFromResource(
       @ApiParam(value = "Resource id", example = "0") @RequestParam("idResource") Long idResource,
@@ -512,7 +529,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_contributors_to_resources")
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
-  @ApiOperation(value = "Add Contributors to Resources")
+  @ApiOperation(value = "Add Contributors to Resources", hidden = true)
   public void addContributorsToResources(@ApiParam(value = "Resources List",
       type = "List") @RequestBody List<ResourceAssignationVO> resources) {
     try {
@@ -533,7 +550,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/remove_contributors_from_resources")
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
-  @ApiOperation(value = "Remove Contributors from Resources")
+  @ApiOperation(value = "Remove Contributors from Resources", hidden = true)
   public void removeContributorsFromResources(@ApiParam(value = "Resources List",
       type = "List") @RequestBody List<ResourceAssignationVO> resources) {
     try {
@@ -553,7 +570,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_user_to_resources")
-  @ApiOperation(value = "Add Resources to Users")
+  @ApiOperation(value = "Add Resources to Users", hidden = true)
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
   public void addUserToResources(@ApiParam(value = "Resources List",
       type = "List") @RequestBody List<ResourceAssignationVO> resources) {
@@ -580,7 +597,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/remove_user_from_resources")
-  @ApiOperation(value = "Remove Resources from Users")
+  @ApiOperation(value = "Remove Resources from Users", hidden = true)
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
   public void removeUserFromResources(@ApiParam(value = "Resources List",
       type = "List") @RequestBody List<ResourceAssignationVO> resources) {
@@ -611,7 +628,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_STEWARD','DATAFLOW_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
   @PostMapping("/createApiKey")
-  @ApiOperation(value = "Create ApiKey for the logged User", response = String.class)
+  @ApiOperation(value = "Create ApiKey for the logged User", response = String.class, hidden = true)
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
   public String createApiKey(
       @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
@@ -644,7 +661,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_STEWARD','DATAFLOW_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
   @GetMapping("/getApiKey")
   @ApiOperation(value = "Get logged User ApiKey by Dataflow Id and Dataprovider Id",
-      response = String.class)
+      response = String.class, hidden = true)
   public String getApiKey(
       @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
       @ApiParam(value = "Data provider id", example = "0") @RequestParam(value = "dataProvider",
@@ -669,7 +686,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/{userId}/getApiKey")
   @ApiOperation(value = "Create ApiKey by User Id, Dataflow Id and Dataprovider Id",
-      response = String.class)
+      response = String.class, hidden = true)
   public String getApiKey(@ApiParam(value = "User wanted id") @PathVariable("userId") String userId,
       @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
       @ApiParam(value = "Data provider id", example = "0") @RequestParam(value = "dataProvider",
@@ -687,7 +704,8 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @PostMapping("/authenticateByApiKey/{apiKey}")
-  @ApiOperation(value = "Authenticate an User by an Api Key", response = TokenVO.class)
+  @ApiOperation(value = "Authenticate an User by an Api Key", response = TokenVO.class,
+      hidden = true)
   public TokenVO authenticateUserByApiKey(
       @ApiParam(value = "Apikey") @PathVariable("apiKey") String apiKey) {
     return securityProviderInterfaceService.authenticateApiKey(apiKey);
@@ -696,7 +714,8 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @HystrixCommand
   @PostMapping("/authenticateByEmail")
-  @ApiOperation(value = "Authenticate an User by its email.", response = TokenVO.class)
+  @ApiOperation(value = "Authenticate an User by its email.", response = TokenVO.class,
+      hidden = true)
   public TokenVO authenticateUserByEmail(@RequestParam("email") String email) {
     return securityProviderInterfaceService.authenticateEmail(email);
   }
@@ -713,7 +732,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getUsersByGroup/{group}")
   @ApiOperation(value = "Get a List of Users by Group", response = UserRepresentationVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<UserRepresentationVO> getUsersByGroup(
       @ApiParam(value = "Group Resource") @PathVariable("group") String group) {
     GroupInfo[] groupInfo = keycloakConnectorService.getGroupsWithSearch(group);
@@ -739,7 +758,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_OBSERVER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   @GetMapping("/getUserRolesByDataflow/{dataflowId}/dataProviderId/{dataProviderId}")
   @ApiOperation(value = "Get a List of Users by Dataflow", response = UserRoleVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<UserRoleVO> getUserRolesByDataflowAndCountry(
       @ApiParam(value = "dataflowId") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(value = "dataProviderId") @PathVariable("dataProviderId") Long dataProviderId) {
@@ -756,7 +775,10 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Override
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
   @GetMapping("/userRoles/dataflow/{dataflowId}")
-  public List<UserRoleVO> getUserRolesByDataflow(@PathVariable("dataflowId") Long dataflowId) {
+  @ApiOperation(value = "Get a List of User roles by Dataflow", response = UserRoleVO.class,
+      responseContainer = "List", hidden = true)
+  public List<UserRoleVO> getUserRolesByDataflow(
+      @ApiParam(value = "dataflowId", example = "1") @PathVariable("dataflowId") Long dataflowId) {
 
     return userRoleService.getUserRolesByDataflow(dataflowId);
   }
@@ -803,4 +825,77 @@ public class UserManagementControllerImpl implements UserManagementController {
           EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
   }
+
+  /**
+   * Export users by country.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @PostMapping("/exportUsersByCountry/dataflow/{dataflowId}")
+  @ApiOperation(value = "Export all users by country into a CSV file", hidden = true)
+  public void exportUsersByCountry(@ApiParam(
+      value = "Dataflow id used in the export process.") @PathVariable("dataflowId") Long dataflowId) {
+    LOG.info("Export users by country from dataflow {}, with type csv.", dataflowId);
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_USERS_BY_COUNTRY_START",
+        userNotificationContentVO);
+    try {
+      userRoleService.exportUsersByCountry(dataflowId);
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.error("Error exporting users by country from dataflow {}. Message: {}", dataflowId,
+          e.getMessage());
+    }
+  }
+
+  /**
+   * Download users by country.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @GetMapping("/downloadUsersByCountry/{dataflowId}")
+  @ApiOperation(value = "Download the generated CSV file containing the users by country",
+      hidden = true)
+  @ApiResponse(code = 404, message = "Couldn't find a file with the specified name")
+  public void downloadUsersByCountry(
+      @ApiParam(value = "Dataflow id used in the export process.",
+          example = "10") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(
+          value = "The filename the export process asigned to the Users by country export file.",
+          example = "dataflow-10-UsersByCountry.csv") @RequestParam String fileName,
+      HttpServletResponse response) {
+    try {
+      LOG.info(
+          "Downloading file generared when exporting users by country. Dataflow Id {}. Filename {}.",
+          dataflowId, fileName);
+      File file = userRoleService.downloadUsersByCountry(dataflowId, fileName);
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
+      OutputStream out = response.getOutputStream();
+      FileInputStream in = new FileInputStream(file);
+
+      IOUtils.copyLarge(in, out);
+      out.close();
+      in.close();
+
+      FileUtils.forceDelete(file);
+
+    } catch (IOException | ResponseStatusException e) {
+      LOG_ERROR.error(
+          "Downloading file generated when exporting Users by country. Dataflow Id {}. Filename {}. Error message: {}",
+          dataflowId, fileName, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
+          "Trying to download a file generated during the export users by country process but the file is not found, dataflowId: %s + filename: %s + message: %s ",
+          dataflowId, fileName, e.getMessage()), e);
+    }
+  }
+
+
 }

@@ -49,11 +49,18 @@
       display: flex;
       align-items: center;
       margin-right: 1rem;
-      :global .p-button-primary {
-        background-color: var(--white);
+      .loginButton {
+        background-color: var(--c-white-color);
         color: var(--public-custom-header-bg);
+        padding: 0.25rem 0.9rem;
+        font-weight: bold;
+        span:first-child {
+          margin-left: 0.5rem;
+          margin-top: -0.5rem;
+        }
       }
     }
+
     .userWrapper {
       display: flex;
       align-items: center;
@@ -102,7 +109,7 @@
     }
 
     .themeSwitcherInputSwitch:before {
-      background-color: var(--black);
+      background-color: var(--c-black-color);
       box-shadow: var(--inputswitch-dark-theme-checked);
     }
   }

@@ -2,6 +2,7 @@ package org.eea.validation.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -33,9 +34,10 @@ public class AutomaticRules {
    */
   public static Rule createRequiredRulePoint(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isBlankPoint(this)",
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isBlankPoint(this)",
         "The value must not be missing or empty", ErrorTypeEnum.ERROR.getValue(), shortCode,
-        automaticType, description);
+        automaticType, description, null);
   }
 
   /**
@@ -51,9 +53,10 @@ public class AutomaticRules {
    */
   public static Rule createRequiredRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isBlank(value)",
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isBlank(value)",
         "The value must not be missing or empty", ErrorTypeEnum.ERROR.getValue(), shortCode,
-        automaticType, description);
+        automaticType, description, null);
   }
 
 
@@ -71,9 +74,10 @@ public class AutomaticRules {
   public static Rule createNumberIntegerAutomaticRule(String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode,
       AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isNumberInteger(value)",
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isNumberInteger(value)",
         "The value is not a valid whole number", ErrorTypeEnum.ERROR.getValue(), shortCode,
-        automaticType, description);
+        automaticType, description, null);
   }
 
   /**
@@ -90,9 +94,10 @@ public class AutomaticRules {
   public static Rule createNumberDecimalAutomaticRule(String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode,
       AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isNumberDecimal(value)",
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isNumberDecimal(value)",
         "The value is not a valid whole or decimal number", ErrorTypeEnum.ERROR.getValue(),
-        shortCode, automaticType, description);
+        shortCode, automaticType, description, null);
   }
 
   /**
@@ -108,9 +113,10 @@ public class AutomaticRules {
    */
   public static Rule createDateAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isDateYYYYMMDD(value)",
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isDateYYYYMMDD(value)",
         "The value is not a valid date (YYYY-MM-DD)", ErrorTypeEnum.ERROR.getValue(), shortCode,
-        automaticType, description);
+        automaticType, description, null);
   }
 
   /**
@@ -125,9 +131,10 @@ public class AutomaticRules {
    */
   public static Rule createDateTimeAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isDateTime(value)",
-        "The value is not a valid datetime (YYYY-MM-DD HH:MM:SS)", ErrorTypeEnum.ERROR.getValue(),
-        shortCode, automaticType, description);
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isDateTime(value)",
+        "The value is not a valid datetime YYYY-MM-DDTHH:mm:ss[Z]", ErrorTypeEnum.ERROR.getValue(),
+        shortCode, automaticType, description, null);
   }
 
 
@@ -144,9 +151,10 @@ public class AutomaticRules {
    */
   public static Rule createBooleanAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isBoolean(value)",
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isBoolean(value)",
         "The field must be TRUE or FALSE", ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType,
-        description);
+        description, null);
   }
 
   /**
@@ -162,9 +170,10 @@ public class AutomaticRules {
    */
   public static Rule createLatAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isCordenateLat(value)",
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isCordenateLat(value)",
         "The field must be a valid latitude (between -90 and 90)", ErrorTypeEnum.ERROR.getValue(),
-        shortCode, automaticType, description);
+        shortCode, automaticType, description, null);
   }
 
   /**
@@ -180,9 +189,10 @@ public class AutomaticRules {
    */
   public static Rule createLongAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isCordenateLong(value)",
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isCordenateLong(value)",
         "The field must be a valid longitude (between -180 and 180)",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description);
+        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description, null);
   }
 
 
@@ -200,6 +210,7 @@ public class AutomaticRules {
   public static List<Rule> createCodelistAutomaticRule(String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, List<String> singleCodeListItems,
       String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
+    ObjectId ruleId = new ObjectId();
     List<Rule> ruleList = new ArrayList<>();
     // PART INSENSITIVE
     // we create the new list to send with ;
@@ -212,10 +223,10 @@ public class AutomaticRules {
             new StringBuilder(codelist).append("; ").append(singleCodeListItems.get(i)).toString();
       }
     }
-    ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
+    ruleList.add(composeRule(ruleId, referenceId, typeEntityEnum, nameRule,
         "isCodelistInsensitive(value,'[" + codelist + "]')",
         "The value is not a valid member of the codelist", ErrorTypeEnum.ERROR.getValue(),
-        shortCode, automaticType, description));
+        shortCode, automaticType, description, null));
     return ruleList;
   }
 
@@ -234,7 +245,7 @@ public class AutomaticRules {
   public static List<Rule> createMultiSelectCodelistAutomaticRule(String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, List<String> codelistItems, String shortCode,
       AutomaticRuleTypeEnum automaticType, String description) {
-
+    ObjectId ruleId = new ObjectId();
     List<Rule> ruleList = new ArrayList<>();
     // PART INSENSITIVE
     // we create the new list to send with ;
@@ -246,10 +257,10 @@ public class AutomaticRules {
         codelist = new StringBuilder(codelist).append("; ").append(codelistItems.get(i)).toString();
       }
     }
-    ruleList.add(composeRule(referenceId, typeEntityEnum, nameRule,
+    ruleList.add(composeRule(ruleId, referenceId, typeEntityEnum, nameRule,
         "isMultiSelectCodelistValidate(value,'[" + codelist + "]')",
         "The value is not a valid member of the codelist", ErrorTypeEnum.ERROR.getValue(),
-        shortCode, automaticType, description));
+        shortCode, automaticType, description, null));
     return ruleList;
   }
 
@@ -269,15 +280,16 @@ public class AutomaticRules {
   public static Rule createFKAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description,
       String tableSchemaId, boolean pkMustBeUsed) {
+    ObjectId ruleId = new ObjectId();
     String errorMsg = null;
     if (pkMustBeUsed) {
       errorMsg = "Omission - does not contain an expected record based on set criteria.";
     } else {
       errorMsg = "The value is not a valid member of the referenced list.";
     }
-    Rule rule = composeRule(tableSchemaId, typeEntityEnum, nameRule,
+    Rule rule = composeRule(ruleId, tableSchemaId, typeEntityEnum, nameRule,
         "isfieldFK(datasetId,'" + referenceId + "',", errorMsg, ErrorTypeEnum.ERROR.getValue(),
-        shortCode, automaticType, description);
+        shortCode, automaticType, description, null);
     // we add the rule data to take the message if the user edit the rule
     StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());
     whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("',")
@@ -300,9 +312,10 @@ public class AutomaticRules {
    */
   public static Rule createUrlAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isURL(value)",
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isURL(value)",
         "The value does not follow the expected syntax for a valid URL",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description);
+        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description, null);
   }
 
   /**
@@ -318,9 +331,10 @@ public class AutomaticRules {
    */
   public static Rule createPhoneAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isPhone(value)",
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isPhone(value)",
         "The value does not follow the expected syntax for a valid phone number",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description);
+        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description, null);
   }
 
   /**
@@ -336,9 +350,10 @@ public class AutomaticRules {
    */
   public static Rule createEmailAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
       String nameRule, String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isEmail(value)",
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isEmail(value)",
         "The value does not follow the expected syntax for a valid email",
-        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description);
+        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description, null);
   }
 
 
@@ -362,8 +377,9 @@ public class AutomaticRules {
     } else {
       error = LiteralConstants.GEOMETRYERROR + typeData.toString().toLowerCase();
     }
-    return composeRule(referenceId, typeEntityEnum, nameRule, "isGeometry(this)", error,
-        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description);
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isGeometry(this)", error,
+        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description, null);
   }
 
   /**
@@ -380,9 +396,53 @@ public class AutomaticRules {
   public static Rule createGeometryAutomaticRuleCheckEPSGSRID(DataType typeData, String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode,
       AutomaticRuleTypeEnum automaticType, String description) {
-    return composeRule(referenceId, typeEntityEnum, nameRule, "checkEPSGSRID(this)",
-        "Unsupported SRID", ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description);
+    ObjectId ruleId = new ObjectId();
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "checkEPSGSRID(this)",
+        "Unsupported SRID", ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description,
+        null);
   }
+
+
+
+  /**
+   * Creates the geometry automatic rule check geometries.
+   *
+   * @param typeData the type data
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param automaticType the automatic type
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createGeometryAutomaticRuleCheckGeometries(Long datasetId, Document document,
+      DataType typeData, String referenceId, EntityTypeEnum typeEntityEnum, String nameRule,
+      String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
+    ObjectId ruleId = new ObjectId();
+
+    String message = "Geometry is not valid. Reason: {%reason%}";
+
+    String whenCondition = "isSQLSentenceWithCode(this.datasetId.id, '" + ruleId.toString()
+        + "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX')";
+
+    String fieldName = document.getString("headerName");
+
+    String sql = "select * from ( select rv.id as record_id ,fv.id as %s_id,"
+        + " public.ST_isValidReason(public.ST_SetSRID(public.ST_GeomFromGeoJSON(fv.value::json->'geometry'),"
+        + " ((fv.value::json->'properties')::json->>'srid')::integer)) as reason,"
+        + " public.ST_SetSRID(public.ST_GeomFromGeoJSON(fv.value::json->'geometry'), "
+        + " ((fv.value::json->'properties')::json->>'srid')::integer) as value "
+        + " from dataset_%s.field_value fv inner join dataset_%s.record_value rv "
+        + " on rv.id = fv.id_record where fv.value <> '' and public.is_valid_json(fv.value) and geometry is null ) tableAux "
+        + " where public.ST_isValid(value) = false;";
+
+    String sqlResult = String.format(sql, fieldName, datasetId, datasetId);
+
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, whenCondition, message,
+        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description, sqlResult);
+  }
+
 
   /**
    * Creates the unique constraint automatic rule.
@@ -403,10 +463,10 @@ public class AutomaticRules {
         new StringBuilder("isUniqueConstraint('").append(uniqueId).append("',");
 
 
-
-    Rule rule = composeRule(referenceId, typeEntityEnum, nameRule, ruleString.toString(),
+    ObjectId ruleId = new ObjectId();
+    Rule rule = composeRule(ruleId, referenceId, typeEntityEnum, nameRule, ruleString.toString(),
         "Uniqueness and multiplicity constraints - " + message, ErrorTypeEnum.ERROR.getValue(),
-        shortCode, automaticType, description);
+        shortCode, automaticType, description, null);
 
     StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());
     whenCondition = whenCondition.append("'").append(rule.getRuleId().toString()).append("')");
@@ -418,6 +478,8 @@ public class AutomaticRules {
 
   /**
    * Compose rule.
+   * 
+   * @param ruleId
    *
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
@@ -429,12 +491,13 @@ public class AutomaticRules {
    * @param description the description
    * @return the rule
    */
-  private static Rule composeRule(String referenceId, EntityTypeEnum typeEntityEnum,
-      String nameRule, String whenCondition, String thenCondition0, String thenCondition1,
-      String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
+  private static Rule composeRule(ObjectId ruleId, String referenceId,
+      EntityTypeEnum typeEntityEnum, String nameRule, String whenCondition, String thenCondition0,
+      String thenCondition1, String shortCode, AutomaticRuleTypeEnum automaticType,
+      String description, String sql) {
     final Rule rule = new Rule();
     List<String> thenCondition = new ArrayList<>();
-    rule.setRuleId(new ObjectId());
+    rule.setRuleId(ruleId);
     rule.setReferenceId(new ObjectId(referenceId));
     rule.setAutomatic(true);
     rule.setEnabled(true);
@@ -448,6 +511,10 @@ public class AutomaticRules {
     rule.setDescription(description);
     rule.setShortCode(shortCode);
     rule.setAutomaticType(automaticType);
+    if (null != sql && !sql.isEmpty()) {
+      rule.setSqlSentence(sql);
+      rule.setExpressionText("");
+    }
     return rule;
   }
 }

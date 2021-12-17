@@ -9,10 +9,21 @@
   font-weight: bold;
   height: 100%;
 }
+.loadingSpinner {
+  height: 95%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+}
 .columnActionButton {
   color: var(--datatable-header-info-button-color) !important;
   margin-left: 0.4rem !important;
-  background-color: var(--white) !important;
+  background-color: var(--c-white-color) !important;
 }
 .center {
   display: flex;

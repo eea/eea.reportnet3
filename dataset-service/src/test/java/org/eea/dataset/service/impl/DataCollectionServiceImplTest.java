@@ -411,7 +411,7 @@ public class DataCollectionServiceImplTest {
         .thenReturn(new ResourceInfoVO());
     RulesSchemaVO rulesSchemaVO = new RulesSchemaVO();
     rulesSchemaVO.setRules(Arrays.asList(ruleVO));
-    Mockito.when(rulesControllerZuul.findRuleSchemaByDatasetId(Mockito.any()))
+    Mockito.when(rulesControllerZuul.findRuleSchemaByDatasetId(Mockito.any(), Mockito.any()))
         .thenReturn(rulesSchemaVO);
     Mockito.doNothing().when(recordStoreControllerZuul).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());

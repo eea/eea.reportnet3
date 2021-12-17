@@ -1,7 +1,6 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import { withRouter } from 'react-router-dom';
 
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './Dataflows.module.scss';
@@ -11,24 +10,23 @@ import { DataflowsReporterHelpConfig } from 'conf/help/dataflows/reporter';
 import { DataflowsRequesterHelpConfig } from 'conf/help/dataflows/requester';
 
 import { Button } from 'views/_components/Button';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'views/_components/Dialog';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
-import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
+import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
+import { GoTopButton } from 'views/_components/GoTopButton';
 
-import { DataflowService } from 'services/DataflowService';
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
-import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { CitizenScienceDataflowService } from 'services/CitizenScienceDataflowService';
+import { DataflowService } from 'services/DataflowService';
+import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { UserService } from 'services/UserService';
-
-import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
-import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -40,6 +38,10 @@ import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
+
+import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -59,24 +61,30 @@ const Dataflows = withRouter(({ history, match }) => {
     activeIndex: 0,
     business: [],
     citizenScience: [],
-    reporting: [],
+    dataflowsCount: {},
+    dataflowsCountFirstLoad: false,
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
-    isReportingDataflowDialogVisible: false,
+    isCitizenScienceDataflowDialogVisible: false,
     isCustodian: null,
     isNationalCoordinator: false,
+    isRecreatePermissionsDialogVisible: false,
     isReferencedDataflowDialogVisible: false,
-    isCitizenScienceDataflowDialogVisible: false,
+    isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
+    isValidatingAllDataflowsUsers: false,
     isUserListVisible: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
-    reference: []
+    reference: [],
+    reporting: []
   });
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
     useReportingObligations();
 
-  const { activeIndex, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
+  const { activeIndex, dataflowsCount, isAdmin, isCustodian, isNationalCoordinator, loadingStatus } = dataflowsState;
+
+  const containerRef = useRef(null);
 
   const tabMenuItems =
     isCustodian || isAdmin
@@ -92,7 +100,12 @@ const Dataflows = withRouter(({ history, match }) => {
             id: 'citizenScience',
             label: resourcesContext.messages['citizenScienceDataflowsListTab']
           },
-          { className: styles.flow_tab, id: 'reference', label: resourcesContext.messages['referenceDataflowsListTab'] }
+          {
+            className: styles.flow_tab,
+            disabled: dataflowsState.dataflowsCountFirstLoad,
+            id: 'reference',
+            label: resourcesContext.messages['referenceDataflowsListTab']
+          }
         ]
       : [
           {
@@ -113,8 +126,10 @@ const Dataflows = withRouter(({ history, match }) => {
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS, history });
 
   useEffect(() => {
+    getDataflowsCount();
+
     if (!isNil(dataflowsErrorType)) {
-      notificationContext.add({ type: ErrorUtils.parseErrorType(dataflowsErrorType) });
+      notificationContext.add({ type: ErrorUtils.parseErrorType(dataflowsErrorType) }, true);
     }
   }, []);
 
@@ -166,8 +181,18 @@ const Dataflows = withRouter(({ history, match }) => {
       title: 'allDataflowsUserList'
     };
 
+    const adminCreateNewPermissionsBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'userShield',
+      isVisible: isAdmin,
+      label: 'adminCreatePermissions',
+      onClick: () => manageDialogs('isRecreatePermissionsDialogVisible', true),
+      title: 'adminCreatePermissions'
+    };
+
     leftSideBarContext.addModels(
       [
+        adminCreateNewPermissionsBtn,
         createBusinessDataflowBtn,
         createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
@@ -193,7 +218,7 @@ const Dataflows = withRouter(({ history, match }) => {
   }, [userContext.contextRoles]);
 
   useLayoutEffect(() => {
-    if (isEmpty(dataflowsState[tabId]) && !isNil(userContext.contextRoles)) {
+    if (!isNil(userContext.contextRoles)) {
       getDataflows();
     }
   }, [tabId]);
@@ -201,6 +226,18 @@ const Dataflows = withRouter(({ history, match }) => {
   useEffect(() => {
     setActiveIndexTabOnBack();
   }, [isCustodian, isAdmin]);
+
+  const setIsValidatingAllDataflowsUsers = isValidatingAllDataflowsUsers => {
+    dataflowsDispatch({ type: 'SET_IS_VALIDATING_ALL_DATAFLOWS_USERS', payload: { isValidatingAllDataflowsUsers } });
+  };
+
+  const onValidatingAllDataflowsUsersCompleted = () => {
+    setIsValidatingAllDataflowsUsers(false);
+    manageDialogs('isRecreatePermissionsDialogVisible', false);
+  };
+
+  useCheckNotifications(['VALIDATE_ALL_REPORTERS_FAILED_EVENT'], setIsValidatingAllDataflowsUsers, false);
+  useCheckNotifications(['VALIDATE_ALL_REPORTERS_COMPLETED_EVENT'], onValidatingAllDataflowsUsersCompleted);
 
   const setActiveIndexTabOnBack = () => {
     for (let tabItemIndex = 0; tabItemIndex < tabMenuItems.length; tabItemIndex++) {
@@ -216,39 +253,85 @@ const Dataflows = withRouter(({ history, match }) => {
     }
   };
 
+  const setStatusDataflowLabel = dataflows =>
+    dataflows.map(dataflow => {
+      dataflow.statusKey = dataflow.status;
+      if (dataflow.status === config.dataflowStatus.OPEN) {
+        dataflow.status = dataflow.isReleasable
+          ? resourcesContext.messages['open'].toUpperCase()
+          : resourcesContext.messages['closed'].toUpperCase();
+      } else {
+        dataflow.status = resourcesContext.messages['design'].toUpperCase();
+      }
+      return dataflow;
+    });
+
   const getDataflows = async () => {
     setLoading(true);
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
         const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
-        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reporting' } });
-      }
-
-      if (TextUtils.areEquals(tabId, 'reference')) {
+        setStatusDataflowLabel(data);
+        dataflowsDispatch({
+          type: 'SET_DATAFLOWS',
+          payload: { data, type: 'reporting', contextCurrentDataflowType: userContext.currentDataflowType }
+        });
+      } else if (TextUtils.areEquals(tabId, 'reference')) {
         const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
-        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'reference' } });
-      }
-
-      if (TextUtils.areEquals(tabId, 'business')) {
+        setStatusDataflowLabel(data);
+        dataflowsDispatch({
+          type: 'SET_DATAFLOWS',
+          payload: { data, type: 'reference', contextCurrentDataflowType: userContext.currentDataflowType }
+        });
+      } else if (TextUtils.areEquals(tabId, 'business')) {
         const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
-        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'business' } });
-      }
-
-      if (TextUtils.areEquals(tabId, 'citizenScience')) {
+        setStatusDataflowLabel(data);
+        dataflowsDispatch({
+          type: 'SET_DATAFLOWS',
+          payload: { data, type: 'business', contextCurrentDataflowType: userContext.currentDataflowType }
+        });
+      } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
         const data = await CitizenScienceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
-        dataflowsDispatch({ type: 'SET_DATAFLOWS', payload: { data, type: 'citizenScience' } });
+        setStatusDataflowLabel(data);
+        dataflowsDispatch({
+          type: 'SET_DATAFLOWS',
+          payload: { data, type: 'citizenScience', contextCurrentDataflowType: userContext.currentDataflowType }
+        });
       }
     } catch (error) {
       console.error('Dataflows - getDataflows.', error);
-      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' });
+      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' }, true);
     } finally {
       setLoading(false);
     }
   };
 
+  const getDataflowsCount = async () => {
+    setLoading(true);
+
+    try {
+      const data = await DataflowService.countByType();
+      dataflowsDispatch({ type: 'SET_DATAFLOWS_COUNT', payload: data });
+    } catch (error) {
+      console.error('Dataflows - getDataflows.', error);
+      notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' }, true);
+    }
+  };
+
   const manageDialogs = (dialog, value) => {
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
+  };
+
+  const onConfirmValidateAllDataflowsUsers = async () => {
+    setIsValidatingAllDataflowsUsers(true);
+    try {
+      await DataflowService.validateAllDataflowsUsers();
+    } catch (error) {
+      console.error('Dataflows -  onConfirmValidateAllDataflowsUsers.', error);
+      setIsValidatingAllDataflowsUsers(false);
+      notificationContext.add({ type: 'VALIDATE_ALL_REPORTERS_FAILED_EVENT' }, true);
+    }
   };
 
   const onCreateDataflow = dialog => {
@@ -261,7 +344,15 @@ const Dataflows = withRouter(({ history, match }) => {
     setObligationToPrevious();
   };
 
-  const onChangeTab = index => dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
+  const onChangeTab = (index, value) => {
+    if (!isNil(value)) {
+      const [currentTabDataflowType] = Object.keys(config.dataflowType).filter(
+        type => config.dataflowType[type].key === value.id
+      );
+      userContext.setCurrentDataflowType(currentTabDataflowType);
+    }
+    dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
+  };
 
   const onLoadPermissions = () => {
     const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
@@ -329,7 +420,15 @@ const Dataflows = withRouter(({ history, match }) => {
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
-        <TabMenu activeIndex={activeIndex} model={tabMenuItems} onTabChange={event => onChangeTab(event.index)} />
+        <div ref={containerRef}>
+          <TabMenu
+            activeIndex={activeIndex}
+            headerLabelChildrenCount={dataflowsCount}
+            headerLabelLoading={loadingStatus}
+            model={tabMenuItems}
+            onTabChange={event => onChangeTab(event.index, event.value)}
+          />
+        </div>
         <DataflowsList
           className="dataflowList-accepted-help-step"
           content={{
@@ -338,10 +437,14 @@ const Dataflows = withRouter(({ history, match }) => {
             citizenScience: dataflowsState['citizenScience'],
             reference: dataflowsState['reference']
           }}
+          isAdmin={isAdmin}
+          isCustodian={isCustodian}
           isLoading={loadingStatus[tabId]}
           visibleTab={tabId}
         />
       </div>
+
+      <GoTopButton parentRef={containerRef} referenceMargin={70} />
 
       {dataflowsState.isUserListVisible && (
         <Dialog
@@ -370,6 +473,20 @@ const Dataflows = withRouter(({ history, match }) => {
           onCreateDataflow={onCreateDataflow}
           resetObligations={resetObligations}
         />
+      )}
+
+      {dataflowsState.isRecreatePermissionsDialogVisible && (
+        <ConfirmDialog
+          disabledConfirm={dataflowsState.isValidatingAllDataflowsUsers}
+          header={resourcesContext.messages['adminNewCreatePermissions']}
+          iconConfirm={dataflowsState.isValidatingAllDataflowsUsers ? 'spinnerAnimate' : ''}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onConfirmValidateAllDataflowsUsers}
+          onHide={() => manageDialogs('isRecreatePermissionsDialogVisible', false)}
+          visible={dataflowsState.isRecreatePermissionsDialogVisible}>
+          {resourcesContext.messages['confirmCreateNewPermissions']}
+        </ConfirmDialog>
       )}
 
       {dataflowsState.isCitizenScienceDataflowDialogVisible && (

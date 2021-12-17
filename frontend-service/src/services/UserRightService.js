@@ -16,13 +16,20 @@ export const UserRightService = {
   deleteReporter: async (userRight, dataflowId, dataProviderId) => {
     return await UserRightRepository.deleteReporter(userRight, dataflowId, dataProviderId);
   },
+
   deleteRequester: async (userRight, dataflowId, dataProviderId) => {
     return await UserRightRepository.deleteRequester(userRight, dataflowId, dataProviderId);
   },
+
   updateReporter: async (userRight, dataflowId, dataProviderId) => {
     return await UserRightRepository.updateReporter(userRight, dataflowId, dataProviderId);
   },
+
   updateRequester: async (userRight, dataflowId) => {
     return await UserRightRepository.updateRequester(userRight, dataflowId);
+  },
+
+  validateReporters: async (dataflowId, dataProviderId) => {
+    return await UserRightRepository.validateReporters(dataflowId, dataProviderId);
   }
 };

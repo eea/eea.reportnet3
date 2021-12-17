@@ -1,5 +1,6 @@
 package org.eea.validation.service;
 
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.TableValue;
@@ -42,14 +43,14 @@ public interface SqlRulesService {
    * Retrieve table data.
    *
    * @param query the query
-   * @param datasetId the dataset id
+   * @param dataSetMetabaseVO the data set metabase VO
    * @param rule the rule
    * @param ischeckDC the ischeck DC
    * @return the table value
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
-  TableValue retrieveTableData(String query, Long datasetId, Rule rule, Boolean ischeckDC)
-      throws EEAInvalidSQLException;
+  TableValue retrieveTableData(String query, DataSetMetabaseVO dataSetMetabaseVO, Rule rule,
+      Boolean ischeckDC) throws EEAInvalidSQLException;
 
   /**
    * Validate SQL rules.

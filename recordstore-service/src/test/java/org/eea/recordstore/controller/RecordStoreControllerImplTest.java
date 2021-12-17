@@ -116,29 +116,6 @@ public class RecordStoreControllerImplTest {
   }
 
   /**
-   * Reste data set data base test.
-   *
-   * @throws RecordStoreAccessException the docker access exception
-   */
-  @Test
-  public void resteDataSetDataBaseTest() throws RecordStoreAccessException {
-    recordStoreControllerImpl.resteDataSetDataBase();
-    Mockito.verify(recordStoreService, times(1)).resetDatasetDatabase();
-  }
-
-  /**
-   * Reste data set data base test exception.
-   *
-   * @throws RecordStoreAccessException the docker access exception
-   */
-  @Test
-  public void resteDataSetDataBaseTestException() throws RecordStoreAccessException {
-    doThrow(new RecordStoreAccessException()).when(recordStoreService).resetDatasetDatabase();
-    recordStoreControllerImpl.resteDataSetDataBase();
-    Mockito.verify(recordStoreService, times(1)).resetDatasetDatabase();
-  }
-
-  /**
    * Gets the connection to dataset test.
    *
    * @return the connection to dataset test
@@ -227,5 +204,13 @@ public class RecordStoreControllerImplTest {
     recordStoreControllerImpl.deleteDataset("schema");
 
     Mockito.verify(recordStoreService, times(1)).deleteDataset(Mockito.any());
+  }
+
+
+  @Test
+  public void testRefreshMaterializedView() {
+    recordStoreControllerImpl.refreshMaterializedView(1L);
+    Mockito.verify(recordStoreService, times(1)).refreshMaterializedQuery(Mockito.any(),
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any());
   }
 }

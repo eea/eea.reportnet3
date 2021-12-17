@@ -1,7 +1,6 @@
 .container {
   position: relative;
   border: none;
-  background-color: var(--c-lilac-100);
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
@@ -19,7 +18,7 @@
       grid-template-rows: 15% 50% 25%;
       row-gap: 1rem;
       column-gap: 1.5rem;
-      color: var(--gray-110);
+      color: var(--main-font-color);
       padding: 1rem;
       .card_component {
         &_btn {
@@ -62,9 +61,11 @@
       }
     }
     &.DESIGN {
-      background-color: var(--c-lilac-100);
+      color: var(--main-font-color);
+      background: var(--card-design-dataflow-bg);
+
       &:hover {
-        background-color: #c2c8cf;
+        background: var(--card-design-dataflow-bg-hover);
       }
     }
     &.OPEN,
@@ -74,13 +75,23 @@
         background-color: #6565a8;
       }
       .containerLink {
-        color: var(--white);
+        color: var(--c-white-color);
         background-image: url('/views/_assets/images/logos/logo-blanco.png');
-        .deliveryDate {
-          color: var(--white);
-          text-align: right;
+        .dataflowDates {
+          color: var(--c-white-color);
+          margin-left: auto;
         }
       }
+    }
+  }
+  &.DESIGN,
+  &.OPEN,
+  &.CLOSED {
+    box-shadow: var(--dataflow-item-box-shadow);
+    transition: var(--dataflow-item-transition-box-shadow);
+    &:hover {
+      box-shadow: var(--dataflow-item-box-shadow-hover);
+      transition: var(--dataflow-item-transition-box-shadow);
     }
   }
   &:first-of-type {
@@ -109,7 +120,7 @@
     font-size: 14pt;
     margin-left: 0.9rem;
     margin-top: 0.7rem;
-    color: var(--white);
+    color: var(--c-white-color);
     cursor: pointer;
     &.pinned {
       transform: rotate(0deg);
@@ -151,13 +162,19 @@
     font-size: 2.5rem;
     opacity: 0.6;
   }
+  .upperIcon {
+    grid-column: 1/2;
+    grid-row: 1/3;
+    margin: 0px;
+    font-size: 1.5rem;
+  }
 
-  .deliveryDate {
+  .dataflowDates {
     grid-column: 3/3;
     grid-row: 1/2;
-    color: var(--gray-110);
+    color: var(--main-font-color);
     font-size: 1rem;
-    text-align: right;
+    margin-left: auto;
     margin-right: 3rem;
     span {
       font-weight: normal;
@@ -262,8 +279,8 @@
       }
     }
     .rep_button {
-      background-color: var(--blue-120);
-      color: var(--white);
+      background-color: var(--c-blue-120);
+      color: var(--c-white-color);
       border: 0px;
       margin: 0 0 0.5rem 0;
       -webkit-appearance: none;
@@ -281,9 +298,9 @@
 
       &:hover {
         cursor: pointer;
-        background-color: var(--white);
-        border: 2px solid var(--blue-120);
-        color: var(--blue-120);
+        background-color: var(--c-white-color);
+        border: 2px solid var(--c-blue-120);
+        color: var(--c-blue-120);
         padding: calc(0.75rem - 2px) calc(1rem - 2px);
       }
       &:last-child {
@@ -292,8 +309,8 @@
     }
     i {
       font-size: 3.5em !important;
-      color: var(--blue-120);
-      fill: var(--blue-120);
+      color: var(--c-blue-120);
+      fill: var(--c-blue-120);
     }
   }
   @media (max-width: 1024px) {
@@ -306,7 +323,7 @@
     .icon {
       display: none;
     }
-    .deliveryDate {
+    .dataflowDates {
       grid-column: 2/2;
       font-size: 0.9rem;
     }
@@ -350,7 +367,7 @@
     .role {
       grid-row: 1/2;
     }
-    .deliveryDate {
+    .dataflowDates {
       grid-column: 1/1;
       grid-row: 2/3;
       text-align: left;

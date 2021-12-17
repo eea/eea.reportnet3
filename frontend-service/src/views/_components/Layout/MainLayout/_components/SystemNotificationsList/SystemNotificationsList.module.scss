@@ -1,0 +1,48 @@
+.actionsColumnButtons {
+  display: flex;
+  justify-content: center;
+}
+.notificationsWithoutTable {
+  height: 15.5vh;
+}
+.noNotifications {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  height: 100%;
+}
+.columnActionButton {
+  color: var(--datatable-header-info-button-color) !important;
+  margin-left: 0.4rem !important;
+  background-color: var(--c-white-color) !important;
+}
+.center {
+  display: flex;
+  justify-content: center;
+}
+.notificationLevelTemplateWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.invisibleHeader {
+  display: none;
+}
+
+.enabledColumnWrapper {
+  text-align: center;
+}
+
+.spinner {
+  top: 0 !important;
+}
+
+.checkboxEditorWrapper {
+  display: flex;
+  justify-content: center;
+  .checkboxEditor {
+    width: 20px !important;
+  }
+}

@@ -77,10 +77,12 @@ export class DataTable extends Component {
     onVirtualScroll: null,
     pageLinkSize: 5,
     paginator: false,
+    paginatorDisabled: false,
     paginatorLeft: null,
     paginatorPosition: 'bottom',
     paginatorRight: null,
     paginatorTemplate: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink',
+    quickEditRowInfo: null,
     reorderableColumns: false,
     resizableColumns: false,
     responsive: false,
@@ -168,6 +170,7 @@ export class DataTable extends Component {
     onVirtualScroll: PropTypes.func,
     pageLinkSize: PropTypes.number,
     paginator: PropTypes.bool,
+    paginatorDisabled: PropTypes.bool,
     paginatorLeft: PropTypes.any,
     paginatorPosition: PropTypes.string,
     paginatorRight: PropTypes.any,
@@ -496,6 +499,7 @@ export class DataTable extends Component {
         alwaysShow={this.props.alwaysShowPaginator}
         className={className}
         currentPageReportTemplate={this.props.currentPageReportTemplate}
+        disabled={this.props.paginatorDisabled}
         first={this.getFirst()}
         leftContent={this.props.paginatorLeft}
         onPageChange={this.onPageChange}
@@ -510,11 +514,12 @@ export class DataTable extends Component {
                 layout: `FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport`,
                 CurrentPageReport: options => {
                   return (
-                    <span style={{ color: 'var(--white)', marginLeft: '1.5rem', userSelect: 'none' }}>
+                    <span style={{ color: 'var(--c-white-color)', marginLeft: '1.5rem', userSelect: 'none' }}>
                       <label style={{ margin: '0 0.5rem' }}>{this.context.messages['goTo']}</label>
                       <InputText
                         data-for="pageInputTooltip"
                         data-tip
+                        disabled={this.props.paginatorDisabled}
                         id="currentPageInput"
                         keyfilter="pint"
                         onChange={this.onChangeCurrentPage}
@@ -552,9 +557,14 @@ export class DataTable extends Component {
   }
 
   onSort(event) {
-    let sortField = event.sortField;
-    let sortOrder = this.getSortField() === event.sortField ? this.getSortOrder() * -1 : this.props.defaultSortOrder;
+    let sortField = null;
+    let sortOrder = null;
     let multiSortMeta;
+
+    if (this.getSortOrder() >= 0) {
+      sortField = event.sortField;
+      sortOrder = this.getSortField() === event.sortField ? this.getSortOrder() * -1 : this.props.defaultSortOrder;
+    }
 
     this.columnSortable = event.sortable;
     this.columnSortFunction = event.sortFunction;
@@ -1303,6 +1313,7 @@ export class DataTable extends Component {
         onRowUnselect={this.props.onRowUnselect}
         onSelectionChange={this.props.onSelectionChange}
         paginator={this.props.paginator}
+        quickEditRowInfo={this.props.quickEditRowInfo}
         responsive={this.props.responsive}
         rowClassName={this.props.rowClassName}
         rowEditorValidator={this.props.rowEditorValidator}

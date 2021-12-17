@@ -3,6 +3,10 @@ package org.eea.kafka.utils;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -29,6 +33,9 @@ public class KafkaSenderUtils {
 
   @Autowired
   private NotificableEventFactory notificableEventFactory;
+
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
 
   private static final Logger LOG = LoggerFactory.getLogger(KafkaSenderUtils.class);
 
@@ -77,12 +84,66 @@ public class KafkaSenderUtils {
    */
   public void releaseNotificableKafkaEvent(final EventType eventType, Map<String, Object> value,
       final NotificationVO notificationVO) throws EEAException {
+
     if (value == null) {
       value = new HashMap<>();
     }
-    value.put("notification",
-        notificableEventFactory.getNotificableEventHandler(eventType).getMap(notificationVO));
+    Map<String, Object> notificationMap =
+        notificableEventFactory.getNotificableEventHandler(eventType).getMap(notificationVO);
+
+    saveUserNotification(eventType.toString(), notificationMap);
+    value.put("notification", notificationMap);
     releaseKafkaEvent(eventType, value);
     LOG.info("released kafaka event {}", eventType);
   }
+
+  /**
+   * Save user notification.
+   *
+   * @param eventType the event type
+   * @param notificationMap the notification map
+   */
+  private void saveUserNotification(String eventType, Map<String, Object> notificationMap) {
+    Long dataflowId = (notificationMap.get("dataflowId") != null)
+        ? Long.parseLong(notificationMap.get("dataflowId").toString())
+        : null;
+    String dataflowName = (notificationMap.get("dataflowName") != null)
+        ? notificationMap.get("dataflowName").toString()
+        : null;
+    Long datasetId = (notificationMap.get("datasetId") != null)
+        ? Long.parseLong(notificationMap.get("datasetId").toString())
+        : null;
+    String datasetName =
+        (notificationMap.get("datasetName") != null) ? notificationMap.get("datasetName").toString()
+            : null;
+    String dataProviderName = (notificationMap.get("dataProviderName") != null)
+        ? notificationMap.get("dataProviderName").toString()
+        : null;
+
+    String tableSchemaName = (notificationMap.get("tableSchemaName") != null)
+        ? notificationMap.get("tableSchemaName").toString()
+        : null;
+    String fileName =
+        (notificationMap.get("fileName") != null) ? notificationMap.get("fileName").toString()
+            : null;
+
+    UserNotificationContentVO content = new UserNotificationContentVO();
+    content.setDataflowId(dataflowId);
+    content.setDataflowName(dataflowName);
+    content.setDatasetId(datasetId);
+    content.setDatasetName(datasetName);
+    content.setDataProviderName(dataProviderName);
+    content.setTypeStatus((notificationMap.get("typeStatus") != null)
+        ? TypeStatusEnum.valueOf(notificationMap.get("typeStatus").toString())
+        : null);
+    content.setType((notificationMap.get("type") != null)
+        ? DatasetTypeEnum.valueOf(notificationMap.get("type").toString())
+        : null);
+    content.setTableSchemaName(tableSchemaName);
+    content.setFileName(fileName);
+    notificationControllerZuul.createUserNotificationPrivate(eventType, content);
+    LOG.info("Save user notification, eventType: {}, notification content: {}", eventType, content);
+
+  }
+
 }

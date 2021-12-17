@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 import org.eea.recordstore.docker.DockerClientBuilderBean;
@@ -154,51 +153,6 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
 
   }
 
-  /**
-   * Gets the connection.
-   *
-   * @return the connection
-   *
-   * @deprecated (not used)
-   */
-  @Deprecated
-  @Override
-  public List<String> getConnection() {
-    final Container container = getContainer(containerName);
-    final List<String> result = new ArrayList<>();
-    final OutputStream output = new ByteArrayOutputStream();
-    final OutputStream errorOutput = new ByteArrayOutputStream();
-
-    final ExecCreateCmdResponse execCreateCmdResponse = dockerClient.dockerClient()
-        .execCreateCmd(container.getId()).withAttachStdout(true).withCmd(
-
-            "psql", "-h", "localhost", "-U", "root", "-p", "5432", "-d", "datasets", "-c",
-            "select * from pg_namespace where nspname like 'dataset%'")
-        .withTty(true).exec();
-    // This works for event management. Interesting
-    ExecStartResultCallback execResult = null;
-    execResult = dockerClient.dockerClient().execStartCmd(execCreateCmdResponse.getId())
-        .withDetach(false).exec(new ExecStartResultCallback(output, errorOutput));
-
-    try {
-      execResult.awaitCompletion().onComplete();
-
-    } catch (final InterruptedException e) {
-      LOG_ERROR.error(e.getMessage());
-      Thread.currentThread().interrupt();
-    }
-    final String outcomeOk = new String(((ByteArrayOutputStream) output).toByteArray());
-    final String outcomeKo = new String(((ByteArrayOutputStream) errorOutput).toByteArray());
-    LOG.info(outcomeOk);
-    if (!"".equals(outcomeKo)) {
-      LOG_ERROR.error(outcomeKo);
-    }
-    final Matcher dataMatcher = DATASET_NAME_PATTERN.matcher(outcomeOk);
-    while (dataMatcher.find()) {
-      result.add(dataMatcher.group(0));
-    }
-    return result;
-  }
 
   /**
    * Stop and remove container.

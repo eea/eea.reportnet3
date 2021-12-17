@@ -3,15 +3,15 @@ import { useContext, useReducer } from 'react';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import { config } from 'conf';
-
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { userReducer } from 'views/_functions/Reducers/userReducer';
 
+import { SystemNotificationService } from 'services/SystemNotificationService';
+
 const userSettingsDefaultState = {
-  currentDataflowType: config.dataflowType.REPORTING.value,
+  currentDataflowType: undefined,
   userProps: {
     amPm24h: true,
     basemapLayer: 'Topographic',
@@ -32,15 +32,22 @@ export const UserProvider = ({ children }) => {
   const notificationContext = useContext(NotificationContext);
   const [userState, userDispatcher] = useReducer(userReducer, userSettingsDefaultState);
 
+  const onLoadSystemNotifications = async () => {
+    const unparsedNotifications = await SystemNotificationService.all();
+    unparsedNotifications.forEach(notification => {
+      notificationContext.add(notification, false, true);
+    });
+  };
+
   return (
     <UserContext.Provider
       value={{
         ...userState,
         hasPermission: (permissions, entity) => {
           if (isUndefined(entity)) {
-            return permissions.some(permission => userState.accessRole.includes(permission));
+            return permissions.some(permission => userState.accessRole?.includes(permission));
           } else {
-            return permissions.some(permission => userState.contextRoles.includes(`${entity}-${permission}`));
+            return permissions.some(permission => userState.contextRoles?.includes(`${entity}-${permission}`));
           }
         },
 
@@ -48,6 +55,7 @@ export const UserProvider = ({ children }) => {
           if (isNil(userState.contextRoles)) {
             return false;
           }
+
           return allowedPermissions.some(allowedPermission => {
             if (isNil(entityID)) {
               return userState.contextRoles.some(role => role.startsWith(entity) && role.endsWith(allowedPermission));
@@ -73,7 +81,10 @@ export const UserProvider = ({ children }) => {
           userDispatcher({ type: 'USER_PINNED_DATAFLOWS', payload: pinnedDataflows }),
         onChangeRowsPerPage: rowNumber => userDispatcher({ type: 'DEFAULT_ROW_SELECTED', payload: rowNumber }),
 
-        onLogin: user => userDispatcher({ type: 'LOGIN', payload: user }),
+        onLogin: user => {
+          onLoadSystemNotifications();
+          userDispatcher({ type: 'LOGIN', payload: user });
+        },
 
         onLogout: () => {
           notificationContext.deleteAll();

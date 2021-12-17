@@ -4,6 +4,7 @@
   padding: 2rem 2rem 2rem 2rem;
   position: relative;
   color: var(--general-text-color);
+  border-radius: 3px;
 
   .actionButtons {
     padding: 1rem;
@@ -55,12 +56,12 @@
   h3 {
     .infoButtonWrapper {
       border-radius: 5px;
-      border: 0.1rem solid var(--gray-25);
+      border: 0.1rem solid var(--c-gray-25);
       padding: 1rem;
       display: flex;
       align-items: center;
       .infoButton {
-        background-color: var(--white) !important;
+        background-color: var(--c-white-color) !important;
         border-radius: 50% !important;
         color: red !important;
         font-size: 12pt !important;
@@ -166,14 +167,14 @@
 
     .infoButtonWrapper {
       border-radius: 5px;
-      border: 0.1rem solid var(--gray-25);
+      border: 0.1rem solid var(--c-gray-25);
       padding: 1rem;
       display: flex;
       align-items: center;
       .infoButton {
-        background-color: var(--white) !important;
+        background-color: var(--c-white-color) !important;
         border-radius: 50% !important;
-        color: red !important;
+        color: var(--errors) !important;
         font-size: 12pt !important;
         height: 0.7em !important;
         margin-left: 0.4rem !important;
@@ -193,7 +194,7 @@
     }
 
     .infoCircle {
-      background-color: var(--white);
+      background-color: var(--c-white-color);
       border-radius: 50%;
       color: var(--datatable-header-info-button-color);
       font-size: 12pt;
@@ -213,7 +214,7 @@
     }
   }
   .infoCircle {
-    background-color: var(--white) !important;
+    background-color: var(--c-white-color) !important;
     border-radius: 50% !important;
     color: var(--datatable-header-info-button-color) !important;
     font-size: 12pt;
@@ -249,14 +250,14 @@
 .subTable {
   padding: 1rem;
   margin: 2rem 0 2rem 0;
-  border: 1px solid var(--gray-25);
+  border: 1px solid var(--c-gray-25);
   color: var(--general-text-color);
   .content {
-    border: 1px solid var(--gray-25);
+    border: 1px solid var(--c-gray-25);
   }
   .title {
-    border-radius: 10px;
-    border: 0.1rem solid var(--gray-25);
+    border-radius: 3px;
+    border: var(--general-border-style);
     padding: 0 1rem;
     margin: 0.5rem 0;
   }
@@ -278,10 +279,10 @@
 
 .subTable,
 .showInsideParentTable {
-  border-radius: 10px;
+  border-radius: 3px;
   height: 100%;
   width: 100%;
-
+  border-color: var(--general-border-color);
   .title {
     display: flex;
     align-items: center;

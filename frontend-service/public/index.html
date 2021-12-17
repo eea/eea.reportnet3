@@ -2,14 +2,14 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" id="favicon" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" id="manifest" />
     <link rel="stylesheet" type="text/css" href="/css/indexStyles.css" />
     <!--
       Notice the use of %PUBLIC_URL% in the tags above.
@@ -58,5 +58,24 @@
     </div>
     <script src="%PUBLIC_URL%/env.js"></script>
     <script src="%PUBLIC_URL%/js/index.js"></script>
+    <script>
+      // Dynamically change favicon for system/browser light or dark mode
+      const usesDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches || false;
+      const favicon = document.getElementById('favicon');
+      const manifest = document.getElementById('manifest');
+
+      function switchIcon(usesDarkMode) {
+        if (usesDarkMode) {
+          favicon.href = '%PUBLIC_URL%/favicon-dark.ico';
+          manifest.href = '%PUBLIC_URL%/manifest-dark.json';
+        } else {
+          favicon.href = '%PUBLIC_URL%/favicon.ico';
+          manifest.href = '%PUBLIC_URL%/manifest.json';
+        }
+      }
+
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => switchIcon(e.matches));
+      switchIcon(usesDarkMode);
+    </script>
   </body>
 </html>

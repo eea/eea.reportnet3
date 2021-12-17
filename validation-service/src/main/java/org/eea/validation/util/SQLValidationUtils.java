@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
+import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -142,10 +143,13 @@ public class SQLValidationUtils {
   public static void executeValidationSQLRule(Long datasetId, String ruleId,
       String dataProviderCode) {
     Rule rule = sqlRulesService.getRule(datasetId, ruleId);
-    TableValue tableToEvaluate = getTableToEvaluate(datasetId, rule, dataProviderCode);
-    if (null != tableToEvaluate && null != tableToEvaluate.getId()) {
-      String schemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
-      Optional<DataSetSchema> dataSetSchema = schemasRepository.findById(new ObjectId(schemaId));
+    DataSetMetabaseVO dataSetMetabaseVO =
+        datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    TableValue tableToEvaluate = getTableToEvaluate(rule, dataProviderCode, dataSetMetabaseVO);
+    if (null != tableToEvaluate && null != tableToEvaluate.getId()
+        && CollectionUtils.isNotEmpty(tableToEvaluate.getRecords())) {
+      Optional<DataSetSchema> dataSetSchema =
+          schemasRepository.findById(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
       Optional<TableValue> tableValue = tableRepository.findById(tableToEvaluate.getId());
       String tableName = getTableName(dataSetSchema, tableValue);
       switch (rule.getType()) {
@@ -177,17 +181,23 @@ public class SQLValidationUtils {
    * @param dataProviderCode the data provider code
    * @return the table to evaluate
    */
-  private static TableValue getTableToEvaluate(Long datasetId, Rule rule, String dataProviderCode) {
+  private static TableValue getTableToEvaluate(Rule rule, String dataProviderCode,
+      DataSetMetabaseVO dataSetMetabaseVO) {
     TableValue table = null;
-    String query = rule.getSqlSentence();
+    String query = rule != null ? rule.getSqlSentence() : null;
     try {
-      String preparedquery = query.contains(";") ? query.replace(";", "") : query;
-      if (dataProviderCode != null) {
-        preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", dataProviderCode);
-        preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", dataProviderCode);
-        preparedquery = preparedquery.replace("{%R3_ORGANIZATION_CODE%}", dataProviderCode);
+      if (query != null) {
+        String preparedquery = query.contains(";") ? query.replace(";", "") : query;
+        if (dataProviderCode != null) {
+          preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", dataProviderCode);
+          preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", dataProviderCode);
+          preparedquery = preparedquery.replace("{%R3_ORGANIZATION_CODE%}", dataProviderCode);
+        }
+        table = sqlRulesService.retrieveTableData(preparedquery, dataSetMetabaseVO, rule,
+            Boolean.FALSE);
+      } else {
+        throw new EEAInvalidSQLException("No sql found");
       }
-      table = sqlRulesService.retrieveTableData(preparedquery, datasetId, rule, Boolean.FALSE);
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
     }
@@ -375,22 +385,14 @@ public class SQLValidationUtils {
     Validation validationDataset = createValidation(rule, tableName, null,
         prepareSQLErrorMessage(dataset, rule, dataSetSchema, null));
     validationDataset.setTableName(datasetMetabase.getDataSetName());
-    if (dataset.getDatasetValidations().isEmpty()) {
-      DatasetValidation datasetValidation = new DatasetValidation();
-      datasetValidation.setDatasetValue(dataset);
-      datasetValidation.setValidation(validationDataset);
-      List<DatasetValidation> datasetValidations = new ArrayList<>();
-      datasetValidations.add(datasetValidation);
-      dataset.setDatasetValidations(datasetValidations);
-    } else {
-      List<DatasetValidation> datasetValidations = dataset.getDatasetValidations();
-      DatasetValidation datasetValidation = new DatasetValidation();
-      datasetValidation.setDatasetValue(dataset);
-      datasetValidation.setValidation(createValidation(rule, tableName, null,
-          prepareSQLErrorMessage(dataset, rule, dataSetSchema, null)));
-      datasetValidations.add(datasetValidation);
-      dataset.setDatasetValidations(datasetValidations);
-    }
+    DatasetValidation datasetValidation = new DatasetValidation();
+    datasetValidation.setDatasetValue(dataset);
+    datasetValidation.setValidation(validationDataset);
+    List<DatasetValidation> datasetValidations =
+        dataset.getDatasetValidations() != null ? dataset.getDatasetValidations()
+            : new ArrayList<>();
+    datasetValidations.add(datasetValidation);
+    dataset.setDatasetValidations(datasetValidations);
     saveDataset(dataset);
   }
 
@@ -488,6 +490,20 @@ public class SQLValidationUtils {
       RecordValue rvAux = (RecordValue) object;
       for (String field : fieldsToReplace) {
         errorMessage = errorMessage.replace(field, getReplacement(field, rvAux, tableToEvaluate));
+      }
+    } else if (object instanceof TableValue) {
+      TableValue tvAux = (TableValue) object;
+      for (String field : fieldsToReplace) {
+        if (null != tvAux) {
+          String replacement = "";
+          for (RecordValue record : tvAux.getRecords()) {
+            replacement = getReplacement(field, record, tableToEvaluate);
+            if (!"".equals(replacement)) {
+              break;
+            }
+          }
+          errorMessage = errorMessage.replace(field, replacement);
+        }
       }
     }
     return errorMessage;

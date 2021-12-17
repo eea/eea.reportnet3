@@ -7,6 +7,8 @@ import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
 
+import { config } from 'conf';
+
 import styles from './DataflowsItem.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -18,7 +20,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
 
-const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }) => {
+const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = () => {} }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -29,6 +31,30 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
   useEffect(() => {
     setIsPinned(itemContent.pinned === 'pinned');
   }, [itemContent, isPinning]);
+
+  const renderShowPublicInfo = () => {
+    const id = uniqueId(itemContent.showPublicInfo ? 'showPublicInfo' : 'doNotShowPublicInfo');
+    if ((isCustodian || isAdmin) && itemContent.statusKey === config.dataflowStatus.OPEN) {
+      return (
+        <div className={`${styles.upperIcon}`}>
+          <div>
+            <span data-for={id} data-tip>
+              <FontAwesomeIcon
+                icon={AwesomeIcons(itemContent.showPublicInfo ? 'eye' : 'eyeSlash')}
+                role="presentation"
+                style={{ opacity: '0.6' }}
+              />
+            </span>
+            <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={id} place="top">
+              {resourcesContext.messages[itemContent.showPublicInfo ? 'public' : 'notPublic']}
+            </ReactTooltip>
+          </div>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  };
 
   const layout = children => {
     return (
@@ -61,22 +87,33 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
 
   return layout(
     <Fragment>
+      {renderShowPublicInfo()}
       <div className={`${styles.icon}`}>
         <FontAwesomeIcon icon={AwesomeIcons('clone')} role="presentation" />
       </div>
 
-      <div className={`${styles.deliveryDate} dataflowList-delivery-date-help-step`}>
-        <p>
-          <span>{`${resourcesContext.messages['deliveryDate']}: `}</span>
-          <span className={`${styles.dateBlock}`}>
-            {TextUtils.areEquals(itemContent.expirationDate, '-')
-              ? resourcesContext.messages['pending']
-              : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
-          </span>
-        </p>
+      <div className={`${styles.dataflowDates}`}>
+        <div>
+          {(isCustodian || isAdmin) && (
+            <div>
+              <span>{`${resourcesContext.messages['creationDate']}: `}</span>
+              <span className={`${styles.dateBlock}`}>
+                {dayjs(itemContent.creationDate).format(userContext.userProps.dateFormat)}
+              </span>
+            </div>
+          )}
+          <div>
+            <span>{`${resourcesContext.messages['deliveryDate']}: `}</span>
+            <span className={`${styles.dateBlock}`}>
+              {TextUtils.areEquals(itemContent.expirationDate, '-')
+                ? resourcesContext.messages['pending']
+                : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div className={`${styles.text} dataflowList-name-description-help-step`}>
+      <div className={`${styles.text}`}>
         <h3 className={`${styles.title}`} data-for={idTooltip} data-tip>
           {itemContent.name}
         </h3>
@@ -89,14 +126,16 @@ const DataflowsItem = ({ isCustodian, itemContent, reorderDataflows = () => {} }
       </div>
 
       <div className={`${styles.status} dataflowList-status-help-step`}>
-        {!isCustodian && !isNil(itemContent.reportingDatasetsStatus) && itemContent.status === 'OPEN' && (
-          <p>
-            <span>{`${resourcesContext.messages['deliveryStatus']}: `}</span>
-            {itemContent.reportingDatasetsStatus === 'PENDING'
-              ? resourcesContext.messages['draft'].toUpperCase()
-              : itemContent.reportingDatasetsStatus.split('_').join(' ').toUpperCase()}
-          </p>
-        )}
+        {!isCustodian &&
+          !isNil(itemContent.reportingDatasetsStatus) &&
+          itemContent.statusKey === config.dataflowStatus.OPEN && (
+            <p>
+              <span>{`${resourcesContext.messages['deliveryStatus']}: `}</span>
+              {itemContent.reportingDatasetsStatus === 'PENDING'
+                ? resourcesContext.messages['draft'].toUpperCase()
+                : itemContent.reportingDatasetsStatus.split('_').join(' ').toUpperCase()}
+            </p>
+          )}
         <p>
           <span>{`${resourcesContext.messages['dataflowStatus']}: `}</span>
           {itemContent.status}

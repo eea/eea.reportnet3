@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
-import { withRouter } from 'react-router';
+import { withRouter } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
@@ -122,19 +122,22 @@ const BigButtonListReference = withRouter(
       handleDialogs({ dialog: 'cloneDialogVisible', isVisible: false });
       setCloneLoading(true);
 
-      notificationContext.add({
-        type: 'CLONE_DATASET_SCHEMAS_INIT',
-        content: { sourceDataflowName: cloneDataflow.name, targetDataflowName: dataflowState.name }
-      });
+      notificationContext.add(
+        {
+          type: 'CLONE_DATASET_SCHEMAS_INIT',
+          content: { customContent: { sourceDataflowName: cloneDataflow.name, targetDataflowName: dataflowState.name } }
+        },
+        true
+      );
 
       try {
         await DataflowService.cloneSchemas(cloneDataflow.id, dataflowId);
       } catch (error) {
         if (error.response.status === 423) {
-          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' });
+          notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
         } else {
           console.error('BigButtonListReference - cloneDatasetSchemas.', error);
-          notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' });
+          notificationContext.add({ type: 'CLONE_NEW_SCHEMA_ERROR' }, true);
         }
       }
     };
@@ -151,7 +154,7 @@ const BigButtonListReference = withRouter(
         return await MetadataUtils.getMetadata(ids);
       } catch (error) {
         console.error('BigButtonListReference - getMetadata.', error);
-        notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId } });
+        notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId } }, true);
       }
     };
 
@@ -168,7 +171,7 @@ const BigButtonListReference = withRouter(
       } catch (error) {
         console.error('BigButtonListReference - onDeleteDatasetSchema.', error);
         if (error.response.status === 401) {
-          notificationContext.add({ type: 'DELETE_DATASET_SCHEMA_LINK_ERROR' });
+          notificationContext.add({ type: 'DELETE_DATASET_SCHEMA_LINK_ERROR' }, true);
         }
       } finally {
         hideLoading();
@@ -190,13 +193,17 @@ const BigButtonListReference = withRouter(
           dataflow: { name: dataflowName }
         } = await getMetadata({ dataflowId });
 
-        notificationContext.add({
-          type: 'CREATE_REFERENCE_DATASETS_ERROR',
-          content: { referenceDataflowId: dataflowId, dataflowName }
-        });
+        notificationContext.add(
+          {
+            type: 'CREATE_REFERENCE_DATASETS_ERROR',
+            content: { customContent: { referenceDataflowId: dataflowId }, dataflowName }
+          },
+          true
+        );
         setIsCreatingReferenceDatasets(false);
       } finally {
         handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });
+        notificationContext.removeHiddenByKey('NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT');
       }
     };
 
@@ -215,13 +222,17 @@ const BigButtonListReference = withRouter(
           dataflow: { name: dataflowName }
         } = await getMetadata({ dataflowId });
 
-        notificationContext.add({
-          type: 'CREATE_REFERENCE_DATASETS_ERROR',
-          content: { referenceDataflowId: dataflowId, dataflowName }
-        });
+        notificationContext.add(
+          {
+            type: 'CREATE_REFERENCE_DATASETS_ERROR',
+            content: { customContent: { referenceDataflowId: dataflowId }, dataflowName }
+          },
+          true
+        );
         setIsCreatingReferenceDatasets(false);
       } finally {
         handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });
+        notificationContext.removeHiddenByKey('NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT');
       }
     };
 
@@ -427,7 +438,10 @@ const BigButtonListReference = withRouter(
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
             onConfirm={() => onCreateReferenceDatasetsWithNoPKs()}
-            onHide={() => handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false })}
+            onHide={() => {
+              handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });
+              notificationContext.removeHiddenByKey('NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT');
+            }}
             visible={dialogVisibility.isTableWithNoPK}>
             {resourcesContext.messages['tableWithNoPKWarningBody']}
           </ConfirmDialog>

@@ -39,6 +39,7 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
     return EventType.UPDATE_MATERIALIZED_VIEW_EVENT;
   }
 
+
   /**
    * Execute.
    *

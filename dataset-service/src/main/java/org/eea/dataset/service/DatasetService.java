@@ -19,7 +19,6 @@ import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -70,32 +69,6 @@ public interface DatasetService {
       String fields, ErrorTypeEnum[] levelError, String[] idRules, String fieldSchema,
       String fieldValue) throws EEAException;
 
-  /**
-   * Gets the position from any object id.
-   *
-   * @param id the id
-   * @param idDataset the id dataset
-   * @param type the type
-   *
-   * @return the position from any object id
-   *
-   * @throws EEAException the EEA exception
-   */
-  ValidationLinkVO getPositionFromAnyObjectId(String id, @DatasetId Long idDataset,
-      EntityTypeEnum type) throws EEAException;
-
-  /**
-   * Gets the dataset by id.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the by id
-   *
-   * @throws EEAException the EEA exception
-   * @deprecated this deprecated
-   */
-  @Deprecated
-  DataSetVO getById(@DatasetId Long datasetId) throws EEAException;
 
   /**
    * Update dataset.
@@ -640,6 +613,5 @@ public interface DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException;
-
 
 }

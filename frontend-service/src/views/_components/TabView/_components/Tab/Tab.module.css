@@ -31,8 +31,12 @@ a.p_tabview_design_add span:first-child:hover {
 
 a.p_tabview_design_add span {
   font-size: 24px;
-  margin-top: -6px;
   position: absolute;
+}
+
+a.tabGeneral {
+  pointer-events: fill;
+  min-width: 3.6rem;
 }
 
 input.p_tabview_input_design {
@@ -43,4 +47,20 @@ input.p_tabview_input_design {
 .dragArrow {
   color: var(--drag-and-drop-arrow-color);
   opacity: var(--drag-and-drop-arrow-opacity);
+}
+
+.highlight {
+  color: var(--tabview-highlight-color) !important;
+}
+
+.tabViewTableEmpty {
+  height: 2.34rem !important;
+}
+
+.tabViewNavigationHidden {
+  height: 2.6rem !important;
+}
+
+.tabViewTabNavigationShown {
+  height: 2.7rem !important;
 }

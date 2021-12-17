@@ -19,7 +19,7 @@
       grid-template-rows: 15% 50% 25%;
       row-gap: 1rem;
       column-gap: 1.5rem;
-      color: var(--gray-110);
+      color: var(--main-font-color);
       padding: 1rem;
 
       @media (max-width: 1440px) {
@@ -46,24 +46,33 @@
     }
 
     &.DESIGN {
-      background-color: var(--c-lilac-100);
+      color: var(--main-font-color);
+      background: var(--card-design-dataflow-bg);
+
       &:hover {
-        background-color: #c2c8cf;
+        background: var(--card-design-dataflow-bg-hover);
       }
     }
-    &.DRAFT {
+    &.OPEN,
+    &.CLOSED {
       background-color: var(--c-lilac-300);
       &:hover {
         background-color: #6565a8;
       }
       .containerLink {
-        color: var(--white);
+        color: var(--c-white-color);
         background-image: url('/views/_assets/images/logos/logo-blanco.png');
-        .deliveryDate {
-          color: var(--white);
-          text-align: right;
-        }
       }
+    }
+  }
+  &.DESIGN,
+  &.OPEN,
+  &.CLOSED {
+    box-shadow: var(--dataflow-item-box-shadow);
+    transition: var(--dataflow-item-transition-box-shadow);
+    &:hover {
+      box-shadow: var(--dataflow-item-box-shadow-hover);
+      transition: var(--dataflow-item-transition-box-shadow);
     }
   }
   &:first-of-type {
@@ -92,7 +101,7 @@
     font-size: 14pt;
     margin-left: 0.9rem;
     margin-top: 0.7rem;
-    color: var(--white);
+    color: var(--c-white-color);
     cursor: pointer;
     &.pinned {
       transform: rotate(0deg);
@@ -127,18 +136,6 @@
     margin: 0px;
     font-size: 2.5rem;
     opacity: 0.6;
-  }
-
-  .deliveryDate {
-    grid-column: 3/3;
-    grid-row: 1/2;
-    color: var(--gray-110);
-    font-size: 1rem;
-    text-align: right;
-    margin-right: 3rem;
-    span {
-      font-weight: normal;
-    }
   }
 
   .dateBlock {
@@ -200,11 +197,6 @@
     .icon {
       display: none;
     }
-    .deliveryDate {
-      grid-column: 2/2;
-      font-size: 0.9rem;
-    }
-
     .status {
       grid-column: 2/3;
       justify-content: center;
@@ -231,11 +223,6 @@
   @media (max-width: 415px) {
     .role {
       grid-row: 1/2;
-    }
-    .deliveryDate {
-      grid-column: 1/1;
-      grid-row: 2/3;
-      text-align: left;
     }
     .text {
       grid-row: 3/4;

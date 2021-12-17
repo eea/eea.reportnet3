@@ -254,6 +254,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
+
   /**
    * Gets the dataflow status.
    *
@@ -680,11 +681,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       List<FKDataCollection> newTESTsRegistry = new ArrayList<>();
       List<FKDataCollection> newReferencesRegistry = new ArrayList<>();
 
+
       List<IntegrityDataCollection> lIntegrityDataCollections = new ArrayList<>();
       if (!referenceDataflow) {
         for (DesignDatasetVO design : designs) {
           RulesSchemaVO rulesSchemaVO =
-              rulesControllerZuul.findRuleSchemaByDatasetId(design.getDatasetSchema());
+              rulesControllerZuul.findRuleSchemaByDatasetId(design.getDatasetSchema(), dataflowId);
           List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
           if (isCreation) {
 
@@ -729,6 +731,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           datasetIdsAndSchemaIds.put(referenceDatasetId, referenceDataset.getDatasetSchema());
           for (RepresentativeVO representative : representatives) {
             List<String> emails = representative.getLeadReporters().stream()
+                .filter(leadReporter -> !Boolean.TRUE.equals(leadReporter.getInvalid()))
                 .map(LeadReporterVO::getEmail).collect(Collectors.toList());
             if (!emails.isEmpty()) {
               if (referenceDatasetIdsEmails.containsKey(referenceDatasetId)) {
@@ -738,12 +741,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               }
             } else {
               if (!referenceDatasetIdsEmails.containsKey(referenceDatasetId)) {
-                referenceDatasetIdsEmails.put(referenceDatasetId, null);
+                referenceDatasetIdsEmails.put(referenceDatasetId, new ArrayList<>());
               }
             }
           }
-          RulesSchemaVO rulesSchemaVO =
-              rulesControllerZuul.findRuleSchemaByDatasetId(referenceDataset.getDatasetSchema());
+          RulesSchemaVO rulesSchemaVO = rulesControllerZuul
+              .findRuleSchemaByDatasetId(referenceDataset.getDatasetSchema(), dataflowId);
           List<IntegrityVO> integritieVOs = findIntegrityVO(rulesSchemaVO);
           prepareFKAndIntegrityForEUandDC(referenceDatasetId, newReferencesRegistry,
               lIntegrityDataCollections, referenceDataset, integritieVOs);

@@ -306,6 +306,4 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
     return emptyNames.toArray(result);
   }
 
-
-
 }

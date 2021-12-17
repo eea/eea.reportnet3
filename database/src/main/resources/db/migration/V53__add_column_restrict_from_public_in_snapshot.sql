@@ -1,0 +1,1 @@
+ALTER TABLE public.snapshot ADD column if not exists "restrict_from_public" bool NULL;

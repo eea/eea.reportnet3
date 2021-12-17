@@ -29,6 +29,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The type Resource management controller implementation.
@@ -36,6 +37,7 @@ import io.swagger.annotations.ApiResponse;
 @RestController
 @RequestMapping(value = "/resource")
 @Api(tags = "Resources : Resources Manager")
+@ApiIgnore
 public class ResourceManagementControllerImpl implements ResourceManagementController {
 
   /**
@@ -59,7 +61,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @PostMapping(value = "/create")
   @ResponseStatus(HttpStatus.CREATED)
-  @ApiOperation(value = "Create a Resource")
+  @ApiOperation(value = "Create a Resource", hidden = true)
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
   public void createResource(@ApiParam(type = "Object",
       value = "ResourceInfoVO Object") @RequestBody ResourceInfoVO resourceInfoVO) {
@@ -83,7 +85,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping(value = "/delete")
   @ResponseStatus(HttpStatus.OK)
-  @ApiOperation(value = "Delete a list of Resources")
+  @ApiOperation(value = "Delete a list of Resources", hidden = true)
   public void deleteResource(@ApiParam(type = "List<Object>",
       value = "ResourceInfoVO Object List") @RequestBody List<ResourceInfoVO> resourceInfoVO) {
     ThreadPropertiesManager.setVariable("user",
@@ -101,7 +103,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping(value = "/delete_by_name")
   @ResponseStatus(HttpStatus.OK)
-  @ApiOperation(value = "Delete a list of Resources by their Names")
+  @ApiOperation(value = "Delete a list of Resources by their Names", hidden = true)
   public void deleteResourceByName(@ApiParam(type = "List<String>",
       value = "Resource name String List ") @RequestParam("resourceNames") List<String> resourceName) {
     securityProviderInterfaceService.deleteResourceInstancesByName(resourceName);
@@ -116,7 +118,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @DeleteMapping("/delete_by_dataset_id")
-  @ApiOperation(value = "Delete a Resource its Dataset Id")
+  @ApiOperation(value = "Delete a Resource its Dataset Id", hidden = true)
   public void deleteResourceByDatasetId(@ApiParam(type = "Object",
       value = "Dataset ids Long list") @RequestParam("datasetIds") List<Long> datasetIds) {
     securityProviderInterfaceService.deleteResourceInstancesByDatasetId(datasetIds);
@@ -134,7 +136,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/details")
-  @ApiOperation(value = "Get a Resource details")
+  @ApiOperation(value = "Get a Resource details", hidden = true)
   public ResourceInfoVO getResourceDetail(
       @ApiParam(value = "Resource id", example = "0") @RequestParam("idResource") Long idResource,
       @ApiParam(type = "Object",
@@ -157,7 +159,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getResourceInfoVOByResource")
   @ApiOperation(value = "Get Resources by their Type", response = ResourceInfoVO.class,
-      responseContainer = "List")
+      responseContainer = "List", hidden = true)
   public List<ResourceInfoVO> getGroupsByIdResourceType(
       @ApiParam(value = "Resource id", example = "0") @RequestParam("idResource") Long idResource,
       @ApiParam(type = "Object",
@@ -176,7 +178,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   @PreAuthorize("isAuthenticated()")
   @PostMapping(value = "/createList")
   @ResponseStatus(HttpStatus.CREATED)
-  @ApiOperation(value = "Create Resources at same time")
+  @ApiOperation(value = "Create Resources at same time", hidden = true)
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
   public void createResources(@ApiParam(type = "List<Objects>",
       value = "ResourceInfoVOs List objects") @RequestBody List<ResourceInfoVO> resourceInfoVOs) {

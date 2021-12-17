@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.drools.template.ObjectDataCompiler;
@@ -81,25 +82,37 @@ public class KieBaseManager {
    *
    * @param datasetId the dataset id
    * @param datasetSchemaId the dataset schema
-   *
+   * @param sqlRule the sql rule
    * @return the kie base
-   *
    * @throws FileNotFoundException the file not found exception
    */
-  public KieBase reloadRules(Long datasetId, String datasetSchemaId) throws FileNotFoundException {
+  public KieBase reloadRules(Long datasetId, String datasetSchemaId, Rule sqlRule)
+      throws FileNotFoundException {
 
     ObjectId datasetSchemaOId = new ObjectId(datasetSchemaId);
     List<Map<String, String>> ruleAttributes = new ArrayList<>();
     ObjectDataCompiler compiler = new ObjectDataCompiler();
     KieServices kieServices = KieServices.Factory.get();
-
+    RulesSchema schemaRules = null;
+    List<Rule> filteredRules = new ArrayList<>();
+    if (sqlRule == null) {
+      schemaRules = rulesRepository.getActiveAndVerifiedRules(datasetSchemaOId);
+      filteredRules = schemaRules.getRules().stream()
+          .filter(rule -> !rule.getWhenCondition().startsWith("isSQL"))
+          .collect(Collectors.toList());
+    } else {
+      if (sqlRule.isEnabled()) {
+        filteredRules.add(sqlRule);
+      }
+      schemaRules = new RulesSchema();
+    }
+    schemaRules.setRules(filteredRules);
     // Get enabled and verified rules
-    RulesSchema schemaRules = rulesRepository.getActiveAndVerifiedRules(datasetSchemaOId);
 
     // we bring the datasetschema
     DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(datasetSchemaOId);
 
-    // here we have the mothod who compose the field in template
+    // here we have the method who compose the field in template
     if (null != schemaRules.getRules() && !schemaRules.getRules().isEmpty()) {
       schemaRules.getRules().stream().forEach(rule -> {
         String schemasDrools = "";
@@ -242,7 +255,6 @@ public class KieBaseManager {
    *
    * @param dataSetSchema the data set schema
    * @param rule the rule
-   * @param tableName the table name
    * @return the list
    */
   private List<String> fillFieldOriginName(DataSetSchema dataSetSchema, Rule rule) {

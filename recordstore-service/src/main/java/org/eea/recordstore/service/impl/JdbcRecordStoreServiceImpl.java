@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -214,10 +215,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
 
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
+
   /** The reference dataset controller zuul. */
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
-
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -394,7 +398,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
    * @param dateRelease the date release
-   * @param prefillingReference the prefilling reference
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
@@ -609,8 +612,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    * @param type the type
-   * @param dateRelease the date release
-   * @param prefillingReference the prefilling reference
+   *
    * @return the event type
    */
   private void notificationCreateAndCheckRelease(Long idDataset, Long idSnapshot, String type,
@@ -669,7 +671,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param datasetType the dataset type
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
-   * @param prefillingReference the prefilling reference
+   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -753,16 +755,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   /**
-   * Reset dataset database.
-   *
-   * @throws RecordStoreAccessException the record store access exception
-   */
-  @Override
-  public void resetDatasetDatabase() throws RecordStoreAccessException {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
-  }
-
-  /**
    * Restore snapshot.
    *
    * @param datasetId the dataset id
@@ -773,7 +765,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param deleteData the delete data
    * @param successEventType the success event type
    * @param failEventType the fail event type
-   * @param prefillingReference the prefilling reference
    */
   private void restoreSnapshot(Long datasetId, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
@@ -854,6 +845,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           releaseNotificableKafkaEvent(failEventType, value, datasetId,
               "Error restoring the snapshot data");
         }
+      } else {
+        LOG_ERROR.error(
+            "Error restoring the snapshot data into the prefilling reference dataset due to error {}.",
+            e.getMessage(), e);
       }
     } finally {
       // Release the lock manually
@@ -979,10 +974,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     if (!EventType.RELEASE_COMPLETED_EVENT.equals(event)) {
       try {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(event, value,
-            NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .datasetId(datasetId).error(error).build());
+        NotificationVO notificationVO = NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .datasetId(datasetId).error(error).build();
+        DataSetMetabaseVO datasetMetabaseVO =
+            dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+        notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+        notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+        notificationVO.setDataflowName(
+            dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+        kafkaSenderUtils.releaseNotificableKafkaEvent(event, value, notificationVO);
       } catch (EEAException ex) {
         LOG.error("Error realeasing event {} due to error {}", event, ex.getMessage(), ex);
       }
@@ -1235,6 +1236,39 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     LOG.info("These views: {} have been refreshed.", viewList);
   }
 
+  /**
+   * Refresh materialized query.
+   *
+   * @param datasetIds the dataset ids
+   */
+  @Override
+  @Async
+  public void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation,
+      boolean released, Long datasetId) {
+    datasetIds.forEach(id -> {
+      String viewToUpdate =
+          "select matviewname from pg_matviews  where schemaname = 'dataset_" + id + "'";
+      List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
+
+      String updateQuery = "refresh materialized view concurrently dataset_";
+
+      for (String view : viewList) {
+        try {
+          executeQueryViewCommands(updateQuery + id + "." + "\"" + view + "\"");
+        } catch (RecordStoreAccessException e) {
+          LOG_ERROR.error("Error refreshing materialized view from dataset {}", id);
+        }
+      }
+      LOG.info("These materialized views: {} have been refreshed.", viewList);
+    });
+    if (Boolean.TRUE.equals(continueValidation)) {
+      Map<String, Object> values = new HashMap<>();
+      values.put(LiteralConstants.DATASET_ID, datasetId);
+      values.put("released", released);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
+    }
+  }
+
 
   /**
    * Creates the index materialized view.
@@ -1345,7 +1379,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           break;
         case DATETIME:
           stringQuery.append("(select case when dataset_" + datasetId
-              + ".is_date( fv.value ) then CAST(fv.value as timestamp) else null end from dataset_"
+              + ".is_date( fv.value ) then CAST(fv.value as timestamp with time zone) else null end from dataset_"
               + datasetId + QUERY_FILTER_BY_ID_RECORD).append(schemaId).append(AS).append("\"")
               .append(columns.get(i).getName()).append("\" ");
           break;

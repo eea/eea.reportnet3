@@ -64,7 +64,7 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
       return { ...state, initialFieldValue: payload };
 
     case 'SET_INITIAL_FIELD_DESCRIPTION':
-      return { ...state, initialFieldValue: payload };
+      return { ...state, initialDescriptionValue: payload };
 
     case 'SET_NAME':
       return { ...state, fieldValue: payload };
@@ -77,7 +77,8 @@ export const fieldDesignerReducer = (state, { type, payload }) => {
         ...state,
         fieldLinkValue: payload.link,
         fieldPkMustBeUsed: payload.pkMustBeUsed,
-        fieldPkHasMultipleValues: payload.pkHasMultipleValues
+        fieldPkHasMultipleValues: payload.pkHasMultipleValues,
+        completeLink: payload.link
       };
 
     case 'SET_PK':

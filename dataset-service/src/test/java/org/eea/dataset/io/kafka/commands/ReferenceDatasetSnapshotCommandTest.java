@@ -89,4 +89,3 @@ public class ReferenceDatasetSnapshotCommandTest {
         referenceDatasetSnapshotCommand.getEventType());
   }
 }
-

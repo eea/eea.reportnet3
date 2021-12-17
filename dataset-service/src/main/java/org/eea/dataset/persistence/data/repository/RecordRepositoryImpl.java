@@ -42,6 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -49,6 +51,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * The Class RecordRepositoryImpl.
  */
 public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
+
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant MAX_FILTERS. */
   private static final int MAX_FILTERS = 5;
@@ -204,6 +210,37 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private static final String RECORDS = "records";
 
 
+  /** The Constant RESERVED_SQL_WORDS. */
+  private static final String[] RESERVED_SQL_WORDS = {"ABORT", "ABSOLUTE", "ACCESS", "ACTION",
+      "ADD", "AGGREGATE", "ALTER", "ANALYSE", "ANALYZE", "ANY", "ARRAY", "ASSERTION", "ASSIGNMENT",
+      "AT", "AUTHORIZATION", "BACKWARD", "BIGINT", "BINARY", "BIT", "BOOLEAN", "BOTH", "CACHE",
+      "CALLED", "CAST", "CHAIN", "CHAR", "CHARACTER", "CHARACTERISTICS", "CHECKPOINT", "CLASS",
+      "CLOSE", "CLUSTER", "COALESCE", "COLUMN", "COMMENT", "COMMITTED", "CONSTRAINTS", "CONVERSION",
+      "CONVERT", "COPY", "CREATEDB", "CREATEUSER", "CURRENT_DATE", "CURRENT_TIME",
+      "CURRENT_TIMESTAMP", "CURRENT_USER", "CURSOR", "CYCLE", "DAY", "DEALLOCATE", "DEC", "DECIMAL",
+      "DECLARE", "DEFAULTS", "DEFERRABLE", "DEFERRED", "DEFINER", "DELIMITER", "DELIMITERS", "DO",
+      "DOMAIN", "DOUBLE", "EACH", "ENCODING", "ENCRYPTED", "ESCAPE", "EXCEPT", "EXCLUDING",
+      "EXCLUSIVE", "EXECUTE", "EXISTS", "EXTERNAL", "EXTRACT", "FALSE", "FETCH", "FIRST", "FLOAT",
+      "FORCE", "FORWARD", "FREEZE", "FUNCTION", "GLOBAL", "GRANT", "HANDLER", "HOLD", "HOUR",
+      "ILIKE", "IMMEDIATE", "IMMUTABLE", "IMPLICIT", "INCLUDING", "INCREMENT", "INHERITS",
+      "INITIALLY", "INOUT", "INPUT", "INSENSITIVE", "INSTEAD", "INT", "INTERSECT", "INTERVAL",
+      "INVOKER", "ISNULL", "ISOLATION", "LANCOMPILER", "LANGUAGE", "LAST", "LEADING", "LEVEL",
+      "LISTEN", "LOAD", "LOCAL", "LOCALTIME", "LOCALTIMESTAMP", "LOCATION", "LOCK", "MAXVALUE",
+      "MINUTE", "MINVALUE", "MODE", "MONTH", "MOVE", "NAMES", "NATIONAL", "NCHAR", "NEW", "NEXT",
+      "NO", "NOCREATEDB", "NOCREATEUSER", "NONE", "NOTHING", "NOTIFY", "NOTNULL", "NULLIF",
+      "NUMERIC", "OF", "OFF", "OIDS", "OLD", "ONLY", "OPERATOR", "OPTION", "OUT", "OVERLAPS",
+      "OVERLAY", "OWNER", "PARTIAL", "PASSWORD", "PATH", "PENDANT", "PLACING", "POSITION",
+      "PRECISION", "PREPARE", "PRESERVE", "PRIOR", "PRIVILEGES", "PROCEDURAL", "PROCEDURE", "READ",
+      "REAL", "RECHECK", "REINDEX", "RELATIVE", "RENAME", "RESET", "RESTART", "RETURNS", "REVOKE",
+      "ROWS", "RULE", "SCHEMA", "SCROLL", "SECOND", "SECURITY", "SEQUENCE", "SERIALIZABLE",
+      "SESSION", "SESSION_USER", "SETOF", "SHARE", "SHOW", "SIMPLE", "SMALLINT", "SOME", "STABLE",
+      "START", "STATEMENT", "STATISTICS", "STDIN", "STDOUT", "STORAGE", "STRICT", "SUBSTRING",
+      "SYSID", "TEMP", "TEMPLATE", "TIME", "TIMESTAMP", "TOAST", "TRAILING", "TREAT", "TRIGGER",
+      "TRIM", "TRUE", "TRUNCATE", "TRUSTED", "TYPE", "UNENCRYPTED", "UNKNOWN", "UNLISTEN", "UNTIL",
+      "USAGE", "USER", "VACUUM", "VALID", "VALIDATOR", "VARCHAR", "VARYING", "VERBOSE", "VERSION",
+      "VIEW", "VOLATILE", "WITH", "WITHOUT", "WORK", "WRITE", "YEAR", "ZONE"};
+
+
 
   /**
    * Find by table value with order.
@@ -251,7 +288,245 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   }
 
   /**
-   * Compose filter by error.
+   * Find by table value no order.
+   *
+   * @param idTableSchema the id table schema
+   * @param pageable the pageable
+   * @return the list
+   */
+  @Override
+  public List<RecordValue> findByTableValueNoOrder(String idTableSchema, Pageable pageable) {
+    Query query = entityManager.createQuery(QUERY_UNSORTERED);
+    query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
+    if (null != pageable) {
+      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+      query.setMaxResults(pageable.getPageSize());
+    }
+    return query.getResultList();
+  }
+
+  /**
+   * Find by table value no order optimized.
+   *
+   * @param idTableSchema the id table schema
+   * @param pageable the pageable
+   * @return the list
+   */
+  /*
+   * Find by table value no order optimized.
+   *
+   * @param idTableSchema the id table schema
+   * 
+   * @param pageable the pageable
+   * 
+   * @return the list
+   */
+  @Override
+  public List<RecordValue> findByTableValueNoOrderOptimized(String idTableSchema,
+      Pageable pageable) {
+    Query query = entityManager.createQuery(QUERY_UNSORTERED_FIELDS);
+    query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
+    if (null != pageable) {
+      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+      query.setMaxResults(pageable.getPageSize());
+    }
+    return sanitizeRecords(query.getResultList());
+  }
+
+
+  /**
+   * Find by table value all records.
+   *
+   * @param idTableSchema the id table schema
+   * @return the list
+   */
+  @Override
+  public List<RecordValue> findByTableValueAllRecords(String idTableSchema) {
+    Query query = entityManager.createQuery(QUERY_UNSORTERED);
+    query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
+    return query.getResultList();
+  }
+
+  /**
+   * Find ordered native record.
+   *
+   * @param idTable the id table
+   * @param datasetId the dataset id
+   * @param pageable the pageable
+   * @return the list
+   * @throws HibernateException the hibernate exception
+   */
+  @Override
+  @Transactional
+  public List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable)
+      throws HibernateException {
+    Session session = (Session) entityManager.getDelegate();
+    return session
+        .doReturningWork(conn -> findByTableValueOrdered(conn, idTable, datasetId, pageable));
+  }
+
+  /**
+   * Find and generate ETL json.
+   *
+   * @param datasetId the dataset id
+   * @param outputStream the output stream
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @return the string
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public String findAndGenerateETLJson(Long datasetId, OutputStream outputStream,
+      String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName)
+      throws EEAException {
+    checkSql(filterValue);
+    checkSql(columnName);
+    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
+        .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+    List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+    String tableName = "";
+    StringBuilder stringQuery = new StringBuilder();
+    if (null == tableSchemaId) {
+      stringQuery
+          .append(" select cast(json_build_object('tables',json_agg(tables)) as TEXT) from ( ");
+    } else {
+      stringQuery.append(" select cast(tables as TEXT) from ( ");
+    }
+    String tableSchemaQueryPart = " when id_table_schema = '%s' then '%s' ";
+    StringBuilder caseTables = new StringBuilder();
+    if (null != tableSchemaId) {
+      Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
+      if (tableSchema != null) {
+        tableName = (String) tableSchema.get("nameTableSchema");
+      }
+    }
+    if (null != tableSchemaList) {
+      if (null != tableSchemaId) {
+        caseTables.append((String.format(tableSchemaQueryPart, tableSchemaId, tableName)));
+      } else {
+        for (TableSchema table : tableSchemaList) {
+          caseTables.append((String.format(tableSchemaQueryPart,
+              table.getIdTableSchema().toString(), table.getNameTableSchema())));
+        }
+      }
+    }
+    stringQuery
+        .append(" select json_build_object('tableName',(case " + caseTables.toString() + " end), ");
+    String totalRecords = "";
+    if (null != tableSchemaId) {
+      totalRecords = String.format(
+          " 'totalRecords',(select count(*) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table), ",
+          datasetId, datasetId, tableSchemaId);
+    }
+    if (null != columnName || null != filterValue) {
+      totalRecords =
+          totalRecordsQuery(datasetId, tableSchemaList, tableSchemaId, filterValue, columnName);
+    }
+    stringQuery.append(totalRecords).append(" 'records', json_agg(records)) as tables ")
+        .append(" from ( ")
+        .append(
+            " select * from ( select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
+        .append(
+            " select data_provider_code,id_table_schema,id_record,rdata_position,json_build_object('fieldName',\"fieldName\",'value',value,'field_value_id',field_value_id) as fields from( ")
+        .append(" select case ");
+    String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
+    if (null != tableSchemaList) {
+      for (TableSchema table : tableSchemaList) {
+        if (null != tableSchemaId) {
+          if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
+            for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+              stringQuery.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                  field.getHeaderName()));
+            }
+          }
+        } else {
+          for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+            stringQuery.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
+                field.getHeaderName()));
+          }
+        }
+      }
+    }
+    stringQuery.append(String.format(
+        " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
+        datasetId, datasetId, datasetId));
+    if (null != tableSchemaId) {
+      stringQuery.append(" where ")
+          .append(null != tableSchemaId
+              ? String.format(" id_table_schema like '%s' and ", tableSchemaId)
+              : "");
+      stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
+    }
+    stringQuery.append(
+        ") records group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position )recordAux2 ");
+    if (null != filterValue || null != columnName) {
+      stringQuery.append(
+          " where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
+          .append(null != columnName ? String.format(" x.o ->> 'fieldName' = '%s' and ", columnName)
+              : "")
+          .append(null != filterValue ? String.format(" x.o ->> 'value' = '%s' and ", filterValue)
+              : "");
+      stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
+      stringQuery.append(" ) ");
+    }
+    String paginationPart = " offset %s limit %s ";
+    if (null != offset && null != limit) {
+      Integer offsetAux = (limit * offset) - limit;
+      if (offsetAux < 0) {
+        offsetAux = 0;
+      }
+      stringQuery.append(String.format(paginationPart, offsetAux, limit));
+    }
+    stringQuery.append(" ) tablesAux ");
+    stringQuery.append(" group by id_table_schema ) as json ");
+    LOG.info("Query: {} ", stringQuery);
+    Query query = entityManager.createNativeQuery(stringQuery.toString());
+    Object result = null;
+    try {
+
+      result = query.getSingleResult();
+    } catch (NoResultException nre) {
+      LOG.info("no result, ignore message");
+    }
+    if (null == result || result.toString().equals(("{\"tables\" : null}"))) {
+      result = returnigJsonWithNoData(datasetId, datasetSchemaId, tableSchemaList, tableSchemaId,
+          filterValue, columnName);
+    }
+    return result.toString();
+  }
+
+
+  /**
+   * Check sql.
+   *
+   * @param text the text
+   * @return true, if successful
+   * @throws EEAException the EEA exception
+   */
+  private boolean checkSql(String text) throws EEAException {
+    List<String> illegalwords = Arrays.asList(RESERVED_SQL_WORDS);
+    boolean isAllowed = false;
+    if (null != text && !text.isEmpty()) {
+      if (!illegalwords.contains(text.toUpperCase())) {
+        isAllowed = true;
+      } else {
+        LOG_ERROR.error("Param {} is illegal.", text);
+        throw new EEAException("Unprocessable Entity",
+            new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY));
+      }
+    } else {
+      isAllowed = true;
+    }
+    return isAllowed;
+  }
+
+  /**
+   * 
+   * /** Compose filter by error.
    *
    * @param levelErrorList the level error list
    * @param fieldSchema the field schema
@@ -449,57 +724,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
   }
 
-  /**
-   * Find by table value no order.
-   *
-   * @param idTableSchema the id table schema
-   * @param pageable the pageable
-   * @return the list
-   */
-  @Override
-  public List<RecordValue> findByTableValueNoOrder(String idTableSchema, Pageable pageable) {
-    Query query = entityManager.createQuery(QUERY_UNSORTERED);
-    query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
-    if (null != pageable) {
-      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
-      query.setMaxResults(pageable.getPageSize());
-    }
-    return query.getResultList();
-  }
 
-
-
-  /**
-   * Find by table value all records.
-   *
-   * @param idTableSchema the id table schema
-   * @return the list
-   */
-  @Override
-  public List<RecordValue> findByTableValueAllRecords(String idTableSchema) {
-    Query query = entityManager.createQuery(QUERY_UNSORTERED);
-    query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
-    return query.getResultList();
-  }
-
-  /**
-   * Find by table value no order optimized.
-   *
-   * @param idTableSchema the id table schema
-   * @param pageable the pageable
-   * @return the list
-   */
-  @Override
-  public List<RecordValue> findByTableValueNoOrderOptimized(String idTableSchema,
-      Pageable pageable) {
-    Query query = entityManager.createQuery(QUERY_UNSORTERED_FIELDS);
-    query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
-    if (null != pageable) {
-      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
-      query.setMaxResults(pageable.getPageSize());
-    }
-    return sanitizeRecords(query.getResultList());
-  }
 
   /**
    * Sanitize ordered records.
@@ -590,168 +815,25 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   }
 
 
-  /**
-   * Find ordered native record.
-   *
-   * @param idTable the id table
-   * @param datasetId the dataset id
-   * @param pageable the pageable
-   * @return the list
-   * @throws HibernateException the hibernate exception
-   */
-  @Override
-  @Transactional
-  public List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable)
-      throws HibernateException {
-    Session session = (Session) entityManager.getDelegate();
-    return session
-        .doReturningWork(conn -> findByTableValueOrdered(conn, idTable, datasetId, pageable));
-  }
 
   /**
-   * Find and generate ETL json.
+   * Returnig json with no data.
    *
    * @param datasetId the dataset id
-   * @param outputStream the output stream
+   * @param datasetSchemaId the dataset schema id
+   * @param tableSchemaList the table schema list
    * @param tableSchemaId the table schema id
-   * @param limit the limit
-   * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
    * @return the string
    * @throws EEAException the EEA exception
    */
-  @Override
-  public String findAndGenerateETLJson(Long datasetId, OutputStream outputStream,
-      String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName)
-      throws EEAException {
-    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-    DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
-        .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
-    List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-    String tableName = "";
-    StringBuilder stringQuery = new StringBuilder();
-    if (null == tableSchemaId) {
-      stringQuery
-          .append(" select cast(json_build_object('tables',json_agg(tables)) as TEXT) from ( ");
-    } else {
-      stringQuery.append(" select cast(tables as TEXT) from ( ");
-    }
-    String tableSchemaQueryPart = " when id_table_schema = '%s' then '%s' ";
-    StringBuilder caseTables = new StringBuilder();
-    if (null != tableSchemaId) {
-      Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
-      if (tableSchema != null) {
-        tableName = (String) tableSchema.get("nameTableSchema");
-      }
-    }
-    if (null != tableSchemaList) {
-      if (null != tableSchemaId) {
-        caseTables.append((String.format(tableSchemaQueryPart, tableSchemaId, tableName)));
-      } else {
-        for (TableSchema table : tableSchemaList) {
-          caseTables.append((String.format(tableSchemaQueryPart,
-              table.getIdTableSchema().toString(), table.getNameTableSchema())));
-        }
-      }
-    }
-    stringQuery
-        .append(" select json_build_object('tableName',(case " + caseTables.toString() + " end), ");
-    String totalRecords = "";
-    if (null != tableSchemaId) {
-      totalRecords = String.format(
-          " 'totalRecords',(select count(*) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table), ",
-          datasetId, datasetId, tableSchemaId);
-    }
-    if (null != columnName || null != filterValue) {
-      totalRecords =
-          totalRecordsQuery(datasetId, tableSchemaList, tableSchemaId, filterValue, columnName);
-    }
-    stringQuery.append(totalRecords).append(" 'records', json_agg(records)) as tables ")
-        .append(" from ( ")
-        .append(
-            " select * from ( select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
-        .append(
-            " select data_provider_code,id_table_schema,id_record,rdata_position,json_build_object('fieldName',\"fieldName\",'value',value,'field_value_id',field_value_id) as fields from( ")
-        .append(" select case ");
-    String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-    if (null != tableSchemaList) {
-      for (TableSchema table : tableSchemaList) {
-        if (null != tableSchemaId) {
-          if (table.getIdTableSchema().toString().equals(tableSchemaId)) {
-            for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-              stringQuery.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
-                  field.getHeaderName()));
-            }
-          }
-        } else {
-          for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-            stringQuery.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
-                field.getHeaderName()));
-          }
-        }
-      }
-    }
-    stringQuery.append(String.format(
-        " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
-        datasetId, datasetId, datasetId));
-    if (null != tableSchemaId) {
-      stringQuery.append(" where ")
-          .append(null != tableSchemaId
-              ? String.format(" id_table_schema like '%s' and ", tableSchemaId)
-              : "");
-      stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
-    }
-    stringQuery.append(
-        ") records group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position )recordAux2 ");
-    if (null != filterValue || null != columnName) {
-      stringQuery.append(
-          " where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
-          .append(null != columnName ? String.format(" x.o ->> 'fieldName' = '%s' and ", columnName)
-              : "")
-          .append(null != filterValue ? String.format(" x.o ->> 'value' = '%s' and ", filterValue)
-              : "");
-      stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
-      stringQuery.append(" ) ");
-    }
-    String paginationPart = " offset %s limit %s ";
-    if (null != offset && null != limit) {
-      Integer offsetAux = (limit * offset) - limit;
-      if (offsetAux < 0) {
-        offsetAux = 0;
-      }
-      stringQuery.append(String.format(paginationPart, offsetAux, limit));
-    }
-    stringQuery.append(" ) tablesAux ");
-    stringQuery.append(" group by id_table_schema ) as json ");
-    LOG.info("Query: {} ", stringQuery);
-    Query query = entityManager.createNativeQuery(stringQuery.toString());
-    Object result = null;
-    try {
-      result = query.getSingleResult();
-    } catch (NoResultException nre) {
-      LOG.info("no result, ignore message");
-    }
-    if (null == result || result.toString().equals(("{\"tables\" : null}"))) {
-      result = returnigJsonWithNoData(datasetId, datasetSchemaId, tableSchemaList, tableSchemaId,
-          filterValue, columnName);
-    }
-    return result.toString();
-  }
-
-
-  /**
-   * Returnig json with no data.
-   *
-   * @param datasetSchemaId the dataset schema id
-   * @param tableSchemaList the table schema list
-   * @param tableSchemaId the table schema id
-   * @return the string
-   */
   @SuppressWarnings("unchecked")
   private String returnigJsonWithNoData(Long datasetId, String datasetSchemaId,
       List<TableSchema> tableSchemaList, String tableSchemaId, String filterValue,
-      String columnName) {
+      String columnName) throws EEAException {
+    checkSql(filterValue);
+    checkSql(columnName);
     JSONObject tables = new JSONObject();
     JSONArray jsonArray = new JSONArray();
     String tableName = "";

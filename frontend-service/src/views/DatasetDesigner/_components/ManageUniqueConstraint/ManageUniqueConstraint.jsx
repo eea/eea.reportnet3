@@ -143,7 +143,7 @@ export const ManageUniqueConstraint = ({
       refreshList(true);
     } catch (error) {
       console.error('ManageUniqueConstraint - onCreateConstraint.', error);
-      notificationContext.add({ type: 'CREATE_UNIQUE_CONSTRAINT_ERROR' });
+      notificationContext.add({ type: 'CREATE_UNIQUE_CONSTRAINT_ERROR' }, true);
     } finally {
       setIsCreating(false);
     }
@@ -184,7 +184,7 @@ export const ManageUniqueConstraint = ({
         refreshList(true);
       } catch (error) {
         console.error('ManageUniqueConstraint - onUpdateConstraint.', error);
-        notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' });
+        notificationContext.add({ type: 'UPDATE_UNIQUE_CONSTRAINT_ERROR' }, true);
       } finally {
         setIsUpdating(false);
       }

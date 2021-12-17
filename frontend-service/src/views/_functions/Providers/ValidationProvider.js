@@ -14,7 +14,8 @@ const validationReducer = (state, { type, payload }) => {
         reOpenOpener: !isNil(state.opener),
         ruleEdit: false,
         ruleToEdit: {},
-        tableSchemaId: null
+        tableSchemaId: null,
+        updatedRuleId: null
       };
 
     case 'ON_OPEN_QC_CREATION_MODAL_FROM_FIELD':
@@ -65,6 +66,12 @@ const validationReducer = (state, { type, payload }) => {
         ruleEdit: true,
         ruleToEdit: payload.ruleToEdit,
         level: payload.level,
+        updatedRuleId: payload.updatedRuleId
+      };
+
+    case 'ON_OPEN_TO_QUICK_EDIT':
+      return {
+        ...state,
         updatedRuleId: payload.updatedRuleId
       };
 
@@ -143,6 +150,13 @@ export const ValidationProvider = ({ children }) => {
           dispatch({
             type: 'ON_OPEN_TO_EDIT',
             payload: { ruleToEdit: { ...rule }, referenceId: rule.referenceId, level, updatedRuleId: rule.id }
+          });
+        },
+
+        onOpenToQuickEdit: ruleId => {
+          dispatch({
+            type: 'ON_OPEN_TO_QUICK_EDIT',
+            payload: { updatedRuleId: ruleId }
           });
         },
 

@@ -60,7 +60,6 @@ public class CreateConnectionEventTest {
   @Mock
   private TableRepository tableRepository;
 
-
   /**
    * Inits the mocks.
    */

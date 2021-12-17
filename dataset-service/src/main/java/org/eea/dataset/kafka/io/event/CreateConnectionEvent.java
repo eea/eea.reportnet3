@@ -35,7 +35,6 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
   @Autowired
   private TableRepository tableRepository;
 
-
   /**
    * Gets the event type.
    *

@@ -1,29 +1,29 @@
 {
   "exportTableTypes": [
     {
-      "text": "CSV (.csv)",
+      "key": "exportCsv",
       "code": "csv"
     },
     {
-      "text": "XLSX (.xlsx)",
+      "key": "exportXlsx",
       "code": "xlsx"
     }
   ],
   "exportDatasetTypes": [
     {
-      "text": "XLSX (.xlsx)",
+      "key": "exportXlsx",
       "code": "xlsx"
     },
     {
-      "text": "XLSX (.xlsx with validations)",
+      "key": "exportXlsxValidations",
       "code": "xlsx+validations"
     },
     {
-      "text": "ZIP (XLSX + attachments)",
+      "key": "exportZipAttachments",
       "code": "zip+xlsx"
     },
     {
-      "text": "ZIP (CSV for each table)",
+      "key": "zipCsvTable",
       "code": "zip+csv"
     }
   ]

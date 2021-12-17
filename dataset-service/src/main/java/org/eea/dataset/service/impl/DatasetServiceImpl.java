@@ -36,7 +36,6 @@ import org.eea.dataset.mapper.FieldValidationMapper;
 import org.eea.dataset.mapper.RecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.mapper.RecordValidationMapper;
-import org.eea.dataset.persistence.data.SortFieldsHelper;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.FieldValidation;
@@ -95,6 +94,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -106,7 +106,6 @@ import org.eea.interfaces.vo.dataset.FieldValidationVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.RecordValidationVO;
 import org.eea.interfaces.vo.dataset.TableVO;
-import org.eea.interfaces.vo.dataset.ValidationLinkVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -317,7 +316,6 @@ public class DatasetServiceImpl implements DatasetService {
   /** The dataset snapshot service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
-
 
   /** The import path. */
   @Value("${importPath}")
@@ -538,31 +536,6 @@ public class DatasetServiceImpl implements DatasetService {
     return result;
   }
 
-  /**
-   * Gets the by id.
-   *
-   * @param datasetId the dataset id
-   *
-   * @return the by id
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  @Deprecated
-  public DataSetVO getById(Long datasetId) throws EEAException {
-    DatasetValue datasetValue = new DatasetValue();
-    List<TableValue> allTableValues = tableRepository.findAllTables();
-    datasetValue.setTableValues(allTableValues);
-    datasetValue.setId(datasetId);
-    datasetValue.setIdDatasetSchema(datasetRepository.findIdDatasetSchemaById(datasetId));
-    for (TableValue tableValue : allTableValues) {
-      tableValue
-          .setRecords(sanitizeRecords(retrieveRecordValue(tableValue.getIdTableSchema(), null)));
-    }
-    LOG.info("Get dataset by id: {}", datasetId);
-    return dataSetMapper.entityToClass(datasetValue);
-  }
 
   /**
    * Update dataset.
@@ -593,65 +566,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Cacheable(value = "dataFlowId", key = "#datasetId")
   public Long getDataFlowIdById(Long datasetId) {
     return dataSetMetabaseRepository.findDataflowIdById(datasetId);
-  }
-
-  /**
-   * Gets the position from any object id.
-   *
-   * @param id the id
-   * @param idDataset the id dataset
-   * @param type the type
-   *
-   * @return the position from any object id
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public ValidationLinkVO getPositionFromAnyObjectId(final String id, final Long idDataset,
-      final EntityTypeEnum type) throws EEAException {
-
-    ValidationLinkVO validationLink = new ValidationLinkVO();
-    RecordValue record = new RecordValue();
-    List<RecordValue> records = new ArrayList<>();
-
-    // TABLE
-    if (EntityTypeEnum.TABLE == type) {
-      TableValue table = tableRepository.findByIdAndDatasetId_Id(Long.parseLong(id), idDataset);
-      records = recordRepository.findByTableValueNoOrder(table.getIdTableSchema(), null);
-      if (records != null && !records.isEmpty()) {
-        record = records.get(0);
-      }
-    }
-
-    // RECORD
-    if (EntityTypeEnum.RECORD == type) {
-      record = recordRepository.findByIdAndTableValue_DatasetId_Id(id, idDataset);
-      records =
-          recordRepository.findByTableValueNoOrder(record.getTableValue().getIdTableSchema(), null);
-    }
-
-    // FIELD
-    if (EntityTypeEnum.FIELD == type) {
-      FieldValue field = fieldRepository.findByIdAndRecord_TableValue_DatasetId_Id(id, idDataset);
-      if (field != null && field.getRecord() != null && field.getRecord().getTableValue() != null) {
-        record = field.getRecord();
-        records = recordRepository
-            .findByTableValueNoOrder(record.getTableValue().getIdTableSchema(), null);
-      }
-    }
-
-    if (records != null && !records.isEmpty()) {
-      int recordPosition = records.indexOf(record);
-      validationLink.setIdTableSchema(record.getTableValue().getIdTableSchema());
-      validationLink.setPosition(Long.valueOf(recordPosition));
-      validationLink.setIdRecord(record.getId());
-    }
-
-    LOG.info(
-        "Validation error with idObject {} clicked in dataset {}. The position is {} from table schema {}",
-        id, idDataset, validationLink.getPosition(), validationLink.getIdTableSchema());
-    return validationLink;
   }
 
   /**
@@ -967,8 +881,6 @@ public class DatasetServiceImpl implements DatasetService {
     return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode,
         false);
   }
-
-
 
   /**
    * Export file through integration.
@@ -2151,26 +2063,6 @@ public class DatasetServiceImpl implements DatasetService {
     return result;
   }
 
-  /**
-   * Retrieve record value.
-   *
-   * @param idTableSchema the id table schema
-   * @param idFieldSchema the id field schema
-   *
-   * @return the list
-   */
-  @Deprecated
-  private List<RecordValue> retrieveRecordValue(String idTableSchema, String idFieldSchema) {
-    Optional.ofNullable(idFieldSchema).ifPresent(field -> SortFieldsHelper.setSortingField(field));
-    List<RecordValue> records = null;
-    try {
-      records = recordRepository.findByTableValueIdTableSchema(idTableSchema);
-    } finally {
-      SortFieldsHelper.cleanSortingField();
-    }
-
-    return records;
-  }
 
   /**
    * Sanitize records.
@@ -3047,9 +2939,8 @@ public class DatasetServiceImpl implements DatasetService {
           new File(directoryDataflow, "dataProvider-" + representative.getDataProviderId());
       // we create the dataprovider folder to save it andwe always delete it and put new files
       FileUtils.deleteDirectory(directoryDataProvider);
-
-      if (!representative.isRestrictFromPublic()) {
-        // we check if the representative have permit to do it
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+      if (!TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
         createAllDatasetFiles(dataflowId, representative.getDataProviderId());
       } else {
         // we delete all file names in the table dataset
@@ -3080,6 +2971,7 @@ public class DatasetServiceImpl implements DatasetService {
     // we compound the route and create the file
     File file = null;
     if (dataProviderId != null) {
+      checkRestrictFromPublic(dataflowId, dataProviderId);
       file = new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
           "dataProvider-" + dataProviderId.toString()), fileName);
     } else {
@@ -3477,6 +3369,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
+  @Transactional
   public void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
 
     List<DesignDataset> desingDataset =
@@ -3754,5 +3647,23 @@ public class DatasetServiceImpl implements DatasetService {
     error.setTypeEntity(validation.getTypeEntity().name());
     error.setValidationDate(validation.getValidationDate());
     error.setShortCode(validation.getShortCode());
+  }
+
+  /**
+   * Check restrict from public.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @throws EEAException the EEA exception
+   */
+  private void checkRestrictFromPublic(Long dataflowId, Long dataProviderId) throws EEAException {
+    List<RepresentativeVO> representatives =
+        representativeControllerZuul.findRepresentativesByDataFlowIdAndProviderIdList(dataflowId,
+            Arrays.asList(dataProviderId));
+    for (RepresentativeVO representative : representatives) {
+      if (representative.isRestrictFromPublic()) {
+        throw new EEAException(EEAErrorMessage.IS_RESTRICT_FROM_PUBLIC);
+      }
+    }
   }
 }

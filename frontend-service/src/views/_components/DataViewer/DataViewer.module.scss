@@ -1,3 +1,5 @@
+@import '_styles/mixins';
+
 .actionTemplate {
   display: flex;
 }
@@ -10,8 +12,19 @@
   display: inline-block;
   vertical-align: middle;
 }
+
 .addEditRecordDialog {
-  width: 35vw !important;
+  @include for-phone-landscape-up {
+    max-width: 90%;
+  }
+
+  @include for-tablet-landscape-up {
+    max-width: 80%;
+  }
+
+  @include for-desktop-up {
+    max-width: 60%;
+  }
 }
 .fieldDisabled {
   cursor: default;
@@ -19,6 +32,19 @@
 .chips {
   display: flex !important;
   justify-content: center;
+}
+.coordinatesMoreInfo {
+  @include for-phone-landscape-up {
+    width: 90vw;
+  }
+
+  @include for-tablet-landscape-up {
+    width: 80vw;
+  }
+
+  @include for-desktop-up {
+    width: 70vw;
+  }
 }
 .currentPageWrapper {
   label {
@@ -112,21 +138,21 @@
 :global .p-datatable-scrollable-body::-webkit-scrollbar-button:single-button:vertical:increment {
   background-color: var(--bg);
   border-width: 8px 8px 0 8px;
-  border-color: var(--gray-75) transparent transparent transparent;
+  border-color: var(--c-gray-75) transparent transparent transparent;
 }
 :global .p-datatable-scrollable-body::-webkit-scrollbar-button:single-button:vertical:decrement {
   background-color: var(--bg);
   border-width: 0px 8px 8px 8px;
-  border-color: transparent transparent var(--gray-75) transparent;
+  border-color: transparent transparent var(--c-gray-75) transparent;
 }
 
 :global .p-datatable-scrollable-body::-webkit-scrollbar-button:single-button:horizontal:increment {
   background-color: var(--bg);
   border-width: 8px 0 8px 8px;
-  border-color: transparent transparent transparent var(--gray-75);
+  border-color: transparent transparent transparent var(--c-gray-75);
 }
 :global .p-datatable-scrollable-body::-webkit-scrollbar-button:single-button:horizontal:decrement {
   background-color: var(--bg);
   border-width: 8px 8px 8px 0px;
-  border-color: transparent var(--gray-75) transparent transparent;
+  border-color: transparent var(--c-gray-75) transparent transparent;
 }

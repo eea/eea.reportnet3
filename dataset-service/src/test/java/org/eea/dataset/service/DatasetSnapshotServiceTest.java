@@ -44,6 +44,7 @@ import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstr
 import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
+import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
 import org.eea.exception.EEAErrorMessage;
@@ -142,9 +143,10 @@ public class DatasetSnapshotServiceTest {
   @Mock
   private RecordRepository recordRepository;
 
-  /** The dataset service. */
+
+  /** The delete helper. */
   @Mock
-  private DatasetService datasetService;
+  private DeleteHelper deleteHelper;
 
   /** The snapshot schema repository. */
   @Mock
@@ -297,6 +299,10 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void addSnapshotTest1() throws EEAException {
+    DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
+    datasetVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
+    datasetVO.setId(1L);
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(datasetVO);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(partitionDataSetMetabaseRepository
@@ -316,11 +322,14 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void addSnapshotTest2() throws EEAException {
-
+    DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
+    datasetVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
+    datasetVO.setId(1L);
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(datasetVO);
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZuul).createSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.any(), Mockito.any());
     datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L, new Date().toString(),
         false);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
@@ -333,6 +342,10 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void addSnapshotTest3() throws EEAException {
+    DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
+    datasetVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
+    datasetVO.setId(1L);
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(datasetVO);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(partitionDataSetMetabaseRepository
@@ -405,8 +418,7 @@ public class DatasetSnapshotServiceTest {
     datasetSnapshotService.restoreSnapshotToCloneData(1L, 1L, 1L, true, DatasetTypeEnum.EUDATASET,
         false);
     Mockito.verify(recordStoreControllerZuul, times(1)).restoreSnapshotData(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.anyBoolean());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -616,7 +628,7 @@ public class DatasetSnapshotServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZuul).createSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.any(), Mockito.any());
     doNothing().when(documentControllerZuul).uploadSchemaSnapshotDocument(Mockito.any(),
         Mockito.any(), Mockito.any());
     when(schemaRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(new DataSetSchema());
@@ -984,7 +996,10 @@ public class DatasetSnapshotServiceTest {
   @Test
   public void getReleasesReportingSuccessTest() throws Exception {
 
-    when(datasetService.getDatasetType(Mockito.anyLong())).thenReturn(DatasetTypeEnum.REPORTING);
+    DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
+    datasetVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
+    datasetVO.setId(1L);
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(datasetVO);
     when(snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc(Mockito.any()))
         .thenReturn(snapshots);
     when(releaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -999,7 +1014,10 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void getReleasesDataCollectionSuccessTest() throws Exception {
-    when(datasetService.getDatasetType(Mockito.anyLong())).thenReturn(DatasetTypeEnum.COLLECTION);
+    DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
+    datasetVO.setDatasetTypeEnum(DatasetTypeEnum.COLLECTION);
+    datasetVO.setId(1L);
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(datasetVO);
     when(snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(Mockito.any()))
         .thenReturn(snapshots);
     when(releaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
@@ -1014,7 +1032,11 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void getReleasesEUDatasetSuccessTest() throws Exception {
-    when(datasetService.getDatasetType(Mockito.anyLong())).thenReturn(DatasetTypeEnum.EUDATASET);
+    DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
+    datasetVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
+    datasetVO.setId(1L);
+
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(datasetVO);
     when(eUDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(new EUDataset()));
     when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(new DataCollection()));
@@ -1078,7 +1100,45 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(schema);
 
     datasetSnapshotService.releaseLocksRelatedToRelease(1L, 1L);
-    Mockito.verify(lockService, times(10)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(11)).removeLockByCriteria(Mockito.any());
   }
 
+  @Test
+  public void addSnapshot4Test() throws EEAException {
+    List<RepresentativeVO> representatives = new ArrayList<>();
+    RepresentativeVO representative = new RepresentativeVO();
+    representative.setId(1L);
+    representative.setRestrictFromPublic(false);
+    representative.setDataProviderId(1L);
+    representatives.add(representative);
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setId(1L);
+    datasetMetabase.setDatasetSchema("SCHEMA");
+    datasetMetabase.setDataProviderId(1L);
+    DataCollection dataCollection = new DataCollection();
+    dataCollection.setId(1L);
+    dataCollection.setDatasetSchema("SCHEMA");
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(partitionDataSetMetabaseRepository
+        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
+        .thenReturn(Optional.empty());
+    DataSetMetabaseVO datasetVO = new DataSetMetabaseVO();
+    datasetVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
+    datasetVO.setId(1L);
+    when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(datasetVO);
+
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(datasetMetabase));
+    Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.anyString()))
+        .thenReturn(Optional.of(dataCollection));
+    Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.anyLong())).thenReturn(1L);
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.anyLong()))
+        .thenReturn(representatives);
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+    datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), null, new Date().toString(),
+        false);
+    Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
+  }
 }

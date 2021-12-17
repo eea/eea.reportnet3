@@ -6,6 +6,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -53,7 +54,9 @@ public class DeleteTableSchemaCompletedEventTest {
 
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(7,
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowVO.getStatus()).thenReturn(TypeStatusEnum.DESIGN);
+    Assert.assertEquals(8,
         deleteTableSchemaCompletedEvent.getMap(NotificationVO.builder().user("user").datasetId(1L)
             .dataflowId(1L).datasetName("datasetName").dataflowName("dataflowName")
             .tableSchemaId("tableSchemaId").tableSchemaName("tableSchemaName").build()).size());
@@ -70,7 +73,8 @@ public class DeleteTableSchemaCompletedEventTest {
         .thenReturn("tableSchemaName");
     Mockito.when(datasetMetabaseVO.getDataSetName()).thenReturn("datasetName");
     Mockito.when(dataflowVO.getName()).thenReturn("dataflowName");
-    Assert.assertEquals(7, deleteTableSchemaCompletedEvent
+    Mockito.when(dataflowVO.getStatus()).thenReturn(TypeStatusEnum.DESIGN);
+    Assert.assertEquals(8, deleteTableSchemaCompletedEvent
         .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
   }
 }

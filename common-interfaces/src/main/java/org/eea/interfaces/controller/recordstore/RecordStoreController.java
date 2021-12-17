@@ -26,15 +26,6 @@ public interface RecordStoreController {
 
   }
 
-  /**
-   * Reste data set data base. DO NOT USE IN PRODUCTION. TO BE REMOVED. ONLY FOR TEST PURPOSES
-   *
-   * @deprecated (reset db)
-   */
-  @Deprecated
-  @PostMapping(value = "/reset")
-  void resteDataSetDataBase();
-
 
   /**
    * Creates the empty dataset.
@@ -71,6 +62,7 @@ public interface RecordStoreController {
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
    * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    */
   @PostMapping(value = "/dataset/{datasetId}/snapshot/create")
   void createSnapshotData(@PathVariable("datasetId") Long datasetId,
@@ -91,6 +83,7 @@ public interface RecordStoreController {
    * @param datasetType the dataset type
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
+   * @param prefillingReference the prefilling reference
    */
   @PostMapping(value = "/dataset/{datasetId}/snapshot/restore")
   void restoreSnapshotData(@PathVariable("datasetId") Long datasetId,
@@ -149,4 +142,13 @@ public interface RecordStoreController {
   @PutMapping("/private/createUpdateQueryView")
   void createUpdateQueryView(@RequestParam("datasetId") Long datasetId,
       @RequestParam("isMaterialized") boolean isMaterialized);
+
+
+  /**
+   * Refresh materialized view.
+   *
+   * @param datasetId the dataset id
+   */
+  @PutMapping("/private/refreshMaterializedView")
+  void refreshMaterializedView(@RequestParam("datasetId") Long datasetId);
 }

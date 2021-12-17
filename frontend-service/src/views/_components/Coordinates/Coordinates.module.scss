@@ -1,0 +1,60 @@
+.coordinatesWrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  input {
+    margin-top: 0.25rem;
+  }
+  .coordinatesModalWrapper {
+    display: flex;
+    align-items: center;
+    div:first-child {
+      margin-right: 0.5rem;
+    }
+  }
+  .isCellEditor {
+    width: 100%;
+  }
+}
+
+.errorMessage {
+  display: block;
+  height: 1rem;
+  margin: 0;
+  .pointError {
+    color: var(--errors);
+    font-weight: bold;
+    font-size: 0.7rem;
+  }
+}
+.mapButton {
+  margin-top: 2px !important;
+}
+.error {
+  border: var(--inputtext-border-error) !important;
+  box-shadow: var(--inputtext-box-shadow-focus-error) !important;
+}
+.epsg {
+  color: var(--main-font-color);
+  font-size: 0.9em;
+  font-weight: bold;
+  margin-right: 0.25rem;
+  width: fit-content;
+}
+.pointEpsgWrapper {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+  button {
+    margin-left: 1rem;
+    flex: none;
+  }
+
+  .pointEpsgAndButtonWrapper {
+    display: flex;
+    margin-top: 0.25rem;
+  }
+}
+.pointEpsgWrapperCellEditor {
+  display: flex;
+}

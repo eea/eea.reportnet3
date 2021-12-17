@@ -34,7 +34,7 @@ export const BreadCrumb = ({ className, id, style, isPublic = false }) => {
   const onLoadItem = item => {
     const className = !isUndefined(item.className) || !isEmpty(item.className) ? item.className : null;
     return (
-      <li className={className} role="menuitem" style={item.style}>
+      <li className={className} style={item.style}>
         <span
           className="p-menuitem-link"
           onClick={event => {

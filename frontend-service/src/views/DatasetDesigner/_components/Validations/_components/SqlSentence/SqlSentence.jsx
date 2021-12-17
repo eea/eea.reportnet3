@@ -126,6 +126,10 @@ export const SqlSentence = ({ creationFormState, dataflowType, onSetSqlSentence,
             dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceHelpNote'] }}
           />
           <p
+            className={styles.note}
+            dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceDatetimeNote'] }}
+          />
+          <p
             className={styles.levelHelp}
             dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceSpatialNote'] }}
           />

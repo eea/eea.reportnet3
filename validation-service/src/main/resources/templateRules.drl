@@ -111,11 +111,15 @@ function boolean isDateYYYYMMDD( String value ){
     return true;
 }
 
-//////////////////////////////////////////VALIDATION DATE////////////////////////////////////////////////////////////
+//////////////////////////////////////////VALIDATION DATETIME////////////////////////////////////////////////////////////
 function boolean isDateTime( String value ){
 	if(!isBlank(value)){
 		return true;
-	}	
+	}
+    
+	if(!value.matches(".+[zZ0-9]$")){
+        return false;
+    }
 	
  SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
  	if(!isBlank(value)){
@@ -124,7 +128,7 @@ function boolean isDateTime( String value ){
  	Date dateDrools = null;
     try {
       sdf.setLenient(false);
-      dateDrools = sdf.parse(value);
+      dateDrools = sdf.parse(value.replaceAll("[zZ]$", "").replace('T', ' '));
     } catch( Exception e ){
         return false;
     }
@@ -184,32 +188,12 @@ function boolean isPhone(String value){
  
 ///////////////////////////////////////VALIDATION GEOMETRY TYPES///////////////////////////////////////////////////////
 function boolean isGeometry(FieldValue fieldValue){
-	return FKValidationUtils.isGeometry(fieldValue);
+	return GeometryValidationUtils.isGeometry(fieldValue);
 }
 
 ///////////////////////////////////////VALIDATION GEOMETRY TYPES CHECK EPSG AND SRID///////////////////////////////////////////////////////
 function boolean checkEPSGSRID(FieldValue fieldValue){
-	if(fieldValue.getValue().length() < 1) {
-		return true;
-	}
-	//Obtain the SRID code removing all other characters from geojson
-	String[] sridstring = fieldValue.getValue().split("srid");
-	
-	if(sridstring.length < 2){
-		return false;
-	}
-	
-	String srid = sridstring[1].replace("\"","").replace(":","").replace("}","");
-
-	//The cases are the SRID supported in reportnet
-    switch(srid) {
-		case "4326":
-		case "4258":
-		case "3035":
-        	return true;
-		default:
-			return false;
-    }
+	return GeometryValidationUtils.checkEPSGSRID(fieldValue);
 }
  
  //////////////////////////////////////////DEFAULT VALIDATIONS END BLOCK////////////////////////////////////////////////////////////

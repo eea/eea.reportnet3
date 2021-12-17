@@ -1,11 +1,20 @@
-import { Component, Fragment } from 'react';
+import { Component } from 'react';
 import classNames from 'classnames';
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
+
+import styles from './BodyCell.module.scss';
+
+import { Button } from 'views/_components/Button';
+import ReactTooltip from 'react-tooltip';
 import { RowRadioButton } from './_components/RowRadioButton';
 import { RowCheckbox } from 'views/_components/DataTable/_components/RowCheckbox';
 
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
 export class BodyCell extends Component {
+  static contextType = ResourcesContext;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -93,6 +102,18 @@ export class BodyCell extends Component {
 
       document.addEventListener('click', this.documentEditListener);
     }
+  }
+
+  calculateRowDisabledQuickEdit() {
+    return (
+      (this.props.rowData[this.props.quickEditRowInfo.property] === this.props.quickEditRowInfo.updatedRow ||
+        this.props.rowData[this.props.quickEditRowInfo.property] === this.props.quickEditRowInfo.deletedRow) &&
+      this.props.quickEditRowInfo.condition
+    );
+  }
+
+  checkEditorInvalid() {
+    return this.props.quickEditRowInfo.requiredFields.some(field => this.props.rowData[field] === '');
   }
 
   closeCell() {
@@ -207,20 +228,75 @@ export class BodyCell extends Component {
     } else if (this.props.rowEditor) {
       if (this.state.editing) {
         content = (
-          <Fragment>
-            <button className="p-row-editor-save p-link" onClick={this.props.onRowEditSave}>
-              <span className="p-row-editor-save-icon pi pi-fw pi-check p-clickable"></span>
-            </button>
-            <button className="p-row-editor-cancel p-link" onClick={this.props.onRowEditCancel}>
-              <span className="p-row-editor-cancel-icon pi pi-fw pi-times p-clickable"></span>
-            </button>
-          </Fragment>
+          <div className={styles.actionTemplate}>
+            <span data-for={`quickEditSaveTooltip${this.props.rowIndex}`} data-tip>
+              <Button
+                className={`${`p-button-rounded p-button-primary-transparent ${styles.editSaveRowButton}`} ${
+                  !this.checkEditorInvalid() ? 'p-button-animated-blink' : ''
+                }`}
+                disabled={this.checkEditorInvalid()}
+                icon="check"
+                onClick={this.props.onRowEditSave}
+              />
+            </span>
+            <span data-for={`quickEditCancelTooltip${this.props.rowIndex}`} data-tip>
+              <Button
+                className={`${`p-button-rounded p-button-secondary-transparent ${styles.editCancelRowButton}`} p-button-animated-blink`}
+                icon="cancel"
+                onClick={this.props.onRowEditCancel}
+              />
+            </span>
+
+            <ReactTooltip
+              border={true}
+              className={styles.tooltip}
+              effect="solid"
+              id={`quickEditSaveTooltip${this.props.rowIndex}`}
+              place="top">
+              <span>
+                {!this.checkEditorInvalid()
+                  ? this.context.messages['save']
+                  : this.context.messages['fcSubmitButtonDisabled']}
+              </span>
+            </ReactTooltip>
+            <ReactTooltip
+              border={true}
+              className={styles.tooltip}
+              effect="solid"
+              id={`quickEditCancelTooltip${this.props.rowIndex}`}
+              place="top">
+              <span> {this.context.messages['cancel']} </span>
+            </ReactTooltip>
+          </div>
         );
       } else {
         content = (
-          <button className="p-row-editor-init p-link" onClick={this.props.onRowEditInit}>
-            <span className="p-row-editor-init-icon pi pi-fw pi-pencil p-clickable"></span>
-          </button>
+          <div className={styles.actionTemplate}>
+            <span data-for="sortedQuickEditTooltip" data-tip>
+              <Button
+                className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} ${
+                  this.props.quickEditRowInfo && !this.props.quickEditRowInfo.condition ? 'p-button-animated-blink' : ''
+                }`}
+                disabled={this.props.quickEditRowInfo ? this.props.quickEditRowInfo.condition : false}
+                icon={this.props.quickEditRowInfo && this.calculateRowDisabledQuickEdit() ? 'spinnerAnimate' : 'clock'}
+                onClick={this.props.onRowEditInit}
+                tooltip={this.context.messages['quickEdit']}
+                tooltipOptions={{ position: 'top' }}
+                type="button"
+              />
+            </span>
+            {this.props.quickEditRowInfo.condition && (
+              <ReactTooltip
+                border={true}
+                className={styles.tooltip}
+                effect="solid"
+                id="sortedQuickEditTooltip"
+                place="top">
+                <span> {this.context.messages['disabledQuickEdit']} </span>
+              </ReactTooltip>
+            )}
+            {this.props.body(this.props.rowData, this.props)}
+          </div>
         );
       }
     } else {
@@ -237,19 +313,19 @@ export class BodyCell extends Component {
     }
 
     if (this.props.editMode !== 'row') {
-      /* eslint-disable */
       editorKeyHelper = this.props.editor && (
+        /* eslint-disable jsx-a11y/anchor-is-valid */
         <a
-          tabIndex="0"
+          className="p-cell-editor-key-helper p-hidden-accessible"
+          onFocus={this.onEditorFocus}
           ref={el => {
             this.keyHelper = el;
           }}
-          className="p-cell-editor-key-helper p-hidden-accessible"
-          onFocus={this.onEditorFocus}>
+          tabIndex="0">
           <span></span>
         </a>
+        /* eslint-enable jsx-a11y/anchor-is-valid */
       );
-      /* eslint-enable */
     }
 
     return (

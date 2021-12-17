@@ -3,6 +3,10 @@ import flattenDeep from 'lodash/flattenDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
+
+import proj4 from 'proj4';
+
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const changeIncorrectCoordinates = record => {
@@ -138,6 +142,33 @@ const getGeometryType = json =>
 
 const getSrid = json => (!isNil(json) && json !== '' ? JSON.parse(json).properties.srid : 'EPSG:4326');
 
+const hasValidCRS = (fieldValue, crs) => {
+  if (fieldValue === '') return true;
+  const parsedGeoJsonData = JSON.parse(fieldValue);
+  return crs.some(crsItem => crsItem.value === parsedGeoJsonData.properties.srid);
+};
+
+const inBounds = ({ coord, coordType, checkProjected = false }) => {
+  const parsedCoord = parseFloat(coord) || 0;
+  if (checkProjected) {
+    if (coordType === 'latitude') {
+      return (
+        parsedCoord >= config.GEOGRAPHICAL_LAT_COORD_3035.min && parsedCoord <= config.GEOGRAPHICAL_LAT_COORD_3035.max
+      );
+    } else {
+      return (
+        parsedCoord >= config.GEOGRAPHICAL_LONG_COORD_3035.min && parsedCoord <= config.GEOGRAPHICAL_LONG_COORD_3035.max
+      );
+    }
+  } else {
+    if (coordType === 'latitude') {
+      return parsedCoord >= config.GEOGRAPHICAL_LAT_COORD.min && parsedCoord <= config.GEOGRAPHICAL_LAT_COORD.max;
+    } else {
+      return parsedCoord >= config.GEOGRAPHICAL_LONG_COORD.min && parsedCoord <= config.GEOGRAPHICAL_LONG_COORD.max;
+    }
+  }
+};
+
 const latLngToLngLat = (coordinates = []) =>
   typeof coordinates[0] === 'number'
     ? [coordinates[0], coordinates[1]]
@@ -178,7 +209,13 @@ const parseGeometryData = records => {
   return records;
 };
 
-const printCoordinates = (data, isGeoJson = true, geometryType) => {
+const printCoordinates = ({
+  data,
+  isGeoJson = true,
+  geometryType,
+  firstCoordinateText = 'Latitude',
+  secondCoordinateText = 'Longitude'
+}) => {
   if (isGeoJson) {
     let parsedJSON = data;
     if (typeof parsedJSON === 'string') {
@@ -197,23 +234,40 @@ const printCoordinates = (data, isGeoJson = true, geometryType) => {
     }
 
     if (!Array.isArray(data) && checkValidJSONCoordinates(data)) {
-      return `{Latitude: ${parsedJSON.geometry.coordinates[0]}, Longitude: ${parsedJSON.geometry.coordinates[1]}}`;
+      return `{${firstCoordinateText}: ${parsedJSON.geometry.coordinates[0]}, ${secondCoordinateText}: ${parsedJSON.geometry.coordinates[1]}}`;
     } else {
       if (Array.isArray(data)) {
-        return `{Latitude: ${data[0]}, Longitude: ${data[1]}}`;
+        return `{${firstCoordinateText}: ${data[0]}, ${secondCoordinateText}: ${data[1]}}`;
       } else {
-        return `{Latitude: , Longitude: }`;
+        return `{${firstCoordinateText}: , ${secondCoordinateText}: }`;
       }
     }
   } else {
     if (!isNil(data)) {
       const splittedCoordinate = Array.isArray(data) ? data : TextUtils.splitByChar(data);
-      return `{Latitude: ${isNil(splittedCoordinate[0]) ? '' : splittedCoordinate[0]}, Longitude: ${
-        isNil(splittedCoordinate[1]) ? '' : splittedCoordinate[1]
-      }}`;
+      return `{${firstCoordinateText}: ${
+        isNil(splittedCoordinate[0]) ? '' : splittedCoordinate[0]
+      }, ${secondCoordinateText}: ${isNil(splittedCoordinate[1]) ? '' : splittedCoordinate[1]}}`;
     } else {
-      return `{Latitude: , Longitude: }`;
+      return `{${firstCoordinateText}: , ${secondCoordinateText}: }`;
     }
+  }
+};
+
+const projectCoordinates = ({ coordinates, currentCRS, newCRS }) => {
+  if (checkValidCoordinates(coordinates)) {
+    if (newCRS === 'EPSG:3035') {
+      return proj4(proj4(currentCRS.value), proj4(newCRS), [coordinates[1], coordinates[0]]);
+    } else {
+      const projectedCoordinates = proj4(proj4(currentCRS.value), proj4(newCRS), coordinates);
+      if (currentCRS.value === 'EPSG:3035') {
+        return [projectedCoordinates[1], projectedCoordinates[0]];
+      } else {
+        return projectedCoordinates;
+      }
+    }
+  } else {
+    return coordinates;
   }
 };
 
@@ -225,10 +279,13 @@ export const MapUtils = {
   getFirstPointComplexGeometry,
   getGeometryType,
   getSrid,
+  hasValidCRS,
+  inBounds,
   isValidJSON,
   latLngToLngLat,
   lngLatToLatLng,
   parseCoordinates,
   parseGeometryData,
-  printCoordinates
+  printCoordinates,
+  projectCoordinates
 };

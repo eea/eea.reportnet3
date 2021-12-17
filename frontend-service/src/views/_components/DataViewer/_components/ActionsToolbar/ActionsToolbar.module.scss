@@ -78,7 +78,7 @@
       }
       &:focus,
       &:enabled:focus {
-        box-shadow: 0 0 0 0 var(--blue-120) !important;
+        box-shadow: 0 0 0 0 var(--c-blue-120) !important;
       }
       &:focus ~ label {
         top: -1px !important;
@@ -103,7 +103,7 @@
         }
 
         &:enabled:focus {
-          box-shadow: 0 0 0 0 var(--white) !important;
+          box-shadow: 0 0 0 0 var(--c-white-color) !important;
           outline: none;
         }
 

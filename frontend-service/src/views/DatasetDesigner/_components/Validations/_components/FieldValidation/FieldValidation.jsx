@@ -116,6 +116,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
       setTabContents([
         <TabPanel
           header={resourcesContext.messages.tabMenuConstraintData}
+          headerClassName={showErrorOnInfoTab ? styles.error : ''}
           key="fieldInfoTab"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
@@ -270,12 +271,12 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
     try {
       setIsSubmitDisabled(true);
       const { candidateRule, expressionText } = creationFormState;
-      candidateRule.expressionText = expressionText;      
+      candidateRule.expressionText = expressionText;
       await ValidationService.createFieldRule(datasetId, candidateRule);
       onHide();
     } catch (error) {
       console.error('FieldValidation - onCreateValidationRule.', error);
-      notificationContext.add({ type: 'QC_RULE_CREATION_ERROR' });
+      notificationContext.add({ type: 'QC_RULE_CREATION_ERROR' }, true);
     } finally {
       setIsSubmitDisabled(false);
     }
@@ -285,7 +286,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
     try {
       setIsSubmitDisabled(true);
       const { candidateRule, expressionText } = creationFormState;
-      candidateRule.expressionText = expressionText;      
+      candidateRule.expressionText = expressionText;
       await ValidationService.updateFieldRule(datasetId, candidateRule);
       if (!isNil(candidateRule) && candidateRule.automatic) {
         validationContext.onAutomaticRuleIsUpdated(true);
@@ -293,9 +294,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
       onHide();
     } catch (error) {
       console.error('FieldValidation - onUpdateValidationRule.', error);
-      notificationContext.add({
-        type: 'QC_RULE_UPDATING_ERROR'
-      });
+      notificationContext.add({ type: 'QC_RULE_UPDATING_ERROR' }, true);
     } finally {
       setIsSubmitDisabled(false);
     }
@@ -469,7 +468,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                 id={`${componentName}__update`}
                 label={resourcesContext.messages.update}
-                onClick={() => onUpdateValidationRule()}
+                onClick={onUpdateValidationRule}
                 type="button"
               />
             </span>
@@ -483,7 +482,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                 id={`${componentName}__create`}
                 label={resourcesContext.messages.create}
-                onClick={() => onCreateValidationRule()}
+                onClick={onCreateValidationRule}
                 type="button"
               />
             </span>

@@ -2,10 +2,13 @@ package org.eea.interfaces.controller.dataflow;
 
 import java.util.Date;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
+import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -41,9 +44,21 @@ public interface DataFlowController {
    * @param providerId the provider id
    * @return the data flow VO
    */
-  @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/v1/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataFlowVO findById(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
+
+  /**
+   * Find by id legacy.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return the data flow VO
+   */
+  @GetMapping(value = "/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataFlowVO findByIdLegacy(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
+
 
   /**
    * Find by status.
@@ -109,6 +124,14 @@ public interface DataFlowController {
   List<DataFlowVO> findCloneableDataflows();
 
   /**
+   * Gets the dataflows count.
+   *
+   * @return the dataflows count
+   */
+  @GetMapping(value = "/countByType", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataflowCountVO> getDataflowsCount();
+
+  /**
    * Adds the contributor.
    *
    * @param dataflowId the dataflow id
@@ -152,8 +175,18 @@ public interface DataFlowController {
    * @param dataflowId the dataflow id
    * @return the metabase by id
    */
-  @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/v1/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   DataFlowVO getMetabaseById(@PathVariable("dataflowId") Long dataflowId);
+
+
+  /**
+   * Gets the metabase by id legacy.
+   *
+   * @param dataflowId the dataflow id
+   * @return the metabase by id legacy
+   */
+  @GetMapping(value = "/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataFlowVO getMetabaseByIdLegacy(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Delete data flow.
@@ -264,4 +297,52 @@ public interface DataFlowController {
    */
   @GetMapping("/getPrivateDataflow/{dataflowId}")
   DataflowPrivateVO getPrivateDataflowById(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Gets the dataset summary by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the dataset summary by dataflow id
+   */
+  @GetMapping("/{dataflowId}/datasetsSummary")
+  List<DatasetsSummaryVO> getDatasetSummaryByDataflowId(
+      @PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Export schema information.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @PostMapping("/exportSchemaInformation/{dataflowId}")
+  void exportSchemaInformation(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Download schema information.
+   *
+   * @param dataflowId the dataflow id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @GetMapping("/downloadSchemaInformation/{dataflowId}")
+  void downloadSchemaInformation(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam String fileName, HttpServletResponse response);
+
+  /**
+   * Download public schema information.
+   *
+   * @param dataflowId the dataflow id
+   * @return the response entity
+   */
+  @GetMapping("/downloadPublicSchemaInformation/{dataflowId}")
+  ResponseEntity<byte[]> downloadPublicSchemaInformation(
+      @PathVariable("dataflowId") Long dataflowId);
+
+
+  /**
+   * Validate all reporters.
+   *
+   * @return the response entity
+   */
+  @PutMapping("/validateAllReporters")
+  ResponseEntity validateAllReporters();
 }

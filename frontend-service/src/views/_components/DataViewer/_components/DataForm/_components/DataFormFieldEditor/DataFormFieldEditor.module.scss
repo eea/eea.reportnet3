@@ -1,13 +1,7 @@
-.mapButton {
-  margin-right: 1rem;
-  width: 2.357em;
-}
-
 .pointEpsgWrapper {
   align-items: center;
   display: flex;
   margin-top: 0.5rem;
-  width: 100%;
   .pointInput {
     width: 45% !important;
   }
@@ -18,58 +12,6 @@
   button {
     width: 35%;
   }
-}
-
-.epsg {
-  width: 60px;
-  color: var(--main-font-color);
-  font-size: 0.9em;
-  font-weight: bold;
-  padding: 5px;
-}
-
-.epsgSwitcher {
-  margin-right: 1rem;
-  min-width: 45% !important;
-  width: 45% !important;
-}
-
-.pointError {
-  color: var(--errors);
-  font-weight: bold;
-  font-size: 0.7rem;
-  margin-left: 1rem;
-}
-
-.pointLegendWrapper {
-  display: flex;
-  flex-direction: column;
-  float: left;
-}
-
-.pointLegendItem {
-  display: flex;
-  flex-direction: row;
-  margin-top: 3px;
-}
-
-.pointLegendItemColour {
-  width: 20px;
-  height: 20px;
-  border: 1px solid;
-}
-
-.pointLegendItemColourCurrent {
-  background-color: #628ccc;
-}
-
-.pointLegendItemColourNew {
-  background-color: #6fb638;
-}
-
-.pointLegendItemLabel label:first-child {
-  font-weight: bold;
-  margin-left: 3px;
 }
 
 .saveButton {

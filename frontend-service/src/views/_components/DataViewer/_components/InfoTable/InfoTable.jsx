@@ -5,7 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
-import styles from './InfoTable.module.css';
+import styles from './InfoTable.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
@@ -26,6 +26,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
     return (
       <div className={styles.infoTableCellCorrect}>
         <Button
+          className={`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`}
           disabled={isPasting}
           icon="trash"
           onClick={() => {
@@ -132,7 +133,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         <Fragment>
           <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {RecordUtils.getFieldTypeValue(column.type)}
+            {RecordUtils.getFieldTypeValue(column.type)?.value}
           </span>
           <br />
           <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['description']}: </span>
@@ -164,7 +165,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
         <Fragment>
           <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['type']}: </span>{' '}
           <span style={{ color: 'var(--success-color-lighter)', fontWeight: '600' }}>
-            {RecordUtils.getFieldTypeValue(column.type)}
+            {RecordUtils.getFieldTypeValue(column.type)?.value}
           </span>
           <br />
           <span style={{ fontWeight: 'bold' }}>{resourcesContext.messages['description']}: </span>

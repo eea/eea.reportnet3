@@ -1,0 +1,19 @@
+.goTopButton {
+  position: fixed;
+  bottom: 20px;
+  right: 4px;
+  z-index: 99;
+  font-size: 20px;
+  border: none;
+  outline: none;
+  background-color: var(--go-top-button-bg-color);
+  color: var(--go-top-button-color);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  box-shadow: var(--go-top-button-box-shadow);
+  :hover {
+    color: var(--go-top-button-color-hover);
+    background-color: var(--go-top-button-bg-color-hover);
+  }
+}

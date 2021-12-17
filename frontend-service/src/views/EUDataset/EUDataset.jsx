@@ -111,7 +111,7 @@ export const EUDataset = withRouter(({ history, match }) => {
       euDatasetDispatch({ type: 'GET_METADATA', payload: { metadata } });
     } catch (error) {
       console.error('DataCollection - setMetadata.', error);
-      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } });
+      notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } }, true);
     }
   };
 
@@ -127,13 +127,13 @@ export const EUDataset = withRouter(({ history, match }) => {
       });
     } catch (error) {
       console.error('EUDataset - getDataflowName.', error);
-      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
+      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} }, true);
     }
   };
 
   const getDataSchema = async () => {
     try {
-      const datasetSchema = await DatasetService.getSchema(datasetId);
+      const datasetSchema = await DatasetService.getSchema(dataflowId, datasetId);
       euDatasetDispatch({
         type: 'GET_DATA_SCHEMA',
         payload: {
@@ -159,7 +159,7 @@ export const EUDataset = withRouter(({ history, match }) => {
       return {
         command: () => onExportDataInternalExtension(type.code),
         icon: extensionsTypes[0],
-        label: type.text
+        label: resourcesContext.messages[type.key]
       };
     });
 
@@ -192,10 +192,13 @@ export const EUDataset = withRouter(({ history, match }) => {
         dataset: { name: datasetName }
       } = euDatasetState.metaData;
 
-      notificationContext.add({
-        type: 'EXPORT_DATA_BY_ID_ERROR',
-        content: { dataflowName: dataflowName, datasetName: datasetName }
-      });
+      notificationContext.add(
+        {
+          type: 'EXPORT_DATA_BY_ID_ERROR',
+          content: { dataflowName: dataflowName, datasetName: datasetName }
+        },
+        true
+      );
     }
   };
 
@@ -257,7 +260,7 @@ export const EUDataset = withRouter(({ history, match }) => {
       });
     } catch (error) {
       console.error('EUDataset - onLoadDatasetSchema.', error);
-      notificationContext.add({ type: 'ERROR_LOADING_EU_DATASET_SCHEMA' });
+      notificationContext.add({ type: 'ERROR_LOADING_EU_DATASET_SCHEMA' }, true);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOW, { dataflowId }));
       }
@@ -288,7 +291,7 @@ export const EUDataset = withRouter(({ history, match }) => {
   const renderTabsSchema = () => (
     <TabsSchema
       dataflowType={dataflowType}
-      datasetSchemaId={euDatasetState.metaData.dataset.datasetSchemaId}
+      datasetSchemaId={euDatasetState.metaData.dataset?.datasetSchemaId}
       hasCountryCode={true}
       hasWritePermissions={false}
       isExportable={false}

@@ -1,32 +1,35 @@
 .feedbackWrapper {
   display: flex;
+  flex-direction: column;
   margin-bottom: 1rem;
   padding-top: 1rem;
   .dataProviderWrapper {
     margin: 0;
+    margin-bottom: 0.5rem;
     vertical-align: middle;
-    width: 12%;
     display: flex;
+    @media (min-width: 590px) {
+      margin-bottom: 0;
+    }
     .dataProvider {
       width: 100%;
-      min-width: 8%;
       :global .p-listbox-title-wrapper {
         overflow: hidden;
+      }
+      @media (min-width: 590px) {
+        width: 220px;
+      }
+    }
+    .hasCounter {
+      margin-bottom: 2.5rem;
+      @media (min-width: 590px) {
+        margin-bottom: 0;
       }
     }
     span {
       color: var(--main-font-color);
       font-weight: bold;
     }
-    @media (max-width: 468px) {
-      width: 100%;
-    }
-  }
-  .flexBasisCustodian {
-    flex-basis: 75%;
-  }
-  .flexBasisProvider {
-    flex-basis: 100%;
   }
   .dragAndDropFileMessage {
     position: absolute;
@@ -38,27 +41,55 @@
     font-weight: bold;
   }
   .listMessagesWrapper {
-    align-items: center;
     display: flex;
+    align-items: flex-start;
     flex-direction: column;
-    justify-content: center;
-    width: 50%;
-    margin-left: 0.5rem;
+    position: relative;
+    justify-content: space-between;
+    width: 100%;
+
+    @media (min-width: 590px) {
+      margin-left: 0.5rem;
+    }
     .sendMessageWrapper {
-      align-items: center;
       display: flex;
+      flex-direction: row-reverse;
+      flex-wrap: wrap;
       margin-top: 0.5rem;
       width: 100%;
+      textarea {
+        height: 78px !important;
+      }
+      @media (min-width: 590px) {
+        flex-direction: column;
+        flex-wrap: unset;
+      }
+      @media (min-width: 960px) {
+        flex-direction: row;
+      }
       .sendMessageTextarea {
-        width: 90%;
         overflow: hidden;
         &:disabled {
-          border: 1px solid var(--gray-50) !important;
+          border: 1px solid var(--c-gray-50);
+        }
+      }
+      .buttonsWrapper {
+        margin-top: 0.5rem;
+        margin-left: 0.5rem;
+        display: flex;
+        align-items: flex-end;
+        justify-content: right;
+        @media (min-width: 960px) {
+          margin-top: 0;
+          width: 300px;
+          align-self: center;
+        }
+        @media (min-width: 1310px) {
+          width: 260px;
         }
       }
       .sendMessageButton {
-        width: 10%;
-        height: 48px;
+        margin-left: 0.5rem;
         align-self: flex-start;
         @media (max-width: 320px) {
           :global .pi-comment {
@@ -67,35 +98,16 @@
         }
       }
       .attachFileMessageButton {
-        width: 8%;
-        height: 48px;
-        margin: 0 0.5rem;
         align-self: flex-start;
-        @media (max-width: 320px) {
-          :global .pi-comment {
-            display: none;
-          }
-        }
-      }
-      @media (max-width: 468px) {
-        .sendMessageTextarea {
-          width: 70%;
-        }
-        .sendMessageButton {
-          width: 30%;
-        }
       }
     }
     .spinnerLoadingMessages {
       top: 0 !important;
       left: 0 !important;
     }
-    @media (max-width: 468px) {
-      width: 100%;
-    }
   }
-  @media (max-width: 468px) {
-    flex-direction: column;
+  @media (min-width: 590px) {
+    flex-direction: row;
   }
 }
 .helpdeskMessage {
@@ -103,4 +115,16 @@
   font-style: italic;
   font-weight: bold;
   margin: 1rem;
+}
+
+.messageCounter {
+  user-select: none;
+  font-size: 0.8rem;
+  font-weight: bold;
+  position: absolute;
+  top: -2rem;
+  background-color: var(--statusBox-info-bg);
+  color: var(--statusBox-info-color);
+  border-radius: 3px;
+  padding: 4px;
 }

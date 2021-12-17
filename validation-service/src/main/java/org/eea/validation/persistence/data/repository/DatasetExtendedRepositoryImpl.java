@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -48,8 +49,13 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
   /** The Constant RECORD_ID: {@value}. */
   private static final String RECORD_ID = "record_id";
 
+  /** The geometry error message. */
   @Value("${query.message.geometry.error}")
   private String geometryErrorMessage;
+
+  /** The field batch size. */
+  @Value("${validation.sqlFetchSize}")
+  private int sqlFetchSize;
 
   /** The entity manager. */
   @PersistenceContext(unitName = "dataSetsEntityManagerFactory")
@@ -92,6 +98,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
           conn -> executeQuery(conn, entityName, query, entityTypeEnum, datasetId, idTable));
     } catch (HibernateException e) {
       throw new EEAInvalidSQLException("SQL can't be executed: " + query, e);
+    } finally {
+      System.gc();
     }
   }
 
@@ -197,6 +205,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             fieldValidations.add(fieldValidation);
           }
           return fieldValidations;
+        } finally {
+          System.gc();
         }
       }
     });
@@ -218,9 +228,11 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       EntityTypeEnum entityTypeEnum, Long datasetId, Long idTable) throws SQLException {
     conn.setSchema("dataset_" + datasetId);
     TableValue tableValue;
-    try (PreparedStatement stmt = conn.prepareStatement(query);
-        ResultSet rs = stmt.executeQuery()) {
-      ResultSetMetaData rsm = stmt.getMetaData();
+    conn.setAutoCommit(false);
+    Statement stmt = conn.createStatement();
+    stmt.setFetchSize(sqlFetchSize);
+    try (ResultSet rs = stmt.executeQuery(query)) {
+      ResultSetMetaData rsm = rs.getMetaData();
       LOG.info("Query executed: {}", query);
       tableValue = new TableValue();
       List<RecordValue> records = new ArrayList<>();
@@ -231,34 +243,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         List<FieldValue> fields = new ArrayList<>();
         switch (entityTypeEnum) {
           case RECORD:
-            record.setId(rs.getString(RECORD_ID));
-            ArrayList<FieldValue> auxFields = new ArrayList<>();
-            for (int indexCol = 1; indexCol <= rsm.getColumnCount(); indexCol++) {
-              FieldValue auxField = new FieldValue();
-              auxField.setColumnName(rsm.getColumnName(indexCol));
-              // ColumnType = 1111 -> is Postgres Geometry type
-              if (rsm.getColumnType(indexCol) == 1111) {
-                try {
-                  // we try to convert Extended Well-Known Binary (EWKB) into String
-                  // Example : 0101000020E610000095B9F94674CF37C09CBF0985083B5040 -> Point (1,2)
-                  // RSID : 4236
-                  final GeometryFactory gm = new GeometryFactory(new PrecisionModel(), 4326);
-                  final WKBReader wkbr = new WKBReader(gm);
-                  byte[] wkbBytes = wkbr.hexToBytes(rs.getString(indexCol));
-                  Geometry geom = wkbr.read(wkbBytes);
-                  auxField.setValue(geom.toText());
-                } catch (ParseException | NullPointerException e) {
-                  auxField.setValue(geometryErrorMessage);
-                }
-              } else {
-                auxField.setValue(rs.getString(indexCol));
-              }
-              auxField.setRecord(record);
-              auxFields.add(auxField);
-            }
-            record.setFields(auxFields);
-            records.add(record);
-            tableValue.setRecords(records);
+            getTableValue(tableValue, rs, rsm, records, record);
             break;
           case FIELD:
             record.setId(rs.getString(RECORD_ID));
@@ -294,15 +279,62 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             break;
           case TABLE:
             continueLoop = false;
-            records.add(record);
-            tableValue.setRecords(records);
+            getTableValue(tableValue, rs, rsm, records, record);
             break;
           default:
             break;
         }
       }
+      stmt.setFetchSize(0);
+    } finally {
+      stmt.close();
+      conn.setAutoCommit(true);
     }
+    System.gc();
     return tableValue;
+  }
+
+  /**
+   * Gets the table value.
+   *
+   * @param tableValue the table value
+   * @param rs the rs
+   * @param rsm the rsm
+   * @param records the records
+   * @param record the record
+   * @return the table value
+   * @throws SQLException the SQL exception
+   */
+  private void getTableValue(TableValue tableValue, ResultSet rs, ResultSetMetaData rsm,
+      List<RecordValue> records, RecordValue record) throws SQLException {
+    record.setId(rs.getString(RECORD_ID));
+    ArrayList<FieldValue> auxFields = new ArrayList<>();
+    for (int indexCol = 1; indexCol <= rsm.getColumnCount(); indexCol++) {
+      FieldValue auxField = new FieldValue();
+      auxField.setColumnName(rsm.getColumnName(indexCol));
+      // ColumnType = 1111 -> is Postgres Geometry type
+      if (rsm.getColumnType(indexCol) == 1111) {
+        try {
+          // we try to convert Extended Well-Known Binary (EWKB) into String
+          // Example : 0101000020E610000095B9F94674CF37C09CBF0985083B5040 -> Point (1,2)
+          // RSID : 4236
+          final GeometryFactory gm = new GeometryFactory(new PrecisionModel(), 4326);
+          final WKBReader wkbr = new WKBReader(gm);
+          byte[] wkbBytes = wkbr.hexToBytes(rs.getString(indexCol));
+          Geometry geom = wkbr.read(wkbBytes);
+          auxField.setValue(geom.toText());
+        } catch (ParseException | NullPointerException e) {
+          auxField.setValue(geometryErrorMessage);
+        }
+      } else {
+        auxField.setValue(rs.getString(indexCol));
+      }
+      auxField.setRecord(record);
+      auxFields.add(auxField);
+    }
+    record.setFields(auxFields);
+    records.add(record);
+    tableValue.setRecords(records);
   }
 
   /**

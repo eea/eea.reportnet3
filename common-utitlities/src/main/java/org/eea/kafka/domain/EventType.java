@@ -112,6 +112,10 @@ public enum EventType {
   DELETE_DATASET_DATA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "delete_dataset_data_completed_event", true),
 
+  /** The delete dataset schema completed event. */
+  DELETE_DATASET_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "delete_dataset_schema_completed_event", true),
+
   /** The delete table schema completed event. */
   DELETE_TABLE_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "delete_table_schema_completed_event", true),
@@ -351,6 +355,10 @@ public enum EventType {
   UPDATE_MATERIALIZED_VIEW_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "update_materialized_view_event", true),
 
+  /** The refresh materialized view event. */
+  REFRESH_MATERIALIZED_VIEW_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "refresh_materialized_view_event", true),
+
   /** The create update view event. */
   CREATE_UPDATE_VIEW_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "create_update_view_event", true),
 
@@ -398,14 +406,36 @@ public enum EventType {
   DOWNLOAD_VALIDATIONS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "download_validations_failed_event", true),
 
-
   /** The export qc completed event. */
   EXPORT_QC_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_completed_event",
       true),
 
-
   /** The export qc failed event. */
   EXPORT_QC_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_failed_event", true),
+
+  /** The validate reporters completed event. */
+  VALIDATE_REPORTERS_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_reporters_completed_event", true),
+
+  /** The validate reporters failed event. */
+  VALIDATE_REPORTERS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_reporters_failed_event", true),
+
+  /** The validate reporters completed event. */
+  VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_lead_reporters_completed_event", true),
+
+  /** The validate reporters failed event. */
+  VALIDATE_LEAD_REPORTERS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_lead_reporters_failed_event", true),
+
+  /** The validate all reporters completed event. */
+  VALIDATE_ALL_REPORTERS_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_all_reporters_completed_event", true),
+
+  /** The validate all reporters failed event. */
+  VALIDATE_ALL_REPORTERS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_all_reporters_failed_event", true),
 
   /** The export dataset failed event. */
   EXPORT_DATASET_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_dataset_failed_event",
@@ -431,6 +461,26 @@ public enum EventType {
   NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "no_pk_reference_dataflow_error_event", true),
 
+  /** The export schema information completed event. */
+  EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_schema_information_completed_event", true),
+
+  /** The export schema information failed event. */
+  EXPORT_SCHEMA_INFORMATION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_schema_information_failed_event", true),
+
+  /** The no enabled system notifications. */
+  NO_ENABLED_SYSTEM_NOTIFICATIONS(LiteralConstants.DATA_REPORTING_TOPIC,
+      "no_enabled_system_notifications", true),
+
+  /** The export users by country completed event. */
+  EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_users_by_country_completed_event", true),
+
+  /** The export users by country failed event. */
+  EXPORT_USERS_BY_COUNTRY_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_users_by_country_failed_event", true),
+
   /** The copy reference dataset snapshot completed event. */
   COPY_REFERENCE_DATASET_SNAPSHOT_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "copy_reference_dataset_snapshot_completed_event", true),
@@ -441,8 +491,15 @@ public enum EventType {
 
   /** The continue fme process event. */
   CONTINUE_FME_PROCESS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "continue_fme_process_event",
-      true);
+      true),
 
+  /** The export table data completed event. */
+  EXPORT_TABLE_DATA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_table_data_completed_event", true),
+
+  /** The export table data failed event. */
+  EXPORT_TABLE_DATA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "export_table_data_failed_event", true);
 
   /** The topic. */
   private String topic;

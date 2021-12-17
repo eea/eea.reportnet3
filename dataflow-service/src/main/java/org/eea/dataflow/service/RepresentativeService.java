@@ -56,16 +56,6 @@ public interface RepresentativeService {
    */
   List<DataProviderVO> getAllDataProviderByGroupId(Long groupId);
 
-
-  /**
-   * Find data provider group by dataflow id.
-   *
-   * @param dataflowId the dataflow id
-   * @return the data provider group VO
-   * @throws EEAException the EEA exception
-   */
-  DataProviderCodeVO findDataProviderGroupByDataflowId(Long dataflowId) throws EEAException;
-
   /**
    * Gets the represetatives by id data flow.
    *
@@ -165,6 +155,14 @@ public interface RepresentativeService {
   void deleteLeadReporter(Long leadReporterId) throws EEAException;
 
   /**
+   * Validate lead reporters checking if they are already registered in the system.
+   *
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
+  void validateLeadReporters(Long dataflowId, boolean sendNotification) throws EEAException;
+
+  /**
    * Update representative visibility restrictions.
    *
    * @param dataflowId the dataflow id
@@ -214,4 +212,5 @@ public interface RepresentativeService {
    * @return the list
    */
   List<FMEUserVO> findFmeUsers();
+
 }

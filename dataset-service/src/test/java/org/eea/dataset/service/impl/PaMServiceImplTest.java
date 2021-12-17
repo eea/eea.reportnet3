@@ -83,7 +83,7 @@ public class PaMServiceImplTest {
 
     fieldValueList = new ArrayList<>();
     FieldValue fieldValue = new FieldValue();
-    fieldValue.setValue("1, 2");
+    fieldValue.setValue("1; 2");
     fieldValueList.add(fieldValue);
   }
 

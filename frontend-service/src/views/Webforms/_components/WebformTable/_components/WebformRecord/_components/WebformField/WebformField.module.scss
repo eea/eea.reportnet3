@@ -1,13 +1,13 @@
 .infoButtonWrapper {
-  border-radius: 5px;
-  border: 0.1rem solid var(--gray-25);
+  border-radius: 3px;
+  border: var(--inputtext-border);
   padding: 1rem;
   display: flex;
   align-items: center;
   .infoButton {
-    background-color: var(--white) !important;
+    background-color: var(--c-white-color) !important;
     border-radius: 50% !important;
-    color: red !important;
+    color: var(--errors) !important;
     font-size: 12pt !important;
     height: 0.7em !important;
     margin-left: 0.4rem !important;

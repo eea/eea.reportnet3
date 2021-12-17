@@ -18,9 +18,6 @@ export const RepresentativeRepository = {
   getDataProviders: async dataProviderGroupId =>
     await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getDataProviders, { dataProviderGroupId }) }),
 
-  getSelectedDataProviderGroup: async dataflowId =>
-    await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getSelectedDataProviderGroup, { dataflowId }) }),
-
   getRepresentatives: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(RepresentativeConfig.getRepresentatives, { dataflowId: dataflowId }) }),
 
@@ -62,5 +59,15 @@ export const RepresentativeRepository = {
     await HTTPRequester.update({
       url: getUrl(RepresentativeConfig.updateLeadReporter, { dataflowId }),
       data: { email: leadReporterAccount, id: leadReporterId, representativeId }
+    }),
+
+  updateRestrictFromPublic: async (dataflowId, dataProviderId, restrictFromPublic) =>
+    await HTTPRequester.update({
+      url: getUrl(RepresentativeConfig.updateRestrictFromPublic, { dataProviderId, dataflowId, restrictFromPublic })
+    }),
+
+  validateLeadReporters: async dataflowId =>
+    await HTTPRequester.update({
+      url: getUrl(RepresentativeConfig.validateLeadReporters, { dataflowId })
     })
 };

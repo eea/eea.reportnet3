@@ -4,6 +4,7 @@ import { withRouter } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
+import uniqBy from 'lodash/uniqBy';
 
 import { config } from 'conf';
 import { DataflowHelpReporterHelpConfig } from 'conf/help/dataflowHelp/reporter';
@@ -131,13 +132,13 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       setDataflowName(data.name);
     } catch (error) {
       console.error('DataflowHelp - getDataflowName.', error);
-      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} });
+      notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} }, true);
     }
   };
 
   const onLoadDatasetSchema = async datasetId => {
     try {
-      const datasetSchema = await DatasetService.getSchema(datasetId);
+      const datasetSchema = await DatasetService.getSchema(dataflowId, datasetId);
 
       if (!isEmpty(datasetSchema)) {
         if (isCustodian) {
@@ -148,7 +149,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       }
     } catch (error) {
       console.error('DataflowHelp - onLoadDatasetSchema.', error);
-      notificationContext.add({ type: 'IMPORT_DESIGN_FAILED_EVENT' });
+      notificationContext.add({ type: 'IMPORT_DESIGN_FAILED_EVENT' }, true);
     }
   };
 
@@ -159,15 +160,17 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       setIsLoading(false);
       if (!isCustodian) {
         if (!isEmpty(data.datasets)) {
-          const allDatasets = [...data.referenceDatasets, ...data.datasets];
-          const uniqueDatasetSchemas = allDatasets.filter((dataset, pos, arr) => {
-            return arr.map(dataset => dataset.datasetSchemaId).indexOf(dataset.datasetSchemaId) === pos;
-          });
-          const datasetSchemas = uniqueDatasetSchemas.map(async datasetSchema => {
+          const datasetSchemas = data.datasets.map(async datasetSchema => {
             return await onLoadDatasetSchema(datasetSchema.datasetId);
           });
           Promise.all(datasetSchemas).then(completed => {
-            setDatasetsSchemas(completed);
+            completed.forEach(datasetSchema => {
+              datasetSchema.datasetId = data.datasets.find(
+                dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
+              ).datasetId;
+            });
+
+            setDatasetsSchemas(uniqBy(completed, 'datasetSchemaId'));
           });
         } else {
           setIsLoadingSchemas(false);
@@ -178,7 +181,12 @@ export const DataflowHelp = withRouter(({ history, match }) => {
             return await onLoadDatasetSchema(designDataset.datasetId);
           });
           Promise.all(datasetSchemas).then(completed => {
-            setDatasetsSchemas(completed);
+            completed.forEach(datasetSchema => {
+              datasetSchema.datasetId = data.designDatasets.find(
+                designDataset => designDataset.datasetSchemaId === datasetSchema.datasetSchemaId
+              ).datasetId;
+            });
+            setDatasetsSchemas(uniqBy(completed, 'datasetSchemaId'));
           });
         } else {
           setIsLoadingSchemas(false);
@@ -186,7 +194,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       }
     } catch (error) {
       console.error('DataflowHelp - onLoadDatasetsSchemas.', error);
-      notificationContext.add({ type: 'LOAD_DATASETS_ERROR', content: {} });
+      notificationContext.add({ type: 'LOAD_DATASETS_ERROR', content: {} }, true);
     }
   };
 
@@ -200,7 +208,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       setDocuments(loadedDocuments);
     } catch (error) {
       console.error('DataflowHelp - onLoadDocuments.', error);
-      notificationContext.add({ type: 'LOAD_DOCUMENTS_ERROR', content: {} });
+      notificationContext.add({ type: 'LOAD_DOCUMENTS_ERROR', content: {} }, true);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         history.push(getUrl(routes.DATAFLOWS));
       }
@@ -217,7 +225,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
       setWebLinks(loadedWebLinks);
     } catch (error) {
       console.error('DataflowHelp - onLoadWebLinks.', error);
-      notificationContext.add({ type: 'LOAD_WEB_LINKS_ERROR', content: {} });
+      notificationContext.add({ type: 'LOAD_WEB_LINKS_ERROR', content: {} }, true);
     } finally {
       setIsLoadingWeblinks(false);
     }
@@ -276,6 +284,7 @@ export const DataflowHelp = withRouter(({ history, match }) => {
             rightIcon={isEmpty(datasetsSchemas) && isLoadingSchemas ? config.icons['spinnerAnimate'] : null}>
             <DatasetSchemas
               dataflowId={dataflowId}
+              dataflowName={dataflowName}
               datasetsSchemas={datasetsSchemas}
               isCustodian={isCustodian}
               onLoadDatasetsSchemas={onLoadDatasetsSchemas}

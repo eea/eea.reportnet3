@@ -12,6 +12,8 @@ import uniqBy from 'lodash/uniqBy';
 
 import styles from './HistoricReleases.module.scss';
 
+import { routes } from 'conf/routes';
+
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { Filters } from 'views/_components/Filters';
@@ -26,6 +28,8 @@ import { HistoricReleaseService } from 'services/HistoricReleaseService';
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { getUrl } from 'repositories/_utils/UrlUtils';
+
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
@@ -97,13 +101,13 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       getDataProviderCode(historicReleases);
     } catch (error) {
       console.error('HistoricReleases - onLoadHistoricReleases.', error);
-      notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' });
+      notificationContext.add({ type: 'LOAD_HISTORIC_RELEASES_ERROR' }, true);
     } finally {
       isLoading(false);
     }
   };
 
-  const releaseDateTemplate = rowData => {
+  const renderReleaseDateTemplate = rowData => {
     return (
       <div className={styles.checkedValueColumn}>
         {dayjs(rowData.releaseDate).format(
@@ -115,7 +119,28 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     );
   };
 
-  const isEUReleasedTemplate = rowData => (
+  const renderDataProviderLinkBodyColumn = rowData => (
+    <div onClick={e => e.stopPropagation()}>
+      <span>
+        {rowData.dataProviderCode}{' '}
+        <a
+          href={getUrl(routes.DATASET, { dataflowId, datasetId: rowData.datasetId }, true)}
+          title={rowData.dataProviderCode}>
+          <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalUrl')} />
+        </a>
+      </span>
+    </div>
+  );
+
+  const renderIsDataCollectionReleasedTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {rowData.isDataCollectionReleased ? (
+        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
+      ) : null}
+    </div>
+  );
+
+  const renderIsEUReleasedTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
       {rowData.isEUReleased ? (
         <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
@@ -123,9 +148,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     </div>
   );
 
-  const isDataCollectionReleasedTemplate = rowData => (
+  const renderRestrictFromPublicTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
-      {rowData.isDataCollectionReleased ? (
+      {!rowData.restrictFromPublic ? (
         <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
       ) : null}
     </div>
@@ -138,13 +163,16 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           key.includes('dataProviderCode') ||
           key.includes('releaseDate') ||
           key.includes('isDataCollectionReleased') ||
-          key.includes('isEUReleased')
+          key.includes('isEUReleased') ||
+          key.includes('restrictFromPublic')
       )
       .map(field => {
         let template = null;
-        if (field === 'releaseDate') template = releaseDateTemplate;
-        if (field === 'isEUReleased') template = isEUReleasedTemplate;
-        if (field === 'isDataCollectionReleased') template = isDataCollectionReleasedTemplate;
+        if (field === 'dataProviderCode') template = renderDataProviderLinkBodyColumn;
+        if (field === 'releaseDate') template = renderReleaseDateTemplate;
+        if (field === 'isEUReleased') template = renderIsEUReleasedTemplate;
+        if (field === 'isDataCollectionReleased') template = renderIsDataCollectionReleasedTemplate;
+        if (field === 'restrictFromPublic') template = renderRestrictFromPublicTemplate;
 
         return (
           <Column
@@ -170,10 +198,14 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const renderEUDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
-      .filter(key => key.includes('dataProviderCode') || key.includes('releaseDate'))
+      .filter(
+        key => key.includes('dataProviderCode') || key.includes('releaseDate') || key.includes('restrictFromPublic')
+      )
       .map(field => {
         let template = null;
-        if (field === 'releaseDate') template = releaseDateTemplate;
+        if (field === 'dataProviderCode') template = renderDataProviderLinkBodyColumn;
+        if (field === 'releaseDate') template = renderReleaseDateTemplate;
+        if (field === 'restrictFromPublic') template = renderRestrictFromPublicTemplate;
         return (
           <Column
             body={template}
@@ -219,6 +251,10 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         },
         { name: 'isEUReleased', label: resourcesContext.messages['onlyReleasedEUDatasetCheckboxLabel'] }
       ]
+    },
+    {
+      type: 'multiselect',
+      properties: [{ name: 'restrictFromPublic', label: resourcesContext.messages['restrictFromPublic'] }]
     }
   ];
 
@@ -233,7 +269,8 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             dataflowType,
             'historicReleaseDataProviderFilterLabel'
           )
-        }
+        },
+        { name: 'restrictFromPublic', label: resourcesContext.messages['restrictFromPublic'] }
       ]
     }
   ];
@@ -243,7 +280,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       .filter(key => key.includes('releaseDate'))
       .map(field => {
         let template = null;
-        if (field === 'releaseDate') template = releaseDateTemplate;
+        if (field === 'releaseDate') template = renderReleaseDateTemplate;
         return (
           <Column
             body={template}
@@ -258,41 +295,36 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     return fieldColumns;
   };
 
-  if (historicReleasesState.isLoading) {
+  const getFilters = filterOptions => {
     return (
-      <div className={styles.historicReleasesWithoutTable}>
-        <div className={styles.spinner}>
-          <Spinner className={styles.spinnerPosition} />
-        </div>
-      </div>
+      <Filters
+        data={historicReleasesState.data}
+        getFilteredData={onLoadFilteredData}
+        getFilteredSearched={getFiltered}
+        options={filterOptions}
+      />
     );
-  }
+  };
 
-  return isEmpty(historicReleasesState.data) ? (
-    <div className={styles.historicReleasesWithoutTable}>
-      <div className={styles.noHistoricReleases}>{resourcesContext.messages['noHistoricReleases']}</div>
-    </div>
-  ) : (
-    <div className={styles.historicReleases}>
-      {historicReleasesView === 'dataCollection' && (
-        <Filters
-          data={historicReleasesState.data}
-          getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFiltered}
-          options={filterOptionsDataCollection}
-        />
-      )}
+  const renderFilters = () => {
+    if (historicReleasesView === 'dataCollection') {
+      return getFilters(filterOptionsDataCollection);
+    }
 
-      {historicReleasesView === 'EUDataset' && (
-        <Filters
-          data={historicReleasesState.data}
-          getFilteredData={onLoadFilteredData}
-          getFilteredSearched={getFiltered}
-          options={filterOptionsEUDataset}
-        />
-      )}
+    if (historicReleasesView === 'EUDataset') {
+      return getFilters(filterOptionsEUDataset);
+    }
+  };
 
-      {!isEmpty(historicReleasesState.filteredData) ? (
+  const renderHistoricReleasesTable = () => {
+    if (isEmpty(historicReleasesState.filteredData)) {
+      return (
+        <div className={styles.emptyFilteredData}>
+          {resourcesContext.messages['noHistoricReleasesWithSelectedParameters']}
+        </div>
+      );
+    } else {
+      return (
         <DataTable
           autoLayout={true}
           className={
@@ -310,11 +342,36 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           {historicReleasesView === 'reportingDataset' &&
             renderReportingDatasetColumns(historicReleasesState.filteredData)}
         </DataTable>
-      ) : (
-        <div className={styles.emptyFilteredData}>
-          {resourcesContext.messages['noHistoricReleasesWithSelectedParameters']}
+      );
+    }
+  };
+
+  const renderHistoricReleasesContent = () => {
+    if (historicReleasesState.isLoading) {
+      return (
+        <div className={styles.historicReleasesWithoutTable}>
+          <div className={styles.spinner}>
+            <Spinner className={styles.spinnerPosition} />
+          </div>
         </div>
-      )}
-    </div>
-  );
+      );
+    }
+
+    if (isEmpty(historicReleasesState.data)) {
+      return (
+        <div className={styles.historicReleasesWithoutTable}>
+          <div className={styles.noHistoricReleases}>{resourcesContext.messages['noHistoricReleases']}</div>
+        </div>
+      );
+    }
+
+    return (
+      <div className={styles.historicReleases}>
+        {renderFilters()}
+        {renderHistoricReleasesTable()}
+      </div>
+    );
+  };
+
+  return renderHistoricReleasesContent();
 };

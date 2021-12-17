@@ -65,8 +65,19 @@
   margin: 2rem 0;
   width: 100%;
 
+  .input {
+    &:first-of-type {
+      margin-left: 0 !important;
+    }
+  }
+
+  .checkboxWrap {
+    margin-left: 1rem;
+  }
+
   .input,
   .inputCheckbox {
+    margin-left: 1rem;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
@@ -86,7 +97,7 @@
     width: auto !important;
 
     .strictModeInfoButton {
-      background-color: var(--white) !important;
+      background-color: var(--c-white-color) !important;
       border-radius: 50% !important;
       color: var(--datatable-header-info-button-color) !important;
       font-size: 12pt !important;
@@ -197,7 +208,7 @@
 
     &:focus,
     &:enabled:focus {
-      box-shadow: 0 0 0 0 var(--blue-120) !important;
+      box-shadow: 0 0 0 0 var(--c-blue-120) !important;
     }
   }
 
@@ -281,7 +292,12 @@
 
     &:focus,
     &:enabled:focus {
-      box-shadow: 0 0 0 0 var(--blue-120) !important;
+      box-shadow: 0 0 0 0 var(--c-blue-120) !important;
+      border-color: var(--general-border-color) !important;
+    }
+
+    &:hover {
+      border-color: var(--general-border-color) !important;
     }
 
     &:active {
@@ -322,7 +338,7 @@
   }
 
   &:enabled:focus {
-    box-shadow: 0 0 0 0 var(--white) !important;
+    box-shadow: 0 0 0 0 var(--c-white-color) !important;
     outline: none;
   }
 
@@ -337,6 +353,7 @@
   align-items: center;
   display: flex;
   justify-content: flex-end;
+  margin-left: auto;
 }
 
 :global .p-calendar {

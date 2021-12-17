@@ -21,9 +21,6 @@ export const RepresentativeService = {
     return response;
   },
 
-  getSelectedDataProviderGroup: async dataflowId =>
-    await RepresentativeRepository.getSelectedDataProviderGroup(dataflowId),
-
   getRepresentatives: async dataflowId => {
     const representativesDTO = await RepresentativeRepository.getRepresentatives(dataflowId);
 
@@ -61,5 +58,15 @@ export const RepresentativeService = {
     await RepresentativeRepository.updateDataProviderId(representativeId, dataProviderId),
 
   updateLeadReporter: async (leadReporterAccount, leadReporterId, representativeId, dataflowId) =>
-    await RepresentativeRepository.updateLeadReporter(leadReporterAccount, leadReporterId, representativeId, dataflowId)
+    await RepresentativeRepository.updateLeadReporter(
+      leadReporterAccount,
+      leadReporterId,
+      representativeId,
+      dataflowId
+    ),
+
+  updateRestrictFromPublic: async (dataflowId, dataProviderId, restrictFromPublic) =>
+    await RepresentativeRepository.updateRestrictFromPublic(dataflowId, dataProviderId, restrictFromPublic),
+
+  validateLeadReporters: async dataflowId => await RepresentativeRepository.validateLeadReporters(dataflowId)
 };

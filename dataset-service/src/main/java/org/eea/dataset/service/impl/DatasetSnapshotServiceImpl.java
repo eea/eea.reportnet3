@@ -43,9 +43,9 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.ReportingDatasetService;
+import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -162,9 +162,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
 
-  /** The dataset service. */
+
+  /** The delete helper. */
   @Autowired
-  private DatasetService datasetService;
+  private DeleteHelper deleteHelper;
 
   /** The schema service. */
   @Autowired
@@ -299,7 +300,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setDescription(createSnapshotVO.getDescription());
       DataSetMetabase dataset = new DataSetMetabase();
       dataset.setId(idDataset);
-      if (DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(idDataset))) {
+      if (DatasetTypeEnum.REPORTING
+          .equals(datasetMetabaseService.findDatasetMetabase(idDataset).getDatasetTypeEnum())) {
         dataset = metabaseRepository.findById(idDataset).orElse(new DataSetMetabase());
         if (dataset.getDatasetSchema() != null) {
           DataCollection dataCollection = dataCollectionRepository
@@ -312,6 +314,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setDcReleased(createSnapshotVO.getReleased());
       snap.setEuReleased(false);
 
+      Long dataflowId = metabaseRepository.findDataflowIdById(idDataset);
+      if (snap.getReportingDataset() != null
+          && snap.getReportingDataset().getDataProviderId() != null) {
+        List<RepresentativeVO> representatives =
+            representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
+        for (RepresentativeVO representative : representatives) {
+          if (snap.getReportingDataset().getDataProviderId()
+              .equals(representative.getDataProviderId())) {
+            snap.setRestrictFromPublic(representative.isRestrictFromPublic());
+          }
+        }
+      }
 
       snap.setAutomatic(
           Boolean.TRUE.equals(createSnapshotVO.getAutomatic()) ? Boolean.TRUE : Boolean.FALSE);
@@ -520,11 +534,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   private void deleteDataProvider(Long idDataset, Long idSnapshot, final Long idDataProvider,
       DataProviderVO provider, Long idDataCollection, Date dateRelease) throws EEAException {
-    Long idDataflow = datasetService.getDataFlowIdById(idDataset);
+    Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
     if (provider != null && idDataCollection != null) {
       TenantResolver
           .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataCollection));
-      datasetService.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
+      deleteHelper.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
 
       // Restore data from snapshot
       try {
@@ -1005,16 +1019,19 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public List<ReleaseVO> getReleases(Long datasetId) throws EEAException {
     List<ReleaseVO> releases = new ArrayList<>();
-    if (DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))) {
+    if (DatasetTypeEnum.REPORTING
+        .equals(datasetMetabaseService.findDatasetMetabase(datasetId).getDatasetTypeEnum())) {
       // if dataset is reporting return released snapshots
       releases = getSnapshotsReleasedByIdDataset(datasetId);
     } else {
       // if the snapshot is a datacollection
-      if (DatasetTypeEnum.COLLECTION.equals(datasetService.getDatasetType(datasetId))) {
+      if (DatasetTypeEnum.COLLECTION
+          .equals(datasetMetabaseService.findDatasetMetabase(datasetId).getDatasetTypeEnum())) {
         releases = getSnapshotsReleasedByIdDataCollection(datasetId);
       } else
       // if the snapshot is an eudataset
-      if (DatasetTypeEnum.EUDATASET.equals(datasetService.getDatasetType(datasetId))) {
+      if (DatasetTypeEnum.EUDATASET
+          .equals(datasetMetabaseService.findDatasetMetabase(datasetId).getDatasetTypeEnum())) {
         releases = getSnapshotsReleasedByIdEUDataset(datasetId);
       }
     }
@@ -1109,6 +1126,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
 
+      Map<String, Object> restoreSnapshots = new HashMap<>();
+      restoreSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RESTORE_SNAPSHOT.getValue());
+      restoreSnapshots.put(LiteralConstants.DATASETID, datasetId);
+
       Map<String, Object> insertRecordsMultitable = new HashMap<>();
       insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
           LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
@@ -1121,6 +1142,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       lockService.removeLockByCriteria(deleteDatasetValues);
       lockService.removeLockByCriteria(importFileData);
       lockService.removeLockByCriteria(insertRecordsMultitable);
+      lockService.removeLockByCriteria(restoreSnapshots);
 
       // Delete tables and import tables
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
@@ -1148,6 +1170,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     releaseSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
     releaseSnapshots.put(LiteralConstants.DATAFLOWID, dataflowId);
     releaseSnapshots.put(LiteralConstants.DATAPROVIDERID, dataProviderId);
+
 
     lockService.removeLockByCriteria(populateEuDataset);
     lockService.removeLockByCriteria(releaseSnapshots);
