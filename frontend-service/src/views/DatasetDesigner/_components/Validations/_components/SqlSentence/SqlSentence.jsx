@@ -14,6 +14,7 @@ import { Dialog } from 'views/_components/Dialog';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { Spinner } from 'views/_components/Spinner';
 import { SqlHelp } from './_components/SqlHelp';
+import { TrafficLight } from 'views/_components/TrafficLight';
 
 import { ValidationService } from 'services/ValidationService';
 
@@ -159,10 +160,8 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
         const color = getColor(sqlSentenceCost);
 
         return (
-          <div className={`${styles.sqlSentenceCostWrapper} ${styles.trafficLight}`}>
-            <div className={color === 'green' ? styles.greenLightSignal : ''} key="green"></div>
-            <div className={color === 'yellow' ? styles.yellowLightSignal : ''} key="yellow"></div>
-            <div className={color === 'red' ? styles.redLightSignal : ''} key="red"></div>
+          <div className={styles.sqlSentenceCostWrapper}>
+            <TrafficLight className={styles.trafficLightSize} sqlSentenceCost={sqlSentenceCost} />
           </div>
         );
       }
