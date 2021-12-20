@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
@@ -72,6 +74,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
   /** The Constant REGEX: {@value}. */
   private static final String REGEX = "-";
+
+  /** The Constant EMAIL_REGEX: {@value}. */
+  private static final String EMAIL_REGEX =
+      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$";
 
   /** The Constant ROLE_PROVIDER: {@value}. */
   private static final String ROLE_PROVIDER = "ROLE_PROVIDER-";
@@ -153,12 +159,24 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-
   /** The Constant EMAIL: {@value}. */
   private static final String EMAIL = "Email";
 
   /** The Constant REPRESENTING: {@value}. */
   private static final String REPRESENTING = "Representing";
+
+  /** The Constant IMPORTED: {@value}. */
+  private static final String IMPORTED = "Imported";
+
+  /** The Constant OK_IMPORT: {@value}. */
+  private static final String OK_IMPORT = "OK imported";
+
+  /** The Constant KO_INVALID_EMAIL: {@value}. */
+  private static final String KO_INVALID_EMAIL = "KO invalid email";
+
+  /** The Constant KO_ALREADY_EXISTS: {@value}. */
+  private static final String KO_ALREADY_EXISTS =
+      "KO imported user already exists in Reportnet representing for the same Representative.";
 
   /**
    * Creates the representative.
@@ -470,10 +488,11 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       List<String> headers = new ArrayList<>();
       headers.add(REPRESENTING);
       headers.add(EMAIL);
-      headers.add("Imported");
+      headers.add(IMPORTED);
       csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
       int nHeaders = 3;
       String[] fieldsToWrite = new String[nHeaders];
+      Pattern p = Pattern.compile(EMAIL_REGEX);
 
 
       List<DataProvider> dataProviderList =
@@ -517,8 +536,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                   .findFirst().orElse(representativeRepository
                       .findOneByDataflow_IdAndDataProvider_Id(dataflowId, dataProvider.getId()));
 
+              Matcher m = p.matcher(email);
+
               // if exist we dont create representative
-              if (null == representative) {
+              if (null == representative && m.matches()) {
                 DataProvider dataProviderNew = new DataProvider();
                 representative = new Representative();
                 dataProviderNew.setId(dataProvider.getId());
@@ -540,7 +561,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                   representative.setLeadReporters(new ArrayList<>());
                 }
                 representativeList.add(representative);
-              } else {
+                fieldsToWrite[2] = OK_IMPORT;
+              } else if (m.matches()) {
                 List<LeadReporter> leadReporters = representative.getLeadReporters();
                 if (StringUtils.isNotBlank(email)) {
                   final String innerEmail = email.toLowerCase();
@@ -558,10 +580,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                 if (!representativeList.contains(representative)) {
                   representativeList.add(representative);
                 }
+                fieldsToWrite[2] = OK_IMPORT;
+              } else {
+                fieldsToWrite[2] = KO_INVALID_EMAIL;
               }
-              fieldsToWrite[2] = "OK imported";
+
             } else {
-              fieldsToWrite[2] = "KO imported already exist in reportnet";
+              fieldsToWrite[2] = KO_ALREADY_EXISTS;
             }
           }
 
