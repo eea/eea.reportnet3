@@ -192,7 +192,8 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     }
 
     return (
-      <DataTable style={{ width: `${getTableWidth()}` }} value={sqlResponse}>
+      // <DataTable style={{ width: `${getTableWidth()}` }} value={sqlResponse}>
+      <DataTable autoLayout value={sqlResponse}>
         {columns}
       </DataTable>
     );
