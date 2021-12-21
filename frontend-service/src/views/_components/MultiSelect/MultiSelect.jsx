@@ -545,7 +545,7 @@ export class MultiSelect extends Component {
 
     return this.props.hasSelectedItemsLabel ? (
       this.props.isLoadingData ? (
-        <Spinner style={{ top: 0, width: '25px', height: '25px' }} />
+        <Spinner style={{ top: 0, width: '25px', height: '25px', position: 'absolute' }} />
       ) : (
         <div
           className="p-multiselect-label-container"
