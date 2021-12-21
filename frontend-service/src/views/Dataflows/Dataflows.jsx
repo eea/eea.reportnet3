@@ -489,7 +489,7 @@ const Dataflows = () => {
   const renderUserListDialogFooter = () => (
     <Button
       className="p-button-secondary p-button-animated-blink"
-      icon={'cancel'}
+      icon="cancel"
       label={resourcesContext.messages['close']}
       onClick={() => manageDialogs('isUserListVisible', false)}
     />
