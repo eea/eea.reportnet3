@@ -301,9 +301,10 @@ const useBigButtonList = ({
       const datasetRepresentative = dataflowState.data.representatives.find(
         representative => representative.dataProviderId === dataset.dataProviderId
       );
+
       const releasedShowPublicInfoUpdating = dataset.isReleased && dataflowState.isShowPublicInfoUpdating;
       const representativeRestrictFromPublicUpdating =
-        datasetRepresentative.dataProviderId === dataflowState.restrictFromPublicIsUpdating.dataProviderId &&
+        datasetRepresentative?.dataProviderId === dataflowState.restrictFromPublicIsUpdating.dataProviderId &&
         dataflowState.restrictFromPublicIsUpdating.value;
 
       return {
