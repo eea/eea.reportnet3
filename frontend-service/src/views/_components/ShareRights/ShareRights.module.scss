@@ -83,13 +83,11 @@
 
 .wrapperNoUserRoles,
 .wrapperEmptyFilter {
+  height: 35vh;
   display: flex;
+  flex: 1 auto;
   align-items: center;
   justify-content: center;
-}
-.wrapperNoUserRoles {
-  height: 100%;
-}
-.wrapperEmptyFilter {
-  height: 80%;
+  font-size: 1.1rem;
+  font-weight: bold;
 }
