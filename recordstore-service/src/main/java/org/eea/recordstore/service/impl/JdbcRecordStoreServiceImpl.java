@@ -648,7 +648,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     } catch (SQLException | IOException e) {
       LOG_ERROR.error("Error creating the data from the origin dataset {}", originDataset, e);
-      deleteFile(Arrays.asList(nameFileRecordValue, nameFileFieldValue, nameFileAttachmentValue));
+      deleteFile(Arrays.asList(nameFileTableValue, nameFileRecordValue, nameFileFieldValue,
+          nameFileAttachmentValue));
     }
 
     // Copy the data from the snapshot file into the target dataset
