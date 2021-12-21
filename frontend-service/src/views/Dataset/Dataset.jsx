@@ -854,7 +854,7 @@ export const Dataset = ({ isReferenceDataset }) => {
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => onSetVisible(setValidationListDialogVisible, false)}
       />
@@ -896,7 +896,7 @@ export const Dataset = ({ isReferenceDataset }) => {
   const renderDashboardFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon={'cancel'}
+      icon="cancel"
       label={resourcesContext.messages['close']}
       onClick={() => onSetVisible(setDashDialogVisible, false)}
     />
@@ -906,7 +906,7 @@ export const Dataset = ({ isReferenceDataset }) => {
     <Fragment>
       <Button
         className="p-button-animated-blink"
-        icon={'check'}
+        icon="check"
         label={resourcesContext.messages['import']}
         onClick={() => onImportOtherSystems()}
       />
@@ -980,7 +980,7 @@ export const Dataset = ({ isReferenceDataset }) => {
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => setValidationsVisible(false)}
       />

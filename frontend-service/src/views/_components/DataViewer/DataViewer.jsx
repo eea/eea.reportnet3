@@ -950,7 +950,7 @@ const DataViewer = ({
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['cancel']}
         onClick={onCancelRowEdit}
       />

@@ -266,14 +266,14 @@ const TabView = ({
       <div className={styles.headersWrapper}>
         <Icon
           className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
-          icon={'stepBackward'}
+          icon="stepBackward"
           onClick={() => {
             scrollTo(0, 0);
           }}
         />
         <Icon
           className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
-          icon={'caretLeft'}
+          icon="caretLeft"
           onClick={e => {
             scrollTo(divTabsRef.current.scrollLeft - divTabsRef.current.clientWidth * 0.75, 0);
           }}
@@ -285,14 +285,14 @@ const TabView = ({
         </div>
         <Icon
           className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
-          icon={'caretRight'}
+          icon="caretRight"
           onClick={() => {
             scrollTo(divTabsRef.current.scrollLeft + divTabsRef.current.clientWidth * 0.75, 0);
           }}
         />
         <Icon
           className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
-          icon={'stepForward'}
+          icon="stepForward"
           onClick={() => {
             scrollTo(ulTabsRef.current.clientWidth + 100, 0);
           }}
