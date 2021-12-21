@@ -18,3 +18,7 @@ h2 {
 .app {
   position: relative;
 }
+
+::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
