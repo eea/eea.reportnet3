@@ -17,6 +17,10 @@
       "key": "DATA_CUSTODIAN",
       "label": "CUSTODIAN"
     },
+    "CUSTODIAN_SUPPORT": {
+      "key": "CUSTODIAN_SUPPORT",
+      "label": "CUSTODIAN SUPPORT"
+    },
     "STEWARD": {
       "key": "DATA_STEWARD",
       "label": "STEWARD"
