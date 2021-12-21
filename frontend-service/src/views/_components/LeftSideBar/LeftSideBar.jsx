@@ -203,23 +203,23 @@ const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible 
         {
           <Fragment>
             <div className={`${styles.barSection} dataflowList-left-side-bar-top-section-help-step`}>
-              {renderHome()}
-              {renderUserProfile()}
-              {renderHelp()}
-              {renderUserNotifications()}
-              {renderManageSystemNotifications()}
+              <div className={styles.leftSideBarElementWrapper}>{renderHome()}</div>
+              <div className={styles.leftSideBarElementWrapper}>{renderUserProfile()}</div>
+              <div className={styles.leftSideBarElementWrapper}>{renderHelp()}</div>
+              <div className={styles.leftSideBarElementWrapper}>{renderUserNotifications()}</div>
+              <div className={styles.leftSideBarElementWrapper}>{renderManageSystemNotifications()}</div>
             </div>
             {!isEmpty(renderSectionButtons()) && (
               <Fragment>
                 <hr />
                 <div className={`${styles.barSection} dataflowList-left-side-bar-mid-section-help-step`}>
-                  {renderSectionButtons()}
+                  <div className={styles.leftSideBarElementWrapper}>{renderSectionButtons()}</div>
                 </div>
               </Fragment>
             )}
             <hr />
             <div className={styles.barSection}>
-              {renderLogout()}
+              <div className={styles.leftSideBarElementWrapper}>{renderLogout()}</div>
               <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
             </div>
 
