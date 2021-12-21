@@ -264,13 +264,13 @@ const ReferenceDataflow = () => {
     <div className={styles.buttonsRolesFooter}>
       <Button
         className={`p-button-secondary p-button-animated-blink p-button-left-aligned`}
-        icon={'plus'}
+        icon="plus"
         label={resourcesContext.messages['add']}
         onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
       />
       <Button
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['cancel']}
         onClick={() => onCloseShareRightsDialog()}
       />

@@ -2,6 +2,7 @@ import { Fragment, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+import uniqueId from 'lodash/uniqueId';
 
 import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
 
@@ -127,7 +128,11 @@ const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible 
   };
 
   const renderSectionButtons = () => {
-    return leftSideBarContext.models.map(model => <LeftSideBarButton key={model.label} {...model} />);
+    return leftSideBarContext.models.map(model => (
+      <div className={styles.leftSideBarElementWrapper} key={uniqueId('sectionButton_')}>
+        <LeftSideBarButton key={model.label} {...model} />
+      </div>
+    ));
   };
 
   const userLogout = async () => {
@@ -203,11 +208,11 @@ const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible 
         {
           <Fragment>
             <div className={`${styles.barSection} dataflowList-left-side-bar-top-section-help-step`}>
-              {renderHome()}
-              {renderUserProfile()}
-              {renderHelp()}
-              {renderUserNotifications()}
-              {renderManageSystemNotifications()}
+              <div className={styles.leftSideBarElementWrapper}>{renderHome()}</div>
+              <div className={styles.leftSideBarElementWrapper}>{renderUserProfile()}</div>
+              <div className={styles.leftSideBarElementWrapper}>{renderHelp()}</div>
+              <div className={styles.leftSideBarElementWrapper}>{renderUserNotifications()}</div>
+              <div className={styles.leftSideBarElementWrapper}>{renderManageSystemNotifications()}</div>
             </div>
             {!isEmpty(renderSectionButtons()) && (
               <Fragment>
@@ -219,7 +224,7 @@ const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible 
             )}
             <hr />
             <div className={styles.barSection}>
-              {renderLogout()}
+              <div className={styles.leftSideBarElementWrapper}>{renderLogout()}</div>
               <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
             </div>
 

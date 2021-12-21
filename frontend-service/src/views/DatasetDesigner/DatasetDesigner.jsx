@@ -996,21 +996,21 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
       <Button
         className="p-button-secondary p-button-animated-blink"
-        icon={'plus'}
+        icon="plus"
         label={resourcesContext.messages['createFieldValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('field', 'validationsListDialog')}
         style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
-        icon={'plus'}
+        icon="plus"
         label={resourcesContext.messages['createRowValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('row', 'validationsListDialog')}
         style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
-        icon={'plus'}
+        icon="plus"
         label={resourcesContext.messages['createTableValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
         style={{ float: 'left' }}
@@ -1026,7 +1026,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => onHideValidationsDialog()}
       />
@@ -1036,7 +1036,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const renderDashboardFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon={'cancel'}
+      icon="cancel"
       label={resourcesContext.messages['close']}
       onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
     />
@@ -1046,7 +1046,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     <Fragment>
       <Button
         className="p-button-animated-blink"
-        icon={'check'}
+        icon="check"
         label={resourcesContext.messages['import']}
         onClick={() => onImportOtherSystems()}
       />
@@ -1114,7 +1114,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => manageDialogs('isValidationViewerVisible', false)}
       />
@@ -1220,7 +1220,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           isUndefined(designerState.selectedWebform) ||
           designerState?.selectedWebform?.value === designerState?.webform?.value
         }
-        icon={'check'}
+        icon="check"
         label={resourcesContext.messages['save']}
         onClick={() => {
           onUpdateWebform();
@@ -1231,7 +1231,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       />
       <Button
         className="p-button-secondary p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['cancel']}
         onClick={() => {
           designerDispatch({ type: 'RESET_SELECTED_WEBFORM' });
@@ -1246,14 +1246,14 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       <div className="p-toolbar-group-left">
         <Button
           className="p-button-secondary p-button-animated-blink"
-          icon={'plus'}
+          icon="plus"
           label={resourcesContext.messages['addUniqueConstraint']}
           onClick={() => manageDialogs('isManageUniqueConstraintDialogVisible', true)}
         />
       </div>
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => onCloseUniqueListModal()}
       />
@@ -1470,7 +1470,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                     : null
                 } datasetSchema-uniques-help-step`}
                 disabled={isDataflowOpen || isDesignDatasetEditorRead || designerState.referenceDataset}
-                icon={'table'}
+                icon="table"
                 label={resourcesContext.messages['configureWebform']}
                 onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
               />
@@ -1483,7 +1483,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={isDataflowOpen || isDesignDatasetEditorRead}
-                icon={'import'}
+                icon="import"
                 label={resourcesContext.messages['importDataset']}
                 onClick={event => importMenuRef.current.show(event)}
               />

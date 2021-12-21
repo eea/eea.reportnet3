@@ -94,14 +94,14 @@ export const ManageManualAcceptanceDataset = ({
             isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
             manageManualAcceptanceDatasetState.datasetFeedbackStatus === dataset.feedbackStatus
           }
-          icon={'check'}
+          icon="check"
           label={resourcesContext.messages['update']}
           onClick={() => onUpdateDataset()}
         />
       </span>
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => manageDialogs(false)}
       />

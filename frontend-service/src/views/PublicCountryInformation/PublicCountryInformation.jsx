@@ -374,12 +374,7 @@ export const PublicCountryInformation = () => {
     <PublicLayout>
       <div className={`${styles.container}  rep-container`} style={contentStyles}>
         {!isEmpty(countryName) && (
-          <Title
-            icon={'clone'}
-            iconSize={'4rem'}
-            subtitle={resourcesContext.messages['dataflows']}
-            title={countryName}
-          />
+          <Title icon="clone" iconSize={'4rem'} subtitle={resourcesContext.messages['dataflows']} title={countryName} />
         )}
         {isLoading ? (
           <Spinner className={styles.isLoading} />
