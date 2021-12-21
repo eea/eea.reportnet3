@@ -746,7 +746,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String oldDatasetId = lineSplitted[2];
       String tableSchemaId = lineSplitted[1];
       line = line.replace(oldDatasetId, datasetId.toString());
-      line = line.replace(tableSchemaId, dictionaryOriginTargetObjectId.get(tableSchemaId));
+      if (null != dictionaryOriginTargetObjectId) {
+        line = line.replace(tableSchemaId, dictionaryOriginTargetObjectId.get(tableSchemaId));
+      }
     }
     return line;
   }
@@ -1089,6 +1091,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // not neccesary
       String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+
+      modifySnapshotFile(null, Arrays.asList(nameFileTableValue), datasetId);
 
       String copyQueryTable =
           COPY_DATASET + datasetId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
