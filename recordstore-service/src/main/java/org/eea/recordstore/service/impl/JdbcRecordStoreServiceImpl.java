@@ -792,7 +792,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         Statement stmt = con.createStatement()) {
       con.setAutoCommit(true);
 
-      if (Boolean.TRUE.equals(deleteData)) {
+      if (Boolean.TRUE.equals(deleteData)
+          || (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference)) {
         String sql = composeDeleteSql(datasetId, partitionId, datasetType);
         LOG.info("Deleting previous data");
         stmt.executeUpdate(sql);
@@ -873,7 +874,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void copyProcess(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType,
       CopyManager cm) throws IOException, SQLException {
-    if (DatasetTypeEnum.DESIGN.equals(datasetType)) {
+    if (DatasetTypeEnum.DESIGN.equals(datasetType)
+        || DatasetTypeEnum.REFERENCE.equals(datasetType)) {
       // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
       // not neccesary
       String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
@@ -925,10 +927,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         sql = DELETE_FROM_DATASET + idReportingDataset + ".record_value";
         break;
       case REPORTING:
+      case TEST:
         sql = DELETE_FROM_DATASET + idReportingDataset + ".record_value WHERE dataset_partition_id="
             + partitionId;
         break;
       case DESIGN:
+      case REFERENCE:
         sql = DELETE_FROM_DATASET + idReportingDataset + ".table_value";
         break;
       default:
