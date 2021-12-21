@@ -87,11 +87,14 @@
   &.DESIGN,
   &.OPEN,
   &.CLOSED {
+    box-shadow: var(--card-item-box-shadow);
+    transform: scale(1, 1);
     box-shadow: var(--dataflow-item-box-shadow);
-    transition: var(--dataflow-item-transition-box-shadow);
+    transition: var(--dataflow-item-transition);
     &:hover {
+      transform: scale(1.01, 1.01);
       box-shadow: var(--dataflow-item-box-shadow-hover);
-      transition: var(--dataflow-item-transition-box-shadow);
+      transition: var(--dataflow-item-transition);
     }
   }
   &:first-of-type {

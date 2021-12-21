@@ -5,8 +5,6 @@ import isNil from 'lodash/isNil';
 
 import styles from './SqlSentence.module.scss';
 
-import { config } from 'conf';
-
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
@@ -29,8 +27,8 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
 
   const [columns, setColumns] = useState();
   const [hasValidationError, setHasValidationError] = useState(false);
-  const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isEvaluateSqlSentenceLoading, setIsEvaluateSqlSentenceLoading] = useState(false);
+  const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isValidatingQuery, setIsValidatingQuery] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
   const [isVisibleSqlSentenceValidationDialog, setIsVisibleSqlSentenceValidationDialog] = useState(false);
@@ -85,9 +83,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     const [firstRow] = sqlResponse;
     const columnData = Object.keys(firstRow).map(key => ({ field: key, header: key.replace('*', '.') }));
 
-    return columnData.map(col => (
-      <Column field={col.field} header={col.header} key={col.field} style={{ minWidth: '150px' }} />
-    ));
+    return columnData.map(col => <Column field={col.field} header={col.header} key={col.field} />);
   };
 
   const sqlSentenceValidationDialogFooter = (
@@ -139,16 +135,6 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   };
 
   const renderSqlSentenceCost = () => {
-    const getColor = cost => {
-      if (cost < config.SQL_SENTENCE_LOW_COST) {
-        return 'green';
-      } else if (cost < config.SQL_SENTENCE_HIGH_COST && cost > config.SQL_SENTENCE_LOW_COST) {
-        return 'yellow';
-      } else {
-        return 'red';
-      }
-    };
-
     if (isEvaluateSqlSentenceLoading) {
       return (
         <div className={`${styles.sqlSentenceCostWrapper} ${styles.spinnerWrapper}`}>
@@ -172,7 +158,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
     }
 
     return (
-      <DataTable scrollable value={sqlResponse}>
+      <DataTable autoLayout initialOverflowX value={sqlResponse}>
         {columns}
       </DataTable>
     );

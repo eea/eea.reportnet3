@@ -2,6 +2,7 @@ import { Fragment, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+import uniqueId from 'lodash/uniqueId';
 
 import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
 
@@ -127,7 +128,11 @@ const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible 
   };
 
   const renderSectionButtons = () => {
-    return leftSideBarContext.models.map(model => <LeftSideBarButton key={model.label} {...model} />);
+    return leftSideBarContext.models.map(model => (
+      <div className={styles.leftSideBarElementWrapper} key={uniqueId('sectionButton_')}>
+        <LeftSideBarButton key={model.label} {...model} />
+      </div>
+    ));
   };
 
   const userLogout = async () => {
@@ -213,7 +218,7 @@ const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible 
               <Fragment>
                 <hr />
                 <div className={`${styles.barSection} dataflowList-left-side-bar-mid-section-help-step`}>
-                  <div className={styles.leftSideBarElementWrapper}>{renderSectionButtons()}</div>
+                  {renderSectionButtons()}
                 </div>
               </Fragment>
             )}
