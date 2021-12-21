@@ -124,7 +124,7 @@ public interface RepresentativeService {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  byte[] importFile(Long dataflowId, Long groupId, MultipartFile file)
+  byte[] importLeadReportersFile(Long dataflowId, Long groupId, MultipartFile file)
       throws EEAException, IOException;
 
   /**

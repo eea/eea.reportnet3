@@ -388,7 +388,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     }
 
     try {
-      byte[] fileEnded = representativeService.importFile(dataflowId, groupId, file);
+      byte[] fileEnded = representativeService.importLeadReportersFile(dataflowId, groupId, file);
       String fileName = "Dataflow-" + dataflowId + "-Lead-Reporters-Errors-improt.csv";
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
