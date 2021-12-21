@@ -53,7 +53,7 @@ const Settings = () => {
     layout(
       <div className={styles.settingsContainer}>
         <div className="rep-row">
-          <div className={` rep-col-12 rep-col-sm-12`}>
+          <div className="rep-col-12 rep-col-sm-12">
             <Title
               icon="userConfig"
               iconSize="4rem"

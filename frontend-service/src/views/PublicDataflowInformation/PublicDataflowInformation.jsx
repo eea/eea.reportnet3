@@ -472,7 +472,7 @@ export const PublicDataflowInformation = () => {
         <Title icon="clone" iconSize="4rem" subtitle={dataflowData.description} title={dataflowData.name} />
         {!TextUtils.areEquals(dataflowData.type, config.dataflowType.BUSINESS.value) && (
           <Toolbar className={styles.actionsToolbar}>
-            <div className={'p-toolbar-group-left'}>
+            <div className="p-toolbar-group-left">
               <Button
                 className={`p-button-rounded p-button-secondary ${!isDownloading ? 'p-button-animated-blink' : ''}`}
                 disabled={isDownloading}

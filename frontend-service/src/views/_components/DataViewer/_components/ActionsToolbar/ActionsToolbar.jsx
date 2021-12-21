@@ -273,7 +273,7 @@ const ActionsToolbar = ({
           }}
         />
         <DropdownFilter
-          className={`p-button-animated-blink`}
+          className="p-button-animated-blink"
           filters={visibilityDropdown}
           id="dropdownFilterMenu"
           onShow={event => getExportButtonPosition(event)}
