@@ -569,16 +569,6 @@ export const QCList = ({
   );
 
   const sqlSentenceCostTemplate = rowData => {
-    const getColor = cost => {
-      if (cost < config.SQL_SENTENCE_LOW_COST) {
-        return 'green';
-      } else if (cost < config.SQL_SENTENCE_HIGH_COST && cost > config.SQL_SENTENCE_LOW_COST) {
-        return 'yellow';
-      } else {
-        return 'red';
-      }
-    };
-
     if (rowData.sqlSentenceCost !== 0 && !isNil(rowData.sqlSentenceCost)) {
       return (
         <div className={styles.sqlSentenceCostTemplate}>

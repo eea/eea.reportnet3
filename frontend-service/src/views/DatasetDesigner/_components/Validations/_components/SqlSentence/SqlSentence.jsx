@@ -157,8 +157,6 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       );
     } else {
       if (sqlSentenceCost !== 0 && !isNil(sqlSentenceCost)) {
-        const color = getColor(sqlSentenceCost);
-
         return (
           <div className={styles.sqlSentenceCostWrapper}>
             <TrafficLight className={styles.trafficLightSize} sqlSentenceCost={sqlSentenceCost} />
