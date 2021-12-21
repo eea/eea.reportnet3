@@ -329,7 +329,7 @@ export const MyFilters = ({
           inputClassName={`p-float-label ${styles.label}`}
           inputId={`${option.key}_input`}
           isFilter={true}
-          isLoadingData={isEmpty(optionsMultiselect) ? true : false}
+          isLoadingData={isEmpty(optionsMultiselect)}
           itemTemplate={op => selectTemplate(op, option)}
           key={option.key}
           label={option.label || ''}
