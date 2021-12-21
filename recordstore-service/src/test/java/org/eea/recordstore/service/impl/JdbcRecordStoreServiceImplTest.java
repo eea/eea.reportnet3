@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -670,8 +671,10 @@ public class JdbcRecordStoreServiceImplTest {
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
     Mockito.when(((BaseConnection) connection).getEncoding())
         .thenReturn(Encoding.defaultEncoding());
-    driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
-        Mockito.anyString())).thenReturn(connection);
+    Statement stmt = Mockito.mock(Statement.class);
+    Mockito.when(connection.createStatement()).thenReturn(stmt);
+    Mockito.when(stmt.executeUpdate(Mockito.anyString())).thenReturn(1);
+
     jdbcRecordStoreService.createSnapshotToClone(1L, 1L, dictionaryOriginTargetObjectId, 1L,
         datasets);
     Mockito.verify(jdbcTemplate, times(2)).query(Mockito.anyString(),
