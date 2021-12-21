@@ -285,7 +285,7 @@ const Documents = ({
           <div className="p-toolbar-group-left">
             <Button
               className={`p-button-rounded p-button-secondary-transparent dataflowHelp-document-upload-help-step`}
-              icon={'upload'}
+              icon="upload"
               label={resourcesContext.messages['upload']}
               onClick={() => {
                 setDocumentInitialValues({

@@ -39,7 +39,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
       <div className="p-toolbar-group-left">
         <Button
           className="p-button-secondary p-button-animated-blink"
-          icon={'plus'}
+          icon="plus"
           label={resourcesContext.messages['createExternalIntegration']}
           onClick={() => {
             manageDialogs('isIntegrationManageDialogVisible', true);
@@ -50,7 +50,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
       </div>
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => onCloseListModal()}
       />
