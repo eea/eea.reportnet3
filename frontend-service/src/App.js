@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 
-import styles from './App.module.css';
+import styles from './App.module.scss';
 
 import { routes } from 'conf/routes';
 
