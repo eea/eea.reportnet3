@@ -17,10 +17,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -792,7 +795,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         Statement stmt = con.createStatement()) {
       con.setAutoCommit(true);
 
-      if (Boolean.TRUE.equals(deleteData)) {
+      if (Boolean.TRUE.equals(deleteData)
+          || (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference)) {
         String sql = composeDeleteSql(datasetId, partitionId, datasetType);
         LOG.info("Deleting previous data");
         stmt.executeUpdate(sql);
@@ -862,6 +866,66 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   /**
+   * Modify snapshot file.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param nameFiles the name files
+   */
+  private void modifySnapshotFile(Map<String, String> dictionaryOriginTargetObjectId,
+      List<String> nameFiles, Long datasetId) {
+
+    if (!CollectionUtils.isEmpty(nameFiles)) {
+      nameFiles.stream().forEach(f -> {
+
+        Path pathFile = Paths.get(f);
+        List<String> replaced = new ArrayList<>();
+
+        try (Stream<String> lines = Files.lines(pathFile)) {
+          replaced = lines
+              .map(line -> line = modifyingLine(dictionaryOriginTargetObjectId, line, f, datasetId))
+              .collect(Collectors.toList());
+          Files.write(pathFile, replaced);
+        } catch (IOException e) {
+          LOG_ERROR.error("Error modifying the file {} during the data copy in cloning process", f);
+        }
+      });
+    }
+  }
+
+
+  /**
+   * Modifying line.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param line the line
+   * @param fileName the file name
+   * @return the string
+   */
+  private String modifyingLine(Map<String, String> dictionaryOriginTargetObjectId, String line,
+      String fileName, Long datasetId) {
+
+    String[] lineSplitted = line.split("\t");
+
+    if (fileName.contains("RecordValue")) {
+      String recordSchema = lineSplitted[1];
+      line = line.replace(recordSchema, dictionaryOriginTargetObjectId.get(recordSchema));
+    }
+    if (fileName.contains("FieldValue")) {
+      String fieldSchema = lineSplitted[3];
+      line = line.replace(fieldSchema, dictionaryOriginTargetObjectId.get(fieldSchema));
+    }
+    if (fileName.contains("TableValue")) {
+      String oldDatasetId = lineSplitted[2];
+      String tableSchemaId = lineSplitted[1];
+      line = line.replace(oldDatasetId, datasetId.toString());
+      if (null != dictionaryOriginTargetObjectId) {
+        line = line.replace(tableSchemaId, dictionaryOriginTargetObjectId.get(tableSchemaId));
+      }
+    }
+    return line;
+  }
+
+  /**
    * Copy process.
    *
    * @param datasetId the dataset id
@@ -873,11 +937,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void copyProcess(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType,
       CopyManager cm) throws IOException, SQLException {
-    if (DatasetTypeEnum.DESIGN.equals(datasetType)) {
+    if (DatasetTypeEnum.DESIGN.equals(datasetType)
+        || DatasetTypeEnum.REFERENCE.equals(datasetType)) {
       // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
       // not neccesary
       String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+
+      modifySnapshotFile(null, Arrays.asList(nameFileTableValue), datasetId);
 
       String copyQueryTable =
           COPY_DATASET + datasetId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
@@ -925,10 +992,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         sql = DELETE_FROM_DATASET + idReportingDataset + ".record_value";
         break;
       case REPORTING:
+      case TEST:
         sql = DELETE_FROM_DATASET + idReportingDataset + ".record_value WHERE dataset_partition_id="
             + partitionId;
         break;
       case DESIGN:
+      case REFERENCE:
         sql = DELETE_FROM_DATASET + idReportingDataset + ".table_value";
         break;
       default:
