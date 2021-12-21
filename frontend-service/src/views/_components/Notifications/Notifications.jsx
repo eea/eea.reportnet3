@@ -64,7 +64,7 @@ const Notifications = () => {
               {notification.message}
               <Button
                 className={`p-button-animated-blink ${styles.downloadButton}`}
-                icon={'export'}
+                icon="export"
                 label={resourcesContext.messages['downloadFile']}
                 onClick={() => notification.onClick()}
               />

@@ -604,7 +604,7 @@ const DataFormFieldEditor = ({
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button
         className={`p-button-animated-blink ${styles.saveButton}`}
-        icon={'check'}
+        icon="check"
         label={resourcesContext.messages['save']}
         onClick={() => onSavePoint(map.newPoint, map.newPointCRS)}
       />
