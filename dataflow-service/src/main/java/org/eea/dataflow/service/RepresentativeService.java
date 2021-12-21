@@ -114,8 +114,9 @@ public interface RepresentativeService {
    */
   byte[] exportTemplateReportersFile(Long groupId) throws EEAException, IOException;
 
+
   /**
-   * Import file.
+   * Import lead reporters file.
    *
    * @param dataflowId the dataflow id
    * @param groupId the group id

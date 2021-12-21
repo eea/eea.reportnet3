@@ -467,7 +467,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
   /**
-   * Import file.
+   * Import lead reporters file.
    *
    * @param dataflowId the dataflow id
    * @param groupId the group id
@@ -521,6 +521,17 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return csv.getBytes();
   }
 
+  /**
+   * Fill import lead reporter results.
+   *
+   * @param everyLines the every lines
+   * @param dataProviderList the data provider list
+   * @param headerSize the header size
+   * @param csvWriter the csv writer
+   * @param dataflowId the dataflow id
+   * @return the list
+   * @throws EEAException the EEA exception
+   */
   private List<Representative> fillImportLeadReporterResults(List<String> everyLines,
       List<DataProvider> dataProviderList, int headerSize, CSVWriter csvWriter, Long dataflowId)
       throws EEAException {
