@@ -4,17 +4,17 @@ import { config } from 'conf';
 
 import styles from './TrafficLight.module.scss';
 
-const getColor = cost => {
-  if (cost < config.SQL_SENTENCE_LOW_COST) {
-    return 'green';
-  } else if (cost < config.SQL_SENTENCE_HIGH_COST && cost > config.SQL_SENTENCE_LOW_COST) {
-    return 'yellow';
-  } else {
-    return 'red';
-  }
-};
-
 export const TrafficLight = ({ className, sqlSentenceCost }) => {
+  const getColor = cost => {
+    if (cost < config.SQL_SENTENCE_LOW_COST) {
+      return 'green';
+    } else if (cost < config.SQL_SENTENCE_HIGH_COST && cost > config.SQL_SENTENCE_LOW_COST) {
+      return 'yellow';
+    } else {
+      return 'red';
+    }
+  };
+
   const color = getColor(sqlSentenceCost);
 
   return (
