@@ -5,8 +5,6 @@ import isNil from 'lodash/isNil';
 
 import styles from './SqlSentence.module.scss';
 
-import { config } from 'conf';
-
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
@@ -137,16 +135,6 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   };
 
   const renderSqlSentenceCost = () => {
-    const getColor = cost => {
-      if (cost < config.SQL_SENTENCE_LOW_COST) {
-        return 'green';
-      } else if (cost < config.SQL_SENTENCE_HIGH_COST && cost > config.SQL_SENTENCE_LOW_COST) {
-        return 'yellow';
-      } else {
-        return 'red';
-      }
-    };
-
     if (isEvaluateSqlSentenceLoading) {
       return (
         <div className={`${styles.sqlSentenceCostWrapper} ${styles.spinnerWrapper}`}>
