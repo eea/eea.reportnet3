@@ -9,7 +9,7 @@ storiesOf('Button', module)
   .add('Clickable', () => <Button label="Click me!" onClick={action('clicked')} />)
   .add('Secondary', () => <Button className="p-button-rounded p-button-secondary" label="Secondary" />)
   .add('Secondary transparent', () => (
-    <Button className="p-button-rounded p-button-secondary-transparent " label="Secondary transparent" />
+    <Button className="p-button-rounded p-button-secondary-transparent" label="Secondary transparent" />
   ))
   .add('Icon Right', () => <Button className="p-button-rounded" icon="eye" iconPos="right" label="Icon Right" />)
   .add('Icon Left Secondary', () => (
