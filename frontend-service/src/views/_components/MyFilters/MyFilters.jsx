@@ -315,6 +315,8 @@ export const MyFilters = ({
       }
     };
 
+    const optionsMultiselect = getOptionsTypes(data, option.key);
+
     return (
       <div className={`${styles.block}`} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
@@ -324,17 +326,17 @@ export const MyFilters = ({
           className={styles.multiselectFilter}
           filter={option?.showInput}
           headerClassName={styles.selectHeader}
-          id={options.key}
           inputClassName={`p-float-label ${styles.label}`}
-          inputId={`${options.key}_input`}
+          inputId={`${option.key}_input`}
           isFilter={true}
+          isLoadingData={isEmpty(optionsMultiselect)}
           itemTemplate={op => selectTemplate(op, option)}
           key={option.key}
           label={option.label || ''}
           notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
           onChange={event => onChange({ key: option.key, value: event.target.value })}
           optionLabel="type"
-          options={getOptionsTypes(data, option.key)}
+          options={optionsMultiselect}
           value={filterBy[option.key]}
         />
       </div>
