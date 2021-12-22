@@ -66,6 +66,13 @@ const useBigButtonList = ({
     const isObserver = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
       config.permissions.roles.OBSERVER.key
     ]);
+
+    //  const isObserver = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    //    config.permissions.roles.CUSTODIAN_SUPPORT.key
+    //  ]);
+
+    const isCustodianSupport = true;
+
     const isDesignStatus = dataflowState.status === config.dataflowStatus.DESIGN;
     const isDraftStatus = dataflowState.status === config.dataflowStatus.OPEN;
     const isEditorRead = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
@@ -92,11 +99,11 @@ const useBigButtonList = ({
       designDatasetsOpen: (isLeadDesigner && isDraftStatus) || (isEditorRead && isDesignStatus),
       designDatasetEditorReadActions: isEditorRead && isDesignStatus,
       feedback:
-        (isLeadDesigner && isDraftStatus && isManualAcceptance) ||
+        ((isCustodianSupport || isLeadDesigner) && isDraftStatus && isManualAcceptance) ||
         (isLeadReporterOfCountry && isReleased && isManualAcceptance),
       groupByRepresentative: (isLeadDesigner || isObserver) && isDraftStatus,
       manageReporters: isLeadDesigner,
-      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance,
+      manualTechnicalAcceptance: (isLeadDesigner || isCustodianSupport) && isManualAcceptance,
       newSchema: isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
