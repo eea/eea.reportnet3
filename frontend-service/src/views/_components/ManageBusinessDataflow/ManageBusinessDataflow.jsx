@@ -291,7 +291,7 @@ export const ManageBusinessDataflow = ({
       />
       <Button
         className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
-        icon={'cancel'}
+        icon="cancel"
         label={isEditing ? resourcesContext.messages['cancel'] : resourcesContext.messages['close']}
         onClick={onHideDataflowDialog}
       />

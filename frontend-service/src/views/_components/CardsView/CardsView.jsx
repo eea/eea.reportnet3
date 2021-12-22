@@ -135,7 +135,7 @@ export const CardsView = ({
         })}
       </div>
       <Paginator
-        className={'p-paginator-bottom'}
+        className="p-paginator-bottom"
         first={pagination.first}
         onPageChange={onPaginate}
         rightContent={paginatorRightText}

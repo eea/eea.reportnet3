@@ -21,6 +21,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
 import { QCFieldEditor } from './_components/QCFieldEditor';
 import { Spinner } from 'views/_components/Spinner';
+import { TrafficLight } from 'views/_components/TrafficLight';
 
 import { ValidationService } from 'services/ValidationService';
 
@@ -568,26 +569,10 @@ export const QCList = ({
   );
 
   const sqlSentenceCostTemplate = rowData => {
-    const getColor = cost => {
-      if (cost < config.SQL_SENTENCE_LOW_COST) {
-        return 'green';
-      } else if (cost < config.SQL_SENTENCE_HIGH_COST && cost > config.SQL_SENTENCE_LOW_COST) {
-        return 'yellow';
-      } else {
-        return 'red';
-      }
-    };
-
     if (rowData.sqlSentenceCost !== 0 && !isNil(rowData.sqlSentenceCost)) {
-      const color = getColor(rowData.sqlSentenceCost);
-
       return (
-        <div className={`${styles.sqlSentenceCostTemplate}`}>
-          <div className={styles.trafficLight}>
-            <div className={color === 'green' ? styles.greenLightSignal : ''} key="green"></div>
-            <div className={color === 'yellow' ? styles.yellowLightSignal : ''} key="yellow"></div>
-            <div className={color === 'red' ? styles.redLightSignal : ''} key="red"></div>
-          </div>
+        <div className={styles.sqlSentenceCostTemplate}>
+          <TrafficLight sqlSentenceCost={rowData.sqlSentenceCost} />
         </div>
       );
     }

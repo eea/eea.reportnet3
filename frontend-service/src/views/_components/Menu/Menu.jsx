@@ -95,7 +95,7 @@ class Menu extends Component {
       <div
         className={`${styles.dropDownMenu} ${this.props.className} p-menu-overlay-visible p-menu`}
         style={this.state.style}>
-        <ul className={'p-menu-list p-reset'}>{this.props.model.map((item, index) => this.renderItem(item, index))}</ul>
+        <ul className="p-menu-list p-reset">{this.props.model.map((item, index) => this.renderItem(item, index))}</ul>
       </div>
     );
   }

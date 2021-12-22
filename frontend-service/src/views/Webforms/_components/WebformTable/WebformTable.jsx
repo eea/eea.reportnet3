@@ -295,7 +295,7 @@ export const WebformTable = ({
         </div>
         {webformData.multipleRecords && (
           <Button
-            icon={'plus'}
+            icon="plus"
             label={resourcesContext.messages['addRecord']}
             onClick={() => onAddMultipleWebform(webformData.tableSchemaId)}
           />
