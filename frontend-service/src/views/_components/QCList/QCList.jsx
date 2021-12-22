@@ -9,6 +9,8 @@ import { config } from 'conf';
 
 import styles from './QCList.module.scss';
 
+import { Dialog } from 'views/_components/Dialog';
+
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
@@ -64,8 +66,37 @@ export const QCList = ({
     sortFieldValidations: null,
     sortOrderValidations: null,
     validationId: '',
-    validationList: {}
+    validationList: {},
+    viewedQcHistoryId: null,
+    qcHistoryData: null,
+    isHistoryDialogVisible: false
   });
+
+  const setIsHistoryDialogVisible = isHistoryDialogVisible =>
+    tabsValidationsDispatch({ type: 'SET_IS_HISTORY_DIALOG_VISIBLE', payload: { isHistoryDialogVisible } });
+
+  const setViewedQcHistoryId = viewedQcHistoryId =>
+    tabsValidationsDispatch({ type: 'SET_VIEWED_QC_HISTORY', payload: { viewedQcHistoryId } });
+
+  const getQcHistory = async () => {
+    try {
+      const { data } = await ValidationService.getQcHistory(tabsValidationsState.viewedQcHistoryId);
+
+      // tabsValidationsDispatch({
+      //   type: 'SET_QC_HISTORY_DATA', // TODO CREATE A REDUCER FOR THIS
+      //   payload: { qcHistoryData: data }
+      // });
+    } catch (error) {
+      console.error('ValidationsList - getQcHistory.', error);
+      // notificationContext.add({ type: '________ERROR' }, true); // TODO: add correct error notification
+    }
+  };
+
+  useEffect(() => {
+    if (tabsValidationsState.isHistoryDialogVisible && !isNil(tabsValidationsState.viewedQcHistoryId)) {
+      getQcHistory();
+    }
+  }, [tabsValidationsState.isHistoryDialogVisible]);
 
   useEffect(() => {
     setHasValidations(!checkIsEmptyValidations());
@@ -346,6 +377,23 @@ export const QCList = ({
     return 'edit';
   };
 
+  const historyButton = rowId => {
+    return (
+      <Button
+        className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+        disabled={validationContext.isFetchingData}
+        icon="info"
+        onClick={() => {
+          setIsHistoryDialogVisible(true);
+          setViewedQcHistoryId(rowId);
+        }}
+        tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
+        tooltipOptions={{ position: 'top' }}
+        type="button"
+      />
+    );
+  };
+
   const editAndDeleteTemplate = row => {
     let rowType = 'field';
 
@@ -365,7 +413,7 @@ export const QCList = ({
     return (
       <Fragment>
         <Button
-          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
           disabled={validationContext.isFetchingData}
           icon={getEditBtnIcon(row.id)}
           onClick={() => validationContext.onOpenToEdit(row, rowType)}
@@ -374,7 +422,7 @@ export const QCList = ({
           type="button"
         />
         <Button
-          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
           disabled={validationContext.isFetchingData}
           icon="clone"
           onClick={() => validationContext.onOpenToCopy(row, rowType)}
@@ -382,8 +430,9 @@ export const QCList = ({
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
+        {historyButton(row.id)}
         <Button
-          className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
           disabled={validationContext.isFetchingData}
           icon={getDeleteBtnIcon()}
           onClick={onShowDeleteDialog}
@@ -403,15 +452,18 @@ export const QCList = ({
     if (row.entityType === 'TABLE') rowType = 'dataset';
 
     return (
-      <Button
-        className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-        disabled={validationContext.isFetchingData}
-        icon={getEditBtnIcon(row.id)}
-        onClick={() => validationContext.onOpenToEdit(row, rowType)}
-        tooltip={resourcesContext.messages['edit']}
-        tooltipOptions={{ position: 'top' }}
-        type="button"
-      />
+      <Fragment>
+        {historyButton(row.id)}
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${styles.editRowButton}`}
+          disabled={validationContext.isFetchingData}
+          icon={getEditBtnIcon(row.id)}
+          onClick={() => validationContext.onOpenToEdit(row, rowType)}
+          tooltip={resourcesContext.messages['edit']}
+          tooltipOptions={{ position: 'top' }}
+          type="button"
+        />
+      </Fragment>
     );
   };
 
@@ -683,6 +735,46 @@ export const QCList = ({
     }
   ];
 
+  const mockArray = [1, 2, 3, 4];
+  // const fields = tabsValidationsState.history.map(historicEvent => {
+  const fields = mockArray.map(historicEvent => {
+    return {
+      id: 'id999999',
+      user: 'qc.user@com.com',
+      timestamp: '29/02/2019',
+      rule_id: 'id999999',
+      metadata: 'false',
+      expression: 'true',
+      status: 'true',
+      JSON: '{json: "json", jsonField1: "json2", jsonField2: "json3"}'
+    };
+  });
+
+  const getHistoryColumns = () => {
+    const columnData = Object.keys(fields[0]).map(key => ({ field: key, header: key }));
+
+    return columnData.map(col => <Column field={col.field} header={col.header.toUpperCase()} key={col.field} />);
+  };
+
+  const generateHistoryDialogContent = () => {
+    const columns = getHistoryColumns();
+
+    // todo add loading indicator if no data
+    // if (!tabsValidationsState.qcHistoryData) {
+    //   return (
+    //     <div className={styles.loadingSpinner}>
+    //       <Spinner className={styles.spinnerPosition} />
+    //     </div>
+    //   );
+    // }
+
+    return (
+      <DataTable autoLayout value={fields}>
+        {columns}
+      </DataTable>
+    );
+  };
+
   const validationList = () => {
     if (tabsValidationsState.isLoading) {
       return (
@@ -765,6 +857,16 @@ export const QCList = ({
     <Fragment>
       {validationList()}
       {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
+
+      {tabsValidationsState.isHistoryDialogVisible && (
+        <Dialog
+          className="responsiveDialog"
+          header={resourcesContext.messages['qcHistoryDialogHeader']}
+          onHide={() => setIsHistoryDialogVisible(false)}
+          visible={tabsValidationsState.isHistoryDialogVisible}>
+          {generateHistoryDialogContent()}
+        </Dialog>
+      )}
     </Fragment>
   );
 };
