@@ -1066,8 +1066,8 @@ const Dataflow = () => {
   ];
 
   const requesterRoleOptionsOpenStatus = [
-    { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
     { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key },
+    { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
     { label: config.permissions.roles.CUSTODIAN_SUPPORT.label, role: config.permissions.roles.CUSTODIAN_SUPPORT.key },
     { label: config.permissions.roles.OBSERVER.label, role: config.permissions.roles.OBSERVER.key }
   ];
