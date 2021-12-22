@@ -216,7 +216,7 @@ const ActionsToolbar = ({
               !hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
             }`}
             disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
-            icon={'import'}
+            icon="import"
             label={resourcesContext.messages['importTable']}
             onClick={() => setImportTableDialogVisible(true)}
           />
@@ -254,7 +254,7 @@ const ActionsToolbar = ({
             disabled={
               !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
             }
-            icon={'trash'}
+            icon="trash"
             label={resourcesContext.messages['deleteTable']}
             onClick={() => onSetVisible(setDeleteDialogVisible, true)}
           />
@@ -265,7 +265,7 @@ const ActionsToolbar = ({
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
           disabled={isDataflowOpen || isDesignDatasetEditorRead}
-          icon={'eye'}
+          icon="eye"
           iconClasses={visibilityColumnIcon === 'eye' ? styles.filterInactive : styles.filterActive}
           label={resourcesContext.messages['showHideColumns']}
           onClick={event => {
@@ -273,7 +273,7 @@ const ActionsToolbar = ({
           }}
         />
         <DropdownFilter
-          className={`p-button-animated-blink`}
+          className="p-button-animated-blink"
           filters={visibilityDropdown}
           id="dropdownFilterMenu"
           onShow={event => getExportButtonPosition(event)}
@@ -289,7 +289,7 @@ const ActionsToolbar = ({
                 tableHasErrors ? 'p-button-animated-blink' : null
               }`}
               disabled={!tableHasErrors}
-              icon={'filter'}
+              icon="filter"
               iconClasses={!isFilterValidationsActive ? styles.filterInactive : styles.filterActive}
               label={resourcesContext.messages['validationFilter']}
               onClick={event => filterMenuRef.current.show(event)}

@@ -511,7 +511,7 @@ export const CustomFileUpload = ({
       );
       cancelButton = (
         <Button
-          className={'p-button-secondary'}
+          className="p-button-secondary"
           disabled={disabled || !hasFiles()}
           icon="undo"
           label={cancelLabel}
@@ -532,7 +532,7 @@ export const CustomFileUpload = ({
           {uploadButton}
           <Button
             className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-            icon={'cancel'}
+            icon="cancel"
             label={resourcesContext.messages['close']}
             onClick={() => dialogOnHide()}
           />

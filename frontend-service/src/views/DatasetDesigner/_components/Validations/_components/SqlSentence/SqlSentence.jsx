@@ -89,7 +89,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   const sqlSentenceValidationDialogFooter = (
     <Button
       className="p-button-secondary p-button-right-aligned"
-      icon={'cancel'}
+      icon="cancel"
       label={resourcesContext.messages['close']}
       onClick={() => setIsVisibleSqlSentenceValidationDialog(false)}
     />
