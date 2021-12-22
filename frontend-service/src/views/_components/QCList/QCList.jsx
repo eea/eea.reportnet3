@@ -35,6 +35,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { getExpressionString } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/getExpressionString';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { MyFilters } from '../MyFilters';
 
 export const QCList = ({
   dataflowId,
@@ -683,6 +684,21 @@ export const QCList = ({
     }
   ];
 
+  const FILTER_OPTIONS = [
+    {
+      nestedOptions: [
+        { key: 'table', label: resourcesContext.messages['table'], isInputVisible: true },
+        { key: 'filed', label: resourcesContext.messages['filed'], isInputVisible: true },
+        { key: 'entityType', label: resourcesContext.messages['entityType'] },
+        { key: 'levelError', label: resourcesContext.messages['levelError'], category: 'LEVEL_ERROR' },
+        { name: 'automatic', label: resourcesContext.messages['creationMode'] },
+        { name: 'enabled', label: resourcesContext.messages['statusQC'], category: 'ENABLED_STATUS' },
+        { name: 'isCorrect', label: resourcesContext.messages['statusQC'], category: 'VALIDITY_STATUS' }
+      ],
+      type: 'MULTI_SELECT'
+    }
+  ];
+
   const validationList = () => {
     if (tabsValidationsState.isLoading) {
       return (
@@ -710,6 +726,11 @@ export const QCList = ({
             pointerEvents: tabsValidationsState.editingRows.length > 0 ? 'none' : 'auto',
             opacity: tabsValidationsState.editingRows.length > 0 ? '0.5' : 1
           }}>
+          <MyFilters
+            data={tabsValidationsState.validationList.validations}
+            getFilteredData={onLoadFilteredData}
+            options={FILTER_OPTIONS}
+          />
           <Filters
             className="filter-lines"
             data={tabsValidationsState.validationList.validations}

@@ -299,23 +299,23 @@ export const MyFilters = ({
     );
   };
 
+  const renderMultiSelectTemplate = (multiSelectItem, option) => {
+    console.log('multiSelectItem :>> ', multiSelectItem);
+    switch (option.category) {
+      case 'ENABLED_STATUS':
+      case 'LEVEL_ERROR':
+      case 'VALIDITY_STATUS':
+        return <LevelError type={multiSelectItem.type} />;
+
+      default:
+        return <span className={`${styles.statusBox}`}>{multiSelectItem.value.toString().toUpperCase()}</span>;
+    }
+  };
+
   const renderMultiSelect = option => {
     if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
 
-    const selectTemplate = (optionMultiSelect, nestedOption) => {
-      switch (nestedOption?.category) {
-        case 'LEVEL_ERROR':
-          if (!isNil(optionMultiSelect.type)) {
-            return <LevelError type={optionMultiSelect.type} />;
-          }
-          break;
-
-        default:
-          return <span className={`${styles.statusBox}`}>{optionMultiSelect.value.toString().toUpperCase()}</span>;
-      }
-    };
-
-    const optionsMultiselect = getOptionsTypes(data, option.key);
+    const optionsMultiSelect = getOptionsTypes(data, option.key);
 
     return (
       <div className={`${styles.block}`} key={option.key}>
@@ -329,14 +329,14 @@ export const MyFilters = ({
           inputClassName={`p-float-label ${styles.label}`}
           inputId={`${option.key}_input`}
           isFilter={true}
-          isLoadingData={isEmpty(optionsMultiselect)}
-          itemTemplate={op => selectTemplate(op, option)}
+          isLoadingData={isEmpty(optionsMultiSelect)}
+          itemTemplate={item => renderMultiSelectTemplate(item, option)}
           key={option.key}
           label={option.label || ''}
           notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
           onChange={event => onChange({ key: option.key, value: event.target.value })}
           optionLabel="type"
-          options={optionsMultiselect}
+          options={optionsMultiSelect}
           value={filterBy[option.key]}
         />
       </div>
