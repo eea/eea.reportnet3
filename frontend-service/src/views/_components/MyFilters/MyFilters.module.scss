@@ -186,3 +186,18 @@
     }
   }
 }
+
+.referencingDataflows {
+  display: flex;
+  flex-direction: row;
+  width: 100% !important;
+  margin: 2rem 0;
+
+  .block {
+    width: 100% !important;
+  }
+
+  .sortButtonEmpty {
+    display: none;
+  }
+}
