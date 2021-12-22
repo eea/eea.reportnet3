@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 
 import classNames from 'classnames';
 
+import styles from './MultiSelect.module.scss';
+
 import { MultiSelectHeader } from './_components/MultiSelectHeader';
 import { MultiSelectItem } from './_components/MultiSelectItem';
 import { MultiSelectPanel } from './_components/MultiSelectPanel';
@@ -545,7 +547,7 @@ export class MultiSelect extends Component {
 
     return this.props.hasSelectedItemsLabel ? (
       this.props.isLoadingData ? (
-        <Spinner style={{ top: 0, width: '25px', height: '25px', position: 'absolute' }} />
+        <Spinner className={styles.spinner} />
       ) : (
         <div
           className="p-multiselect-label-container"
