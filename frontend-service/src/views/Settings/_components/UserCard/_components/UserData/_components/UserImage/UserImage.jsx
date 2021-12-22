@@ -145,15 +145,15 @@ const UserImage = () => {
         id="addAvatar"
         place="top">
         <Button
-          className={`p-button-secondary p-button-animated-blink`}
-          icon={'add'}
+          className="p-button-secondary p-button-animated-blink"
+          icon="add"
           label={resourcesContext.messages['uploadImage']}
           onClick={() => imageUploader.current.click()}
           style={{ marginRight: '1rem' }}
         />
         <Button
-          className={`p-button-secondary p-button-animated-blink`}
-          icon={'userPlus'}
+          className="p-button-secondary p-button-animated-blink"
+          icon="userPlus"
           label={resourcesContext.messages['selectImage']}
           onClick={() => setIsAvatarDialogVisible(true)}
         />

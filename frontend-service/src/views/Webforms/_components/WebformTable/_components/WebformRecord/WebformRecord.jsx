@@ -275,7 +275,7 @@ export const WebformRecord = ({
                     return [element.message, element.errorLevel].join();
                   }).map(validation => (
                     <IconTooltip
-                      className={'webform-validationErrors'}
+                      className="webform-validationErrors"
                       key={validation.id}
                       levelError={validation.levelError}
                       message={validation.message}
