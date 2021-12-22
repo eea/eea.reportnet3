@@ -398,7 +398,7 @@ export const Feedback = () => {
 
           <ListMessages
             canLoad={(isCustodian && !isEmpty(selectedDataProvider)) || !isCustodian}
-            className={`feedback-messages-help-step`}
+            className="feedback-messages-help-step"
             dataflowId={dataflowId}
             emptyMessage={
               !isNil(isCustodian)
