@@ -7,10 +7,15 @@ export const filtersStateFamily = atomFamily({
 
 export const filterByKeysFamily = atomFamily({
   key: 'filterByKeys',
-  default: () => ({ CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [] })
+  default: () => ({ CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [], SEARCH: [] })
 });
 
 export const sortByStateFamily = atomFamily({
   key: 'sortByStateFamily',
   default: () => ({})
+});
+
+export const searchStateFamily = atomFamily({
+  key: 'searchStateFamily',
+  default: ''
 });

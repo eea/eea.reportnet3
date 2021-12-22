@@ -18,7 +18,12 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-import { filterByKeysFamily, filtersStateFamily, sortByStateFamily } from './_functions/Stores/filtersStores';
+import {
+  filterByKeysFamily,
+  filtersStateFamily,
+  searchStateFamily,
+  sortByStateFamily
+} from './_functions/Stores/filtersStores';
 
 import { ApplyFiltersUtils } from './_functions/Utils/ApplyFiltersUtils';
 import { FiltersUtils } from './_functions/Utils/FiltersUtils';
@@ -40,6 +45,7 @@ export const MyFilters = ({
 }) => {
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysFamily(viewType));
   const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
+  const [searchBy, setSearchBy] = useRecoilState(searchStateFamily(viewType));
   const [sortBy, setSortBy] = useRecoilState(sortByStateFamily(viewType));
 
   const { filterBy, filteredData } = filters;
@@ -121,10 +127,12 @@ export const MyFilters = ({
   };
 
   const getFilterByKeys = () => {
-    const filterKeys = { CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [] };
+    const filterKeys = { CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [], SEARCH: [] };
 
     options.forEach(option => {
       if (!option) return;
+
+      console.log('option.type :>> ', option.type);
 
       filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption.key) || [
         ...filterKeys[option.type],
@@ -201,6 +209,9 @@ export const MyFilters = ({
 
         case 'MULTI_SELECT':
           return renderMultiSelect(option);
+
+        case 'SEARCH':
+          return renderSearch(option);
 
         default:
           throw new Error('The option type is not correct.');
@@ -300,7 +311,6 @@ export const MyFilters = ({
   };
 
   const renderMultiSelectTemplate = (multiSelectItem, option) => {
-    console.log('multiSelectItem :>> ', multiSelectItem);
     switch (option.category) {
       case 'ENABLED_STATUS':
       case 'LEVEL_ERROR':
@@ -340,6 +350,32 @@ export const MyFilters = ({
           value={filterBy[option.key]}
         />
       </div>
+    );
+  };
+
+  const renderSearch = option => {
+    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderSearch(nestedOption));
+
+    return (
+      <span className={`p-float-label ${styles.input}`}>
+        <InputText
+          className={styles.searchInput}
+          id={'searchInput'}
+          onChange={event => setSearchBy(event.target.value)}
+          value={searchBy}
+        />
+        {/* {filterState.searchBy && (
+        <Button
+          className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+          icon="cancel"
+          onClick={() => onSearchData('')}
+        />
+      )} */}
+
+        <label className={styles.label} htmlFor={'searchInput'}>
+          {option.label}
+        </label>
+      </span>
     );
   };
 

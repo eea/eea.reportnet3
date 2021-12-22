@@ -686,6 +686,11 @@ export const QCList = ({
 
   const FILTER_OPTIONS = [
     {
+      label: 'Search by things label',
+      searchBy: ['shortCode', 'name', 'description', 'message'],
+      type: 'SEARCH'
+    },
+    {
       nestedOptions: [
         { key: 'table', label: resourcesContext.messages['table'], isInputVisible: true },
         { key: 'filed', label: resourcesContext.messages['filed'], isInputVisible: true },
