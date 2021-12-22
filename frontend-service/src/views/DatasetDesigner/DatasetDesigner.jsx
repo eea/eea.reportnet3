@@ -1510,7 +1510,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 ref={exportMenuRef}
               />
               <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataset-deleteDataset-help-step`}
+                className="p-button-rounded p-button-secondary-transparent p-button-animated-blink dataset-deleteDataset-help-step"
                 icon="trash"
                 label={resourcesContext.messages['deleteDatasetData']}
                 onClick={() => manageDialogs('isDeleteDialogVisible', true)}

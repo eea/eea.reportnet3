@@ -382,7 +382,7 @@ export const MyFilters = ({
 
       <div className={`${styles.resetButton}`}>
         <Button
-          className={`p-button-secondary p-button-rounded p-button-animated-blink`}
+          className="p-button-secondary p-button-rounded p-button-animated-blink"
           icon="undo"
           label={resourcesContext.messages['reset']}
           onClick={() => {
