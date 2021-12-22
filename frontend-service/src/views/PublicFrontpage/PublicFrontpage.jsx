@@ -61,7 +61,7 @@ export const PublicFrontpage = () => {
     <PublicLayout>
       <div className={styles.content} style={contentStyles}>
         <div className={styles.mainTextWrapper}>
-          <div className={`rep-container`}>
+          <div className="rep-container">
             <div className={`${styles.pageContent} rep-row`}>
               <div className={styles.frontText}>
                 <div className={styles.text}>
@@ -160,7 +160,7 @@ export const PublicFrontpage = () => {
             </div>
           </div>
         </div>
-        <div className={`rep-container`}>
+        <div className="rep-container">
           <div className={`${styles.pageContent} rep-row`}>
             <div className={styles.showPublicBox}>
               <div className={styles.title}>

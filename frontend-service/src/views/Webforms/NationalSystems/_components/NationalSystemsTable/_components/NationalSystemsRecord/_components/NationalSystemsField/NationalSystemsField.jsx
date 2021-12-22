@@ -281,7 +281,7 @@ export const NationalSystemsField = ({
             )}
             {
               <Button
-                className={`p-button-animated-blink p-button-primary-transparent`}
+                className="p-button-animated-blink p-button-primary-transparent"
                 icon="import"
                 label={
                   resourcesContext.messages[
@@ -295,7 +295,7 @@ export const NationalSystemsField = ({
             }
 
             <Button
-              className={`p-button-animated-blink p-button-primary-transparent`}
+              className="p-button-animated-blink p-button-primary-transparent"
               icon="trash"
               onClick={() => {
                 handleDialogs('deleteAttachment', true);
