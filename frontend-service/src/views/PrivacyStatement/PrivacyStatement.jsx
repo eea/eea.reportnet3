@@ -42,7 +42,7 @@ const PrivacyStatement = () => {
 
   return layout(
     <div className="rep-row">
-      <div className={` rep-col-12 rep-col-sm-12`}>
+      <div className="rep-col-12 rep-col-sm-12">
         <Title
           icon="info"
           iconSize="4rem"

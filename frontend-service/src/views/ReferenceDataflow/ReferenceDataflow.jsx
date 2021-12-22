@@ -263,13 +263,13 @@ const ReferenceDataflow = () => {
   const shareRightsFooterDialogFooter = (
     <div className={styles.buttonsRolesFooter}>
       <Button
-        className={`p-button-secondary p-button-animated-blink p-button-left-aligned`}
+        className="p-button-secondary p-button-animated-blink p-button-left-aligned"
         icon="plus"
         label={resourcesContext.messages['add']}
         onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
       />
       <Button
-        className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
         label={resourcesContext.messages['cancel']}
         onClick={() => onCloseShareRightsDialog()}
@@ -304,7 +304,7 @@ const ReferenceDataflow = () => {
 
   return layout(
     <div className="rep-row">
-      <div className={`rep-col-12 rep-col-sm-12`}>
+      <div className="rep-col-12 rep-col-sm-12">
         <Title
           icon="clone"
           iconSize="4rem"
@@ -312,7 +312,7 @@ const ReferenceDataflow = () => {
           title={dataflowState.name}
         />
       </div>
-      <div className={`rep-col-12 rep-col-sm-12`}>
+      <div className="rep-col-12 rep-col-sm-12">
         <BigButtonListReference
           className="dataflow-big-buttons-help-step"
           dataflowId={referenceDataflowId}

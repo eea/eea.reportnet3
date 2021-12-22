@@ -312,7 +312,7 @@ const TabView = ({
 
   const renderConfirmDialog = () => (
     <ConfirmDialog
-      classNameConfirm={'p-button-danger'}
+      classNameConfirm="p-button-danger"
       header={resourcesContext.messages['deleteTabHeader']}
       labelCancel={resourcesContext.messages['no']}
       labelConfirm={resourcesContext.messages['yes']}
