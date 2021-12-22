@@ -1,20 +1,5 @@
 @import '_styles/mixins';
 
-.checkReadOnly {
-  margin-left: 3.5rem !important;
-  width: 70px;
-}
-.checkRequired {
-  margin-left: 3.5rem !important;
-  width: 70px;
-}
-.checkPK {
-  margin-left: 1rem !important;
-}
-.checkBulkDelete {
-  margin-left: 1rem !important;
-  padding-top: 3px !important;
-}
 .draggableFieldDiv .inputField {
   margin-left: 2.5rem;
   width: 20%;
@@ -39,13 +24,41 @@
     width: 25%;
   }
 }
+
 .draggableFieldDiv {
-  display: flex;
-  justify-items: center;
-  flex-flow: wrap;
-  align-items: baseline;
-  margin: 0px 0 5px 0;
-  width: 100%;
+  display: table-row;
+  .draggableFieldContentCell {
+    display: table-cell;
+    vertical-align: middle;
+
+    &:nth-child(2),
+    &:nth-child(3),
+    &:nth-child(4) {
+      width: 6em;
+    }
+    &:nth-child(8) {
+      width: 11em;
+    }
+    &:nth-child(9),
+    &:nth-child(10) {
+      width: 3em;
+    }
+
+    .draggableFieldCell {
+      margin-right: 0.5em;
+      padding: 3px 0;
+      &:first-child {
+        display: none;
+        font-weight: bold;
+        padding-top: 10px;
+        padding-bottom: 10px;
+      }
+      &:nth-child(2) {
+        display: flex;
+        justify-content: center;
+      }
+    }
+  }
 }
 
 .draggableFieldDiv:active {
@@ -67,13 +80,9 @@
 }
 
 .dropdownFieldType {
-  margin-left: 0.4rem;
-  width: 20%;
-  height: 33px;
-  min-width: 188px;
+  width: 100%;
   &.withCodeListOrLink {
-    width: 20%;
-    min-width: 188px;
+    width: 100%;
   }
 }
 
@@ -97,11 +106,10 @@
 }
 
 .button {
+  width: 2.5em;
   padding-top: 0.4rem;
   padding-bottom: 0.35rem;
-  margin-left: 0.4rem;
   border-radius: 3px;
-  height: 1.95rem;
   border: 1px solid var(--general-border-color);
   color: var(--main-font-color);
   &:hover {
@@ -225,5 +233,71 @@
   100% {
     border: 1px dashed var(--c-gray-75);
     opacity: 0.7;
+  }
+}
+
+.PKWrap {
+  .PKInfoButton {
+    background-color: var(--c-white-color) !important;
+    border-radius: 50% !important;
+    color: var(--datatable-header-info-button-color) !important;
+    font-size: 12pt !important;
+    height: 0.7em !important;
+    width: 0.7em !important;
+    margin-left: 0.4rem !important;
+    margin-right: 0.9rem !important;
+    margin-top: -1rem !important;
+    :global .pi-info-circle {
+      padding: 0 !important;
+      top: 40%;
+    }
+    > span {
+      left: 46% !important;
+      margin-left: -0.48em !important;
+      margin-top: -0.5em !important;
+    }
+    &:focus {
+      box-shadow: none !important;
+    }
+  }
+}
+
+@media screen and (max-width: 650px) {
+  .button {
+    width: 100%;
+  }
+  .draggableFieldDiv {
+    display: table;
+    width: 100%;
+    border-collapse: separate;
+    padding-bottom: 20px;
+    margin: 5% auto 0;
+    text-align: center;
+    .draggableFieldContentCell {
+      display: flex;
+      justify-content: center;
+      &:nth-child(2),
+      &:nth-child(3),
+      &:nth-child(4) {
+        width: 100%;
+      }
+      &:nth-child(8) {
+        width: 100%;
+      }
+      &:nth-child(9),
+      &:nth-child(10) {
+        width: 100%;
+      }
+      .draggableFieldCell {
+        display: table-cell;
+        width: 50%;
+        margin-right: 0;
+        &:first-child {
+          display: table-cell;
+          text-align: left;
+          width: 50%;
+        }
+      }
+    }
   }
 }

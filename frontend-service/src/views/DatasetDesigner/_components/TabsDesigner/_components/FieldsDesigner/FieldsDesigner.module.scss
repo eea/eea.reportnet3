@@ -25,18 +25,27 @@
     top: 40%;
   }
 }
+
+.contentTable {
+  display: table;
+  text-align: left;
+  width: 100%;
+  border-collapse: separate;
+}
+
 .fieldsHeader {
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 3px;
+  display: table-row;
   color: var(--main-font-color);
   font-weight: bold;
+
   span {
-    width: 60px;
-    margin-left: 2.5rem;
+    padding-left: 2em;
   }
+
   label {
-    &:nth-child(2) {
+    display: table-cell;
+
+    /*  &:nth-child(2) {
       width: 75px;
     }
     &:nth-child(3) {
@@ -110,7 +119,7 @@
     .bulkCancelDeleteButtonTooltip {
       font-size: 9pt;
       font-style: italic;
-    }
+    }*/
   }
   .PKWrap {
     > label {
@@ -214,4 +223,20 @@
 
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
   @include shadow-0em;
+}
+
+@media screen and (max-width: 900px) {
+  .contentTable {
+    width: 90%;
+  }
+}
+
+@media screen and (max-width: 650px) {
+  .contentTable {
+    display: block;
+  }
+
+  .fieldsHeader {
+    display: none;
+  }
 }
