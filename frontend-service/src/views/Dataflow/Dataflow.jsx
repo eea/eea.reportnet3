@@ -92,6 +92,7 @@ const Dataflow = () => {
     isBusinessDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
     isCustodian: false,
+    isCustodianSupport: false,
     isDataSchemaCorrect: [],
     isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
@@ -164,6 +165,12 @@ const Dataflow = () => {
   ]);
 
   const isLeadDesigner = isSteward || isCustodian;
+
+  // const isCustodianSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+  //   config.permissions.roles.CUSTODIAN_SUPPORT.key
+  // ]);
+
+  const isCustodianSupport = true;
 
   const isObserver = dataflowState.userRoles.some(userRole => userRole === config.permissions.roles.OBSERVER.key);
 
@@ -707,6 +714,7 @@ const Dataflow = () => {
       payload: {
         hasWritePermissions,
         isCustodian: isLeadDesigner,
+        isCustodianSupport,
         isNationalCoordinator,
         isObserver,
         isAdmin,
@@ -1194,7 +1202,7 @@ const Dataflow = () => {
           </ConfirmDialog>
         )}
 
-        {dataflowState.isCustodian && dataflowState.isManageRolesDialogVisible && (
+        {(dataflowState.isCustodian || dataflowState.isCustodianSupport) && dataflowState.isManageRolesDialogVisible && (
           <Dialog
             className="responsiveDialog"
             contentStyle={{ maxHeight: '60vh' }}

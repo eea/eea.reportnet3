@@ -26,6 +26,7 @@ export const dataflowDataReducer = (state, { type, payload }) => {
         ...state,
         hasWritePermissions: payload.hasWritePermissions,
         isCustodian: payload.isCustodian,
+        isCustodianSupport: payload.isCustodianSupport,
         isObserver: payload.isObserver,
         isAdmin: payload.isAdmin,
         userRoles: payload.userRoles,

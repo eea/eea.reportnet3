@@ -55,6 +55,12 @@ const useBigButtonList = ({
     config.permissions.roles.STEWARD.key
   ]);
 
+  // const isCustodianSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+  //   config.permissions.roles.CUSTODIAN_SUPPORT.key
+  // ]);
+
+  const isCustodianSupport = true;
+
   const restrictFromPublicAccess = isLeadReporter && !TextUtils.areEquals(dataflowState.status, 'business');
 
   const getButtonsVisibility = useCallback(() => {
@@ -95,7 +101,7 @@ const useBigButtonList = ({
         (isLeadDesigner && isDraftStatus && isManualAcceptance) ||
         (isLeadReporterOfCountry && isReleased && isManualAcceptance),
       groupByRepresentative: (isLeadDesigner || isObserver) && isDraftStatus,
-      manageReporters: isLeadDesigner,
+      manageReporters: isLeadDesigner || isCustodianSupport,
       manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance,
       newSchema: isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
