@@ -135,6 +135,9 @@ public enum ResourceGroupEnum {
   /** The testdataset custodian. */
   TESTDATASET_CUSTODIAN("TestDataset-%s-DATA_CUSTODIAN"),
 
+  /** The testdataset custodian support. */
+  TESTDATASET_CUSTODIAN_SUPPORT("TestDataset-%s-CUSTODIAN_SUPPORT"),
+
   /** The referencedataset custodian. */
   REFERENCEDATASET_CUSTODIAN("ReferenceDataset-%s-DATA_CUSTODIAN"),
 

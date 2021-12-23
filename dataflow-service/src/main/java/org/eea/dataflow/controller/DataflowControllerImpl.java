@@ -125,7 +125,7 @@ public class DataflowControllerImpl implements DataFlowController {
   @GetMapping(value = "/v1/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get dataflow by dataflow id", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataFlowVO.class,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, CUSTODIAN SUPPORT, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public DataFlowVO findById(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId,
@@ -994,6 +994,8 @@ public class DataflowControllerImpl implements DataFlowController {
           || ObjectAccessRoleEnum.DATAFLOW_OBSERVER.getAccessRole(dataflowId)
               .equals(role.getAuthority())
           || ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)
+              .equals(role.getAuthority())
+          || ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN_SUPPORT.getAccessRole(dataflowId)
               .equals(role.getAuthority())
           || roleAdmin.equals(role.getAuthority())) {
         return true;
