@@ -80,8 +80,7 @@ export const QCList = ({
 
   const getQcHistory = async () => {
     try {
-      const { data } = await ValidationService.getQcHistory(tabsValidationsState.viewedQcHistoryId);
-
+      //const { data } = await ValidationService.getQcHistory(tabsValidationsState.viewedQcHistoryId);
       // tabsValidationsDispatch({
       //   type: 'SET_QC_HISTORY_DATA', // TODO CREATE A REDUCER FOR THIS
       //   payload: { qcHistoryData: data }
@@ -735,11 +734,11 @@ export const QCList = ({
     }
   ];
 
-  const mockArray = [1, 2, 3, 4];
+  const mockArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
   // const fields = tabsValidationsState.history.map(historicEvent => {
-  const fields = mockArray.map(historicEvent => {
+  const fields = mockArray.map((_historicEvent, index) => {
     return {
-      id: 'id999999',
+      id: `id-${index + 1}`,
       user: 'qc.user@com.com',
       timestamp: '29/02/2019',
       metadata: true,
@@ -805,7 +804,15 @@ export const QCList = ({
     // }
 
     return (
-      <DataTable autoLayout value={fields}>
+      <DataTable
+        autoLayout
+        hasDefaultCurrentPage={true}
+        paginator={true}
+        //paginatorDisabled={fields.length > 15}
+        rows={10}
+        rowsPerPageOptions={[5, 10, 15]}
+        totalRecords={fields.length}
+        value={fields}>
         {columns}
       </DataTable>
     );
@@ -905,14 +912,16 @@ export const QCList = ({
       {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
 
       {tabsValidationsState.isHistoryDialogVisible && (
-        <Dialog
-          className="responsiveDialog"
-          footer={footerQcHistory}
-          header={resourcesContext.messages['qcHistoryDialogHeader']}
-          onHide={() => setIsHistoryDialogVisible(false)}
-          visible={tabsValidationsState.isHistoryDialogVisible}>
-          {generateHistoryDialogContent()}
-        </Dialog>
+        <div className={`${styles.dialogSizeQcHistory}`}>
+          <Dialog
+            className="responsiveDialog"
+            footer={footerQcHistory}
+            header={resourcesContext.messages['qcHistoryDialogHeader']}
+            onHide={() => setIsHistoryDialogVisible(false)}
+            visible={tabsValidationsState.isHistoryDialogVisible}>
+            {generateHistoryDialogContent()}
+          </Dialog>
+        </div>
       )}
     </Fragment>
   );
