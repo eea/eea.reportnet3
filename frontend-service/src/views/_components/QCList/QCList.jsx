@@ -851,6 +851,16 @@ export const QCList = ({
     );
   };
 
+  const footerQcHistory = (
+    <Button
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+      icon="cancel"
+      id="cancelHistoryQc"
+      label={resourcesContext.messages['close']}
+      onClick={() => setIsHistoryDialogVisible(false)}
+    />
+  );
+
   return (
     <Fragment>
       {validationList()}
@@ -859,6 +869,7 @@ export const QCList = ({
       {tabsValidationsState.isHistoryDialogVisible && (
         <Dialog
           className="responsiveDialog"
+          footer={footerQcHistory}
           header={resourcesContext.messages['qcHistoryDialogHeader']}
           onHide={() => setIsHistoryDialogVisible(false)}
           visible={tabsValidationsState.isHistoryDialogVisible}>
