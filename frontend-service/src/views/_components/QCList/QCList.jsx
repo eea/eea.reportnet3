@@ -742,11 +742,9 @@ export const QCList = ({
       id: 'id999999',
       user: 'qc.user@com.com',
       timestamp: '29/02/2019',
-      rule_id: 'id999999',
       metadata: 'false',
       expression: 'true',
-      status: 'true',
-      JSON: '{json: "json", jsonField1: "json2", jsonField2: "json3"}'
+      status: 'true'
     };
   });
 
