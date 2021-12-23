@@ -256,7 +256,7 @@ const Dataflow = () => {
   }, [userContext, dataflowState.data]);
 
   useEffect(() => {
-    if (dataflowState.isCustodian) {
+    if (dataflowState.isCustodian || dataflowState.isCustodianSupport) {
       if (isOpenStatus) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
       } else {
