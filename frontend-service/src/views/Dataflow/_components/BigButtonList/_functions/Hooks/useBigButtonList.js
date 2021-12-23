@@ -87,7 +87,7 @@ const useBigButtonList = ({
       cloneSchemasFromDataflow: isLeadDesigner && isDesignStatus,
       copyDataCollectionToEUDataset: isLeadDesigner && isDraftStatus,
       exportEUDataset: isLeadDesigner && isDraftStatus,
-      dashboard: (isLeadDesigner || isObserver) && isDraftStatus,
+      dashboard: (isLeadDesigner || isObserver || isCustodianSupport) && isDraftStatus,
       designDatasets:
         (isLeadDesigner ||
           userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
@@ -101,8 +101,8 @@ const useBigButtonList = ({
       feedback:
         ((isCustodianSupport || isLeadDesigner) && isDraftStatus && isManualAcceptance) ||
         (isLeadReporterOfCountry && isReleased && isManualAcceptance),
-      groupByRepresentative: (isLeadDesigner || isObserver) && isDraftStatus,
-      manageReporters: isLeadDesigner,
+      groupByRepresentative: (isLeadDesigner || isObserver || isCustodianSupport) && isDraftStatus,
+      manageReporters: isLeadDesigner || isCustodianSupport,
       manualTechnicalAcceptance: (isLeadDesigner || isCustodianSupport) && isManualAcceptance,
       newSchema: isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
