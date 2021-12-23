@@ -228,6 +228,7 @@ export const TabsDesigner = ({
       inmTabs[tabIndex].tableSchemaName = header;
       inmTabs[tabIndex].newTab = false;
       inmTabs[tabIndex].showContextMenu = false;
+      inmTabs[tabIndex].hasInfoTooltip = true;
       setActiveTableSchemaId(data.idTableSchema);
       setTabs(inmTabs);
       getIsTableCreated(true);
@@ -371,7 +372,9 @@ export const TabsDesigner = ({
               return (
                 <TabPanel
                   addTab={tab.addTab}
+                  description={tab.description}
                   editable={tab.editable}
+                  hasInfoTooltip={tab.hasInfoTooltip}
                   hasPKReferenced={tab.hasPKReferenced}
                   header={tab.header}
                   index={tab.index}

@@ -208,15 +208,18 @@ const TabView = ({
     return (
       !(isDataflowOpen && isDesignDatasetEditorRead && tab.props.addTab) && (
         <Tab
+          additionalInfo={tab.props.description}
           addTab={tab.props.addTab}
           ariaControls={ariaControls}
           checkEditingTabs={checkEditingTabs}
           children={tab.props.children}
           className={classNamed}
+          description={tab.props.description}
           designMode={designMode}
           disabled={tab.props.disabled}
           divScrollTabsRef={divTabsRef.current}
           editable={tab.props.editable}
+          hasInfoTooltip={tab.props.hasInfoTooltip}
           hasPKReferenced={tab.props.hasPKReferenced}
           header={tab.props.header}
           headerStyle={tab.props.headerStyle}

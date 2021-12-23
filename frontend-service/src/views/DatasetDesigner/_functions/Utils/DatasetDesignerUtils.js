@@ -60,6 +60,7 @@ const getTabs = ({ datasetSchema, datasetStatistics, editable, isDataflowOpen, i
             ...datasetStatistics.tables.filter(tab => tab['tableSchemaId'] === table['tableSchemaId'])[0]
           }.hasErrors
         : false;
+    table.hasInfoTooltip = true;
     table.header = table.tableSchemaName;
     table.index = idx;
     table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;
@@ -76,6 +77,7 @@ const getTabs = ({ datasetSchema, datasetStatistics, editable, isDataflowOpen, i
   if (!isDataflowOpen && !isDesignDatasetEditorRead) {
     inmDatasetSchema.tables?.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
   }
+  console.log(inmDatasetSchema.tables);
   return inmDatasetSchema.tables;
 };
 

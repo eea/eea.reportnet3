@@ -1,8 +1,12 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
-import isUndefined from 'lodash/isUndefined';
+import ReactDOMServer from 'react-dom/server';
 
-import styles from './Tab.module.css';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
+import uniqueId from 'lodash/uniqueId';
+
+import styles from './Tab.module.scss';
 
 import { config } from 'conf';
 
@@ -13,6 +17,7 @@ import { ContextMenu } from 'views/_components/ContextMenu';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'views/_components/Icon';
 import { InputText } from 'views/_components/InputText';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -22,10 +27,12 @@ const Tab = ({
   checkEditingTabs,
   className,
   closeIcon,
+  description = '',
   designMode = false,
   divScrollTabsRef,
   disabled = false,
   editable = false,
+  hasInfoTooltip = false,
   hasPKReferenced = false,
   header,
   headerStyle,
@@ -107,6 +114,27 @@ const Tab = ({
       }
     }
   }, [newTab]);
+
+  const getTooltipMessage = () => (
+    <div className={styles.fieldText}>
+      <span>{resourcesContext.messages['description']}: </span>
+      <br />
+      <p className={styles.propertyLabel}>{description}</p>
+    </div>
+  );
+
+  const getTooltipContent = () =>
+    ReactDOMServer.renderToStaticMarkup(
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          maxWidth: '250px'
+        }}>
+        {getTooltipMessage()}
+      </div>
+    );
 
   const onTabDragStart = event => {
     if (editingHeader) {
@@ -346,6 +374,15 @@ const Tab = ({
           }}
           role="tab"
           tabIndex={index}>
+          {console.log(description)}
+          {hasInfoTooltip && !editingHeader && !isNil(description) && description !== '' && (
+            <TooltipButton
+              buttonClassName={styles.tooltipButton}
+              getContent={getTooltipContent}
+              tooltipButton={styles.tooltip}
+              uniqueIdentifier={uniqueId('table_more_info_')}
+            />
+          )}
           {leftIcon && <span className={classNames('p-tabview-left-icon ', leftIcon)}></span>}
           {!isUndefined(editingHeader) && editingHeader ? (
             <InputText

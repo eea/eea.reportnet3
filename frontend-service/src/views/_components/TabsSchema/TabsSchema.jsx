@@ -41,8 +41,14 @@ export const TabsSchema = ({
   let tabs =
     tables && tableSchemaColumns
       ? tables.map(table => {
+          console.log({ table });
           return (
-            <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
+            <TabPanel
+              description={table.description}
+              hasInfoTooltip={table.hasInfoTooltip}
+              header={table.name}
+              key={table.id}
+              rightIcon={table.hasErrors ? config.icons['warning'] : null}>
               <div className={styles.tabsSchema}>
                 <DataViewer
                   dataflowType={dataflowType}

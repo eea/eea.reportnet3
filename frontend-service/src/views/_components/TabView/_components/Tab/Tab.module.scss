@@ -64,3 +64,22 @@ input.p_tabview_input_design {
 .tabViewTabNavigationShown {
   height: 2.7rem !important;
 }
+
+.tooltip {
+  max-width: 250px !important;
+}
+.tooltipButton {
+  margin-top: 0.5rem !important;
+  margin-right: 0.5rem !important;
+}
+
+.fieldText {
+  text-align: left;
+  font-weight: bold;
+  .propertyLabel {
+    color: var(--success-color-lighter);
+    font-weight: 600;
+    display: inline-block !important;
+    text-overflow: ellipsis;
+  }
+}

@@ -713,13 +713,15 @@ export const Dataset = ({ isReferenceDataset }) => {
         datasetSchema.tables.map(tableSchema => {
           tableSchemaList.push({ name: tableSchema.tableSchemaName, id: tableSchema.tableSchemaId });
           return {
-            id: tableSchema['tableSchemaId'],
-            name: tableSchema['tableSchemaName'],
+            description: tableSchema.description,
+            id: tableSchema.tableSchemaId,
+            name: tableSchema.tableSchemaName,
+            hasInfoTooltip: true,
             hasErrors: {
-              ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
+              ...datasetStatistics.tables.filter(table => table.tableSchemaId === tableSchema.tableSchemaId)[0]
             }.hasErrors,
-            fixedNumber: tableSchema['tableSchemaFixedNumber'],
-            readOnly: tableSchema['tableSchemaReadOnly']
+            fixedNumber: tableSchema.tableSchemaFixedNumber,
+            readOnly: tableSchema.tableSchemaReadOnly
           };
         })
       );
