@@ -36,6 +36,7 @@ const useBigButtonListRepresentative = ({
   const getButtonsVisibility = () => {
     const isManualAcceptance = dataflowState.data.manualAcceptance;
     const isTestDataset = parseInt(representativeId) === 0;
+    const isCustodianSupport = true;
     const isReleased =
       !isNil(dataflowState.data.datasets) &&
       dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
@@ -55,7 +56,7 @@ const useBigButtonListRepresentative = ({
       help: true,
       receipt: isLeadReporterOfThisCountry && isReleased,
       release: isLeadReporterOfThisCountry && !isTestDataset,
-      testDatasets: isTestDataset
+      testDatasets: isTestDataset || (isCustodianSupport && isTestDataset)
     };
   };
 

@@ -94,6 +94,7 @@ export const Dataset = ({ isReferenceDataset }) => {
   });
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
+  // const [isCustodianSupport, setIsCustodianSupport] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
@@ -163,6 +164,21 @@ export const Dataset = ({ isReferenceDataset }) => {
     }
   }, [isCustodianOrSteward, isReferenceDataset, isReferenceDatasetRegularDataflow]);
 
+  // useEffect(() => {
+  //   if (isCustodianSupport) {
+  //     leftSideBarContext.addModels([
+  //       {
+  //         className: 'dataflow-showPublicInfo-help-step',
+  //         icon: 'lock',
+  //         isVisible: isReferenceDatasetRegularDataflow || isReferenceDataset,
+  //         label: 'referenceUpdateStatusLeftSideBarButton',
+  //         onClick: () => setIsUpdatableDialogVisible(true),
+  //         title: 'referenceUpdateStatusLeftSideBarButton'
+  //       }
+  //     ]);
+  //   }
+  // }, [isCustodianSupport, isReferenceDataset, isReferenceDatasetRegularDataflow]);
+
   useEffect(() => {
     if (!isNil(tableSchema) && tableSchema.length > 0) {
       setDataViewerOptions({
@@ -201,6 +217,11 @@ export const Dataset = ({ isReferenceDataset }) => {
             config.permissions.roles.STEWARD.key
           ])
         );
+        // setIsCustodianSupport(
+        //   userContext.hasContextAccessPermission(config.permissions.prefixes.REFERENCEDATASET, datasetId, [
+        //     config.permissions.roles.CUSTODIAN_SUPPORT.key
+        //   ])
+        // );
       }
     }
   }, [userContext, dataset]);
