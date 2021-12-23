@@ -1,6 +1,6 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
 
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 
 import styles from './ReferencingDataflows.module.scss';
 
@@ -57,20 +57,13 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
     dispatch({ type: 'ON_LOAD_FILTERED_DATA', payload: { dataflows } });
   };
 
-  const filterOptions = [{ type: 'INPUT', nestedOptions: [{ key: 'name', label: 'name' }] }];
+  const filterOptions = [{ type: 'INPUT', nestedOptions: [{ key: 'name', label: resourcesContext.messages['name'] }] }];
 
   const renderNameColumnTemplate = dataflow => <div>{dataflow.name}</div>;
   const renderIdColumnTemplate = dataflow => <div>{dataflow.id}</div>;
 
   const renderDialogLayout = children => {
-    const getClassNameDialog = () => {
-      if (isEmpty(state.dataflows)) {
-        return `${styles.modalEmpty}`;
-      } else {
-        return `${styles.modalData}`;
-      }
-    };
-    return <div className={getClassNameDialog()}>{children}</div>;
+    return <div className={isEmpty(state.dataflows) ? `${styles.modalEmpty}` : `${styles.modalData}`}>{children}</div>;
   };
 
   if (state.requestStatus === 'pending') {
