@@ -437,7 +437,7 @@ public class UserManagementControllerImpl implements UserManagementController {
     if (attributes.containsKey("userImage")) {
       List<String> imageList = attributes.get("userImage");
       if (CollectionUtils.isNotEmpty(imageList) && !imageList.get(0)
-          .matches("^000~data:image/(png|jpg|gif|jpeg|bmp);base64,([A-Za-z0-9+/])*?$")) {
+          .matches("^000~data:image/(png|jpg|gif|jpeg|bmp);base64,([A-Za-z0-9+/]{4})*?$")) {
         LOG_ERROR.error(
             "Error updating the attributes of the user with id {}. The image is not valid", userId);
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
