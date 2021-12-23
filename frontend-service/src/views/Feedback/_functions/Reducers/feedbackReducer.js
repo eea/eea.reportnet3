@@ -62,8 +62,7 @@ export const feedbackReducer = (state, { type, payload }) => {
       return {
         ...state,
         isAdmin: payload.isAdmin,
-        isCustodian: payload.isCustodian,
-        isCustodianSupport: payload.isCustodianSupport
+        hasCustodianPermissions: payload.hasCustodianPermissions
       };
 
     case 'SET_IS_LOADING':

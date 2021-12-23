@@ -50,10 +50,9 @@ export const Feedback = () => {
     dataflowType: '',
     dataProviders: [],
     draggedFiles: null,
+    hasCustodianPermissions: undefined,
     importFileDialogVisible: false,
     isAdmin: false,
-    isCustodian: undefined,
-    isCustodianSupport: undefined,
     isDragging: false,
     isLoading: true,
     isSending: false,
@@ -73,9 +72,8 @@ export const Feedback = () => {
     dataProviders,
     draggedFiles,
     importFileDialogVisible,
+    hasCustodianPermissions,
     isAdmin,
-    isCustodian,
-    isCustodianSupport,
     isDragging,
     isLoading,
     isSending,
@@ -95,20 +93,20 @@ export const Feedback = () => {
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(
-      isCustodian ? FeedbackRequesterHelpConfig : FeedbackReporterHelpConfig,
+      hasCustodianPermissions ? FeedbackRequesterHelpConfig : FeedbackReporterHelpConfig,
       'feedbackHelp'
     );
-  }, [messages, isCustodian]);
+  }, [messages, hasCustodianPermissions]);
 
   useEffect(() => {
-    if (isCustodian || isCustodianSupport) {
+    if (hasCustodianPermissions) {
       onLoadDataProviders();
     }
-  }, [isCustodian, isCustodianSupport]);
+  }, [hasCustodianPermissions]);
 
   useEffect(() => {
-    if (!isNil(isCustodian) || !isNil(isCustodianSupport)) {
-      if (isCustodian || isCustodianSupport) {
+    if (!isNil(hasCustodianPermissions)) {
+      if (hasCustodianPermissions) {
         if (!isEmpty(selectedDataProvider)) {
           onGetInitialMessages(selectedDataProvider.dataProviderId);
         }
@@ -116,7 +114,7 @@ export const Feedback = () => {
         if (!isAdmin) onGetInitialMessages(representativeId);
       }
     }
-  }, [selectedDataProvider, isCustodian, isAdmin, isCustodianSupport]);
+  }, [selectedDataProvider, isAdmin, hasCustodianPermissions]);
 
   useEffect(() => {
     if (!isNil(userContext.contextRoles)) {
@@ -129,8 +127,10 @@ export const Feedback = () => {
       // ]);
       const isCustodianSupport = true;
 
+      const hasCustodianPermissions = isCustodian || isCustodianSupport;
+
       const isAdmin = userContext.accessRole.some(role => role === config.permissions.roles.ADMIN.key);
-      dispatchFeedback({ type: 'SET_PERMISSIONS', payload: { isCustodian, isAdmin, isCustodianSupport } });
+      dispatchFeedback({ type: 'SET_PERMISSIONS', payload: { isAdmin, hasCustodianPermissions } });
     }
   }, [userContext]);
 
@@ -162,9 +162,7 @@ export const Feedback = () => {
     //mark unread messages as read
     if (data?.unreadMessages.length > 0) {
       const unreadMessages = data.unreadMessages
-        .filter(unreadMessage =>
-          isCustodian || isCustodianSupport ? unreadMessage.direction : !unreadMessage.direction
-        )
+        .filter(unreadMessage => (hasCustodianPermissions ? unreadMessage.direction : !unreadMessage.direction))
         .map(unreadMessage => ({ id: unreadMessage.id, read: true }));
 
       if (!isEmpty(unreadMessages)) {
@@ -207,13 +205,13 @@ export const Feedback = () => {
   };
 
   const onGetMoreMessages = async () => {
-    if (((isCustodian || isCustodianSupport) && isEmpty(selectedDataProvider)) || isLoading) {
+    if ((hasCustodianPermissions && isEmpty(selectedDataProvider)) || isLoading) {
       return;
     }
     try {
       dispatchFeedback({ type: 'ON_TOGGLE_LAZY_LOADING', payload: true });
       const data = await onLoadMessages(
-        isCustodian || isCustodianSupport ? selectedDataProvider.dataProviderId : representativeId,
+        hasCustodianPermissions ? selectedDataProvider.dataProviderId : representativeId,
         currentPage,
         true
       );
@@ -265,7 +263,7 @@ export const Feedback = () => {
   };
 
   const onDragOver = event => {
-    if (isCustodian || isCustodianSupport) {
+    if (hasCustodianPermissions) {
       dispatchFeedback({ type: 'TOGGLE_IS_DRAGGING', payload: true });
       event.currentTarget.style.border = 'var(--drag-and-drop-div-wide-border)';
       event.currentTarget.style.opacity = 'var(--drag-and-drop-div-low-opacity)';
@@ -338,7 +336,7 @@ export const Feedback = () => {
         const messageCreated = await FeedbackService.createMessage(
           dataflowId,
           message,
-          (isCustodian || isCustodianSupport) && !isEmpty(selectedDataProvider)
+          hasCustodianPermissions && !isEmpty(selectedDataProvider)
             ? selectedDataProvider.dataProviderId
             : parseInt(representativeId)
         );
@@ -368,7 +366,22 @@ export const Feedback = () => {
     );
   };
 
-  const emptyMessage = () => {};
+  const getEmptyMessage = () => {
+    if (!isNil(hasCustodianPermissions)) {
+      if (!hasCustodianPermissions) {
+        return resourcesContext.messages['noMessages'];
+      } else {
+        if (isEmpty(selectedDataProvider)) {
+          return resourcesContext.messages['noMessagesCustodian'];
+        } else {
+          return resourcesContext.messages['noMessages'];
+        }
+      }
+    } else {
+      return '';
+    }
+  };
+
   return layout(
     <Fragment>
       <Title
@@ -378,7 +391,7 @@ export const Feedback = () => {
         title={`${resourcesContext.messages['technicalFeedback']} `}
       />
       <div className={`${styles.feedbackWrapper} feedback-wrapper-help-step`}>
-        {(isCustodian || isCustodianSupport) && (
+        {hasCustodianPermissions && (
           <div className={`${styles.dataProviderWrapper} feedback-dataProvider-help-step`}>
             <ListBox
               ariaLabel="dataProviders"
@@ -392,14 +405,14 @@ export const Feedback = () => {
               value={selectedDataProvider}></ListBox>
           </div>
         )}
-        {(isCustodian || isCustodianSupport) && !isEmpty(selectedDataProvider) && isDragging && (
+        {hasCustodianPermissions && !isEmpty(selectedDataProvider) && isDragging && (
           <span className={styles.dragAndDropFileMessage}>{resourcesContext.messages['dragAndDropFileMessage']}</span>
         )}
         <div
           className={styles.listMessagesWrapper}
-          onDragLeave={(isCustodian || isCustodianSupport) && !isEmpty(selectedDataProvider) ? onDragLeave : () => {}}
-          onDragOver={(isCustodian || isCustodianSupport) && !isEmpty(selectedDataProvider) ? onDragOver : () => {}}
-          onDrop={(isCustodian || isCustodianSupport) && !isEmpty(selectedDataProvider) ? onDrop : () => {}}>
+          onDragLeave={hasCustodianPermissions && !isEmpty(selectedDataProvider) ? onDragLeave : () => {}}
+          onDragOver={hasCustodianPermissions && !isEmpty(selectedDataProvider) ? onDragOver : () => {}}
+          onDrop={hasCustodianPermissions && !isEmpty(selectedDataProvider) ? onDrop : () => {}}>
           {messages.length > 0 && (
             <div
               className={
@@ -408,23 +421,20 @@ export const Feedback = () => {
           )}
 
           <ListMessages
-            canLoad={
-              ((isCustodian || isCustodianSupport) && !isEmpty(selectedDataProvider)) ||
-              !isCustodian ||
-              !isCustodianSupport
-            }
+            canLoad={(hasCustodianPermissions && !isEmpty(selectedDataProvider)) || !hasCustodianPermissions}
             className="feedback-messages-help-step"
             dataflowId={dataflowId}
-            emptyMessage={
-              !isNil(isCustodian)
-                ? !isCustodian
-                  ? resourcesContext.messages['noMessages']
-                  : isEmpty(selectedDataProvider)
-                  ? resourcesContext.messages['noMessagesCustodian']
-                  : resourcesContext.messages['noMessages']
-                : ''
-            }
-            isCustodian={isCustodian}
+            // emptyMessage={
+            //   !isNil(hasCustodianPermissions)
+            //     ? !hasCustodianPermissions
+            //       ? resourcesContext.messages['noMessages']
+            //       : isEmpty(selectedDataProvider)
+            //       ? resourcesContext.messages['noMessagesCustodian']
+            //       : resourcesContext.messages['noMessages']
+            //     : ''
+            // }
+            emptyMessage={getEmptyMessage()}
+            hasCustodianPermissions={hasCustodianPermissions}
             isLoading={isLoading}
             messages={messages}
             moreMessagesLoaded={moreMessagesLoaded}
@@ -436,21 +446,21 @@ export const Feedback = () => {
             providerId={selectedDataProvider?.dataProviderId}
             totalMessages={totalMessages}
           />
-          {!isNil(isCustodian) && !isCustodian && (
+          {!isNil(hasCustodianPermissions) && !hasCustodianPermissions && (
             <label className={styles.helpdeskMessage}>{resourcesContext.messages['feedbackHelpdeskMessage']}</label>
           )}
-          {(!isNil(isCustodian) || !isNil(isCustodianSupport)) && (isCustodian || isCustodianSupport) && (
+          {!isNil(hasCustodianPermissions) && hasCustodianPermissions && (
             <div className={`${styles.sendMessageWrapper} feedback-send-message-help-step`}>
               <InputTextarea
                 className={styles.sendMessageTextarea}
                 collapsedHeight={50}
-                disabled={(isCustodian || isCustodianSupport) && isEmpty(selectedDataProvider)}
+                disabled={hasCustodianPermissions && isEmpty(selectedDataProvider)}
                 id="feedbackSender"
                 key="feedbackSender"
                 onChange={e => dispatchFeedback({ type: 'ON_UPDATE_MESSAGE', payload: { value: e.target.value } })}
                 onKeyDown={e => onKeyChange(e)}
                 placeholder={
-                  (isCustodian || isCustodianSupport) && isEmpty(selectedDataProvider)
+                  hasCustodianPermissions && isEmpty(selectedDataProvider)
                     ? resourcesContext.messages['noMessagesCustodian']
                     : resourcesContext.messages['writeMessagePlaceholder']
                 }
@@ -459,11 +469,11 @@ export const Feedback = () => {
               <div className={styles.buttonsWrapper}>
                 <Button
                   className={`${
-                    ((isCustodian || isCustodianSupport) && isEmpty(selectedDataProvider)) || isSending
+                    (hasCustodianPermissions && isEmpty(selectedDataProvider)) || isSending
                       ? ''
                       : 'p-button-animated-right-blink'
                   } p-button-secondary ${styles.attachFileMessageButton}`}
-                  disabled={((isCustodian || isCustodianSupport) && isEmpty(selectedDataProvider)) || isSending}
+                  disabled={(hasCustodianPermissions && isEmpty(selectedDataProvider)) || isSending}
                   icon="clipboard"
                   iconPos="right"
                   label={resourcesContext.messages['uploadAttachment']}
@@ -472,11 +482,13 @@ export const Feedback = () => {
 
                 <Button
                   className={`${
-                    messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending
+                    messageToSend === '' || (hasCustodianPermissions && isEmpty(selectedDataProvider)) || isSending
                       ? ''
                       : 'p-button-animated-right-blink'
                   } p-button-primary ${styles.sendMessageButton}`}
-                  disabled={messageToSend === '' || (isCustodian && isEmpty(selectedDataProvider)) || isSending}
+                  disabled={
+                    messageToSend === '' || (hasCustodianPermissions && isEmpty(selectedDataProvider)) || isSending
+                  }
                   icon="comment"
                   iconPos="right"
                   label={resourcesContext.messages['send']}
