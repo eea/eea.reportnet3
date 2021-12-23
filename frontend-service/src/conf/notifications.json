@@ -517,7 +517,10 @@
           "key": "EMAIL_NOT_FOUND_ERROR"
         },
         {
-          "key": "IMPOSSIBLE_ROLE_ERROR"
+          "key": "IMPOSSIBLE_REPORTER_ROLE_ERROR"
+        },
+        {
+          "key": "IMPOSSIBLE_REQUESTER_ROLE_ERROR"
         },
         {
           "key": "ERROR_LOADING_EU_DATASET_SCHEMA"

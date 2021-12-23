@@ -51,6 +51,7 @@ export const ShareRights = ({
   placeholder,
   representativeId,
   roleOptions,
+  saveErrorNotificationKey,
   setHasReporters = () => {},
   setIsUserRightManagementDialogVisible,
   setRightPermissionsChange = () => {},
@@ -304,7 +305,7 @@ export const ShareRights = ({
           notificationContext.add({ type: 'EMAIL_NOT_FOUND_ERROR' }, true);
         } else if (error?.response?.status === 400) {
           shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
-          notificationContext.add({ type: 'IMPOSSIBLE_ROLE_ERROR' }, true);
+          notificationContext.add({ type: saveErrorNotificationKey }, true);
         } else {
           notificationContext.add(
             { type: userRight.isNew ? addErrorNotificationKey : updateErrorNotificationKey },

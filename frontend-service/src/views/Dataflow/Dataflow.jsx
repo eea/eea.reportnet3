@@ -92,6 +92,7 @@ const Dataflow = () => {
     isBusinessDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
     isCustodian: false,
+    isCustodianSupport: false,
     isDataSchemaCorrect: [],
     isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
@@ -164,6 +165,12 @@ const Dataflow = () => {
   ]);
 
   const isLeadDesigner = isSteward || isCustodian;
+
+  // const isCustodianSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+  //   config.permissions.roles.CUSTODIAN_SUPPORT.key
+  // ]);  TODO WITH BACKEND
+
+  const isCustodianSupport = true;
 
   const isObserver = dataflowState.userRoles.some(userRole => userRole === config.permissions.roles.OBSERVER.key);
 
@@ -707,6 +714,7 @@ const Dataflow = () => {
       payload: {
         hasWritePermissions,
         isCustodian: isLeadDesigner,
+        isCustodianSupport,
         isNationalCoordinator,
         isObserver,
         isAdmin,
@@ -1194,7 +1202,7 @@ const Dataflow = () => {
           </ConfirmDialog>
         )}
 
-        {dataflowState.isCustodian && dataflowState.isManageRolesDialogVisible && (
+        {(dataflowState.isCustodian || dataflowState.isCustodianSupport) && dataflowState.isManageRolesDialogVisible && (
           <Dialog
             className="responsiveDialog"
             contentStyle={{ maxHeight: '60vh' }}
@@ -1252,6 +1260,7 @@ const Dataflow = () => {
               placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
+              saveErrorNotificationKey={'IMPOSSIBLE_REQUESTER_ROLE_ERROR'}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
@@ -1282,11 +1291,12 @@ const Dataflow = () => {
               placeholder={resourcesContext.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={reporterRoleOptions}
+              saveErrorNotificationKey={'IMPOSSIBLE_REPORTER_ROLE_ERROR'}
               setHasReporters={setHasReporters}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}
-              userType="reporter"
+              userType={'reporter'}
             />
           </Dialog>
         )}
