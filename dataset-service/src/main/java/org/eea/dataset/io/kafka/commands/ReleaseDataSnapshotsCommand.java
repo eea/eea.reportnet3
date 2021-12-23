@@ -119,7 +119,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         }
       }
 
-      // Send email to custodians and providers
+      // Send email to requesters
       sendMail(dateRelease, dataset, dataflowVO);
 
       // At this point the process of releasing all the datasets has been finished so we unlock
@@ -171,6 +171,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         .getUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD.getGroupName(dataflowVO.getId()));
     List<UserRepresentationVO> observers = userManagementControllerZuul
         .getUsersByGroup(ResourceGroupEnum.DATAFLOW_OBSERVER.getGroupName(dataflowVO.getId()));
+    List<UserRepresentationVO> custodianSupport = userManagementControllerZuul.getUsersByGroup(
+        ResourceGroupEnum.DATAFLOW_CUSTODIAN_SUPPORT.getGroupName(dataflowVO.getId()));
     List<String> emails = new ArrayList<>();
     if (null != custodians) {
       custodians.stream().forEach(custodian -> emails.add(custodian.getEmail()));
@@ -180,6 +182,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
     }
     if (null != observers) {
       observers.stream().forEach(observer -> emails.add(observer.getEmail()));
+    }
+    if (null != custodianSupport) {
+      custodianSupport.stream().forEach(support -> emails.add(support.getEmail()));
     }
 
     EmailVO emailVO = new EmailVO();
