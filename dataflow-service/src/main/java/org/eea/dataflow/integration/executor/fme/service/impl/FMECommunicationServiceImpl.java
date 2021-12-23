@@ -198,8 +198,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       }
       String user = SecurityContextHolder.getContext().getAuthentication().getName();
       NotificationVO notificationVO =
-          NotificationVO.builder().user(user).error("Error calling to FME")
-              .datasetId(Long.valueOf(datasetId)).dataflowId(dataflowId).fileName(fileName).build();
+          NotificationVO.builder().user(user).error("Error calling to FME").datasetId(datasetId)
+              .dataflowId(dataflowId).fileName(fileName).build();
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.CALL_FME_PROCESS_FAILED_EVENT, null,
             notificationVO);
