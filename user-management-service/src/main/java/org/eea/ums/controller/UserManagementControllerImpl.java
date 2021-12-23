@@ -644,7 +644,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_STEWARD','DATAFLOW_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
   @PostMapping("/createApiKey")
   @ApiOperation(value = "Create ApiKey for the logged User", response = String.class, hidden = true)
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
@@ -676,7 +676,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_STEWARD','DATAFLOW_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
   @GetMapping("/getApiKey")
   @ApiOperation(value = "Get logged User ApiKey by Dataflow Id and Dataprovider Id",
       response = String.class, hidden = true)
@@ -773,7 +773,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_OBSERVER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   @GetMapping("/getUserRolesByDataflow/{dataflowId}/dataProviderId/{dataProviderId}")
   @ApiOperation(value = "Get a List of Users by Dataflow", response = UserRoleVO.class,
       responseContainer = "List", hidden = true)
@@ -791,7 +791,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @return the user roles by dataflow
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT')")
   @GetMapping("/userRoles/dataflow/{dataflowId}")
   @ApiOperation(value = "Get a List of User roles by Dataflow", response = UserRoleVO.class,
       responseContainer = "List", hidden = true)
@@ -851,7 +851,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT')")
   @PostMapping("/exportUsersByCountry/dataflow/{dataflowId}")
   @ApiOperation(value = "Export all users by country into a CSV file", hidden = true)
   public void exportUsersByCountry(@ApiParam(
@@ -877,7 +877,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param response the response
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT')")
   @GetMapping("/downloadUsersByCountry/{dataflowId}")
   @ApiOperation(value = "Download the generated CSV file containing the users by country",
       hidden = true)

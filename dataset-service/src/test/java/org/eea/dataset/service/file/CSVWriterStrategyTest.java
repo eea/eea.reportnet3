@@ -102,6 +102,7 @@ public class CSVWriterStrategyTest {
     RecordValue record = new RecordValue();
     RecordValue record2 = new RecordValue();
     FieldValue fieldValue = new FieldValue();
+    fieldValue.setValue("");
     FieldSchemaVO fieldSchema = new FieldSchemaVO();
     fieldSchema.setId("");
     fields.add(fieldValue);
