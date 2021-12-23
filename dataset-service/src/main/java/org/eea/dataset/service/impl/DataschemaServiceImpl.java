@@ -3009,7 +3009,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         } else {
           columns.add(null);
         }
-        columns.add(fieldSchema.getDescription());
+        columns
+            .add(fieldSchema.getDescription().startsWith("=") ? " " + fieldSchema.getDescription()
+                : fieldSchema.getDescription());
         columns.add(fieldSchema.getType().toString());
         if (fieldSchema.getCodelistItems() != null && fieldSchema.getCodelistItems().length > 0) {
           String codelists = "";
@@ -3042,14 +3044,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private void setHeaderFields(CSVWriter csvWriter) {
 
     // Field name,PK,Required,ReadOnly,Field description,Field type,Extra information
-    List<String> headers = new ArrayList<>();
-    headers.add("Field name");
-    headers.add("PK");
-    headers.add("Required");
-    headers.add("ReadOnly");
-    headers.add("Field description");
-    headers.add("Field type");
-    headers.add("Extra information");
+    List<String> headers = new ArrayList<>(Arrays.asList("Field name", "PK", "Required", "ReadOnly",
+        "Field description", "Field type", "Extra information"));
 
     csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
   }

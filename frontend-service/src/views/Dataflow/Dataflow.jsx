@@ -668,7 +668,7 @@ const Dataflow = () => {
       />
       <Button
         className={`p-button-secondary p-button-animated-blink ${styles.closeButton}`}
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => manageDialogs('isUserListVisible', false)}
       />
