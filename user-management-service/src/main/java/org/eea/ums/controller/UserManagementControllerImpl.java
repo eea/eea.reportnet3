@@ -436,7 +436,6 @@ public class UserManagementControllerImpl implements UserManagementController {
     // Check if the user image it's a valid one
     if (attributes.containsKey("userImage")) {
       List<String> imageList = attributes.get("userImage");
-      LOG.info("el elemento 0 es: {}", imageList.get(0));
       if (CollectionUtils.isNotEmpty(imageList) && !imageList.get(0)
           .matches("^000~data:image/(png|jpg|gif|jpeg|bmp);base64,([A-Za-z0-9+/])*?$")) {
         LOG_ERROR.error(
