@@ -187,7 +187,7 @@ export const UniqueConstraints = ({
   ) : (
     <div className={styles.constraints}>
       <Filters
-        className={'uniqueConstraints'}
+        className="uniqueConstraints"
         data={constraintsState.data}
         getFilteredData={onLoadFilteredData}
         getFilteredSearched={getFilteredState}

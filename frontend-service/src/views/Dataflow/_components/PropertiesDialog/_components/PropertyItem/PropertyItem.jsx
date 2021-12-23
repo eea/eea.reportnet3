@@ -34,7 +34,7 @@ export const PropertyItem = ({ content, title, redirectTo }) => {
 
         {!isEmpty(redirectTo) && (
           <Button
-            className={'p-button-secondary-transparent'}
+            className="p-button-secondary-transparent"
             icon="externalUrl"
             onMouseDown={() => window.open(redirectTo)}
             tooltip={resourcesContext.messages['viewMore']}

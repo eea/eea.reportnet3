@@ -1445,7 +1445,7 @@ const DataViewer = ({
       {records.isMapOpen && (
         <Dialog
           blockScroll={false}
-          className={'map-data'}
+          className="map-data"
           footer={saveMapGeoJsonDialogFooter}
           header={resourcesContext.messages['geospatialData']}
           modal={true}
