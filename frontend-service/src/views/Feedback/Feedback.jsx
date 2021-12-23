@@ -424,15 +424,6 @@ export const Feedback = () => {
             canLoad={(hasCustodianPermissions && !isEmpty(selectedDataProvider)) || !hasCustodianPermissions}
             className="feedback-messages-help-step"
             dataflowId={dataflowId}
-            // emptyMessage={
-            //   !isNil(hasCustodianPermissions)
-            //     ? !hasCustodianPermissions
-            //       ? resourcesContext.messages['noMessages']
-            //       : isEmpty(selectedDataProvider)
-            //       ? resourcesContext.messages['noMessagesCustodian']
-            //       : resourcesContext.messages['noMessages']
-            //     : ''
-            // }
             emptyMessage={getEmptyMessage()}
             hasCustodianPermissions={hasCustodianPermissions}
             isLoading={isLoading}
