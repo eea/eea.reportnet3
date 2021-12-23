@@ -1260,6 +1260,7 @@ const Dataflow = () => {
               placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
+              saveErrorNotificationKey={'IMPOSSIBLE_REQUESTER_ROLE_ERROR'}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
@@ -1290,11 +1291,12 @@ const Dataflow = () => {
               placeholder={resourcesContext.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={reporterRoleOptions}
+              saveErrorNotificationKey={'IMPOSSIBLE_REPORTER_ROLE_ERROR'}
               setHasReporters={setHasReporters}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}
-              userType="reporter"
+              userType={'reporter'}
             />
           </Dialog>
         )}
