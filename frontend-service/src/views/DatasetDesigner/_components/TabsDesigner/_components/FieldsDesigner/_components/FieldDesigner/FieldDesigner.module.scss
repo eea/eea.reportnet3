@@ -33,9 +33,6 @@
   grid-row-gap: 0px;
 
   .draggableFieldContentCell {
-    display: table-cell;
-    vertical-align: middle;
-
     .draggableFieldCell {
       &:first-child {
         display: none;
@@ -52,7 +49,7 @@
     }
     &:nth-child(9),
     &:nth-child(10) {
-      width: 3em;
+      width: 100%;
     }
 
     .draggableFieldCell {
@@ -268,7 +265,13 @@
   }
 }
 
-@media screen and (max-width: 650px) {
+@media screen and (max-width: 1400px) {
+  .draggableFieldDiv {
+    grid-template-columns: 2% 5% 5% 5% 21% 21% 21% 10% 5% 5%;
+  }
+}
+
+@media screen and (max-width: 850px) {
   .button {
     width: 100%;
   }
@@ -282,28 +285,25 @@
     .draggableFieldContentCell {
       display: flex;
       justify-content: center;
-      &:nth-child(2),
-      &:nth-child(3),
-      &:nth-child(4) {
-        width: 100%;
-      }
-      &:nth-child(8) {
-        width: 100%;
-      }
-      &:nth-child(9),
-      &:nth-child(10) {
-        width: 100%;
-      }
+
       .draggableFieldCell {
-        display: table-cell;
+        display: flex;
+        flex-direction: row;
         width: 50%;
         margin-right: 0;
         &:first-child {
-          display: table-cell;
+          display: flex;
           text-align: left;
           width: 50%;
+          padding-right: 1em;
         }
       }
     }
+  }
+}
+
+@media screen and (min-width: 1950px) {
+  .draggableFieldDiv {
+    grid-template-columns: 3% 5% 5% 5% 23% 23% 23% 10% 1.5% 1.5%;
   }
 }

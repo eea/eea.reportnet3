@@ -228,12 +228,6 @@
   @include shadow-0em;
 }
 
-@media screen and (max-width: 900px) {
-  .contentTable {
-    width: 90%;
-  }
-}
-
 @media screen and (max-width: 650px) {
   .contentTable {
     display: block;
