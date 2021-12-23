@@ -742,16 +742,54 @@ export const QCList = ({
       id: 'id999999',
       user: 'qc.user@com.com',
       timestamp: '29/02/2019',
-      metadata: 'false',
-      expression: 'true',
-      status: 'true'
+      metadata: true,
+      expression: false,
+      status: true
     };
   });
+
+  const metadataTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {rowData.metadata ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+    </div>
+  );
+
+  const expressionTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {rowData.expression ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+    </div>
+  );
+
+  const statusTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {rowData.status ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+    </div>
+  );
 
   const getHistoryColumns = () => {
     const columnData = Object.keys(fields[0]).map(key => ({ field: key, header: key }));
 
-    return columnData.map(col => <Column field={col.field} header={col.header.toUpperCase()} key={col.field} />);
+    return columnData.map(col => {
+      let template;
+      switch (col.field) {
+        case 'metadata':
+          template = metadataTemplate;
+          break;
+        case 'expression':
+          template = expressionTemplate;
+          break;
+
+        case 'status':
+          template = statusTemplate;
+          break;
+
+        default:
+          template = null;
+          break;
+      }
+
+      return <Column body={template} field={col.field} header={col.header.toUpperCase()} key={col.field} />;
+    });
   };
 
   const generateHistoryDialogContent = () => {
