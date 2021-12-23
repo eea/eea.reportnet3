@@ -67,11 +67,11 @@ const useBigButtonList = ({
       config.permissions.roles.OBSERVER.key
     ]);
 
-    // const isCustodianSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
-    //   config.permissions.roles.CUSTODIAN_SUPPORT.key
-    // ]);  TODO WITH BACKEND
-
-    const isCustodianSupport = true;
+    const isCustodianSupport = userContext.hasContextAccessPermission(
+      config.permissions.prefixes.DATAFLOW,
+      dataflowId,
+      [config.permissions.roles.CUSTODIAN_SUPPORT.key]
+    );
 
     const isDesignStatus = dataflowState.status === config.dataflowStatus.DESIGN;
     const isDraftStatus = dataflowState.status === config.dataflowStatus.OPEN;

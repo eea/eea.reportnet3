@@ -122,10 +122,12 @@ export const Feedback = () => {
         config.permissions.roles.CUSTODIAN.key,
         config.permissions.roles.STEWARD.key
       ]);
-      //   const isCustodianSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
-      //   config.permissions.roles.CUSTODIAN_SUPPORT.key
-      // ]);
-      const isCustodianSupport = true;
+
+      const isCustodianSupport = userContext.hasContextAccessPermission(
+        config.permissions.prefixes.DATAFLOW,
+        dataflowId,
+        [config.permissions.roles.CUSTODIAN_SUPPORT.key]
+      );
 
       const hasCustodianPermissions = isCustodian || isCustodianSupport;
 

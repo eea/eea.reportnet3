@@ -166,11 +166,9 @@ const Dataflow = () => {
 
   const isLeadDesigner = isSteward || isCustodian;
 
-  // const isCustodianSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
-  //   config.permissions.roles.CUSTODIAN_SUPPORT.key
-  // ]);  TODO WITH BACKEND
-
-  const isCustodianSupport = true;
+  const isCustodianSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.CUSTODIAN_SUPPORT.key
+  ]);
 
   const isObserver = dataflowState.userRoles.some(userRole => userRole === config.permissions.roles.OBSERVER.key);
 
