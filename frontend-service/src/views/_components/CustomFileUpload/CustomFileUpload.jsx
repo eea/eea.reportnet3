@@ -511,7 +511,7 @@ export const CustomFileUpload = ({
       );
       cancelButton = (
         <Button
-          className={'p-button-secondary'}
+          className="p-button-secondary"
           disabled={disabled || !hasFiles()}
           icon="undo"
           label={cancelLabel}

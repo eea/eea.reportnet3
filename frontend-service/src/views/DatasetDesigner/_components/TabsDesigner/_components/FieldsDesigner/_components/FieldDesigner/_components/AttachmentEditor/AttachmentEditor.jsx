@@ -126,7 +126,7 @@ const AttachmentEditor = ({
         }
         <div className={styles.maxSizeWrapper}>
           <Button
-            className={`secondary`}
+            className="secondary"
             icon="minus"
             onClick={() => onMaxSizeChange((Number(maxSize) - 0.25).toString())}
             tooltip={resourcesContext.messages['minusFileSize']}
@@ -140,7 +140,7 @@ const AttachmentEditor = ({
             value={maxSize}
           />
           <Button
-            className={`secondary`}
+            className="secondary"
             icon="plus"
             onClick={() => onMaxSizeChange((Number(maxSize) + 0.25).toString())}
             tooltip={resourcesContext.messages['plusFileSize']}

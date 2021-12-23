@@ -1030,7 +1030,7 @@ export const Dataset = ({ isReferenceDataset }) => {
               </Fragment>
             )}
             <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step`}
+              className="p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step"
               icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
               id="buttonExportDataset"
               label={resourcesContext.messages['exportDataset']}

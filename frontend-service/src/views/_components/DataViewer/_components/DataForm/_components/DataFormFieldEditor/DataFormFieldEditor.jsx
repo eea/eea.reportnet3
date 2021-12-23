@@ -628,7 +628,7 @@ const DataFormFieldEditor = ({
       {map.isMapOpen && (
         <Dialog
           blockScroll={false}
-          className={'map-data'}
+          className="map-data"
           dismissableMask={false}
           footer={saveMapCoordinatesDialogFooter}
           header={resourcesContext.messages['geospatialData']}
