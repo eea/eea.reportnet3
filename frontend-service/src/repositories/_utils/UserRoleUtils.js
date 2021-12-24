@@ -24,6 +24,7 @@ const getUserRoleByDataflow = (dataflowId, accessRoles = [], contextRoles = []) 
     const dataflowPermissions = [
       config.permissions.roles.CUSTODIAN,
       config.permissions.roles.STEWARD,
+      config.permissions.roles.CUSTODIAN_SUPPORT,
       config.permissions.roles.OBSERVER,
       config.permissions.roles.EDITOR_WRITE,
       config.permissions.roles.EDITOR_READ,
