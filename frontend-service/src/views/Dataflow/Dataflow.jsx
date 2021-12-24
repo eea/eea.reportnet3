@@ -84,6 +84,7 @@ const Dataflow = () => {
     description: '',
     designDatasetSchemas: [],
     formHasRepresentatives: false,
+    hasCustodianPermissions: undefined,
     hasReporters: false,
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
@@ -91,8 +92,6 @@ const Dataflow = () => {
     isApiKeyDialogVisible: false,
     isBusinessDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
-    isCustodian: false,
-    isCustodianSupport: false,
     isDataSchemaCorrect: [],
     isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
@@ -169,6 +168,8 @@ const Dataflow = () => {
   const isCustodianSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
     config.permissions.roles.CUSTODIAN_SUPPORT.key
   ]);
+
+  const hasCustodianPermissions = isCustodianSupport || isCustodian;
 
   const isObserver = dataflowState.userRoles.some(userRole => userRole === config.permissions.roles.OBSERVER.key);
 
@@ -256,7 +257,7 @@ const Dataflow = () => {
   }, [userContext, dataflowState.data]);
 
   useEffect(() => {
-    if (dataflowState.isCustodian) {
+    if (dataflowState.hasCustodianPermissions) {
       if (isOpenStatus) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
       } else {
@@ -711,8 +712,7 @@ const Dataflow = () => {
       type: 'LOAD_PERMISSIONS',
       payload: {
         hasWritePermissions,
-        isCustodian: isLeadDesigner,
-        isCustodianSupport,
+        hasCustodianPermissions: isLeadDesigner,
         isNationalCoordinator,
         isObserver,
         isAdmin,
@@ -1144,7 +1144,7 @@ const Dataflow = () => {
   };
 
   const layout = children => (
-    <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
+    <MainLayout leftSideBarConfig={{ hasCustodianPermissions: dataflowState.hasCustodianPermissions, buttons: [] }}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );
@@ -1200,7 +1200,7 @@ const Dataflow = () => {
           </ConfirmDialog>
         )}
 
-        {(dataflowState.isCustodian || dataflowState.isCustodianSupport) && dataflowState.isManageRolesDialogVisible && (
+        {hasCustodianPermissions && dataflowState.isManageRolesDialogVisible && (
           <Dialog
             className="responsiveDialog"
             contentStyle={{ maxHeight: '60vh' }}
@@ -1552,8 +1552,8 @@ const Dataflow = () => {
           <ApiKeyDialog
             dataflowId={dataflowId}
             dataProviderId={dataProviderId}
+            hasCustodianPermissions={dataflowState.hasCustodianPermissions}
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
-            isCustodian={dataflowState.isCustodian}
             manageDialogs={manageDialogs}
           />
         )}

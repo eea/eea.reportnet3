@@ -56,9 +56,10 @@ const ReferenceDataflow = () => {
     isAdmin: false,
     isRightPermissionsChanged: false,
     isApiKeyDialogVisible: false,
+    // isCustodianSupport: false,
     isCustodianUser: false,
     isCreatingReferenceDatasets: false,
-    isCustodian: false,
+    hasCustodianPermissions: undefined,
     isEditDialogVisible: false,
     isDatasetsInfoDialogVisible: false,
     isLoading: false,
@@ -81,17 +82,21 @@ const ReferenceDataflow = () => {
 
   const isCustodianUser = userContext.accessRole?.some(role => role === config.permissions.roles.CUSTODIAN.key);
 
+  // const isCustodianSupport = userContext.accessRole?.some(role => role === config.permissions.roles.CUSTODIAN_SUPPORT.key);
+
   const isCustodian = userContext.hasContextAccessPermission(
     config.permissions.prefixes.DATAFLOW,
     referenceDataflowId,
     [config.permissions.roles.CUSTODIAN.key]
   );
 
+  const hasCustodianPermissions = isCustodianUser || isCustodian; /*|| isCustodianSupport*/
+
   const isSteward = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, referenceDataflowId, [
     config.permissions.roles.STEWARD.key
   ]);
 
-  const isLeadDesigner = isSteward || isCustodian;
+  const isLeadDesigner = isSteward || hasCustodianPermissions;
 
   const setUpdatedDatasetSchema = updatedData =>
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
@@ -203,7 +208,7 @@ const ReferenceDataflow = () => {
   };
 
   const onLoadPermissions = () => {
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, isCustodian: isLeadDesigner, isCustodianUser } });
+    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, hasCustodianPermissions: isLeadDesigner } });
   };
 
   const onLoadReferenceDataflow = async () => {
@@ -290,12 +295,12 @@ const ReferenceDataflow = () => {
       manageRequestersBtn: isAdmin || isLeadDesigner,
       propertiesBtn: true,
       reportingDataflowsBtn:
-        dataflowState.status === config.dataflowStatus.OPEN && (isLeadDesigner || dataflowState.isCustodianUser)
+        dataflowState.status === config.dataflowStatus.OPEN && (isLeadDesigner || dataflowState.hasCustodianPermissions)
     };
   }
 
   const layout = children => (
-    <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
+    <MainLayout leftSideBarConfig={{ hasCustodianPermissions: dataflowState.hasCustodianPermissions, buttons: [] }}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );
@@ -357,8 +362,8 @@ const ReferenceDataflow = () => {
       {dataflowState.isApiKeyDialogVisible && (
         <ApiKeyDialog
           dataflowId={referenceDataflowId}
+          hasCustodianPermissions={true}
           isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
-          isCustodian={true}
           manageDialogs={manageDialogs}
         />
       )}

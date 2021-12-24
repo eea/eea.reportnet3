@@ -104,12 +104,6 @@ export const Feedback = () => {
     }
   }, [hasCustodianPermissions]);
 
-  // useEffect(() => {
-  //   if (isCustodianSupport) {
-  //     onLoadDataProviders();
-  //   }
-  // }, [isCustodianSupport]);
-
   useEffect(() => {
     if (!isNil(hasCustodianPermissions)) {
       if (hasCustodianPermissions) {

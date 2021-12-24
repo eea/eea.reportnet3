@@ -48,7 +48,7 @@ export const DataflowHelp = () => {
   const [dataflowType, setDataflowType] = useState('');
   const [datasetsSchemas, setDatasetsSchemas] = useState();
   const [documents, setDocuments] = useState([]);
-  const [isCustodian, setIsCustodian] = useState(false);
+  const [hasCustodianPermissions, setCustodianPermissions] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,16 +70,18 @@ export const DataflowHelp = () => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       const userRoles = userContext.getUserRole(`${config.permissions.prefixes.DATAFLOW}${dataflowId}`);
-      setIsCustodian(
+      setCustodianPermissions(
         userRoles.includes(config.permissions.roles.CUSTODIAN.key) ||
           userRoles.includes(config.permissions.roles.STEWARD.key) ||
           userRoles.includes(config.permissions.roles.EDITOR_WRITE.key) ||
-          userRoles.includes(config.permissions.roles.EDITOR_READ.key)
+          userRoles.includes(config.permissions.roles.EDITOR_READ.key) ||
+          userRoles.includes(config.permissions.roles.CUSTODIAN_SUPPORT.key)
       );
 
       setIsToolbarVisible(
         userRoles.includes(config.permissions.roles.CUSTODIAN.key) ||
           userRoles.includes(config.permissions.roles.STEWARD.key)
+        //  ||  userRoles.includes(config.permissions.roles.CUSTODIAN_SUPPORT.key)
       );
     }
   }, [userContext]);
@@ -88,7 +90,7 @@ export const DataflowHelp = () => {
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(
-      isCustodian ? DataflowHelpRequesterHelpConfig : DataflowHelpReporterHelpConfig,
+      hasCustodianPermissions ? DataflowHelpRequesterHelpConfig : DataflowHelpReporterHelpConfig,
       'dataflowHelpHelp'
     );
   }, [documents, webLinks, datasetsSchemas, selectedIndex]);
@@ -99,7 +101,7 @@ export const DataflowHelp = () => {
 
   useEffect(() => {
     onLoadDatasetsSchemas();
-  }, [isCustodian]);
+  }, [hasCustodianPermissions]);
 
   useCheckNotifications(
     ['DELETE_DOCUMENT_FAILED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
@@ -134,7 +136,7 @@ export const DataflowHelp = () => {
       const datasetSchema = await DatasetService.getSchema(dataflowId, datasetId);
 
       if (!isEmpty(datasetSchema)) {
-        if (isCustodian) {
+        if (hasCustodianPermissions) {
           const datasetMetadata = await DatasetService.getMetadata(datasetId);
           datasetSchema.datasetSchemaName = datasetMetadata.datasetSchemaName;
         }
@@ -151,7 +153,7 @@ export const DataflowHelp = () => {
       const data = await DataflowService.get(dataflowId);
       setDataflowType(data.type);
       setIsLoading(false);
-      if (!isCustodian) {
+      if (!hasCustodianPermissions) {
         if (!isEmpty(data.datasets)) {
           const datasetSchemas = data.datasets.map(async datasetSchema => {
             return await onLoadDatasetSchema(datasetSchema.datasetId);
@@ -279,7 +281,7 @@ export const DataflowHelp = () => {
               dataflowId={dataflowId}
               dataflowName={dataflowName}
               datasetsSchemas={datasetsSchemas}
-              isCustodian={isCustodian}
+              hasCustodianPermissions={hasCustodianPermissions}
               onLoadDatasetsSchemas={onLoadDatasetsSchemas}
             />
           </TabPanel>
