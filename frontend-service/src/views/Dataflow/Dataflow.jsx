@@ -92,7 +92,6 @@ const Dataflow = () => {
     isBusinessDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
     isCustodian: false,
-    isCustodianSupport: false,
     isDataSchemaCorrect: [],
     isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
@@ -256,7 +255,7 @@ const Dataflow = () => {
   }, [userContext, dataflowState.data]);
 
   useEffect(() => {
-    if (dataflowState.isCustodian || dataflowState.isCustodianSupport) {
+    if (dataflowState.isCustodian || isCustodianSupport) {
       if (isOpenStatus) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
       } else {
@@ -712,7 +711,6 @@ const Dataflow = () => {
       payload: {
         hasWritePermissions,
         isCustodian: isLeadDesigner,
-        isCustodianSupport,
         isNationalCoordinator,
         isObserver,
         isAdmin,
@@ -1200,7 +1198,7 @@ const Dataflow = () => {
           </ConfirmDialog>
         )}
 
-        {(dataflowState.isCustodian || dataflowState.isCustodianSupport) && dataflowState.isManageRolesDialogVisible && (
+        {(dataflowState.isCustodian || isCustodianSupport) && dataflowState.isManageRolesDialogVisible && (
           <Dialog
             className="responsiveDialog"
             contentStyle={{ maxHeight: '60vh' }}
@@ -1262,7 +1260,7 @@ const Dataflow = () => {
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
-              userType={'requester'}
+              userType="requester"
             />
           </Dialog>
         )}
@@ -1294,7 +1292,7 @@ const Dataflow = () => {
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}
-              userType={'reporter'}
+              userType="reporter"
             />
           </Dialog>
         )}
