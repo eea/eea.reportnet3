@@ -67,9 +67,9 @@ export const QCList = ({
     sortFieldValidations: null,
     sortOrderValidations: null,
     validationId: '',
-    validationList: {},
+    validationList: {}
     //viewedQcHistoryId: null,
-    qcHistoryData: null
+    //qcHistoryData: null
     //isHistoryDialogVisible: false
   });
 
