@@ -17,7 +17,7 @@ import { Spinner } from 'views/_components/Spinner';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
-export const ButtonQCHistory = ({ className, style, rowId }) => {
+export const ButtonQCHistory = ({ className, style, qcRuleId }) => {
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
@@ -48,11 +48,14 @@ export const ButtonQCHistory = ({ className, style, rowId }) => {
   const generateHistoryDialogContent = () => {
     const columns = getHistoryColumns();
 
-    return isEmpty(qcHistoryData) ? (
-      <div className={styles.loadingSpinner}>
-        <Spinner className={styles.spinnerPosition} />
-      </div>
-    ) : (
+    if (isEmpty(qcHistoryData)) {
+      return (
+        <div className={styles.loadingSpinner}>
+          <Spinner className={styles.spinnerPosition} />
+        </div>
+      );
+    }
+    return (
       <DataTable
         autoLayout
         className={`${styles.sizeContentDialog}`}
@@ -97,7 +100,7 @@ export const ButtonQCHistory = ({ className, style, rowId }) => {
     });
   };
 
-  const getQcHistoryData = async rowId => {
+  const getQcHistoryData = async qcRuleId => {
     await simulateEndPoint(1000);
 
     const mockArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
@@ -162,7 +165,7 @@ export const ButtonQCHistory = ({ className, style, rowId }) => {
         icon="info"
         onClick={() => {
           setShowDialog(true);
-          setTimeout(getQcHistoryData, 1000, rowId);
+          setTimeout(getQcHistoryData, 1000, qcRuleId);
         }}
         style={style}
         tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
