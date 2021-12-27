@@ -87,6 +87,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
         </div>
       );
     }
+
     return (
       <DataTable
         first={state.pagination.first}
