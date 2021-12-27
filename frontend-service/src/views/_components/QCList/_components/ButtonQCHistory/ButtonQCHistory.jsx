@@ -17,7 +17,7 @@ import { Spinner } from 'views/_components/Spinner';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
-export const ButtonQCHistory = ({ className, style, qcRuleId }) => {
+export const ButtonQCHistory = ({ className, style, ruleId }) => {
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
@@ -55,13 +55,13 @@ export const ButtonQCHistory = ({ className, style, qcRuleId }) => {
         </div>
       );
     }
+
     return (
       <DataTable
         autoLayout
         className={`${styles.sizeContentDialog}`}
         hasDefaultCurrentPage={true}
         paginator={true}
-        //paginatorDisabled={fields.length > 15}
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
         totalRecords={qcHistoryData.length}
@@ -75,7 +75,6 @@ export const ButtonQCHistory = ({ className, style, qcRuleId }) => {
     const columnData = isEmpty(qcHistoryData)
       ? []
       : Object.keys(qcHistoryData[0]).map(key => ({ field: key, header: key }));
-    //const columnData = Object.keys(qcHistoryData[0]).map(key => ({ field: key, header: key }));
 
     return columnData.map(col => {
       let template;
@@ -165,7 +164,7 @@ export const ButtonQCHistory = ({ className, style, qcRuleId }) => {
         icon="info"
         onClick={() => {
           setShowDialog(true);
-          setTimeout(getQcHistoryData, 1000, qcRuleId);
+          setTimeout(getQcHistoryData, 1000, ruleId);
         }}
         style={style}
         tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
