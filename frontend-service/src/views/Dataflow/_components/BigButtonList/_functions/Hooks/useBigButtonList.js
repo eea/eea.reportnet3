@@ -66,6 +66,13 @@ const useBigButtonList = ({
     const isObserver = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
       config.permissions.roles.OBSERVER.key
     ]);
+
+    const isCustodianSupport = userContext.hasContextAccessPermission(
+      config.permissions.prefixes.DATAFLOW,
+      dataflowId,
+      [config.permissions.roles.CUSTODIAN_SUPPORT.key]
+    );
+
     const isDesignStatus = dataflowState.status === config.dataflowStatus.DESIGN;
     const isDraftStatus = dataflowState.status === config.dataflowStatus.OPEN;
     const isEditorRead = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
@@ -80,7 +87,7 @@ const useBigButtonList = ({
       cloneSchemasFromDataflow: isLeadDesigner && isDesignStatus,
       copyDataCollectionToEUDataset: isLeadDesigner && isDraftStatus,
       exportEUDataset: isLeadDesigner && isDraftStatus,
-      dashboard: (isLeadDesigner || isObserver) && isDraftStatus,
+      dashboard: (isLeadDesigner || isObserver || isCustodianSupport) && isDraftStatus,
       designDatasets:
         (isLeadDesigner ||
           userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
@@ -92,11 +99,11 @@ const useBigButtonList = ({
       designDatasetsOpen: (isLeadDesigner && isDraftStatus) || (isEditorRead && isDesignStatus),
       designDatasetEditorReadActions: isEditorRead && isDesignStatus,
       feedback:
-        (isLeadDesigner && isDraftStatus && isManualAcceptance) ||
+        ((isCustodianSupport || isLeadDesigner) && isDraftStatus && isManualAcceptance) ||
         (isLeadReporterOfCountry && isReleased && isManualAcceptance),
-      groupByRepresentative: (isLeadDesigner || isObserver) && isDraftStatus,
-      manageReporters: isLeadDesigner,
-      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance,
+      groupByRepresentative: (isLeadDesigner || isObserver || isCustodianSupport) && isDraftStatus,
+      manageReporters: isLeadDesigner || isCustodianSupport,
+      manualTechnicalAcceptance: (isLeadDesigner || isCustodianSupport) && isManualAcceptance,
       newSchema: isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
