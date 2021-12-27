@@ -1,20 +1,21 @@
-import { useState, useContext } from 'react';
+import { useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './ButtonQCHistory.module.scss';
 
-import { Button } from 'views/_components/Button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
+
 import { Column } from 'primereact/column';
+
+import { Button } from 'views/_components/Button';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Spinner } from 'views/_components/Spinner';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
-
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const ButtonQCHistory = ({ className, style, rowId }) => {
   const resourcesContext = useContext(ResourcesContext);
