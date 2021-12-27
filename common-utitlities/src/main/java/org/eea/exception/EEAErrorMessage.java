@@ -1,5 +1,6 @@
 package org.eea.exception;
 
+// TODO: Auto-generated Javadoc
 /**
  * The Class EEAErrorMessage.
  */
@@ -366,6 +367,118 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_VALIDATING_LEAD_REPORTERS: {@value}. */
   public static final String ERROR_VALIDATING_LEAD_REPORTERS =
       "There was an error validating the Lead Reporters.";
+
+  /** The Constant CREATING_A_MESSAGE_IN_A_DATAFLOW: {@value}. */
+  public static final String CREATING_A_MESSAGE_IN_A_DATAFLOW =
+      "There was an error creating a message in the Dataflow.";
+
+  /** The Constant UPDATING_A_MESSAGE_IN_A_DATAFLOW: {@value}. */
+  public static final String UPDATING_A_MESSAGE_IN_A_DATAFLOW =
+      "There was an error updating a message in the Dataflow.";
+
+  /** The Constant DELETING_A_MESSAGE_IN_A_DATAFLOW: {@value}. */
+  public static final String DELETING_A_MESSAGE_IN_A_DATAFLOW =
+      "There was an error deleting a message in the Dataflow.";
+
+  /** The Constant RETRIEVING_A_MESSAGE_IN_A_DATAFLOW: {@value}. */
+  public static final String RETRIEVING_A_MESSAGE_FROM_A_DATAFLOW =
+      "There was an error retrieving messages from a Dataflow.";
+
+  /** The Constant DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW: {@value}. */
+  public static final String DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW =
+      "There was an error downloading an attachment in a Dataflow.";
+
+  /** The Constant CONVERTING_FROM_STRING_TO_LONG: {@value}. */
+  public static final String CONVERTING_FROM_STRING_TO_LONG =
+      "There was an error converting the value from String to Long";
+
+  /** The Constant CREATING_NOTIFICATION: {@value}. */
+  public static final String CREATING_NOTIFICATION =
+      "An unknown error happenned sending the notification.";
+
+  /** The Constant CREATING_SYSTEM_NOTIFICATION: {@value}. */
+  public static final String CREATING_SYSTEM_NOTIFICATION =
+      "An unknown error happenned while creating the system notification.";
+
+  /** The Constant DELETING_SYSTEM_NOTIFICATION: {@value}. */
+  public static final String DELETING_SYSTEM_NOTIFICATION =
+      "An unknown error happenned while deleting the system notification.";
+
+  /** The Constant UPDATING_SYSTEM_NOTIFICATION: {@value}. */
+  public static final String UPDATING_SYSTEM_NOTIFICATION =
+      "An unknown error happenned while updating the system notification.";
+
+  /** The Constant DELETING_REQUESTER: {@value}. */
+  public static final String DELETING_REQUESTER =
+      "An unknown error happenned while deleting the requester.";
+
+  /** The Constant DELETING_REPORTER: {@value}. */
+  public static final String DELETING_REPORTER =
+      "An unknown error happenned while deleting the reporter.";
+
+  /** The Constant CREATING_ASSOCIATED_PERMISSIONS: {@value}. */
+  public static final String CREATING_ASSOCIATED_PERMISSIONS =
+      "An unknown error happenned while creating associated permissions.";
+
+  /** The Constant RETRIEVING_WEBLINK: {@value}. */
+  public static final String RETRIEVING_WEBLINK =
+      "An unknown error happenned while retrieving the weblink.";
+
+  /** The Constant CREATING_WEBLINK: {@value}. */
+  public static final String CREATING_WEBLINK =
+      "An unknown error happenned while creating the weblink.";
+
+  /** The Constant DELETING_WEBLINK: {@value}. */
+  public static final String DELETING_WEBLINK =
+      "An unknown error happenned while deleting the weblink.";
+
+  /** The Constant DELETING_WEBLINK: {@value}. */
+  public static final String UPDATING_WEBLINK =
+      "An unknown error happenned while updating the weblink.";
+
+  /** The Constant RETRIEVING_INTEGRATIONS: {@value}. */
+  public static final String RETRIEVING_INTEGRATIONS =
+      "An unknown error happenned while retrieving integrations.";
+
+  /** The Constant CREATING_INTEGRATION: {@value}. */
+  public static final String CREATING_INTEGRATION =
+      "An unknown error happenned while creating the integration.";
+
+  /** The Constant DELETING_INTEGRATION: {@value}. */
+  public static final String DELETING_INTEGRATION =
+      "An unknown error happenned while deleting the integration.";
+
+  /** The Constant UPDATING_INTEGRATION: {@value}. */
+  public static final String UPDATING_INTEGRATION =
+      "An unknown error happenned while updating the integration.";
+
+  /** The Constant COPYING_INTEGRATIONS: {@value}. */
+  public static final String COPYING_INTEGRATIONS =
+      "An unknown error happenned while copying integrations.";
+
+  /** The Constant EXECUTING_INTEGRATIONS: {@value}. */
+  public static final String EXECUTING_INTEGRATIONS =
+      "An unknown error happenned while executing integrations.";
+
+  /** The Constant EXPORTING_EU_DATASET: {@value}. */
+  public static final String EXPORTING_EU_DATASET =
+      "An unknown error happenned while exporting an EU Dataset.";
+
+  /** The Constant CREATING_REPRESENTATIVE: {@value}. */
+  public static final String CREATING_REPRESENTATIVE =
+      "An unknown error happenned while creating a representative.";
+
+  /** The Constant EXPORT_LEAD_REPORTERS: {@value}. */
+  public static final String EXPORT_LEAD_REPORTERS =
+      "An unknown error happenned while exporting the lead reporters.";
+
+  /** The Constant IMPORT_LEAD_REPORTERS: {@value}. */
+  public static final String IMPORT_LEAD_REPORTERS =
+      "An unknown error happenned while importing the lead reporters.";
+
+  /** The Constant CREATE_LEAD_REPORTER: {@value}. */
+  public static final String CREATE_LEAD_REPORTER =
+      "An unknown error happenned while creating a lead reporter.";
 
   /**
    * Instantiates a new EEA error message.

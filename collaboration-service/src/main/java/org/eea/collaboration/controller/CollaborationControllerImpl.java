@@ -51,9 +51,6 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/collaboration")
 public class CollaborationControllerImpl implements CollaborationController {
 
-  private static final String ERROR_CREATING_A_MESSAGE_IN_A_DATAFLOW =
-      "There was an error creating a message in the Dataflow.";
-
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -92,12 +89,12 @@ public class CollaborationControllerImpl implements CollaborationController {
     } catch (EEAIllegalArgumentException e) {
       LOG_ERROR.error("Error creating message because of missing data: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          ERROR_CREATING_A_MESSAGE_IN_A_DATAFLOW);
+          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (EEAForbiddenException e) {
       LOG_ERROR.error("There were missing permissions while creating the message: {}",
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          ERROR_CREATING_A_MESSAGE_IN_A_DATAFLOW);
+          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     }
   }
 
@@ -141,17 +138,17 @@ public class CollaborationControllerImpl implements CollaborationController {
     } catch (EEAIllegalArgumentException e) {
       LOG_ERROR.error("Error creating message because of missing data: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          ERROR_CREATING_A_MESSAGE_IN_A_DATAFLOW);
+          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (EEAForbiddenException e) {
       LOG_ERROR.error("There were missing permissions while creating the message: {}",
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          ERROR_CREATING_A_MESSAGE_IN_A_DATAFLOW);
+          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (IOException e) {
       LOG_ERROR.error("Error saving message attachment from the dataflowId {}, with message: {}",
           dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          ERROR_CREATING_A_MESSAGE_IN_A_DATAFLOW);
+          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     }
   }
 
@@ -176,10 +173,11 @@ public class CollaborationControllerImpl implements CollaborationController {
     } catch (EEAIllegalArgumentException e) {
       LOG_ERROR.error("Error updating messages: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Error updating the message status.");
+          EEAErrorMessage.UPDATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (EEAForbiddenException e) {
       LOG_ERROR.error("Error updating messages: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Error updating the message status.");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          EEAErrorMessage.UPDATING_A_MESSAGE_IN_A_DATAFLOW);
     }
   }
 
@@ -210,12 +208,12 @@ public class CollaborationControllerImpl implements CollaborationController {
     } catch (EEAIllegalArgumentException e) {
       LOG_ERROR.error("Error deleting message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "There was an error while deleting the message.");
+          EEAErrorMessage.DELETING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting message, messageId {}, with message: {}", messageId,
           e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "There was an error while deleting the message.");
+          EEAErrorMessage.DELETING_A_MESSAGE_IN_A_DATAFLOW);
     }
   }
 
@@ -262,7 +260,7 @@ public class CollaborationControllerImpl implements CollaborationController {
     } catch (EEAForbiddenException e) {
       LOG_ERROR.error("Error finding messages: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "There was an error while retrieving the messages.");
+          EEAErrorMessage.RETRIEVING_A_MESSAGE_FROM_A_DATAFLOW);
     }
   }
 
@@ -300,7 +298,7 @@ public class CollaborationControllerImpl implements CollaborationController {
           "Error downloading message attachment from the dataflowId {}, with message: {}",
           dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          "An error occurred while downloading the attachment.");
+          EEAErrorMessage.DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW);
     }
 
   }
