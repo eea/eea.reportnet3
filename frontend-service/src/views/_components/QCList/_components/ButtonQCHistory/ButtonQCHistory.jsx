@@ -85,11 +85,9 @@ export const ButtonQCHistory = ({ className, style, ruleId }) => {
         case 'expression':
           template = expressionTemplate;
           break;
-
         case 'status':
           template = statusTemplate;
           break;
-
         default:
           template = null;
           break;
@@ -99,7 +97,7 @@ export const ButtonQCHistory = ({ className, style, ruleId }) => {
     });
   };
 
-  const getQcHistoryData = async qcRuleId => {
+  const getQcHistoryData = async ruleId => {
     await simulateEndPoint(1000);
 
     const mockArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
