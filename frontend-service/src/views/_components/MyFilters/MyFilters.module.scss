@@ -119,20 +119,19 @@
   margin-bottom: auto;
 }
 
-.sortButtonEmpty {
+.sortButtonSize {
   height: 1.6em !important;
   width: 3.1rem !important;
 }
 
 .sortButton {
+  @extend .sortButtonSize;
   background-color: transparent;
   border: none;
   color: var(--button-secondary-transparent-color-hover);
   cursor: pointer;
   font-size: 16pt !important;
-  height: 1.6em !important;
   opacity: 0.7;
-  width: 3.1rem !important;
 
   &:hover {
     opacity: 1 !important;
@@ -184,5 +183,21 @@
       width: 25% !important;
       margin-bottom: 1.5rem;
     }
+  }
+}
+
+/*  To component RefrencingDataFlow*/
+.referencingDataflows {
+  display: flex;
+  flex-direction: row;
+  width: 100% !important;
+  margin: 2rem 0;
+
+  .block {
+    width: 100% !important;
+  }
+
+  .sortButtonSize {
+    display: none;
   }
 }
