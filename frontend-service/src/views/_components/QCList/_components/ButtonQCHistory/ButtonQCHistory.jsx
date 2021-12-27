@@ -1,10 +1,14 @@
 import { useState, useContext } from 'react';
+
+import isEmpty from 'lodash/isEmpty';
+
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DataTable } from 'views/_components/DataTable';
 
 import { Column } from 'primereact/column';
 import { Dialog } from 'views/_components/Dialog';
 import { Button } from 'views/_components/Button';
+import { Spinner } from 'views/_components/Spinner';
 
 import styles from './ButtonQCHistory.module.scss';
 
@@ -18,6 +22,29 @@ export const ButtonQCHistory = ({ className, style, rowId }) => {
   const validationContext = useContext(ValidationContext);
 
   const [showDialog, setShowDialog] = useState(false);
+  const [qcHistoryData, setQcHistoryData] = useState([]);
+
+  const simulateEndPoint = ms => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
+
+  const getQcHistoryData = async rowId => {
+    await simulateEndPoint(1000);
+
+    const mockArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+    // const fields = tabsValidationsState.history.map(historicEvent => {
+    const fields = mockArray.map((_historicEvent, index) => {
+      return {
+        id: `id-${index + 1}`,
+        user: 'qc.user@com.com',
+        timestamp: '29/02/2019',
+        metadata: true,
+        expression: false,
+        status: true
+      };
+    });
+    setQcHistoryData(fields);
+  };
 
   // const getQcHistory = async () => {
   //   try {
@@ -31,19 +58,6 @@ export const ButtonQCHistory = ({ className, style, rowId }) => {
   //     // notificationContext.add({ type: '________ERROR' }, true); // TODO: add correct error notification
   //   }
   // };
-
-  const mockArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-  // const fields = tabsValidationsState.history.map(historicEvent => {
-  const fields = mockArray.map((_historicEvent, index) => {
-    return {
-      id: `id-${index + 1}`,
-      user: 'qc.user@com.com',
-      timestamp: '29/02/2019',
-      metadata: true,
-      expression: false,
-      status: true
-    };
-  });
 
   const metadataTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
@@ -64,7 +78,10 @@ export const ButtonQCHistory = ({ className, style, rowId }) => {
   );
 
   const getHistoryColumns = () => {
-    const columnData = Object.keys(fields[0]).map(key => ({ field: key, header: key }));
+    const columnData = isEmpty(qcHistoryData)
+      ? []
+      : Object.keys(qcHistoryData[0]).map(key => ({ field: key, header: key }));
+    //const columnData = Object.keys(qcHistoryData[0]).map(key => ({ field: key, header: key }));
 
     return columnData.map(col => {
       let template;
@@ -92,28 +109,29 @@ export const ButtonQCHistory = ({ className, style, rowId }) => {
   const generateHistoryDialogContent = () => {
     const columns = getHistoryColumns();
 
-    // todo add loading indicator if no data
-    // if (!tabsValidationsState.qcHistoryData) {
-    //   return (
-    //     <div className={styles.loadingSpinner}>
-    //       <Spinner className={styles.spinnerPosition} />
-    //     </div>
-    //   );
-    // }
-
-    return (
+    return isEmpty(qcHistoryData) ? (
+      <div className={styles.loadingSpinner}>
+        <Spinner className={styles.spinnerPosition} />
+      </div>
+    ) : (
       <DataTable
         autoLayout
+        className={`${styles.sizeContentDialog}`}
         hasDefaultCurrentPage={true}
         paginator={true}
         //paginatorDisabled={fields.length > 15}
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
-        totalRecords={fields.length}
-        value={fields}>
+        totalRecords={qcHistoryData.length}
+        value={qcHistoryData}>
         {columns}
       </DataTable>
     );
+  };
+
+  const closeDialog = () => {
+    setShowDialog(false);
+    setQcHistoryData([]);
   };
 
   const footerQcHistory = (
@@ -122,16 +140,16 @@ export const ButtonQCHistory = ({ className, style, rowId }) => {
       icon="cancel"
       id="cancelHistoryQc"
       label={resourcesContext.messages['close']}
-      onClick={() => setShowDialog(false)}
+      onClick={() => closeDialog()}
     />
   );
 
   const DialogQcHistory = () => (
     <Dialog
-      className="responsiveDialog"
+      className={`responsiveDialog ${styles.sizeDialog}`}
       footer={footerQcHistory}
       header={resourcesContext.messages['qcHistoryDialogHeader']}
-      onHide={() => setShowDialog(false)}
+      onHide={() => closeDialog()}
       visible={showDialog}>
       {generateHistoryDialogContent()}
     </Dialog>
@@ -147,7 +165,7 @@ export const ButtonQCHistory = ({ className, style, rowId }) => {
         icon="info"
         onClick={() => {
           setShowDialog(true);
-          //setViewedQcHistoryId(rowId);
+          setTimeout(getQcHistoryData, 1000, rowId);
         }}
         style={style}
         tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
