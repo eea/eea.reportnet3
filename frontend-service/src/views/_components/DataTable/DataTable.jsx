@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import classNames from 'classnames';
 
-import './DataTable.css';
+import './DataTable.scss';
 
 import { InputText } from 'views/_components/InputText';
 import { Paginator } from './_components/Paginator';
@@ -1546,7 +1546,7 @@ export class DataTable extends Component {
         let tableFooter = this.createTableFooter(columns, this.props.footerColumnGroup);
 
         tableContent = (
-          <div className="p-datatable-wrapper">
+          <div className={`p-datatable-wrapper ${this.props.initialOverflowX ? 'initialOverflowX' : ''}`}>
             <table
               className={this.props.tableClassName}
               ref={el => {

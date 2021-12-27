@@ -438,6 +438,9 @@ public class FileTreatmentHelper implements DisposableBean {
               delimiter);
         } catch (Exception e) {
           LOG_ERROR.error("RN3-Import: Unexpected error. {}", e.getMessage(), e);
+          if (e instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+          }
         }
       });
     }

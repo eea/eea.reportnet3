@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -745,16 +746,8 @@ public class ValidationServiceImpl implements ValidationService {
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
       // Creates an array list containing all the column names from the CSV defined as constants
-      List<String> headers = new ArrayList<>();
-      headers.add(ENTITY);
-      headers.add(TABLE);
-      headers.add(FIELD);
-      headers.add(CODE);
-      headers.add(CODENAME);
-      headers.add(CODEDESC);
-      headers.add(LEVELERROR);
-      headers.add(MESSAGE);
-      headers.add(NUMBEROFRECORDS);
+      List<String> headers = new ArrayList<>(Arrays.asList(ENTITY, TABLE, FIELD, CODE, CODENAME,
+          CODEDESC, LEVELERROR, MESSAGE, NUMBEROFRECORDS));
 
       // Writes the column names into the CSV Writer and sets the array String to headers size so it
       // only writes at most the number of columns as variables per row
@@ -907,11 +900,15 @@ public class ValidationServiceImpl implements ValidationService {
     fieldsToWrite[0] = error.getTypeEntity().toString();
     fieldsToWrite[1] = error.getNameTableSchema();
     fieldsToWrite[2] = error.getNameFieldSchema();
-    fieldsToWrite[3] = error.getShortCode();
-    fieldsToWrite[4] = ruleVO.getRuleName();
-    fieldsToWrite[5] = ruleVO.getDescription();
+    fieldsToWrite[3] =
+        error.getShortCode().startsWith("=") ? " " + error.getShortCode() : error.getShortCode();
+    fieldsToWrite[4] =
+        ruleVO.getRuleName().startsWith("=") ? " " + ruleVO.getRuleName() : ruleVO.getRuleName();
+    fieldsToWrite[5] = ruleVO.getDescription().startsWith("=") ? " " + ruleVO.getDescription()
+        : ruleVO.getDescription();
     fieldsToWrite[6] = error.getLevelError().toString();
-    fieldsToWrite[7] = error.getMessage();
+    fieldsToWrite[7] =
+        error.getMessage().startsWith("=") ? " " + error.getMessage() : error.getMessage();
     fieldsToWrite[8] = error.getNumberOfRecords().toString();
 
     return fieldsToWrite;

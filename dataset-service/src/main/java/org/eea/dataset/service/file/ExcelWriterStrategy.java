@@ -277,7 +277,8 @@ public class ExcelWriterStrategy implements WriterStrategy {
             cellNumber = nextUnknownCellNumber++;
           }
 
-          row.createCell(cellNumber).setCellValue(field.getValue());
+          row.createCell(cellNumber).setCellValue(
+              field.getValue().startsWith("=") ? " " + field.getValue() : field.getValue());
           if (errorsMap != null) {
             Cell cell = row.createCell(cellNumber + 1);
             cell.setCellStyle(cs);

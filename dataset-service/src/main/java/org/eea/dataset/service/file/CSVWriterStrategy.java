@@ -201,9 +201,11 @@ public class CSVWriterStrategy implements WriterStrategy {
         for (FieldValue field : fields) {
           if (null != field.getIdFieldSchema()) {
             Integer index = indexMap.get(field.getIdFieldSchema());
-            fieldsToWrite[index] = field.getValue();
+            fieldsToWrite[index] =
+                field.getValue().startsWith("=") ? " " + field.getValue() : field.getValue();
           } else {
-            unknownColumns.add(field.getValue());
+            unknownColumns
+                .add(field.getValue().startsWith("=") ? " " + field.getValue() : field.getValue());
           }
         }
         csvWriter.writeNext(joinOutputArray(unknownColumns, fieldsToWrite), false);

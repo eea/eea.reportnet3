@@ -59,15 +59,15 @@ export const ErrorBoundaryFallback = ({ error, resetErrorBoundary }) => {
             <div className={styles.boundaryButtonsWrap}>
               <div>
                 <Button
-                  icon={'copy'}
-                  label={'Copy to clipboard'}
+                  icon="copy"
+                  label={resourcesContext.messages['errorBoundaryClipboardButtonLabel']}
                   onClick={() => onCopyErrorToClipboard(error)}
                   tooltip={resourcesContext.messages['copyToClipboardSuccess']}
                   tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
                 />
               </div>
               <div>
-                <Button icon={'refresh'} label={'Refresh'} onClick={resetErrorBoundary} />
+                <Button icon="refresh" label={resourcesContext.messages['refresh']} onClick={resetErrorBoundary} />
               </div>
             </div>
           </div>

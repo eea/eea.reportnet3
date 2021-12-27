@@ -378,6 +378,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       @ApiParam(value = "Group Id", example = "0") @PathVariable(value = "groupId") Long groupId,
       @ApiParam(value = "File to be imported") @RequestParam("file") MultipartFile file) {
     // we check if the field is a csv
+    if (file == null || file.getOriginalFilename() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_NOT_FOUND);
+    }
     final int location = file.getOriginalFilename().lastIndexOf('.');
     if (location == -1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_EXTENSION);
@@ -388,7 +391,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     }
 
     try {
-      byte[] fileEnded = representativeService.importFile(dataflowId, groupId, file);
+      byte[] fileEnded = representativeService.importLeadReportersFile(dataflowId, groupId, file);
       String fileName = "Dataflow-" + dataflowId + "-Lead-Reporters-Errors-improt.csv";
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);

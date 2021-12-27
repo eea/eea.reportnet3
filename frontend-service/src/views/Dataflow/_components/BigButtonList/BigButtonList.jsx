@@ -474,7 +474,7 @@ export const BigButtonList = ({
     isHistoricReleasesDialogVisible || isManualTechnicalAcceptanceDialogVisible ? (
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => {
           setIsHistoricReleasesDialogVisible(false);
@@ -486,13 +486,13 @@ export const BigButtonList = ({
         <Button
           className="p-button-primary p-button-animated-blink"
           disabled={isNil(cloneDataflow.id)}
-          icon={'plus'}
+          icon="plus"
           label={resourcesContext.messages['cloneSelectedDataflow']}
           onClick={() => cloneDatasetSchemas()}
         />
         <Button
           className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-          icon={'cancel'}
+          icon="cancel"
           label={resourcesContext.messages['close']}
           onClick={() => setCloneDialogVisible(false)}
         />

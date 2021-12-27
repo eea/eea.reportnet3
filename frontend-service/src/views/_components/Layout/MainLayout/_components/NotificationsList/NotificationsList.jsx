@@ -179,7 +179,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
             <span className={styles.center}>
               <Button
                 className={`${styles.columnActionButton}`}
-                icon={'export'}
+                icon="export"
                 label={resourcesContext.messages['downloadFile']}
                 onClick={() => notification.onClick()}
               />

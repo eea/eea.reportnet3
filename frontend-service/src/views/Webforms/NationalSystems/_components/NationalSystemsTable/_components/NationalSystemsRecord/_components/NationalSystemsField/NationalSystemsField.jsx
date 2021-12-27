@@ -273,7 +273,7 @@ export const NationalSystemsField = ({
             {!isNil(field.value) && field.value !== '' && (
               <Button
                 className={`${field.value === '' && 'p-button-animated-blink'} p-button-primary-transparent`}
-                icon={'export'}
+                icon="export"
                 iconPos={'right'}
                 label={field.value}
                 onClick={() => onFileDownload(field.value, field.fieldId)}
@@ -281,8 +281,8 @@ export const NationalSystemsField = ({
             )}
             {
               <Button
-                className={`p-button-animated-blink p-button-primary-transparent`}
-                icon={'import'}
+                className="p-button-animated-blink p-button-primary-transparent"
+                icon="import"
                 label={
                   resourcesContext.messages[
                     !isNil(field.value) && field.value !== '' ? 'uploadReplaceAttachment' : 'uploadAttachment'
@@ -295,8 +295,8 @@ export const NationalSystemsField = ({
             }
 
             <Button
-              className={`p-button-animated-blink p-button-primary-transparent`}
-              icon={'trash'}
+              className="p-button-animated-blink p-button-primary-transparent"
+              icon="trash"
               onClick={() => {
                 handleDialogs('deleteAttachment', true);
               }}
@@ -330,7 +330,7 @@ export const NationalSystemsField = ({
               {!isNil(tooltip) && (
                 <Button
                   className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
-                  icon={'infoCircle'}
+                  icon="infoCircle"
                   tooltip={tooltip.value || tooltip}
                   tooltipOptions={{ position: 'top' }}
                 />
