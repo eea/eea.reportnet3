@@ -11,6 +11,7 @@ import styles from './QCList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
+import { ButtonQCHistory } from './_components/ButtonQCHistory';
 import { Checkbox } from 'views/_components/Checkbox';
 import { Dropdown } from 'views/_components/Dropdown';
 import { Column } from 'primereact/column';
@@ -365,7 +366,7 @@ export const QCList = ({
     return (
       <Fragment>
         <Button
-          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
           disabled={validationContext.isFetchingData}
           icon={getEditBtnIcon(row.id)}
           onClick={() => validationContext.onOpenToEdit(row, rowType)}
@@ -374,7 +375,7 @@ export const QCList = ({
           type="button"
         />
         <Button
-          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
           disabled={validationContext.isFetchingData}
           icon="clone"
           onClick={() => validationContext.onOpenToCopy(row, rowType)}
@@ -382,8 +383,12 @@ export const QCList = ({
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
+        <ButtonQCHistory
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+          rowId={row.id}
+        />
         <Button
-          className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
           disabled={validationContext.isFetchingData}
           icon={getDeleteBtnIcon()}
           onClick={onShowDeleteDialog}
@@ -403,15 +408,21 @@ export const QCList = ({
     if (row.entityType === 'TABLE') rowType = 'dataset';
 
     return (
-      <Button
-        className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-        disabled={validationContext.isFetchingData}
-        icon={getEditBtnIcon(row.id)}
-        onClick={() => validationContext.onOpenToEdit(row, rowType)}
-        tooltip={resourcesContext.messages['edit']}
-        tooltipOptions={{ position: 'top' }}
-        type="button"
-      />
+      <Fragment>
+        <ButtonQCHistory
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+          rowId={row.id}
+        />
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${styles.editRowButton}`}
+          disabled={validationContext.isFetchingData}
+          icon={getEditBtnIcon(row.id)}
+          onClick={() => validationContext.onOpenToEdit(row, rowType)}
+          tooltip={resourcesContext.messages['edit']}
+          tooltipOptions={{ position: 'top' }}
+          type="button"
+        />
+      </Fragment>
     );
   };
 
