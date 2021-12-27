@@ -63,7 +63,7 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
   const renderIdColumnTemplate = dataflow => <div>{dataflow.id}</div>;
 
   const renderDialogLayout = children => (
-    <div className={isEmpty(state.dataflows) ? `${styles.modalEmpty}` : `${styles.modalData}`}>{children}</div>
+    <div className={isEmpty(state.dataflows) ? styles.modalEmpty : styles.modalData}>{children}</div>
   );
 
   if (state.requestStatus === 'pending') {
@@ -86,27 +86,26 @@ const ReferencingDataflows = ({ referenceDataflowId }) => {
           <h3>{resourcesContext.messages['dataflowsNotMatchingFilter']}</h3>
         </div>
       );
-    } else {
-      return (
-        <DataTable
-          first={state.pagination.first}
-          getPageChange={onPaginate}
-          paginator={true}
-          rows={state.pagination.rows}
-          rowsPerPageOptions={[5, 10, 15]}
-          value={state.filteredData}>
-          <Column
-            body={renderNameColumnTemplate}
-            header={resourcesContext.messages['referencingDataflowNameColumnLabel']}
-          />
-          <Column
-            body={renderIdColumnTemplate}
-            header={resourcesContext.messages['referencingDataflowIdColumnLabel']}
-            style={{ width: '120px' }}
-          />
-        </DataTable>
-      );
     }
+    return (
+      <DataTable
+        first={state.pagination.first}
+        getPageChange={onPaginate}
+        paginator={true}
+        rows={state.pagination.rows}
+        rowsPerPageOptions={[5, 10, 15]}
+        value={state.filteredData}>
+        <Column
+          body={renderNameColumnTemplate}
+          header={resourcesContext.messages['referencingDataflowNameColumnLabel']}
+        />
+        <Column
+          body={renderIdColumnTemplate}
+          header={resourcesContext.messages['referencingDataflowIdColumnLabel']}
+          style={{ width: '120px' }}
+        />
+      </DataTable>
+    );
   };
 
   return renderDialogLayout(
