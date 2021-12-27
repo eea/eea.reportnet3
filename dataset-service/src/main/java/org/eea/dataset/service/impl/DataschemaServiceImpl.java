@@ -2504,6 +2504,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     } catch (Exception e) {
       LOG_ERROR.error("An error in the import process happened. Message: {}", e.getMessage(), e);
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_FAILED_EVENT,
           null,
           NotificationVO.builder()

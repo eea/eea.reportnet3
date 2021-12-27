@@ -522,6 +522,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // release snapshot when the user press create+release
     } catch (Exception e) {
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
       EventType eventType = null;
       switch (type) {
         case SNAPSHOT:

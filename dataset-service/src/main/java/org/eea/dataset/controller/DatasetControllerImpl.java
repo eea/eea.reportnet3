@@ -1400,13 +1400,14 @@ public class DatasetControllerImpl implements DatasetController {
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
       OutputStream out = response.getOutputStream();
-      FileInputStream in = new FileInputStream(file);
-      // copy from in to out
-      IOUtils.copyLarge(in, out);
-      out.close();
-      in.close();
-      // delete the file after downloading it
-      FileUtils.forceDelete(file);
+      try (FileInputStream in = new FileInputStream(file)) {
+        // copy from in to out
+        IOUtils.copyLarge(in, out);
+        out.close();
+        in.close();
+        // delete the file after downloading it
+        FileUtils.forceDelete(file);
+      }
     } catch (IOException | EEAException e) {
       LOG_ERROR.error(
           "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
