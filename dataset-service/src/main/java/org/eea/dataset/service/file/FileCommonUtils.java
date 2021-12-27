@@ -505,12 +505,13 @@ public class FileCommonUtils {
    * @param replace the replace
    * @param schema the schema
    * @param dataset the dataset
+   * @param manageFixedRecords the manage fixed records
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
   public void persistImportedDataset(final String idTableSchema, Long datasetId, String fileName,
-      boolean replace, DataSetSchema schema, DatasetValue dataset)
+      boolean replace, DataSetSchema schema, DatasetValue dataset, boolean manageFixedRecords)
       throws EEAException, IOException, SQLException {
     if (dataset == null || CollectionUtils.isEmpty(dataset.getTableValues())) {
       throw new EEAException("Error processing file " + fileName);
@@ -528,7 +529,7 @@ public class FileCommonUtils {
       LOG.info("RN3-Import - Table saved: datasetId={}, fileName={}", datasetId, fileName);
     }
 
-    if (schemaContainsFixedRecords(datasetId, schema, idTableSchema)) {
+    if (Boolean.TRUE.equals(manageFixedRecords)) {
       if (replace) {
         ObjectId tableSchemaIdTemp = new ObjectId(idTableSchema);
         TableSchema tableSchema = schema.getTableSchemas().stream()

@@ -39,6 +39,10 @@ public class FileParserFactory implements IFileParserFactory {
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
 
+  /** The batch record save. */
+  @Value("${dataset.import.batchRecordSave}")
+  private int batchRecordSave;
+
   /**
    * the field dataset Metabase Service
    */
@@ -75,7 +79,7 @@ public class FileParserFactory implements IFileParserFactory {
 
           context = new FileParseContextImpl(
               new CSVReaderStrategy(delimiterValue != null ? delimiterValue.charAt(0) : delimiter,
-                  fileCommon, datasetId, fieldMaxLength, provider.getCode()));
+                  fileCommon, datasetId, fieldMaxLength, provider.getCode(), batchRecordSave));
           break;
         case XML:
           // Fill it with the xml strategy

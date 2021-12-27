@@ -316,8 +316,10 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       if (dataSetSchema != null) {
         dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
       }
+      boolean manageFixedRecords =
+          fileCommon.schemaContainsFixedRecords(datasetId, dataSetSchema, idTableSchema);
       fileCommon.persistImportedDataset(idTableSchema, datasetId, fileName, replace, schema,
-          dataset);
+          dataset, manageFixedRecords);
     } catch (EEAException | IOException | SQLException e) {
       LOG.error("error persisting excel file", e);
       throw e;

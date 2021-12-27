@@ -36,10 +36,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CSVReaderStrategy implements ReaderStrategy {
 
-
-  /** The Constant BATCH_RECORDS_SAVE. */
-  private static final int BATCH_RECORDS_SAVE = 1000;
-
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -60,6 +56,11 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
   /** The provider code. */
   private String providerCode;
+
+  /** The batch record save. */
+  private int batchRecordSave;
+
+
 
   /**
    * Instantiates a new CSV reader strategy.
@@ -94,6 +95,26 @@ public class CSVReaderStrategy implements ReaderStrategy {
     this.datasetId = datasetId;
     this.fieldMaxLength = fieldMaxLength;
     this.providerCode = providerCode;
+  }
+
+  /**
+   * Instantiates a new CSV reader strategy.
+   *
+   * @param delimiter the delimiter
+   * @param fileCommon the file common
+   * @param datasetId the dataset id
+   * @param fieldMaxLength the field max length
+   * @param providerCode the provider code
+   * @param batchRecordSave the batch record save
+   */
+  public CSVReaderStrategy(char delimiter, FileCommonUtils fileCommon, Long datasetId,
+      int fieldMaxLength, String providerCode, int batchRecordSave) {
+    this.delimiter = delimiter;
+    this.fileCommon = fileCommon;
+    this.datasetId = datasetId;
+    this.fieldMaxLength = fieldMaxLength;
+    this.providerCode = providerCode;
+    this.batchRecordSave = batchRecordSave;
   }
 
   /**
@@ -134,7 +155,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   private DatasetValue readLines(final InputStream inputStream, final Long partitionId,
       final String idTableSchema, Long datasetId, String fileName, boolean replace,
       DataSetSchema dataSetSchema) throws EEAException {
-    LOG.info("Processing entries at method readLines");
+    LOG.info("Processing entries at method readLines in dataset {}", datasetId);
     // Init variables
     String[] line;
     TableValue table = new TableValue();
@@ -172,6 +193,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
         throw new IOException("All fields for this table " + tableSchema.getNameTableSchema()
             + " are readOnly, you can't import new fields");
       }
+      boolean manageFixedRecords =
+          fileCommon.schemaContainsFixedRecords(datasetId, dataSetSchema, idTableSchema);
       // through the file
       int numLines = 0;
       while ((line = reader.readNext()) != null && numLines < 5000) {
@@ -179,12 +202,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
         sanitizeAndCreateDataSet(partitionId, table, tables, values, headers, idTableSchema,
             idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords);
         numLines++;
-        if (numLines == BATCH_RECORDS_SAVE) {
+        if (numLines == batchRecordSave) {
           dataset.setTableValues(tables);
           // Set the dataSetSchemaId of MongoDB
           dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
           fileCommon.persistImportedDataset(idTableSchema, datasetId, fileName, replace,
-              dataSetSchema, dataset);
+              dataSetSchema, dataset, manageFixedRecords);
           numLines = 0;
           tables.remove(table);
           table.setRecords(new ArrayList<>());
@@ -195,13 +218,13 @@ public class CSVReaderStrategy implements ReaderStrategy {
       // Set the dataSetSchemaId of MongoDB
       dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
       fileCommon.persistImportedDataset(idTableSchema, datasetId, fileName, replace, dataSetSchema,
-          dataset);
+          dataset, manageFixedRecords);
 
     } catch (final IOException | SQLException e) {
       LOG_ERROR.error(e.getMessage());
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
     }
-    LOG.info("Reading Csv File Completed");
+    LOG.info("Reading Csv File Completed in dataset {}", datasetId);
     return dataset;
   }
 
