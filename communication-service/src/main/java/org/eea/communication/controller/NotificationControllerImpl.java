@@ -2,6 +2,7 @@ package org.eea.communication.controller;
 
 import java.util.List;
 import org.eea.communication.service.NotificationService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController;
 import org.eea.interfaces.vo.communication.SystemNotificationVO;
@@ -61,7 +62,7 @@ public class NotificationControllerImpl implements NotificationController {
     } catch (EEAException e) {
       LOG.error("Creating user notification produced an error: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "An unknown error happenned with the notification.");
+          EEAErrorMessage.CREATING_NOTIFICATION);
     }
   }
 
@@ -84,7 +85,7 @@ public class NotificationControllerImpl implements NotificationController {
     } catch (EEAException e) {
       LOG.error("Creating user notification produced an error: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "An unknown error happenned with the notification.");
+          EEAErrorMessage.CREATING_NOTIFICATION);
     }
   }
 
@@ -104,7 +105,7 @@ public class NotificationControllerImpl implements NotificationController {
     } catch (EEAException e) {
       LOG.error("Creating system notification produced an error: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "An unknown error happenned while creating the system notification.");
+          EEAErrorMessage.CREATING_SYSTEM_NOTIFICATION);
     }
   }
 
@@ -125,7 +126,7 @@ public class NotificationControllerImpl implements NotificationController {
     } catch (EEAException e) {
       LOG.error("Deleting system notification produced an error: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "An unknown error happenned while deleting the system notification.");
+          EEAErrorMessage.DELETING_SYSTEM_NOTIFICATION);
     }
   }
 
@@ -145,7 +146,7 @@ public class NotificationControllerImpl implements NotificationController {
     } catch (EEAException e) {
       LOG.error("Updating system notification produced an error: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "An unknown error happenned while updating the system notification.");
+          EEAErrorMessage.UPDATING_SYSTEM_NOTIFICATION);
     }
   }
 
