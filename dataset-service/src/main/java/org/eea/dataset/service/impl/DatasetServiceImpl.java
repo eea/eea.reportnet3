@@ -1705,9 +1705,12 @@ public class DatasetServiceImpl implements DatasetService {
           attachments, listOfTablesFiltered);
       if (!targetRecords.isEmpty()) {
         // save values
+        String schema = LiteralConstants.DATASET_PREFIX + targetDataset.getId();
+        ConnectionDataVO connectionDataVO =
+            recordStoreControllerZuul.getConnectionToDataset(schema);
         TenantResolver.setTenantName(String.format(DATASET_ID, targetDataset.getId()));
         try {
-          storeRecords(targetDataset.getId(), targetRecords);
+          storeRecords(targetDataset.getId(), targetRecords, connectionDataVO);
         } catch (IOException | SQLException e) {
           LOG_ERROR.error(
               "Error saving the list of records into the dataset {} when executing a prefill data",
@@ -3404,16 +3407,15 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param datasetId the dataset id
    * @param recordList the record list
+   * @param connectionDataVO the connection data VO
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
   @Override
-  public void storeRecords(@DatasetId Long datasetId, List<RecordValue> recordList)
-      throws IOException, SQLException {
+  public void storeRecords(@DatasetId Long datasetId, List<RecordValue> recordList,
+      ConnectionDataVO connectionDataVO) throws IOException, SQLException {
 
     String schema = LiteralConstants.DATASET_PREFIX + datasetId;
-    LOG.info("RN3-Import - Getting connections: datasetId={}", datasetId);
-    ConnectionDataVO connectionDataVO = recordStoreControllerZuul.getConnectionToDataset(schema);
 
     LOG.info("RN3-Import - Starting PostgresBulkImporter: datasetId={}", datasetId);
     try (
