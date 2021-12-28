@@ -165,6 +165,10 @@ const Dataflow = () => {
 
   const isLeadDesigner = isSteward || isCustodian;
 
+  const isCustodianSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.CUSTODIAN_SUPPORT.key
+  ]);
+
   const isObserver = dataflowState.userRoles.some(userRole => userRole === config.permissions.roles.OBSERVER.key);
 
   const isDesign = dataflowState.status === config.dataflowStatus.DESIGN;
@@ -251,7 +255,7 @@ const Dataflow = () => {
   }, [userContext, dataflowState.data]);
 
   useEffect(() => {
-    if (dataflowState.isCustodian) {
+    if (dataflowState.isCustodian || isCustodianSupport) {
       if (isOpenStatus) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
       } else {
@@ -1066,8 +1070,9 @@ const Dataflow = () => {
   ];
 
   const requesterRoleOptionsOpenStatus = [
-    { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
     { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key },
+    { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
+    { label: config.permissions.roles.CUSTODIAN_SUPPORT.label, role: config.permissions.roles.CUSTODIAN_SUPPORT.key },
     { label: config.permissions.roles.OBSERVER.label, role: config.permissions.roles.OBSERVER.key }
   ];
 
@@ -1193,7 +1198,7 @@ const Dataflow = () => {
           </ConfirmDialog>
         )}
 
-        {dataflowState.isCustodian && dataflowState.isManageRolesDialogVisible && (
+        {(dataflowState.isCustodian || isCustodianSupport) && dataflowState.isManageRolesDialogVisible && (
           <Dialog
             className="responsiveDialog"
             contentStyle={{ maxHeight: '60vh' }}
@@ -1251,10 +1256,11 @@ const Dataflow = () => {
               placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
+              saveErrorNotificationKey={'IMPOSSIBLE_REQUESTER_ROLE_ERROR'}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
-              userType={'requester'}
+              userType="requester"
             />
           </Dialog>
         )}
@@ -1281,6 +1287,7 @@ const Dataflow = () => {
               placeholder={resourcesContext.messages['manageRolesReporterDialogInputPlaceholder']}
               representativeId={representativeId}
               roleOptions={reporterRoleOptions}
+              saveErrorNotificationKey={'IMPOSSIBLE_REPORTER_ROLE_ERROR'}
               setHasReporters={setHasReporters}
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               setRightPermissionsChange={setRightPermissionsChange}

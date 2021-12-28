@@ -162,8 +162,12 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
   @HystrixCommand
   @DeleteMapping(value = "/v1/{idLink}/dataflow/{dataflowId}")
   @ApiOperation(value = "Delete weblink from dataflow help by weblink id",
+<<<<<<< HEAD
+      response = WeblinkVO.class, notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+=======
       response = WeblinkVO.class,
       notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN, CUSTODIAN SUPPORT")
+>>>>>>> sandbox
   @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
@@ -199,7 +203,11 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
   @DeleteMapping(value = "/{idLink}/dataflow/{dataflowId}")
   @ApiOperation(value = "Delete weblink from dataflow help by weblink id",
       response = WeblinkVO.class, hidden = true,
+<<<<<<< HEAD
+      notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+=======
       notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN, CUSTODIAN SUPPORT")
+>>>>>>> sandbox
   @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 500, message = "Internal Server Error")})

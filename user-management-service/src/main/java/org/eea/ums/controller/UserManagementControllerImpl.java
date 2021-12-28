@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -432,6 +433,17 @@ public class UserManagementControllerImpl implements UserManagementController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
 
+    // Check if the user image it's a valid one
+    if (attributes.containsKey("userImage")) {
+      List<String> imageList = attributes.get("userImage");
+      if (CollectionUtils.isNotEmpty(imageList) && !imageList.get(0)
+          .matches("^000~data:image/(png|jpg|gif|jpeg|bmp);base64,([A-Za-z0-9+/]{4})*?$")) {
+        LOG_ERROR.error(
+            "Error updating the attributes of the user with id {}. The image is not valid", userId);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            String.format(EEAErrorMessage.FILE_FORMAT));
+      }
+    }
     UserRepresentation user = keycloakConnectorService.getUser(userId);
     if (user != null) {
       user = securityProviderInterfaceService.setAttributesWithApiKey(user, attributes);
@@ -631,7 +643,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_STEWARD','DATAFLOW_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
   @PostMapping("/createApiKey")
   @ApiOperation(value = "Create ApiKey for the logged User", response = String.class, hidden = true)
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)
@@ -663,7 +675,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_STEWARD','DATAFLOW_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
   @GetMapping("/getApiKey")
   @ApiOperation(value = "Get logged User ApiKey by Dataflow Id and Dataprovider Id",
       response = String.class, hidden = true)
@@ -760,7 +772,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_OBSERVER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   @GetMapping("/getUserRolesByDataflow/{dataflowId}/dataProviderId/{dataProviderId}")
   @ApiOperation(value = "Get a List of Users by Dataflow", response = UserRoleVO.class,
       responseContainer = "List", hidden = true)
@@ -778,7 +790,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @return the user roles by dataflow
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT')")
   @GetMapping("/userRoles/dataflow/{dataflowId}")
   @ApiOperation(value = "Get a List of User roles by Dataflow", response = UserRoleVO.class,
       responseContainer = "List", hidden = true)
@@ -838,7 +850,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT')")
   @PostMapping("/exportUsersByCountry/dataflow/{dataflowId}")
   @ApiOperation(value = "Export all users by country into a CSV file", hidden = true)
   public void exportUsersByCountry(@ApiParam(
@@ -864,7 +876,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param response the response
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT')")
   @GetMapping("/downloadUsersByCountry/{dataflowId}")
   @ApiOperation(value = "Download the generated CSV file containing the users by country",
       hidden = true)

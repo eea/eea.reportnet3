@@ -82,7 +82,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  // @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR')
+  // @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR')
   // OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND
   // checkAccessReferenceEntity('DATAFLOW',#dataflowId)) hasAnyRole('ADMIN')")
   @PreAuthorize("isAuthenticated()")
@@ -135,7 +135,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATASET_NATIONAL_COORDINATOR')")
+  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATASET_NATIONAL_COORDINATOR')")
   @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "find dataset metabase", hidden = true)
   public DataSetMetabaseVO findExternalDatasetMetabaseById(@ApiParam(type = "Long",
@@ -261,7 +261,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @HystrixCommand
   @GetMapping(value = "/{datasetId}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get statistics by dataset", hidden = true)
-  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @PreAuthorize("isAuthenticated()")
   public StatisticsVO getStatisticsById(@ApiParam(type = "Long", value = "dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {
@@ -289,7 +289,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping(value = "/globalStatistics/dataflow/{dataflowId}/dataSchema/{dataschemaId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get global statistics", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   public List<StatisticsVO> getGlobalStatisticsByDataschemaId(
       @ApiParam(type = "String", value = "Dataset schema Id",
           example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataschemaId") String dataschemaId,
