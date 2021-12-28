@@ -3,11 +3,14 @@ package org.eea.dataset.controller;
 import java.util.List;
 import java.util.Set;
 import org.eea.dataset.service.ReferenceDatasetService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -39,6 +42,9 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   /** The reference dataset service. */
   @Autowired
   private ReferenceDatasetService referenceDatasetService;
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
   /**
@@ -109,7 +115,10 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
     try {
       referenceDatasetService.updateUpdatable(datasetId, updatable);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+      LOG_ERROR.error("Error updating reference dataset. DatasetId: {}. Error Message: {}",
+          datasetId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.UPDATING_REFERENCE_DATASET);
     }
   }
 }

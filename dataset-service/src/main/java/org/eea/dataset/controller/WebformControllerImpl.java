@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import java.util.List;
 import org.eea.dataset.service.WebformService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataset.WebformController;
 import org.eea.interfaces.vo.dataset.schemas.WebformConfigVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
@@ -87,8 +88,9 @@ public class WebformControllerImpl implements WebformController {
     try {
       json = webformService.findWebformConfigContentById(id);
     } catch (JsonProcessingException e) {
-      LOG_ERROR.error("Error getting the json webconfig from the id {}", id);
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+      LOG_ERROR.error("Error getting the json webconfig from the id {}", id, e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.OBTAINING_WEBFORM_CONFIG);
     }
     return json;
   }
