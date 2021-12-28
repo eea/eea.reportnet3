@@ -33,6 +33,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -483,8 +484,10 @@ public class FileCommonTest {
     // Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
     // Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any()))
     // .thenReturn(new DataFlowVO());
-    fileCommon.persistImportedDataset(ID, 1L, "filename", true, dataset, datasetValue, false);
-    Mockito.verify(datasetService, times(1)).storeRecords(Mockito.any(), Mockito.any());
+    fileCommon.persistImportedDataset(ID, 1L, "filename", true, dataset, datasetValue, false,
+        new ConnectionDataVO());
+    Mockito.verify(datasetService, times(1)).storeRecords(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   /**
@@ -506,8 +509,10 @@ public class FileCommonTest {
     // Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
     // Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any()))
     // .thenReturn(new DataFlowVO());
-    fileCommon.persistImportedDataset(ID, 1L, "filename", true, dataset, datasetValue, false);
-    Mockito.verify(datasetService, times(1)).storeRecords(Mockito.any(), Mockito.any());
+    fileCommon.persistImportedDataset(ID, 1L, "filename", true, dataset, datasetValue, false,
+        new ConnectionDataVO());
+    Mockito.verify(datasetService, times(1)).storeRecords(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   /**
@@ -534,7 +539,8 @@ public class FileCommonTest {
     dataset.getTableSchemas().add(tableSchema);
     // Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
     // Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
-    fileCommon.persistImportedDataset(ID, 1L, "filename", true, dataset, datasetValue, true);
+    fileCommon.persistImportedDataset(ID, 1L, "filename", true, dataset, datasetValue, true,
+        new ConnectionDataVO());
     Mockito.verify(datasetService, times(1)).updateRecordsWithConditions(Mockito.any(),
         Mockito.any(), Mockito.any());
   }

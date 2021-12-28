@@ -22,6 +22,7 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.opencsv.CSVParser;
@@ -117,6 +118,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
     this.batchRecordSave = batchRecordSave;
   }
 
+
+
   /**
    * Parses the file.
    *
@@ -134,9 +137,11 @@ public class CSVReaderStrategy implements ReaderStrategy {
   @Override
   public void parseFile(final InputStream inputStream, final Long dataflowId,
       final Long partitionId, final String idTableSchema, Long datasetId, String fileName,
-      boolean replace, DataSetSchema schema) throws EEAException {
+      boolean replace, DataSetSchema schema, ConnectionDataVO connectionDataVO)
+      throws EEAException {
     LOG.info("starting csv file reading");
-    readLines(inputStream, partitionId, idTableSchema, datasetId, fileName, replace, schema);
+    readLines(inputStream, partitionId, idTableSchema, datasetId, fileName, replace, schema,
+        connectionDataVO);
   }
 
   /**
@@ -154,7 +159,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private DatasetValue readLines(final InputStream inputStream, final Long partitionId,
       final String idTableSchema, Long datasetId, String fileName, boolean replace,
-      DataSetSchema dataSetSchema) throws EEAException {
+      DataSetSchema dataSetSchema, ConnectionDataVO connectionDataVO) throws EEAException {
     LOG.info("Processing entries at method readLines in dataset {}", datasetId);
     // Init variables
     String[] line;
@@ -195,6 +200,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       }
       boolean manageFixedRecords =
           fileCommon.schemaContainsFixedRecords(datasetId, dataSetSchema, idTableSchema);
+
       // through the file
       int numLines = 0;
       while ((line = reader.readNext()) != null && numLines < 5000) {
@@ -207,7 +213,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
           // Set the dataSetSchemaId of MongoDB
           dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
           fileCommon.persistImportedDataset(idTableSchema, datasetId, fileName, replace,
-              dataSetSchema, dataset, manageFixedRecords);
+              dataSetSchema, dataset, manageFixedRecords, connectionDataVO);
           numLines = 0;
           tables.remove(table);
           table.setRecords(new ArrayList<>());
@@ -218,7 +224,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       // Set the dataSetSchemaId of MongoDB
       dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
       fileCommon.persistImportedDataset(idTableSchema, datasetId, fileName, replace, dataSetSchema,
-          dataset, manageFixedRecords);
+          dataset, manageFixedRecords, connectionDataVO);
 
     } catch (final IOException | SQLException e) {
       LOG_ERROR.error(e.getMessage());

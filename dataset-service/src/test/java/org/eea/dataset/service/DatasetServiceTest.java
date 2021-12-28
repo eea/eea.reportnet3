@@ -3462,8 +3462,7 @@ public class DatasetServiceTest {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
-        .thenReturn(new ConnectionDataVO());
+
     Mockito
         .when(recordValueIdGenerator
             .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
@@ -3472,7 +3471,7 @@ public class DatasetServiceTest {
         .when(fieldValueIdGenerator
             .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
         .thenReturn("fieldId");
-    datasetService.storeRecords(1L, recordValues);
+    datasetService.storeRecords(1L, recordValues, new ConnectionDataVO());
   }
 
   /**
