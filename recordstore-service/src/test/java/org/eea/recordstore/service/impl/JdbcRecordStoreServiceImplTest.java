@@ -627,19 +627,7 @@ public class JdbcRecordStoreServiceImplTest {
     assertFalse(file.exists());
   }
 
-  @After
-  public void afterTests() {
-    File file = new File("./nullsnapshot_1_table_DatasetValue.snap");
-    file.delete();
-    file = new File("./nullsnapshot_1_table_FieldValue.snap");
-    file.delete();
-    file = new File("./nullsnapshot_1_table_RecordValue.snap");
-    file.delete();
-    file = new File("./nullsnapshot_1_table_TableValue.snap");
-    file.delete();
-    file = new File("./nullsnapshot_1_table_AttachmentValue.snap");
-    file.delete();
-  }
+
 
   @Test
   public void testDeleteDataset() throws SQLException, IOException {
@@ -681,5 +669,21 @@ public class JdbcRecordStoreServiceImplTest {
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
 
+  @After
+  public void afterTests() {
+    File file = new File("./nullsnapshot_1_table_DatasetValue.snap");
+    file.delete();
+    file = new File("./nullsnapshot_1_table_FieldValue.snap");
+    file.delete();
+    file = new File("./nullsnapshot_1_table_RecordValue.snap");
+    file.delete();
+    file = new File("./nullsnapshot_1_table_TableValue.snap");
+    file.delete();
+    file = new File("./nullsnapshot_1_table_AttachmentValue.snap");
+    file.delete();
+    file = new File("./nullclone_1_to_1_table_TableValue.snap");
+    file.delete();
+
+  }
 
 }
