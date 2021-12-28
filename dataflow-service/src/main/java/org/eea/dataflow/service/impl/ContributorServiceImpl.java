@@ -385,8 +385,8 @@ public class ContributorServiceImpl implements ContributorService {
     if (!isObserver) {
       // testdataset
       addResources(account, resourcesProviders,
-          referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId).stream()
-              .map(ReferenceDatasetVO::getId).collect(Collectors.toList()),
+          testDatasetControllerZuul.findTestDatasetByDataflowId(dataflowId).stream()
+              .map(TestDatasetVO::getId).collect(Collectors.toList()),
           ResourceGroupEnum.TESTDATASET_CUSTODIAN_SUPPORT);
     }
   }
@@ -439,11 +439,19 @@ public class ContributorServiceImpl implements ContributorService {
 
     // design datasets
     addResources(account, resourcesProviders,
-        referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId).stream()
-            .map(ReferenceDatasetVO::getId).collect(Collectors.toList()),
+        dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(dataflowId).stream()
+            .map(DesignDatasetVO::getId).collect(Collectors.toList()),
         SecurityRoleEnum.DATA_CUSTODIAN.toString().equals(role)
-            ? ResourceGroupEnum.REFERENCEDATASET_OBSERVER
-            : ResourceGroupEnum.REFERENCEDATASET_STEWARD);
+            ? ResourceGroupEnum.DATASCHEMA_CUSTODIAN
+            : ResourceGroupEnum.DATASCHEMA_STEWARD);
+
+    // test datasets
+    addResources(account, resourcesProviders,
+        testDatasetControllerZuul.findTestDatasetByDataflowId(dataflowId).stream()
+            .map(TestDatasetVO::getId).collect(Collectors.toList()),
+        SecurityRoleEnum.DATA_CUSTODIAN.toString().equals(role)
+            ? ResourceGroupEnum.TESTDATASET_CUSTODIAN
+            : ResourceGroupEnum.TESTDATASET_STEWARD);
   }
 
   /**
