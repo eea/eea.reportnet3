@@ -99,7 +99,7 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   @HystrixCommand
   @PutMapping("/{datasetId}")
   @ApiOperation(value = "update referenced dataset", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update dataset"),
       @ApiResponse(code = 404, message = "Dataset not found")})
   public void updateReferenceDataset(
