@@ -218,7 +218,7 @@ public class CollaborationControllerImpl implements CollaborationController {
   @Override
   @HystrixCommand
   @GetMapping("/findMessages/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN_SUPPORT')")
   @ApiOperation(value = "Gets all the messages assigned to a Dataflow and a Provider",
       hidden = true)
   @ApiResponse(code = 403, message = "Error finding the messages.")
