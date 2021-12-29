@@ -182,9 +182,10 @@ public class DatasetControllerImpl implements DatasetController {
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.OBTAINING_TABLE_DATA);
     }
 
     return result;
@@ -211,8 +212,8 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       datasetService.updateDataset(dataset.getId(), dataset);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      LOG_ERROR.error(e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.UPDATING_DATASET);
     }
   }
 
@@ -267,7 +268,8 @@ public class DatasetControllerImpl implements DatasetController {
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
       lockService.removeLockByCriteria(importFileData);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IMPORTING_FILE_DATASET);
     }
   }
 
@@ -365,8 +367,8 @@ public class DatasetControllerImpl implements DatasetController {
       updateRecordHelper.executeUpdateProcess(datasetId, records, updateCascadePK);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating records in the datasetId {}. Message: {}", datasetId,
-          e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.UPDATING_TABLE_DATA);
     }
   }
 
@@ -413,8 +415,8 @@ public class DatasetControllerImpl implements DatasetController {
       updateRecordHelper.executeDeleteProcess(datasetId, recordId, deleteCascadePK);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting record in the datasetId {}. Message: {}", datasetId,
-          e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DELETING_TABLE_DATA);
     }
   }
 
@@ -460,8 +462,9 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       updateRecordHelper.executeCreateProcess(datasetId, records, tableSchemaId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error inserting records: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG_ERROR.error("Error inserting records: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.INSERTING_TABLE_DATA);
     }
   }
 
@@ -486,8 +489,9 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       updateRecordHelper.executeMultiCreateProcess(datasetId, tableRecords);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error inserting records: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG_ERROR.error("Error inserting records: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.INSERTING_TABLE_DATA);
     }
   }
 
@@ -714,8 +718,9 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       datasetService.exportFileThroughIntegration(datasetId, integrationId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error exporting file through integration: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error exporting file through integration: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXPORTING_FILE_INTEGRATION);
     }
   }
 
@@ -737,8 +742,8 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       datasetService.insertSchema(datasetId, idDatasetSchema);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      LOG_ERROR.error(e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.INSERTING_DATASCHEMA);
     }
   }
 
@@ -774,8 +779,8 @@ public class DatasetControllerImpl implements DatasetController {
       updateRecordHelper.executeFieldUpdateProcess(datasetId, field, updateCascadePK);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating a field in the dataset {}. Message: {}", datasetId,
-          e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.UPDATING_FIELD);
     }
   }
 
@@ -806,8 +811,9 @@ public class DatasetControllerImpl implements DatasetController {
       return datasetService.getFieldValuesReferenced(datasetIdOrigin, datasetSchemaId,
           fieldSchemaId, conditionalValue, searchValue, resultsNumber);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error with dataset id {}  caused {}", datasetIdOrigin, e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error with dataset id {}  caused {}", datasetIdOrigin, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_REFERENCED_FIELD);
     }
   }
 
@@ -956,7 +962,8 @@ public class DatasetControllerImpl implements DatasetController {
     } catch (EEAException e) {
       LOG_ERROR.error("The etlImportDataset failed on datasetId {} because {}", datasetId,
           e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.IMPORTING_DATA_DATASET);
     }
   }
 
@@ -1027,7 +1034,8 @@ public class DatasetControllerImpl implements DatasetController {
     } catch (EEAException | IOException e) {
       LOG_ERROR.error("Error downloading attachment from the datasetId {}, with message: {}",
           datasetId, e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW);
     }
   }
 
@@ -1110,7 +1118,8 @@ public class DatasetControllerImpl implements DatasetController {
     } catch (EEAException | IOException e) {
       LOG_ERROR.error("Error updating attachment from the datasetId {}, with message: {}",
           datasetId, e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_ATTACHMENT_IN_A_DATAFLOW);
     }
   }
 
@@ -1182,8 +1191,9 @@ public class DatasetControllerImpl implements DatasetController {
       datasetService.deleteAttachment(datasetId, idField);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting attachment from the datasetId {}, with message: {}",
-          datasetId, e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+          datasetId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.DELETING_ATTACHMENT_IN_A_DATAFLOW);
     }
   }
 

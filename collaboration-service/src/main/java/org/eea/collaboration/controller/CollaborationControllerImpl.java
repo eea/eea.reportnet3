@@ -87,11 +87,14 @@ public class CollaborationControllerImpl implements CollaborationController {
     try {
       return collaborationService.createMessage(dataflowId, messageVO);
     } catch (EEAIllegalArgumentException e) {
-      LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG_ERROR.error("Error creating message because of missing data: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (EEAForbiddenException e) {
-      LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      LOG_ERROR.error("There were missing permissions while creating the message: {}",
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     }
   }
 
@@ -133,15 +136,19 @@ public class CollaborationControllerImpl implements CollaborationController {
       return collaborationService.createMessageAttachment(dataflowId, providerId, is, fileName,
           fileSize, fileAttachment.getContentType());
     } catch (EEAIllegalArgumentException e) {
-      LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG_ERROR.error("Error creating message because of missing data: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (EEAForbiddenException e) {
-      LOG_ERROR.error("Error creating message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      LOG_ERROR.error("There were missing permissions while creating the message: {}",
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (IOException e) {
       LOG_ERROR.error("Error saving message attachment from the dataflowId {}, with message: {}",
           dataflowId, e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     }
   }
 
@@ -165,10 +172,12 @@ public class CollaborationControllerImpl implements CollaborationController {
       collaborationService.updateMessageReadStatus(dataflowId, messageVOs);
     } catch (EEAIllegalArgumentException e) {
       LOG_ERROR.error("Error updating messages: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.UPDATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (EEAForbiddenException e) {
       LOG_ERROR.error("Error updating messages: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          EEAErrorMessage.UPDATING_A_MESSAGE_IN_A_DATAFLOW);
     }
   }
 
@@ -198,11 +207,13 @@ public class CollaborationControllerImpl implements CollaborationController {
 
     } catch (EEAIllegalArgumentException e) {
       LOG_ERROR.error("Error deleting message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DELETING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting message, messageId {}, with message: {}", messageId,
           e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.DELETING_A_MESSAGE_IN_A_DATAFLOW);
     }
   }
 
@@ -248,7 +259,8 @@ public class CollaborationControllerImpl implements CollaborationController {
       return messagePaginatedVO;
     } catch (EEAForbiddenException e) {
       LOG_ERROR.error("Error finding messages: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          EEAErrorMessage.RETRIEVING_A_MESSAGE_FROM_A_DATAFLOW);
     }
   }
 
@@ -285,7 +297,8 @@ public class CollaborationControllerImpl implements CollaborationController {
       LOG_ERROR.error(
           "Error downloading message attachment from the dataflowId {}, with message: {}",
           dataflowId, e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+          EEAErrorMessage.DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW);
     }
 
   }

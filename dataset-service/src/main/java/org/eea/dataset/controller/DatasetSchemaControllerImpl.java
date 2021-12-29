@@ -182,12 +182,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
       integrationControllerZuul.createDefaultIntegration(dataflowId, datasetSchemaId);
     } catch (InterruptedException | ExecutionException | EEAException e) {
-      LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
+      LOG.error("Aborted DataSetSchema creation: {}", e.getMessage(), e);
       if (e instanceof InterruptedException) {
         Thread.currentThread().interrupt();
       }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          "Error creating design dataset", e);
+          "Error creating design dataset");
     }
   }
 
@@ -227,7 +227,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       return dataschemaService.getDataSchemaByDatasetId(true, datasetId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG.error("Error while retrieving dataset schema by id: {}", datasetId, e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_DATASET_SCHEMA);
     }
   }
 
@@ -310,7 +312,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       return dataschemaService.getDataSchemaByDatasetId(false, datasetId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG.error("Error while retrieving dataset schema by id: {}", datasetId, e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_DATASET_SCHEMA);
     }
   }
 
@@ -386,7 +390,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       }
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting a design dataset. Message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DELETING_DESIGN_DATASET);
     }
   }
 
@@ -432,8 +437,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           SecurityContextHolder.getContext().getAuthentication().getName(), false);
       return tableSchemaVO;
     } catch (EEAException e) {
+      LOG_ERROR.error("Error creating a table schema. DatasetId: {}. Message: {}", datasetId,
+          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID, e);
+          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
   }
 
@@ -477,22 +484,21 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       dataschemaService.releaseCreateUpdateView(datasetId,
           SecurityContextHolder.getContext().getAuthentication().getName(), false);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error updating table schema. Message: {}", e.getMessage(), e);
       if (e.getMessage() != null
           && e.getMessage().equals(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
               tableSchemaVO.getIdTableSchema(), datasetId))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
-                tableSchemaVO.getIdTableSchema(), datasetId),
-            e);
+                tableSchemaVO.getIdTableSchema(), datasetId));
       }
       if (e.getMessage() != null && e.getMessage().equals(String
           .format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaVO.getIdTableSchema(), datasetId))) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(String
-            .format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaVO.getIdTableSchema(), datasetId)),
-            e);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String
+            .format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaVO.getIdTableSchema(), datasetId));
       } else {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.DATASET_INCORRECT_ID, e);
+            EEAErrorMessage.DATASET_INCORRECT_ID);
       }
     }
   }
@@ -541,8 +547,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
       LOG.info("A table has been deleted in the datasetId {}", datasetId);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting table schema. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.EXECUTION_ERROR, e);
+          EEAErrorMessage.DELETING_TABLE_SCHEMA);
     }
   }
 
@@ -578,7 +585,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.SCHEMA_NOT_FOUND, e);
+      LOG_ERROR.error("Error ordering table schema. DatasetId: {}. Message: {}", datasetId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.SCHEMA_NOT_FOUND);
     }
   }
 
@@ -651,7 +660,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           SecurityContextHolder.getContext().getAuthentication().getName(), false);
       return (response);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG_ERROR.error("Error creating field schema. DatasetId: {}. Message: {}", datasetId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.CREATING_FIELD_SCHEMA);
     }
   }
 
@@ -726,7 +738,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       }
 
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG_ERROR.error("Error updating field schema. DatasetId: {}. Message: {}", datasetId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.UPDATING_FIELD_SCHEMA);
     }
   }
 
@@ -793,8 +808,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
       }
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
-          e);
+      LOG_ERROR.error("Error deleting field schema. DatasetId: {}. Message: {}", datasetId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DELETING_FIELD_SCHEMA);
     }
   }
 
@@ -830,8 +847,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
-          e);
+      LOG_ERROR.error("Error ordering field schema. DatasetId: {}. Message: {}", datasetId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
     }
   }
 
@@ -877,9 +895,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         }
       }
     } catch (EEAException e) {
-      LOG_ERROR.error("updateDatasetSchema - DatasetSchema not found: datasetId={}", datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
-          e);
+      LOG_ERROR.error("updateDatasetSchema - DatasetSchema not found: datasetId={}", datasetId, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
     }
   }
 
@@ -952,8 +969,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       try {
         schemas.add(dataschemaService.getDataSchemaByDatasetId(false, design.getId()));
       } catch (EEAException e) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
-            e);
+        LOG_ERROR.error("Error finding dataset schema by dataflow id. DatasetId: {}. Message: {}",
+            idDataflow, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
       }
     });
     return schemas;
@@ -1029,7 +1047,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       return dataschemaService.getUniqueConstraint(uniqueId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
     }
   }
 
@@ -1085,7 +1104,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
     }
   }
 
@@ -1152,7 +1172,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           SecurityContextHolder.getContext().getAuthentication().getName());
       designDatasetService.copyDesignDatasets(dataflowIdOrigin, dataflowIdDestination);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      LOG_ERROR.error(
+          "Error copying data from another dataflow. Origin DataflowId {}. Destination DataflowId {}. Message: {}",
+          dataflowIdOrigin, dataflowIdDestination, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.COPYING_DESIGN_DATAFLOW);
     }
   }
 
@@ -1188,7 +1212,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       return dataschemaService.getSimpleSchema(datasetId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      LOG_ERROR.error(
+          "Error retrieving simple dataset schema by dataflowId. DataflowId {}. DatasetId {}. Message: {}",
+          dataflowId, datasetId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_DATASET_SIMPLE_SCHEMA);
     }
   }
 
@@ -1252,7 +1280,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       return dataschemaService.getTableSchemasIds(datasetId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      LOG_ERROR.error(
+          "Error retrieving table schema by datasetId. DataflowId {}. DatasetId {}. Message: {}",
+          dataflowId, datasetId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_TABLE_SCHEMAS);
     }
   }
 
@@ -1312,7 +1344,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     } catch (Exception e) {
       LOG_ERROR.error("Error exporting schemas from the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXPORTING_SCHEMAS);
     }
   }
 
@@ -1353,7 +1386,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     } catch (Exception e) {
       LOG_ERROR.error("Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.IMPORTING_SCHEMAS);
     }
   }
 
@@ -1392,7 +1426,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {
       LOG_ERROR.error("Error exporting field schemas in dataset {}", datasetId, e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXPORTING_FIELD_SCHEMAS);
     }
   }
 
@@ -1467,7 +1502,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     } catch (IOException e) {
       LOG_ERROR.error("File importing field schemas into dataset {} failed. fileName={}", datasetId,
           file.getOriginalFilename(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file");
     }
   }
 
@@ -1525,7 +1560,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       return new ResponseEntity<>(fileZip, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {
       LOG_ERROR.error("Error exporting the zip field schemas in dataset {}", datasetId, e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXPORTING_DATASET_DEFINITION);
     }
   }
 

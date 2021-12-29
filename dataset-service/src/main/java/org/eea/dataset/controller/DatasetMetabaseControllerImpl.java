@@ -226,7 +226,8 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
     try {
       datasetMetabaseService.updateDatasetStatus(datasetStatusMessageVO);
     } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_DATASET_STATUS);
     }
   }
 
