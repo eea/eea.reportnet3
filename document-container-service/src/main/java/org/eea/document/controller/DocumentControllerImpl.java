@@ -191,15 +191,14 @@ public class DocumentControllerImpl implements DocumentController {
       return new ByteArrayResource(file.getBytes());
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        LOG_ERROR.error("Error downloading document to dataflow help: DataflowId {}. Message: {}",
-            dataflowId, e.getMessage(), e);
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-            EEAErrorMessage.DOCUMENT_DOWNLOAD_ERROR);
+        LOG_ERROR.error("Error retrieving document: DocumentId {}. Message: {}", documentId,
+            e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      LOG_ERROR.error("Error downloading document to dataflow help: DataflowId {}. Message: {}",
-          dataflowId, e.getMessage(), e);
+      LOG_ERROR.error("Error retrieving document: DocumentId {}. Message: {}", documentId,
+          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.DOCUMENT_DOWNLOAD_ERROR);
+          EEAErrorMessage.RETRIEVING_DOCUMENT);
     }
   }
 
