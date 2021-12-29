@@ -617,4 +617,7 @@ public interface DatasetService {
    */
   void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException;
 
+  void updateCheckView(@DatasetId Long datasetId, Boolean updated);
+
+  Boolean getCheckView(@DatasetId Long datasetId);
 }

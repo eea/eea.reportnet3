@@ -39,6 +39,9 @@ public class DatasetValue {
   @Column(name = "ID_DATASET_SCHEMA")
   private String idDatasetSchema;
 
+  @Column(name = "VIEW_UPDATED")
+  private Boolean viewUpdated;
+
   /**
    * The table values.
    */

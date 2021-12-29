@@ -1444,16 +1444,22 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException {
-    String viewToUpdate =
-        "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
-    List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
 
-    String updateQuery = "refresh materialized view concurrently dataset_";
+    if (!Boolean.TRUE.equals(datasetControllerZuul.getCheckView(datasetId))) {
+      datasetControllerZuul.updateCheckView(datasetId, true);
+      String viewToUpdate =
+          "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
+      List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
 
-    for (String view : viewList) {
-      executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
+      String updateQuery = "refresh materialized view concurrently dataset_";
+
+      for (String view : viewList) {
+        executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
+      }
+      LOG.info("These views: {} have been refreshed.", viewList);
+    } else {
+      LOG.info("The views from the dataset {} are updated, no need to refresh.", datasetId);
     }
-    LOG.info("These views: {} have been refreshed.", viewList);
   }
 
   /**
@@ -1466,20 +1472,25 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation,
       boolean released, Long datasetId) {
     datasetIds.forEach(id -> {
-      String viewToUpdate =
-          "select matviewname from pg_matviews  where schemaname = 'dataset_" + id + "'";
-      List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
+      if (!Boolean.TRUE.equals(datasetControllerZuul.getCheckView(id))) {
+        datasetControllerZuul.updateCheckView(id, true);
+        String viewToUpdate =
+            "select matviewname from pg_matviews  where schemaname = 'dataset_" + id + "'";
+        List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
 
-      String updateQuery = "refresh materialized view concurrently dataset_";
+        String updateQuery = "refresh materialized view concurrently dataset_";
 
-      for (String view : viewList) {
-        try {
-          executeQueryViewCommands(updateQuery + id + "." + "\"" + view + "\"");
-        } catch (RecordStoreAccessException e) {
-          LOG_ERROR.error("Error refreshing materialized view from dataset {}", id);
+        for (String view : viewList) {
+          try {
+            executeQueryViewCommands(updateQuery + id + "." + "\"" + view + "\"");
+          } catch (RecordStoreAccessException e) {
+            LOG_ERROR.error("Error refreshing materialized view from dataset {}", id);
+          }
         }
+        LOG.info("These materialized views: {} have been refreshed.", viewList);
+      } else {
+        LOG.info("The views from the dataset {} are updated, no need to refresh.", id);
       }
-      LOG.info("These materialized views: {} have been refreshed.", viewList);
     });
     if (Boolean.TRUE.equals(continueValidation)) {
       Map<String, Object> values = new HashMap<>();

@@ -129,6 +129,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
       throws EEAException {
     datasetService.updateField(datasetId, field, updateCascadePK);
     LOG.info("Field is modified");
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
     // after the field has been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);
   }

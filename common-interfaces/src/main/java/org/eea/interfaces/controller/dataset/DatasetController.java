@@ -539,4 +539,11 @@ public interface DatasetController {
   ResponseEntity<InputStreamResource> exportReferenceDatasetFile(@PathVariable Long dataflowId,
       @RequestParam String fileName);
 
+  @PutMapping("/private/viewUpdated/{datasetId}")
+  public void updateCheckView(@PathVariable("datasetId") Long datasetId,
+      @RequestParam Boolean updated);
+
+  @GetMapping("/private/viewUpdated/{datasetId}")
+  public Boolean getCheckView(@PathVariable("datasetId") Long datasetId);
+
 }

@@ -1,6 +1,6 @@
 CREATE schema %dataset_name% AUTHORIZATION %user%;
 
-CREATE TABLE %dataset_name%.DATASET_VALUE (ID bigint, ID_DATASET_SCHEMA text, PRIMARY key (ID))  TABLESPACE pg_default;
+CREATE TABLE %dataset_name%.DATASET_VALUE (ID bigint, ID_DATASET_SCHEMA text, VIEW_UPDATED boolean, PRIMARY key (ID))  TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.TABLE_VALUE (ID bigint, ID_TABLE_SCHEMA text, DATASET_ID bigint, PRIMARY key (ID), FOREIGN KEY (dataset_id) REFERENCES %dataset_name%.dataset_value(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.RECORD_VALUE(ID text, ID_RECORD_SCHEMA text, ID_TABLE bigint, DATASET_PARTITION_ID bigint, DATA_PROVIDER_CODE text, data_position bigserial, PRIMARY key (ID), FOREIGN KEY (id_table) REFERENCES %dataset_name%.table_value(id) ON DELETE CASCADE) TABLESPACE pg_default;
 CREATE TABLE %dataset_name%.FIELD_VALUE (ID text, TYPE text, VALUE text, ID_FIELD_SCHEMA text, ID_RECORD text, GEOMETRY geometry('GEOMETRY', 4326) NULL, data_position bigserial, geometry_error text null, PRIMARY key (ID), FOREIGN KEY (id_record) REFERENCES %dataset_name%.record_value(id) ON DELETE CASCADE) TABLESPACE pg_default;

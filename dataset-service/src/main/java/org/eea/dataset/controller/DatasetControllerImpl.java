@@ -1415,6 +1415,25 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
+  @Override
+  @PutMapping("/private/viewUpdated/{datasetId}")
+  @ApiOperation(value = "Mark the view as updated or not", hidden = true)
+  public void updateCheckView(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Boolean", value = "Updated",
+          example = "true/false") @RequestParam Boolean updated) {
+    datasetService.updateCheckView(datasetId, updated);
+  }
+
+  @Override
+  @GetMapping("/private/viewUpdated/{datasetId}")
+  @ApiOperation(value = "Mark the view as updated or not", hidden = true)
+  public Boolean getCheckView(@ApiParam(type = "Long", value = "Dataset Id",
+      example = "0") @PathVariable("datasetId") Long datasetId) {
+    return datasetService.getCheckView(datasetId);
+  }
+
 
   /**
    * Creates the response entity.
