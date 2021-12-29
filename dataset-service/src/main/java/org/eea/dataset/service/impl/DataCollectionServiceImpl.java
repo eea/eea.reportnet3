@@ -1429,10 +1429,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
             SecurityRoleEnum.DATA_OBSERVER));
 
-        // Create ReferenceDataset-%s-CUSTODIAN_SUPPORT
-        groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
-            SecurityRoleEnum.CUSTODIAN_SUPPORT));
-
         // Assign ReferenceDataset-%s-DATA_STEWARD
         for (UserRepresentationVO steward : stewards) {
           assignments.add(createAssignments(referenceDatasetId, steward.getEmail(),
