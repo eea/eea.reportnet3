@@ -51,6 +51,7 @@ import io.swagger.annotations.ApiResponse;
 @Api(tags = "Integrations : Integrations Manager")
 public class IntegrationControllerImpl implements IntegrationController {
 
+  /** The Constant ERROR_FINDING_INTEGRATIONS: {@value}. */
   private static final String ERROR_FINDING_INTEGRATIONS = "Error finding integrations: {}";
 
   /**

@@ -52,6 +52,7 @@ import io.swagger.annotations.ApiResponses;
 @Api(tags = "Representatives : Representatives Manager")
 public class RepresentativeControllerImpl implements RepresentativeController {
 
+  /** The Constant ATTACHMENT_FILENAME: {@value}. */
   private static final String ATTACHMENT_FILENAME = "attachment; filename=";
 
   /** The Constant LOG_ERROR. */
