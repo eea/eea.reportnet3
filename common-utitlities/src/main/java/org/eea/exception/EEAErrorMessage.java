@@ -668,11 +668,11 @@ public final class EEAErrorMessage {
   /** The Constant SQL_COMMAND_NOT_ALLOWED: {@value}. */
   public static final String SQL_COMMAND_NOT_ALLOWED = "SQL Command not allowed in SQL Sentence.";
 
-  /** The Constant SQL_COMMAND_NOT_ALLOWED: {@value}. */
+  /** The Constant RUNNING_RULE: {@value}. */
   public static final String RUNNING_RULE =
       "An unknown error happenned while running the SQL rule.";
 
-  /** The Constant SQL_COMMAND_NOT_ALLOWED: {@value}. */
+  /** The Constant EVALUATING_RULE: {@value}. */
   public static final String EVALUATING_RULE =
       "An unknown error happenned while evaluating the SQL rule.";
 
