@@ -341,8 +341,8 @@ public class ValidationControllerImpl implements ValidationController {
           datasetId, fileName, e.getMessage());
 
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
-          "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s + message: %s ",
-          datasetId, fileName, e.getMessage()), e);
+          "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s",
+          datasetId, fileName));
 
     }
 

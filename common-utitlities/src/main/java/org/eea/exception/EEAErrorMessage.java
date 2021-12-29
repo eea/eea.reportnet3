@@ -607,6 +607,76 @@ public final class EEAErrorMessage {
   public static final String OBTAINING_WEBFORM_CONFIG =
       "An unknown error happenned while obtaining the webform config.";
 
+  /** The Constant RETRIEVING_DOCUMENT: {@value}. */
+  public static final String RETRIEVING_DOCUMENT =
+      "An unknown error happenned while retrieving the document.";
+
+  /** The Constant DELETING_DOCUMENT: {@value}. */
+  public static final String DELETING_DOCUMENT =
+      "An unknown error happenned while deleting the document.";
+
+  /** The Constant UPDATING_DOCUMENT: {@value}. */
+  public static final String UPDATING_DOCUMENT =
+      "An unknown error happenned while updating the document.";
+
+  /** The Constant UPDATING_SCHEMA_SNAPSHOT_DOCUMENT: {@value}. */
+  public static final String UPDATING_SCHEMA_SNAPSHOT_DOCUMENT =
+      "An unknown error happenned while updating the schema snapshot document.";
+
+  /** The Constant RETRIEVING_SNAPSHOT_DOCUMENT: {@value}. */
+  public static final String RETRIEVING_SNAPSHOT_DOCUMENT =
+      "An unknown error happenned while retrieving the snapshot document.";
+
+  /** The Constant DELETING_SNAPSHOT_DOCUMENT: {@value}. */
+  public static final String DELETING_SNAPSHOT_DOCUMENT =
+      "An unknown error happenned while deleting the snapshot document.";
+
+  /** The Constant UPDATING_COLLABORATION_DOCUMENT: {@value}. */
+  public static final String UPDATING_COLLABORATION_DOCUMENT =
+      "An unknown error happenned while uploading a collaboration document.";
+
+  /** The Constant DELETING_COLLABORATION_DOCUMENT: {@value}. */
+  public static final String DELETING_COLLABORATION_DOCUMENT =
+      "An unknown error happenned while deleting the collaboration document.";
+
+  /** The Constant RETRIEVING_COLLABORATION_DOCUMENT: {@value}. */
+  public static final String RETRIEVING_COLLABORATION_DOCUMENT =
+      "An unknown error happenned while retrieving the collaboration document.";
+
+  /** The Constant CREATING_EMPTY_DATASET: {@value}. */
+  public static final String CREATING_EMPTY_DATASET =
+      "An unknown error happenned while creating a dataset.";
+
+  /** The Constant CREATING_SNAPSHOT: {@value}. */
+  public static final String CREATING_SNAPSHOT =
+      "An unknown error happenned while creating a snapshot.";
+
+  /** The Constant RESTORING_SNAPSHOT: {@value}. */
+  public static final String RESTORING_SNAPSHOT =
+      "An unknown error happenned while restoring a snapshot.";
+
+  /** The Constant CREATING_USERS_THROUGH_FILE: {@value}. */
+  public static final String CREATING_USERS_THROUGH_FILE =
+      "An unknown error happenned while creating users through a file.";
+
+  /** The Constant COPYING_RULE: {@value}. */
+  public static final String COPYING_RULE = "An unknown error happenned while copying a rule.";
+
+  /** The Constant IMPORTING_RULE: {@value}. */
+  public static final String IMPORTING_RULE = "An unknown error happenned while importing a rule.";
+
+  /** The Constant SQL_COMMAND_NOT_ALLOWED: {@value}. */
+  public static final String SQL_COMMAND_NOT_ALLOWED = "SQL Command not allowed in SQL Sentence.";
+
+  /** The Constant SQL_COMMAND_NOT_ALLOWED: {@value}. */
+  public static final String RUNNING_RULE =
+      "An unknown error happenned while running the SQL rule.";
+
+  /** The Constant SQL_COMMAND_NOT_ALLOWED: {@value}. */
+  public static final String EVALUATING_RULE =
+      "An unknown error happenned while evaluating the SQL rule.";
+
+
   /**
    * Instantiates a new EEA error message.
    */
