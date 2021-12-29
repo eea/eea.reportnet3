@@ -75,7 +75,7 @@ public class CollaborationControllerImpl implements CollaborationController {
   @Override
   @HystrixCommand
   @PostMapping("/createMessage/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN_SUPPORT')")
   @ApiOperation(value = "Creates a new message assigned to a Dataflow", hidden = true,
       response = MessageVO.class)
   @ApiResponses(value = {@ApiResponse(code = 400, message = "Error creating message"),
@@ -110,7 +110,7 @@ public class CollaborationControllerImpl implements CollaborationController {
   @HystrixCommand(commandProperties = {
       @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
   @PostMapping("/createMessage/dataflow/{dataflowId}/attachment")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN_SUPPORT')")
   @ApiOperation(value = "Creates a new message attachment assigned to a Dataflow and a provider Id",
       response = MessageVO.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.FILE_FORMAT),
@@ -161,7 +161,7 @@ public class CollaborationControllerImpl implements CollaborationController {
   @Override
   @HystrixCommand
   @PutMapping("/updateMessageReadStatus/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN_SUPPORT')")
   @ApiOperation(value = "Updates the message read status", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400, message = "Error updating the message"),
       @ApiResponse(code = 500, message = "Error updating the message")})
@@ -191,7 +191,7 @@ public class CollaborationControllerImpl implements CollaborationController {
   @Override
   @HystrixCommand
   @DeleteMapping("/deleteMessage/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN_SUPPORT')")
   @ApiOperation(value = "Deletes the message", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400, message = "Error deleting the message"),
       @ApiResponse(code = 404, message = "Error deleting the message")})
@@ -276,14 +276,13 @@ public class CollaborationControllerImpl implements CollaborationController {
   @HystrixCommand(commandProperties = {
       @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
   @GetMapping("/findMessages/dataflow/{dataflowId}/getMessageAttachment")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_CUSTODIAN_SUPPORT')")
   @ApiOperation(value = "Gets the attachment assigned to a message", hidden = true)
   @ApiResponse(code = 404, message = "Error getting the message attachment")
   public ResponseEntity<byte[]> getMessageAttachment(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
       @ApiParam(value = "Message Id", example = "0") @RequestParam("messageId") Long messageId) {
-
 
     LOG.info("Downloading message attachment from the dataflowId {}", dataflowId);
     try {

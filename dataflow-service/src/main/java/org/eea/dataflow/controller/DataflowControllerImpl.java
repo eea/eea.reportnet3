@@ -506,7 +506,7 @@ public class DataflowControllerImpl implements DataFlowController {
   @GetMapping(value = "/v1/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get dataflow metadata by dataflow id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN, CUSTODIAN SUPPORT")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public DataFlowVO getMetabaseById(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {

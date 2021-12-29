@@ -234,7 +234,7 @@ public class DatasetControllerImpl implements DatasetController {
   @LockMethod(removeWhenFinish = false)
   @PostMapping("/v1/{datasetId}/importFileData")
   @ApiOperation(value = "Import file to dataset data",
-      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD\n\n Test dataset: CUSTODIAN, STEWARD, CUSTODIAN SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
       @ApiResponse(code = 400, message = "Error importing file"),
@@ -289,7 +289,7 @@ public class DatasetControllerImpl implements DatasetController {
   @HystrixCommand
   @PostMapping("/{datasetId}/importFileData")
   @ApiOperation(value = "Import file to dataset data", hidden = true,
-      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD\n\n Test dataset: CUSTODIAN, STEWARD, CUSTODIAN SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
       @ApiResponse(code = 400, message = "Error importing file"),
@@ -588,7 +588,7 @@ public class DatasetControllerImpl implements DatasetController {
   @DeleteMapping("/v1/{datasetId}/deleteTableData/{tableSchemaId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @ApiOperation(value = "Delete table data",
-      notes = "Allowed roles: \n\n Reporting dataset: REPORTER WRITE, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+      notes = "Allowed roles: \n\n Reporting dataset: REPORTER WRITE, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD, CUSTODIAN SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
       @ApiResponse(code = 403, message = "Dataset not belong dataflow"),
       @ApiResponse(code = 401, message = "Unauthorize"),
