@@ -752,7 +752,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
               new EeaSecurityExpressionRoot(SecurityContextHolder.getContext().getAuthentication(),
                   userManagementControllerZull, entityAccessService);
           isAuthorized = eeaSecurityExpressionRoot.secondLevelAuthorize(dataflow.getId(),
-              ObjectAccessRoleEnum.DATAFLOW_STEWARD, ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN);
+              ObjectAccessRoleEnum.DATAFLOW_STEWARD, ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN,
+              ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN_SUPPORT);
         }
       }
     }

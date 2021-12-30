@@ -333,7 +333,7 @@ public class RepresentativeControllerImplTest {
       representativeControllerImpl.exportLeadReportersFile(1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      assertEquals(null, e.getReason());
+      assertEquals("An unknown error happenned while exporting the lead reporters.", e.getReason());
     }
   }
 
@@ -368,7 +368,7 @@ public class RepresentativeControllerImplTest {
       representativeControllerImpl.exportTemplateReportersFile(1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      assertEquals(null, e.getReason());
+      assertEquals("An unknown error happenned while exporting the lead reporters.", e.getReason());
     }
   }
 

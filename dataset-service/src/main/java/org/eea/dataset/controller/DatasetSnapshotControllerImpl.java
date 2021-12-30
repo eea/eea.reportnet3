@@ -140,7 +140,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get snapshots by dataset id", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get snapshots"),
       @ApiResponse(code = 400, message = "Dataset id incorrect")})
   public List<SnapshotVO> getSnapshotsByIdDataset(@ApiParam(type = "Long", value = "Dataset Id",
@@ -170,7 +170,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @PostMapping(value = "/dataset/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Create snapshot", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   public void createSnapshot(
       @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
           name = "datasetId") @PathVariable("idDataset") Long datasetId,
@@ -193,7 +193,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/v1/{idSnapshot}/dataset/{idDataset}/delete")
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
   @ApiOperation(value = "Delete dataset snapshot by snapshot id",
       notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD \n\n Reference dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete snapshot"),
@@ -212,8 +212,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       datasetSnapshotService.removeSnapshot(datasetId, idSnapshot);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting a snapshot. Error Message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DELETING_SNAPSHOT);
     }
   }
 
@@ -226,7 +225,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
   @ApiOperation(value = "Delete dataset snapshot by id", hidden = true,
       notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD \n\n Reference dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete snapshot"),
@@ -250,7 +249,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @ApiOperation(value = "Restore snapshot", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully restore snapshot"),
       @ApiResponse(code = 400, message = "Dataset id incorrect"),
@@ -291,7 +290,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     } catch (EEAException e) {
       LOG_ERROR.error("Error restoring a snapshot. Error Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID, e);
+          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
   }
 
@@ -333,7 +332,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot, dateRelease);
     } catch (EEAException e) {
       LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
     }
   }
 
@@ -437,7 +436,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     } catch (EEAException | IOException e) {
       LOG_ERROR.error("Error restoring a schema snapshot. Error Message {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID, e);
+          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
   }
 
@@ -486,7 +485,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     } catch (EEAException | IOException e) {
       LOG_ERROR.error("Error deleting a schema snapshot. Error message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.USER_REQUEST_NOTFOUND, e);
+          EEAErrorMessage.DELETING_SCHEMA_SNAPSHOT);
     }
   }
 
@@ -544,9 +543,8 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       releases = datasetSnapshotService.getReleases(datasetId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error retreiving releases. Error message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND,
-          e);
+      LOG_ERROR.error("Error retrieving releases. Error message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
     }
 
     return releases;
@@ -639,9 +637,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   public void createReleaseSnapshots(
       @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
           name = "dataflowId") @PathVariable(value = "dataflowId", required = true) Long dataflowId,
-      @ApiParam(type = "Long", value = "Provider Id",
-          example = "0") @LockCriteria(name = "dataProviderId") @PathVariable(
-              value = "dataProviderId", required = true) Long dataProviderId,
+      @ApiParam(type = "Long", value = "Provider Id", example = "0") @LockCriteria(
+          name = "dataProviderId") @PathVariable(value = "dataProviderId",
+              required = true) Long dataProviderId,
       @ApiParam(type = "boolean", value = "Restric from public", example = "true") @RequestParam(
           name = "restrictFromPublic", required = true,
           defaultValue = "false") boolean restrictFromPublic) {
@@ -668,8 +666,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
         try {
           datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
         } catch (EEAException e1) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR,
-              e1);
+          LOG_ERROR.error("Error releasing snapshot locks. Error Message: {}", e.getMessage(), e1);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.EXECUTION_ERROR);
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR,
             e);
@@ -710,7 +709,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
           "Error releasing the locks in the operation release datasets. Error Message: {}",
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.EXECUTION_ERROR, e);
+          EEAErrorMessage.EXECUTION_ERROR);
     }
   }
 

@@ -51,7 +51,8 @@ public final class EEAErrorMessage {
   public static final String REFERENCEID_INCORRECT = "referenceId incorrect";
 
   /** The Constant EXECUTION_ERROR: {@value}. */
-  public static final String EXECUTION_ERROR = "Runtime error";
+  public static final String EXECUTION_ERROR =
+      "An error was produced during the process execution.";
 
   /** The Constant VALIDATION_SESSION_ERROR: {@value}. */
   public static final String VALIDATION_SESSION_ERROR = "Validation session error";
@@ -366,6 +367,315 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_VALIDATING_LEAD_REPORTERS: {@value}. */
   public static final String ERROR_VALIDATING_LEAD_REPORTERS =
       "There was an error validating the Lead Reporters.";
+
+  /** The Constant CREATING_A_MESSAGE_IN_A_DATAFLOW: {@value}. */
+  public static final String CREATING_A_MESSAGE_IN_A_DATAFLOW =
+      "There was an error creating a message in the Dataflow.";
+
+  /** The Constant UPDATING_A_MESSAGE_IN_A_DATAFLOW: {@value}. */
+  public static final String UPDATING_A_MESSAGE_IN_A_DATAFLOW =
+      "There was an error updating a message in the Dataflow.";
+
+  /** The Constant DELETING_A_MESSAGE_IN_A_DATAFLOW: {@value}. */
+  public static final String DELETING_A_MESSAGE_IN_A_DATAFLOW =
+      "There was an error deleting a message in the Dataflow.";
+
+  /** The Constant RETRIEVING_A_MESSAGE_IN_A_DATAFLOW: {@value}. */
+  public static final String RETRIEVING_A_MESSAGE_FROM_A_DATAFLOW =
+      "There was an error retrieving messages from a Dataflow.";
+
+  /** The Constant DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW: {@value}. */
+  public static final String DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW =
+      "There was an error downloading an attachment in a Dataflow.";
+
+  /** The Constant UPDATING_ATTACHMENT_IN_A_DATAFLOW: {@value}. */
+  public static final String UPDATING_ATTACHMENT_IN_A_DATAFLOW =
+      "There was an error updating an attachment in a Dataflow.";
+
+  /** The Constant DELETING_ATTACHMENT_IN_A_DATAFLOW: {@value}. */
+  public static final String DELETING_ATTACHMENT_IN_A_DATAFLOW =
+      "There was an error deleting an attachment in a Dataflow.";
+
+  /** The Constant CONVERTING_FROM_STRING_TO_LONG: {@value}. */
+  public static final String CONVERTING_FROM_STRING_TO_LONG =
+      "There was an error converting the value from String to Long";
+
+  /** The Constant CREATING_NOTIFICATION: {@value}. */
+  public static final String CREATING_NOTIFICATION =
+      "An unknown error happenned sending the notification.";
+
+  /** The Constant CREATING_SYSTEM_NOTIFICATION: {@value}. */
+  public static final String CREATING_SYSTEM_NOTIFICATION =
+      "An unknown error happenned while creating the system notification.";
+
+  /** The Constant DELETING_SYSTEM_NOTIFICATION: {@value}. */
+  public static final String DELETING_SYSTEM_NOTIFICATION =
+      "An unknown error happenned while deleting the system notification.";
+
+  /** The Constant UPDATING_SYSTEM_NOTIFICATION: {@value}. */
+  public static final String UPDATING_SYSTEM_NOTIFICATION =
+      "An unknown error happenned while updating the system notification.";
+
+  /** The Constant DELETING_REQUESTER: {@value}. */
+  public static final String DELETING_REQUESTER =
+      "An unknown error happenned while deleting the requester.";
+
+  /** The Constant DELETING_REPORTER: {@value}. */
+  public static final String DELETING_REPORTER =
+      "An unknown error happenned while deleting the reporter.";
+
+  /** The Constant CREATING_ASSOCIATED_PERMISSIONS: {@value}. */
+  public static final String CREATING_ASSOCIATED_PERMISSIONS =
+      "An unknown error happenned while creating associated permissions.";
+
+  /** The Constant RETRIEVING_WEBLINK: {@value}. */
+  public static final String RETRIEVING_WEBLINK =
+      "An unknown error happenned while retrieving the weblink.";
+
+  /** The Constant CREATING_WEBLINK: {@value}. */
+  public static final String CREATING_WEBLINK =
+      "An unknown error happenned while creating the weblink.";
+
+  /** The Constant DELETING_WEBLINK: {@value}. */
+  public static final String DELETING_WEBLINK =
+      "An unknown error happenned while deleting the weblink.";
+
+  /** The Constant DELETING_WEBLINK: {@value}. */
+  public static final String UPDATING_WEBLINK =
+      "An unknown error happenned while updating the weblink.";
+
+  /** The Constant RETRIEVING_INTEGRATIONS: {@value}. */
+  public static final String RETRIEVING_INTEGRATIONS =
+      "An unknown error happenned while retrieving integrations.";
+
+  /** The Constant CREATING_INTEGRATION: {@value}. */
+  public static final String CREATING_INTEGRATION =
+      "An unknown error happenned while creating the integration.";
+
+  /** The Constant DELETING_INTEGRATION: {@value}. */
+  public static final String DELETING_INTEGRATION =
+      "An unknown error happenned while deleting the integration.";
+
+  /** The Constant UPDATING_INTEGRATION: {@value}. */
+  public static final String UPDATING_INTEGRATION =
+      "An unknown error happenned while updating the integration.";
+
+  /** The Constant COPYING_INTEGRATIONS: {@value}. */
+  public static final String COPYING_INTEGRATIONS =
+      "An unknown error happenned while copying integrations.";
+
+  /** The Constant EXECUTING_INTEGRATIONS: {@value}. */
+  public static final String EXECUTING_INTEGRATIONS =
+      "An unknown error happenned while executing integrations.";
+
+  /** The Constant EXPORTING_EU_DATASET: {@value}. */
+  public static final String EXPORTING_EU_DATASET =
+      "An unknown error happenned while exporting an EU Dataset.";
+
+  /** The Constant CREATING_REPRESENTATIVE: {@value}. */
+  public static final String CREATING_REPRESENTATIVE =
+      "An unknown error happenned while creating a representative.";
+
+  /** The Constant EXPORT_LEAD_REPORTERS: {@value}. */
+  public static final String EXPORT_LEAD_REPORTERS =
+      "An unknown error happenned while exporting the lead reporters.";
+
+  /** The Constant IMPORT_LEAD_REPORTERS: {@value}. */
+  public static final String IMPORT_LEAD_REPORTERS =
+      "An unknown error happenned while importing the lead reporters.";
+
+  /** The Constant CREATE_LEAD_REPORTER: {@value}. */
+  public static final String CREATE_LEAD_REPORTER =
+      "An unknown error happenned while creating a lead reporter.";
+
+  /** The Constant OBTAINING_TABLE_DATA: {@value}. */
+  public static final String OBTAINING_TABLE_DATA =
+      "An unknown error happenned while obtaining the table data.";
+
+  /** The Constant INSERTING_TABLE_DATA: {@value}. */
+  public static final String INSERTING_TABLE_DATA =
+      "An unknown error happenned while inserting data in the table.";
+
+  /** The Constant UPDATING_TABLE_DATA: {@value}. */
+  public static final String UPDATING_TABLE_DATA =
+      "An unknown error happenned while updating the table data.";
+
+  /** The Constant DELETING_TABLE_DATA: {@value}. */
+  public static final String DELETING_TABLE_DATA =
+      "An unknown error happenned while deleting the table data.";
+
+  /** The Constant UPDATING_DATASET: {@value}. */
+  public static final String UPDATING_DATASET =
+      "An unknown error happenned while updating the dataset.";
+
+  /** The Constant IMPORTING_FILE_DATASET: {@value}. */
+  public static final String IMPORTING_FILE_DATASET =
+      "An unknown error happenned while importing a file into the dataset.";
+
+  /** The Constant EXPORTING_FILE_INTEGRATION: {@value}. */
+  public static final String EXPORTING_FILE_INTEGRATION =
+      "An unknown error happenned while exporting a file through integration.";
+
+  /** The Constant INSERTING_TABLE_DATA: {@value}. */
+  public static final String INSERTING_DATASCHEMA =
+      "An unknown error happenned while inserting a dataschema.";
+
+  /** The Constant UPDATING_FIELD: {@value}. */
+  public static final String UPDATING_FIELD = "An unknown error happenned while updating a field.";
+
+  /** The Constant RETRIEVING_REFERENCED_FIELD: {@value}. */
+  public static final String RETRIEVING_REFERENCED_FIELD =
+      "An unknown error happenned while retrieving data from a referenced field.";
+
+  /** The Constant IMPORTING_DATA_DATASET: {@value}. */
+  public static final String IMPORTING_DATA_DATASET =
+      "An unknown error happenned while importing data into a dataset.";
+
+  /** The Constant UPDATING_DATASET_STATUS: {@value}. */
+  public static final String UPDATING_DATASET_STATUS =
+      "An unknown error happenned while updating the dataset status.";
+
+  /** The Constant RETRIEVING_DATASET_SCHEMA: {@value}. */
+  public static final String RETRIEVING_DATASET_SCHEMA =
+      "An unknown error happenned while retrieving the dataset schema.";
+
+  /** The Constant DELETING_TABLE_SCHEMA: {@value}. */
+  public static final String DELETING_TABLE_SCHEMA =
+      "An unknown error happenned while deleting the table schema.";
+
+  /** The Constant RETRIEVING_TABLE_SCHEMAS: {@value}. */
+  public static final String RETRIEVING_TABLE_SCHEMAS =
+      "An unknown error happenned while retrieving the table schemas.";
+
+  /** The Constant DELETING_DESIGN_DATASET: {@value}. */
+  public static final String DELETING_DESIGN_DATASET =
+      "An unknown error happenned while deleting a dataset.";
+
+  /** The Constant CREATING_FIELD_SCHEMA: {@value}. */
+  public static final String CREATING_FIELD_SCHEMA =
+      "An unknown error happenned while creating a field schema.";
+
+  /** The Constant UPDATING_FIELD_SCHEMA: {@value}. */
+  public static final String UPDATING_FIELD_SCHEMA =
+      "An unknown error happenned while updating a field schema.";
+
+  /** The Constant DELETING_FIELD_SCHEMA: {@value}. */
+  public static final String DELETING_FIELD_SCHEMA =
+      "An unknown error happenned while deleting a field schema.";
+
+  /** The Constant COPYING_DESIGN_DATAFLOW: {@value}. */
+  public static final String COPYING_DESIGN_DATAFLOW =
+      "An unknown error happenned while copying designs from another dataflow.";
+
+  /** The Constant RETRIEVING_DATASET_SIMPLE_SCHEMA: {@value}. */
+  public static final String RETRIEVING_DATASET_SIMPLE_SCHEMA =
+      "An unknown error happenned while retrieving dataset simple schema.";
+
+  /** The Constant EXPORTING_SCHEMAS: {@value}. */
+  public static final String EXPORTING_SCHEMAS =
+      "An unknown error happenned while exporting schemas.";
+
+  /** The Constant EXPORTING_FIELD_SCHEMAS: {@value}. */
+  public static final String EXPORTING_FIELD_SCHEMAS =
+      "An unknown error happenned while exporting field schemas.";
+
+  /** The Constant IMPORTING_SCHEMAS: {@value}. */
+  public static final String IMPORTING_SCHEMAS =
+      "An unknown error happenned while importing schemas.";
+
+  /** The Constant EXPORTING_DATASET_DEFINITION: {@value}. */
+  public static final String EXPORTING_DATASET_DEFINITION =
+      "An unknown error happenned while exporting dataset definition.";
+
+  /** The Constant DELETING_SNAPSHOT: {@value}. */
+  public static final String DELETING_SNAPSHOT =
+      "An unknown error happenned while deleting a snapshot.";
+
+  /** The Constant DELETING_SCHEMA_SNAPSHOT: {@value}. */
+  public static final String DELETING_SCHEMA_SNAPSHOT =
+      "An unknown error happenned while deleting a schema snapshot.";
+
+  /** The Constant RETRIEVING_SINGLE_PAM_LIST: {@value}. */
+  public static final String RETRIEVING_SINGLE_PAM_LIST =
+      "An unknown error happenned while retrieving single PAM list.";
+
+  /** The Constant UPDATING_REFERENCE_DATASET: {@value}. */
+  public static final String UPDATING_REFERENCE_DATASET =
+      "An unknown error happenned while updating a reference dataset.";
+
+  /** The Constant OBTAINING_WEBFORM_CONFIG: {@value}. */
+  public static final String OBTAINING_WEBFORM_CONFIG =
+      "An unknown error happenned while obtaining the webform config.";
+
+  /** The Constant RETRIEVING_DOCUMENT: {@value}. */
+  public static final String RETRIEVING_DOCUMENT =
+      "An unknown error happenned while retrieving the document.";
+
+  /** The Constant DELETING_DOCUMENT: {@value}. */
+  public static final String DELETING_DOCUMENT =
+      "An unknown error happenned while deleting the document.";
+
+  /** The Constant UPDATING_DOCUMENT: {@value}. */
+  public static final String UPDATING_DOCUMENT =
+      "An unknown error happenned while updating the document.";
+
+  /** The Constant UPDATING_SCHEMA_SNAPSHOT_DOCUMENT: {@value}. */
+  public static final String UPDATING_SCHEMA_SNAPSHOT_DOCUMENT =
+      "An unknown error happenned while updating the schema snapshot document.";
+
+  /** The Constant RETRIEVING_SNAPSHOT_DOCUMENT: {@value}. */
+  public static final String RETRIEVING_SNAPSHOT_DOCUMENT =
+      "An unknown error happenned while retrieving the snapshot document.";
+
+  /** The Constant DELETING_SNAPSHOT_DOCUMENT: {@value}. */
+  public static final String DELETING_SNAPSHOT_DOCUMENT =
+      "An unknown error happenned while deleting the snapshot document.";
+
+  /** The Constant UPDATING_COLLABORATION_DOCUMENT: {@value}. */
+  public static final String UPDATING_COLLABORATION_DOCUMENT =
+      "An unknown error happenned while uploading a collaboration document.";
+
+  /** The Constant DELETING_COLLABORATION_DOCUMENT: {@value}. */
+  public static final String DELETING_COLLABORATION_DOCUMENT =
+      "An unknown error happenned while deleting the collaboration document.";
+
+  /** The Constant RETRIEVING_COLLABORATION_DOCUMENT: {@value}. */
+  public static final String RETRIEVING_COLLABORATION_DOCUMENT =
+      "An unknown error happenned while retrieving the collaboration document.";
+
+  /** The Constant CREATING_EMPTY_DATASET: {@value}. */
+  public static final String CREATING_EMPTY_DATASET =
+      "An unknown error happenned while creating a dataset.";
+
+  /** The Constant CREATING_SNAPSHOT: {@value}. */
+  public static final String CREATING_SNAPSHOT =
+      "An unknown error happenned while creating a snapshot.";
+
+  /** The Constant RESTORING_SNAPSHOT: {@value}. */
+  public static final String RESTORING_SNAPSHOT =
+      "An unknown error happenned while restoring a snapshot.";
+
+  /** The Constant CREATING_USERS_THROUGH_FILE: {@value}. */
+  public static final String CREATING_USERS_THROUGH_FILE =
+      "An unknown error happenned while creating users through a file.";
+
+  /** The Constant COPYING_RULE: {@value}. */
+  public static final String COPYING_RULE = "An unknown error happenned while copying a rule.";
+
+  /** The Constant IMPORTING_RULE: {@value}. */
+  public static final String IMPORTING_RULE = "An unknown error happenned while importing a rule.";
+
+  /** The Constant SQL_COMMAND_NOT_ALLOWED: {@value}. */
+  public static final String SQL_COMMAND_NOT_ALLOWED = "SQL Command not allowed in SQL Sentence.";
+
+  /** The Constant RUNNING_RULE: {@value}. */
+  public static final String RUNNING_RULE =
+      "An unknown error happenned while running the SQL rule.";
+
+  /** The Constant EVALUATING_RULE: {@value}. */
+  public static final String EVALUATING_RULE =
+      "An unknown error happenned while evaluating the SQL rule.";
+
 
   /**
    * Instantiates a new EEA error message.
