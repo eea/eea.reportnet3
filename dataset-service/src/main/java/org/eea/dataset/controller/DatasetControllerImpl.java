@@ -1425,6 +1425,12 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
+  /**
+   * Update check view.
+   *
+   * @param datasetId the dataset id
+   * @param updated the updated
+   */
   @Override
   @PutMapping("/private/viewUpdated/{datasetId}")
   @ApiOperation(value = "Mark the view as updated or not", hidden = true)
@@ -1436,6 +1442,12 @@ public class DatasetControllerImpl implements DatasetController {
     datasetService.updateCheckView(datasetId, updated);
   }
 
+  /**
+   * Gets the check view.
+   *
+   * @param datasetId the dataset id
+   * @return the check view
+   */
   @Override
   @GetMapping("/private/viewUpdated/{datasetId}")
   @ApiOperation(value = "Mark the view as updated or not", hidden = true)

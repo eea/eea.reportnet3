@@ -3483,12 +3483,24 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
+  /**
+   * Update check view.
+   *
+   * @param datasetId the dataset id
+   * @param updated the updated
+   */
   @Override
   @Transactional
   public void updateCheckView(@DatasetId Long datasetId, Boolean updated) {
     datasetRepository.updateCheckView(datasetId, updated);
   }
 
+  /**
+   * Gets the check view.
+   *
+   * @param datasetId the dataset id
+   * @return the check view
+   */
   @Override
   @Transactional
   public Boolean getCheckView(@DatasetId Long datasetId) {
