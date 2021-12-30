@@ -1529,6 +1529,8 @@ public class DatasetServiceImpl implements DatasetService {
     FieldValue field = fieldRepository.findById(fieldId);
     field.setValue("");
     fieldRepository.save(field);
+    // now the view is not updated, update the check to false
+    updateCheckView(datasetId, false);
   }
 
   /**
@@ -1573,6 +1575,8 @@ public class DatasetServiceImpl implements DatasetService {
     // Field table
     field.setValue(fileName);
     fieldRepository.save(field);
+    // now the view is not updated, update the check to false
+    updateCheckView(datasetId, false);
   }
 
   /**
@@ -1610,6 +1614,8 @@ public class DatasetServiceImpl implements DatasetService {
     attachmentRepository.deleteByFieldValueIdFieldSchema(fieldSchemaId);
     // Put the field value name to null
     fieldRepository.clearFieldValue(fieldSchemaId);
+    // now the view is not updated, update the check to false
+    updateCheckView(datasetId, false);
   }
 
 

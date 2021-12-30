@@ -246,7 +246,8 @@ public class FileTreatmentHelper implements DisposableBean {
       datasetService.createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria,
           SecurityContextHolder.getContext().getAuthentication().getName());
     }
-
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
     fileManagement(datasetId, tableSchemaId, schema, file, replace, integrationId, delimiter);
   }
 
@@ -1014,6 +1015,8 @@ public class FileTreatmentHelper implements DisposableBean {
         tableWithAttachmentFieldSet, datasetSchema.getTableSchemas());
     recordRepository.saveAll(allRecords);
     LOG.info("Data saved into dataset {}", datasetId);
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
   }
 
   /**
