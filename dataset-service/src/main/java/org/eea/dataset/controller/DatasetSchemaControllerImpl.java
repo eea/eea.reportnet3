@@ -219,7 +219,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @GetMapping(value = "/v1/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_CUSTODIAN_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_CUSTODIAN_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','TESTDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @ApiOperation(value = "Get dataset schema by dataset id",
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, OBSERVER, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR READ, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER ")
+      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, OBSERVER, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR, CUSTODIAN SUPPORT \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER, CUSTODIAN SUPPORT\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER, CUSTODIAN SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER, CUSTODIAN SUPPORT\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR READ, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER, CUSTODIAN SUPPORT ")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting the data")})
   public DataSetSchemaVO findDataSchemaByDatasetId(@ApiParam(type = "Long", value = "Dataset id",
@@ -241,8 +241,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @GetMapping(value = "/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_CUSTODIAN_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_CUSTODIAN_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','TESTDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
-  @ApiOperation(value = "Get dataset schema by dataset id", hidden = true,
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, OBSERVER, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR READ, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER ")
+  @ApiOperation(value = "Get dataset schema by dataset id", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting the data")})
   public DataSetSchemaVO findDataSchemaByDatasetIdLegacy(@ApiParam(type = "Long",
@@ -1170,7 +1169,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @GetMapping(value = "/v1/getSimpleSchema/dataset/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get dataset schema by dataset id",
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD \n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE \n\n EU dataset: CUSTODIAN, STEWARD ")
+      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD, CUSTODIAN SUPPORT \n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE \n\n EU dataset: CUSTODIAN, STEWARD ")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting data"),
       @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)})
@@ -1204,8 +1203,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD')")
   @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Get dataset schema by dataset id", hidden = true,
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD \n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE \n\n EU dataset: CUSTODIAN, STEWARD ")
+  @ApiOperation(value = "Get dataset schema by dataset id", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting data"),
       @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)})
@@ -1234,7 +1232,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @GetMapping(value = "/v1/getTableSchemasIds/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get list of dataset table schemas by dataset id",
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD \n\n Reference dataset: CUSTODIAN, STEWARD \n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE \n\n EU dataset: CUSTODIAN, STEWARD ")
+      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD, CUSTODIAN SUPPORT \n\n Reference dataset: CUSTODIAN, STEWARD \n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE \n\n EU dataset: CUSTODIAN, STEWARD ")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting data"),
       @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)})
@@ -1268,8 +1266,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_STEWARD','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @GetMapping(value = "/getTableSchemasIds/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Get list of dataset table schemas by dataset id", hidden = true,
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD \n\n Reference dataset: CUSTODIAN, STEWARD \n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE \n\n EU dataset: CUSTODIAN, STEWARD ")
+  @ApiOperation(value = "Get list of dataset table schemas by dataset id", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting data"),
       @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)})
@@ -1409,8 +1406,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @GetMapping(value = "/{datasetSchemaId}/exportFieldSchemas",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @ApiOperation(value = "Export field schemas", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE")
+  @ApiOperation(value = "Export field schemas", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully export data"),
       @ApiResponse(code = 500, message = "Error exporting data")})
   public ResponseEntity<byte[]> exportFieldSchemasLegacy(@ApiParam(type = "String",
@@ -1484,8 +1480,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PostMapping(value = "/{datasetSchemaId}/importFieldSchemas")
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
-  @ApiOperation(value = "Import field schemas", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE")
+  @ApiOperation(value = "Import field schemas", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully import data"),
       @ApiResponse(code = 400, message = "Error importing file")})
   public void importFieldSchemasLegacy(@ApiParam(type = "String", value = "Dataset schema Id",
@@ -1540,8 +1535,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @GetMapping(value = "/dataset/{datasetId}/exportFieldSchemas",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @ApiOperation(value = "Export field schemas from dataset", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE")
+  @ApiOperation(value = "Export field schemas from dataset", hidden = true)
   public ResponseEntity<byte[]> exportFieldSchemasFromDatasetLegacy(@ApiParam(type = "Long",
       value = "Dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
     return this.exportFieldSchemasFromDataset(datasetId);

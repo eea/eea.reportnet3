@@ -316,7 +316,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @LockMethod
   @PostMapping(value = "/executeEUDatasetExport")
   @ApiOperation(value = "Execute EUDataset Export", response = ExecutionResultVO.class,
-      hidden = true, responseContainer = "List", notes = "Allowed roles: CUSTODIAN, STEWARD")
+      hidden = true, responseContainer = "List")
   @ApiResponse(code = 500, message = "Internal Server Error")
   public List<ExecutionResultVO> executeEUDatasetExportLegacy(
       @ApiParam(value = "Dataflow Id", example = "0") @LockCriteria(
