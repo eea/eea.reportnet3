@@ -27,18 +27,11 @@
 }
 
 .contentTable {
-  display: table;
-  text-align: left;
   width: 100%;
-  border-collapse: separate;
 }
 
 .fieldsHeader {
-  display: grid;
-  grid-template-columns: 3% 5% 5% 5% 22% 22% 22% 10% 3% 3%;
-  grid-template-rows: 1fr;
-  grid-column-gap: 0px;
-  grid-row-gap: 0px;
+  display: none;
   color: var(--main-font-color);
   font-weight: bold;
 
@@ -125,9 +118,8 @@
     }*/
   }
   .PKWrap {
-    > label {
-      margin-left: 1.7rem !important;
-    }
+    text-align: center;
+
     .PKInfoButton {
       background-color: var(--c-white-color) !important;
       border-radius: 50% !important;
@@ -228,12 +220,23 @@
   @include shadow-0em;
 }
 
-@media screen and (max-width: 650px) {
-  .contentTable {
-    display: block;
-  }
-
+@media (min-width: 1090px) {
   .fieldsHeader {
-    display: none;
+    display: grid;
+    grid-template-columns: 5% 5% 5% 5% 16% 16% 16% 22% 5% 5%;
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+  }
+}
+
+@media (min-width: 1750px) {
+  .PKWrap {
+    label {
+      margin-left: 1.2rem;
+    }
+  }
+  .fieldsHeader {
+    grid-template-columns: 5% 5% 5% 5% 20% 20% 20% 10% 3% 3%;
   }
 }

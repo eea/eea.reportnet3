@@ -95,6 +95,7 @@
     "close": "Close",
     "closed": "Closed",
     "closeSidebar": "Close sidebar",
+    "codelistItems": "Code list items",
     "codelistEditor": "Single select editor",
     "codelistEditorItems": "Single select items",
     "codelistEditorItemsMessage": "Press <strong>enter</strong>, <strong>tab</strong> or <strong>paste the list</strong> (separated by semicolons) <u><strong>to add</strong></u> new items.",

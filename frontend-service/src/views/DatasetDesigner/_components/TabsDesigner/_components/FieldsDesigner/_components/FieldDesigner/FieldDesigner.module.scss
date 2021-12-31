@@ -26,38 +26,34 @@
 }
 
 .draggableFieldDiv {
-  display: grid;
-  grid-template-columns: 3% 5% 5% 5% 22% 22% 22% 10% 3% 3%;
-  grid-template-rows: 1fr;
-  grid-column-gap: 0px;
-  grid-row-gap: 0px;
-
+  display: table;
+  width: 100%;
+  padding-bottom: 20px;
+  margin: 5% auto 0;
+  text-align: center;
   .draggableFieldContentCell {
+    display: flex;
+    justify-content: center;
     .draggableFieldCell {
-      &:first-child {
-        display: none;
-        font-weight: bold;
-        padding-top: 10px;
-        padding-bottom: 10px;
-      }
-    }
-
-    &:nth-child(8) {
-      button {
-        width: 100%;
-      }
-    }
-    &:nth-child(9),
-    &:nth-child(10) {
-      width: 100%;
-    }
-
-    .draggableFieldCell {
+      display: flex;
+      flex-direction: row;
+      width: 50%;
       margin-right: 0.5em;
       padding: 3px 0;
-      &:nth-child(2) {
+      &:first-child {
+        display: flex;
+        text-align: left;
+        width: 50%;
+        font-weight: bold;
+        padding-right: 1em;
+      }
+      &:last-child {
         display: flex;
         justify-content: center;
+        align-items: center;
+        div > svg {
+          bottom: 0.7rem;
+        }
       }
     }
   }
@@ -82,14 +78,14 @@
 }
 
 .dropdownFieldType {
-  width: 100%;
+  text-align: left;
   &.withCodeListOrLink {
     width: 100%;
   }
 }
 
 .codelistButton {
-  margin-left: 0.4rem !important;
+  //margin-left: 0.4rem !important;
   border: 1px solid var(--general-border-color) !important;
   width: 8%;
   height: 1.95rem;
@@ -265,45 +261,55 @@
   }
 }
 
-@media screen and (max-width: 1400px) {
-  .draggableFieldDiv {
-    grid-template-columns: 2% 5% 5% 5% 21% 21% 21% 10% 5% 5%;
-  }
-}
-
-@media screen and (max-width: 850px) {
-  .button {
-    width: 100%;
-  }
-  .draggableFieldDiv {
-    display: table;
-    width: 100%;
-    border-collapse: separate;
-    padding-bottom: 20px;
-    margin: 5% auto 0;
-    text-align: center;
-    .draggableFieldContentCell {
-      display: flex;
-      justify-content: center;
-
-      .draggableFieldCell {
-        display: flex;
-        flex-direction: row;
-        width: 50%;
-        margin-right: 0;
-        &:first-child {
-          display: flex;
-          text-align: left;
-          width: 50%;
-          padding-right: 1em;
+@media (max-width: 1089px) {
+  .draggableFieldContentCell {
+    .draggableFieldCell {
+      &:last-child {
+        button {
+          width: 100%;
         }
       }
     }
   }
 }
 
-@media screen and (min-width: 1950px) {
+@media (min-width: 1090px) {
+  .smallItems {
+    width: 5%;
+  }
+
+  .bigItems {
+    width: 16%;
+  }
+
   .draggableFieldDiv {
-    grid-template-columns: 3% 5% 5% 5% 23% 23% 23% 10% 1.5% 1.5%;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+
+    .draggableFieldContentCell {
+      .draggableFieldCell {
+        width: 100%;
+        &:first-child {
+          display: none;
+          padding-top: 10px;
+          padding-bottom: 10px;
+        }
+        &:last-child {
+          div > svg {
+            bottom: 0.8rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: 1740px) {
+  .bigItems {
+    width: 20%;
   }
 }

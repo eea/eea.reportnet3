@@ -873,8 +873,8 @@ export const FieldDesigner = ({
   const renderCheckboxes = () => (
     <Fragment>
       {!addField ? (
-        <div className={styles.draggableFieldContentCell}>
-          <div className={styles.draggableFieldCell}></div>
+        <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
+          <div className={styles.draggableFieldCell}>{resourcesContext.messages['moveField']}</div>
           <div className={styles.draggableFieldCell}>
             <FontAwesomeIcon
               aria-label={resourcesContext.messages['moveField']}
@@ -884,11 +884,19 @@ export const FieldDesigner = ({
           </div>
         </div>
       ) : (
-        <div className={styles.draggableFieldContentCell}>
-          <div className={styles.draggableFieldCell}></div>
+        <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
+          <div className={styles.draggableFieldCell}>{resourcesContext.messages['add']}</div>
+          <div className={styles.draggableFieldCell}>
+            <FontAwesomeIcon
+              aria-label={resourcesContext.messages['add']}
+              icon={AwesomeIcons('plus')}
+              style={{ width: '32px', opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
+            />
+          </div>
         </div>
       )}
-      <div className={styles.draggableFieldContentCell}>
+
+      <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
         <div className={styles.draggableFieldCell}>
           <span className={styles.PKWrap}>
             <label>{resourcesContext.messages['pk']}</label>
@@ -931,7 +939,7 @@ export const FieldDesigner = ({
           />
         </div>
       </div>
-      <div className={styles.draggableFieldContentCell}>
+      <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
         <div className={styles.draggableFieldCell}>
           <label>{resourcesContext.messages['required']}</label>
         </div>
@@ -941,7 +949,7 @@ export const FieldDesigner = ({
             checked={fieldDesignerState.fieldRequiredValue}
             className={`datasetSchema-required-help-step ${
               fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-            } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
+            } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled} `}
             disabled={
               Boolean(fieldDesignerState.fieldPKValue) || isDataflowOpen || isDesignDatasetEditorRead || isLoading
             }
@@ -956,7 +964,7 @@ export const FieldDesigner = ({
           />
         </div>
       </div>
-      <div className={styles.draggableFieldContentCell}>
+      <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
         <div className={styles.draggableFieldCell}>
           <label>{resourcesContext.messages['readOnly']}</label>
         </div>
@@ -986,7 +994,11 @@ export const FieldDesigner = ({
     ) {
       return (
         <div className={styles.draggableFieldContentCell}>
-          <div className={styles.draggableFieldCell}></div>
+          <div className={styles.draggableFieldCell}>
+            {!isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
+              ? `${resourcesContext.messages['codelistItems']}`
+              : ''}
+          </div>
           <div className={styles.draggableFieldCell}>
             <Button
               className={`${styles.codelistButton} p-button-secondary-transparent ${
@@ -1016,6 +1028,13 @@ export const FieldDesigner = ({
     ) {
       return (
         <div className={styles.draggableFieldContentCell}>
+          <div className={styles.draggableFieldCell}>
+            {isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
+              ? resourcesContext.messages['linkSelection']
+              : isNil(fieldDesignerState.fieldLinkValue.name)
+              ? '...'
+              : `${resourcesContext.messages['selectedLink']}`}
+          </div>
           <div className={styles.draggableFieldCell}>
             <Button
               className={`${styles.codelistButton} p-button-secondary-transparent ${
@@ -1057,6 +1076,7 @@ export const FieldDesigner = ({
     ) {
       return (
         <div className={styles.draggableFieldContentCell}>
+          <div className={styles.draggableFieldCell}>{resourcesContext.messages['validExtensions']}</div>
           <div className={styles.draggableFieldCell}>
             <Button
               className={`${styles.codelistButton} p-button-secondary-transparent ${
@@ -1236,7 +1256,7 @@ export const FieldDesigner = ({
 
   const renderInputs = () => (
     <Fragment>
-      <div className={styles.draggableFieldContentCell}>
+      <div className={`${styles.draggableFieldContentCell} ${styles.bigItems}`}>
         <div className={styles.draggableFieldCell}>
           <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}>
             {resourcesContext.messages['newFieldPlaceHolder']}
@@ -1280,7 +1300,7 @@ export const FieldDesigner = ({
           />
         </div>
       </div>
-      <div className={styles.draggableFieldContentCell}>
+      <div className={`${styles.draggableFieldContentCell} ${styles.bigItems}`}>
         <div className={styles.draggableFieldCell}>
           <label>{resourcesContext.messages['newFieldDescriptionPlaceHolder']}</label>
         </div>
@@ -1312,7 +1332,7 @@ export const FieldDesigner = ({
           />
         </div>
       </div>
-      <div className={styles.draggableFieldContentCell}>
+      <div className={`${styles.draggableFieldContentCell} ${styles.bigItems}`}>
         <div className={styles.draggableFieldCell}>
           <label>{resourcesContext.messages['newFieldTypePlaceHolder']}</label>
         </div>
