@@ -1424,6 +1424,9 @@
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
     "errorBoundaryClipboardButtonLabel": "Copy to clipboard",
-    "impossibleRequesterRoleError": "The user cannot be assigned as requester"
+    "qcHistoryDialogHeader": "QC history",
+    "qcHistoryButtonTooltip": "View QC history",
+    "impossibleRequesterRoleError": "The user cannot be assigned as requester",
+    "callFmeProcessFailedEvent": "Error calling to FME at <strong title='{:datasetName}'>{:shortDatasetName}</strong>"
   }
 }
