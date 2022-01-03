@@ -885,14 +885,10 @@ export const FieldDesigner = ({
         </div>
       ) : (
         <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
-          <div className={styles.draggableFieldCell}>{resourcesContext.messages['add']}</div>
           <div className={styles.draggableFieldCell}>
-            <FontAwesomeIcon
-              aria-label={resourcesContext.messages['add']}
-              icon={AwesomeIcons('plus')}
-              style={{ width: '32px', opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
-            />
+            {resourcesContext.messages['add']} {resourcesContext.messages['field']}
           </div>
+          <div className={styles.draggableFieldCell}></div>
         </div>
       )}
 

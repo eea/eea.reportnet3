@@ -28,32 +28,43 @@
 .draggableFieldDiv {
   display: table;
   width: 100%;
-  padding-bottom: 20px;
   margin: 5% auto 0;
   text-align: center;
+  background-color: var(--c-gray-5);
+  border: 1px solid var(--c-gray-25);
+  border-radius: 4px;
+  box-shadow: 0px 4px var(--c-gray-25);
   .draggableFieldContentCell {
+    height: 3em;
     display: flex;
     justify-content: center;
     .draggableFieldCell {
       display: flex;
       flex-direction: row;
       width: 50%;
-      margin-right: 0.5em;
-      padding: 3px 0;
+      border-bottom: 1px solid var(--c-gray-25);
       &:first-child {
         display: flex;
         text-align: left;
         width: 50%;
         font-weight: bold;
-        padding-right: 1em;
+        padding: 0 1em;
+        align-items: center;
       }
       &:last-child {
         display: flex;
         justify-content: center;
         align-items: center;
+        padding: 0 1em;
         div > svg {
           bottom: 0.7rem;
         }
+        div > label > svg {
+          display: none;
+        }
+      }
+      button {
+        background-color: var(--c-white-color);
       }
     }
   }
@@ -78,6 +89,7 @@
 }
 
 .dropdownFieldType {
+  width: 100%;
   text-align: left;
   &.withCodeListOrLink {
     width: 100%;
@@ -110,6 +122,7 @@
   border-radius: 3px;
   border: 1px solid var(--general-border-color);
   color: var(--main-font-color);
+  background-color: var(--c-white-color);
   &:hover {
     background-color: var(--button-secondary-transparent-bg-hover);
     color: var(--main-font-color);
@@ -185,6 +198,15 @@
 .qcButton {
   border: 1px solid var(--general-border-color) !important;
   align-self: center;
+  background-color: var(--c-white-color) !important;
+  span {
+    &:first-child {
+      display: none;
+    }
+    &:last-child {
+      padding: 0.5em !important;
+    }
+  }
   &:hover {
     border-color: var(--button-secondary-border-color-hover) !important;
   }
@@ -274,6 +296,16 @@
 }
 
 @media (min-width: 1090px) {
+  .qcButton {
+    span {
+      &:first-child {
+        display: block;
+      }
+      &:last-child {
+        padding: 0.429em 1em 0.429em 2.25em !important;
+      }
+    }
+  }
   .smallItems {
     width: 5%;
   }
@@ -283,24 +315,36 @@
   }
 
   .draggableFieldDiv {
-    width: 100%;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     padding: 0;
     margin: 0;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
 
     .draggableFieldContentCell {
+      height: auto;
       .draggableFieldCell {
+        margin-right: 0.5em;
         width: 100%;
+        border: none;
+        padding: 3px 0;
         &:first-child {
           display: none;
           padding-top: 10px;
           padding-bottom: 10px;
         }
         &:last-child {
+          padding: 3px 0;
           div > svg {
             bottom: 0.8rem;
+          }
+          div > label > svg {
+            display: revert;
+            float: right;
           }
         }
       }
