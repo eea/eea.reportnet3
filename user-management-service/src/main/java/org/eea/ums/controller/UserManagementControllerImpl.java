@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -342,7 +343,8 @@ public class UserManagementControllerImpl implements UserManagementController {
       backupManagmentControlerService.readAndSaveUsers(file.getInputStream());
     } catch (IOException e) {
       LOG_ERROR.error("Error creating users", e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.CREATING_USERS_THROUGH_FILE);
     }
   }
 
@@ -432,6 +434,17 @@ public class UserManagementControllerImpl implements UserManagementController {
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
 
+    // Check if the user image it's a valid one
+    if (attributes.containsKey("userImage")) {
+      List<String> imageList = attributes.get("userImage");
+      if (CollectionUtils.isNotEmpty(imageList) && !imageList.get(0)
+          .matches("^000~data:image/(png|jpg|gif|jpeg|bmp);base64,([A-Za-z0-9+/]{4})*?$")) {
+        LOG_ERROR.error(
+            "Error updating the attributes of the user with id {}. The image is not valid", userId);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+            String.format(EEAErrorMessage.FILE_FORMAT));
+      }
+    }
     UserRepresentation user = keycloakConnectorService.getUser(userId);
     if (user != null) {
       user = securityProviderInterfaceService.setAttributesWithApiKey(user, attributes);
@@ -649,7 +662,7 @@ public class UserManagementControllerImpl implements UserManagementController {
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
   }
 
@@ -827,7 +840,7 @@ public class UserManagementControllerImpl implements UserManagementController {
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
   }
 
@@ -897,8 +910,8 @@ public class UserManagementControllerImpl implements UserManagementController {
           "Downloading file generated when exporting Users by country. Dataflow Id {}. Filename {}. Error message: {}",
           dataflowId, fileName, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
-          "Trying to download a file generated during the export users by country process but the file is not found, dataflowId: %s + filename: %s + message: %s ",
-          dataflowId, fileName, e.getMessage()), e);
+          "Trying to download a file generated during the export users by country process but the file is not found, dataflowId: %s + filename: %s",
+          dataflowId, fileName));
     }
   }
 

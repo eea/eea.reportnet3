@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.eea.dataset.service.ReferenceDatasetService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
@@ -88,7 +89,7 @@ public class ReferenceDatasetControllerImplTest {
     try {
       referenceDatasetControllerImpl.updateReferenceDataset(1L, true);
     } catch (ResponseStatusException e) {
-      Assert.assertEquals("Fail", e.getReason());
+      Assert.assertEquals(EEAErrorMessage.UPDATING_REFERENCE_DATASET, e.getReason());
       Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       throw e;
     }
