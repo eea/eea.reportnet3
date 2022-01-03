@@ -44,14 +44,10 @@ const applyMultiSelects = ({ filterBy, filterByKeys, item }) => {
   );
 };
 
-const applySearch = ({ filterBy, filterByKeys, item }) => {
-  const filteredKeys = filterByKeys.SEARCH.filter(key => Object.keys(filterBy).includes(key));
+const applySearch = ({ filterByKeys, item, value }) => {
+  const filteredKeys = filterByKeys.SEARCH.filter(key => key);
 
-  return filteredKeys.every(
-    filteredKey =>
-      areEquals(filterBy[filteredKey], '') ||
-      item[filteredKey].toLowerCase().includes(filterBy[filteredKey].toLowerCase())
-  );
+  return filteredKeys.some(key => isEmpty(key) || item[key].toLowerCase().includes(value.toLowerCase()));
 };
 
 export const ApplyFiltersUtils = { applyDates, applyInputs, applyMultiSelects, applySearch };

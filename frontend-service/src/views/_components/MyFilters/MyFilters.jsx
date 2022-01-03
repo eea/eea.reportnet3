@@ -49,8 +49,8 @@ export const MyFilters = ({
   const [searchBy, setSearchBy] = useRecoilState(searchStateFamily(viewType));
   const [sortBy, setSortBy] = useRecoilState(sortByStateFamily(viewType));
 
-  const [filterBy, setFilterByRecoilState] = useRecoilState(filterByState(viewType));
-  const [filteredData, setFilteredDataRecoilState] = useRecoilState(filteredDataState(viewType));
+  const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
+  const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
 
   console.log('filterBy :>> ', filterBy);
 
@@ -138,7 +138,9 @@ export const MyFilters = ({
     options.forEach(option => {
       if (!option) return;
 
-      console.log('option.type :>> ', option.type);
+      if (option.type === 'SEARCH') {
+        filterKeys.SEARCH = option.searchBy;
+      }
 
       filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption.key) || [
         ...filterKeys[option.type],
@@ -160,18 +162,19 @@ export const MyFilters = ({
       }
 
       // setFilters({ ...filters, filteredData });
-      setFilteredDataRecoilState(filteredData);
+      setFilteredData(filteredData);
     } catch (error) {
       console.error('MyFilters - loadFilters.', error);
     }
   };
 
-  const onApplyFilters = ({ filterBy }) => {
+  const onApplyFilters = ({ filterBy, searchValue = searchBy }) => {
     return data.filter(
       item =>
         applyInputs({ filterBy, filterByKeys, item }) &&
         applyDates({ filterBy, filterByKeys, item }) &&
-        applyMultiSelects({ filterBy, filterByKeys, item })
+        applyMultiSelects({ filterBy, filterByKeys, item }) &&
+        applySearch({ filterByKeys, item, value: searchValue })
     );
   };
 
@@ -179,18 +182,21 @@ export const MyFilters = ({
     const filteredData = onApplyFilters({ filterBy: { ...filterBy, [key]: value } });
 
     // setFilters({ ...filters, filterBy: { ...filters.filterBy, [key]: value }, filteredData });
-    setFilterByRecoilState({ ...filterBy, [key]: value });
-    setFilteredDataRecoilState(filteredData);
+    setFilterBy({ ...filterBy, [key]: value });
+    setFilteredData(filteredData);
   };
 
   const onResetFilters = () => {
     // setFilters({ filterBy: {}, filteredData: data });
-    setFilterByRecoilState({});
-    setFilteredDataRecoilState(data);
+    setFilterBy({});
+    setFilteredData(data);
   };
 
   const onSearch = value => {
+    const filteredData = onApplyFilters({ filterBy, searchValue: value });
+
     setSearchBy(value);
+    setFilteredData(filteredData);
   };
 
   const onSortData = key => {
@@ -199,7 +205,7 @@ export const MyFilters = ({
 
     setSortBy({ [key]: sortOption });
     // setFilters({ ...filters, filteredData: sortedData });
-    setFilteredDataRecoilState(sortedData);
+    setFilteredData(sortedData);
   };
 
   const updateValueLabelsAnimationDate = (labelsAnimationDate, position, key, value) => {
@@ -379,7 +385,7 @@ export const MyFilters = ({
         <InputText
           className={styles.searchInput}
           id={'searchInput'}
-          onChange={event => setSearchBy(event.target.value)}
+          onChange={event => onSearch(event.target.value)}
           value={searchBy}
         />
 

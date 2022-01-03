@@ -1,9 +1,9 @@
 import { atomFamily } from 'recoil';
 
-export const filtersStateFamily = atomFamily({
-  key: 'filtersState',
-  default: () => ({ filterBy: {}, filteredData: [] })
-});
+// export const filtersStateFamily = atomFamily({
+//   key: 'filtersState',
+//   default: () => ({ filterBy: {}, filteredData: [] })
+// });
 
 export const filteredDataState = atomFamily({
   key: 'filteredData',
