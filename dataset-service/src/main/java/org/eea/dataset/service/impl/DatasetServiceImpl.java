@@ -1529,6 +1529,8 @@ public class DatasetServiceImpl implements DatasetService {
     FieldValue field = fieldRepository.findById(fieldId);
     field.setValue("");
     fieldRepository.save(field);
+    // now the view is not updated, update the check to false
+    updateCheckView(datasetId, false);
   }
 
   /**
@@ -1573,6 +1575,8 @@ public class DatasetServiceImpl implements DatasetService {
     // Field table
     field.setValue(fileName);
     fieldRepository.save(field);
+    // now the view is not updated, update the check to false
+    updateCheckView(datasetId, false);
   }
 
   /**
@@ -1610,6 +1614,8 @@ public class DatasetServiceImpl implements DatasetService {
     attachmentRepository.deleteByFieldValueIdFieldSchema(fieldSchemaId);
     // Put the field value name to null
     fieldRepository.clearFieldValue(fieldSchemaId);
+    // now the view is not updated, update the check to false
+    updateCheckView(datasetId, false);
   }
 
 
@@ -2058,27 +2064,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
 
-  /**
-   * Sanitize records.
-   *
-   * @param records the records
-   *
-   * @return the list
-   */
-  private List<RecordValue> sanitizeRecords(final List<RecordValue> records) {
-    List<RecordValue> sanitizedRecords = new ArrayList<>();
-    if (records != null && !records.isEmpty()) {
-      Set<String> processedRecords = new HashSet<>();
-      for (RecordValue recordValue : records) {
-        if (!processedRecords.contains(recordValue.getId())) {
-          processedRecords.add(recordValue.getId());
-          sanitizedRecords.add(recordValue);
-        }
-
-      }
-    }
-    return sanitizedRecords;
-  }
 
   /**
    * Process table stats.
@@ -2366,102 +2351,7 @@ public class DatasetServiceImpl implements DatasetService {
     return readOnly;
   }
 
-  /**
-   * Replace data.
-   *
-   * @param schema the schema
-   * @param originDataset the origin dataset
-   * @param targetDataset the target dataset
-   * @param listOfTablesFiltered the list of tables filtered
-   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
-   * @param attachments the attachments
-   * @return the list
-   */
-  private List<RecordValue> replaceData(DataSetSchema schema, Long originDataset,
-      Long targetDataset, List<TableSchema> listOfTablesFiltered,
-      Map<String, String> dictionaryOriginTargetObjectId, List<AttachmentValue> attachments) {
-    List<RecordValue> result = new ArrayList<>();
-    TenantResolver.setTenantName(
-        String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
 
-    // attachment values
-    Iterable<AttachmentValue> iterableAttachments = attachmentRepository.findAll();
-    Map<String, AttachmentValue> dictionaryIdFieldAttachment = new HashMap<>();
-    iterableAttachments.forEach(attachment -> {
-      if (null != attachment.getFieldValue() && null != attachment.getFieldValue().getId()) {
-        dictionaryIdFieldAttachment.put(attachment.getFieldValue().getId(), attachment);
-      }
-    });
-
-    // fill the data
-    DatasetValue ds = new DatasetValue();
-    ds.setId(targetDataset);
-
-    Optional<PartitionDataSetMetabase> datasetPartition =
-        partitionDataSetMetabaseRepository.findFirstByIdDataSet_id(targetDataset);
-    final Long datasetPartitionId =
-        datasetPartition.isPresent() ? datasetPartition.get().getId() : null;
-
-    Map<String, RecordValue> mapTargetRecordValues = new HashMap<>();
-    for (TableSchema desingTable : listOfTablesFiltered) {
-      // Get number of fields per record. Doing it on origin table schema as origin and target has
-      // the same structure
-      Integer numberOfFieldsInRecord = desingTable.getRecordSchema().getFieldSchema().size();
-
-      // get target table by translating origing table schema into target table schema and then
-      // query to target database
-      TenantResolver.setTenantName(
-          String.format(LiteralConstants.DATASET_FORMAT_NAME, targetDataset.toString()));
-      TableValue targetTable = tableRepository.findByIdTableSchema(
-          dictionaryOriginTargetObjectId.get(desingTable.getIdTableSchema().toString()));
-
-      TenantResolver.setTenantName(
-          String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-
-      // creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
-
-      if (Boolean.TRUE.equals(desingTable.getFixedNumber())) {
-        LOG.info("Processing Table {} with table schema {} from Dataset {} and Target Dataset {} ",
-            desingTable.getNameTableSchema(), desingTable.getIdTableSchema(), originDataset,
-            targetDataset);
-        processRecordPageWithFixedRecords(dictionaryIdFieldAttachment, targetTable,
-            datasetPartitionId, dictionaryOriginTargetObjectId, targetDataset, originDataset, null);
-      } else {
-        // creating a first page of 1000 records, this means 1000*Number Of Fields in a Record
-
-        Pageable fieldValuePage = PageRequest.of(0, 1000 * numberOfFieldsInRecord);
-
-        List<FieldValue> pagedFieldValues;
-
-        // run through the origin table, getting its records and fields and translating them into
-        // the
-        // new schema
-        while (!(pagedFieldValues = fieldRepository.findByRecord_IdRecordSchema(
-            desingTable.getRecordSchema().getIdRecordSchema().toString(), fieldValuePage))
-                .isEmpty()) {
-          LOG.info(
-              "Processing page {} with {} records of {} fields from Table {} with table schema {} from Dataset {} and Target Dataset {} ",
-              fieldValuePage.getPageNumber(), pagedFieldValues.size() / numberOfFieldsInRecord,
-              numberOfFieldsInRecord, desingTable.getNameTableSchema(),
-              desingTable.getIdTableSchema(), originDataset, targetDataset);
-          // For this, the best is getting fields in big completed sets and assign them to the
-          // records
-          // to avoid excessive queries to bd
-
-          processRecordPage(pagedFieldValues, result, mapTargetRecordValues,
-              dictionaryIdFieldAttachment, targetTable, numberOfFieldsInRecord, null,
-              datasetPartitionId, dictionaryOriginTargetObjectId);
-
-          fieldValuePage = fieldValuePage.next();
-          TenantResolver.setTenantName(
-              String.format(LiteralConstants.DATASET_FORMAT_NAME, originDataset.toString()));
-        }
-      }
-    }
-
-    attachments.addAll(dictionaryIdFieldAttachment.values());
-    return result;
-  }
 
   /**
    * Process record page with fixed records.
@@ -3590,6 +3480,31 @@ public class DatasetServiceImpl implements DatasetService {
     validation.setErrors(getFieldAndRecordErrors(datasetId, idTableSchema));
     validation.setTotalFilteredRecords(countValidations);
     return validation;
+  }
+
+
+  /**
+   * Update check view.
+   *
+   * @param datasetId the dataset id
+   * @param updated the updated
+   */
+  @Override
+  @Transactional
+  public void updateCheckView(@DatasetId Long datasetId, Boolean updated) {
+    datasetRepository.updateCheckView(datasetId, updated);
+  }
+
+  /**
+   * Gets the check view.
+   *
+   * @param datasetId the dataset id
+   * @return the check view
+   */
+  @Override
+  @Transactional
+  public Boolean getCheckView(@DatasetId Long datasetId) {
+    return datasetRepository.findViewUpdatedById(datasetId);
   }
 
   /**

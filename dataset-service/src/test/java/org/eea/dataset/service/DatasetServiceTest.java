@@ -3752,6 +3752,18 @@ public class DatasetServiceTest {
         EntityTypeEnum.DATASET));
   }
 
+  @Test
+  public void getCheckViewTest() {
+    Assert.assertFalse(datasetService.getCheckView(1L));
+  }
+
+  @Test
+  public void updateCheckViewTest() {
+    datasetService.updateCheckView(1L, true);
+    Mockito.verify(datasetRepository, times(1)).updateCheckView(Mockito.anyLong(), Mockito.any());
+  }
+
+
   /**
    * After tests we remove the files.
    */
