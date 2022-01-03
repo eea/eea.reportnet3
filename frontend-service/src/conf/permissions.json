@@ -21,6 +21,10 @@
       "key": "DATA_STEWARD",
       "label": "STEWARD"
     },
+    "CUSTODIAN_SUPPORT": {
+      "key": "CUSTODIAN_SUPPORT",
+      "label": "CUSTODIAN SUPPORT"
+    },
     "OBSERVER": {
       "key": "DATA_OBSERVER",
       "label": "OBSERVER"

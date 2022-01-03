@@ -399,7 +399,7 @@ export const MyFilters = ({
     );
   };
 
-  const renderSortButtonEmpty = () => <div className={styles.sortButtonEmpty} />;
+  const renderSortButtonEmpty = () => <div className={styles.sortButtonSize} />;
 
   return (
     <div className={className ? styles[className] : styles.default}>
