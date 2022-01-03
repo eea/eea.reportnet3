@@ -12,6 +12,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -422,5 +423,16 @@ public interface RulesController {
    */
   @PostMapping(value = "/evaluateSqlRule")
   Double evaluateSqlRule(@RequestParam("datasetId") Long datasetId, @RequestBody SqlRuleVO sqlRule);
+
+  /**
+   * Gets the rule historic.
+   *
+   * @param datasetId the dataset id
+   * @param ruleId the rule id
+   * @return the rule historic
+   */
+  @GetMapping(value = "/historicInfo")
+  List<RuleHistoricInfoVO> getRuleHistoric(@RequestParam("datasetId") long datasetId,
+      @RequestParam("ruleId") String ruleId);
 
 }

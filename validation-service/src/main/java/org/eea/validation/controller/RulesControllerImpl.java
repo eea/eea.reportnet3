@@ -21,6 +21,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -936,4 +937,27 @@ public class RulesControllerImpl implements RulesController {
 
     return sqlCost;
   }
+
+  /**
+   * Gets the rule historic.
+   *
+   * @param datasetId the dataset id
+   * @param ruleId the rule id
+   * @return the rule historic
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN')")
+  @ApiOperation(value = "Get a historic information about the updates of a rule", hidden = false)
+  @GetMapping(value = "/historicInfo")
+  public List<RuleHistoricInfoVO> getRuleHistoric(@RequestParam("datasetId") long datasetId,
+      @RequestParam("ruleId") String ruleId) {
+    try {
+      return rulesService.getRuleHistoricInfo(datasetId, ruleId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Not found rule historic information, please check rule with id: {}", ruleId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+    }
+  }
+
 }

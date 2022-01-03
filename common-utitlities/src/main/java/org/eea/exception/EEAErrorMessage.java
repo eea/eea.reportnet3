@@ -367,6 +367,9 @@ public final class EEAErrorMessage {
   public static final String ERROR_VALIDATING_LEAD_REPORTERS =
       "There was an error validating the Lead Reporters.";
 
+  /** The Constant HISTORIC_QC_NOT_FOUND: {@value}. */
+  public static final String HISTORIC_QC_NOT_FOUND = "There aren't any historic information.";
+
   /**
    * Instantiates a new EEA error message.
    */
