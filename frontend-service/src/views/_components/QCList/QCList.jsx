@@ -736,7 +736,7 @@ export const QCList = ({
             getFilteredData={onLoadFilteredData}
             options={FILTER_OPTIONS}
           />
-          <Filters
+          {/* <Filters
             className="filter-lines"
             data={tabsValidationsState.validationList.validations}
             getFilteredData={onLoadFilteredData}
@@ -744,7 +744,7 @@ export const QCList = ({
             options={filterOptions}
             searchAll
             searchBy={['shortCode', 'name', 'description', 'message']}
-          />
+          /> */}
         </div>
         {!isEmpty(tabsValidationsState.filteredData) ? (
           <DataTable

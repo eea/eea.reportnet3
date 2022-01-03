@@ -37,7 +37,6 @@ export const MyFilters = ({
   className,
   data = [],
   getFilteredData,
-  isSearchVisible,
   isStrictMode,
   onFilter,
   options = [],
@@ -364,13 +363,6 @@ export const MyFilters = ({
           onChange={event => setSearchBy(event.target.value)}
           value={searchBy}
         />
-        {/* {filterState.searchBy && (
-        <Button
-          className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
-          icon="cancel"
-          onClick={() => onSearchData('')}
-        />
-      )} */}
 
         <label className={styles.label} htmlFor={'searchInput'}>
           {option.label}
@@ -379,31 +371,21 @@ export const MyFilters = ({
     );
   };
 
-  const renderSortButton = ({ key }) => {
-    const getClassName = () => {
-      const inactive = `p-button-secondary-transparent ${styles.sortButton}`;
-      const active = `p-button-secondary-transparent ${styles.sortButton} ${styles.iconActive}`;
-      if (sortBy[key] === undefined || sortBy[key] === 'idle') {
-        return inactive;
-      } else {
-        return active;
-      }
-    };
-    return (
-      <Button
-        className={getClassName()}
-        icon={switchSortByIcon(sortBy[key])}
-        onClick={() => onSortData(key)}
-        style={{ fontSize: '0.12rem' }}
-      />
-    );
-  };
+  const renderSortButton = ({ key }) => (
+    <Button
+      className={`p-button-secondary-transparent ${styles.sortButton} ${
+        isNil(sortBy[key]) || sortBy[key] === 'idle' ? null : styles.iconActive
+      }`}
+      icon={switchSortByIcon(sortBy[key])}
+      onClick={() => onSortData(key)}
+      style={{ fontSize: '0.12rem' }}
+    />
+  );
 
   const renderSortButtonEmpty = () => <div className={styles.sortButtonSize} />;
 
   return (
     <div className={className ? styles[className] : styles.default}>
-      {isSearchVisible ? <InputText placeholder="Search" /> : null}
       {renderFilters()}
       {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
