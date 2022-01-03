@@ -522,7 +522,7 @@ export const WebformField = ({
             )}
             {
               <Button
-                className={`p-button-animated-blink p-button-primary-transparent`}
+                className="p-button-animated-blink p-button-primary-transparent"
                 icon="import"
                 label={
                   !isNil(field.value) && field.value !== ''
@@ -542,7 +542,7 @@ export const WebformField = ({
             }
 
             <Button
-              className={`p-button-animated-blink p-button-primary-transparent`}
+              className="p-button-animated-blink p-button-primary-transparent"
               icon="trash"
               onClick={() => onFileDeleteVisible(field.fieldId, field.fieldSchemaId)}
             />

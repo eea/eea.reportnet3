@@ -1,0 +1,203 @@
+@import '_styles/mixins';
+
+/* Default css for options from MultiSelect when nestedOptions hasn't category */
+.statusBox {
+  border-radius: 3px;
+  color: var(--main-font-color);
+  font-size: 0.833rem;
+  font-weight: 600;
+  padding: 4px;
+}
+
+.icon {
+  background-color: transparent;
+  border: none;
+  color: var(--button-secondary-transparent-color-hover);
+  cursor: pointer;
+  font-size: 16pt !important;
+  height: 1.6em !important;
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  &:enabled:focus {
+    box-shadow: 0 0 0 0 var(--c-white-color) !important;
+    outline: none;
+  }
+
+  &:enabled:active,
+  &:enabled:hover {
+    background-color: transparent !important;
+    border-color: transparent !important;
+  }
+}
+
+.cancelIcon {
+  font-size: 12pt !important;
+  height: 2.1rem !important;
+}
+
+.iconActive {
+  color: var(--filter-sort-icon-color) !important;
+}
+
+.block .elementFilter {
+  display: flex;
+  border-bottom: var(--inputtext-border) !important;
+}
+
+.block {
+  display: flex;
+  color: var(--font-filters);
+  height: 2rem;
+  font-size: 0.8333rem;
+
+  .label {
+    clip: auto;
+    height: auto;
+    overflow: visible;
+    width: 90%;
+  }
+
+  .inputFilter {
+    background: transparent;
+    border: 0px;
+    border-radius: 0px;
+    width: 100% !important;
+
+    &:focus,
+    &:enabled:focus {
+      box-shadow: 0 0 0 0 var(--c-blue-120) !important;
+    }
+  }
+  .inputFilter::placeholder {
+    font-style: normal;
+    font-size: 0.8333rem;
+  }
+
+  .multiselectFilter {
+    border: 0px;
+    border-radius: 0px;
+    border-bottom: var(--inputtext-border) !important;
+    color: var(--floating-label-color) !important;
+    font-size: 0.8333rem !important;
+    height: 2rem;
+    padding-left: 0em;
+    width: 90% !important;
+
+    label {
+      color: var(--font-filters);
+      margin-left: 0.1rem;
+    }
+
+    li {
+      opacity: 0.8;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+  .selectHeader {
+    border-radius: 3px;
+    color: var(--floating-label-color);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 4px;
+  }
+  .labelDown {
+    font-size: 0.8333rem !important;
+    top: 50% !important;
+    color: var(--font-filters);
+  }
+}
+
+.resetButton {
+  margin-left: auto;
+  margin-bottom: auto;
+}
+
+.sortButtonSize {
+  height: 1.6em !important;
+  width: 3.1rem !important;
+}
+
+.sortButton {
+  @extend .sortButtonSize;
+  background-color: transparent;
+  border: none;
+  color: var(--button-secondary-transparent-color-hover);
+  cursor: pointer;
+  font-size: 16pt !important;
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 1 !important;
+  }
+
+  &:enabled:focus {
+    box-shadow: 0 0 0 0 var(--c-white-color) !important;
+    outline: none;
+  }
+
+  &:enabled:active,
+  &:enabled:hover {
+    background-color: transparent !important;
+    border-color: transparent !important;
+  }
+}
+
+.default {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  margin: 2rem 0;
+  width: 100%;
+  flex-wrap: wrap;
+
+  @include for-phone-only {
+    justify-content: flex-start;
+    .block {
+      margin-bottom: 1.5rem;
+      width: 100% !important;
+    }
+  }
+  @include for-tablet-portrait-up {
+    .block,
+    .inputCheckbox {
+      width: 50% !important;
+      margin-bottom: 1.5rem;
+    }
+  }
+  @include for-desktop-up {
+    .block,
+    .inputCheckbox {
+      width: 25% !important;
+    }
+  }
+  @include for-big-desktop-up {
+    .block,
+    .inputCheckbox {
+      width: 25% !important;
+      margin-bottom: 1.5rem;
+    }
+  }
+}
+
+/*  To component RefrencingDataFlow*/
+.referencingDataflows {
+  display: flex;
+  flex-direction: row;
+  width: 100% !important;
+  margin: 2rem 0;
+
+  .block {
+    width: 100% !important;
+  }
+
+  .sortButtonSize {
+    display: none;
+  }
+}

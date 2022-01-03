@@ -793,7 +793,7 @@ public class DatasetControllerImplTest {
     try {
       datasetControllerImpl.updateAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, e.getReason());
+      assertEquals(EEAErrorMessage.UPDATING_ATTACHMENT_IN_A_DATAFLOW, e.getReason());
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
@@ -816,7 +816,7 @@ public class DatasetControllerImplTest {
     try {
       datasetControllerImpl.updateAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e.getReason());
+      assertEquals(EEAErrorMessage.UPDATING_ATTACHMENT_IN_A_DATAFLOW, e.getReason());
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
@@ -1291,6 +1291,18 @@ public class DatasetControllerImplTest {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
+  }
+
+  @Test
+  public void updateCheckViewTest() {
+    datasetControllerImpl.updateCheckView(1L, true);
+    Mockito.verify(datasetService, times(1)).updateCheckView(Mockito.anyLong(), Mockito.any());
+  }
+
+  @Test
+  public void getCheckViewTest() {
+    datasetControllerImpl.getCheckView(1L);
+    Mockito.verify(datasetService, times(1)).getCheckView(Mockito.anyLong());
   }
 
 }

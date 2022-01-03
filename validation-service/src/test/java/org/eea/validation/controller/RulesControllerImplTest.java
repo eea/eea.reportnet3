@@ -626,9 +626,7 @@ public class RulesControllerImplTest {
     try {
       rulesControllerImpl.runSqlRule(1L, sqlRule, true);
     } catch (ResponseStatusException e) {
-      assertEquals(
-          "422 UNPROCESSABLE_ENTITY; nested exception is org.eea.validation.exception.EEAForbiddenSQLCommandException",
-          e.getMessage());
+      assertEquals(EEAErrorMessage.SQL_COMMAND_NOT_ALLOWED, e.getReason());
       throw e;
     }
 
@@ -643,8 +641,7 @@ public class RulesControllerImplTest {
     try {
       rulesControllerImpl.runSqlRule(1L, sqlRule, true);
     } catch (ResponseStatusException e) {
-      assertEquals("403 FORBIDDEN; nested exception is org.eea.exception.EEAException",
-          e.getMessage());
+      assertEquals(EEAErrorMessage.RUNNING_RULE, e.getReason());
       throw e;
     }
 

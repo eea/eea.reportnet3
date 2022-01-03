@@ -522,6 +522,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // release snapshot when the user press create+release
     } catch (Exception e) {
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
       EventType eventType = null;
       switch (type) {
         case SNAPSHOT:
@@ -586,6 +589,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     LOG.info(
         "Copying the data from the dataset {} to dataset {} because this is a cloning process and there are tables to prefill",
         originDataset, targetDataset);
+
+    String nameFileTableValue = pathSnapshot + String.format(FILE_CLONE_PATTERN_NAME, originDataset,
+        targetDataset, LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+
     String nameFileRecordValue = pathSnapshot + String.format(FILE_CLONE_PATTERN_NAME,
         originDataset, targetDataset, LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
@@ -610,6 +617,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
       placeHolders = builder.deleteCharAt(builder.length() - 1).toString();
 
+      String copyQueryTable = "COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
+          + originDataset + ".table_value) to STDOUT";
       String copyQueryRecord = "COPY (SELECT rv.id, rv.id_record_schema, rv.id_table, "
           + partitionDatasetTarget + ", rv.data_provider_code FROM dataset_" + originDataset
           + ".record_value rv, dataset_" + originDataset + ".table_value tv "
@@ -628,6 +637,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               + "WHERE at.field_value_id =fv.id and fv.id_record = rv.id and rv.id_table=tv.id"
               + " and tv.id_table_schema in (" + placeHolders + ")) to STDOUT";
 
+      // Copy table_value
+      printToFile(nameFileTableValue, copyQueryTable, cm);
       // Copy record_value
       printToFile(nameFileRecordValue, copyQueryRecord, cm);
       // Copy field_value
@@ -635,12 +646,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Copy attachment_value
       printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
 
-      modifySnapshotFile(dictionaryOriginTargetObjectId,
-          Arrays.asList(nameFileRecordValue, nameFileFieldValue, nameFileAttachmentValue));
+      modifySnapshotFile(dictionaryOriginTargetObjectId, Arrays.asList(nameFileTableValue,
+          nameFileRecordValue, nameFileFieldValue, nameFileAttachmentValue), targetDataset);
 
     } catch (SQLException | IOException e) {
       LOG_ERROR.error("Error creating the data from the origin dataset {}", originDataset, e);
-      deleteFile(Arrays.asList(nameFileRecordValue, nameFileFieldValue, nameFileAttachmentValue));
+      deleteFile(Arrays.asList(nameFileTableValue, nameFileRecordValue, nameFileFieldValue,
+          nameFileAttachmentValue));
     }
 
     // Copy the data from the snapshot file into the target dataset
@@ -652,6 +664,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         Statement stmt = con.createStatement()) {
       con.setAutoCommit(true);
       CopyManager cm = new CopyManager((BaseConnection) con);
+
+      // Delete the previous table values
+      String sql = DELETE_FROM_DATASET + targetDataset + ".table_value";
+      stmt.executeUpdate(sql);
+
+      String copyQueryTable =
+          COPY_DATASET + targetDataset + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
+      copyFromFile(copyQueryTable, nameFileTableValue, cm);
 
       String copyQueryRecord = COPY_DATASET + targetDataset
           + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
@@ -683,7 +703,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param nameFiles the name files
    */
   private void modifySnapshotFile(Map<String, String> dictionaryOriginTargetObjectId,
-      List<String> nameFiles) {
+      List<String> nameFiles, Long datasetId) {
 
     if (!CollectionUtils.isEmpty(nameFiles)) {
       nameFiles.stream().forEach(f -> {
@@ -691,21 +711,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         Path pathFile = Paths.get(f);
         List<String> replaced = new ArrayList<>();
 
-        // for (Map.Entry<String, String> entry : dictionaryOriginTargetObjectId.entrySet()) {
         try (Stream<String> lines = Files.lines(pathFile)) {
-          // replaced = lines.map(line -> line.replace(entry.getKey(), entry.getValue()))
-          // .collect(Collectors.toList());
-          replaced =
-              lines.map(line -> line = modifyingLine(dictionaryOriginTargetObjectId, line, f))
-                  .collect(Collectors.toList());
+          replaced = lines
+              .map(line -> line = modifyingLine(dictionaryOriginTargetObjectId, line, f, datasetId))
+              .collect(Collectors.toList());
           Files.write(pathFile, replaced);
         } catch (IOException e) {
           LOG_ERROR.error("Error modifying the file {} during the data copy in cloning process", f);
         }
-        // }
       });
     }
   }
+
 
   /**
    * Modifying line.
@@ -716,7 +733,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @return the string
    */
   private String modifyingLine(Map<String, String> dictionaryOriginTargetObjectId, String line,
-      String fileName) {
+      String fileName, Long datasetId) {
 
     String[] lineSplitted = line.split("\t");
 
@@ -727,6 +744,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     if (fileName.contains("FieldValue")) {
       String fieldSchema = lineSplitted[3];
       line = line.replace(fieldSchema, dictionaryOriginTargetObjectId.get(fieldSchema));
+    }
+    if (fileName.contains("TableValue")) {
+      String oldDatasetId = lineSplitted[2];
+      String tableSchemaId = lineSplitted[1];
+      line = line.replace(oldDatasetId, datasetId.toString());
+      if (null != dictionaryOriginTargetObjectId) {
+        line = line.replace(tableSchemaId, dictionaryOriginTargetObjectId.get(tableSchemaId));
+      }
     }
     return line;
   }
@@ -981,7 +1006,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         Statement stmt = con.createStatement()) {
       con.setAutoCommit(true);
 
-      if (Boolean.TRUE.equals(deleteData)) {
+      if (Boolean.TRUE.equals(deleteData)
+          || (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference)) {
         String sql = composeDeleteSql(datasetId, partitionId, datasetType);
         LOG.info("Deleting previous data");
         stmt.executeUpdate(sql);
@@ -1062,11 +1088,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void copyProcess(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType,
       CopyManager cm) throws IOException, SQLException {
-    if (DatasetTypeEnum.DESIGN.equals(datasetType)) {
+    if (DatasetTypeEnum.DESIGN.equals(datasetType)
+        || DatasetTypeEnum.REFERENCE.equals(datasetType)) {
       // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
       // not neccesary
       String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+
+      modifySnapshotFile(null, Arrays.asList(nameFileTableValue), datasetId);
 
       String copyQueryTable =
           COPY_DATASET + datasetId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
@@ -1114,10 +1143,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         sql = DELETE_FROM_DATASET + idReportingDataset + ".record_value";
         break;
       case REPORTING:
+      case TEST:
         sql = DELETE_FROM_DATASET + idReportingDataset + ".record_value WHERE dataset_partition_id="
             + partitionId;
         break;
       case DESIGN:
+      case REFERENCE:
         sql = DELETE_FROM_DATASET + idReportingDataset + ".table_value";
         break;
       default:
@@ -1413,16 +1444,22 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException {
-    String viewToUpdate =
-        "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
-    List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
 
-    String updateQuery = "refresh materialized view concurrently dataset_";
+    if (!Boolean.TRUE.equals(datasetControllerZuul.getCheckView(datasetId))) {
+      datasetControllerZuul.updateCheckView(datasetId, true);
+      String viewToUpdate =
+          "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
+      List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
 
-    for (String view : viewList) {
-      executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
+      String updateQuery = "refresh materialized view concurrently dataset_";
+
+      for (String view : viewList) {
+        executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
+      }
+      LOG.info("These views: {} have been refreshed.", viewList);
+    } else {
+      LOG.info("The views from the dataset {} are updated, no need to refresh.", datasetId);
     }
-    LOG.info("These views: {} have been refreshed.", viewList);
   }
 
   /**
@@ -1435,20 +1472,25 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation,
       boolean released, Long datasetId) {
     datasetIds.forEach(id -> {
-      String viewToUpdate =
-          "select matviewname from pg_matviews  where schemaname = 'dataset_" + id + "'";
-      List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
+      if (!Boolean.TRUE.equals(datasetControllerZuul.getCheckView(id))) {
+        datasetControllerZuul.updateCheckView(id, true);
+        String viewToUpdate =
+            "select matviewname from pg_matviews  where schemaname = 'dataset_" + id + "'";
+        List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
 
-      String updateQuery = "refresh materialized view concurrently dataset_";
+        String updateQuery = "refresh materialized view concurrently dataset_";
 
-      for (String view : viewList) {
-        try {
-          executeQueryViewCommands(updateQuery + id + "." + "\"" + view + "\"");
-        } catch (RecordStoreAccessException e) {
-          LOG_ERROR.error("Error refreshing materialized view from dataset {}", id);
+        for (String view : viewList) {
+          try {
+            executeQueryViewCommands(updateQuery + id + "." + "\"" + view + "\"");
+          } catch (RecordStoreAccessException e) {
+            LOG_ERROR.error("Error refreshing materialized view from dataset {}", id);
+          }
         }
+        LOG.info("These materialized views: {} have been refreshed.", viewList);
+      } else {
+        LOG.info("The views from the dataset {} are updated, no need to refresh.", id);
       }
-      LOG.info("These materialized views: {} have been refreshed.", viewList);
     });
     if (Boolean.TRUE.equals(continueValidation)) {
       Map<String, Object> values = new HashMap<>();

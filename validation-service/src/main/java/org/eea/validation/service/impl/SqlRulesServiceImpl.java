@@ -393,7 +393,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
         throw new EEAException();
       } else {
-
+        datasetRepository.validateQuery("explain " + sqlRule, datasetId);
         if (showInternalFields) {
           sb.append("SELECT * FROM (");
           sb.append(sqlRule);
@@ -450,6 +450,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
         throw new EEAException();
       } else {
+        datasetRepository.validateQuery("explain " + sqlRule, datasetId);
         sb.append("EXPLAIN (FORMAT JSON) ");
         sb.append(sqlRule);
         String result = datasetRepository.evaluateSqlRule(datasetId, sb.toString());
@@ -514,9 +515,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           try {
             checkQueryTestExecution(query.replace(";", ""), dataSetMetabaseVO, rule);
           } catch (EEAInvalidSQLException e) {
-            LOG_ERROR.error(String.format("SQL is not correct: %s.  %s", "a",
+            LOG_ERROR.error(String.format("SQL is not correct: %s.  %s", rule.getSqlSentence(),
                 e.getCause().getCause().getMessage()));
-            isSQLCorrect = e.getCause().getMessage();
+            isSQLCorrect = e.getCause().getCause().getMessage();
           }
         } else {
           isSQLCorrect = "Datasets " + ids.toString() + " not from this dataflow";

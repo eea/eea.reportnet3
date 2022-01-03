@@ -3462,8 +3462,7 @@ public class DatasetServiceTest {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(recordStoreControllerZuul.getConnectionToDataset(Mockito.anyString()))
-        .thenReturn(new ConnectionDataVO());
+
     Mockito
         .when(recordValueIdGenerator
             .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
@@ -3472,7 +3471,7 @@ public class DatasetServiceTest {
         .when(fieldValueIdGenerator
             .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
         .thenReturn("fieldId");
-    datasetService.storeRecords(1L, recordValues);
+    datasetService.storeRecords(1L, recordValues, new ConnectionDataVO());
   }
 
   /**
@@ -3752,6 +3751,18 @@ public class DatasetServiceTest {
     Assert.assertFalse(datasetService.checkIfDatasetLockedOrReadOnly(1L, "idRecordSchema",
         EntityTypeEnum.DATASET));
   }
+
+  @Test
+  public void getCheckViewTest() {
+    Assert.assertFalse(datasetService.getCheckView(1L));
+  }
+
+  @Test
+  public void updateCheckViewTest() {
+    datasetService.updateCheckView(1L, true);
+    Mockito.verify(datasetRepository, times(1)).updateCheckView(Mockito.anyLong(), Mockito.any());
+  }
+
 
   /**
    * After tests we remove the files.

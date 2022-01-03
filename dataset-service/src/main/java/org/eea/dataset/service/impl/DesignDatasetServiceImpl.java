@@ -296,6 +296,9 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
 
     } catch (Exception e) {
       LOG_ERROR.error("Error during the copy. Message: {}", e.getMessage(), e);
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
       // Release the error notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_FAILED_EVENT,
           null,

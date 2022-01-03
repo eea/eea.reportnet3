@@ -5,8 +5,6 @@ import isNil from 'lodash/isNil';
 
 import styles from './SqlSentence.module.scss';
 
-import { config } from 'conf';
-
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
@@ -14,6 +12,7 @@ import { Dialog } from 'views/_components/Dialog';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { Spinner } from 'views/_components/Spinner';
 import { SqlHelp } from './_components/SqlHelp';
+import { TrafficLight } from 'views/_components/TrafficLight';
 
 import { ValidationService } from 'services/ValidationService';
 
@@ -28,8 +27,8 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
 
   const [columns, setColumns] = useState();
   const [hasValidationError, setHasValidationError] = useState(false);
-  const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isEvaluateSqlSentenceLoading, setIsEvaluateSqlSentenceLoading] = useState(false);
+  const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isValidatingQuery, setIsValidatingQuery] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
   const [isVisibleSqlSentenceValidationDialog, setIsVisibleSqlSentenceValidationDialog] = useState(false);
@@ -90,7 +89,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   const sqlSentenceValidationDialogFooter = (
     <Button
       className="p-button-secondary p-button-right-aligned"
-      icon={'cancel'}
+      icon="cancel"
       label={resourcesContext.messages['close']}
       onClick={() => setIsVisibleSqlSentenceValidationDialog(false)}
     />
@@ -136,24 +135,6 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   };
 
   const renderSqlSentenceCost = () => {
-    const costColors = ['green', 'yellow', 'red'];
-
-    const getCostColor = color => {
-      if (color === 'green' && sqlSentenceCost <= config.SQL_SENTENCE_LOW_COST) {
-        return styles.greenLightSignal;
-      } else if (
-        color === 'yellow' &&
-        sqlSentenceCost < config.SQL_SENTENCE_HIGH_COST &&
-        sqlSentenceCost > config.SQL_SENTENCE_LOW_COST
-      ) {
-        return styles.yellowLightSignal;
-      } else if (color === 'red' && sqlSentenceCost >= config.SQL_SENTENCE_HIGH_COST) {
-        return styles.redLightSignal;
-      }
-    };
-
-    const renderLightSignals = () => costColors.map(color => <div className={getCostColor(color)} key={color}></div>);
-
     if (isEvaluateSqlSentenceLoading) {
       return (
         <div className={`${styles.sqlSentenceCostWrapper} ${styles.spinnerWrapper}`}>
@@ -162,7 +143,11 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       );
     } else {
       if (sqlSentenceCost !== 0 && !isNil(sqlSentenceCost)) {
-        return <div className={`${styles.sqlSentenceCostWrapper} ${styles.trafficLight}`}>{renderLightSignals()}</div>;
+        return (
+          <div className={styles.sqlSentenceCostWrapper}>
+            <TrafficLight className={styles.trafficLightSize} sqlSentenceCost={sqlSentenceCost} />
+          </div>
+        );
       }
     }
   };
@@ -172,7 +157,11 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       return <h3 className={styles.noDataMessage}>{resourcesContext.messages['noData']}</h3>;
     }
 
-    return <DataTable value={sqlResponse}>{columns}</DataTable>;
+    return (
+      <DataTable autoLayout initialOverflowX value={sqlResponse}>
+        {columns}
+      </DataTable>
+    );
   };
 
   const runSqlSentence = async () => {
@@ -275,9 +264,10 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
           />
         </div>
       </div>
-
-      {renderErrorMessage()}
-
+      <div className={styles.errorSectionWrapper}>
+        <div className={styles.errorSpacer}></div>
+        {renderErrorMessage()}
+      </div>
       {isVisibleInfoDialog && (
         <Dialog
           header={resourcesContext.messages['sqlSentenceHelpDialogTitle']}

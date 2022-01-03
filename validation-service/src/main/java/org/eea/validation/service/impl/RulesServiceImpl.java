@@ -9,6 +9,7 @@ import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1516,19 +1517,8 @@ public class RulesServiceImpl implements RulesService {
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
       // Creates an array list containing all the column names from the CSV defined as constants
-      List<String> headers = new ArrayList<>();
-      headers.add(TABLE);
-      headers.add(FIELD);
-      headers.add(CODE);
-      headers.add(QCNAME);
-      headers.add(QCDESC);
-      headers.add(MESSAGE);
-      headers.add(EXPRESSION);
-      headers.add(TYPE_OF_QC);
-      headers.add(LEVEL_ERROR);
-      headers.add(CREATION_MODE);
-      headers.add(STATUS);
-      headers.add(VALID);
+      List<String> headers = new ArrayList<>(Arrays.asList(TABLE, FIELD, CODE, QCNAME, QCDESC,
+          MESSAGE, EXPRESSION, TYPE_OF_QC, LEVEL_ERROR, CREATION_MODE, STATUS, VALID));
 
       // Writes the column names into the CSV Writer and sets the array String to headers size so it
       // only writes at most the number of columns as variables per row
@@ -1746,6 +1736,63 @@ public class RulesServiceImpl implements RulesService {
     Map<String, String> tableNames = new HashMap<>();
     Map<String, String> fieldNames = new HashMap<>();
 
+    retrieveTableAndFieldNames(tables, tableNames, fieldNames);
+
+    RulesSchemaVO dataSetRules = getRulesSchemaByDatasetId(dataSetSchema);
+
+    String[] fieldsToWrite;
+
+    for (RuleVO rule : dataSetRules.getRules()) {
+      fieldsToWrite = new String[nHeaders];
+
+      if (rule.getType() == EntityTypeEnum.TABLE || rule.getType() == EntityTypeEnum.RECORD) {
+        fieldsToWrite[0] =
+            tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
+                : "Table not found"; // Table Name
+      } else {
+        fieldsToWrite[0] =
+            tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
+                : ""; // Table Name if it has a Field reference ID
+      }
+
+      fieldsToWrite[1] =
+          fieldNames.containsKey(rule.getReferenceId()) ? fieldNames.get(rule.getReferenceId())
+              : ""; // Field Name
+      fieldsToWrite[2] =
+          rule.getShortCode().startsWith("=") ? " " + rule.getShortCode() : rule.getShortCode();
+      fieldsToWrite[3] =
+          rule.getRuleName().startsWith("=") ? " " + rule.getRuleName() : rule.getRuleName();
+      fieldsToWrite[4] = rule.getDescription().startsWith("=") ? " " + rule.getDescription()
+          : rule.getDescription();
+      fieldsToWrite[5] =
+          rule.getThenCondition().get(0).startsWith("=") ? " " + rule.getThenCondition().get(0)
+              : rule.getThenCondition().get(0); // Message
+      if (rule.getSqlSentence() != null) {
+        fieldsToWrite[6] = rule.getSqlSentence().startsWith("=") ? " " + rule.getSqlSentence()
+            : rule.getSqlSentence();
+      } else if (rule.getExpressionText() != null) {
+        fieldsToWrite[6] = rule.getExpressionText().startsWith("=") ? " " + rule.getExpressionText()
+            : rule.getExpressionText();
+      }
+      fieldsToWrite[7] = rule.getType().toString(); // Type of QC
+      fieldsToWrite[8] = rule.getThenCondition().get(1); // Level Error
+      fieldsToWrite[9] = Boolean.toString(rule.isAutomatic()); // Creation Mode
+      fieldsToWrite[10] = Boolean.toString(rule.isEnabled()); // Status
+      fieldsToWrite[11] = rule.getVerified().toString(); // Valid
+
+      csvWriter.writeNext(fieldsToWrite);
+    }
+  }
+
+  /**
+   * Retrieve table and field names.
+   *
+   * @param tables the tables
+   * @param tableNames the table names
+   * @param fieldNames the field names
+   */
+  private void retrieveTableAndFieldNames(List<TableSchema> tables, Map<String, String> tableNames,
+      Map<String, String> fieldNames) {
     for (TableSchema table : tables) {
       tableNames.put(table.getIdTableSchema().toString(), table.getNameTableSchema());
 
@@ -1755,39 +1802,6 @@ public class RulesServiceImpl implements RulesService {
         tableNames.put(field.getIdRecord().toString(), table.getNameTableSchema());
 
       }
-    }
-
-    RulesSchemaVO dataSetRules = getRulesSchemaByDatasetId(dataSetSchema);
-
-    String[] fieldsToWrite;
-
-    for (RuleVO rule : dataSetRules.getRules()) {
-      fieldsToWrite = new String[nHeaders];
-
-      if (rule.getType() == EntityTypeEnum.TABLE || rule.getType() == EntityTypeEnum.RECORD)
-        fieldsToWrite[0] =
-            tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
-                : "Table not found"; // Table Name
-      else
-        fieldsToWrite[0] =
-            tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
-                : ""; // Table Name if it has a Field reference ID
-      fieldsToWrite[1] =
-          fieldNames.containsKey(rule.getReferenceId()) ? fieldNames.get(rule.getReferenceId())
-              : ""; // Field Name
-      fieldsToWrite[2] = rule.getShortCode();
-      fieldsToWrite[3] = rule.getRuleName();
-      fieldsToWrite[4] = rule.getDescription();
-      fieldsToWrite[5] = rule.getThenCondition().get(0); // Message
-      fieldsToWrite[6] =
-          rule.getSqlSentence() != null ? rule.getSqlSentence() : rule.getExpressionText();
-      fieldsToWrite[7] = rule.getType().toString(); // Type of QC
-      fieldsToWrite[8] = rule.getThenCondition().get(1); // Level Error
-      fieldsToWrite[9] = Boolean.toString(rule.isAutomatic()); // Creation Mode
-      fieldsToWrite[10] = Boolean.toString(rule.isEnabled()); // Status
-      fieldsToWrite[11] = rule.getVerified().toString(); // Valid
-
-      csvWriter.writeNext(fieldsToWrite);
     }
   }
 }

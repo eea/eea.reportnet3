@@ -54,6 +54,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
@@ -67,6 +68,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -178,6 +180,10 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private IFileParserFactory fileParserFactory;
 
+  /** The record store controller zuul. */
+  @Autowired
+  private RecordStoreControllerZuul recordStoreControllerZuul;
+
   /**
    * Initialize the executor service.
    */
@@ -240,7 +246,8 @@ public class FileTreatmentHelper implements DisposableBean {
       datasetService.createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria,
           SecurityContextHolder.getContext().getAuthentication().getName());
     }
-
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
     fileManagement(datasetId, tableSchemaId, schema, file, replace, integrationId, delimiter);
   }
 
@@ -438,6 +445,9 @@ public class FileTreatmentHelper implements DisposableBean {
               delimiter);
         } catch (Exception e) {
           LOG_ERROR.error("RN3-Import: Unexpected error. {}", e.getMessage(), e);
+          if (e instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+          }
         }
       });
     }
@@ -712,8 +722,11 @@ public class FileTreatmentHelper implements DisposableBean {
       final IFileParseContext context =
           fileParserFactory.createContext(mimeType, datasetId, delimiter);
 
+      ConnectionDataVO connectionDataVO = recordStoreControllerZuul
+          .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+
       context.parse(is, dataflowId, partition.getId(), idTableSchema, datasetId, fileName, replace,
-          schema);
+          schema, connectionDataVO);
 
     } catch (Exception e) {
       LOG.error("error processing file", e);
@@ -1002,6 +1015,8 @@ public class FileTreatmentHelper implements DisposableBean {
         tableWithAttachmentFieldSet, datasetSchema.getTableSchemas());
     recordRepository.saveAll(allRecords);
     LOG.info("Data saved into dataset {}", datasetId);
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
   }
 
   /**

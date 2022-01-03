@@ -73,14 +73,15 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
     try {
       return dataflowWebLinkService.getWebLink(idLink);
     } catch (EntityNotFoundException e) {
-      LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.ID_LINK_NOT_FOUND);
     } catch (ResourceNoFoundException e) {
-      LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.ID_LINK_INCORRECT);
     } catch (EEAException e) {
-      LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_WEBLINK);
     }
 
 
@@ -95,9 +96,9 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @PostMapping(value = "/v1/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Create a weblink into dataflow help", response = WeblinkVO.class,
-      notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+      notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN, CUSTODIAN SUPPORT")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully created Weblink"),
       @ApiResponse(code = 404, message = "Dataflow Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
@@ -111,17 +112,19 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       dataflowWebLinkService.saveWebLink(dataflowId, weblinkVO);
     } catch (EntityNotFoundException e) {
       LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.ID_LINK_NOT_FOUND);
     } catch (WrongDataExceptions e) {
       LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CREATING_WEBLINK);
     } catch (EEAException e) {
       if (EEAErrorMessage.WEBLINK_ALREADY_EXIST.equals(e.getMessage())) {
         LOG_ERROR.error("Weblink url already exist in dataflow : {}", dataflowId);
-        throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+            EEAErrorMessage.WEBLINK_ALREADY_EXIST);
       }
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.CREATING_WEBLINK);
     }
 
   }
@@ -135,9 +138,8 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @PostMapping(value = "/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
-  @ApiOperation(value = "Create a dataflow weblink", response = WeblinkVO.class, hidden = true,
-      notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Create a dataflow weblink", response = WeblinkVO.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully created Weblink"),
       @ApiResponse(code = 404, message = "Dataflow Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
@@ -158,12 +160,13 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/v1/{idLink}/dataflow/{dataflowId}")
-  @ApiOperation(value = "Delete weblink from dataflow help by weblink id", response = WeblinkVO.class,
-      notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+  @ApiOperation(value = "Delete weblink from dataflow help by weblink id",
+      response = WeblinkVO.class,
+      notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN, CUSTODIAN SUPPORT")
   @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR hasAnyRole('ADMIN')")
   public void removeLink(
       @ApiParam(value = "Weblink id", example = "0") @PathVariable(value = "idLink") Long idLink,
       @ApiParam(value = "Dataflow id",
@@ -173,13 +176,14 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       dataflowWebLinkService.removeWebLink(idLink);
     } catch (EntityNotFoundException e) {
       LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.ID_LINK_NOT_FOUND);
     } catch (ResourceNoFoundException e) {
       LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.ID_LINK_INCORRECT);
     } catch (EEAException e) {
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_WEBLINK);
     }
   }
 
@@ -192,12 +196,12 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idLink}/dataflow/{dataflowId}")
-  @ApiOperation(value = "Delete weblink from dataflow help by weblink id", response = WeblinkVO.class,
-      hidden = true, notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+  @ApiOperation(value = "Delete weblink from dataflow help by weblink id",
+      response = WeblinkVO.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR hasAnyRole('ADMIN')")
   public void removeLinkLegacy(
       @ApiParam(value = "Weblink id", example = "0") @PathVariable(value = "idLink") Long idLink,
       @ApiParam(value = "Dataflow id",
@@ -215,12 +219,12 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
   @HystrixCommand
   @PutMapping(value = "/v1/dataflow/{dataflowId}")
   @ApiOperation(value = "Update dataflow weblink", response = WeblinkVO.class,
-      notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+      notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN, CUSTODIAN SUPPORT")
   @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR hasAnyRole('ADMIN')")
   public void updateLink(
       @ApiParam(type = "Object", value = "Weblink object") @RequestBody WeblinkVO weblinkVO,
       @ApiParam(value = "Dataflow id",
@@ -229,20 +233,22 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       dataflowWebLinkService.updateWebLink(weblinkVO);
     } catch (EntityNotFoundException e) {
       LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.ID_LINK_NOT_FOUND);
     } catch (ResourceNoFoundException e) {
       LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.ID_LINK_INCORRECT);
     } catch (WrongDataExceptions e) {
       LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UPDATING_WEBLINK);
     } catch (EEAException e) {
       if (EEAErrorMessage.WEBLINK_ALREADY_EXIST.equals(e.getMessage())) {
         LOG_ERROR.error(HttpStatus.CONFLICT.getReasonPhrase(), e);
-        throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+            EEAErrorMessage.WEBLINK_ALREADY_EXIST);
       }
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_WEBLINK);
     }
 
   }
@@ -250,13 +256,12 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
   @Override
   @HystrixCommand
   @PutMapping(value = "/dataflow/{dataflowId}")
-  @ApiOperation(value = "Update dataflow weblink", response = WeblinkVO.class, hidden = true,
-      notes = "Allowed rolles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+  @ApiOperation(value = "Update dataflow weblink", response = WeblinkVO.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 403, message = "Forbidden"),
       @ApiResponse(code = 404, message = "Not Found"),
       @ApiResponse(code = 500, message = "Internal Server Error")})
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR hasAnyRole('ADMIN')")
   public void updateLinkLegacy(
       @ApiParam(type = "Object", value = "Weblink object") @RequestBody WeblinkVO weblinkVO,
       @ApiParam(value = "Dataflow id",
@@ -273,12 +278,12 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/v1/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get list of dataflow weblinks from dataflow help",
       produces = MediaType.APPLICATION_JSON_VALUE, response = WeblinkVO.class,
       responseContainer = "List",
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR WRITE, EDITOR READ, NATIONAL COORDINATOR, ADMIN ")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, CUSTODIAN SUPPORT, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR WRITE, EDITOR READ, NATIONAL COORDINATOR, ADMIN ")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public List<WeblinkVO> getAllWeblinksByDataflow(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
@@ -299,12 +304,11 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get list of dataflow weblinks from dataflow help",
       produces = MediaType.APPLICATION_JSON_VALUE, response = WeblinkVO.class,
-      responseContainer = "List", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR WRITE, EDITOR READ, NATIONAL COORDINATOR, ADMIN ")
+      responseContainer = "List", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public List<WeblinkVO> getAllWeblinksByDataflowLegacy(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
