@@ -20,7 +20,9 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import {
   filterByKeysFamily,
-  filtersStateFamily,
+  filterByState,
+  filteredDataState,
+  // filtersStateFamily,
   searchStateFamily,
   sortByStateFamily
 } from './_functions/Stores/filtersStores';
@@ -29,7 +31,7 @@ import { ApplyFiltersUtils } from './_functions/Utils/ApplyFiltersUtils';
 import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
 
-const { applyDates, applyInputs, applyMultiSelects } = ApplyFiltersUtils;
+const { applyDates, applyInputs, applyMultiSelects, applySearch } = ApplyFiltersUtils;
 const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
@@ -43,11 +45,16 @@ export const MyFilters = ({
   viewType
 }) => {
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysFamily(viewType));
-  const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
+  // const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
   const [searchBy, setSearchBy] = useRecoilState(searchStateFamily(viewType));
   const [sortBy, setSortBy] = useRecoilState(sortByStateFamily(viewType));
 
-  const { filterBy, filteredData } = filters;
+  const [filterBy, setFilterByRecoilState] = useRecoilState(filterByState(viewType));
+  const [filteredData, setFilteredDataRecoilState] = useRecoilState(filteredDataState(viewType));
+
+  console.log('filterBy :>> ', filterBy);
+
+  // const { filterBy, filteredData } = filters;
 
   const { userProps } = useContext(UserContext);
   const notificationContext = useContext(NotificationContext);
@@ -152,7 +159,8 @@ export const MyFilters = ({
         filteredData = applySort({ filteredData, order: value, prevSortState: applyFilters(), sortByKey: key });
       }
 
-      setFilters({ ...filters, data: data, filteredData });
+      // setFilters({ ...filters, filteredData });
+      setFilteredDataRecoilState(filteredData);
     } catch (error) {
       console.error('MyFilters - loadFilters.', error);
     }
@@ -168,19 +176,30 @@ export const MyFilters = ({
   };
 
   const onChange = ({ key, value }) => {
-    const filteredData = onApplyFilters({ filterBy: { ...filters.filterBy, [key]: value } });
+    const filteredData = onApplyFilters({ filterBy: { ...filterBy, [key]: value } });
 
-    setFilters({ ...filters, filterBy: { ...filters.filterBy, [key]: value }, filteredData });
+    // setFilters({ ...filters, filterBy: { ...filters.filterBy, [key]: value }, filteredData });
+    setFilterByRecoilState({ ...filterBy, [key]: value });
+    setFilteredDataRecoilState(filteredData);
   };
 
-  const onResetFilters = () => setFilters({ data, filteredData: data, filterBy: {} });
+  const onResetFilters = () => {
+    // setFilters({ filterBy: {}, filteredData: data });
+    setFilterByRecoilState({});
+    setFilteredDataRecoilState(data);
+  };
+
+  const onSearch = value => {
+    setSearchBy(value);
+  };
 
   const onSortData = key => {
     const sortOption = switchSortByOption(sortBy[key]);
     const sortedData = applySort({ filteredData, order: sortOption, prevSortState: applyFilters(), sortByKey: key });
 
     setSortBy({ [key]: sortOption });
-    setFilters({ ...filters, filteredData: sortedData });
+    // setFilters({ ...filters, filteredData: sortedData });
+    setFilteredDataRecoilState(sortedData);
   };
 
   const updateValueLabelsAnimationDate = (labelsAnimationDate, position, key, value) => {
