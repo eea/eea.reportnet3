@@ -1262,7 +1262,7 @@ const Dataflow = () => {
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
-              userType={'requester'}
+              userType="requester"
             />
           </Dialog>
         )}
@@ -1294,7 +1294,7 @@ const Dataflow = () => {
               setIsUserRightManagementDialogVisible={setIsUserRightManagementDialogVisible}
               setRightPermissionsChange={setRightPermissionsChange}
               updateErrorNotificationKey={'UPDATE_REPORTER_ERROR'}
-              userType={'reporter'}
+              userType="reporter"
             />
           </Dialog>
         )}
