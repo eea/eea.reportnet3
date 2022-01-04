@@ -40,7 +40,9 @@ const applyMultiSelects = ({ filterBy, filterByKeys, item }) => {
   const filteredKeys = filterByKeys.MULTI_SELECT.filter(key => Object.keys(filterBy).includes(key));
 
   return filteredKeys.every(
-    filteredKey => isEmpty(filterBy[filteredKey]) || filterBy[filteredKey].includes(item[filteredKey].toUpperCase())
+    filteredKey =>
+      isEmpty(filterBy[filteredKey]) ||
+      filterBy[filteredKey].toString().toUpperCase().includes(item[filteredKey].toString().toUpperCase())
   );
 };
 

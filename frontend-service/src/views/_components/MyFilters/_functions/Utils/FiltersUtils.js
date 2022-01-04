@@ -39,6 +39,9 @@ const getOptionsTypes = (data, nestedOptionKey, category) => {
 
   return test.map(option => {
     switch (category) {
+      case 'CREATION_MODE':
+        return { type: option ? 'AUTOMATIC' : 'MANUAL', value: option };
+
       case 'ENABLED_STATUS':
         return { type: option ? 'ENABLED' : 'DISABLED', value: option };
 

@@ -693,12 +693,12 @@ export const QCList = ({
     {
       nestedOptions: [
         { key: 'table', label: resourcesContext.messages['table'], isInputVisible: true },
-        { key: 'filed', label: resourcesContext.messages['filed'], isInputVisible: true },
+        { key: 'field', label: resourcesContext.messages['field'], isInputVisible: true },
         { key: 'entityType', label: resourcesContext.messages['entityType'] },
         { key: 'levelError', label: resourcesContext.messages['levelError'], category: 'LEVEL_ERROR' },
         { key: 'automatic', label: resourcesContext.messages['creationMode'], category: 'CREATION_MODE' },
         { key: 'enabled', label: resourcesContext.messages['statusQC'], category: 'ENABLED_STATUS' },
-        { key: 'isCorrect', label: resourcesContext.messages['statusQC'], category: 'VALIDITY_STATUS' }
+        { key: 'isCorrect', label: resourcesContext.messages['isCorrect'], category: 'VALIDITY_STATUS' }
       ],
       type: 'MULTI_SELECT'
     }

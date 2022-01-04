@@ -190,6 +190,7 @@ export const MyFilters = ({
     // setFilters({ filterBy: {}, filteredData: data });
     setFilterBy({});
     setFilteredData(data);
+    setSearchBy('');
   };
 
   const onSearch = value => {
