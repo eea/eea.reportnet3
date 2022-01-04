@@ -1293,4 +1293,16 @@ public class DatasetControllerImplTest {
     }
   }
 
+  @Test
+  public void updateCheckViewTest() {
+    datasetControllerImpl.updateCheckView(1L, true);
+    Mockito.verify(datasetService, times(1)).updateCheckView(Mockito.anyLong(), Mockito.any());
+  }
+
+  @Test
+  public void getCheckViewTest() {
+    datasetControllerImpl.getCheckView(1L);
+    Mockito.verify(datasetService, times(1)).getCheckView(Mockito.anyLong());
+  }
+
 }
