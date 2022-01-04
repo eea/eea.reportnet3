@@ -953,10 +953,13 @@ public class RulesControllerImpl implements RulesController {
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN')")
-  @ApiOperation(value = "Get a historic information about the updates of a rule", hidden = false)
+  @ApiOperation(value = "Get a historic information about the updates of a rule", hidden = true)
   @GetMapping(value = "/historicInfo")
-  public List<RuleHistoricInfoVO> getRuleHistoric(@RequestParam("datasetId") long datasetId,
-      @RequestParam("ruleId") String ruleId) {
+  public List<RuleHistoricInfoVO> getRuleHistoric(
+      @ApiParam(value = "Dataset id used in the get of a historic rule",
+          example = "1") @RequestParam("datasetId") long datasetId,
+      @ApiParam(value = "Rule id used in the get of a historic rule",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("ruleId") String ruleId) {
     try {
       return rulesService.getRuleHistoricInfo(datasetId, ruleId);
     } catch (EEAException e) {

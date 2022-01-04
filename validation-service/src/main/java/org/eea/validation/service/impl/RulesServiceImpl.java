@@ -821,6 +821,7 @@ public class RulesServiceImpl implements RulesService {
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
     addHistoricRuleInfo(false, rule, ruleOriginal);
+
   }
 
   /**
@@ -1610,6 +1611,33 @@ public class RulesServiceImpl implements RulesService {
     return file;
   }
 
+  /**
+   * Gets the rule historic info.
+   *
+   * @param datasetId the dataset id
+   * @param ruleId the rule id
+   * @return the rule historic info
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public List<RuleHistoricInfoVO> getRuleHistoricInfo(Long datasetId, String ruleId)
+      throws EEAException {
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    if (datasetSchemaId == null) {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    var rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
+    if (null == rule) {
+      throw new EEAException(EEAErrorMessage.RULE_NOT_FOUND);
+    }
+    var audit = auditRepository.getAuditByRuleId(rule.getRuleId());
+    if (null == audit) {
+      throw new EEAException(EEAErrorMessage.HISTORIC_QC_NOT_FOUND);
+    }
+    return ruleHistoricInfoMapper.entityListToClass(audit.getHistoric());
+  }
+
 
   /**
    * Import data.
@@ -1839,7 +1867,16 @@ public class RulesServiceImpl implements RulesService {
    * @return true, if successful
    */
   private boolean checkExpressionHasChange(Rule ruleActual, Rule ruleOriginal) {
-    return !(ruleActual.getSqlSentence().equals(ruleOriginal.getSqlSentence()));
+    boolean change = false;
+    if (ruleActual.getSqlSentence() == null && ruleOriginal.getSqlSentence() == null) {
+      change = false;
+    } else {
+      if ((ruleActual.getSqlSentence() != null && ruleOriginal.getSqlSentence() == null)
+          || !(ruleActual.getSqlSentence().equals(ruleOriginal.getSqlSentence()))) {
+        change = true;
+      }
+    }
+    return change;
   }
 
   /**
@@ -1868,32 +1905,6 @@ public class RulesServiceImpl implements RulesService {
     return ruleActual.isEnabled() != ruleOriginal.isEnabled();
   }
 
-  /**
-   * Gets the rule historic info.
-   *
-   * @param datasetId the dataset id
-   * @param ruleId the rule id
-   * @return the rule historic info
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  @Transactional
-  public List<RuleHistoricInfoVO> getRuleHistoricInfo(Long datasetId, String ruleId)
-      throws EEAException {
-    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
-    if (datasetSchemaId == null) {
-      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-    var rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
-    if (null == rule) {
-      throw new EEAException(EEAErrorMessage.RULE_NOT_FOUND);
-    }
-    var audit = auditRepository.getAuditByRuleId(rule.getRuleId());
-    if (null == audit) {
-      throw new EEAException(EEAErrorMessage.HISTORIC_QC_NOT_FOUND);
-    }
-    return ruleHistoricInfoMapper.entityListToClass(audit.getHistoric());
-  }
 
   /**
    * Retrieve table and field names.
