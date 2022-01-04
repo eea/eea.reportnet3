@@ -334,22 +334,22 @@ export const MyFilters = ({
     );
   };
 
-  const renderMultiSelectTemplate = (multiSelectItem, option) => {
-    switch (option.category) {
-      case 'ENABLED_STATUS':
-      case 'LEVEL_ERROR':
-      case 'VALIDITY_STATUS':
-        return <LevelError type={multiSelectItem.type} />;
+  // const renderMultiSelectTemplate = (multiSelectItem, option) => {
+  //   switch (option.category) {
+  //     case 'ENABLED_STATUS':
+  //     case 'LEVEL_ERROR':
+  //     case 'VALIDITY_STATUS':
+  //       return <LevelError type={multiSelectItem.type} />;
 
-      default:
-        return <span className={`${styles.statusBox}`}>{multiSelectItem.value.toString().toUpperCase()}</span>;
-    }
-  };
+  //     default:
+  //       return <span className={`${styles.statusBox}`}>{multiSelectItem.value.toString().toUpperCase()}</span>;
+  //   }
+  // };
 
   const renderMultiSelect = option => {
     if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
 
-    const optionsMultiSelect = getOptionsTypes(data, option.key);
+    const optionsMultiSelect = getOptionsTypes(data, option.key, option.category);
 
     return (
       <div className={`${styles.block}`} key={option.key}>
@@ -364,7 +364,7 @@ export const MyFilters = ({
           inputId={`${option.key}_input`}
           isFilter={true}
           isLoadingData={isEmpty(optionsMultiSelect)}
-          itemTemplate={item => renderMultiSelectTemplate(item, option)}
+          itemTemplate={item => <LevelError type={item.type} />}
           key={option.key}
           label={option.label || ''}
           notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}

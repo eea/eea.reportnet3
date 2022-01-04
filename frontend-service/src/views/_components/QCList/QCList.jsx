@@ -696,9 +696,9 @@ export const QCList = ({
         { key: 'filed', label: resourcesContext.messages['filed'], isInputVisible: true },
         { key: 'entityType', label: resourcesContext.messages['entityType'] },
         { key: 'levelError', label: resourcesContext.messages['levelError'], category: 'LEVEL_ERROR' },
-        { name: 'automatic', label: resourcesContext.messages['creationMode'] },
-        { name: 'enabled', label: resourcesContext.messages['statusQC'], category: 'ENABLED_STATUS' },
-        { name: 'isCorrect', label: resourcesContext.messages['statusQC'], category: 'VALIDITY_STATUS' }
+        { key: 'automatic', label: resourcesContext.messages['creationMode'], category: 'CREATION_MODE' },
+        { key: 'enabled', label: resourcesContext.messages['statusQC'], category: 'ENABLED_STATUS' },
+        { key: 'isCorrect', label: resourcesContext.messages['statusQC'], category: 'VALIDITY_STATUS' }
       ],
       type: 'MULTI_SELECT'
     }

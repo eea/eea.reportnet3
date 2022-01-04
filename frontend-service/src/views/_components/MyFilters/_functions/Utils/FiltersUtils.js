@@ -31,18 +31,24 @@ const getLabelsAnimationDateInitial = (options, filterBy) => {
     }));
 };
 
-const getOptionsByKeyNestedOption = (filteredOptions, key) => {
-  return filteredOptions.map(option => ({
-    type: option?.toString().toUpperCase(),
-    value: option?.toString().toUpperCase()
-  }));
-};
+// const onFilterBooleanOptions = option => (typeof option !== 'boolean' ? !isNil(option) && !isEmpty(option) : true);
 
-const onFilterBooleanOptions = option => (typeof option !== 'boolean' ? !isNil(option) && !isEmpty(option) : true);
+const getOptionsTypes = (data, nestedOptionKey, category) => {
+  const options = uniq(data.map(item => item[nestedOptionKey])).filter(item => item);
+  const test = options.some(item => typeof item === 'boolean') ? [true, false] : options;
 
-const getOptionsTypes = (data, nestedOptionKey) => {
-  const options = uniq(data.map(item => item[nestedOptionKey])).filter(onFilterBooleanOptions);
-  return getOptionsByKeyNestedOption(options, nestedOptionKey);
+  return test.map(option => {
+    switch (category) {
+      case 'ENABLED_STATUS':
+        return { type: option ? 'ENABLED' : 'DISABLED', value: option };
+
+      case 'VALIDITY_STATUS':
+        return { type: option ? 'VALID' : 'INVALID', value: option };
+
+      default:
+        return { type: option?.toString().toUpperCase(), value: option?.toString().toUpperCase() };
+    }
+  });
 };
 
 export const FiltersUtils = {
