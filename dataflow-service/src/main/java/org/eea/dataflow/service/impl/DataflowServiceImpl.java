@@ -1049,7 +1049,7 @@ public class DataflowServiceImpl implements DataflowService {
   private void deleteDocuments(Long idDataflow, DataFlowVO dataflowVO) throws Exception {
     for (DocumentVO document : dataflowVO.getDocuments()) {
       try {
-        documentControllerZuul.deleteDocument(document.getId(), dataflowVO.getId(), Boolean.TRUE);
+        documentControllerZuul.deleteDocument(document.getId(), dataflowVO.getId(), Boolean.FALSE);
       } catch (EEAException e) {
         LOG.error("Error deleting document with id {}", document.getId());
         throw new EEAException(new StringBuilder().append("Error Deleting document ")
