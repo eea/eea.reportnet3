@@ -1842,16 +1842,23 @@ public class RulesServiceImpl implements RulesService {
    * @param isNewRule the is new rule
    * @param rule the rule
    * @param ruleOriginal the rule original
+   * @throws EEAException
    */
-  private void addHistoricRuleInfo(boolean isNewRule, Rule rule, Rule ruleOriginal) {
+  private void addHistoricRuleInfo(boolean isNewRule, Rule rule, Rule ruleOriginal)
+      throws EEAException {
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     UserRepresentationVO user = userManagementControllerZuul.getUserByUserId(userId);
     if (isNewRule) {
+      LOG.info("Creating a new historic for the rule {}", rule.getRuleId());
       auditRepository.createAudit(rule, user);
     } else {
+      LOG.info("Adding new information in the historic of the rule {}", rule.getRuleId());
       Audit audit = auditRepository.getAuditByRuleId(rule.getRuleId());
+      if (null == audit) {
+        throw new EEAException(EEAErrorMessage.AUDIT_NOT_FOUND);
+      }
       boolean metadata = checkMetadataHasChange(rule, ruleOriginal);
       boolean status = checkStatusHasChange(rule, ruleOriginal);
       boolean expression = checkExpressionHasChange(rule, ruleOriginal);
