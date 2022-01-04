@@ -182,12 +182,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
       integrationControllerZuul.createDefaultIntegration(dataflowId, datasetSchemaId);
     } catch (InterruptedException | ExecutionException | EEAException e) {
-      LOG.error("Aborted DataSetSchema creation: {}", e.getMessage());
+      LOG.error("Aborted DataSetSchema creation: {}", e.getMessage(), e);
       if (e instanceof InterruptedException) {
         Thread.currentThread().interrupt();
       }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          "Error creating design dataset", e);
+          "Error creating design dataset");
     }
   }
 
@@ -217,9 +217,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/v1/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','TESTDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_CUSTODIAN_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_CUSTODIAN_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','TESTDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @ApiOperation(value = "Get dataset schema by dataset id",
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, OBSERVER, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR READ, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER ")
+      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, OBSERVER, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR, CUSTODIAN SUPPORT \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER, CUSTODIAN SUPPORT\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER, CUSTODIAN SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER, CUSTODIAN SUPPORT\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR READ, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER, CUSTODIAN SUPPORT ")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting the data")})
   public DataSetSchemaVO findDataSchemaByDatasetId(@ApiParam(type = "Long", value = "Dataset id",
@@ -227,7 +227,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       return dataschemaService.getDataSchemaByDatasetId(true, datasetId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG.error("Error while retrieving dataset schema by id: {}", datasetId, e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_DATASET_SCHEMA);
     }
   }
 
@@ -240,9 +242,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/datasetId/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','TESTDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
-  @ApiOperation(value = "Get dataset schema by dataset id", hidden = true,
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, OBSERVER, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD, OBSERVER\n\n Test dataset: CUSTODIAN, STEWARD ,OBSERVER\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR READ, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER ")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_CUSTODIAN_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_CUSTODIAN_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','TESTDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Get dataset schema by dataset id", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting the data")})
   public DataSetSchemaVO findDataSchemaByDatasetIdLegacy(@ApiParam(type = "Long",
@@ -310,7 +311,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       return dataschemaService.getDataSchemaByDatasetId(false, datasetId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG.error("Error while retrieving dataset schema by id: {}", datasetId, e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_DATASET_SCHEMA);
     }
   }
 
@@ -386,7 +389,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       }
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting a design dataset. Message: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DELETING_DESIGN_DATASET);
     }
   }
 
@@ -432,8 +436,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           SecurityContextHolder.getContext().getAuthentication().getName(), false);
       return tableSchemaVO;
     } catch (EEAException e) {
+      LOG_ERROR.error("Error creating a table schema. DatasetId: {}. Message: {}", datasetId,
+          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID, e);
+          EEAErrorMessage.DATASET_INCORRECT_ID);
     }
   }
 
@@ -477,22 +483,21 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       dataschemaService.releaseCreateUpdateView(datasetId,
           SecurityContextHolder.getContext().getAuthentication().getName(), false);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error updating table schema. Message: {}", e.getMessage(), e);
       if (e.getMessage() != null
           && e.getMessage().equals(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
               tableSchemaVO.getIdTableSchema(), datasetId))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
-                tableSchemaVO.getIdTableSchema(), datasetId),
-            e);
+                tableSchemaVO.getIdTableSchema(), datasetId));
       }
       if (e.getMessage() != null && e.getMessage().equals(String
           .format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaVO.getIdTableSchema(), datasetId))) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(String
-            .format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaVO.getIdTableSchema(), datasetId)),
-            e);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String
+            .format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaVO.getIdTableSchema(), datasetId));
       } else {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.DATASET_INCORRECT_ID, e);
+            EEAErrorMessage.DATASET_INCORRECT_ID);
       }
     }
   }
@@ -541,8 +546,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
       LOG.info("A table has been deleted in the datasetId {}", datasetId);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting table schema. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.EXECUTION_ERROR, e);
+          EEAErrorMessage.DELETING_TABLE_SCHEMA);
     }
   }
 
@@ -578,7 +584,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.SCHEMA_NOT_FOUND, e);
+      LOG_ERROR.error("Error ordering table schema. DatasetId: {}. Message: {}", datasetId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.SCHEMA_NOT_FOUND);
     }
   }
 
@@ -651,7 +659,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           SecurityContextHolder.getContext().getAuthentication().getName(), false);
       return (response);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG_ERROR.error("Error creating field schema. DatasetId: {}. Message: {}", datasetId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.CREATING_FIELD_SCHEMA);
     }
   }
 
@@ -726,7 +737,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       }
 
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG_ERROR.error("Error updating field schema. DatasetId: {}. Message: {}", datasetId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.UPDATING_FIELD_SCHEMA);
     }
   }
 
@@ -793,8 +807,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.PK_REFERENCED);
       }
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.INVALID_OBJECTID,
-          e);
+      LOG_ERROR.error("Error deleting field schema. DatasetId: {}. Message: {}", datasetId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DELETING_FIELD_SCHEMA);
     }
   }
 
@@ -830,8 +846,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         throw new EEAException(EEAErrorMessage.EXECUTION_ERROR);
       }
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
-          e);
+      LOG_ERROR.error("Error ordering field schema. DatasetId: {}. Message: {}", datasetId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
     }
   }
 
@@ -877,9 +894,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         }
       }
     } catch (EEAException e) {
-      LOG_ERROR.error("updateDatasetSchema - DatasetSchema not found: datasetId={}", datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
-          e);
+      LOG_ERROR.error("updateDatasetSchema - DatasetSchema not found: datasetId={}", datasetId, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
     }
   }
 
@@ -909,7 +925,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @GetMapping(value = "/validate/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_REQUESTER','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "validate schemas", hidden = true)
   public Boolean validateSchemas(@ApiParam(type = "Long", value = "Dataflow Id",
       example = "0") @PathVariable("dataflowId") Long dataflowId) {
@@ -952,8 +968,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       try {
         schemas.add(dataschemaService.getDataSchemaByDatasetId(false, design.getId()));
       } catch (EEAException e) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND,
-            e);
+        LOG_ERROR.error("Error finding dataset schema by dataflow id. DatasetId: {}. Message: {}",
+            idDataflow, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
       }
     });
     return schemas;
@@ -968,7 +985,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the unique constraints
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_STEWARD')")
   @GetMapping(value = "{schemaId}/getUniqueConstraints/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find unique constraints", hidden = true)
@@ -1029,7 +1046,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       return dataschemaService.getUniqueConstraint(uniqueId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
     }
   }
 
@@ -1085,7 +1103,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
     }
   }
 
@@ -1152,7 +1171,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           SecurityContextHolder.getContext().getAuthentication().getName());
       designDatasetService.copyDesignDatasets(dataflowIdOrigin, dataflowIdDestination);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      LOG_ERROR.error(
+          "Error copying data from another dataflow. Origin DataflowId {}. Destination DataflowId {}. Message: {}",
+          dataflowIdOrigin, dataflowIdDestination, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.COPYING_DESIGN_DATAFLOW);
     }
   }
 
@@ -1166,11 +1189,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the simple schema
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD')")
   @GetMapping(value = "/v1/getSimpleSchema/dataset/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get dataset schema by dataset id",
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD \n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE \n\n EU dataset: CUSTODIAN, STEWARD ")
+      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD, CUSTODIAN SUPPORT \n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE \n\n EU dataset: CUSTODIAN, STEWARD ")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting data"),
       @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)})
@@ -1188,7 +1211,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       return dataschemaService.getSimpleSchema(datasetId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      LOG_ERROR.error(
+          "Error retrieving simple dataset schema by dataflowId. DataflowId {}. DatasetId {}. Message: {}",
+          dataflowId, datasetId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_DATASET_SIMPLE_SCHEMA);
     }
   }
 
@@ -1201,11 +1228,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the simple schema legacy
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD')")
   @GetMapping(value = "/getSimpleSchema/dataset/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Get dataset schema by dataset id", hidden = true,
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD \n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE \n\n EU dataset: CUSTODIAN, STEWARD ")
+  @ApiOperation(value = "Get dataset schema by dataset id", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting data"),
       @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)})
@@ -1230,11 +1256,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    * @return the table schemas ids
    */
   @Override
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_STEWARD','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_STEWARD','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD')")
   @GetMapping(value = "/v1/getTableSchemasIds/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get list of dataset table schemas by dataset id",
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD \n\n Reference dataset: CUSTODIAN, STEWARD \n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE \n\n EU dataset: CUSTODIAN, STEWARD ")
+      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD, CUSTODIAN SUPPORT \n\n Reference dataset: CUSTODIAN, STEWARD \n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE \n\n EU dataset: CUSTODIAN, STEWARD ")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting data"),
       @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)})
@@ -1252,7 +1278,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       return dataschemaService.getTableSchemasIds(datasetId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      LOG_ERROR.error(
+          "Error retrieving table schema by datasetId. DataflowId {}. DatasetId {}. Message: {}",
+          dataflowId, datasetId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_TABLE_SCHEMAS);
     }
   }
 
@@ -1268,8 +1298,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_STEWARD','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @GetMapping(value = "/getTableSchemasIds/{datasetId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "Get list of dataset table schemas by dataset id", hidden = true,
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE, REPORTER READ, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD \n\n Reference dataset: CUSTODIAN, STEWARD \n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE \n\n EU dataset: CUSTODIAN, STEWARD ")
+  @ApiOperation(value = "Get list of dataset table schemas by dataset id", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 500, message = "Error getting data"),
       @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)})
@@ -1312,7 +1341,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     } catch (Exception e) {
       LOG_ERROR.error("Error exporting schemas from the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXPORTING_SCHEMAS);
     }
   }
 
@@ -1353,7 +1383,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     } catch (Exception e) {
       LOG_ERROR.error("Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.IMPORTING_SCHEMAS);
     }
   }
 
@@ -1392,7 +1423,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {
       LOG_ERROR.error("Error exporting field schemas in dataset {}", datasetId, e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXPORTING_FIELD_SCHEMAS);
     }
   }
 
@@ -1409,8 +1441,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @GetMapping(value = "/{datasetSchemaId}/exportFieldSchemas",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @ApiOperation(value = "Export field schemas", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE")
+  @ApiOperation(value = "Export field schemas", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully export data"),
       @ApiResponse(code = 500, message = "Error exporting data")})
   public ResponseEntity<byte[]> exportFieldSchemasLegacy(@ApiParam(type = "String",
@@ -1467,7 +1498,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     } catch (IOException e) {
       LOG_ERROR.error("File importing field schemas into dataset {} failed. fileName={}", datasetId,
           file.getOriginalFilename(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file");
     }
   }
 
@@ -1484,8 +1515,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @HystrixCommand
   @PostMapping(value = "/{datasetSchemaId}/importFieldSchemas")
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
-  @ApiOperation(value = "Import field schemas", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE")
+  @ApiOperation(value = "Import field schemas", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully import data"),
       @ApiResponse(code = 400, message = "Error importing file")})
   public void importFieldSchemasLegacy(@ApiParam(type = "String", value = "Dataset schema Id",
@@ -1525,7 +1555,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       return new ResponseEntity<>(fileZip, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {
       LOG_ERROR.error("Error exporting the zip field schemas in dataset {}", datasetId, e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXPORTING_DATASET_DEFINITION);
     }
   }
 
@@ -1540,8 +1571,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @GetMapping(value = "/dataset/{datasetId}/exportFieldSchemas",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @ApiOperation(value = "Export field schemas from dataset", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE")
+  @ApiOperation(value = "Export field schemas from dataset", hidden = true)
   public ResponseEntity<byte[]> exportFieldSchemasFromDatasetLegacy(@ApiParam(type = "Long",
       value = "Dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
     return this.exportFieldSchemasFromDataset(datasetId);

@@ -14,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -76,7 +75,7 @@ public class WebformControllerImplTest {
           .findWebformConfigContentById(Mockito.anyLong());
       webFormControllerImpl.findWebformConfigById(1L);
     } catch (JsonProcessingException e) {
-      assertEquals(HttpStatus.NOT_FOUND, e.getCause());
+      assertEquals("not found", e.getMessage());
     }
   }
 

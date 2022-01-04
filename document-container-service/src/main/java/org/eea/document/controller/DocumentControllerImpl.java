@@ -73,6 +73,9 @@ public class DocumentControllerImpl implements DocumentController {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DocumentControllerImpl.class);
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /**
    * Upload document.
    *
@@ -83,12 +86,13 @@ public class DocumentControllerImpl implements DocumentController {
    * @param isPublic the is public
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR hasAnyRole('ADMIN')")
   @HystrixCommand
   @PostMapping(value = "/v1/upload/{dataflowId}")
   @ApiOperation(value = "Upload document to dataflow help", hidden = false,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
-  public void uploadDocument(@ApiParam(value = "File to upload") @RequestPart("file") final MultipartFile file,
+      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN, CUSTODIAN_SUPPORT")
+  public void uploadDocument(
+      @ApiParam(value = "File to upload") @RequestPart("file") final MultipartFile file,
       @ApiParam(value = "Dataflow id",
           example = "0") @PathVariable("dataflowId") final Long dataflowId,
       @ApiParam(value = "Document description",
@@ -124,9 +128,14 @@ public class DocumentControllerImpl implements DocumentController {
           file.getOriginalFilename(), documentVO, file.getSize());
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error("Error uploading document to dataflow help: Dataflow {} is not DRAFT",
+            dataflowId);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error uploading document to dataflow help: DataflowId {}. Message: {}",
+          dataflowId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
     }
   }
 
@@ -140,11 +149,10 @@ public class DocumentControllerImpl implements DocumentController {
    * @param isPublic the is public
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR hasAnyRole('ADMIN')")
   @HystrixCommand
   @PostMapping(value = "/upload/{dataflowId}")
-  @ApiOperation(value = "Upload dataflow document by dataflow Id", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+  @ApiOperation(value = "Upload dataflow document by dataflow Id", hidden = true)
   public void uploadDocumentLegacy(@RequestPart("file") final MultipartFile file,
       @PathVariable("dataflowId") final Long dataflowId,
       @RequestParam("description") final String description,
@@ -162,11 +170,11 @@ public class DocumentControllerImpl implements DocumentController {
    * @return the document
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/v1/{documentId}/dataflow/{dataflowId}",
       produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   @ApiOperation(value = "Download document from dataflow help by document id", hidden = false,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN, CUSTODIAN SUPPORT")
   @HystrixCommand
   public Resource getDocument(
       @ApiParam(value = "Document id",
@@ -182,9 +190,14 @@ public class DocumentControllerImpl implements DocumentController {
       return new ByteArrayResource(file.getBytes());
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error("Error retrieving document: DocumentId {}. Message: {}", documentId,
+            e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error retrieving document: DocumentId {}. Message: {}", documentId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_DOCUMENT);
     }
   }
 
@@ -196,11 +209,10 @@ public class DocumentControllerImpl implements DocumentController {
    * @return the document legacy
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/{documentId}/dataflow/{dataflowId}",
       produces = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
-  @ApiOperation(value = "Download document from dataflow help by document id", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
+  @ApiOperation(value = "Download document from dataflow help by document id", hidden = true)
   @HystrixCommand
   public Resource getDocumentLegacy(
       @ApiParam(value = "Document Id",
@@ -228,7 +240,7 @@ public class DocumentControllerImpl implements DocumentController {
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      if (document.getIsPublic()) {
+      if (Boolean.TRUE.equals(document.getIsPublic())) {
         FileResponse file = documentService.getDocument(documentId, document.getDataflowId());
         return new ByteArrayResource(file.getBytes());
       } else {
@@ -237,9 +249,14 @@ public class DocumentControllerImpl implements DocumentController {
       }
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error("Error retrieving public document: DocumentId {}. Message: {}", documentId,
+            e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error retrieving public document: DocumentId {}. Message: {}", documentId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_DOCUMENT);
     }
   }
 
@@ -255,10 +272,10 @@ public class DocumentControllerImpl implements DocumentController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR hasAnyRole('ADMIN')")
   @DeleteMapping(value = "/v1/{documentId}/dataflow/{dataflowId}")
   @ApiOperation(value = "Delete document from dataflow help by document id", hidden = false,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN, CUSTODIAN SUPPORT")
   public void deleteDocument(
       @ApiParam(value = "Document id",
           example = "0") @PathVariable("documentId") final Long documentId,
@@ -284,12 +301,19 @@ public class DocumentControllerImpl implements DocumentController {
       }
       documentService.deleteDocument(documentId, document.getDataflowId(), deleteMetabase);
     } catch (final FeignException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      LOG_ERROR.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
+          documentId, dataflowId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
+            documentId, dataflowId, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
+          documentId, dataflowId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_DOCUMENT);
     }
   }
 
@@ -303,10 +327,9 @@ public class DocumentControllerImpl implements DocumentController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR hasAnyRole('ADMIN')")
   @DeleteMapping(value = "/{documentId}/dataflow/{dataflowId}")
-  @ApiOperation(value = "Delete document from dataflow help by document id", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+  @ApiOperation(value = "Delete document from dataflow help by document id", hidden = true)
   public void deleteDocumentLegacy(
       @ApiParam(value = "Document id",
           example = "0") @PathVariable("documentId") final Long documentId,
@@ -331,17 +354,17 @@ public class DocumentControllerImpl implements DocumentController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR hasAnyRole('ADMIN')")
   @PutMapping(value = "/v1/update/{idDocument}/dataflow/{dataflowId}")
   @ApiOperation(value = "Update dataflow document by document id", hidden = false,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN, CUSTODIAN SUPPORT")
   public void updateDocument(
       @ApiParam(value = "File to upload") @RequestPart(name = "file",
           required = false) final MultipartFile file,
       @ApiParam(value = "Dataflow id",
           example = "0") @PathVariable("dataflowId") final Long dataflowId,
-      @ApiParam(value = "Document description", example = "description") @RequestParam(name = "description",
-          required = false) final String description,
+      @ApiParam(value = "Document description", example = "description") @RequestParam(
+          name = "description", required = false) final String description,
       @ApiParam(value = "Document language", example = "English") @RequestParam(name = "language",
           required = false) final String language,
       @ApiParam(value = "Document id",
@@ -383,9 +406,14 @@ public class DocumentControllerImpl implements DocumentController {
       }
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error("Error updating document: DocumentId {}. DataflowId {}. Message: {}",
+            idDocument, dataflowId, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error updating document: DocumentId {}. DataflowId {}. Message: {}",
+          idDocument, dataflowId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_DOCUMENT);
     }
   }
 
@@ -401,10 +429,9 @@ public class DocumentControllerImpl implements DocumentController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN_SUPPORT') OR hasAnyRole('ADMIN')")
   @PutMapping(value = "/update/{idDocument}/dataflow/{dataflowId}")
-  @ApiOperation(value = "Update dataflow document", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR WRITE, ADMIN")
+  @ApiOperation(value = "Update dataflow document", hidden = true)
   public void updateDocumentLegacy(
       @ApiParam(value = "File to upload") @RequestPart(name = "file",
           required = false) final MultipartFile file,
@@ -429,15 +456,15 @@ public class DocumentControllerImpl implements DocumentController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/v1/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get list of dataflow documents from dataflow help",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class,
       responseContainer = "List", hidden = false,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN, CUSTODIAN SUPPORT")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
-  public List<DocumentVO> getAllDocumentsByDataflow(@ApiParam(value = "Dataflow id",
-          example = "0") @PathVariable("dataflowId") Long dataflowId) {
+  public List<DocumentVO> getAllDocumentsByDataflow(
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     List<DocumentVO> documents = new ArrayList<>();
     documents = dataflowController.getAllDocumentsByDataflowId(dataflowId);
     return documents;
@@ -451,12 +478,11 @@ public class DocumentControllerImpl implements DocumentController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId)) OR checkApiKey(#dataflowId,#providerId,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get list of dataflow documents from dataflow help",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DocumentVO.class,
-      responseContainer = "List", hidden = true,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
+      responseContainer = "List", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public List<DocumentVO> getAllDocumentsByDataflowLegacy(
       @PathVariable("dataflowId") Long dataflowId) {
@@ -494,9 +520,16 @@ public class DocumentControllerImpl implements DocumentController {
       documentService.uploadSchemaSnapshot(inStream, "json", fileName, designDatasetId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error(
+            "Error updating schema snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
+            designDatasetId, fileName, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error updating schema snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
+          designDatasetId, fileName, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_SCHEMA_SNAPSHOT_DOCUMENT);
     }
   }
 
@@ -527,9 +560,16 @@ public class DocumentControllerImpl implements DocumentController {
       return resource.getByteArray();
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error(
+            "Error retrieving snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
+            idDesignDataset, fileName, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error retrieving snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
+          idDesignDataset, fileName, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_SNAPSHOT_DOCUMENT);
     }
   }
 
@@ -559,9 +599,16 @@ public class DocumentControllerImpl implements DocumentController {
       documentService.deleteSnapshotDocument(fileName, idDesignDataset);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error(
+            "Error deleting snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
+            idDesignDataset, fileName, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error deleting snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
+          idDesignDataset, fileName, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_SNAPSHOT_DOCUMENT);
     }
   }
 
@@ -599,9 +646,16 @@ public class DocumentControllerImpl implements DocumentController {
           messageId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error(
+            "Error uploading collaboration document: DataflowId {}. FileName {}. Message: {}",
+            dataflowId, fileName, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error uploading collaboration document: DataflowId {}. FileName {}. Message: {}",
+          dataflowId, fileName, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_COLLABORATION_DOCUMENT);
     }
   }
 
@@ -632,9 +686,16 @@ public class DocumentControllerImpl implements DocumentController {
       documentService.deleteCollaborationDocument(fileName, dataflowId, messageId);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error(
+            "Error deleting collaboration document: DataflowId {}. FileName {}. Message: {}",
+            dataflowId, fileName, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error deleting collaboration document: DataflowId {}. FileName {}. Message: {}",
+          dataflowId, fileName, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_COLLABORATION_DOCUMENT);
     }
   }
 
@@ -666,9 +727,16 @@ public class DocumentControllerImpl implements DocumentController {
       return resource.getByteArray();
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error(
+            "Error retrieving collaboration document: DataflowId {}. FileName {}. Message: {}",
+            dataflowId, fileName, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error retrieving collaboration document: DataflowId {}. FileName {}. Message: {}",
+          dataflowId, fileName, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_COLLABORATION_DOCUMENT);
     }
   }
 

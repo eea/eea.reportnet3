@@ -692,7 +692,7 @@
     "importTableSchema": "Import definition",
     "importTableSchemaDialogHeader": "Import schema definition in table",
     "importTableSchemaInit": "Importing table schema definition",
-    "impossibleRoleError": "The lead reporter cannot be assigned as reporter",
+    "impossibleReporterRoleError": "The lead reporter cannot be assigned as reporter",
     "incompleteDataTooltip": "Incomplete data",
     "info": "Info",
     "instrumentColumnTitle": "Instrument",
@@ -1421,6 +1421,9 @@
     "x": "X",
     "y": "Y",
     "yes": "Yes",
-    "zipCsvTable": "ZIP (.csv for each table)"
+    "zipCsvTable": "ZIP (.csv for each table)",
+    "errorBoundaryClipboardButtonLabel": "Copy to clipboard",
+    "impossibleRequesterRoleError": "The user cannot be assigned as requester",
+    "callFmeProcessFailedEvent": "Error calling to FME at <strong title='{:datasetName}'>{:shortDatasetName}</strong>"
   }
 }

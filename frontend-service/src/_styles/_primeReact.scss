@@ -2357,7 +2357,7 @@ body .p-dialog .p-dialog-content {
   background-color: var(--dialog-content-bg);
   color: var(--dialog-content-color);
   border: var(--dialog-content-border);
-  padding: 1em 1.5em;
+  padding: 2em 1.5em;
   max-height: 90vh;
   overflow: auto;
 }
@@ -2367,7 +2367,7 @@ body .p-dialog .p-dialog-footer {
   border-top: 0 none;
   background-color: var(--dialog-footer-bg);
   color: var(--dialog-content-color);
-  padding: 0.571em 1em;
+  padding: 1.012rem 1.5em;
   margin: 0;
   text-align: right;
   border-radius: 0 0 5px 5px;

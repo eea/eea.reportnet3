@@ -14,6 +14,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -101,7 +102,7 @@ public class CSVReaderStrategyTest {
     when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any(DataSetSchema.class))).thenReturn(fschema);
     csvReaderStrategy.parseFile(input, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
-        dataSet);
+        dataSet, new ConnectionDataVO());
     Mockito.verify(fileCommon, times(3)).findIdFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any(DataSetSchema.class));
   }
@@ -123,7 +124,7 @@ public class CSVReaderStrategyTest {
     when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any(DataSetSchema.class))).thenReturn(fschema);
     csvReaderStrategy.parseFile(input, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
-        dataSet);
+        dataSet, new ConnectionDataVO());
     Mockito.verify(fileCommon, times(3)).findIdFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any(DataSetSchema.class));
   }
@@ -143,7 +144,7 @@ public class CSVReaderStrategyTest {
     when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any(DataSetSchema.class))).thenReturn(fschema);
     csvReaderStrategy.parseFile(input, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
-        dataSet);
+        dataSet, new ConnectionDataVO());
     Mockito.verify(fileCommon, times(3)).findIdFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any(DataSetSchema.class));
   }
@@ -160,7 +161,8 @@ public class CSVReaderStrategyTest {
     MockMultipartFile file =
         new MockMultipartFile("file", "fileOriginal.csv", "cvs", csv.getBytes());
     input = file.getInputStream();
-    csvReaderStrategy.parseFile(input, 1L, null, null, null, csv, false, dataSet);
+    csvReaderStrategy.parseFile(input, 1L, null, null, null, csv, false, dataSet,
+        new ConnectionDataVO());
   }
 
   /**
@@ -180,7 +182,7 @@ public class CSVReaderStrategyTest {
     when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any(DataSetSchema.class))).thenReturn(fschema);
     csvReaderStrategy.parseFile(input, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
-        dataSet);
+        dataSet, new ConnectionDataVO());
   }
 
   /**
@@ -197,6 +199,6 @@ public class CSVReaderStrategyTest {
     when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any(DataSetSchema.class))).thenReturn(null);
     csvReaderStrategy.parseFile(input, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
-        dataSet);
+        dataSet, new ConnectionDataVO());
   }
 }

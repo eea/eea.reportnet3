@@ -26,6 +26,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
@@ -591,10 +592,12 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param recordList the record list
+   * @param connectionDataVO the connection data VO
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
-  void storeRecords(Long datasetId, List<RecordValue> recordList) throws IOException, SQLException;
+  void storeRecords(Long datasetId, List<RecordValue> recordList, ConnectionDataVO connectionDataVO)
+      throws IOException, SQLException;
 
   /**
    * Gets the total failed validations by id dataset.
@@ -614,4 +617,19 @@ public interface DatasetService {
    */
   void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException;
 
+  /**
+   * Update check view.
+   *
+   * @param datasetId the dataset id
+   * @param updated the updated
+   */
+  void updateCheckView(@DatasetId Long datasetId, Boolean updated);
+
+  /**
+   * Gets the check view.
+   *
+   * @param datasetId the dataset id
+   * @return the check view
+   */
+  Boolean getCheckView(@DatasetId Long datasetId);
 }
