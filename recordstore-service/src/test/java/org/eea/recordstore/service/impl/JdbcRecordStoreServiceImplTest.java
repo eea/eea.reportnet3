@@ -524,7 +524,7 @@ public class JdbcRecordStoreServiceImplTest {
         .thenReturn(datasetSchemaVO);
 
     jdbcRecordStoreService.createUpdateQueryView(1L, false);
-    Mockito.verify(jdbcTemplate, Mockito.times(3)).execute(Mockito.anyString());
+    Mockito.verify(jdbcTemplate, Mockito.times(4)).execute(Mockito.anyString());
   }
 
   @Test
