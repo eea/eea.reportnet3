@@ -25,6 +25,10 @@
   }
 }
 
+.emptyCodelistOrLink {
+  display: none;
+}
+
 .draggableFieldDiv {
   display: table;
   width: 100%;
@@ -97,11 +101,10 @@
 }
 
 .codelistButton {
-  //margin-left: 0.4rem !important;
   border: 1px solid var(--general-border-color) !important;
-  width: 8%;
+  padding: 0 0.5em !important;
   height: 1.95rem;
-  width: 4rem;
+  width: 100%;
   &:hover {
     border-color: var(--button-secondary-border-color-hover) !important;
   }
@@ -111,8 +114,9 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 4rem;
+  width: 8em;
   font-size: 13px;
+  text-align: left;
 }
 
 .button {
@@ -200,6 +204,9 @@
   align-self: center;
   background-color: var(--c-white-color) !important;
   span {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
     &:first-child {
       display: none;
     }
@@ -296,6 +303,11 @@
 }
 
 @media (min-width: 1090px) {
+  .emptyCodelistOrLink {
+    display: block;
+    width: 4rem;
+    margin-right: 0.4rem;
+  }
   .qcButton {
     span {
       &:first-child {
@@ -304,6 +316,13 @@
       &:last-child {
         padding: 0.429em 1em 0.429em 2.25em !important;
       }
+    }
+  }
+
+  .codelistButton {
+    width: 4rem;
+    span {
+      width: 100%;
     }
   }
   .smallItems {

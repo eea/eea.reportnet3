@@ -40,6 +40,7 @@
     &:nth-child(3),
     &:nth-child(4) {
       text-align: center;
+      word-wrap: break-word;
     }
     /*  &:nth-child(2) {
       width: 75px;

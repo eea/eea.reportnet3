@@ -1099,8 +1099,9 @@ export const FieldDesigner = ({
     if (isCodelistOrLink) {
       return (
         <span
-          className={fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive}
-          style={{ width: '4rem', marginRight: '0.4rem' }}></span>
+          className={`${styles.emptyCodelistOrLink} ${
+            fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+          }`}></span>
       );
     }
   };
