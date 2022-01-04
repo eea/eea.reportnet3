@@ -74,8 +74,7 @@ export const DataflowHelp = () => {
         userRoles.includes(config.permissions.roles.CUSTODIAN.key) ||
           userRoles.includes(config.permissions.roles.STEWARD.key) ||
           userRoles.includes(config.permissions.roles.EDITOR_WRITE.key) ||
-          userRoles.includes(config.permissions.roles.EDITOR_READ.key) ||
-          userRoles.includes(config.permissions.roles.CUSTODIAN_SUPPORT.key)
+          userRoles.includes(config.permissions.roles.EDITOR_READ.key)
       );
 
       setIsToolbarVisible(
