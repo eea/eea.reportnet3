@@ -23,7 +23,6 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -249,11 +248,8 @@ public class ValidationHelper implements DisposableBean {
       String processId, boolean released, boolean updateViews) throws EEAException {
 
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    DatasetTypeEnum type = dataset.getDatasetTypeEnum();
 
-    if (DatasetTypeEnum.DESIGN.equals(type)) {
-      executeValidationProcess(datasetId, processId, released);
-    } else if (Boolean.FALSE.equals(updateViews)) {
+    if (Boolean.FALSE.equals(updateViews)) {
       executeValidationProcess(datasetId, processId, released);
     } else {
       Map<String, Object> values = new HashMap<>();
