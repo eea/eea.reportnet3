@@ -732,6 +732,7 @@ export const QCList = ({
             opacity: tabsValidationsState.editingRows.length > 0 ? '0.5' : 1
           }}>
           <MyFilters
+            className="qcList"
             data={tabsValidationsState.validationList.validations}
             getFilteredData={onLoadFilteredData}
             options={FILTER_OPTIONS}

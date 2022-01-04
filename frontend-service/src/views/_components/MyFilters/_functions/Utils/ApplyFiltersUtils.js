@@ -47,7 +47,9 @@ const applyMultiSelects = ({ filterBy, filterByKeys, item }) => {
 const applySearch = ({ filterByKeys, item, value }) => {
   const filteredKeys = filterByKeys.SEARCH.filter(key => key);
 
-  return filteredKeys.some(key => isEmpty(key) || item[key].toLowerCase().includes(value.toLowerCase()));
+  if (isEmpty(filteredKeys)) return true;
+
+  return filteredKeys.some(key => areEquals(value, '') || item[key].toLowerCase().includes(value.toLowerCase()));
 };
 
 export const ApplyFiltersUtils = { applyDates, applyInputs, applyMultiSelects, applySearch };

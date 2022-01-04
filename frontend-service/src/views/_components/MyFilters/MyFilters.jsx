@@ -381,18 +381,28 @@ export const MyFilters = ({
     if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderSearch(nestedOption));
 
     return (
-      <span className={`p-float-label ${styles.input}`}>
-        <InputText
-          className={styles.searchInput}
-          id={'searchInput'}
-          onChange={event => onSearch(event.target.value)}
-          value={searchBy}
-        />
+      <div className={styles.block}>
+        {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
+        <div className={`p-float-label ${styles.label} ${styles.elementFilter} `}>
+          <InputText
+            className={styles.searchInput}
+            id={'searchInput'}
+            onChange={event => onSearch(event.target.value)}
+            value={searchBy}
+          />
+          {searchBy && (
+            <Button
+              className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+              icon="cancel"
+              onClick={() => onSearch('')}
+            />
+          )}
 
-        <label className={styles.label} htmlFor={'searchInput'}>
-          {option.label}
-        </label>
-      </span>
+          <label className={styles.label} htmlFor={'searchInput'}>
+            {option.label}
+          </label>
+        </div>
+      </div>
     );
   };
 
