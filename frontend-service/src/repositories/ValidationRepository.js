@@ -31,6 +31,13 @@ export const ValidationRepository = {
   getAll: async (dataflowId, datasetSchemaId) =>
     await HTTPRequester.get({ url: getUrl(ValidationConfig.getAll, { dataflowId, datasetSchemaId }) }),
 
+  getHistoricReleases: async (datasetId, ruleId) => {
+    console.log(datasetId);
+    return await HTTPRequester.get({
+      url: getUrl(ValidationConfig.getHistoricReleases, { datasetId, ruleId })
+    });
+  },
+
   runSqlRule: async (datasetId, sqlSentence, showInternalFields) =>
     await HTTPRequester.post({
       url: getUrl(ValidationConfig.runSqlRule, { datasetId, sqlSentence, showInternalFields }),

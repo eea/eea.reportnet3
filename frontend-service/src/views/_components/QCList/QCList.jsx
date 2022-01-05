@@ -68,6 +68,8 @@ export const QCList = ({
     validationList: {}
   });
 
+  console.log('dataset.datasetId :>> ', dataset.datasetId);
+
   useEffect(() => {
     setHasValidations(!checkIsEmptyValidations());
   }, [tabsValidationsState.validationList]);
@@ -385,6 +387,7 @@ export const QCList = ({
         />
         <ButtonQCHistory
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+          datasetId={dataset.datasetId}
           rowId={row.id}
         />
         <Button

@@ -17,7 +17,9 @@ import { Spinner } from 'views/_components/Spinner';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
-export const ButtonQCHistory = ({ className, style, ruleId }) => {
+import { ValidationService } from 'services/ValidationService';
+
+export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
@@ -97,7 +99,15 @@ export const ButtonQCHistory = ({ className, style, ruleId }) => {
     });
   };
 
-  const getQcHistoryData = async ruleId => {
+  const getQcHistoryData = async () => {
+    console.log('componente: ', datasetId);
+
+    try {
+      const response = await ValidationService.getHistoricReleases(datasetId, ruleId);
+    } catch (error) {
+      console.log('error :>> ', error);
+    }
+
     await simulateEndPoint(1000);
 
     const mockArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
@@ -162,7 +172,8 @@ export const ButtonQCHistory = ({ className, style, ruleId }) => {
         icon="info"
         onClick={() => {
           setShowDialog(true);
-          setTimeout(getQcHistoryData, 1000, ruleId);
+          // setTimeout(getQcHistoryData, 1000, ruleId);
+          getQcHistoryData();
         }}
         style={style}
         tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
