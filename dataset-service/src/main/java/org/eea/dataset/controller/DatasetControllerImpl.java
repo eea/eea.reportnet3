@@ -12,6 +12,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -1102,9 +1103,13 @@ public class DatasetControllerImpl implements DatasetController {
             datasetId);
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
       }
+
       // Remove comma "," character to avoid error with special characters
-      String fileName = file.getOriginalFilename().replace(",", "");
-      if (!validateAttachment(datasetId, idField, fileName, file.getSize())) {
+      String fileName = file.getOriginalFilename();
+      fileName = StringUtils.isNotBlank(fileName) ? fileName.replace(",", "") : "";
+
+      if (!validateAttachment(datasetId, idField, fileName, file.getSize())
+          || fileName.equals("")) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
       }
       InputStream is = file.getInputStream();

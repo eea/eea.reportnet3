@@ -3,6 +3,7 @@ package org.eea.collaboration.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.service.CollaborationService;
 import org.eea.collaboration.service.helper.CollaborationServiceHelper;
@@ -122,8 +123,8 @@ public class CollaborationControllerImpl implements CollaborationController {
       @ApiParam(
           value = "The file which is going to be attached") @RequestPart("fileAttachment") MultipartFile fileAttachment) {
     try {
-      if (providerId == null || dataflowId == null || fileAttachment == null
-          || fileAttachment.getOriginalFilename() == null) {
+      if (providerId == null || dataflowId == null || null == fileAttachment
+          || null == fileAttachment.getOriginalFilename()) {
         throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGING_BAD_REQUEST);
       }
       if (fileAttachment.getSize() > 20971520) {
@@ -131,7 +132,9 @@ public class CollaborationControllerImpl implements CollaborationController {
       }
       InputStream is = fileAttachment.getInputStream();
       // Remove comma "," character to avoid error with special characters
-      String fileName = fileAttachment.getOriginalFilename().replace(",", "");
+      String fileName = fileAttachment.getOriginalFilename();
+      fileName = StringUtils.isNotBlank(fileName) ? fileName.replace(",", "") : "";
+
       String fileSize = String.valueOf(fileAttachment.getSize());
       return collaborationService.createMessageAttachment(dataflowId, providerId, is, fileName,
           fileSize, fileAttachment.getContentType());

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -373,12 +374,17 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     if (file == null || file.getOriginalFilename() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_NOT_FOUND);
     }
-    final int location = file.getOriginalFilename().lastIndexOf('.');
+    String originalFileName = file.getOriginalFilename();
+    final int location =
+        StringUtils.isNotBlank(originalFileName) ? originalFileName.lastIndexOf('.') : -1;
     if (location == -1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_EXTENSION);
     }
-    String mimeType = file.getOriginalFilename().substring(location + 1);
-    if (!FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType)) {
+
+    String mimeType =
+        StringUtils.isNotBlank(originalFileName) ? originalFileName.substring(location + 1) : "";
+
+    if (!FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || mimeType.equals("")) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CSV_FILE_ERROR);
     }
 
