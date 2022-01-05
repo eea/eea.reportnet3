@@ -19,12 +19,11 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import {
-  filterByKeysFamily,
+  filterByKeysState,
   filterByState,
   filteredDataState,
-  // filtersStateFamily,
-  searchStateFamily,
-  sortByStateFamily
+  searchState,
+  sortByState
 } from './_functions/Stores/filtersStores';
 
 import { ApplyFiltersUtils } from './_functions/Utils/ApplyFiltersUtils';
@@ -44,17 +43,11 @@ export const MyFilters = ({
   options = [],
   viewType
 }) => {
-  const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysFamily(viewType));
-  // const [filters, setFilters] = useRecoilState(filtersStateFamily(viewType));
-  const [searchBy, setSearchBy] = useRecoilState(searchStateFamily(viewType));
-  const [sortBy, setSortBy] = useRecoilState(sortByStateFamily(viewType));
-
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
+  const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
   const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
-
-  console.log('filterBy :>> ', filterBy);
-
-  // const { filterBy, filteredData } = filters;
+  const [searchBy, setSearchBy] = useRecoilState(searchState(viewType));
+  const [sortBy, setSortBy] = useRecoilState(sortByState(viewType));
 
   const { userProps } = useContext(UserContext);
   const notificationContext = useContext(NotificationContext);
@@ -161,7 +154,6 @@ export const MyFilters = ({
         filteredData = applySort({ filteredData, order: value, prevSortState: applyFilters(), sortByKey: key });
       }
 
-      // setFilters({ ...filters, filteredData });
       setFilteredData(filteredData);
     } catch (error) {
       console.error('MyFilters - loadFilters.', error);
@@ -181,13 +173,11 @@ export const MyFilters = ({
   const onChange = ({ key, value }) => {
     const filteredData = onApplyFilters({ filterBy: { ...filterBy, [key]: value } });
 
-    // setFilters({ ...filters, filterBy: { ...filters.filterBy, [key]: value }, filteredData });
     setFilterBy({ ...filterBy, [key]: value });
     setFilteredData(filteredData);
   };
 
   const onResetFilters = () => {
-    // setFilters({ filterBy: {}, filteredData: data });
     setFilterBy({});
     setFilteredData(data);
     setSearchBy('');
@@ -205,7 +195,6 @@ export const MyFilters = ({
     const sortedData = applySort({ filteredData, order: sortOption, prevSortState: applyFilters(), sortByKey: key });
 
     setSortBy({ [key]: sortOption });
-    // setFilters({ ...filters, filteredData: sortedData });
     setFilteredData(sortedData);
   };
 
@@ -334,18 +323,6 @@ export const MyFilters = ({
       </div>
     );
   };
-
-  // const renderMultiSelectTemplate = (multiSelectItem, option) => {
-  //   switch (option.category) {
-  //     case 'ENABLED_STATUS':
-  //     case 'LEVEL_ERROR':
-  //     case 'VALIDITY_STATUS':
-  //       return <LevelError type={multiSelectItem.type} />;
-
-  //     default:
-  //       return <span className={`${styles.statusBox}`}>{multiSelectItem.value.toString().toUpperCase()}</span>;
-  //   }
-  // };
 
   const renderMultiSelect = option => {
     if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));

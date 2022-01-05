@@ -13,13 +13,13 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { ButtonQCHistory } from './_components/ButtonQCHistory';
 import { Checkbox } from 'views/_components/Checkbox';
-import { Dropdown } from 'views/_components/Dropdown';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
+import { Dropdown } from 'views/_components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
+import { MyFilters } from 'views/_components/MyFilters';
 import { QCFieldEditor } from './_components/QCFieldEditor';
 import { Spinner } from 'views/_components/Spinner';
 import { TrafficLight } from 'views/_components/TrafficLight';
@@ -36,7 +36,6 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { getExpressionString } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/getExpressionString';
 import { TextUtils } from 'repositories/_utils/TextUtils';
-import { MyFilters } from '../MyFilters';
 
 export const QCList = ({
   dataflowId,
@@ -680,21 +679,6 @@ export const QCList = ({
     }
   };
 
-  const filterOptions = [
-    {
-      type: 'multiselect',
-      properties: [
-        { name: 'table', showInput: true },
-        { name: 'field', showInput: true },
-        { name: 'entityType' },
-        { name: 'levelError' },
-        { name: 'automatic', label: resourcesContext.messages['creationMode'] },
-        { name: 'enabled', label: resourcesContext.messages['statusQC'] },
-        { name: 'isCorrect' }
-      ]
-    }
-  ];
-
   const FILTER_OPTIONS = [
     {
       label: 'Search by things label',
@@ -748,15 +732,6 @@ export const QCList = ({
             getFilteredData={onLoadFilteredData}
             options={FILTER_OPTIONS}
           />
-          {/* <Filters
-            className="filter-lines"
-            data={tabsValidationsState.validationList.validations}
-            getFilteredData={onLoadFilteredData}
-            getFilteredSearched={getFilteredState}
-            options={filterOptions}
-            searchAll
-            searchBy={['shortCode', 'name', 'description', 'message']}
-          /> */}
         </div>
         {!isEmpty(tabsValidationsState.filteredData) ? (
           <DataTable

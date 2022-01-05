@@ -1,6 +1,5 @@
 import isDate from 'lodash/isDate';
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 
 const parseDateValues = values => {
@@ -31,13 +30,11 @@ const getLabelsAnimationDateInitial = (options, filterBy) => {
     }));
 };
 
-// const onFilterBooleanOptions = option => (typeof option !== 'boolean' ? !isNil(option) && !isEmpty(option) : true);
-
 const getOptionsTypes = (data, nestedOptionKey, category) => {
   const options = uniq(data.map(item => item[nestedOptionKey])).filter(item => item);
-  const test = options.some(item => typeof item === 'boolean') ? [true, false] : options;
+  const parsedOptions = options.some(item => typeof item === 'boolean') ? [true, false] : options;
 
-  return test.map(option => {
+  return parsedOptions.map(option => {
     switch (category) {
       case 'CREATION_MODE':
         return { type: option ? 'AUTOMATIC' : 'MANUAL', value: option };
