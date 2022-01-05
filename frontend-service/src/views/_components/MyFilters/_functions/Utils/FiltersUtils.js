@@ -30,25 +30,10 @@ const getLabelsAnimationDateInitial = (options, filterBy) => {
     }));
 };
 
-const getOptionsTypes = (data, nestedOptionKey, category) => {
+const getOptionsTypes = (data, nestedOptionKey) => {
   const options = uniq(data.map(item => item[nestedOptionKey])).filter(item => item);
-  const parsedOptions = options.some(item => typeof item === 'boolean') ? [true, false] : options;
 
-  return parsedOptions.map(option => {
-    switch (category) {
-      case 'CREATION_MODE':
-        return { type: option ? 'AUTOMATIC' : 'MANUAL', value: option };
-
-      case 'ENABLED_STATUS':
-        return { type: option ? 'ENABLED' : 'DISABLED', value: option };
-
-      case 'VALIDITY_STATUS':
-        return { type: option ? 'VALID' : 'INVALID', value: option };
-
-      default:
-        return { type: option?.toString().toUpperCase(), value: option?.toString().toUpperCase() };
-    }
-  });
+  return options.map(option => ({ type: option?.toString().toUpperCase(), value: option?.toString().toUpperCase() }));
 };
 
 export const FiltersUtils = {

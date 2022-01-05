@@ -327,7 +327,7 @@ export const MyFilters = ({
   const renderMultiSelect = option => {
     if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
 
-    const optionsMultiSelect = getOptionsTypes(data, option.key, option.category);
+    const optionsMultiSelect = getOptionsTypes(data, option.key);
 
     return (
       <div className={`${styles.block}`} key={option.key}>
@@ -348,7 +348,7 @@ export const MyFilters = ({
           notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
           onChange={event => onChange({ key: option.key, value: event.target.value })}
           optionLabel="type"
-          options={optionsMultiSelect}
+          options={option.multiSelectOptions ? option.multiSelectOptions : optionsMultiSelect}
           value={filterBy[option.key]}
         />
       </div>

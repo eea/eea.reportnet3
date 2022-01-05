@@ -687,13 +687,34 @@ export const QCList = ({
     },
     {
       nestedOptions: [
-        { key: 'table', label: resourcesContext.messages['table'], isInputVisible: true },
-        { key: 'field', label: resourcesContext.messages['field'], isInputVisible: true },
+        { key: 'table', label: resourcesContext.messages['table'] },
+        { key: 'field', label: resourcesContext.messages['field'] },
         { key: 'entityType', label: resourcesContext.messages['entityType'] },
-        { key: 'levelError', label: resourcesContext.messages['levelError'], category: 'LEVEL_ERROR' },
-        { key: 'automatic', label: resourcesContext.messages['creationMode'], category: 'CREATION_MODE' },
-        { key: 'enabled', label: resourcesContext.messages['statusQC'], category: 'ENABLED_STATUS' },
-        { key: 'isCorrect', label: resourcesContext.messages['isCorrect'], category: 'VALIDITY_STATUS' }
+        { key: 'levelError', label: resourcesContext.messages['levelError'] },
+        {
+          key: 'automatic',
+          label: resourcesContext.messages['creationMode'],
+          multiSelectOptions: [
+            { type: 'AUTOMATIC', value: true },
+            { type: 'MANUAL', value: false }
+          ]
+        },
+        {
+          key: 'enabled',
+          label: resourcesContext.messages['statusQC'],
+          multiSelectOptions: [
+            { type: 'ENABLED', value: true },
+            { type: 'DISABLED', value: false }
+          ]
+        },
+        {
+          key: 'isCorrect',
+          label: resourcesContext.messages['isCorrect'],
+          multiSelectOptions: [
+            { type: 'VALID', value: true },
+            { type: 'INVALID', value: false }
+          ]
+        }
       ],
       type: 'MULTI_SELECT'
     }
