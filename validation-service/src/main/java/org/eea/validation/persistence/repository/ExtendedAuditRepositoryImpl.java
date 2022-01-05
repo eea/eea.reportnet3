@@ -52,7 +52,7 @@ public class ExtendedAuditRepositoryImpl implements ExtendedAuditRepository {
    */
   @Override
   public Audit getAuditByRuleId(ObjectId ruleId) {
-    Audit audit = new Audit();
+    Audit audit = null;
     List<Audit> audits = mongoTemplate.findAll(Audit.class);
     for (Audit auditExpected : audits) {
       if (auditExpected.getHistoric().get(0).getRuleId().equals(ruleId)) {
