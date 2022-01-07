@@ -83,8 +83,6 @@ export const QCList = ({
     }
   }, [validationContext.isAutomaticRuleUpdated]);
 
-  const getFilteredState = value => tabsValidationsDispatch({ type: 'IS_FILTERED', payload: { value } });
-
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {tabsValidationsState.filtered &&
