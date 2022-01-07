@@ -32,7 +32,6 @@ export const ValidationRepository = {
     await HTTPRequester.get({ url: getUrl(ValidationConfig.getAll, { dataflowId, datasetSchemaId }) }),
 
   getHistoricReleases: async (datasetId, ruleId) => {
-    console.log(datasetId);
     return await HTTPRequester.get({
       url: getUrl(ValidationConfig.getHistoricReleases, { datasetId, ruleId })
     });

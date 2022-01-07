@@ -68,8 +68,6 @@ export const QCList = ({
     validationList: {}
   });
 
-  console.log('dataset.datasetId :>> ', dataset.datasetId);
-
   useEffect(() => {
     setHasValidations(!checkIsEmptyValidations());
   }, [tabsValidationsState.validationList]);

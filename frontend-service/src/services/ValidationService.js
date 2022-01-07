@@ -117,7 +117,6 @@ export const ValidationService = {
   },
 
   getHistoricReleases: async (datasetId, ruleId) => {
-    console.log('datasetservice; ', datasetId);
     return await ValidationRepository.getHistoricReleases(datasetId, ruleId);
   },
 

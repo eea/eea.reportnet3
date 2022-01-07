@@ -100,29 +100,13 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
   };
 
   const getQcHistoryData = async () => {
-    console.log('componente: ', datasetId);
-
     try {
       const response = await ValidationService.getHistoricReleases(datasetId, ruleId);
+      const data = response.data;
+      setQcHistoryData(data);
     } catch (error) {
       console.log('error :>> ', error);
     }
-
-    await simulateEndPoint(1000);
-
-    const mockArray = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
-    // const fields = tabsValidationsState.history.map(historicEvent => {
-    const fields = mockArray.map((_historicEvent, index) => {
-      return {
-        id: `id-${index + 1}`,
-        user: 'qc.user@com.com',
-        timestamp: '29/02/2019',
-        metadata: true,
-        expression: false,
-        status: true
-      };
-    });
-    setQcHistoryData(fields);
   };
 
   const metadataTemplate = rowData => (
@@ -130,22 +114,6 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
       {rowData.metadata ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
     </div>
   );
-
-  const simulateEndPoint = async ms => {
-    new Promise(resolve => setTimeout(resolve, ms));
-  };
-  // const getQcHistory = async () => {
-  //   try {
-  //     //const { data } = await ValidationService.getQcHistory(tabsValidationsState.viewedQcHistoryId);
-  //     // tabsValidationsDispatch({
-  //     //   type: 'SET_QC_HISTORY_DATA', // TODO CREATE A REDUCER FOR THIS
-  //     //   payload: { qcHistoryData: data }
-  //     // });
-  //   } catch (error) {
-  //     console.error('ValidationsList - getQcHistory.', error);
-  //     // notificationContext.add({ type: '________ERROR' }, true); // TODO: add correct error notification
-  //   }
-  // };
 
   const statusTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
@@ -172,7 +140,6 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
         icon="info"
         onClick={() => {
           setShowDialog(true);
-          // setTimeout(getQcHistoryData, 1000, ruleId);
           getQcHistoryData();
         }}
         style={style}
