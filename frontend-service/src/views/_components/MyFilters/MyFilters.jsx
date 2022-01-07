@@ -361,10 +361,10 @@ export const MyFilters = ({
     return (
       <div className={styles.block}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
-        <div className={`p-float-label ${styles.label} ${styles.elementFilter} `}>
+        <div className={`p-float-label ${styles.label} ${styles.elementFilter}`}>
           <InputText
             className={styles.searchInput}
-            id={'searchInput'}
+            id="searchInput"
             onChange={event => onSearch(event.target.value)}
             value={searchBy}
           />
@@ -391,7 +391,6 @@ export const MyFilters = ({
       }`}
       icon={switchSortByIcon(sortBy[key])}
       onClick={() => onSortData(key)}
-      style={{ fontSize: '0.12rem' }}
     />
   );
 
