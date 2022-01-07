@@ -1,5 +1,6 @@
 package org.eea.dataset.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.eea.exception.EEAException;
@@ -48,6 +49,7 @@ public interface ReferenceDatasetService {
    * @param datasetId the dataset id
    * @param updatable the updatable
    * @throws EEAException the EEA exception
+   * @throws IOException
    */
-  void updateUpdatable(Long datasetId, Boolean updatable) throws EEAException;
+  void updateUpdatable(Long datasetId, Boolean updatable) throws EEAException, IOException;
 }

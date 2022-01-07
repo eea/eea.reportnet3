@@ -1,6 +1,7 @@
 package org.eea.dataset.controller;
 
 import static org.mockito.Mockito.doThrow;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -71,7 +72,7 @@ public class ReferenceDatasetControllerImplTest {
   }
 
   @Test
-  public void updateReferenceDatasetSuccessTest() throws EEAException {
+  public void updateReferenceDatasetSuccessTest() throws EEAException, IOException {
     referenceDatasetControllerImpl.updateReferenceDataset(1L, true);
     Mockito.verify(referenceDatasetService, Mockito.times(1)).updateUpdatable(Mockito.anyLong(),
         Mockito.anyBoolean());
@@ -81,9 +82,10 @@ public class ReferenceDatasetControllerImplTest {
    * Update reference dataset exception test.
    *
    * @throws EEAException the EEA exception
+   * @throws IOException
    */
   @Test(expected = ResponseStatusException.class)
-  public void updateReferenceDatasetExceptionTest() throws EEAException {
+  public void updateReferenceDatasetExceptionTest() throws EEAException, IOException {
     doThrow(new EEAException("Fail")).when(referenceDatasetService)
         .updateUpdatable(Mockito.anyLong(), Mockito.anyBoolean());
     try {

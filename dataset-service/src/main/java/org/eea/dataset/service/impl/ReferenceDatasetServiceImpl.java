@@ -1,16 +1,20 @@
 package org.eea.dataset.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.eea.dataset.mapper.ReferenceDatasetMapper;
 import org.eea.dataset.mapper.ReferenceDatasetPublicMapper;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferencedSchema;
 import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.ReferenceDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -63,6 +67,14 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
   /** The dataflow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
+
+  /** The dataset metabase repository. */
+  @Autowired
+  private DataSetMetabaseRepository datasetMetabaseRepository;
+
+  /** The dataset service. */
+  @Autowired
+  private DatasetService datasetService;
 
 
   /**
@@ -122,14 +134,19 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
    * @param datasetId the dataset id
    * @param updatable the updatable
    * @throws EEAException the EEA exception
+   * @throws IOException
    */
-  public void updateUpdatable(Long datasetId, Boolean updatable) throws EEAException {
+  public void updateUpdatable(Long datasetId, Boolean updatable) throws EEAException, IOException {
 
     ReferenceDataset referenceDataset = referenceDatasetRepository.findById(datasetId).orElse(null);
     if (null == referenceDataset) {
       throw new EEAException(String.format(EEAErrorMessage.DATASET_NOTFOUND, datasetId));
     }
     referenceDataset.setUpdatable(updatable);
+    if (!updatable) {
+      DataSetMetabase dataset = datasetMetabaseRepository.findById(datasetId).orElse(null);
+      datasetService.createReferenceDatasetFiles(dataset);
+    }
     referenceDatasetRepository.save(referenceDataset);
   }
 
