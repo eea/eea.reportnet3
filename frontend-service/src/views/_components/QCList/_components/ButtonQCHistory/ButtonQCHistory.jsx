@@ -14,6 +14,7 @@ import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Spinner } from 'views/_components/Spinner';
 
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
@@ -22,9 +23,11 @@ import { ValidationService } from 'services/ValidationService';
 export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
+  const notificationContext = useContext(NotificationContext);
 
   const [showDialog, setShowDialog] = useState(false);
   const [qcHistoryData, setQcHistoryData] = useState([]);
+  const [loadingStatus, setLoadingStatus] = useState('idle');
 
   const closeDialog = () => {
     setShowDialog(false);
@@ -50,10 +53,18 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
   const generateHistoryDialogContent = () => {
     const columns = getHistoryColumns();
 
-    if (isEmpty(qcHistoryData)) {
+    if (loadingStatus === 'pending') {
       return (
         <div className={styles.loadingSpinner}>
           <Spinner className={styles.spinnerPosition} />
+        </div>
+      );
+    }
+    if (loadingStatus === 'failed') {
+      return (
+        <div>
+          <p>{resourcesContext.messages['loadHistorydataError']}</p>
+          <Button label="refresh" onClick={getQcHistoryData}></Button>
         </div>
       );
     }
@@ -100,12 +111,16 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
   };
 
   const getQcHistoryData = async () => {
+    setLoadingStatus('pending');
     try {
       const response = await ValidationService.getHistoricReleases(datasetId, ruleId);
       const data = response.data;
       setQcHistoryData(data);
+      setLoadingStatus('success');
     } catch (error) {
-      console.log('error :>> ', error);
+      console.error('HistoryData - getQcHistoryData.', error);
+      notificationContext.add({ type: 'LOAD_HISTORYDATA_ERROR' }, true);
+      setLoadingStatus('failed');
     }
   };
 
