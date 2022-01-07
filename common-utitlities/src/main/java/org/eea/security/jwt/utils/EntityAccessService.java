@@ -104,6 +104,7 @@ public class EntityAccessService {
           List.of(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN, ObjectAccessRoleEnum.DATAFLOW_OBSERVER,
               ObjectAccessRoleEnum.DATAFLOW_STEWARD,
               ObjectAccessRoleEnum.DATAFLOW_NATIONAL_COORDINATOR,
+              ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER,
               ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN_SUPPORT).toArray(ObjectAccessRoleEnum[]::new))
           || dataflowControllerZuul.accessReferenceEntity(entity, entityId);
     }
