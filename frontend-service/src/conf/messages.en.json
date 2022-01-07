@@ -1426,6 +1426,8 @@
     "qcHistoryDialogHeader": "QC history",
     "qcHistoryButtonTooltip": "View QC history",
     "impossibleRequesterRoleError": "The user cannot be assigned as requester",
-    "callFmeProcessFailedEvent": "Error calling to FME at <strong title='{:datasetName}'>{:shortDatasetName}</strong>"
+    "callFmeProcessFailedEvent": "Error calling to FME at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
+    "invalid": "Invalid",
+    "searchByQcList": "Search by (code, name, description, message)"
   }
 }
