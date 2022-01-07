@@ -752,6 +752,7 @@ export const QCList = ({
             data={tabsValidationsState.validationList.validations}
             getFilteredData={onLoadFilteredData}
             options={FILTER_OPTIONS}
+            viewType="qcList"
           />
         </div>
         {!isEmpty(tabsValidationsState.filteredData) ? (
