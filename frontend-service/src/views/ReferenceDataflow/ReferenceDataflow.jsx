@@ -56,7 +56,7 @@ const ReferenceDataflow = () => {
     isAdmin: false,
     isRightPermissionsChanged: false,
     isApiKeyDialogVisible: false,
-    // isCustodianSupport: false,
+    isStewardSupport: false,
     isCustodianUser: false,
     isCreatingReferenceDatasets: false,
     hasCustodianPermissions: undefined,
@@ -82,7 +82,7 @@ const ReferenceDataflow = () => {
 
   const isCustodianUser = userContext.accessRole?.some(role => role === config.permissions.roles.CUSTODIAN.key);
 
-  // const isCustodianSupport = userContext.accessRole?.some(role => role === config.permissions.roles.CUSTODIAN_SUPPORT.key);
+  const isStewardSupport = userContext.accessRole?.some(role => role === config.permissions.roles.STEWARD_SUPPORT.key);
 
   const isCustodian = userContext.hasContextAccessPermission(
     config.permissions.prefixes.DATAFLOW,
@@ -90,7 +90,7 @@ const ReferenceDataflow = () => {
     [config.permissions.roles.CUSTODIAN.key]
   );
 
-  const hasCustodianPermissions = isCustodianUser || isCustodian; /*|| isCustodianSupport*/
+  const hasCustodianPermissions = isCustodianUser || isCustodian || isStewardSupport;
 
   const isSteward = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, referenceDataflowId, [
     config.permissions.roles.STEWARD.key

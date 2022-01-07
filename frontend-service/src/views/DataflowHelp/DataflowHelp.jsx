@@ -80,7 +80,7 @@ export const DataflowHelp = () => {
       setIsToolbarVisible(
         userRoles.includes(config.permissions.roles.CUSTODIAN.key) ||
           userRoles.includes(config.permissions.roles.STEWARD.key) ||
-          userRoles.includes(config.permissions.roles.CUSTODIAN_SUPPORT.key)
+          userRoles.includes(config.permissions.roles.STEWARD_SUPPORT.key)
       );
     }
   }, [userContext]);

@@ -94,7 +94,7 @@ export const Dataset = ({ isReferenceDataset }) => {
   });
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
-  const [isCustodianSupport, setIsCustodianSupport] = useState(false);
+  const [isStewardSupport, setIsStewardSupport] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
@@ -123,7 +123,7 @@ export const Dataset = ({ isReferenceDataset }) => {
   const [webformData, setWebformData] = useState(null);
   const [webformOptions, setWebformOptions] = useState([]);
 
-  const hasCustodianPermissions = isCustodianOrSteward || isCustodianSupport;
+  const hasCustodianPermissions = isCustodianOrSteward || isStewardSupport;
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -204,9 +204,9 @@ export const Dataset = ({ isReferenceDataset }) => {
             config.permissions.roles.STEWARD.key
           ])
         );
-        setIsCustodianSupport(
+        setIsStewardSupport(
           userContext.hasContextAccessPermission(config.permissions.prefixes.REFERENCEDATASET, datasetId, [
-            config.permissions.roles.CUSTODIAN_SUPPORT.key
+            config.permissions.roles.STEWARD_SUPPORT.key
           ])
         );
       }
