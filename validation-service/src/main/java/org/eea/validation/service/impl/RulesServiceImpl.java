@@ -1626,15 +1626,19 @@ public class RulesServiceImpl implements RulesService {
       throws EEAException {
     String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
     if (datasetSchemaId == null) {
+      LOG.error("Datasetschema id not found on dataset {}", datasetId);
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     var rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
     if (null == rule) {
+      LOG.error("Rule with id {} not found", ruleId);
       throw new EEAException(EEAErrorMessage.RULE_NOT_FOUND);
     }
     var audit = auditRepository.getAuditByRuleId(rule.getRuleId());
     if (null == audit) {
-      throw new EEAException(EEAErrorMessage.HISTORIC_QC_NOT_FOUND);
+      LOG.info("Historic not found for rule {}", ruleId);
+      addHistoricRuleInfo(rule, null);
+      audit = auditRepository.getAuditByRuleId(rule.getRuleId());
     }
     return ruleHistoricInfoMapper.entityListToClass(audit.getHistoric());
   }

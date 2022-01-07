@@ -1,6 +1,7 @@
 package org.eea.validation.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -25,12 +26,14 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.mapper.IntegrityMapper;
+import org.eea.validation.mapper.RuleHistoricInfoMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.data.repository.TableRepository;
@@ -132,6 +135,9 @@ public class RulesServiceImplTest {
 
   @Mock
   private AuditRepository auditRepository;
+
+  @Mock
+  private RuleHistoricInfoMapper ruleHistoricInfoMapper;
 
   private SecurityContext securityContext;
 
@@ -1836,5 +1842,16 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
 
+  @Test(expected = EEAException.class)
+  public void getRuleHistoricInfoDatasetIncorrectTest() throws EEAException {
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(null);
+    try {
+      List<RuleHistoricInfoVO> historic = rulesServiceImpl.getRuleHistoricInfo(1L, "RULEID");
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
 
 }
