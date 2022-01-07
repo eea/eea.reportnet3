@@ -13,13 +13,13 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { ButtonQCHistory } from './_components/ButtonQCHistory';
 import { Checkbox } from 'views/_components/Checkbox';
-import { Dropdown } from 'views/_components/Dropdown';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
+import { Dropdown } from 'views/_components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
+import { MyFilters } from 'views/_components/MyFilters';
 import { QCFieldEditor } from './_components/QCFieldEditor';
 import { Spinner } from 'views/_components/Spinner';
 import { TrafficLight } from 'views/_components/TrafficLight';
@@ -679,18 +679,44 @@ export const QCList = ({
     }
   };
 
-  const filterOptions = [
+  const FILTER_OPTIONS = [
     {
-      type: 'multiselect',
-      properties: [
-        { name: 'table', showInput: true },
-        { name: 'field', showInput: true },
-        { name: 'entityType' },
-        { name: 'levelError' },
-        { name: 'automatic', label: resourcesContext.messages['creationMode'] },
-        { name: 'enabled', label: resourcesContext.messages['statusQC'] },
-        { name: 'isCorrect' }
-      ]
+      label: resourcesContext.messages['searchByQcList'],
+      searchBy: ['shortCode', 'name', 'description', 'message'],
+      type: 'SEARCH'
+    },
+    {
+      nestedOptions: [
+        { key: 'table', label: resourcesContext.messages['table'] },
+        { key: 'field', label: resourcesContext.messages['field'] },
+        { key: 'entityType', label: resourcesContext.messages['entityType'] },
+        { key: 'levelError', label: resourcesContext.messages['levelError'] },
+        {
+          key: 'automatic',
+          label: resourcesContext.messages['creationMode'],
+          multiSelectOptions: [
+            { type: resourcesContext.messages['automatic'], value: true },
+            { type: resourcesContext.messages['manual'], value: false }
+          ]
+        },
+        {
+          key: 'enabled',
+          label: resourcesContext.messages['statusQC'],
+          multiSelectOptions: [
+            { type: resourcesContext.messages['enabled'], value: true },
+            { type: resourcesContext.messages['disabled'], value: false }
+          ]
+        },
+        {
+          key: 'isCorrect',
+          label: resourcesContext.messages['isCorrect'],
+          multiSelectOptions: [
+            { type: resourcesContext.messages['valid'], value: true },
+            { type: resourcesContext.messages['invalid'], value: false }
+          ]
+        }
+      ],
+      type: 'MULTI_SELECT'
     }
   ];
 
@@ -721,14 +747,11 @@ export const QCList = ({
             pointerEvents: tabsValidationsState.editingRows.length > 0 ? 'none' : 'auto',
             opacity: tabsValidationsState.editingRows.length > 0 ? '0.5' : 1
           }}>
-          <Filters
-            className="filter-lines"
+          <MyFilters
+            className="qcList"
             data={tabsValidationsState.validationList.validations}
             getFilteredData={onLoadFilteredData}
-            getFilteredSearched={getFilteredState}
-            options={filterOptions}
-            searchAll
-            searchBy={['shortCode', 'name', 'description', 'message']}
+            options={FILTER_OPTIONS}
           />
         </div>
         {!isEmpty(tabsValidationsState.filteredData) ? (
