@@ -73,6 +73,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
@@ -1841,8 +1842,9 @@ public class RulesServiceImpl implements RulesService {
    *
    * @param rule the rule
    * @param ruleOriginal the rule original
+   * @throws EEAException
    */
-  private void addHistoricRuleInfo(Rule rule, Rule ruleOriginal) {
+  private void addHistoricRuleInfo(Rule rule, Rule ruleOriginal) throws EEAException {
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
@@ -1856,7 +1858,12 @@ public class RulesServiceImpl implements RulesService {
       boolean metadata = checkMetadataHasChange(rule, ruleOriginal);
       boolean status = checkStatusHasChange(rule, ruleOriginal);
       boolean expression = checkExpressionHasChange(rule, ruleOriginal);
-      auditRepository.updateAudit(audit, user, rule, status, expression, metadata);
+      try {
+        auditRepository.updateAudit(audit, user, rule, status, expression, metadata);
+      } catch (JsonProcessingException e) {
+        LOG.error("Error updating historic information for rule {}", rule.getRuleId());
+        throw new EEAException(EEAErrorMessage.HISTORIC_QC_UPDATE_ERROR);
+      }
     }
   }
 
