@@ -679,8 +679,8 @@ public final class EEAErrorMessage {
   public static final String EVALUATING_RULE =
       "An unknown error happenned while evaluating the SQL rule.";
 
-  /** The Constant AUDIT_NOT_FOUND: {@value}. */
-  public static final String AUDIT_NOT_FOUND = "Audit not found.";
+  /** The Constant HISTORIC_QC_UPDATE_ERROR: {@value}. */
+  public static final String HISTORIC_QC_UPDATE_ERROR = "Error updating historic rule information.";
 
   /**
    * Instantiates a new EEA error message.
