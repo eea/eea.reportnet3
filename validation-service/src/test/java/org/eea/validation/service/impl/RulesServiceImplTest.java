@@ -46,6 +46,7 @@ import org.eea.validation.persistence.schemas.IntegritySchema;
 import org.eea.validation.persistence.schemas.RecordSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.UniqueConstraintSchema;
+import org.eea.validation.persistence.schemas.audit.Audit;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.util.GeometryValidationUtils;
@@ -1090,6 +1091,8 @@ public class RulesServiceImplTest {
     userRepresentationVO.setUsername("userName");
     userRepresentationVO.setFirstName("First Name");
     userRepresentationVO.setLastName("Last Name");
+    Audit audit = new Audit();
+    audit.setIdAudit(new ObjectId());
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
@@ -1097,6 +1100,7 @@ public class RulesServiceImplTest {
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
+    Mockito.when(auditRepository.getAuditByRuleId(Mockito.any())).thenReturn(audit);
     rulesServiceImpl.updateRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
@@ -1134,6 +1138,8 @@ public class RulesServiceImplTest {
     userRepresentationVO.setUsername("userName");
     userRepresentationVO.setFirstName("First Name");
     userRepresentationVO.setLastName("Last Name");
+    Audit audit = new Audit();
+    audit.setIdAudit(new ObjectId());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
@@ -1144,6 +1150,7 @@ public class RulesServiceImplTest {
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
+    Mockito.when(auditRepository.getAuditByRuleId(Mockito.any())).thenReturn(audit);
     rulesServiceImpl.updateRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
