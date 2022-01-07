@@ -681,7 +681,7 @@ export const QCList = ({
 
   const FILTER_OPTIONS = [
     {
-      label: 'Search by things label',
+      label: resourcesContext.messages['searchByQcList'],
       searchBy: ['shortCode', 'name', 'description', 'message'],
       type: 'SEARCH'
     },
@@ -695,24 +695,24 @@ export const QCList = ({
           key: 'automatic',
           label: resourcesContext.messages['creationMode'],
           multiSelectOptions: [
-            { type: 'AUTOMATIC', value: true },
-            { type: 'MANUAL', value: false }
+            { type: resourcesContext.messages['automatic'], value: true },
+            { type: resourcesContext.messages['manual'], value: false }
           ]
         },
         {
           key: 'enabled',
           label: resourcesContext.messages['statusQC'],
           multiSelectOptions: [
-            { type: 'ENABLED', value: true },
-            { type: 'DISABLED', value: false }
+            { type: resourcesContext.messages['enabled'], value: true },
+            { type: resourcesContext.messages['disabled'], value: false }
           ]
         },
         {
           key: 'isCorrect',
           label: resourcesContext.messages['isCorrect'],
           multiSelectOptions: [
-            { type: 'VALID', value: true },
-            { type: 'INVALID', value: false }
+            { type: resourcesContext.messages['valid'], value: true },
+            { type: resourcesContext.messages['invalid'], value: false }
           ]
         }
       ],
