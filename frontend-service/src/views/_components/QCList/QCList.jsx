@@ -388,7 +388,7 @@ export const QCList = ({
         <ButtonQCHistory
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
           datasetId={dataset.datasetId}
-          rowId={row.id}
+          ruleId={row.id}
         />
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
@@ -414,7 +414,8 @@ export const QCList = ({
       <Fragment>
         <ButtonQCHistory
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
-          rowId={row.id}
+          datasetId={dataset.datasetId}
+          ruleId={row.id}
         />
         <Button
           className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${styles.editRowButton}`}
