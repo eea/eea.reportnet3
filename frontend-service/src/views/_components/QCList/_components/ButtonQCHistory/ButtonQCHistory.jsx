@@ -32,21 +32,6 @@ export const ButtonQCHistory = ({ className, datasetId, ruleId, style }) => {
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [qcHistoryData, setQcHistoryData] = useState([]);
 
-  const onCloseDialog = () => {
-    setIsDialogVisible(false);
-    setQcHistoryData([]);
-  };
-
-  const footerQcHistory = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon="cancel"
-      id="cancelHistoryQc"
-      label={resourcesContext.messages['close']}
-      onClick={() => onCloseDialog()}
-    />
-  );
-
   const expressionTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
       {rowData.expression ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
@@ -149,6 +134,12 @@ export const ButtonQCHistory = ({ className, datasetId, ruleId, style }) => {
     </div>
   );
 
+  const statusTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>
+      {rowData.status ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+    </div>
+  );
+
   const timestampTemplate = rowData => (
     <div>
       {dayjs(rowData.timestamp).format(
@@ -159,10 +150,14 @@ export const ButtonQCHistory = ({ className, datasetId, ruleId, style }) => {
     </div>
   );
 
-  const statusTemplate = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.status ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
-    </div>
+  const dialogFooter = (
+    <Button
+      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+      icon="cancel"
+      id="cancelHistoryQc"
+      label={resourcesContext.messages['close']}
+      onClick={() => setIsDialogVisible(false)}
+    />
   );
 
   return (
@@ -184,9 +179,9 @@ export const ButtonQCHistory = ({ className, datasetId, ruleId, style }) => {
       {isDialogVisible && (
         <Dialog
           className={`responsiveDialog ${styles.dialogSize}`}
-          footer={footerQcHistory}
+          footer={dialogFooter}
           header={resourcesContext.messages['qcHistoryDialogHeader']}
-          onHide={onCloseDialog}
+          onHide={() => setIsDialogVisible(false)}
           visible={isDialogVisible}>
           {generateHistoryDialogContent()}
         </Dialog>
