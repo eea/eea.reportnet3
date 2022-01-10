@@ -184,14 +184,22 @@ export const Dataset = ({ isReferenceDataset }) => {
             `${config.permissions.prefixes.DATASET}${datasetId}`
           ) ||
             userContext.hasPermission(
-              [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
+              [
+                config.permissions.roles.CUSTODIAN.key,
+                config.permissions.roles.STEWARD.key,
+                config.permissions.roles.STEWARD_SUPPORT.key
+              ],
               `${config.permissions.prefixes.TESTDATASET}${datasetId}`
             ) ||
             (hasCustodianPermissions && isDatasetUpdatable)
         );
         setIsTestDataset(
           userContext.hasPermission(
-            [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
+            [
+              config.permissions.roles.CUSTODIAN.key,
+              config.permissions.roles.STEWARD.key,
+              config.permissions.roles.STEWARD_SUPPORT.key
+            ],
             `${config.permissions.prefixes.TESTDATASET}${datasetId}`
           )
         );
