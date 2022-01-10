@@ -11,7 +11,6 @@ import styles from './QCList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
-import { QCsHistory } from './_components/QCsHistory';
 import { Checkbox } from 'views/_components/Checkbox';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
@@ -21,6 +20,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
 import { MyFilters } from 'views/_components/MyFilters';
 import { QCFieldEditor } from './_components/QCFieldEditor';
+import { QCsHistory } from 'views/_components/QCsHistory';
 import { Spinner } from 'views/_components/Spinner';
 import { TrafficLight } from 'views/_components/TrafficLight';
 
