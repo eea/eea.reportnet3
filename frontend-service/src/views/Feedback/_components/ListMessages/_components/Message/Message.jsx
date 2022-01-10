@@ -18,7 +18,13 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onToggleVisibleDeleteMessage }) => {
+export const Message = ({
+  dataflowId,
+  hasSeparator,
+  hasCustodianPermissions,
+  message,
+  onToggleVisibleDeleteMessage
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -43,7 +49,7 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
       accStyles.push(styles.automatic);
     }
 
-    if (isCustodian) {
+    if (hasCustodianPermissions) {
       if (!message.direction) {
         accStyles.push(styles.sender);
       } else {
@@ -131,7 +137,7 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
               dangerouslySetInnerHTML={{ __html: getMessageContent() }}></span>
           )}
         </div>
-        {isCustodian && !message.automatic && (
+        {hasCustodianPermissions && !message.automatic && (
           <FontAwesomeIcon
             className={styles.deleteMessageButton}
             icon={AwesomeIcons('deleteCircle')}
