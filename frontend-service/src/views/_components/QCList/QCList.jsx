@@ -410,11 +410,13 @@ export const QCList = ({
 
     return (
       <Fragment>
-        <ButtonQCHistory
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
-          datasetId={dataset.datasetId}
-          ruleId={row.id}
-        />
+        {row.hasHistoric && (
+          <ButtonQCHistory
+            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+            datasetId={dataset.datasetId}
+            ruleId={row.id}
+          />
+        )}
         <Button
           className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${styles.editRowButton}`}
           disabled={validationContext.isFetchingData}
