@@ -249,6 +249,10 @@ public class RulesServiceImpl implements RulesService {
             && AutomaticRuleTypeEnum.FIELD_SQL_TYPE.equals(rule.getAutomaticType())) {
           rule.setSqlSentence(null);
         }
+        var audit = auditRepository.getAuditByRuleId(rule.getRuleId());
+        if (null != audit) {
+          rule.setHasHistoric(true);
+        }
       }
       rulesVO = rulesSchemaMapper.entityToClass(rulesSchema);
     }
@@ -1624,6 +1628,7 @@ public class RulesServiceImpl implements RulesService {
   @Transactional
   public List<RuleHistoricInfoVO> getRuleHistoricInfo(Long datasetId, String ruleId)
       throws EEAException {
+    List<RuleHistoricInfoVO> historic = new ArrayList<>();
     String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
     if (datasetSchemaId == null) {
       LOG.error("Datasetschema id not found on dataset {}", datasetId);
@@ -1635,12 +1640,11 @@ public class RulesServiceImpl implements RulesService {
       throw new EEAException(EEAErrorMessage.RULE_NOT_FOUND);
     }
     var audit = auditRepository.getAuditByRuleId(rule.getRuleId());
-    if (null == audit) {
-      LOG.info("Historic not found for rule {}", ruleId);
-      addHistoricRuleInfo(rule, null);
-      audit = auditRepository.getAuditByRuleId(rule.getRuleId());
+    if (null != audit) {
+      historic = ruleHistoricInfoMapper.entityListToClass(audit.getHistoric());
+
     }
-    return ruleHistoricInfoMapper.entityListToClass(audit.getHistoric());
+    return historic;
   }
 
 
