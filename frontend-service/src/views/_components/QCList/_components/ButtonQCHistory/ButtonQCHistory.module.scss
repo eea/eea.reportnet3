@@ -24,3 +24,15 @@
     left: 0;
   }
 }
+
+.errorLoadingHistory {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  flex-direction: column;
+  button {
+    padding: 0.5em 1em;
+  }
+}

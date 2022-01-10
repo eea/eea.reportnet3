@@ -62,9 +62,9 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
     }
     if (loadingStatus === 'failed') {
       return (
-        <div>
+        <div className={styles.errorLoadingHistory}>
           <p>{resourcesContext.messages['loadHistorydataError']}</p>
-          <Button label="refresh" onClick={getQcHistoryData}></Button>
+          <Button label={resourcesContext.messages['refresh']} onClick={getQcHistoryData}></Button>
         </div>
       );
     }
