@@ -90,6 +90,9 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
       : Object.keys(qcHistoryData[0]).map(key => ({ field: key, header: key }));
 
     return columnData.map(col => {
+      if (col.field === 'ruleBefore' || col.field === 'ruleInfoId' || col.field === 'ruleId') {
+        return null;
+      }
       let template;
       switch (col.field) {
         case 'metadata':
