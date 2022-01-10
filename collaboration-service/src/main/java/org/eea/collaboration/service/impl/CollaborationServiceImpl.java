@@ -354,7 +354,7 @@ public class CollaborationServiceImpl implements CollaborationService {
           || authorities.contains(new SimpleGrantedAuthority(
               ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)))
           || authorities.contains(new SimpleGrantedAuthority(
-              ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN_SUPPORT.getAccessRole(dataflowId)));
+              ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT.getAccessRole(dataflowId)));
       if (custodianSteward) {
         direction = false;
       }
