@@ -73,6 +73,9 @@ public class DocumentControllerImpl implements DocumentController {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DocumentControllerImpl.class);
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /**
    * Upload document.
    *
@@ -125,9 +128,14 @@ public class DocumentControllerImpl implements DocumentController {
           file.getOriginalFilename(), documentVO, file.getSize());
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error("Error uploading document to dataflow help: Dataflow {} is not DRAFT",
+            dataflowId);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error uploading document to dataflow help: DataflowId {}. Message: {}",
+          dataflowId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
     }
   }
 
@@ -182,9 +190,14 @@ public class DocumentControllerImpl implements DocumentController {
       return new ByteArrayResource(file.getBytes());
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error("Error retrieving document: DocumentId {}. Message: {}", documentId,
+            e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error retrieving document: DocumentId {}. Message: {}", documentId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_DOCUMENT);
     }
   }
 
@@ -227,7 +240,7 @@ public class DocumentControllerImpl implements DocumentController {
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      if (document.getIsPublic()) {
+      if (Boolean.TRUE.equals(document.getIsPublic())) {
         FileResponse file = documentService.getDocument(documentId, document.getDataflowId());
         return new ByteArrayResource(file.getBytes());
       } else {
@@ -236,9 +249,14 @@ public class DocumentControllerImpl implements DocumentController {
       }
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error("Error retrieving public document: DocumentId {}. Message: {}", documentId,
+            e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error retrieving public document: DocumentId {}. Message: {}", documentId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_DOCUMENT);
     }
   }
 
@@ -283,12 +301,19 @@ public class DocumentControllerImpl implements DocumentController {
       }
       documentService.deleteDocument(documentId, document.getDataflowId(), deleteMetabase);
     } catch (final FeignException e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      LOG_ERROR.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
+          documentId, dataflowId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
+            documentId, dataflowId, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
+          documentId, dataflowId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_DOCUMENT);
     }
   }
 
@@ -381,9 +406,14 @@ public class DocumentControllerImpl implements DocumentController {
       }
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error("Error updating document: DocumentId {}. DataflowId {}. Message: {}",
+            idDocument, dataflowId, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error updating document: DocumentId {}. DataflowId {}. Message: {}",
+          idDocument, dataflowId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_DOCUMENT);
     }
   }
 
@@ -490,9 +520,16 @@ public class DocumentControllerImpl implements DocumentController {
       documentService.uploadSchemaSnapshot(inStream, "json", fileName, designDatasetId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error(
+            "Error updating schema snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
+            designDatasetId, fileName, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error updating schema snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
+          designDatasetId, fileName, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_SCHEMA_SNAPSHOT_DOCUMENT);
     }
   }
 
@@ -523,9 +560,16 @@ public class DocumentControllerImpl implements DocumentController {
       return resource.getByteArray();
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error(
+            "Error retrieving snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
+            idDesignDataset, fileName, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error retrieving snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
+          idDesignDataset, fileName, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_SNAPSHOT_DOCUMENT);
     }
   }
 
@@ -555,9 +599,16 @@ public class DocumentControllerImpl implements DocumentController {
       documentService.deleteSnapshotDocument(fileName, idDesignDataset);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error(
+            "Error deleting snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
+            idDesignDataset, fileName, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error deleting snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
+          idDesignDataset, fileName, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_SNAPSHOT_DOCUMENT);
     }
   }
 
@@ -595,9 +646,16 @@ public class DocumentControllerImpl implements DocumentController {
           messageId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error(
+            "Error uploading collaboration document: DataflowId {}. FileName {}. Message: {}",
+            dataflowId, fileName, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error uploading collaboration document: DataflowId {}. FileName {}. Message: {}",
+          dataflowId, fileName, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_COLLABORATION_DOCUMENT);
     }
   }
 
@@ -628,9 +686,16 @@ public class DocumentControllerImpl implements DocumentController {
       documentService.deleteCollaborationDocument(fileName, dataflowId, messageId);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error(
+            "Error deleting collaboration document: DataflowId {}. FileName {}. Message: {}",
+            dataflowId, fileName, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error deleting collaboration document: DataflowId {}. FileName {}. Message: {}",
+          dataflowId, fileName, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_COLLABORATION_DOCUMENT);
     }
   }
 
@@ -662,9 +727,16 @@ public class DocumentControllerImpl implements DocumentController {
       return resource.getByteArray();
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        LOG_ERROR.error(
+            "Error retrieving collaboration document: DataflowId {}. FileName {}. Message: {}",
+            dataflowId, fileName, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error retrieving collaboration document: DataflowId {}. FileName {}. Message: {}",
+          dataflowId, fileName, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_COLLABORATION_DOCUMENT);
     }
   }
 

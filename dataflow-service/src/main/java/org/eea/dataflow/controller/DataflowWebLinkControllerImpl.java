@@ -73,14 +73,15 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
     try {
       return dataflowWebLinkService.getWebLink(idLink);
     } catch (EntityNotFoundException e) {
-      LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.ID_LINK_NOT_FOUND);
     } catch (ResourceNoFoundException e) {
-      LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.ID_LINK_INCORRECT);
     } catch (EEAException e) {
-      LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_WEBLINK);
     }
 
 
@@ -111,17 +112,19 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       dataflowWebLinkService.saveWebLink(dataflowId, weblinkVO);
     } catch (EntityNotFoundException e) {
       LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.ID_LINK_NOT_FOUND);
     } catch (WrongDataExceptions e) {
       LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CREATING_WEBLINK);
     } catch (EEAException e) {
       if (EEAErrorMessage.WEBLINK_ALREADY_EXIST.equals(e.getMessage())) {
         LOG_ERROR.error("Weblink url already exist in dataflow : {}", dataflowId);
-        throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+            EEAErrorMessage.WEBLINK_ALREADY_EXIST);
       }
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.CREATING_WEBLINK);
     }
 
   }
@@ -173,13 +176,14 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       dataflowWebLinkService.removeWebLink(idLink);
     } catch (EntityNotFoundException e) {
       LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.ID_LINK_NOT_FOUND);
     } catch (ResourceNoFoundException e) {
       LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.ID_LINK_INCORRECT);
     } catch (EEAException e) {
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_WEBLINK);
     }
   }
 
@@ -229,20 +233,22 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       dataflowWebLinkService.updateWebLink(weblinkVO);
     } catch (EntityNotFoundException e) {
       LOG_ERROR.error(HttpStatus.NOT_FOUND.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.ID_LINK_NOT_FOUND);
     } catch (ResourceNoFoundException e) {
       LOG_ERROR.error(HttpStatus.FORBIDDEN.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.ID_LINK_INCORRECT);
     } catch (WrongDataExceptions e) {
       LOG_ERROR.error(HttpStatus.BAD_REQUEST.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UPDATING_WEBLINK);
     } catch (EEAException e) {
       if (EEAErrorMessage.WEBLINK_ALREADY_EXIST.equals(e.getMessage())) {
         LOG_ERROR.error(HttpStatus.CONFLICT.getReasonPhrase(), e);
-        throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+            EEAErrorMessage.WEBLINK_ALREADY_EXIST);
       }
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_WEBLINK);
     }
 
   }

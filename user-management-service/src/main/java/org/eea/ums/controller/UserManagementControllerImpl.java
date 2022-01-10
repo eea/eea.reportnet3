@@ -343,7 +343,8 @@ public class UserManagementControllerImpl implements UserManagementController {
       backupManagmentControlerService.readAndSaveUsers(file.getInputStream());
     } catch (IOException e) {
       LOG_ERROR.error("Error creating users", e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.CREATING_USERS_THROUGH_FILE);
     }
   }
 
@@ -661,7 +662,7 @@ public class UserManagementControllerImpl implements UserManagementController {
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
   }
 
@@ -839,7 +840,7 @@ public class UserManagementControllerImpl implements UserManagementController {
     } catch (EEAException e) {
       LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
   }
 
@@ -909,8 +910,8 @@ public class UserManagementControllerImpl implements UserManagementController {
           "Downloading file generated when exporting Users by country. Dataflow Id {}. Filename {}. Error message: {}",
           dataflowId, fileName, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
-          "Trying to download a file generated during the export users by country process but the file is not found, dataflowId: %s + filename: %s + message: %s ",
-          dataflowId, fileName, e.getMessage()), e);
+          "Trying to download a file generated during the export users by country process but the file is not found, dataflowId: %s + filename: %s",
+          dataflowId, fileName));
     }
   }
 

@@ -2,9 +2,12 @@ package org.eea.dataset.controller;
 
 import java.util.List;
 import org.eea.dataset.service.PaMService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.PamController;
 import org.eea.interfaces.vo.pams.SinglePaMVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +34,9 @@ public class PamControllerImpl implements PamController {
   @Autowired
   private PaMService paMService;
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /**
    * Gets the list single paM.
    *
@@ -52,7 +58,9 @@ public class PamControllerImpl implements PamController {
     try {
       return paMService.getListSinglePaM(datasetId, groupPaMId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      LOG_ERROR.error("Error retrieving single PAM list. Error Message: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_SINGLE_PAM_LIST);
     }
   }
 

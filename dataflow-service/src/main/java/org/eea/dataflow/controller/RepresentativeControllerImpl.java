@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -52,6 +53,9 @@ import io.swagger.annotations.ApiResponses;
 @Api(tags = "Representatives : Representatives Manager")
 public class RepresentativeControllerImpl implements RepresentativeController {
 
+  /** The Constant ATTACHMENT_FILENAME: {@value}. */
+  private static final String ATTACHMENT_FILENAME = "attachment; filename=";
+
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -85,7 +89,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       return representativeService.createRepresentative(dataflowId, representativeVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating new representative: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.CREATING_REPRESENTATIVE);
     }
   }
 
@@ -185,8 +190,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       representativeVOs = representativeService.getRepresetativesByIdDataFlow(dataflowId);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error retrieving representatives: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e);
+          EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
     return representativeVOs;
   }
@@ -254,8 +260,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       representativeService.deleteDataflowRepresentative(dataflowRepresentativeId);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting representative: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e);
+          EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
   }
 
@@ -301,11 +308,12 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       byte[] file = representativeService.exportFile(dataflowId);
       String fileName = "Dataflow-" + dataflowId + "-Lead-Reporters.csv";
       HttpHeaders httpHeaders = new HttpHeaders();
-      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + fileName);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("Internal server error: {}", e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error while exporting lead reporters: ", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXPORT_LEAD_REPORTERS);
     }
   }
 
@@ -330,11 +338,12 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       byte[] file = representativeService.exportTemplateReportersFile(groupId);
       String fileName = "CountryCodes-Lead-Reporters.csv";
       HttpHeaders httpHeaders = new HttpHeaders();
-      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + fileName);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("Internal server error: {}", e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error("Error exporting lead reporters template.", e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXPORT_LEAD_REPORTERS);
     }
   }
 
@@ -365,12 +374,17 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     if (file == null || file.getOriginalFilename() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_NOT_FOUND);
     }
-    final int location = file.getOriginalFilename().lastIndexOf('.');
+    String originalFileName = file.getOriginalFilename();
+    final int location =
+        StringUtils.isNotBlank(originalFileName) ? originalFileName.lastIndexOf('.') : -1;
     if (location == -1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_EXTENSION);
     }
-    String mimeType = file.getOriginalFilename().substring(location + 1);
-    if (!FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType)) {
+
+    String mimeType =
+        StringUtils.isNotBlank(originalFileName) ? originalFileName.substring(location + 1) : "";
+
+    if (!FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || mimeType.equals("")) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CSV_FILE_ERROR);
     }
 
@@ -378,12 +392,13 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       byte[] fileEnded = representativeService.importLeadReportersFile(dataflowId, groupId, file);
       String fileName = "Dataflow-" + dataflowId + "-Lead-Reporters-Errors-improt.csv";
       HttpHeaders httpHeaders = new HttpHeaders();
-      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + fileName);
       return new ResponseEntity<>(fileEnded, httpHeaders, HttpStatus.OK);
     } catch (EEAException | IOException e) {
       LOG_ERROR.error("File import failed lead reporters in dataflow={}, fileName={}", dataflowId,
           file.getName());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file", e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IMPORT_LEAD_REPORTERS);
     }
   }
 
@@ -425,8 +440,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       return representativeService.createLeadReporter(representativeId, leadReporterVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error creating new lead reporter: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      LOG_ERROR.error("Error creating new lead reporter: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.CREATE_LEAD_REPORTER);
     }
   }
 
@@ -468,7 +484,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       return representativeService.updateLeadReporter(leadReporterVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating lead reporter: duplicated representative. leadReporterVO={}",
-          leadReporterVO);
+          leadReporterVO, e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Representative not found");
     }
   }
@@ -490,8 +506,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       representativeService.deleteLeadReporter(leadReporterId);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error deleting lead reporter: leadReporterId ={}", leadReporterId, e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e);
+          EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
   }
 
@@ -511,8 +528,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       representativeService.validateLeadReporters(dataflowId, true);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error validating lead reporters: leadReporterId ={}", dataflowId, e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.ERROR_VALIDATING_LEAD_REPORTERS, e);
+          EEAErrorMessage.ERROR_VALIDATING_LEAD_REPORTERS);
     }
   }
 

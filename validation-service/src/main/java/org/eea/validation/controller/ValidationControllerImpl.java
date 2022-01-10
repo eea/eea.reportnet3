@@ -214,7 +214,7 @@ public class ValidationControllerImpl implements ValidationController {
    */
   @Override
   @GetMapping(value = "listGroupValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_CUSTODIAN_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_CUSTODIAN_SUPPORT','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER')")
+  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId)")
   @ApiOperation(value = "Gets all the failed validations for a given dataset grouped by code",
       hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
@@ -341,8 +341,8 @@ public class ValidationControllerImpl implements ValidationController {
           datasetId, fileName, e.getMessage());
 
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
-          "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s + message: %s ",
-          datasetId, fileName, e.getMessage()), e);
+          "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s",
+          datasetId, fileName));
 
     }
 
