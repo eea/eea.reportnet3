@@ -5,6 +5,8 @@ import isNil from 'lodash/isNil';
 
 import styles from './PropertiesDialog.module.scss';
 
+import { config } from 'conf';
+
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { PropertyItem } from './_components/PropertyItem';
@@ -13,6 +15,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { RodUrl } from 'repositories/config/RodUrl';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
   const { description, isPropertiesDialogVisible, name, obligations, status } = dataflowState;
@@ -76,7 +80,13 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
             content={[
               { id: 0, label: resourcesContext.messages['dataflowName'], value: name },
               { id: 1, label: resourcesContext.messages['dataflowDescription'], value: description },
-              { id: 2, label: resourcesContext.messages['dataflowStatus'], value: status }
+              {
+                id: 2,
+                label: resourcesContext.messages['dataflowStatus'],
+                value: TextUtils.areEquals(status, config.dataflowStatus.OPEN)
+                  ? resourcesContext.messages['open'].toUpperCase()
+                  : status
+              }
             ]}
             title={resourcesContext.messages['dataflowDetails']}
           />
