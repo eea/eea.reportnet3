@@ -13,7 +13,11 @@ import { config } from 'conf';
 import classNames from 'classnames';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { Button } from 'views/_components/Button';
+import { Column } from 'primereact/column';
 import { ContextMenu } from 'views/_components/ContextMenu';
+import { DataTable } from 'views/_components/DataTable';
+import { Dialog } from 'views/_components/Dialog';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'views/_components/Icon';
 import { InputText } from 'views/_components/InputText';
@@ -65,7 +69,9 @@ const Tab = ({
   const [hasErrors, setHasErrors] = useState(false);
   const [initialTitleHeader, setInitialTitleHeader] = useState(!isUndefined(addTab) ? '' : header);
   const [iconToShow, setIconToShow] = useState(!isUndefined(closeIcon) ? closeIcon : 'cancel');
+  const [isTableInfoVisible, setIsTableInfoVisible] = useState(false);
   const [menu, setMenu] = useState();
+  const [selectedTableInfoHeader, setSelectedTableInfoHeader] = useState('');
   const [titleHeader, setTitleHeader] = useState(!isUndefined(addTab) ? '' : header);
 
   const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s]/);
@@ -115,11 +121,18 @@ const Tab = ({
     }
   }, [newTab]);
 
+  const descriptionTemplate = rowData => (
+    <div>
+      <p className={styles.tableDescriptionTemplate}>{rowData.description}</p>
+    </div>
+  );
+
   const getTooltipMessage = () => (
-    <div className={styles.fieldText}>
+    <div className={`${styles.fieldText} ${styles.tooltipWrapper}`}>
       <span>{resourcesContext.messages['description']}: </span>
       <br />
       <p className={styles.propertyLabel}>{description}</p>
+      <p className={styles.moreInfoLabel}>{resourcesContext.messages['detailedInfoTooltip']}</p>
     </div>
   );
 
@@ -135,6 +148,17 @@ const Tab = ({
         {getTooltipMessage()}
       </div>
     );
+
+  const tableInfoDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button icon="check" label={resourcesContext.messages['ok']} onClick={() => setIsTableInfoVisible(false)} />
+    </div>
+  );
+
+  const onShowTableInfo = (header, visible) => {
+    setSelectedTableInfoHeader(header);
+    setIsTableInfoVisible(visible);
+  };
 
   const onTabDragStart = event => {
     if (editingHeader) {
@@ -287,6 +311,30 @@ const Tab = ({
     }
   };
 
+  const renderTableInfo = () => {
+    if (isTableInfoVisible) {
+      return (
+        <Dialog
+          className={styles.fieldInfoDialogWrapper}
+          footer={tableInfoDialogFooter}
+          header={resourcesContext.messages['tableInfo']}
+          onHide={() => setIsTableInfoVisible(false)}
+          visible={isTableInfoVisible}>
+          <DataTable value={[{ header, description }]}>
+            {['header', 'description'].map(column => (
+              <Column
+                body={column === 'description' ? descriptionTemplate : null}
+                field={column}
+                header={column}
+                key={column}
+              />
+            ))}
+          </DataTable>
+        </Dialog>
+      );
+    }
+  };
+
   return (
     <Fragment>
       <div
@@ -379,7 +427,10 @@ const Tab = ({
             <TooltipButton
               buttonClassName={styles.tooltipButton}
               getContent={getTooltipContent}
-              tooltipButton={styles.tooltip}
+              onClick={() => {
+                onShowTableInfo(header, true);
+              }}
+              tooltipClassName={styles.tooltipContent}
               uniqueIdentifier={uniqueId('table_more_info_')}
             />
           )}
@@ -461,6 +512,7 @@ const Tab = ({
       {designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (
         <ContextMenu model={menu} ref={contextMenuRef} />
       ) : null}
+      {renderTableInfo()}
     </Fragment>
   );
 };

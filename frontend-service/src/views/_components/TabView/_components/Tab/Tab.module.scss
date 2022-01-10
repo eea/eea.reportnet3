@@ -65,12 +65,13 @@ input.p_tabview_input_design {
   height: 2.7rem !important;
 }
 
-.tooltip {
-  max-width: 250px !important;
-}
 .tooltipButton {
   margin-top: 0.5rem !important;
   margin-right: 0.5rem !important;
+}
+.tooltipContent {
+  max-height: 300px !important;
+  z-index: 3003 !important;
 }
 
 .fieldText {
@@ -78,8 +79,25 @@ input.p_tabview_input_design {
   font-weight: bold;
   .propertyLabel {
     color: var(--success-color-lighter);
+    max-height: 200px;
     font-weight: 600;
-    display: inline-block !important;
-    text-overflow: ellipsis;
+    overflow: hidden;
+    text-overflow: ellipsis !important;
   }
+  .moreInfoLabel {
+    font-size: 9pt;
+    font-style: italic;
+  }
+}
+
+.tableDescriptionTemplate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 30vh;
+  overflow: auto;
+}
+
+.tooltipWrapper {
+  white-space: pre-line;
 }

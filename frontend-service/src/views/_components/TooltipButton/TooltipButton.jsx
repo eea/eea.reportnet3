@@ -13,7 +13,8 @@ export const TooltipButton = ({
   tooltipClassName = '',
   uniqueIdentifier = 1,
   usedInPortal = false,
-  maxWidth = false
+  maxWidth = false,
+  place = 'top'
 }) => {
   useEffect(() => {
     if (usedInPortal) ReactTooltip.rebuild();
@@ -38,7 +39,7 @@ export const TooltipButton = ({
         html={true}
         id={`infoCircleButton_${uniqueIdentifier}`}
         multiline={true}
-        place="top"
+        place={place}
       />
     </Fragment>
   );

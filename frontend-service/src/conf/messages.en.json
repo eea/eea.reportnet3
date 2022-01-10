@@ -1422,6 +1422,8 @@
     "y": "Y",
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
-    "errorBoundaryClipboardButtonLabel": "Copy to clipboard"
+    "errorBoundaryClipboardButtonLabel": "Copy to clipboard",
+    "detailedInfoTooltip": "Click to show detailed info",
+    "tableInfo": "Table info"
   }
 }
