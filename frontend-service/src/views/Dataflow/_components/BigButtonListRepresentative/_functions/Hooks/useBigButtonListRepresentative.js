@@ -68,7 +68,7 @@ const useBigButtonListRepresentative = ({
     if (
       isNil(dataflowState.data.referenceDatasets) ||
       dataflowState.data.representatives.length > 1 ||
-      dataflowState.isCustodian
+      dataflowState.hasCustodianPermissions
     ) {
       return [];
     }

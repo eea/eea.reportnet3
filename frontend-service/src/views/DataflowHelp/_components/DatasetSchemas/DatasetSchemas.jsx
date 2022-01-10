@@ -24,7 +24,13 @@ import { IntegrationService } from 'services/IntegrationService';
 import { UniqueConstraintService } from 'services/UniqueConstraintService';
 import { ValidationService } from 'services/ValidationService';
 
-const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
+const DatasetSchemas = ({
+  dataflowId,
+  dataflowName,
+  datasetsSchemas,
+  hasCustodianPermissions,
+  onLoadDatasetsSchemas
+}) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
   const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
@@ -286,7 +292,7 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
             qc.fieldName = additionalInfo.fieldName || '';
             qc.expression = getExpressionString(qc, datasetSchema[0].tables);
             qc.datasetSchemaId = allQCs.datasetSchemaId;
-            if (!isCustodian) {
+            if (!hasCustodianPermissions) {
               return pick(
                 qc,
                 'tableName',
@@ -329,11 +335,11 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
     try {
       setIsLoading(true);
       const datasetValidations = datasetsSchemas.map(async datasetSchema => {
-        return await ValidationService.getAll(dataflowId, datasetSchema.datasetSchemaId, !isCustodian);
+        return await ValidationService.getAll(dataflowId, datasetSchema.datasetSchemaId, !hasCustodianPermissions);
       });
       Promise.all(datasetValidations).then(allQCs => {
         allQCs = allQCs.filter(qc => !isUndefined(qc));
-        if (!isCustodian) {
+        if (!hasCustodianPermissions) {
           allQCs.forEach(qc => (qc = qc.validations.filter(validation => validation.enabled !== false)));
         }
         setQCList(getQCList(allQCs));
@@ -367,8 +373,8 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
           <DatasetSchema
             designDataset={designDataset}
             extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
+            hasCustodianPermissions={hasCustodianPermissions}
             index={i}
-            isCustodian={isCustodian}
             key={designDataset.datasetSchemaId}
             onGetReferencedFieldName={onGetReferencedFieldName}
             qcList={filterData(designDataset, qcList)}
@@ -383,7 +389,7 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
 
   const renderToolbar = () => {
     return (
-      isCustodian && (
+      hasCustodianPermissions && (
         <Toolbar className={styles.datasetSchemasToolbar} id="datasetSchemaIndex">
           <div className="p-toolbar-group-left">
             <Button
