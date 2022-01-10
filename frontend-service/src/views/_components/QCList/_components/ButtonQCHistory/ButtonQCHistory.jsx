@@ -158,17 +158,6 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
 
   return (
     <div>
-      {showDialog && (
-        <Dialog
-          className={`responsiveDialog ${styles.sizeDialog}`}
-          footer={footerQcHistory}
-          header={resourcesContext.messages['qcHistoryDialogHeader']}
-          onHide={() => closeDialog()}
-          visible={showDialog}>
-          {generateHistoryDialogContent()}
-        </Dialog>
-      )}
-
       <Button
         className={className}
         disabled={validationContext.isFetchingData}
@@ -182,6 +171,17 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
         tooltipOptions={{ position: 'top' }}
         type="button"
       />
+
+      {showDialog && (
+        <Dialog
+          className={`responsiveDialog ${styles.sizeDialog}`}
+          footer={footerQcHistory}
+          header={resourcesContext.messages['qcHistoryDialogHeader']}
+          onHide={() => closeDialog()}
+          visible={showDialog}>
+          {generateHistoryDialogContent()}
+        </Dialog>
+      )}
     </div>
   );
 };
