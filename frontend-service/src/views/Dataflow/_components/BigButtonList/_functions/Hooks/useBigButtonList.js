@@ -106,7 +106,7 @@ const useBigButtonList = ({
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry,
-      testDatasetVisibility: (isLeadDesigner && isDraftStatus) || isStewardSupport
+      testDatasetVisibility: (isLeadDesigner || isStewardSupport) && isDraftStatus
     };
   }, [
     dataflowId,
