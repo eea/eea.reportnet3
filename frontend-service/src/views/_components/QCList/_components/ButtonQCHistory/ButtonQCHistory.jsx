@@ -1,5 +1,6 @@
 import { useContext, useState } from 'react';
 
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './ButtonQCHistory.module.scss';
@@ -16,18 +17,20 @@ import { Spinner } from 'views/_components/Spinner';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'views/_functions/Contexts/UserContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { ValidationService } from 'services/ValidationService';
 
 export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
-  const resourcesContext = useContext(ResourcesContext);
-  const validationContext = useContext(ValidationContext);
   const notificationContext = useContext(NotificationContext);
+  const resourcesContext = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
+  const validationContext = useContext(ValidationContext);
 
-  const [showDialog, setShowDialog] = useState(false);
-  const [qcHistoryData, setQcHistoryData] = useState([]);
   const [loadingStatus, setLoadingStatus] = useState('idle');
+  const [qcHistoryData, setQcHistoryData] = useState([]);
+  const [showDialog, setShowDialog] = useState(false);
 
   const closeDialog = () => {
     setShowDialog(false);
@@ -94,15 +97,19 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
         return null;
       }
       let template;
+
       switch (col.field) {
-        case 'metadata':
-          template = metadataTemplate;
-          break;
         case 'expression':
           template = expressionTemplate;
           break;
+        case 'metadata':
+          template = metadataTemplate;
+          break;
         case 'status':
           template = statusTemplate;
+          break;
+        case 'timestamp':
+          template = timestampTemplate;
           break;
         default:
           template = null;
@@ -130,6 +137,16 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
   const metadataTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
       {rowData.metadata ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+    </div>
+  );
+
+  const timestampTemplate = rowData => (
+    <div>
+      {dayjs(rowData.timestamp).format(
+        `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
+          userContext.userProps.amPm24h ? '' : ' A'
+        }`
+      )}
     </div>
   );
 
