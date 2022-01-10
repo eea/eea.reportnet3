@@ -10,7 +10,7 @@
   background-color: var(--header-footer-bg);
   transition: 0.5s;
   box-shadow: var(--header-box-shadow);
-  z-index: 5002;
+  z-index: 3002;
   &.public {
     background-color: var(--public-page-header-bg);
   }
