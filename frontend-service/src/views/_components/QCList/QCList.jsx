@@ -363,6 +363,13 @@ export const QCList = ({
 
     return (
       <Fragment>
+        {row.hasHistoric && (
+          <ButtonQCHistory
+            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+            datasetId={dataset.datasetId}
+            ruleId={row.id}
+          />
+        )}
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
           disabled={validationContext.isFetchingData}
@@ -380,11 +387,6 @@ export const QCList = ({
           tooltip={resourcesContext.messages['duplicate']}
           tooltipOptions={{ position: 'top' }}
           type="button"
-        />
-        <ButtonQCHistory
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
-          datasetId={dataset.datasetId}
-          ruleId={row.id}
         />
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
