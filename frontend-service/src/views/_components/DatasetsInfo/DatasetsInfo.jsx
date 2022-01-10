@@ -23,11 +23,11 @@ import { filterByState } from 'views/_components/MyFilters/_functions/Stores/fil
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
-  const filterBy = useRecoilValue(filterByState('datasetInfo'));
-  const isDataFiltered = !isEmpty(filterBy);
-
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+
+  const filterBy = useRecoilValue(filterByState('datasetInfo'));
+  const isDataFiltered = !isEmpty(filterBy);
 
   const [datasetsInfo, setDatasetsInfo] = useState([]);
   const [filteredData, setFilteredData] = useState(datasetsInfo);
