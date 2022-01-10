@@ -187,21 +187,6 @@
   }
 }
 
-.referencingDataflows {
-  display: flex;
-  flex-direction: row;
-  width: 100% !important;
-  margin: 2rem 0;
-
-  .block {
-    width: 100% !important;
-  }
-
-  .sortButtonSize {
-    display: none;
-  }
-}
-
 .qcList {
   display: grid;
   grid-row-gap: 2.5rem;
@@ -214,6 +199,7 @@
 
   .resetButton {
     grid-area: button;
+    margin: auto;
   }
 
   .searchInput {
@@ -227,4 +213,30 @@
       box-shadow: 0 0 0 0 var(--c-blue-120);
     }
   }
+  .sortButtonSize {
+    display: none;
+  }
+}
+
+.lineItems {
+  display: flex;
+  flex-direction: row;
+  margin: 2rem 0;
+  width: 100% !important;
+
+  .block {
+    width: 100% !important;
+  }
+
+  .sortButtonSize {
+    display: none;
+  }
+}
+
+.referencingDataflows {
+  @extend .lineItems;
+}
+
+.datasetsInfo {
+  @extend .lineItems;
 }
