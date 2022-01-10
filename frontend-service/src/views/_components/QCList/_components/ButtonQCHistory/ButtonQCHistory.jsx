@@ -85,6 +85,27 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
         {columns}
       </DataTable>
     );
+    if (isEmpty(columns)) {
+      return (
+        <div className={styles.noDataContent}>
+          <h3>{resourcesContext.messages['noHistoryData']}</h3>
+        </div>
+      );
+    } else {
+      return (
+        <DataTable
+          autoLayout
+          className={styles.dialogContent}
+          hasDefaultCurrentPage
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 15]}
+          totalRecords={qcHistoryData.length}
+          value={qcHistoryData}>
+          {columns}
+        </DataTable>
+      );
+    }
   };
 
   const getHistoryColumns = () => {
