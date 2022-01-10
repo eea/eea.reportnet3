@@ -116,8 +116,12 @@ export const ValidationService = {
     return validationsList;
   },
 
-  getHistoricReleases: async (datasetId, ruleId) => {
-    return await ValidationRepository.getHistoricReleases(datasetId, ruleId);
+  getAllQCsHistoricInfo: async datasetId => {
+    return await ValidationRepository.getAllQCsHistoricInfo(datasetId);
+  },
+
+  getQcHistoricInfo: async (datasetId, ruleId) => {
+    return await ValidationRepository.getQcHistoricInfo(datasetId, ruleId);
   },
 
   generateQCRulesFile: async datasetId => await ValidationRepository.generateQCRulesFile(datasetId),

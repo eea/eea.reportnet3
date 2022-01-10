@@ -31,9 +31,15 @@ export const ValidationRepository = {
   getAll: async (dataflowId, datasetSchemaId) =>
     await HTTPRequester.get({ url: getUrl(ValidationConfig.getAll, { dataflowId, datasetSchemaId }) }),
 
-  getHistoricReleases: async (datasetId, ruleId) => {
+  getAllQCsHistoricInfo: async datasetId => {
     return await HTTPRequester.get({
-      url: getUrl(ValidationConfig.getHistoricReleases, { datasetId, ruleId })
+      url: getUrl(ValidationConfig.getAllQCsHistoricInfo, { datasetId })
+    });
+  },
+
+  getQcHistoricInfo: async (datasetId, ruleId) => {
+    return await HTTPRequester.get({
+      url: getUrl(ValidationConfig.getQcHistoricInfo, { datasetId, ruleId })
     });
   },
 

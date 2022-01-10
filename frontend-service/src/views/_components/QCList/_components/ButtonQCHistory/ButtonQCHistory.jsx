@@ -53,7 +53,7 @@ export const ButtonQCHistory = ({ className, datasetId, ruleId, style }) => {
       return (
         <div className={styles.errorLoadingHistory}>
           <p>{resourcesContext.messages['loadHistorydataError']}</p>
-          <Button label={resourcesContext.messages['refresh']} onClick={getQcHistoryData}></Button>
+          <Button label={resourcesContext.messages['refresh']} onClick={getQcHistoryData} />
         </div>
       );
     }
@@ -117,7 +117,7 @@ export const ButtonQCHistory = ({ className, datasetId, ruleId, style }) => {
   const getQcHistoryData = async () => {
     setLoadingStatus('pending');
     try {
-      const response = await ValidationService.getHistoricReleases(datasetId, ruleId);
+      const response = await ValidationService.getQcHistoricInfo(datasetId, ruleId);
       const data = response.data;
       setQcHistoryData(data);
       setLoadingStatus('success');
