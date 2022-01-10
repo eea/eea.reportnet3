@@ -22,18 +22,18 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { ValidationService } from 'services/ValidationService';
 
-export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
+export const ButtonQCHistory = ({ className, datasetId, ruleId, style }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
 
+  const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [qcHistoryData, setQcHistoryData] = useState([]);
-  const [showDialog, setShowDialog] = useState(false);
 
-  const closeDialog = () => {
-    setShowDialog(false);
+  const onCloseDialog = () => {
+    setIsDialogVisible(false);
     setQcHistoryData([]);
   };
 
@@ -43,7 +43,7 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
       icon="cancel"
       id="cancelHistoryQc"
       label={resourcesContext.messages['close']}
-      onClick={() => closeDialog()}
+      onClick={() => onCloseDialog()}
     />
   );
 
@@ -63,6 +63,7 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
         </div>
       );
     }
+
     if (loadingStatus === 'failed') {
       return (
         <div className={styles.errorLoadingHistory}>
@@ -72,19 +73,6 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
       );
     }
 
-    return (
-      <DataTable
-        autoLayout
-        className={`${styles.sizeContentDialog}`}
-        hasDefaultCurrentPage={true}
-        paginator={true}
-        rows={10}
-        rowsPerPageOptions={[5, 10, 15]}
-        totalRecords={qcHistoryData.length}
-        value={qcHistoryData}>
-        {columns}
-      </DataTable>
-    );
     if (isEmpty(columns)) {
       return (
         <div className={styles.noDataContent}>
@@ -184,7 +172,7 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
         disabled={validationContext.isFetchingData}
         icon="info"
         onClick={() => {
-          setShowDialog(true);
+          setIsDialogVisible(true);
           getQcHistoryData();
         }}
         style={style}
@@ -193,13 +181,13 @@ export const ButtonQCHistory = ({ className, style, ruleId, datasetId }) => {
         type="button"
       />
 
-      {showDialog && (
+      {isDialogVisible && (
         <Dialog
-          className={`responsiveDialog ${styles.sizeDialog}`}
+          className={`responsiveDialog ${styles.dialogSize}`}
           footer={footerQcHistory}
           header={resourcesContext.messages['qcHistoryDialogHeader']}
-          onHide={() => closeDialog()}
-          visible={showDialog}>
+          onHide={onCloseDialog}
+          visible={isDialogVisible}>
           {generateHistoryDialogContent()}
         </Dialog>
       )}
