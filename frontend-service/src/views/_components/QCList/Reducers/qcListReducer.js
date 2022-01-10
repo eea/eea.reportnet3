@@ -16,8 +16,8 @@ export const qcListReducer = (state, { type, payload }) => {
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
-    case 'ON_LOAD_VALIDATION_ID':
-      return { ...state, validationId: payload.value };
+    case 'SET_VALIDATION_ID':
+      return { ...state, validationId: payload.validationId };
 
     case 'ON_LOAD_VALIDATION_LIST':
       return { ...state, validationList: payload.validationsServiceList };

@@ -11,7 +11,7 @@ import styles from './QCList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
-import { ButtonQCHistory } from './_components/ButtonQCHistory';
+import { QCsHistory } from './_components/QCsHistory';
 import { Checkbox } from 'views/_components/Checkbox';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
@@ -51,6 +51,7 @@ export const QCList = ({
 
   const [tabsValidationsState, tabsValidationsDispatch] = useReducer(qcListReducer, {
     deletedRuleId: null,
+    editingRows: [],
     filtered: false,
     filteredData: [],
     hasEmptyFields: false,
@@ -59,7 +60,7 @@ export const QCList = ({
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isDeletingRule: false,
-    editingRows: [],
+    isHistoryDialogVisible: false,
     isLoading: true,
     isTableSorted: false,
     sortFieldValidations: null,
@@ -98,6 +99,26 @@ export const QCList = ({
     </Fragment>
   );
 
+  const setIsHistoryDialogVisible = isHistoryDialogVisible => {
+    tabsValidationsDispatch({
+      type: 'SET_IS_HISTORY_DIALOG_VISIBLE',
+      payload: { isHistoryDialogVisible }
+    });
+  };
+
+  const setValidationId = validationId =>
+    tabsValidationsDispatch({ type: 'SET_VALIDATION_ID', payload: { validationId } });
+
+  const onOpenHistoryDialog = validationId => {
+    setIsHistoryDialogVisible(true);
+    setValidationId(validationId);
+  };
+
+  const onCloseHistoryDialog = () => {
+    setIsHistoryDialogVisible(false);
+    setValidationId('');
+  };
+
   const isDeleteDialogVisible = value =>
     tabsValidationsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
 
@@ -120,7 +141,7 @@ export const QCList = ({
     } catch (error) {
       console.error('ValidationsList - onDeleteValidation.', error);
       notificationContext.add({ type: 'DELETE_RULE_ERROR' }, true);
-      validationId('');
+      setValidationId('');
     } finally {
       onHideDeleteDialog();
       tabsValidationsDispatch({
@@ -185,7 +206,7 @@ export const QCList = ({
       updatedRuleId = null;
       isFetchingData = false;
       isLoading(false);
-      validationId('');
+      setValidationId('');
       validationContext.onFetchingData(isFetchingData, updatedRuleId);
     }
   };
@@ -382,12 +403,19 @@ export const QCList = ({
           type="button"
         />
         {row.hasHistoric && (
-          <ButtonQCHistory
+          <Button
             className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
-            datasetId={dataset.datasetId}
-            ruleId={row.id}
+            disabled={validationContext.isFetchingData}
+            icon="info"
+            onClick={() => {
+              onOpenHistoryDialog(row.id);
+            }}
+            tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
+            tooltipOptions={{ position: 'top' }}
+            type="button"
           />
         )}
+
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
           disabled={validationContext.isFetchingData}
@@ -420,10 +448,16 @@ export const QCList = ({
           type="button"
         />
         {row.hasHistoric && (
-          <ButtonQCHistory
+          <Button
             className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
-            datasetId={dataset.datasetId}
-            ruleId={row.id}
+            disabled={validationContext.isFetchingData}
+            icon="info"
+            onClick={() => {
+              onOpenHistoryDialog(row.id);
+            }}
+            tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
+            tooltipOptions={{ position: 'top' }}
+            type="button"
           />
         )}
       </Fragment>
@@ -623,8 +657,6 @@ export const QCList = ({
     return fieldColumns;
   };
 
-  const validationId = value => tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_ID', payload: { value } });
-
   const checkIsEmptyValidations = () =>
     isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
@@ -766,7 +798,7 @@ export const QCList = ({
             editMode="row"
             hasDefaultCurrentPage={true}
             loading={false}
-            onRowClick={event => validationId(event.data.id)}
+            onRowClick={event => setValidationId(event.data.id)}
             onRowEditCancel={onRowEditCancel}
             onRowEditInit={onRowEditInit}
             onRowEditSave={onUpdateValidationRule}
@@ -803,6 +835,16 @@ export const QCList = ({
   return (
     <Fragment>
       {validationList()}
+
+      {tabsValidationsState.isHistoryDialogVisible && (
+        <QCsHistory
+          datasetId={dataset.datasetId}
+          isDialogVisible={tabsValidationsState.isHistoryDialogVisible}
+          onCloseDialog={onCloseHistoryDialog}
+          ruleId={tabsValidationsState.validationId}
+        />
+      )}
+
       {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
     </Fragment>
   );

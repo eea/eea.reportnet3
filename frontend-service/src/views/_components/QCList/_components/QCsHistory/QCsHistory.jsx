@@ -1,9 +1,10 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
-import styles from './ButtonQCHistory.module.scss';
+import styles from './QCsHistory.module.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -18,19 +19,20 @@ import { Spinner } from 'views/_components/Spinner';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
-import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { ValidationService } from 'services/ValidationService';
 
-export const ButtonQCHistory = ({ className, datasetId, ruleId, style }) => {
+export const QCsHistory = ({ isDialogVisible, onCloseDialog, datasetId, ruleId }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
-  const validationContext = useContext(ValidationContext);
 
-  const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [qcHistoryData, setQcHistoryData] = useState([]);
+
+  useEffect(() => {
+    getQcHistoryData();
+  }, []);
 
   const expressionTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
@@ -51,7 +53,7 @@ export const ButtonQCHistory = ({ className, datasetId, ruleId, style }) => {
 
     if (loadingStatus === 'failed') {
       return (
-        <div className={styles.errorLoadingHistory}>
+        <div className={styles.noDataContent}>
           <p>{resourcesContext.messages['loadHistorydataError']}</p>
           <Button label={resourcesContext.messages['refresh']} onClick={getQcHistoryData} />
         </div>
@@ -117,7 +119,9 @@ export const ButtonQCHistory = ({ className, datasetId, ruleId, style }) => {
   const getQcHistoryData = async () => {
     setLoadingStatus('pending');
     try {
-      const response = await ValidationService.getQcHistoricInfo(datasetId, ruleId);
+      const response = isNil(ruleId)
+        ? await ValidationService.getAllQcHistoricInfo(datasetId)
+        : await ValidationService.getQcHistoricInfo(datasetId, ruleId);
       const data = response.data;
       setQcHistoryData(data);
       setLoadingStatus('success');
@@ -156,36 +160,18 @@ export const ButtonQCHistory = ({ className, datasetId, ruleId, style }) => {
       icon="cancel"
       id="cancelHistoryQc"
       label={resourcesContext.messages['close']}
-      onClick={() => setIsDialogVisible(false)}
+      onClick={onCloseDialog}
     />
   );
 
   return (
-    <div>
-      <Button
-        className={className}
-        disabled={validationContext.isFetchingData}
-        icon="info"
-        onClick={() => {
-          setIsDialogVisible(true);
-          getQcHistoryData();
-        }}
-        style={style}
-        tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
-        tooltipOptions={{ position: 'top' }}
-        type="button"
-      />
-
-      {isDialogVisible && (
-        <Dialog
-          className={`responsiveDialog ${styles.dialogSize}`}
-          footer={dialogFooter}
-          header={resourcesContext.messages['qcHistoryDialogHeader']}
-          onHide={() => setIsDialogVisible(false)}
-          visible={isDialogVisible}>
-          {generateHistoryDialogContent()}
-        </Dialog>
-      )}
-    </div>
+    <Dialog
+      className={`responsiveDialog ${styles.dialogSize}`}
+      footer={dialogFooter}
+      header={resourcesContext.messages['qcHistoryDialogHeader']}
+      onHide={onCloseDialog}
+      visible={isDialogVisible}>
+      {generateHistoryDialogContent()}
+    </Dialog>
   );
 };
