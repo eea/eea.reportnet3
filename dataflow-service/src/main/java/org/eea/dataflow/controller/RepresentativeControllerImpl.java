@@ -78,7 +78,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @LockMethod
   @HystrixCommand
   @PostMapping("/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(value = "Create one Representative", response = Long.class, hidden = true)
   public Long createRepresentative(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId,
@@ -174,11 +174,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/v1/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE')")
   @ApiOperation(value = "Get dataflow representatives by dataflow id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = RepresentativeVO.class,
       responseContainer = "List",
-      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR READ, EDITOR WRITE, OBSERVER, LEAD REPORTER, REPORTER WRITE, CUSTODIAN SUPPORT")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, EDITOR READ, EDITOR WRITE, OBSERVER, LEAD REPORTER, REPORTER WRITE, STEWARD SUPPORT")
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_NOTFOUND),
       @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)})
   public List<RepresentativeVO> findRepresentativesByIdDataFlow(
@@ -206,7 +206,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE')")
   @ApiOperation(value = "Get Representatives by Dataflow Id",
       produces = MediaType.APPLICATION_JSON_VALUE, response = RepresentativeVO.class,
       responseContainer = "List", hidden = true)
@@ -250,7 +250,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{dataflowRepresentativeId}/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_CUSTODIAN_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(value = "Delete Representative", hidden = true)
   @ApiResponse(code = 404, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
   public void deleteRepresentative(
@@ -297,7 +297,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_CUSTODIAN_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
   @GetMapping(value = "/export/{dataflowId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ApiOperation(value = "Exports the file containing the info of Lead reporters",
       response = ResponseEntity.class, hidden = true)
@@ -359,7 +359,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_CUSTODIAN_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(value = "Import file lead reporters", hidden = true)
   @PostMapping("/import/{dataflowId}/group/{groupId}")
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.FILE_EXTENSION),
@@ -414,7 +414,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @PostMapping("/{representativeId}/leadReporter/dataflow/{dataflowId}")
   @LockMethod
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_CUSTODIAN_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(value = "Create one Lead reporter", response = Long.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.USER_NOTFOUND),
       @ApiResponse(code = 400, message = EEAErrorMessage.NOT_EMAIL),
@@ -456,7 +456,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @PutMapping("/leadReporter/update/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_CUSTODIAN_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(value = "Updates a Lead reporter", response = Long.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 403, message = "LeadReporter not allowed"),
       @ApiResponse(code = 400, message = "Invalid email"),
@@ -498,7 +498,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @DeleteMapping("/leadReporter/{leadReporterId}/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_CUSTODIAN_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(value = "Deletes a Lead reporter", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.REPRESENTATIVE_NOT_FOUND)
   public void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId,
@@ -518,7 +518,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * @param dataflowId the dataflow id
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_CUSTODIAN_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(
       value = "Validates all lead reporters, checking wether they are registered in the system or not",
       hidden = true)

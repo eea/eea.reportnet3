@@ -15,8 +15,8 @@ public enum SecurityRoleEnum {
   /** The data custodian. */
   DATA_CUSTODIAN("DATA_CUSTODIAN"),
 
-  /** The custodian support. */
-  CUSTODIAN_SUPPORT("CUSTODIAN_SUPPORT"),
+  /** The steward support. */
+  STEWARD_SUPPORT("STEWARD_SUPPORT"),
 
   /** The data observer. */
   DATA_OBSERVER("DATA_OBSERVER"),

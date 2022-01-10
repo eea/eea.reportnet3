@@ -632,13 +632,11 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail().toLowerCase());
         leadReporter.setInvalid(newUser == null ? true : false);
         if (null != representative.getLeadReporters() && representative.getLeadReporters().stream()
-            .filter(reporter -> leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
-            .collect(Collectors.counting()) == 0) {
+            .filter(reporter -> !Boolean.TRUE.equals(leadReporter.getInvalid())
+                && leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
+            .collect(Collectors.counting()) == 1) {
           modifyLeadReporterPermissions(leadReporter.getEmail().toLowerCase(), representative,
-              true);
-          if (!Boolean.TRUE.equals(leadReporter.getInvalid())) {
-            modifyLeadReporterPermissions(leadReporterVO.getEmail(), representative, false);
-          }
+              false);
           leadReporter.setEmail(leadReporterVO.getEmail());
         }
         leadReporter.setRepresentative(representative);
@@ -753,7 +751,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
                   userManagementControllerZull, entityAccessService);
           isAuthorized = eeaSecurityExpressionRoot.secondLevelAuthorize(dataflow.getId(),
               ObjectAccessRoleEnum.DATAFLOW_STEWARD, ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN,
-              ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN_SUPPORT);
+              ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT);
         }
       }
     }
