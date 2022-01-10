@@ -119,20 +119,20 @@
   margin-bottom: auto;
 }
 
-.sortButtonEmpty {
+.sortButtonSize {
+  font-size: 0.12rem;
   height: 1.6em !important;
   width: 3.1rem !important;
 }
 
 .sortButton {
+  @extend .sortButtonSize;
   background-color: transparent;
   border: none;
   color: var(--button-secondary-transparent-color-hover);
   cursor: pointer;
   font-size: 16pt !important;
-  height: 1.6em !important;
   opacity: 0.7;
-  width: 3.1rem !important;
 
   &:hover {
     opacity: 1 !important;
@@ -185,4 +185,58 @@
       margin-bottom: 1.5rem;
     }
   }
+}
+
+.qcList {
+  display: grid;
+  grid-row-gap: 2.5rem;
+  grid-template-areas:
+    'area area area area button'
+    'area area area area button';
+  grid-template-columns: calc(95% / 4) calc(95% / 4) calc(95% / 4) calc(95% / 4) 5%;
+  margin: 1rem 0;
+  width: 100%;
+
+  .resetButton {
+    grid-area: button;
+    margin: auto;
+  }
+
+  .searchInput {
+    background: transparent;
+    border: 0px;
+    border-radius: 0;
+    width: 100%;
+
+    &:focus,
+    &:enabled:focus {
+      box-shadow: 0 0 0 0 var(--c-blue-120);
+    }
+  }
+  .sortButtonSize {
+    display: none;
+  }
+}
+
+.lineItems {
+  display: flex;
+  flex-direction: row;
+  margin: 2rem 0;
+  width: 100% !important;
+
+  .block {
+    width: 100% !important;
+  }
+
+  .sortButtonSize {
+    display: none;
+  }
+}
+
+.referencingDataflows {
+  @extend .lineItems;
+}
+
+.datasetsInfo {
+  @extend .lineItems;
 }
