@@ -16,10 +16,8 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { RodUrl } from 'repositories/config/RodUrl';
 
-import { TextUtils } from 'repositories/_utils/TextUtils';
-
 export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
-  const { description, isPropertiesDialogVisible, name, obligations, status } = dataflowState;
+  const { description, isPropertiesDialogVisible, isReleasable, name, obligations, status } = dataflowState;
 
   const resourcesContext = useContext(ResourcesContext);
   const {
@@ -58,6 +56,18 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
     ];
   };
 
+  const parseStatus = () => {
+    if (status === config.dataflowStatus.OPEN) {
+      if (isReleasable) {
+        return resourcesContext.messages['open'].toUpperCase();
+      } else {
+        return resourcesContext.messages['closed'].toUpperCase();
+      }
+    } else {
+      return status;
+    }
+  };
+
   const renderDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink button-right-aligned"
@@ -83,9 +93,7 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
               {
                 id: 2,
                 label: resourcesContext.messages['dataflowStatus'],
-                value: TextUtils.areEquals(status, config.dataflowStatus.OPEN)
-                  ? resourcesContext.messages['open'].toUpperCase()
-                  : status
+                value: parseStatus()
               }
             ]}
             title={resourcesContext.messages['dataflowDetails']}
