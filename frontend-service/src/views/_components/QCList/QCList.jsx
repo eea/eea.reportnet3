@@ -83,8 +83,6 @@ export const QCList = ({
     }
   }, [validationContext.isAutomaticRuleUpdated]);
 
-  const getFilteredState = value => tabsValidationsDispatch({ type: 'IS_FILTERED', payload: { value } });
-
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {tabsValidationsState.filtered &&
@@ -754,6 +752,7 @@ export const QCList = ({
             data={tabsValidationsState.validationList.validations}
             getFilteredData={onLoadFilteredData}
             options={FILTER_OPTIONS}
+            viewType="qcList"
           />
         </div>
         {!isEmpty(tabsValidationsState.filteredData) ? (
