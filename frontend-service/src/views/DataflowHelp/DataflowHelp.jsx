@@ -48,7 +48,7 @@ export const DataflowHelp = () => {
   const [dataflowType, setDataflowType] = useState('');
   const [datasetsSchemas, setDatasetsSchemas] = useState();
   const [documents, setDocuments] = useState([]);
-  const [hasCustodianPermissions, setCustodianPermissions] = useState(false);
+  const [hasCustodianPermissions, setHasCustodianPermissions] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,7 +70,7 @@ export const DataflowHelp = () => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       const userRoles = userContext.getUserRole(`${config.permissions.prefixes.DATAFLOW}${dataflowId}`);
-      setCustodianPermissions(
+      setHasCustodianPermissions(
         userRoles.includes(config.permissions.roles.CUSTODIAN.key) ||
           userRoles.includes(config.permissions.roles.STEWARD.key) ||
           userRoles.includes(config.permissions.roles.EDITOR_WRITE.key) ||

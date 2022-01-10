@@ -84,7 +84,7 @@ const Dataflow = () => {
     description: '',
     designDatasetSchemas: [],
     formHasRepresentatives: false,
-    hasCustodianPermissions: undefined,
+    hasCustodianPermissions: false,
     hasReporters: false,
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
@@ -712,7 +712,7 @@ const Dataflow = () => {
       type: 'LOAD_PERMISSIONS',
       payload: {
         hasWritePermissions,
-        hasCustodianPermissions: isLeadDesigner,
+        isStewardSupport: isLeadDesigner,
         isNationalCoordinator,
         isObserver,
         isAdmin,
