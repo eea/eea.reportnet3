@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
 
-import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -18,17 +17,19 @@ import { Spinner } from 'views/_components/Spinner';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { ValidationService } from 'services/ValidationService';
+
+import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
 export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validationId }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
 
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [qcHistoryData, setQcHistoryData] = useState([]);
+
+  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
   useEffect(() => {
     getQcHistoryData();
@@ -156,15 +157,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     return <div>{rowData.ruleId}</div>;
   };
 
-  const timestampTemplate = rowData => (
-    <div>
-      {dayjs(rowData.timestamp).format(
-        `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-          userContext.userProps.amPm24h ? '' : ' A'
-        }`
-      )}
-    </div>
-  );
+  const timestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
 
   const dialogFooter = (
     <Button

@@ -1,7 +1,5 @@
 import { useContext } from 'react';
 
-import dayjs from 'dayjs';
-
 import styles from './SnapshotItem.module.scss';
 
 import { Button } from 'views/_components/Button';
@@ -10,25 +8,19 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
-import { UserContext } from 'views/_functions/Contexts/UserContext';
+
+import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
 const SnapshotItem = ({ itemData }) => {
   const snapshotContext = useContext(SnapshotContext);
   const resourcesContext = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
 
-  const getFormatedDate = creationDate => {
-    return dayjs(creationDate).format(
-      `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-        userContext.userProps.amPm24h ? '' : ' A'
-      } CET`
-    );
-  };
+  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
   return (
     <li className={styles.listItem}>
       <div className={styles.listItemData}>
-        <h5>{getFormatedDate(itemData.creationDate)}</h5>
+        <h5>{getDateTimeFormatByUserPreferences(itemData.creationDate)} CET</h5>
         {itemData.isReleased && (
           <h5 className={styles.is_released_snapshot}>
             {resourcesContext.messages['snapshotIsReleased']}
