@@ -17,6 +17,7 @@ public interface ExtendedAuditRepository {
    *
    * @param rule the rule
    * @param user the user
+   * @param datasetId the dataset id
    */
   void createAudit(Rule rule, UserRepresentationVO user, Long datasetId);
 
