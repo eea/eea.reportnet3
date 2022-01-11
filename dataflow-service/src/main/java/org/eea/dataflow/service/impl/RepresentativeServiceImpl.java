@@ -700,8 +700,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
 
     } catch (Exception e) {
-      LOG.error("An error was produced while validating lead reporters for dataflow {}",
-          dataflowId);
+      LOG.error("An error was produced while validating lead reporters for dataflow {}", dataflowId,
+          e);
       if (sendNotification) {
         NotificationVO notificationVO = NotificationVO.builder()
             .user(SecurityContextHolder.getContext().getAuthentication().getName())
