@@ -919,13 +919,13 @@ public class RulesControllerImpl implements RulesController {
     } catch (ParseException e) {
       LOG_ERROR.error("There was an error trying to parse the explain plan: {}",
           sqlRule.getSqlRule(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EVALUATING_RULE);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error(
           "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.",
           sqlRule.getSqlRule(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EVALUATING_RULE);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     } catch (EEAForbiddenSQLCommandException e) {
       LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}",
           sqlRule.getSqlRule(), e.getMessage());
@@ -934,10 +934,10 @@ public class RulesControllerImpl implements RulesController {
     } catch (EEAException e) {
       LOG_ERROR.error("User doesn't have access to one of the datasets: {}", sqlRule.getSqlRule(),
           e);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.EVALUATING_RULE);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
     } catch (StringIndexOutOfBoundsException e) {
       LOG_ERROR.error("SQL sentence has wrong format, please check: {}", sqlRule.getSqlRule(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EVALUATING_RULE);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     return sqlCost;
