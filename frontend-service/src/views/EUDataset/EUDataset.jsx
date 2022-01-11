@@ -214,12 +214,17 @@ export const EUDataset = () => {
         tableSchemaNamesList.push(tableSchema.tableSchemaName);
 
         return {
+          description: tableSchema['tableSchemaDescription'],
+          fixedNumber: tableSchema['tableSchemaFixedNumber'],
           hasErrors: {
             ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
           }.hasErrors,
+          hasInfoTooltip: true,
           id: tableSchema['tableSchemaId'],
           name: tableSchema['tableSchemaName'],
-          readOnly: tableSchema['tableSchemaReadOnly']
+          notEmpty: tableSchema['tableSchemaNotEmpty'],
+          readOnly: tableSchema['tableSchemaReadOnly'],
+          toPrefill: tableSchema['tableSchemaToPrefill']
         };
       });
 
