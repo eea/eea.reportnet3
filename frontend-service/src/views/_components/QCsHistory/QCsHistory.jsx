@@ -89,9 +89,11 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       : Object.keys(qcHistoryData[0]).map(key => ({ field: key, header: key }));
 
     return columnData.map(col => {
-      if (col.field === 'ruleBefore' || col.field === 'ruleInfoId') {
-        return null;
-      } else if (!isNil(validationId) && col.field === 'ruleId') {
+      if (
+        col.field === 'ruleBefore' ||
+        col.field === 'ruleInfoId' ||
+        (!isNil(validationId) && col.field === 'ruleId')
+      ) {
         return null;
       }
       let template;
