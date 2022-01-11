@@ -89,7 +89,9 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       : Object.keys(qcHistoryData[0]).map(key => ({ field: key, header: key }));
 
     return columnData.map(col => {
-      if (col.field === 'ruleBefore' || col.field === 'ruleInfoId' || col.field === 'ruleId') {
+      if (col.field === 'ruleBefore' || col.field === 'ruleInfoId') {
+        return null;
+      } else if (!isNil(validationId) && col.field === 'ruleId') {
         return null;
       }
       let template;
@@ -103,6 +105,9 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
           break;
         case 'status':
           template = statusTemplate;
+          break;
+        case 'ruleId':
+          template = ruleIdTemplate;
           break;
         case 'timestamp':
           template = timestampTemplate;
@@ -145,6 +150,10 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       {rowData.status ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
     </div>
   );
+
+  const ruleIdTemplate = rowData => {
+    return <div>{rowData.ruleId}</div>;
+  };
 
   const timestampTemplate = rowData => (
     <div>
