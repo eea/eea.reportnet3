@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -55,7 +54,7 @@ export const DataflowHelp = () => {
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
   const [isLoadingSchemas, setIsLoadingSchemas] = useState(true);
   const [isLoadingWebLinks, setIsLoadingWeblinks] = useState(false);
-  const [isToolbarVisible, setIsToolbarVisible] = useState(false);
+  const [isDocumentsWeblinksToolbarVisible, setIsDocumentsWeblinksToolbarVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
   const [sortFieldWebLinks, setSortFieldWebLinks] = useState();
@@ -70,18 +69,20 @@ export const DataflowHelp = () => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       const userRoles = userContext.getUserRole(`${config.permissions.prefixes.DATAFLOW}${dataflowId}`);
-      setHasCustodianPermissions(
-        userRoles.includes(config.permissions.roles.CUSTODIAN.key) ||
-          userRoles.includes(config.permissions.roles.STEWARD.key) ||
-          userRoles.includes(config.permissions.roles.EDITOR_WRITE.key) ||
-          userRoles.includes(config.permissions.roles.EDITOR_READ.key)
-      );
 
-      setIsToolbarVisible(
+      const isLeadDesigner =
         userRoles.includes(config.permissions.roles.CUSTODIAN.key) ||
-          userRoles.includes(config.permissions.roles.STEWARD.key) ||
-          userRoles.includes(config.permissions.roles.STEWARD_SUPPORT.key)
-      );
+        userRoles.includes(config.permissions.roles.STEWARD.key);
+
+      const isDesigner =
+        isLeadDesigner ||
+        userRoles.includes(config.permissions.roles.EDITOR_WRITE.key) ||
+        userRoles.includes(config.permissions.roles.EDITOR_READ.key);
+
+      const isStewardSupport = userRoles.includes(config.permissions.roles.STEWARD_SUPPORT.key);
+
+      setHasCustodianPermissions(isDesigner);
+      setIsDocumentsWeblinksToolbarVisible(isLeadDesigner || isStewardSupport);
     }
   }, [userContext]);
 
@@ -249,7 +250,7 @@ export const DataflowHelp = () => {
               documents={documents}
               isDeletingDocument={isDeletingDocument}
               isLoading={isLoadingDocuments}
-              isToolbarVisible={isToolbarVisible}
+              isToolbarVisible={isDocumentsWeblinksToolbarVisible}
               onLoadDocuments={onLoadDocuments}
               setIsDeletingDocument={setIsDeletingDocument}
               setSortFieldDocuments={setSortFieldDocuments}
@@ -262,7 +263,7 @@ export const DataflowHelp = () => {
             <WebLinks
               dataflowId={dataflowId}
               isLoading={isLoadingWebLinks}
-              isToolbarVisible={isToolbarVisible}
+              isToolbarVisible={isDocumentsWeblinksToolbarVisible}
               onLoadWebLinks={onLoadWebLinks}
               setSortFieldWebLinks={setSortFieldWebLinks}
               setSortOrderWebLinks={setSortOrderWebLinks}

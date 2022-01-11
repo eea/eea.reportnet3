@@ -24,13 +24,7 @@ import { IntegrationService } from 'services/IntegrationService';
 import { UniqueConstraintService } from 'services/UniqueConstraintService';
 import { ValidationService } from 'services/ValidationService';
 
-const DatasetSchemas = ({
-  dataflowId,
-  dataflowName,
-  datasetsSchemas,
-  hasCustodianPermissions,
-  onLoadDatasetsSchemas
-}) => {
+const DatasetSchemas = ({ dataflowId, datasetsSchemas, hasCustodianPermissions, onLoadDatasetsSchemas }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
   const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
@@ -389,35 +383,33 @@ const DatasetSchemas = ({
 
   const renderToolbar = () => {
     return (
-      hasCustodianPermissions && (
-        <Toolbar className={styles.datasetSchemasToolbar} id="datasetSchemaIndex">
-          <div className="p-toolbar-group-left">
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
-                !isDownloading ? 'p-button-animated-blink' : ''
-              }`}
-              disabled={isDownloading}
-              icon={isDownloading ? 'spinnerAnimate' : 'export'}
-              label={resourcesContext.messages['downloadSchemasInfo']}
-              onClick={() => onDownloadAllSchemasInfo(dataflowId)}
-              tooltip={resourcesContext.messages['downloadSchemasInfoTooltip']}
-              tooltipOptions={{ position: 'top' }}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
-                isLoading ? 'p-button-animated-spin' : ''
-              }`}
-              icon="refresh"
-              label={resourcesContext.messages['refresh']}
-              onClick={async () => {
-                setIsLoading(true);
-                await onLoadDatasetsSchemas();
-                setIsLoading(false);
-              }}
-            />
-          </div>
-        </Toolbar>
-      )
+      <Toolbar className={styles.datasetSchemasToolbar} id="datasetSchemaIndex">
+        <div className="p-toolbar-group-left">
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent ${
+              !isDownloading ? 'p-button-animated-blink' : ''
+            }`}
+            disabled={isDownloading}
+            icon={isDownloading ? 'spinnerAnimate' : 'export'}
+            label={resourcesContext.messages['downloadSchemasInfo']}
+            onClick={() => onDownloadAllSchemasInfo(dataflowId)}
+            tooltip={resourcesContext.messages['downloadSchemasInfoTooltip']}
+            tooltipOptions={{ position: 'top' }}
+          />
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
+              isLoading ? 'p-button-animated-spin' : ''
+            }`}
+            icon="refresh"
+            label={resourcesContext.messages['refresh']}
+            onClick={async () => {
+              setIsLoading(true);
+              await onLoadDatasetsSchemas();
+              setIsLoading(false);
+            }}
+          />
+        </div>
+      </Toolbar>
     );
   };
 
