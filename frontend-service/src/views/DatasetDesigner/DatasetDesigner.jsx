@@ -988,7 +988,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const setIsHistoryDialogVisible = isHistoryDialogVisible => {
     designerDispatch({
       type: 'SET_IS_HISTORY_DIALOG_VISIBLE',
-      payload: { isHistoryDialogVisible }
+      payload: isHistoryDialogVisible
     });
   };
 

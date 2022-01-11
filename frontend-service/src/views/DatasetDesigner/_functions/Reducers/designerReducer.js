@@ -95,7 +95,7 @@ export const designerReducer = (state, { type, payload }) => {
       return { ...state, isTableCreated: payload.isTableCreated };
 
     case 'SET_IS_HISTORY_DIALOG_VISIBLE':
-      return { ...state, isHistoryDialogVisible: payload.isHistoryDialogVisible };
+      return { ...state, isHistoryDialogVisible: payload };
 
     case 'SET_VIEW_MODE':
       const inmViewType = { ...state.viewType };

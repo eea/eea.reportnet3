@@ -102,12 +102,11 @@ export const QCList = ({
   const setIsHistoryDialogVisible = isHistoryDialogVisible => {
     tabsValidationsDispatch({
       type: 'SET_IS_HISTORY_DIALOG_VISIBLE',
-      payload: { isHistoryDialogVisible }
+      payload: isHistoryDialogVisible
     });
   };
 
-  const setValidationId = validationId =>
-    tabsValidationsDispatch({ type: 'SET_VALIDATION_ID', payload: { validationId } });
+  const setValidationId = validationId => tabsValidationsDispatch({ type: 'SET_VALIDATION_ID', payload: validationId });
 
   const onOpenHistoryDialog = validationId => {
     setIsHistoryDialogVisible(true);
