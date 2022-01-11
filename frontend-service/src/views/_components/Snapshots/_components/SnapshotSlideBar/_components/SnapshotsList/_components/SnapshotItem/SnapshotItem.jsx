@@ -20,7 +20,7 @@ const SnapshotItem = ({ itemData }) => {
   return (
     <li className={styles.listItem}>
       <div className={styles.listItemData}>
-        <h5>{getDateTimeFormatByUserPreferences(itemData.creationDate)} CET</h5>
+        <h5>{getDateTimeFormatByUserPreferences(itemData.creationDate, true)}</h5>
         {itemData.isReleased && (
           <h5 className={styles.is_released_snapshot}>
             {resourcesContext.messages['snapshotIsReleased']}
