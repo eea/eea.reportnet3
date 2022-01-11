@@ -179,8 +179,9 @@ const DocumentFileUpload = ({
         setFileUpdatingId('');
       } finally {
         setIsUploading(false);
-        setSubmitting(false);
       }
+    } else {
+      setSubmitting(false);
     }
   };
 

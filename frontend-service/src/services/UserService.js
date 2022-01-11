@@ -38,7 +38,7 @@ const calculateUser = async userDTO => {
   });
 
   LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
-  const userInfoDTO = await UserRepository.getUserInfo();
+  const userInfoDTO = await UserRepository.getUserInfo(userDTO.data.userId);
   user.email = userInfoDTO.data.email;
   user.firstName = userInfoDTO.data.firstName;
   user.lastName = userInfoDTO.data.lastName;
@@ -65,6 +65,15 @@ export const UserService = {
     }
 
     return await UserRepository.logout(currentTokens.refreshToken);
+  },
+
+  getUserInfo: async userId => {
+    const userDTO = await UserRepository.getUserInfo(userId);
+    return new User({
+      email: userDTO.email,
+      firstName: userDTO.firstName,
+      lastName: userDTO.lastName
+    });
   },
 
   getConfiguration: async () => {

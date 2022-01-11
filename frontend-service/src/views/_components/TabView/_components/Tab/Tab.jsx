@@ -2,6 +2,7 @@ import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import ReactDOMServer from 'react-dom/server';
 
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniqueId from 'lodash/uniqueId';
 
