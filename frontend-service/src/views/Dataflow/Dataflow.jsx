@@ -169,7 +169,7 @@ const Dataflow = () => {
     config.permissions.roles.STEWARD_SUPPORT.key
   ]);
 
-  const hasCustodianPermissions = isStewardSupport || isCustodian;
+  const hasCustodianPermissions = isStewardSupport || isLeadDesigner;
 
   const isObserver = dataflowState.userRoles.some(userRole => userRole === config.permissions.roles.OBSERVER.key);
 
@@ -335,7 +335,11 @@ const Dataflow = () => {
         isLeadReporterOfCountry && dataflowState.showPublicInfo && isReleased && !isBusinessDataflow,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
-        isLeadReporterOfCountry || isNationalCoordinatorOfCountry || isReporterOfCountry || isLeadDesigner || isObserver
+        hasCustodianPermissions ||
+        isLeadReporterOfCountry ||
+        isNationalCoordinatorOfCountry ||
+        isReporterOfCountry ||
+        isObserver
     };
   };
 
