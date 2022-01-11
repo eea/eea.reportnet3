@@ -35,7 +35,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     getQcHistoryData();
   }, []);
 
-  const generateHistoryDialogContent = () => {
+  const renderHistoryDialogContent = () => {
     const columns = getHistoryColumns();
 
     if (loadingStatus === 'pending') {
@@ -161,7 +161,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       header={resourcesContext.messages['qcHistoryDialogHeader']}
       onHide={onCloseDialog}
       visible={isDialogVisible}>
-      {generateHistoryDialogContent()}
+      {renderHistoryDialogContent()}
     </Dialog>
   );
 };
