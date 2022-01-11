@@ -327,8 +327,6 @@ export const MyFilters = ({
   const renderMultiSelect = option => {
     if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
 
-    const optionsMultiSelect = getOptionsTypes(data, option.key);
-
     return (
       <div className={`${styles.block}`} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
@@ -341,14 +339,13 @@ export const MyFilters = ({
           inputClassName={`p-float-label ${styles.label}`}
           inputId={`${option.key}_input`}
           isFilter={true}
-          isLoadingData={isEmpty(optionsMultiSelect)}
           itemTemplate={item => <LevelError type={item.type} />}
           key={option.key}
           label={option.label || ''}
           notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
           onChange={event => onChange({ key: option.key, value: event.target.value })}
           optionLabel="type"
-          options={option.multiSelectOptions ? option.multiSelectOptions : optionsMultiSelect}
+          options={option.multiSelectOptions ? option.multiSelectOptions : getOptionsTypes(data, option.key)}
           value={filterBy[option.key]}
         />
       </div>
