@@ -468,7 +468,7 @@ export class MultiSelect extends Component {
         .join(this.props.addSpaceAfterSeparator ? `${this.props.valuesSeparator} ` : this.props.valuesSeparator);
 
       if (label === '') {
-        return []; //to avoid show null values in selected options and keep label on top
+        return [];
       }
 
       if (this.props.hasSelectedItemsLabel) {
