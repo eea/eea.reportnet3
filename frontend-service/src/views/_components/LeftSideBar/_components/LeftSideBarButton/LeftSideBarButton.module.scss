@@ -62,6 +62,7 @@
 
 .tooltipClass {
   border: 1px solid var(--main-font-color) !important;
+  margin-left: 0 !important;
   &:after {
     border-right-color: var(--main-font-color) !important;
   }
