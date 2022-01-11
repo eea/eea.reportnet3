@@ -9,5 +9,6 @@ export const ValidationConfig = {
   getAll: '/rules/{:datasetSchemaId}/dataflow/{:dataflowId}',
   runSqlRule: '/rules/runSqlRule?datasetId={:datasetId}&showInternalFields={:showInternalFields}',
   update: '/rules/updateRule?datasetId={:datasetId}',
-  updateAutomatic: '/rules/updateAutomaticRule/{:datasetId}'
+  updateAutomatic: '/rules/updateAutomaticRule/{:datasetId}',
+  viewUpdated: '/dataset/{:datasetId}/viewUpdated'
 };
