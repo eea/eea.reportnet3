@@ -228,6 +228,7 @@ export const TabsDesigner = ({
       inmTabs[tabIndex].tableSchemaName = header;
       inmTabs[tabIndex].newTab = false;
       inmTabs[tabIndex].showContextMenu = false;
+      inmTabs[tabIndex].hasInfoTooltip = true;
       setActiveTableSchemaId(data.idTableSchema);
       setTabs(inmTabs);
       getIsTableCreated(true);
@@ -371,14 +372,20 @@ export const TabsDesigner = ({
               return (
                 <TabPanel
                   addTab={tab.addTab}
+                  description={tab.description}
                   editable={tab.editable}
+                  fixedNumber={tab.fixedNumber}
+                  hasInfoTooltip={tab.hasInfoTooltip}
                   hasPKReferenced={tab.hasPKReferenced}
                   header={tab.header}
                   index={tab.index}
                   key={tab.index}
                   newTab={tab.newTab}
+                  notEmpty={tab.notEmpty}
+                  readOnly={tab.readOnly}
                   rightIcon={tab.hasErrors ? config.icons['warning'] : null}
-                  tableSchemaId={tab.tableSchemaId}>
+                  tableSchemaId={tab.tableSchemaId}
+                  toPrefill={tab.toPrefill}>
                   {(tabs.length > 0 && (isDataflowOpen || isDesignDatasetEditorRead)) || tabs.length > 1 ? (
                     <FieldsDesigner
                       autoFocus={false}
