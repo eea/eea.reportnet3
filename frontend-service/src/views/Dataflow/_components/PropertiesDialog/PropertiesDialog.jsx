@@ -5,6 +5,8 @@ import isNil from 'lodash/isNil';
 
 import styles from './PropertiesDialog.module.scss';
 
+import { config } from 'conf';
+
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { PropertyItem } from './_components/PropertyItem';
@@ -15,7 +17,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 import { RodUrl } from 'repositories/config/RodUrl';
 
 export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
-  const { description, isPropertiesDialogVisible, name, obligations, status } = dataflowState;
+  const { description, isPropertiesDialogVisible, isReleasable, name, obligations, status } = dataflowState;
 
   const resourcesContext = useContext(ResourcesContext);
   const {
@@ -54,6 +56,18 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
     ];
   };
 
+  const parseStatus = () => {
+    if (status === config.dataflowStatus.OPEN) {
+      if (isReleasable) {
+        return resourcesContext.messages['open'].toUpperCase();
+      } else {
+        return resourcesContext.messages['closed'].toUpperCase();
+      }
+    } else {
+      return status;
+    }
+  };
+
   const renderDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink button-right-aligned"
@@ -76,7 +90,11 @@ export const PropertiesDialog = ({ dataflowState, manageDialogs }) => {
             content={[
               { id: 0, label: resourcesContext.messages['dataflowName'], value: name },
               { id: 1, label: resourcesContext.messages['dataflowDescription'], value: description },
-              { id: 2, label: resourcesContext.messages['dataflowStatus'], value: status }
+              {
+                id: 2,
+                label: resourcesContext.messages['dataflowStatus'],
+                value: parseStatus()
+              }
             ]}
             title={resourcesContext.messages['dataflowDetails']}
           />

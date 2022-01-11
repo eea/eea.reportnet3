@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.logging.log4j.util.Strings;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.schemas.audit.Audit;
 import org.eea.validation.persistence.schemas.audit.RuleHistoricInfo;
 import org.eea.validation.persistence.schemas.rule.Rule;
@@ -14,13 +15,17 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ExtendedAuditRepositoryImpl implements ExtendedAuditRepository {
 
   /** The mongo template. */
   @Autowired
   private MongoTemplate mongoTemplate;
+
+  @Autowired
+  private RuleMapper ruleMapper;
 
   /**
    * Creates the audit.
@@ -52,7 +57,7 @@ public class ExtendedAuditRepositoryImpl implements ExtendedAuditRepository {
    */
   @Override
   public Audit getAuditByRuleId(ObjectId ruleId) {
-    Audit audit = new Audit();
+    Audit audit = null;
     List<Audit> audits = mongoTemplate.findAll(Audit.class);
     for (Audit auditExpected : audits) {
       if (auditExpected.getHistoric().get(0).getRuleId().equals(ruleId)) {
@@ -71,10 +76,11 @@ public class ExtendedAuditRepositoryImpl implements ExtendedAuditRepository {
    * @param status the status
    * @param expression the expression
    * @param metadata the metadata
+   * @throws JsonProcessingException
    */
   @Override
   public void updateAudit(Audit audit, UserRepresentationVO user, Rule rule, boolean status,
-      boolean expression, boolean metadata) {
+      boolean expression, boolean metadata) throws JsonProcessingException {
     RuleHistoricInfo ruleHistoricInfo = new RuleHistoricInfo();
     ruleHistoricInfo.setRuleInfoId(new ObjectId());
     ruleHistoricInfo.setExpression(expression);
@@ -82,8 +88,8 @@ public class ExtendedAuditRepositoryImpl implements ExtendedAuditRepository {
     ruleHistoricInfo.setStatus(status);
     ruleHistoricInfo.setUser(user.getEmail());
     ruleHistoricInfo.setTimestamp(new Date());
-    Gson gson = new Gson();
-    ruleHistoricInfo.setRuleBefore(gson.toJson(rule));
+    ObjectMapper mapper = new ObjectMapper();
+    ruleHistoricInfo.setRuleBefore(mapper.writeValueAsString(ruleMapper.entityToClass(rule)));
     ruleHistoricInfo.setRuleId(rule.getRuleId());
     Update update = new Update();
     update.addToSet("historic", ruleHistoricInfo);

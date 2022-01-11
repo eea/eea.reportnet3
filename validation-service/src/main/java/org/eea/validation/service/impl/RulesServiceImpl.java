@@ -39,7 +39,6 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleHistoricInfoMapper;
 import org.eea.validation.mapper.RuleMapper;
@@ -73,6 +72,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
@@ -247,6 +247,10 @@ public class RulesServiceImpl implements RulesService {
         if (null != rule.getAutomaticType()
             && AutomaticRuleTypeEnum.FIELD_SQL_TYPE.equals(rule.getAutomaticType())) {
           rule.setSqlSentence(null);
+        }
+        var audit = auditRepository.getAuditByRuleId(rule.getRuleId());
+        if (null != audit) {
+          rule.setHasHistoric(true);
         }
       }
       rulesVO = rulesSchemaMapper.entityToClass(rulesSchema);
@@ -458,7 +462,7 @@ public class RulesServiceImpl implements RulesService {
       createRule(datasetSchemaId, rule);
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
-    addHistoricRuleInfo(true, rule, null);
+    addHistoricRuleInfo(rule, null);
   }
 
   /**
@@ -820,7 +824,7 @@ public class RulesServiceImpl implements RulesService {
       }
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
-    addHistoricRuleInfo(false, rule, ruleOriginal);
+    addHistoricRuleInfo(rule, ruleOriginal);
 
   }
 
@@ -1623,19 +1627,23 @@ public class RulesServiceImpl implements RulesService {
   @Transactional
   public List<RuleHistoricInfoVO> getRuleHistoricInfo(Long datasetId, String ruleId)
       throws EEAException {
+    List<RuleHistoricInfoVO> historic = new ArrayList<>();
     String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
     if (datasetSchemaId == null) {
+      LOG.error("Datasetschema id not found on dataset {}", datasetId);
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     var rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
     if (null == rule) {
+      LOG.error("Rule with id {} not found", ruleId);
       throw new EEAException(EEAErrorMessage.RULE_NOT_FOUND);
     }
     var audit = auditRepository.getAuditByRuleId(rule.getRuleId());
-    if (null == audit) {
-      throw new EEAException(EEAErrorMessage.HISTORIC_QC_NOT_FOUND);
+    if (null != audit) {
+      historic = ruleHistoricInfoMapper.entityListToClass(audit.getHistoric());
+
     }
-    return ruleHistoricInfoMapper.entityListToClass(audit.getHistoric());
+    return historic;
   }
 
 
@@ -1839,30 +1847,27 @@ public class RulesServiceImpl implements RulesService {
   /**
    * Adds the historic rule info.
    *
-   * @param isNewRule the is new rule
    * @param rule the rule
    * @param ruleOriginal the rule original
    * @throws EEAException
    */
-  private void addHistoricRuleInfo(boolean isNewRule, Rule rule, Rule ruleOriginal)
-      throws EEAException {
-    String userId =
-        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
-            .get(AuthenticationDetails.USER_ID);
-    UserRepresentationVO user = userManagementControllerZuul.getUserByUserId(userId);
-    if (isNewRule) {
+  private void addHistoricRuleInfo(Rule rule, Rule ruleOriginal) throws EEAException {
+    UserRepresentationVO user = userManagementControllerZuul.getUserByUserId();
+    Audit audit = auditRepository.getAuditByRuleId(rule.getRuleId());
+    if (null == audit) {
       LOG.info("Creating a new historic for the rule {}", rule.getRuleId());
       auditRepository.createAudit(rule, user);
     } else {
       LOG.info("Adding new information in the historic of the rule {}", rule.getRuleId());
-      Audit audit = auditRepository.getAuditByRuleId(rule.getRuleId());
-      if (null == audit) {
-        throw new EEAException(EEAErrorMessage.AUDIT_NOT_FOUND);
-      }
       boolean metadata = checkMetadataHasChange(rule, ruleOriginal);
       boolean status = checkStatusHasChange(rule, ruleOriginal);
       boolean expression = checkExpressionHasChange(rule, ruleOriginal);
-      auditRepository.updateAudit(audit, user, rule, status, expression, metadata);
+      try {
+        auditRepository.updateAudit(audit, user, rule, status, expression, metadata);
+      } catch (JsonProcessingException e) {
+        LOG.error("Error updating historic information for rule {}", rule.getRuleId());
+        throw new EEAException(EEAErrorMessage.HISTORIC_QC_UPDATE_ERROR);
+      }
     }
   }
 

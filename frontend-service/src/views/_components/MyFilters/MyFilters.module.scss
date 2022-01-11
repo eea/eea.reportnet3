@@ -86,6 +86,7 @@
     height: 2rem;
     padding-left: 0em;
     width: 90% !important;
+    z-index: 3000;
 
     label {
       color: var(--font-filters);
@@ -120,6 +121,7 @@
 }
 
 .sortButtonSize {
+  font-size: 0.12rem;
   height: 1.6em !important;
   width: 3.1rem !important;
 }
@@ -186,12 +188,42 @@
   }
 }
 
-/*  To component RefrencingDataFlow*/
-.referencingDataflows {
+.qcList {
+  display: grid;
+  grid-row-gap: 2.5rem;
+  grid-template-areas:
+    'area area area area button'
+    'area area area area button';
+  grid-template-columns: calc(95% / 4) calc(95% / 4) calc(95% / 4) calc(95% / 4) 5%;
+  margin: 1rem 0;
+  width: 100%;
+
+  .resetButton {
+    grid-area: button;
+    margin: auto;
+  }
+
+  .searchInput {
+    background: transparent;
+    border: 0px;
+    border-radius: 0;
+    width: 100%;
+
+    &:focus,
+    &:enabled:focus {
+      box-shadow: 0 0 0 0 var(--c-blue-120);
+    }
+  }
+  .sortButtonSize {
+    display: none;
+  }
+}
+
+.lineItems {
   display: flex;
   flex-direction: row;
-  width: 100% !important;
   margin: 2rem 0;
+  width: 100% !important;
 
   .block {
     width: 100% !important;
@@ -200,4 +232,12 @@
   .sortButtonSize {
     display: none;
   }
+}
+
+.referencingDataflows {
+  @extend .lineItems;
+}
+
+.datasetsInfo {
+  @extend .lineItems;
 }

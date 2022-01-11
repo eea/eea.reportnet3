@@ -74,7 +74,6 @@ import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1247,9 +1246,7 @@ public class DataflowServiceImpl implements DataflowService {
         dataflowVO.setDesignDatasets(datasetMetabaseControllerZuul
             .findDesignDataSetIdByDataflowId(id).stream()
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-        String userId = ((Map<String, String>) SecurityContextHolder.getContext()
-            .getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
-        UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);
+        UserRepresentationVO user = userManagementControllerZull.getUserByUserId();
         dataflowVO.setRepresentatives(
             representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));
       }

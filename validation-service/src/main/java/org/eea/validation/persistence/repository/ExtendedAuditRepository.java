@@ -4,6 +4,7 @@ import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.validation.persistence.schemas.audit.Audit;
 import org.eea.validation.persistence.schemas.rule.Rule;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * The Interface ExtendedAuditRepository.
@@ -35,8 +36,9 @@ public interface ExtendedAuditRepository {
    * @param status the status
    * @param expression the expression
    * @param metadata the metadata
+   * @throws JsonProcessingException the json processing exception
    */
   void updateAudit(Audit audit, UserRepresentationVO user, Rule rule, boolean status,
-      boolean expression, boolean metadata);
+      boolean expression, boolean metadata) throws JsonProcessingException;
 
 }

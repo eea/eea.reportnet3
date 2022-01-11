@@ -729,7 +729,9 @@ public class DatasetControllerImplTest {
     fieldSchemaVO.setId("id");
     FieldVO fieldVO = new FieldVO();
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
-    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    MockMultipartFile file =
+        new MockMultipartFile("file.csv", "file.csv", "csv", "content".getBytes());
+
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
     Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
@@ -746,7 +748,8 @@ public class DatasetControllerImplTest {
     fieldSchemaVO.setId("id");
     FieldVO fieldVO = new FieldVO();
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
-    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    MockMultipartFile file =
+        new MockMultipartFile("file.csv", "file.csv", "csv", "content".getBytes());
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
     Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
@@ -768,7 +771,8 @@ public class DatasetControllerImplTest {
     fieldSchemaVO.setName("test");
     fieldSchemaVO.setId("id");
     fieldSchemaVO.setMaxSize(100000.1f);
-    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    MockMultipartFile file =
+        new MockMultipartFile("file.csv", "file.csv", "csv", "content".getBytes());
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
     FieldVO fieldVO = new FieldVO();
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
@@ -862,7 +866,8 @@ public class DatasetControllerImplTest {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setName("test");
     fieldSchemaVO.setId("id");
-    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    MockMultipartFile file =
+        new MockMultipartFile("file.csv", "file.csv", "csv", "content".getBytes());
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
     FieldVO fieldVO = new FieldVO();
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");

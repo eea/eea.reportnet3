@@ -81,7 +81,6 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -892,9 +891,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
             .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
 
-    UserRepresentationVO user = userManagementControllerZull.getUserByUserId(
-        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
-            .get(AuthenticationDetails.USER_ID));
+    UserRepresentationVO user = userManagementControllerZull.getUserByUserId();
     receipt.setEmail(user.getEmail());
 
     if (!representatives.isEmpty()) {

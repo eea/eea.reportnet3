@@ -91,15 +91,21 @@ public class EntityAccessService {
           ObjectAccessRoleEnum.REFERENCEDATASET_STEWARD, ObjectAccessRoleEnum.EUDATASET_CUSTODIAN,
           ObjectAccessRoleEnum.EUDATASET_STEWARD, ObjectAccessRoleEnum.DATACOLLECTION_CUSTODIAN,
           ObjectAccessRoleEnum.DATACOLLECTION_STEWARD,
-          ObjectAccessRoleEnum.DATASET_NATIONAL_COORDINATOR);
+          ObjectAccessRoleEnum.DATASET_NATIONAL_COORDINATOR,
+          ObjectAccessRoleEnum.DATASET_STEWARD_SUPPORT,
+          ObjectAccessRoleEnum.EUDATASET_STEWARD_SUPPORT,
+          ObjectAccessRoleEnum.DATACOLLECTION_STEWARD_SUPPORT,
+          ObjectAccessRoleEnum.REFERENCEDATASET_STEWARD_SUPPORT,
+          ObjectAccessRoleEnum.TESTDATASET_STEWARD_SUPPORT);
       result = (canAccess(entityId, objectAccessRoles.toArray(ObjectAccessRoleEnum[]::new))
           || dataflowControllerZuul.accessReferenceEntity(entity, entityId));
     } else {
       result = canAccess(entityId,
           List.of(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN, ObjectAccessRoleEnum.DATAFLOW_OBSERVER,
               ObjectAccessRoleEnum.DATAFLOW_STEWARD,
-              ObjectAccessRoleEnum.DATAFLOW_NATIONAL_COORDINATOR)
-              .toArray(ObjectAccessRoleEnum[]::new))
+              ObjectAccessRoleEnum.DATAFLOW_NATIONAL_COORDINATOR,
+              ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER,
+              ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT).toArray(ObjectAccessRoleEnum[]::new))
           || dataflowControllerZuul.accessReferenceEntity(entity, entityId);
     }
     return result;

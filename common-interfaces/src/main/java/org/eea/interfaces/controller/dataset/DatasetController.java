@@ -555,7 +555,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @return the check view
    */
-  @GetMapping("/private/viewUpdated/{datasetId}")
+  @GetMapping("/{datasetId}/viewUpdated")
   public Boolean getCheckView(@PathVariable("datasetId") Long datasetId);
 
 }
