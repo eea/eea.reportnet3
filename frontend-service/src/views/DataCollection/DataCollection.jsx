@@ -178,9 +178,14 @@ export const DataCollection = () => {
         datasetSchema.tables.map(tableSchema => {
           tableSchemaNamesList.push(tableSchema.tableSchemaName);
           return {
+            description: tableSchema['tableSchemaDescription'],
+            fixedNumber: tableSchema['tableSchemaFixedNumber'],
+            hasInfoTooltip: true,
             id: tableSchema['tableSchemaId'],
             name: tableSchema['tableSchemaName'],
-            readOnly: tableSchema['tableSchemaReadOnly']
+            notEmpty: tableSchema['tableSchemaNotEmpty'],
+            readOnly: tableSchema['tableSchemaReadOnly'],
+            toPrefill: tableSchema['tableSchemaToPrefill']
           };
         })
       );
