@@ -459,10 +459,12 @@ export class MultiSelect extends Component {
   }
 
   getLabel() {
-    let label = '';
+    if (this.isEmpty() || this.props.fixedPlaceholder) {
+      return '';
+    }
 
-    if (!this.isEmpty() && !this.props.fixedPlaceholder) {
-      label = this.props.value
+    if (this.props.hasSelectedItemsLabel) {
+      const label = this.props.value
         .map(value => this.findLabelByValue(value))
         .filter(item => item !== null)
         .join(this.props.addSpaceAfterSeparator ? `${this.props.valuesSeparator} ` : this.props.valuesSeparator);
@@ -470,17 +472,12 @@ export class MultiSelect extends Component {
       if (label === '') {
         return [];
       }
-
-      if (this.props.hasSelectedItemsLabel) {
-        if (this.props.value.length <= this.props.maxSelectedLabels) {
-          return label;
-        } else {
-          return this.getSelectedItemsLabel();
-        }
+      if (this.props.value.length <= this.props.maxSelectedLabels) {
+        return label;
+      } else {
+        return this.getSelectedItemsLabel();
       }
     }
-
-    return label;
   }
 
   getLabelContent() {
