@@ -1,6 +1,6 @@
 export const UserConfig = {
   getConfiguration: '/user/getAttributes',
-  getUserInfo: '/user/getUserByUserId?userId={:userId}',
+  getUserInfo: '/user/getUserByUserId',
   login: '/user/generateTokenByCode?code={:code}',
   logout: '/user/logout?refreshToken={:refreshToken}',
   oldLogin: '/user/generateToken?password={:password}&username={:userName}',

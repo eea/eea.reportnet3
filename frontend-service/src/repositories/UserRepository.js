@@ -12,7 +12,7 @@ export const UserRepository = {
     return parseUserImage(response.data);
   },
 
-  getUserInfo: async userId => await HTTPRequester.get({ url: getUrl(UserConfig.getUserInfo, { userId }) }),
+  getUserInfo: async () => await HTTPRequester.get({ url: getUrl(UserConfig.getUserInfo) }),
 
   login: async code => await HTTPRequester.post({ url: getUrl(UserConfig.login, { code }) }),
 
