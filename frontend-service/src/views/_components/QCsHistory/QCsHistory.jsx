@@ -122,7 +122,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
 
     try {
       const response = isNil(validationId)
-        ? await ValidationService.getAllQcHistoricInfo(datasetId)
+        ? await ValidationService.getAllQCsHistoricInfo(datasetId)
         : await ValidationService.getQcHistoricInfo(datasetId, validationId);
       const data = response.data;
 
