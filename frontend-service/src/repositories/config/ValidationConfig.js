@@ -11,5 +11,6 @@ export const ValidationConfig = {
   getQcHistoricInfo: '/rules/historicInfo?datasetId={:datasetId}&ruleId={:ruleId}',
   runSqlRule: '/rules/runSqlRule?datasetId={:datasetId}&showInternalFields={:showInternalFields}',
   update: '/rules/updateRule?datasetId={:datasetId}',
-  updateAutomatic: '/rules/updateAutomaticRule/{:datasetId}'
+  updateAutomatic: '/rules/updateAutomaticRule/{:datasetId}',
+  viewUpdated: '/dataset/{:datasetId}/viewUpdated'
 };

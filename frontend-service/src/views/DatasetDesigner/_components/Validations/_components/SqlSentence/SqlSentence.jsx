@@ -35,6 +35,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   const [sqlResponse, setSqlResponse] = useState(null);
   const [sqlSentenceCost, setSqlSentenceCost] = useState(0);
   const [validationErrorMessage, setValidationErrorMessage] = useState('');
+  const [isViewUpdated, setIsViewUpdated] = useState(false);
 
   useEffect(() => {
     if (!isNil(creationFormState.candidateRule.sqlError) && !isNil(creationFormState.candidateRule.sqlSentence)) {
@@ -174,6 +175,8 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
         showInternalFields
       );
       setSqlResponse(response);
+      const { data } = await ValidationService.viewUpdated(datasetId);
+      setIsViewUpdated(data);
     } catch (error) {
       console.error('SqlSentence - runSqlSentence.', error);
       if (error.response.status === 400 || error.response.status === 422) {
@@ -195,6 +198,17 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
       return <p className={styles.sqlErrorMessage}>{creationFormState.candidateRule.sqlError}</p>;
     }
     return <p className={styles.emptySqlErrorMessage}></p>;
+  };
+
+  const renderIsViewUpdatedMessage = () => {
+    if (!isViewUpdated) {
+      return (
+        <p className={styles.IsViewUpdatedMessage}>
+          <span className="pi pi-info-circle"></span>
+          {resourcesContext.messages['isViewUpdated']}
+        </p>
+      );
+    }
   };
 
   return (
@@ -312,6 +326,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
           onHide={() => setIsVisibleSqlSentenceValidationDialog(false)}
           visible={isVisibleSqlSentenceValidationDialog}>
           {generateValidationDialogContent()}
+          {renderIsViewUpdatedMessage()}
         </Dialog>
       )}
     </div>

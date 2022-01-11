@@ -1431,6 +1431,7 @@
     "searchByQcList": "Search by (code, name, description, message)",
     "detailedInfoTooltip": "Click to show detailed info",
     "tableInfo": "Table info",
+    "isViewUpdated": "It is possible that the data are not update, because the view has not been updated. The dataset must be validated to update the view.",
     "loadHistoryDataError": "Error loading history data in QC rules",
     "noHistoryData": "There are no historic changes",
     "allQCsHistoryBtn": "QCs history"
