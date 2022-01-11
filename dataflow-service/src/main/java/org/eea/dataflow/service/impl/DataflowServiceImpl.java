@@ -5,9 +5,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
@@ -1550,15 +1552,18 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Async
-  @Transactional
   public void validateAllReporters(String userId) throws EEAException {
 
     try {
       List<Representative> representativeList = representativeRepository.findAllByInvalid(true);
       List<TempUser> tempUserList = tempUserRepository.findAll();
 
+      Set<Long> dataflowsToCheck = new HashSet<>();
       for (Representative representative : representativeList) {
-        representativeService.validateLeadReporters(representative.getDataflow().getId(), false);
+        dataflowsToCheck.add(representative.getDataflow().getId());
+      }
+      for (Long dataflowId : dataflowsToCheck) {
+        representativeService.validateLeadReporters(dataflowId, false);
       }
 
       for (TempUser tempuser : tempUserList) {
