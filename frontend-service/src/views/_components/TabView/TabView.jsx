@@ -208,15 +208,19 @@ const TabView = ({
     return (
       !(isDataflowOpen && isDesignDatasetEditorRead && tab.props.addTab) && (
         <Tab
+          additionalInfo={tab.props.description}
           addTab={tab.props.addTab}
           ariaControls={ariaControls}
           checkEditingTabs={checkEditingTabs}
           children={tab.props.children}
           className={classNamed}
+          description={tab.props.description}
           designMode={designMode}
           disabled={tab.props.disabled}
           divScrollTabsRef={divTabsRef.current}
           editable={tab.props.editable}
+          fixedNumber={tab.props.fixedNumber}
+          hasInfoTooltip={tab.props.hasInfoTooltip}
           hasPKReferenced={tab.props.hasPKReferenced}
           header={tab.props.header}
           headerStyle={tab.props.headerStyle}
@@ -229,6 +233,7 @@ const TabView = ({
           key={id}
           leftIcon={tab.props.leftIcon}
           newTab={tab.props.newTab}
+          notEmpty={tab.props.notEmpty}
           onTabAddCancel={onTabAddCancel}
           onTabBlur={onTabBlur}
           onTabDeleteClick={onTabDeleteClicked}
@@ -243,11 +248,13 @@ const TabView = ({
           }}
           onTabMouseWheel={onTabMouseWheel}
           onTabNameError={onTabNameError}
+          readOnly={tab.props.readOnly}
           rightIcon={tab.props.rightIcon}
           rightIconClass={tab.props.rightIconClass}
           scrollTo={scrollTo}
           selected={selected}
           tableSchemaId={tab.props.tableSchemaId}
+          toPrefill={tab.props.toPrefill}
           totalTabs={totalTabs}
         />
       )

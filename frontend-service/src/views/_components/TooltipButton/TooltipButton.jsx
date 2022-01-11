@@ -5,6 +5,7 @@ import ReactTooltip from 'react-tooltip';
 import { Button } from 'views/_components/Button';
 
 export const TooltipButton = ({
+  buttonClassName = '',
   getContent = null,
   message,
   onClick = () => {},
@@ -12,7 +13,8 @@ export const TooltipButton = ({
   tooltipClassName = '',
   uniqueIdentifier = 1,
   usedInPortal = false,
-  maxWidth = false
+  maxWidth = false,
+  place = 'top'
 }) => {
   useEffect(() => {
     if (usedInPortal) ReactTooltip.rebuild();
@@ -22,7 +24,7 @@ export const TooltipButton = ({
     <Fragment>
       <span data-for={`infoCircleButton_${uniqueIdentifier}`} data-tip>
         <Button
-          className={`${styles.tooltipButton} p-button-rounded p-button-secondary-transparent`}
+          className={`${buttonClassName} ${styles.tooltipButton} p-button-rounded p-button-secondary-transparent`}
           icon="infoCircle"
           onClick={onClick}
           role="button"
@@ -36,7 +38,8 @@ export const TooltipButton = ({
         getContent={() => (getContent ? getContent() : message)}
         html={true}
         id={`infoCircleButton_${uniqueIdentifier}`}
-        place="top"
+        multiline={true}
+        place={place}
       />
     </Fragment>
   );
