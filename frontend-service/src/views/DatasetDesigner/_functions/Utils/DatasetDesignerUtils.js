@@ -60,6 +60,7 @@ const getTabs = ({ datasetSchema, datasetStatistics, editable, isDataflowOpen, i
             ...datasetStatistics.tables.filter(tab => tab['tableSchemaId'] === table['tableSchemaId'])[0]
           }.hasErrors
         : false;
+    table.hasInfoTooltip = true;
     table.header = table.tableSchemaName;
     table.index = idx;
     table.levelErrorTypes = inmDatasetSchema.levelErrorTypes;

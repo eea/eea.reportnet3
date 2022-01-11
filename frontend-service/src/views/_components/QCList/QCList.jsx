@@ -11,14 +11,15 @@ import styles from './QCList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
+import { ButtonQCHistory } from './_components/ButtonQCHistory';
 import { Checkbox } from 'views/_components/Checkbox';
-import { Dropdown } from 'views/_components/Dropdown';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
+import { Dropdown } from 'views/_components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
+import { MyFilters } from 'views/_components/MyFilters';
 import { QCFieldEditor } from './_components/QCFieldEditor';
 import { Spinner } from 'views/_components/Spinner';
 import { TrafficLight } from 'views/_components/TrafficLight';
@@ -81,8 +82,6 @@ export const QCList = ({
       validationContext.onAutomaticRuleIsUpdated(false);
     }
   }, [validationContext.isAutomaticRuleUpdated]);
-
-  const getFilteredState = value => tabsValidationsDispatch({ type: 'IS_FILTERED', payload: { value } });
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
@@ -365,7 +364,7 @@ export const QCList = ({
     return (
       <Fragment>
         <Button
-          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
           disabled={validationContext.isFetchingData}
           icon={getEditBtnIcon(row.id)}
           onClick={() => validationContext.onOpenToEdit(row, rowType)}
@@ -374,7 +373,7 @@ export const QCList = ({
           type="button"
         />
         <Button
-          className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
           disabled={validationContext.isFetchingData}
           icon="clone"
           onClick={() => validationContext.onOpenToCopy(row, rowType)}
@@ -382,8 +381,12 @@ export const QCList = ({
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
+        <ButtonQCHistory
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+          rowId={row.id}
+        />
         <Button
-          className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} p-button-animated-blink`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
           disabled={validationContext.isFetchingData}
           icon={getDeleteBtnIcon()}
           onClick={onShowDeleteDialog}
@@ -403,15 +406,21 @@ export const QCList = ({
     if (row.entityType === 'TABLE') rowType = 'dataset';
 
     return (
-      <Button
-        className={`${`p-button-rounded p-button-secondary-transparent ${styles.editRowButton}`} p-button-animated-blink`}
-        disabled={validationContext.isFetchingData}
-        icon={getEditBtnIcon(row.id)}
-        onClick={() => validationContext.onOpenToEdit(row, rowType)}
-        tooltip={resourcesContext.messages['edit']}
-        tooltipOptions={{ position: 'top' }}
-        type="button"
-      />
+      <Fragment>
+        <ButtonQCHistory
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+          rowId={row.id}
+        />
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${styles.editRowButton}`}
+          disabled={validationContext.isFetchingData}
+          icon={getEditBtnIcon(row.id)}
+          onClick={() => validationContext.onOpenToEdit(row, rowType)}
+          tooltip={resourcesContext.messages['edit']}
+          tooltipOptions={{ position: 'top' }}
+          type="button"
+        />
+      </Fragment>
     );
   };
 
@@ -668,18 +677,44 @@ export const QCList = ({
     }
   };
 
-  const filterOptions = [
+  const FILTER_OPTIONS = [
     {
-      type: 'multiselect',
-      properties: [
-        { name: 'table', showInput: true },
-        { name: 'field', showInput: true },
-        { name: 'entityType' },
-        { name: 'levelError' },
-        { name: 'automatic', label: resourcesContext.messages['creationMode'] },
-        { name: 'enabled', label: resourcesContext.messages['statusQC'] },
-        { name: 'isCorrect' }
-      ]
+      label: resourcesContext.messages['searchByQcList'],
+      searchBy: ['shortCode', 'name', 'description', 'message'],
+      type: 'SEARCH'
+    },
+    {
+      nestedOptions: [
+        { key: 'table', label: resourcesContext.messages['table'] },
+        { key: 'field', label: resourcesContext.messages['field'] },
+        { key: 'entityType', label: resourcesContext.messages['entityType'] },
+        { key: 'levelError', label: resourcesContext.messages['levelError'] },
+        {
+          key: 'automatic',
+          label: resourcesContext.messages['creationMode'],
+          multiSelectOptions: [
+            { type: resourcesContext.messages['automatic'], value: true },
+            { type: resourcesContext.messages['manual'], value: false }
+          ]
+        },
+        {
+          key: 'enabled',
+          label: resourcesContext.messages['statusQC'],
+          multiSelectOptions: [
+            { type: resourcesContext.messages['enabled'], value: true },
+            { type: resourcesContext.messages['disabled'], value: false }
+          ]
+        },
+        {
+          key: 'isCorrect',
+          label: resourcesContext.messages['isCorrect'],
+          multiSelectOptions: [
+            { type: resourcesContext.messages['valid'], value: true },
+            { type: resourcesContext.messages['invalid'], value: false }
+          ]
+        }
+      ],
+      type: 'MULTI_SELECT'
     }
   ];
 
@@ -710,14 +745,12 @@ export const QCList = ({
             pointerEvents: tabsValidationsState.editingRows.length > 0 ? 'none' : 'auto',
             opacity: tabsValidationsState.editingRows.length > 0 ? '0.5' : 1
           }}>
-          <Filters
-            className="filter-lines"
+          <MyFilters
+            className="qcList"
             data={tabsValidationsState.validationList.validations}
             getFilteredData={onLoadFilteredData}
-            getFilteredSearched={getFilteredState}
-            options={filterOptions}
-            searchAll
-            searchBy={['shortCode', 'name', 'description', 'message']}
+            options={FILTER_OPTIONS}
+            viewType="qcList"
           />
         </div>
         {!isEmpty(tabsValidationsState.filteredData) ? (
