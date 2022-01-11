@@ -35,12 +35,6 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     getQcHistoryData();
   }, []);
 
-  const expressionTemplate = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.expression ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
-    </div>
-  );
-
   const generateHistoryDialogContent = () => {
     const columns = getHistoryColumns();
 
@@ -101,13 +95,9 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
 
       switch (col.field) {
         case 'expression':
-          template = expressionTemplate;
-          break;
         case 'metadata':
-          template = metadataTemplate;
-          break;
         case 'status':
-          template = statusTemplate;
+          template = checkTemplate;
           break;
         case 'ruleId':
           template = ruleIdTemplate;
@@ -142,15 +132,9 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     }
   };
 
-  const metadataTemplate = rowData => (
+  const checkTemplate = (rowData, column) => (
     <div className={styles.checkedValueColumn}>
-      {rowData.metadata ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
-    </div>
-  );
-
-  const statusTemplate = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.status ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
+      {rowData[column.field] ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
     </div>
   );
 
