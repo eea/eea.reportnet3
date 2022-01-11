@@ -40,7 +40,6 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.validation.mapper.DatasetHistoricRuleMapper;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleHistoricInfoMapper;
@@ -1866,10 +1865,7 @@ public class RulesServiceImpl implements RulesService {
    */
   private void addHistoricRuleInfo(Rule rule, Rule ruleOriginal, Long datasetId)
       throws EEAException {
-    String userId =
-        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
-            .get(AuthenticationDetails.USER_ID);
-    UserRepresentationVO user = userManagementControllerZuul.getUserByUserId(userId);
+    UserRepresentationVO user = userManagementControllerZuul.getUserByUserId();
     Audit audit = auditRepository.getAuditByRuleId(rule.getRuleId());
     if (null == audit) {
       LOG.info("Creating a new historic for the rule {}", rule.getRuleId());
