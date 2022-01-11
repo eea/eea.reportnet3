@@ -1428,6 +1428,8 @@
     "impossibleRequesterRoleError": "The user cannot be assigned as requester",
     "callFmeProcessFailedEvent": "Error calling to FME at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
     "invalid": "Invalid",
-    "searchByQcList": "Search by (code, name, description, message)"
+    "searchByQcList": "Search by (code, name, description, message)",
+    "detailedInfoTooltip": "Click to show detailed info",
+    "tableInfo": "Table info"
   }
 }
