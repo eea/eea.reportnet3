@@ -21,6 +21,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.DatasetHistoricRuleVO;
 import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
@@ -964,8 +965,27 @@ public class RulesControllerImpl implements RulesController {
       return rulesService.getRuleHistoricInfo(datasetId, ruleId);
     } catch (EEAException e) {
       LOG_ERROR.error("Not found rule historic information, please check rule with id: {}", ruleId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.HISTORIC_QC_NOT_FOUND);
     }
+  }
+
+  /**
+   * Gets the rule historic by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the rule historic by dataset id
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN')")
+  @ApiOperation(value = "Get the historic information of the all rules in the dataset",
+      hidden = true)
+  @GetMapping(value = "/historicDatasetRules")
+  public List<DatasetHistoricRuleVO> getRuleHistoricByDatasetId(
+      @ApiParam(value = "Dataset id used in the get of a historic rule",
+          example = "1") @RequestParam("datasetId") long datasetId) {
+    return rulesService.getRuleHistoricInfoByDatasetId(datasetId);
   }
 
 }

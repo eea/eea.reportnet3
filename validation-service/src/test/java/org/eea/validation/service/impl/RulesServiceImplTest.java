@@ -752,7 +752,8 @@ public class RulesServiceImplTest {
         .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
-    Mockito.doNothing().when(auditRepository).createAudit(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(auditRepository).createAudit(Mockito.any(), Mockito.any(),
+        Mockito.any());
     rulesServiceImpl.createNewRule(1L, new RuleVO());
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
@@ -801,8 +802,8 @@ public class RulesServiceImplTest {
     userRepresentationVO.setUsername("userName");
     userRepresentationVO.setFirstName("First Name");
     userRepresentationVO.setLastName("Last Name");
-
-    Mockito.doNothing().when(auditRepository).createAudit(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(auditRepository).createAudit(Mockito.any(), Mockito.any(),
+        Mockito.any());
     rulesServiceImpl.createNewRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }

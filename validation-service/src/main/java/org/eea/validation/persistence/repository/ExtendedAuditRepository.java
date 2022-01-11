@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.repository;
 
+import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.validation.persistence.schemas.audit.Audit;
@@ -17,7 +18,7 @@ public interface ExtendedAuditRepository {
    * @param rule the rule
    * @param user the user
    */
-  void createAudit(Rule rule, UserRepresentationVO user);
+  void createAudit(Rule rule, UserRepresentationVO user, Long datasetId);
 
   /**
    * Gets the audit by rule id.
@@ -40,5 +41,14 @@ public interface ExtendedAuditRepository {
    */
   void updateAudit(Audit audit, UserRepresentationVO user, Rule rule, boolean status,
       boolean expression, boolean metadata) throws JsonProcessingException;
+
+
+  /**
+   * Gets the audits by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the audits by dataset id
+   */
+  List<Audit> getAuditsByDatasetId(Long datasetId);
 
 }
