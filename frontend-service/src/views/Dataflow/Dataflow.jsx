@@ -716,7 +716,7 @@ const Dataflow = () => {
       type: 'LOAD_PERMISSIONS',
       payload: {
         hasWritePermissions,
-        isStewardSupport: isLeadDesigner,
+        hasCustodianPermissions,
         isNationalCoordinator,
         isObserver,
         isAdmin,
