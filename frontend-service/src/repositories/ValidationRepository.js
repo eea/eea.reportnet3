@@ -31,17 +31,15 @@ export const ValidationRepository = {
   getAll: async (dataflowId, datasetSchemaId) =>
     await HTTPRequester.get({ url: getUrl(ValidationConfig.getAll, { dataflowId, datasetSchemaId }) }),
 
-  getAllQCsHistoricInfo: async datasetId => {
-    return await HTTPRequester.get({
+  getAllQCsHistoricInfo: async datasetId =>
+    await HTTPRequester.get({
       url: getUrl(ValidationConfig.getAllQCsHistoricInfo, { datasetId })
-    });
-  },
+    }),
 
-  getQcHistoricInfo: async (datasetId, ruleId) => {
-    return await HTTPRequester.get({
+  getQcHistoricInfo: async (datasetId, ruleId) =>
+    await HTTPRequester.get({
       url: getUrl(ValidationConfig.getQcHistoricInfo, { datasetId, ruleId })
-    });
-  },
+    }),
 
   runSqlRule: async (datasetId, sqlSentence, showInternalFields) =>
     await HTTPRequester.post({
