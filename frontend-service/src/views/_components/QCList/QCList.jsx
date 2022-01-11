@@ -841,7 +841,7 @@ export const QCList = ({
           datasetId={dataset.datasetId}
           isDialogVisible={tabsValidationsState.isHistoryDialogVisible}
           onCloseDialog={onCloseHistoryDialog}
-          ruleId={tabsValidationsState.validationId}
+          validationId={tabsValidationsState.validationId}
         />
       )}
 

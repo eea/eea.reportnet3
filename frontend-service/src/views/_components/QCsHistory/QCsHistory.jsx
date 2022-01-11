@@ -22,7 +22,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { ValidationService } from 'services/ValidationService';
 
-export const QCsHistory = ({ isDialogVisible, onCloseDialog, datasetId, ruleId }) => {
+export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validationId }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -118,11 +118,13 @@ export const QCsHistory = ({ isDialogVisible, onCloseDialog, datasetId, ruleId }
 
   const getQcHistoryData = async () => {
     setLoadingStatus('pending');
+
     try {
-      const response = isNil(ruleId)
+      const response = isNil(validationId)
         ? await ValidationService.getAllQcHistoricInfo(datasetId)
-        : await ValidationService.getQcHistoricInfo(datasetId, ruleId);
+        : await ValidationService.getQcHistoricInfo(datasetId, validationId);
       const data = response.data;
+
       setQcHistoryData(data);
       setLoadingStatus('success');
     } catch (error) {
