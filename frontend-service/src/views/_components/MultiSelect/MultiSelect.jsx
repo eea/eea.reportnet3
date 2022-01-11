@@ -472,6 +472,7 @@ export class MultiSelect extends Component {
       if (label === '') {
         return [];
       }
+
       if (this.props.value.length <= this.props.maxSelectedLabels) {
         return label;
       } else {
