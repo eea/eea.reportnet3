@@ -366,6 +366,22 @@ export const QCList = ({
     return 'edit';
   };
 
+  const renderHistoricButton = id => {
+    return (
+      <Button
+        className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+        disabled={validationContext.isFetchingData}
+        icon="info"
+        onClick={() => {
+          onOpenHistoryDialog(id);
+        }}
+        tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
+        tooltipOptions={{ position: 'top' }}
+        type="button"
+      />
+    );
+  };
+
   const editAndDeleteTemplate = row => {
     let rowType = 'field';
 
@@ -402,19 +418,7 @@ export const QCList = ({
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
-        {row.hasHistoric && (
-          <Button
-            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
-            disabled={validationContext.isFetchingData}
-            icon="info"
-            onClick={() => {
-              onOpenHistoryDialog(row.id);
-            }}
-            tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
-            tooltipOptions={{ position: 'top' }}
-            type="button"
-          />
-        )}
+        {row.hasHistoric && renderHistoricButton(row.id)}
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
@@ -447,19 +451,7 @@ export const QCList = ({
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
-        {row.hasHistoric && (
-          <Button
-            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
-            disabled={validationContext.isFetchingData}
-            icon="info"
-            onClick={() => {
-              onOpenHistoryDialog(row.id);
-            }}
-            tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
-            tooltipOptions={{ position: 'top' }}
-            type="button"
-          />
-        )}
+        {row.hasHistoric && renderHistoricButton(row.id)}
       </Fragment>
     );
   };
