@@ -25,6 +25,8 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
 const Tab = ({
   addTab,
   ariaControls,
@@ -155,9 +157,7 @@ const Tab = ({
           <Fragment>
             <span>{resourcesContext.messages['description']}: </span>
             <br />
-            <p className={styles.propertyLabel}>
-              {`${description.substring(0, 100)}${description.length > 100 ? '...' : ''}` || '-'}
-            </p>
+            <p className={styles.propertyLabel}>{TextUtils.ellipsis(description, 103)}</p>
           </Fragment>
         );
       }
