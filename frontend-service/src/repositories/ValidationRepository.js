@@ -49,5 +49,7 @@ export const ValidationRepository = {
     await HTTPRequester.post({
       url: getUrl(ValidationConfig.evaluateSqlSentence, { datasetId }),
       data: { sqlRule: sqlSentence }
-    })
+    }),
+
+  viewUpdated: async datasetId => await HTTPRequester.get({ url: getUrl(ValidationConfig.viewUpdated, { datasetId }) })
 };

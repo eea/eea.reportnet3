@@ -1430,6 +1430,7 @@
     "invalid": "Invalid",
     "searchByQcList": "Search by (code, name, description, message)",
     "detailedInfoTooltip": "Click to show detailed info",
-    "tableInfo": "Table info"
+    "tableInfo": "Table info",
+    "isViewUpdated": "It is possible that the data are not update, because the view has not been updated. The dataset must be validated to update the view."
   }
 }

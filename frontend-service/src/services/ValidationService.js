@@ -218,5 +218,7 @@ export const ValidationService = {
   },
 
   evaluateSqlSentence: async (datasetId, sqlSentence) =>
-    await ValidationRepository.evaluateSqlSentence(datasetId, sqlSentence)
+    await ValidationRepository.evaluateSqlSentence(datasetId, sqlSentence),
+
+  viewUpdated: async datasetId => await ValidationRepository.viewUpdated(datasetId)
 };
