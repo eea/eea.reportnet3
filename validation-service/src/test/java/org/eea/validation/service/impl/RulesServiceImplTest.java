@@ -755,7 +755,8 @@ public class RulesServiceImplTest {
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
-    Mockito.doNothing().when(auditRepository).createAudit(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(auditRepository).createAudit(Mockito.any(), Mockito.any(),
+        Mockito.any());
     rulesServiceImpl.createNewRule(1L, new RuleVO());
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
@@ -807,7 +808,8 @@ public class RulesServiceImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
-    Mockito.doNothing().when(auditRepository).createAudit(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(auditRepository).createAudit(Mockito.any(), Mockito.any(),
+        Mockito.any());
     rulesServiceImpl.createNewRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
