@@ -368,6 +368,9 @@ public final class EEAErrorMessage {
   public static final String ERROR_VALIDATING_LEAD_REPORTERS =
       "There was an error validating the Lead Reporters.";
 
+  /** The Constant HISTORIC_QC_NOT_FOUND: {@value}. */
+  public static final String HISTORIC_QC_NOT_FOUND = "There aren't any historic information.";
+
   /** The Constant CREATING_A_MESSAGE_IN_A_DATAFLOW: {@value}. */
   public static final String CREATING_A_MESSAGE_IN_A_DATAFLOW =
       "There was an error creating a message in the Dataflow.";
@@ -676,6 +679,8 @@ public final class EEAErrorMessage {
   public static final String EVALUATING_RULE =
       "An unknown error happenned while evaluating the SQL rule.";
 
+  /** The Constant HISTORIC_QC_UPDATE_ERROR: {@value}. */
+  public static final String HISTORIC_QC_UPDATE_ERROR = "Error updating historic rule information.";
 
   /**
    * Instantiates a new EEA error message.

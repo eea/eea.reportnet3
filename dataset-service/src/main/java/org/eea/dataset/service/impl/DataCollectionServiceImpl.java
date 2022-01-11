@@ -1291,7 +1291,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     List<UserRepresentationVO> observers =
         findUsersByGroup(ResourceGroupEnum.DATAFLOW_OBSERVER.getGroupName(dataflowId));
     List<UserRepresentationVO> custodiansSupport =
-        findUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN_SUPPORT.getGroupName(dataflowId));
+        findUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD_SUPPORT.getGroupName(dataflowId));
 
     for (Long dataCollectionId : dataCollectionIds) {
 
@@ -1307,9 +1307,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       groups.add(createGroup(dataCollectionId, ResourceTypeEnum.DATA_COLLECTION,
           SecurityRoleEnum.DATA_OBSERVER));
 
-      // Create DataCollection-%s-CUSTODIAN_SUPPORT
+      // Create DataCollection-%s-STEWARD_SUPPORT
       groups.add(createGroup(dataCollectionId, ResourceTypeEnum.DATA_COLLECTION,
-          SecurityRoleEnum.CUSTODIAN_SUPPORT));
+          SecurityRoleEnum.STEWARD_SUPPORT));
 
       // Assign DataCollection-%s-DATA_STEWARD
       for (UserRepresentationVO steward : stewards) {
@@ -1329,10 +1329,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             ResourceGroupEnum.DATACOLLECTION_OBSERVER));
       }
 
-      // Assign DataCollection-%s-CUSTODIAN_SUPPORT
+      // Assign DataCollection-%s-STEWARD_SUPPORT
       for (UserRepresentationVO custodianSupport : custodiansSupport) {
         assignments.add(createAssignments(dataCollectionId, custodianSupport.getEmail(),
-            ResourceGroupEnum.DATACOLLECTION_CUSTODIAN_SUPPORT));
+            ResourceGroupEnum.DATACOLLECTION_STEWARD_SUPPORT));
       }
     }
 
@@ -1351,9 +1351,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           createGroup(euDatasetId, ResourceTypeEnum.EU_DATASET, SecurityRoleEnum.DATA_OBSERVER));
 
 
-      // Create EUDataset-%s-CUSTODIAN_SUPPORT
+      // Create EUDataset-%s-STEWARD_SUPPORT
       groups.add(createGroup(euDatasetId, ResourceTypeEnum.EU_DATASET,
-          SecurityRoleEnum.CUSTODIAN_SUPPORT));
+          SecurityRoleEnum.STEWARD_SUPPORT));
 
 
       // Assign DataCollection-%s-DATA_STEWARD
@@ -1374,10 +1374,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             ResourceGroupEnum.EUDATASET_OBSERVER));
       }
 
-      // Assign EUDataset-%s-CUSTODIAN_SUPPORT
+      // Assign EUDataset-%s-STEWARD_SUPPORT
       for (UserRepresentationVO custodianSupport : custodiansSupport) {
         assignments.add(createAssignments(euDatasetId, custodianSupport.getEmail(),
-            ResourceGroupEnum.EUDATASET_CUSTODIAN_SUPPORT));
+            ResourceGroupEnum.EUDATASET_STEWARD_SUPPORT));
       }
     }
 
@@ -1391,9 +1391,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       groups.add(createGroup(testDatasetId, ResourceTypeEnum.TEST_DATASET,
           SecurityRoleEnum.DATA_CUSTODIAN));
 
-      // Create TestDataset-%s-CUSTODIAN_SUPPORT
+      // Create TestDataset-%s-STEWARD_SUPPORT
       groups.add(createGroup(testDatasetId, ResourceTypeEnum.TEST_DATASET,
-          SecurityRoleEnum.CUSTODIAN_SUPPORT));
+          SecurityRoleEnum.STEWARD_SUPPORT));
 
       // Assign TestDataset-%s-DATA_STEWARD
       for (UserRepresentationVO steward : stewards) {
@@ -1407,10 +1407,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             ResourceGroupEnum.TESTDATASET_CUSTODIAN));
       }
 
-      // Assign TestDataset-%s-CUSTODIAN_SUPPORT
+      // Assign TestDataset-%s-STEWARD_SUPPORT
       for (UserRepresentationVO custodianSupport : custodiansSupport) {
         assignments.add(createAssignments(testDatasetId, custodianSupport.getEmail(),
-            ResourceGroupEnum.TESTDATASET_CUSTODIAN_SUPPORT));
+            ResourceGroupEnum.TESTDATASET_STEWARD_SUPPORT));
       }
     }
 
@@ -1448,7 +1448,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
         }
 
-        // Assign ReferenceDataset-%s-CUSTODIAN_SUPPORT
+        // Assign ReferenceDataset-%s-STEWARD_SUPPORT
         for (UserRepresentationVO custodianSupport : custodiansSupport) {
           assignments.add(createAssignments(referenceDatasetId, custodianSupport.getEmail(),
               ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
@@ -1487,9 +1487,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       groups.add(
           createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_OBSERVER));
 
-      // Create Dataset-%s-CUSTODIAN_SUPPORT
+      // Create Dataset-%s-STEWARD_SUPPORT
       groups.add(createGroup(entry.getKey(), ResourceTypeEnum.DATASET,
-          SecurityRoleEnum.CUSTODIAN_SUPPORT));
+          SecurityRoleEnum.STEWARD_SUPPORT));
 
       // Create Dataset-%s-LEAD_REPORTER
       groups.add(
@@ -1513,10 +1513,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             ResourceGroupEnum.DATASET_OBSERVER));
       }
 
-      // Assign Dataset-%s-CUSTODIAN_SUPPORT
+      // Assign Dataset-%s-STEWARD_SUPPORT
       for (UserRepresentationVO custodianSupport : custodiansSupport) {
         assignments.add(createAssignments(entry.getKey(), custodianSupport.getEmail(),
-            ResourceGroupEnum.DATASET_CUSTODIAN_SUPPORT));
+            ResourceGroupEnum.DATASET_STEWARD_SUPPORT));
       }
 
       if (null != entry.getValue()) {

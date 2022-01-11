@@ -1,16 +1,26 @@
 import { atomFamily } from 'recoil';
 
-export const filtersStateFamily = atomFamily({
-  key: 'filtersState',
-  default: () => ({ filterBy: {}, filteredData: [] })
+export const filterByKeysState = atomFamily({
+  key: 'filterByKeysState',
+  default: () => ({ CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [], SEARCH: [] })
 });
 
-export const filterByKeysFamily = atomFamily({
-  key: 'filterByKeys',
-  default: () => ({ CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [] })
+export const filterByState = atomFamily({
+  key: 'filterByState',
+  default: () => ({})
 });
 
-export const sortByStateFamily = atomFamily({
-  key: 'sortByStateFamily',
+export const filteredDataState = atomFamily({
+  key: 'filteredDataState',
+  default: () => []
+});
+
+export const searchState = atomFamily({
+  key: 'searchState',
+  default: () => ''
+});
+
+export const sortByState = atomFamily({
+  key: 'sortByState',
   default: () => ({})
 });

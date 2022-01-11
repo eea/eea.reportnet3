@@ -1,6 +1,7 @@
 package org.eea.validation.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -19,19 +20,24 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.mapper.IntegrityMapper;
+import org.eea.validation.mapper.RuleHistoricInfoMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.data.repository.TableRepository;
+import org.eea.validation.persistence.repository.AuditRepository;
 import org.eea.validation.persistence.repository.IntegritySchemaRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.RulesSequenceRepository;
@@ -43,6 +49,7 @@ import org.eea.validation.persistence.schemas.IntegritySchema;
 import org.eea.validation.persistence.schemas.RecordSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.UniqueConstraintSchema;
+import org.eea.validation.persistence.schemas.audit.Audit;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.util.GeometryValidationUtils;
@@ -122,6 +129,15 @@ public class RulesServiceImplTest {
   /** The unique repository. */
   @Mock
   private UniqueConstraintRepository uniqueRepository;
+
+  @Mock
+  private UserManagementControllerZull userManagementControllerZuul;
+
+  @Mock
+  private AuditRepository auditRepository;
+
+  @Mock
+  private RuleHistoricInfoMapper ruleHistoricInfoMapper;
 
   private SecurityContext securityContext;
 
@@ -388,13 +404,8 @@ public class RulesServiceImplTest {
     tableSchemaList.add(tableSchema);
     datasetSchema.setTableSchemas(tableSchemaList);
     datasetSchema.setIdDataSetSchema(new ObjectId());
-
-
-
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
-
-
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -734,11 +745,17 @@ public class RulesServiceImplTest {
     rule.setWhenCondition("whenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
     rule.setType(EntityTypeEnum.FIELD);
+    UserRepresentationVO userRepresentationVO = new UserRepresentationVO();
+    userRepresentationVO.setUsername("userName");
+    userRepresentationVO.setFirstName("First Name");
+    userRepresentationVO.setLastName("Last Name");
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
-
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
+    Mockito.doNothing().when(auditRepository).createAudit(Mockito.any(), Mockito.any());
     rulesServiceImpl.createNewRule(1L, new RuleVO());
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
@@ -783,6 +800,14 @@ public class RulesServiceImplTest {
     Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    UserRepresentationVO userRepresentationVO = new UserRepresentationVO();
+    userRepresentationVO.setUsername("userName");
+    userRepresentationVO.setFirstName("First Name");
+    userRepresentationVO.setLastName("Last Name");
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
+    Mockito.doNothing().when(auditRepository).createAudit(Mockito.any(), Mockito.any());
     rulesServiceImpl.createNewRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
@@ -1053,7 +1078,12 @@ public class RulesServiceImplTest {
    */
   @Test
   public void updateRuleTest() throws EEAException {
-
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setType(EntityTypeEnum.DATASET);
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
+    ruleVO.setEnabled(true);
+    ruleVO.setWhenCondition(null);
+    ruleVO.setIntegrityVO(null);
     Rule rule = new Rule();
     rule.setRuleId(new ObjectId());
     rule.setReferenceId(new ObjectId());
@@ -1063,12 +1093,21 @@ public class RulesServiceImplTest {
     rule.setWhenCondition("whenCondition");
     rule.setThenCondition(Arrays.asList("success", "error"));
     rule.setType(EntityTypeEnum.FIELD);
-
+    UserRepresentationVO userRepresentationVO = new UserRepresentationVO();
+    userRepresentationVO.setUsername("userName");
+    userRepresentationVO.setFirstName("First Name");
+    userRepresentationVO.setLastName("Last Name");
+    Audit audit = new Audit();
+    audit.setIdAudit(new ObjectId());
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
-    rulesServiceImpl.updateRule(1L, new RuleVO());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
+    Mockito.when(auditRepository.getAuditByRuleId(Mockito.any())).thenReturn(audit);
+    rulesServiceImpl.updateRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
 
@@ -1101,13 +1140,23 @@ public class RulesServiceImplTest {
     rule.setDescription("");
     rule.setRuleName("");
     rule.setThenCondition(Arrays.asList("success", "error"));
+    UserRepresentationVO userRepresentationVO = new UserRepresentationVO();
+    userRepresentationVO.setUsername("userName");
+    userRepresentationVO.setFirstName("First Name");
+    userRepresentationVO.setLastName("Last Name");
+    Audit audit = new Audit();
+    audit.setIdAudit(new ObjectId());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(integrityMapper.classToEntity(Mockito.any())).thenReturn(integritySchema);
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
+    Mockito.when(auditRepository.getAuditByRuleId(Mockito.any())).thenReturn(audit);
     rulesServiceImpl.updateRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
@@ -1119,11 +1168,14 @@ public class RulesServiceImplTest {
    */
   @Test(expected = EEAException.class)
   public void updateRuleRuleIdExceptionTest() throws EEAException {
+    RuleVO ruleVO = new RuleVO();
+    ruleVO.setRuleId("5e44110d6a9e3a270ce13fac");
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(new Rule());
     try {
-      rulesServiceImpl.updateRule(1L, new RuleVO());
+      rulesServiceImpl.updateRule(1L, ruleVO);
     } catch (EEAException e) {
       Assert.assertEquals(EEAErrorMessage.RULE_ID_REQUIRED, e.getMessage());
       throw e;
@@ -1188,6 +1240,7 @@ public class RulesServiceImplTest {
 
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(false);
     RuleVO ruleVO = new RuleVO();
@@ -1789,5 +1842,16 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
 
+  @Test(expected = EEAException.class)
+  public void getRuleHistoricInfoDatasetIncorrectTest() throws EEAException {
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(null);
+    try {
+      List<RuleHistoricInfoVO> historic = rulesServiceImpl.getRuleHistoricInfo(1L, "RULEID");
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
 
 }

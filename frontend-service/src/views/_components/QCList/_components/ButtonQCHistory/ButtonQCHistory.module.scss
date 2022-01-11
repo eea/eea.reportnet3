@@ -1,0 +1,26 @@
+.checkedValueColumn {
+  text-align: center;
+  .icon {
+    color: var(--main-color-font);
+  }
+}
+
+.sizeDialog {
+  min-height: 42vh;
+}
+
+.sizeContentDialog {
+  min-height: 42vh;
+}
+
+.loadingSpinner {
+  height: 42vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+}
