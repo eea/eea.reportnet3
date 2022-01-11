@@ -62,6 +62,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
         </div>
       );
     }
+
     return (
       <DataTable
         autoLayout
@@ -92,6 +93,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       ) {
         return null;
       }
+
       let template;
 
       switch (col.field) {
