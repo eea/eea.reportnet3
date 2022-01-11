@@ -60,6 +60,12 @@ export const qcListReducer = (state, { type, payload }) => {
     case 'UPDATE_VALIDATION_RULE':
       return { ...state, editingRows: state.editingRows.filter(editingRow => editingRow.id !== payload.id) };
 
+    case 'SET_VIEWED_QC_HISTORY_ID':
+      return { ...state, viewedQcHistoryId: payload.viewedQcHistoryId };
+
+    case 'SET_IS_HISTORY_DIALOG_VISIBLE':
+      return { ...state, isHistoryDialogVisible: payload.isHistoryDialogVisible };
+
     default: {
       return state;
     }

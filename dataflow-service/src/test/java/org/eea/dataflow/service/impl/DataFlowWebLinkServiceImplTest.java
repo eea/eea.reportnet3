@@ -230,8 +230,6 @@ public class DataFlowWebLinkServiceImplTest {
   @Test(expected = EntityNotFoundException.class)
   public void removeWebLinkException() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
-        .thenReturn(resources);
     doThrow(EmptyResultDataAccessException.class).when(webLinkRepository).deleteById(Mockito.any());
     try {
       dataflowServiceWebLinkImpl.removeWebLink(1L);
@@ -264,8 +262,6 @@ public class DataFlowWebLinkServiceImplTest {
   @Test
   public void removeWebLink() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
-        .thenReturn(resources);
     dataflowServiceWebLinkImpl.removeWebLink(Mockito.anyLong());
     Mockito.verify(webLinkRepository, times(1)).deleteById(Mockito.any());
   }
@@ -278,8 +274,6 @@ public class DataFlowWebLinkServiceImplTest {
   @Test(expected = EntityNotFoundException.class)
   public void updateWebLinkException() throws EEAException {
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
-        .thenReturn(resources);
     when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
     when(webLinkRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     weblinkVO.setId(1L);
@@ -318,8 +312,6 @@ public class DataFlowWebLinkServiceImplTest {
   public void updateWebLink() throws EEAException {
     when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
     when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
-        .thenReturn(resources);
     when(webLinkRepository.findById(Mockito.any())).thenReturn(Optional.of(new Weblink()));
     weblinkVO.setId(1L);
     dataflowServiceWebLinkImpl.updateWebLink(weblinkVO);
@@ -412,25 +404,6 @@ public class DataFlowWebLinkServiceImplTest {
     }
   }
 
-  @Test(expected = ResourceNoFoundException.class)
-  public void removeWebLinkExceptionTest() throws EEAException {
-    try {
-      Dataflow dataflow = new Dataflow();
-      dataflow.setId(1L);
-      ResourceAccessVO resource = new ResourceAccessVO();
-      resource.setId(2L);
-      List<ResourceAccessVO> resources = new ArrayList<>();
-      resources.add(resource);
-      when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
-      when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
-          .thenReturn(resources);
-      dataflowServiceWebLinkImpl.removeWebLink(Mockito.anyLong());
-    } catch (ResourceNoFoundException e) {
-      assertNotNull(e);
-      throw e;
-    }
-  }
-
   @Test(expected = WrongDataExceptions.class)
   public void updateWebLinkWrongDataExceptionTest() throws EEAException {
     try {
@@ -439,8 +412,6 @@ public class DataFlowWebLinkServiceImplTest {
       weblink.setUrl("url");
       when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
       when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
-      when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
-          .thenReturn(resources);
       weblinkVO.setId(1L);
       dataflowServiceWebLinkImpl.updateWebLink(weblinkVO);
       Mockito.verify(webLinkRepository, times(1)).findById(1L);
@@ -450,33 +421,12 @@ public class DataFlowWebLinkServiceImplTest {
     }
   }
 
-  @Test(expected = ResourceNoFoundException.class)
-  public void updateWeblinkResourceNoFoundExceptionTest() throws EEAException {
-    try {
-      Dataflow dataflow = new Dataflow();
-      dataflow.setId(1L);
-      ResourceAccessVO resource = new ResourceAccessVO();
-      resource.setId(2L);
-      List<ResourceAccessVO> resources = new ArrayList<>();
-      resources.add(resource);
-      when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
-      when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
-      when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
-          .thenReturn(resources);
-      dataflowServiceWebLinkImpl.updateWebLink(weblinkVO);
-    } catch (ResourceNoFoundException e) {
-      assertNotNull(e);
-      throw e;
-    }
-  }
 
   @Test(expected = EEAException.class)
   public void updateWeblinkEEAExceptionTest() throws EEAException {
     try {
       when(dataflowWebLinkMapper.classToEntity(Mockito.any())).thenReturn(weblink);
       when(dataflowRepository.findDataflowByWeblinks_Id(Mockito.anyLong())).thenReturn(dataflow);
-      when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
-          .thenReturn(resources);
       when(webLinkRepository.findById(Mockito.any())).thenReturn(Optional.of(weblink));
       weblinkVO.setId(1L);
       Weblink weblink2 = new Weblink();

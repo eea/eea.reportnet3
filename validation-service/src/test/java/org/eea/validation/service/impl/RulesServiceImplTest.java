@@ -1,6 +1,7 @@
 package org.eea.validation.service.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -31,6 +32,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.mapper.IntegrityMapper;
+import org.eea.validation.mapper.RuleHistoricInfoMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
 import org.eea.validation.persistence.data.repository.TableRepository;
@@ -132,6 +134,9 @@ public class RulesServiceImplTest {
 
   @Mock
   private AuditRepository auditRepository;
+
+  @Mock
+  private RuleHistoricInfoMapper ruleHistoricInfoMapper;
 
   private SecurityContext securityContext;
 
@@ -417,7 +422,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesCodelistTest() throws EEAException {
     Document doc = new Document();
-    doc.put("codelistItems", new ArrayList());
+    doc.put("codelistItems", new ArrayList<>());
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
         .thenReturn(doc);
@@ -437,7 +442,7 @@ public class RulesServiceImplTest {
   @Test
   public void createAutomaticRulesMultiCodelistTest() throws EEAException {
     Document doc = new Document();
-    doc.put("codelistItems", new ArrayList());
+    doc.put("codelistItems", new ArrayList<>());
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     when(schemasRepository.findFieldSchema("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac"))
         .thenReturn(doc);
@@ -747,8 +752,6 @@ public class RulesServiceImplTest {
         .thenReturn("5e44110d6a9e3a270ce13fac");
     Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(true);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
     Mockito.doNothing().when(auditRepository).createAudit(Mockito.any(), Mockito.any());
     rulesServiceImpl.createNewRule(1L, new RuleVO());
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
@@ -799,8 +802,6 @@ public class RulesServiceImplTest {
     userRepresentationVO.setFirstName("First Name");
     userRepresentationVO.setLastName("Last Name");
 
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
     Mockito.doNothing().when(auditRepository).createAudit(Mockito.any(), Mockito.any());
     rulesServiceImpl.createNewRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
@@ -1098,8 +1099,6 @@ public class RulesServiceImplTest {
     Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
     Mockito.when(auditRepository.getAuditByRuleId(Mockito.any())).thenReturn(audit);
     rulesServiceImpl.updateRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
@@ -1148,8 +1147,6 @@ public class RulesServiceImplTest {
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(integrityMapper.classToEntity(Mockito.any())).thenReturn(integritySchema);
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
     Mockito.when(auditRepository.getAuditByRuleId(Mockito.any())).thenReturn(audit);
     rulesServiceImpl.updateRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
@@ -1836,5 +1833,16 @@ public class RulesServiceImplTest {
     Mockito.verify(rulesRepository, times(1)).createNewRule(Mockito.any(), Mockito.any());
   }
 
+  @Test(expected = EEAException.class)
+  public void getRuleHistoricInfoDatasetIncorrectTest() throws EEAException {
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(null);
+    try {
+      rulesServiceImpl.getRuleHistoricInfo(1L, "RULEID");
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
 
 }
