@@ -1432,7 +1432,7 @@
     "detailedInfoTooltip": "Click to show detailed info",
     "tableInfo": "Table info",
     "loadHistoryDataError": "Error loading history data in QC rules",
-    "noHistoryData": "There are no historic changes for this QC",
+    "noHistoryData": "There are no historic changes",
     "allQCsHistoryBtn": "QCs history"
   }
 }
