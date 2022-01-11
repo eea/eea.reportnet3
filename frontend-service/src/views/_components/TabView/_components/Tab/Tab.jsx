@@ -36,6 +36,7 @@ const Tab = ({
   divScrollTabsRef,
   disabled = false,
   editable = false,
+  fixedNumber = false,
   hasInfoTooltip = false,
   hasPKReferenced = false,
   header,
@@ -48,6 +49,7 @@ const Tab = ({
   isNavigationHidden,
   leftIcon,
   newTab,
+  notEmpty = true,
   onTabBlur,
   onTabAddCancel,
   onTabDeleteClick,
@@ -57,11 +59,13 @@ const Tab = ({
   onTabHeaderClick,
   onTabMouseWheel,
   onTabNameError,
+  readOnly = false,
   rightIcon,
   rightIconClass = '',
   scrollTo,
   selected,
   tableSchemaId,
+  toPrefill = false,
   totalTabs
 }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -71,7 +75,6 @@ const Tab = ({
   const [iconToShow, setIconToShow] = useState(!isUndefined(closeIcon) ? closeIcon : 'cancel');
   const [isTableInfoVisible, setIsTableInfoVisible] = useState(false);
   const [menu, setMenu] = useState();
-  const [selectedTableInfoHeader, setSelectedTableInfoHeader] = useState('');
   const [titleHeader, setTitleHeader] = useState(!isUndefined(addTab) ? '' : header);
 
   const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s]/);
@@ -121,20 +124,76 @@ const Tab = ({
     }
   }, [newTab]);
 
-  const descriptionTemplate = rowData => (
-    <div>
-      <p className={styles.tableDescriptionTemplate}>{rowData.description}</p>
-    </div>
-  );
+  const tableTemplate = rowData => {
+    if (rowData.key === 'description') {
+      return (
+        <div className={styles.templateWrapper}>
+          <p className={styles.tableDescriptionTemplate}>{rowData.value || '-'}</p>
+        </div>
+      );
+    } else if (
+      (rowData.key === 'fixedNumber' ||
+        rowData.key === 'readOnly' ||
+        rowData.key === 'notEmpty' ||
+        rowData.key === 'prefilled') &&
+      rowData.value
+    ) {
+      return (
+        <div className={styles.templateWrapper}>
+          <FontAwesomeIcon className={styles.checkTemplate} icon={AwesomeIcons('check')} />
+        </div>
+      );
+    } else {
+      return <div className={styles.templateWrapper}>{rowData.value}</div>;
+    }
+  };
 
-  const getTooltipMessage = () => (
-    <div className={`${styles.fieldText} ${styles.tooltipWrapper}`}>
-      <span>{resourcesContext.messages['description']}: </span>
-      <br />
-      <p className={styles.propertyLabel}>{description}</p>
-      <p className={styles.moreInfoLabel}>{resourcesContext.messages['detailedInfoTooltip']}</p>
-    </div>
-  );
+  const getTooltipMessage = () => {
+    const renderDescription = () => {
+      if (description && description !== '') {
+        return (
+          <Fragment>
+            <span>{resourcesContext.messages['description']}: </span>
+            <br />
+            <p className={styles.propertyLabel}>
+              {`${description.substring(0, 100)}${description.length > 100 ? '...' : ''}` || '-'}
+            </p>
+          </Fragment>
+        );
+      }
+    };
+    const renderReadOnly = () => {
+      if (readOnly) {
+        return <p className={styles.propertyLabel}>{resourcesContext.messages['readOnly']}</p>;
+      }
+    };
+    const renderPrefilled = () => {
+      if (toPrefill) {
+        return <p className={styles.propertyLabel}>{resourcesContext.messages['prefilled']}</p>;
+      }
+    };
+    const renderFixedNumber = () => {
+      if (fixedNumber) {
+        return <p className={styles.propertyLabel}>{resourcesContext.messages['fixedNumber']}</p>;
+      }
+    };
+    const renderNotEmpty = () => {
+      if (notEmpty) {
+        return <p className={styles.propertyLabel}>{resourcesContext.messages['notEmpty']}</p>;
+      }
+    };
+
+    return (
+      <div className={`${styles.fieldText} ${styles.tooltipWrapper}`}>
+        {renderDescription()}
+        {renderReadOnly()}
+        {renderPrefilled()}
+        {renderFixedNumber()}
+        {renderNotEmpty()}
+        <p className={styles.moreInfoLabel}>{resourcesContext.messages['detailedInfoTooltip']}</p>
+      </div>
+    );
+  };
 
   const getTooltipContent = () =>
     ReactDOMServer.renderToStaticMarkup(
@@ -154,11 +213,6 @@ const Tab = ({
       <Button icon="check" label={resourcesContext.messages['ok']} onClick={() => setIsTableInfoVisible(false)} />
     </div>
   );
-
-  const onShowTableInfo = (header, visible) => {
-    setSelectedTableInfoHeader(header);
-    setIsTableInfoVisible(visible);
-  };
 
   const onTabDragStart = event => {
     if (editingHeader) {
@@ -313,6 +367,24 @@ const Tab = ({
 
   const renderTableInfo = () => {
     if (isTableInfoVisible) {
+      const values = [
+        { field: resourcesContext.messages['tableSchemaName'], key: 'tableSchemaName', value: header },
+        { field: resourcesContext.messages['description'], key: 'description', value: description }
+      ];
+
+      if (fixedNumber) {
+        values.push({ field: resourcesContext.messages['fixedNumber'], key: 'fixedNumber', value: fixedNumber });
+      }
+      if (readOnly) {
+        values.push({ field: resourcesContext.messages['readOnly'], key: 'readOnly', value: readOnly });
+      }
+      if (toPrefill) {
+        values.push({ field: resourcesContext.messages['prefilled'], key: 'prefilled', value: toPrefill });
+      }
+      if (notEmpty) {
+        values.push({ field: resourcesContext.messages['notEmpty'], key: 'notEmpty', value: notEmpty });
+      }
+
       return (
         <Dialog
           className={styles.fieldInfoDialogWrapper}
@@ -320,12 +392,12 @@ const Tab = ({
           header={resourcesContext.messages['tableInfo']}
           onHide={() => setIsTableInfoVisible(false)}
           visible={isTableInfoVisible}>
-          <DataTable value={[{ header, description }]}>
-            {['header', 'description'].map(column => (
+          <DataTable value={values}>
+            {['field', 'value'].map(column => (
               <Column
-                body={column === 'description' ? descriptionTemplate : null}
+                body={column === 'value' ? tableTemplate : null}
                 field={column}
-                header={column}
+                headerStyle={{ display: 'none' }}
                 key={column}
               />
             ))}
@@ -422,14 +494,11 @@ const Tab = ({
           }}
           role="tab"
           tabIndex={index}>
-          {console.log(description)}
-          {hasInfoTooltip && !editingHeader && !isNil(description) && description !== '' && (
+          {hasInfoTooltip && !editingHeader && (
             <TooltipButton
               buttonClassName={styles.tooltipButton}
               getContent={getTooltipContent}
-              onClick={() => {
-                onShowTableInfo(header, true);
-              }}
+              onClick={() => setIsTableInfoVisible(true)}
               tooltipClassName={styles.tooltipContent}
               uniqueIdentifier={uniqueId('table_more_info_')}
             />

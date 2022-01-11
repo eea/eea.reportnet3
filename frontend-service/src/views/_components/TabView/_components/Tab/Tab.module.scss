@@ -79,14 +79,21 @@ input.p_tabview_input_design {
   font-weight: bold;
   .propertyLabel {
     color: var(--success-color-lighter);
-    max-height: 200px;
+    max-height: 100px;
     font-weight: 600;
     overflow: hidden;
-    text-overflow: ellipsis !important;
   }
   .moreInfoLabel {
     font-size: 9pt;
     font-style: italic;
+  }
+}
+
+.templateWrapper {
+  display: flex;
+  justify-content: center;
+  .checkTemplate {
+    font-size: 14pt;
   }
 }
 
@@ -96,6 +103,7 @@ input.p_tabview_input_design {
   justify-content: center;
   max-height: 30vh;
   overflow: auto;
+  white-space: pre-line;
 }
 
 .tooltipWrapper {

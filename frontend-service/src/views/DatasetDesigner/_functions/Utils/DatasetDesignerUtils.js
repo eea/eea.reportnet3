@@ -77,7 +77,6 @@ const getTabs = ({ datasetSchema, datasetStatistics, editable, isDataflowOpen, i
   if (!isDataflowOpen && !isDesignDatasetEditorRead) {
     inmDatasetSchema.tables?.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });
   }
-  console.log(inmDatasetSchema.tables);
   return inmDatasetSchema.tables;
 };
 
