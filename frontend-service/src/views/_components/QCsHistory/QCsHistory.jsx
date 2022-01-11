@@ -66,21 +66,20 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
           <h3>{resourcesContext.messages['noHistoryData']}</h3>
         </div>
       );
-    } else {
-      return (
-        <DataTable
-          autoLayout
-          className={styles.dialogContent}
-          hasDefaultCurrentPage
-          paginator
-          rows={10}
-          rowsPerPageOptions={[5, 10, 15]}
-          totalRecords={qcHistoryData.length}
-          value={qcHistoryData}>
-          {columns}
-        </DataTable>
-      );
     }
+    return (
+      <DataTable
+        autoLayout
+        className={styles.dialogContent}
+        hasDefaultCurrentPage
+        paginator
+        rows={10}
+        rowsPerPageOptions={[5, 10, 15]}
+        totalRecords={qcHistoryData.length}
+        value={qcHistoryData}>
+        {columns}
+      </DataTable>
+    );
   };
 
   const getHistoryColumns = () => {
