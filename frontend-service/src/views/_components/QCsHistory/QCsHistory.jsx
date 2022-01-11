@@ -54,7 +54,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     if (loadingStatus === 'failed') {
       return (
         <div className={styles.noDataContent}>
-          <p>{resourcesContext.messages['loadHistorydataError']}</p>
+          <p>{resourcesContext.messages['loadHistoryDataError']}</p>
           <Button label={resourcesContext.messages['refresh']} onClick={getQcHistoryData} />
         </div>
       );
@@ -134,7 +134,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       setLoadingStatus('success');
     } catch (error) {
       console.error('HistoryData - getQcHistoryData.', error);
-      notificationContext.add({ type: 'LOAD_HISTORYDATA_ERROR' }, true);
+      notificationContext.add({ type: 'LOAD_HISTORY_DATA_ERROR' }, true);
       setLoadingStatus('failed');
     }
   };

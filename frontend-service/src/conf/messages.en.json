@@ -1429,7 +1429,7 @@
     "callFmeProcessFailedEvent": "Error calling to FME at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
     "invalid": "Invalid",
     "searchByQcList": "Search by (code, name, description, message)",
-    "loadHistorydataError": "Error loading history data in QC rules",
+    "loadHistoryDataError": "Error loading history data in QC rules",
     "noHistoryData": "There are no historic changes for this QC",
     "allQCsHistoryBtn": "QCs history"
   }
