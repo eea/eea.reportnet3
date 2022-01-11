@@ -392,8 +392,6 @@ public class UserManagementControllerImpl implements UserManagementController {
   /**
    * Gets the user by user id.
    *
-   * @param userId the user id
-   *
    * @return the user by user id
    */
   @Override
@@ -401,13 +399,14 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getUserByUserId")
   @ApiOperation(value = "Get Users by Id", response = UserRepresentationVO.class, hidden = true)
-  public UserRepresentationVO getUserByUserId(
-      @ApiParam(value = "User id") @RequestParam("userId") String userId) {
+  public UserRepresentationVO getUserByUserId() {
     UserRepresentationVO userVO = null;
-    if (!(((Map<String, String>) SecurityContextHolder.getContext().getAuthentication()
-        .getDetails()).get(AuthenticationDetails.USER_ID).equals(userId))) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.USER_NOTFOUND);
+    String userId =
+        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
+            .get(AuthenticationDetails.USER_ID);
+
+    if (StringUtils.isBlank(userId)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.USER_NOTFOUND);
     }
     UserRepresentation user = keycloakConnectorService.getUser(userId);
     if (user != null) {
