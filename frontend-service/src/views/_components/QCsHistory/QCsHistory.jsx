@@ -81,6 +81,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     if (isEmpty(qcHistoryData)) {
       return [];
     }
+
     const columnData = Object.keys(qcHistoryData[0]).map(key => ({ field: key, header: key }));
 
     return columnData.map(col => {
