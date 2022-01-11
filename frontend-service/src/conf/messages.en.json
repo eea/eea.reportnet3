@@ -1430,6 +1430,7 @@
     "invalid": "Invalid",
     "searchByQcList": "Search by (code, name, description, message)",
     "detailedInfoTooltip": "Click to show detailed info",
-    "tableInfo": "Table info"
+    "tableInfo": "Table info",
+    "loadDatasetSchemaInfoError": "Error on loading dataset schema information"
   }
 }

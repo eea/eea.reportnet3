@@ -144,7 +144,7 @@ export const DataflowHelp = () => {
       }
     } catch (error) {
       console.error('DataflowHelp - onLoadDatasetSchema.', error);
-      notificationContext.add({ type: 'IMPORT_DESIGN_FAILED_EVENT' }, true);
+      notificationContext.add({ type: 'LOAD_DATASET_SCHEMA_INFO_ERROR' }, true);
     }
   };
 
