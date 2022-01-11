@@ -497,6 +497,7 @@ const parseDataValidationRulesDTO = validations => {
       expressions: newExpressions,
       expressionsIf: newExpressionsIf,
       expressionsThen: newExpressionsThen,
+      hasHistoric: validationDTO.hasHistoric,
       id: validationDTO.ruleId,
       isCorrect: validationDTO.verified,
       levelError:

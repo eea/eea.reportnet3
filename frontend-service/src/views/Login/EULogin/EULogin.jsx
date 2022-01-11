@@ -17,8 +17,14 @@ const EULogin = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [isLoading] = useState(true);
   const userContext = useContext(UserContext);
+
+  const [isLoading] = useState(true);
+
+  useEffect(() => {
+    onLogin();
+  }, []);
+
   const onLogin = async () => {
     try {
       const params = new URLSearchParams(location.hash);
@@ -42,9 +48,7 @@ const EULogin = () => {
       navigate(getUrl(routes.ACCESS_POINT));
     }
   };
-  useEffect(() => {
-    onLogin();
-  }, []);
+
   return (
     <div className="rp-container">
       <div className={`${styles.loginBoxContainer}`}>

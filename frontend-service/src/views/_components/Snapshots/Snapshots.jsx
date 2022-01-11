@@ -1,7 +1,5 @@
 import { Fragment, useContext } from 'react';
 
-import dayjs from 'dayjs';
-
 import styles from './Snapshots.module.scss';
 
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
@@ -9,7 +7,8 @@ import { SnapshotSlideBar } from './_components/SnapshotSlideBar';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
-import { UserContext } from 'views/_functions/Contexts/UserContext';
+
+import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
 const Snapshots = ({
   isLoadingSnapshotListData,
@@ -19,7 +18,8 @@ const Snapshots = ({
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const snapshotContext = useContext(SnapshotContext);
-  const userContext = useContext(UserContext);
+
+  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
   const getConfirmBtnClassnames = () => {
     let classNames = '';
@@ -66,15 +66,11 @@ const Snapshots = ({
           <p>{snapshotContext.snapshotState.dialogConfirmMessage}</p>
           <ul>
             <li>
-              <strong>{resourcesContext.messages.creationDate}: </strong>
-              {dayjs(snapshotContext.snapshotState.creationDate).format(
-                `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-                  userContext.userProps.amPm24h ? '' : ' A'
-                }`
-              )}
+              <strong>{resourcesContext.messages['creationDate']}: </strong>
+              {getDateTimeFormatByUserPreferences(snapshotContext.snapshotState.creationDate)}
             </li>
             <li>
-              <strong>{resourcesContext.messages.description}: </strong>
+              <strong>{resourcesContext.messages['description']}: </strong>
               <span className={styles.description}>{snapshotContext.snapshotState.description}</span>
             </li>
           </ul>

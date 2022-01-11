@@ -11,10 +11,11 @@ export class Validation {
     description,
     enabled,
     entityType,
-    expressionText,
     expressions,
     expressionsIf,
     expressionsThen,
+    expressionText,
+    hasHistoric,
     id,
     isCorrect,
     levelError,
@@ -39,10 +40,11 @@ export class Validation {
     this.description = description;
     this.enabled = enabled;
     this.entityType = entityType;
-    this.expressionText = expressionText;
     this.expressions = expressions;
     this.expressionsIf = expressionsIf;
     this.expressionsThen = expressionsThen;
+    this.expressionText = expressionText;
+    this.hasHistoric = hasHistoric;
     this.id = id;
     this.isCorrect = isCorrect;
     this.levelError = levelError;
