@@ -147,7 +147,7 @@ const ReportnetLogin = () => {
                 label={resourcesContext.messages['login']}
                 layout="simple"
                 onClick={() => onLogin()}
-                type="button"
+                type="submit"
               />
             </fieldset>
           </form>
