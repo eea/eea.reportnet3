@@ -66,11 +66,11 @@ const Snapshots = ({
           <p>{snapshotContext.snapshotState.dialogConfirmMessage}</p>
           <ul>
             <li>
-              <strong>{resourcesContext.messages.creationDate}: </strong>
+              <strong>{resourcesContext.messages['creationDate']}: </strong>
               {getDateTimeFormatByUserPreferences(snapshotContext.snapshotState.creationDate)}
             </li>
             <li>
-              <strong>{resourcesContext.messages.description}: </strong>
+              <strong>{resourcesContext.messages['description']}: </strong>
               <span className={styles.description}>{snapshotContext.snapshotState.description}</span>
             </li>
           </ul>

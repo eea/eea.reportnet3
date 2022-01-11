@@ -40,7 +40,7 @@ const SnapshotItem = ({ itemData }) => {
               payload: { ...itemData }
             });
           }}
-          tooltip={resourcesContext.messages.restoreSnapshotTooltip}
+          tooltip={resourcesContext.messages['restoreSnapshotTooltip']}
           tooltipOptions={{ position: 'top' }}
         />
 
