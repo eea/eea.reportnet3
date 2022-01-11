@@ -7,6 +7,8 @@ export const ValidationConfig = {
   generateQCRulesFile: '/rules/exportQC/{:datasetId}',
   generateShowValidationsFile: '/validation/export/{:datasetId}',
   getAll: '/rules/{:datasetSchemaId}/dataflow/{:dataflowId}',
+  getAllQCsHistoricInfo: '/rules/historicDatasetRules?datasetId={:datasetId}',
+  getQcHistoricInfo: '/rules/historicInfo?datasetId={:datasetId}&ruleId={:ruleId}',
   runSqlRule: '/rules/runSqlRule?datasetId={:datasetId}&showInternalFields={:showInternalFields}',
   update: '/rules/updateRule?datasetId={:datasetId}',
   updateAutomatic: '/rules/updateAutomaticRule/{:datasetId}',
