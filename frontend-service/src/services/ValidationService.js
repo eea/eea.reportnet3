@@ -116,6 +116,10 @@ export const ValidationService = {
     return validationsList;
   },
 
+  getAllQCsHistoricInfo: async datasetId => await ValidationRepository.getAllQCsHistoricInfo(datasetId),
+
+  getQcHistoricInfo: async (datasetId, ruleId) => await ValidationRepository.getQcHistoricInfo(datasetId, ruleId),
+
   generateQCRulesFile: async datasetId => await ValidationRepository.generateQCRulesFile(datasetId),
 
   generateShowValidationsFile: async datasetId => await ValidationRepository.generateShowValidationsFile(datasetId),

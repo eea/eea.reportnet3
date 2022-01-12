@@ -60,7 +60,7 @@ const ComparisonExpression = ({
   const [operatorValues, setOperatorValues] = useState([]);
   const [secondFieldOptions, setSecondFieldOptions] = useState([]);
   const [tableFields, setTableFields] = useState([]);
-  const [valueFieldPlaceholder, setValueFieldPlaceholder] = useState(resourcesContext.messages.selectField);
+  const [valueFieldPlaceholder, setValueFieldPlaceholder] = useState(resourcesContext.messages['selectField']);
   const [valueKeyFilter, setValueKeyFilter] = useState();
   const [valueTypeSelectorOptions, setValueTypeSelectorOptions] = useState([]);
 
@@ -216,10 +216,10 @@ const ComparisonExpression = ({
   }, [clickedFields, showRequiredFields]);
 
   useLayoutEffect(() => {
-    let fieldPlaceholder = resourcesContext.messages.selectField;
+    let fieldPlaceholder = resourcesContext.messages['selectField'];
 
     if (secondFieldOptions.length === 0 && expressionValues.valueTypeSelector === 'field') {
-      fieldPlaceholder = resourcesContext.messages.notFieldToSelect;
+      fieldPlaceholder = resourcesContext.messages['notFieldToSelect'];
     }
     setValueFieldPlaceholder(fieldPlaceholder);
   }, [expressionValues.operatorType, expressionValues.valueTypeSelector]);
@@ -332,7 +332,7 @@ const ComparisonExpression = ({
           optionLabel="label"
           options={valueTypeSelectorOptions}
           optionValue="value"
-          placeholder={resourcesContext.messages.comparisonValueFieldSelector}
+          placeholder={resourcesContext.messages['comparisonValueFieldSelector']}
           value={first(valueTypeSelectorOptions.filter(option => option.value === expressionValues.valueTypeSelector))}
         />
       </span>
@@ -349,7 +349,7 @@ const ComparisonExpression = ({
         <Dropdown
           appendTo={document.body}
           disabled={disabledFields.field2}
-          filterPlaceholder={resourcesContext.messages.selectField}
+          filterPlaceholder={resourcesContext.messages['selectField']}
           id={`${componentName}__field2`}
           onChange={e => onUpdateExpressionField('field2', e.value.value)}
           optionLabel="label"
@@ -432,7 +432,7 @@ const ComparisonExpression = ({
           min={0}
           mode="decimal"
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
-          placeholder={resourcesContext.messages.value}
+          placeholder={resourcesContext.messages['value']}
           steps={0}
           useGrouping={false}
           value={field2}
@@ -452,7 +452,7 @@ const ComparisonExpression = ({
               disabled={isDisabled}
               id={uniqueId(componentName)}
               onChange={e => onUpdateExpressionField('field2', e.target.value)}
-              placeholder={resourcesContext.messages.value}
+              placeholder={resourcesContext.messages['value']}
               ref={inputStringMatchRef}
               value={field2}
             />
@@ -483,7 +483,7 @@ const ComparisonExpression = ({
             disabled={isDisabled}
             id={uniqueId(componentName)}
             onChange={e => onUpdateExpressionField('field2', e.target.value)}
-            placeholder={resourcesContext.messages.value}
+            placeholder={resourcesContext.messages['value']}
             value={field2}
           />
         );
@@ -498,7 +498,7 @@ const ComparisonExpression = ({
             keyfilter={RecordUtils.getFilter(fieldType)}
             onBlur={e => checkField('number', e.target.value)}
             onChange={e => onUpdateExpressionField('field2', e.target.value)}
-            placeholder={resourcesContext.messages.value}
+            placeholder={resourcesContext.messages['value']}
             value={field2}
           />
         );
@@ -512,7 +512,7 @@ const ComparisonExpression = ({
           keyfilter={valueKeyFilter}
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
-          placeholder={resourcesContext.messages.value}
+          placeholder={resourcesContext.messages['value']}
           value={field2}
         />
       );
@@ -526,7 +526,7 @@ const ComparisonExpression = ({
           mode="decimal"
           onBlur={e => checkField('year', e.target.value)}
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
-          placeholder={resourcesContext.messages.value}
+          placeholder={resourcesContext.messages['value']}
           steps={0}
           useGrouping={false}
           value={field2}
@@ -544,7 +544,7 @@ const ComparisonExpression = ({
           min={0}
           mode="decimal"
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
-          placeholder={resourcesContext.messages.value}
+          placeholder={resourcesContext.messages['value']}
           steps={0}
           useGrouping={false}
           value={field2}
@@ -561,7 +561,7 @@ const ComparisonExpression = ({
           min={-1}
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('field2', e.target.value)}
-          placeholder={resourcesContext.messages.value}
+          placeholder={resourcesContext.messages['value']}
           value={field2}
         />
       );
@@ -575,7 +575,7 @@ const ComparisonExpression = ({
         onChange={e => {
           onUpdateExpressionField('field2', e.target.value);
         }}
-        placeholder={resourcesContext.messages.value}
+        placeholder={resourcesContext.messages['value']}
         value={field2}
       />
     );
@@ -601,7 +601,7 @@ const ComparisonExpression = ({
           onChange={e => onUpdateExpressionField('union', e.value.value)}
           optionLabel="label"
           options={config.validations.logicalOperators}
-          placeholder={resourcesContext.messages.union}
+          placeholder={resourcesContext.messages['union']}
           value={first(config.validations.logicalOperators.filter(option => option.value === expressionValues.union))}
         />
       </span>
@@ -618,7 +618,7 @@ const ComparisonExpression = ({
           }}
           optionLabel={'label'}
           options={tableFields}
-          placeholder={resourcesContext.messages.selectField}
+          placeholder={resourcesContext.messages['selectField']}
           value={first(tableFields.filter(option => option.value === expressionValues.field1))}
         />
       </span>
@@ -632,7 +632,7 @@ const ComparisonExpression = ({
           onChange={e => onUpdateExpressionField('operatorType', e.value.value)}
           optionLabel="label"
           options={operatorTypes}
-          placeholder={resourcesContext.messages.operatorType}
+          placeholder={resourcesContext.messages['operatorType']}
           value={first(operatorTypes.filter(option => option.value === expressionValues.operatorType))}
         />
       </span>
@@ -646,7 +646,7 @@ const ComparisonExpression = ({
           optionLabel="label"
           options={operatorValues}
           optionValue="value"
-          placeholder={resourcesContext.messages.operator}
+          placeholder={resourcesContext.messages['operator']}
           value={first(operatorValues.filter(option => option.value === expressionValues.operatorValue))}
         />
       </span>

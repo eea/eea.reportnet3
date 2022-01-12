@@ -77,7 +77,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
     if (!creationFormState.candidateRule.automatic) {
       setTabContents([
         <TabPanel
-          header={resourcesContext.messages.tabMenuConstraintData}
+          header={resourcesContext.messages['tabMenuConstraintData']}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}
           key="fieldInfoTab"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
@@ -91,7 +91,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
           />
         </TabPanel>,
         <TabPanel
-          header={resourcesContext.messages.tabMenuExpression}
+          header={resourcesContext.messages['tabMenuExpression']}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}
           key="fieldExpressionTab"
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}>
@@ -116,7 +116,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
     } else {
       setTabContents([
         <TabPanel
-          header={resourcesContext.messages.tabMenuConstraintData}
+          header={resourcesContext.messages['tabMenuConstraintData']}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}
           key="fieldInfoTab"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
@@ -468,7 +468,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
                 disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                 id={`${componentName}__update`}
-                label={resourcesContext.messages.update}
+                label={resourcesContext.messages['update']}
                 onClick={onUpdateValidationRule}
                 type="button"
               />
@@ -482,7 +482,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
                 disabled={creationFormState.isValidationCreationDisabled || isSubmitDisabled}
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                 id={`${componentName}__create`}
-                label={resourcesContext.messages.create}
+                label={resourcesContext.messages['create']}
                 onClick={onCreateValidationRule}
                 type="button"
               />
@@ -490,7 +490,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
           )}
           {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
             <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
-              <span>{resourcesContext.messages.fcSubmitButtonDisabled}</span>
+              <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
             </ReactTooltip>
           )}
 
@@ -498,7 +498,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
             className="p-button-secondary p-button-text-icon-left p-button-animated-blink button-right-aligned"
             icon="cancel"
             id={`${componentName}__cancel`}
-            label={resourcesContext.messages.cancel}
+            label={resourcesContext.messages['cancel']}
             onClick={() => onHide()}
             type="button"
           />
@@ -514,8 +514,8 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
         footer={renderFieldQCsFooter}
         header={
           validationContext.ruleEdit
-            ? resourcesContext.messages.editFieldConstraint
-            : resourcesContext.messages.createFieldConstraintTitle
+            ? resourcesContext.messages['editFieldConstraint']
+            : resourcesContext.messages['createFieldConstraintTitle']
         }
         onHide={() => onHide()}
         style={{ width: '975px' }}
