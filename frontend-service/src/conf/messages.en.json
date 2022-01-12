@@ -1423,7 +1423,7 @@
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
     "errorBoundaryClipboardButtonLabel": "Copy to clipboard",
-    "qcHistoryDialogHeader": "QC history",
+    "qcHistoryDialogHeader": "QC History",
     "qcHistoryButtonTooltip": "View QC history",
     "impossibleRequesterRoleError": "The user cannot be assigned as requester",
     "callFmeProcessFailedEvent": "Error calling to FME at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
@@ -1434,6 +1434,7 @@
     "isViewUpdated": "It is possible that the data are not update, because the view has not been updated. The dataset must be validated to update the view.",
     "loadHistoryDataError": "Error loading history data in QC rules",
     "noHistoryData": "There are no historic changes",
-    "allQCsHistoryBtn": "QCs history"
+    "allQCsHistoryBtn": "QCs history",
+    "allQCsHistoryHeader": "All QCs history"
   }
 }
