@@ -757,7 +757,8 @@ body .p-fileupload-files {
   display: table-cell;
   width: 100%;
   font-size: 0.9em;
-  text-align: center;
+  word-break: break-all;
+  text-align: left;
 }
 body .p-fileupload .p-progressbar {
   top: 0;

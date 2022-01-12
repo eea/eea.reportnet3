@@ -95,6 +95,7 @@
     "close": "Close",
     "closed": "Closed",
     "closeSidebar": "Close sidebar",
+    "codelistItems": "Code list items",
     "codelistEditor": "Single select editor",
     "codelistEditorItems": "Single select items",
     "codelistEditorItemsMessage": "Press <strong>enter</strong>, <strong>tab</strong> or <strong>paste the list</strong> (separated by semicolons) <u><strong>to add</strong></u> new items.",
@@ -1436,6 +1437,8 @@
     "noHistoryData": "There are no historic changes",
     "allQCsHistoryBtn": "QCs history",
     "unpinned": "Unpinned",
-    "isViewUpdated": "Note: The data may not be up to date because the view has not been updated. The dataset must be validated."
+    "isViewUpdated": "Note: The data may not be up to date because the view has not been updated. The dataset must be validated.",
+    "moveUp": "Move up",
+    "moveDown": "Move down"
   }
 }
