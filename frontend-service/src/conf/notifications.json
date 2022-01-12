@@ -819,6 +819,7 @@
         { "key": "FILTER_DATA_ERROR" },
         { "key": "CALL_FME_PROCESS_FAILED_EVENT" },
         { "key": "LOAD_DATASET_SCHEMA_INFO_ERROR" }
+        { "key": "LOAD_HISTORY_DATA_ERROR" }
       ]
     },
     {

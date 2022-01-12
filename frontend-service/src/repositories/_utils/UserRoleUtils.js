@@ -36,6 +36,10 @@ const getUserRoleByDataflow = (dataflowId, accessRoles = [], contextRoles = []) 
 
     const permissions = dataflowPermissions.filter(permission => dataflowRoles.includes(permission.key));
 
+    if (isEmpty(permissions) || permissions.length === 0) {
+      return '';
+    }
+
     return UserRoleUtils.getUserRoleLabel(permissions[0].key);
   }
 };

@@ -1431,6 +1431,10 @@
     "searchByQcList": "Search by (code, name, description, message)",
     "detailedInfoTooltip": "Click to show detailed info",
     "tableInfo": "Table info",
-    "loadDatasetSchemaInfoError": "Error on loading dataset schema information"
+    "loadDatasetSchemaInfoError": "Error on loading dataset schema information",
+    "loadHistoryDataError": "Error loading history data in QC rules",
+    "noHistoryData": "There are no historic changes",
+    "allQCsHistoryBtn": "QCs history",
+    "isViewUpdated": "Note: The data may not be up to date because the view has not been updated. The dataset must be validated."
   }
 }

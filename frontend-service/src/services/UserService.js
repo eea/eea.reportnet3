@@ -1,3 +1,5 @@
+import isNil from 'lodash/isNil';
+
 import { config } from 'conf/index';
 
 import { UserRepository } from 'repositories/UserRepository';
@@ -60,8 +62,8 @@ export const UserService = {
     const currentTokens = LocalUserStorageUtils.getTokens();
     LocalUserStorageUtils.remove();
 
-    if (!currentTokens) {
-      return;
+    if (isNil(currentTokens)) {
+      return null;
     }
 
     return await UserRepository.logout(currentTokens.refreshToken);

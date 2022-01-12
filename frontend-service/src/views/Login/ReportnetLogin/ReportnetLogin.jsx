@@ -81,6 +81,8 @@ const ReportnetLogin = () => {
     }
   };
 
+  const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
   return (
     <div className="rp-container login">
       <div className={`${styles.loginBoxContainer}`}>
@@ -146,8 +148,8 @@ const ReportnetLogin = () => {
                 id="kc-login"
                 label={resourcesContext.messages['login']}
                 layout="simple"
-                onClick={() => onLogin()}
-                type="submit"
+                onClick={onLogin}
+                type={isFirefox ? 'button' : 'submit'}
               />
             </fieldset>
           </form>
