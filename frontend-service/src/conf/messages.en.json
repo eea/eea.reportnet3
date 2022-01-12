@@ -1437,6 +1437,8 @@
     "allQCsHistoryBtn": "QCs history",
     "unpinned": "Unpinned",
     "isViewUpdated": "Note: The data may not be up to date because the view has not been updated. The dataset must be validated.",
-    "allQCsHistoryHeader": "All QCs history"
+    "allQCsHistoryHeader": "All QCs history",
+    "metadata": "Metadata",
+    "timestamp": "Timestamp"
   }
 }

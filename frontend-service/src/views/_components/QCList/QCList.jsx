@@ -21,7 +21,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
 import { MyFilters } from 'views/_components/MyFilters';
 import { QCFieldEditor } from './_components/QCFieldEditor';
-import { QCsHistory } from 'views/_components/QCsHistory';
+import { QCSpecificHistory } from 'views/_components/QCSpecificHistory';
 import { Spinner } from 'views/_components/Spinner';
 import { TrafficLight } from 'views/_components/TrafficLight';
 
@@ -197,10 +197,11 @@ export const QCList = ({
         validationsServiceList?.validations?.map(validation => {
           return {
             automaticType: validation.automaticType,
-            id: validation.id,
             description: validation.description,
+            id: validation.id,
             message: validation.message,
-            name: validation.name
+            name: validation.name,
+            shortCode: validation.shortCode
           };
         })
       );
@@ -843,19 +844,15 @@ export const QCList = ({
   return (
     <Fragment>
       {validationList()}
-
       {tabsValidationsState.isHistoryDialogVisible && (
-        <QCsHistory
+        <QCSpecificHistory
           datasetId={dataset.datasetId}
           isDialogVisible={tabsValidationsState.isHistoryDialogVisible}
           onCloseDialog={onCloseHistoryDialog}
           validationId={tabsValidationsState.validationId}
-          validations={tabsValidationsState?.validationList?.validations}
         />
       )}
-
       {renderAllQCsHistory()}
-
       {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
     </Fragment>
   );
