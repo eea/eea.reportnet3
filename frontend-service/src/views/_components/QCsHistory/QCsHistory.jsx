@@ -224,7 +224,11 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     <Dialog
       className={`responsiveDialog ${styles.dialogWidth}`}
       footer={dialogFooter}
-      header={resourcesContext.messages['qcHistoryDialogHeader']}
+      header={
+        isAllQCsHistoryDialog
+          ? resourcesContext.messages['allQCsHistoryHeader']
+          : resourcesContext.messages['qcHistoryDialogHeader']
+      }
       onHide={onCloseDialog}
       visible={isDialogVisible}>
       {renderHistoryDialogContent()}
