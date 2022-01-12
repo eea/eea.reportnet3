@@ -1557,8 +1557,8 @@ const Dataflow = () => {
           <ApiKeyDialog
             dataflowId={dataflowId}
             dataProviderId={dataProviderId}
-            hasCustodianPermissions={dataflowState.hasCustodianPermissions}
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
+            isCustodian={isLeadDesigner}
             manageDialogs={manageDialogs}
           />
         )}
