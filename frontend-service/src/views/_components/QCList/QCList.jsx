@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useRecoilValue } from 'recoil';
 
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
@@ -30,6 +31,8 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
+import { filterByState } from '../MyFilters/_functions/Stores/filtersStores';
+
 import { qcListReducer } from './Reducers/qcListReducer';
 
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
@@ -49,10 +52,12 @@ export const QCList = ({
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
+  const filterBy = useRecoilValue(filterByState('qcList'));
+  const isDataFiltered = !isEmpty(filterBy);
+
   const [tabsValidationsState, tabsValidationsDispatch] = useReducer(qcListReducer, {
     deletedRuleId: null,
     editingRows: [],
-    filtered: false,
     filteredData: [],
     hasEmptyFields: false,
     initialFilteredData: [],
@@ -86,13 +91,13 @@ export const QCList = ({
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
-      {tabsValidationsState.filtered &&
+      {isDataFiltered &&
       tabsValidationsState.validationList.validations.length !== tabsValidationsState.filteredData.length
         ? `${resourcesContext.messages['filtered']} : ${tabsValidationsState.filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {tabsValidationsState.validationList.validations.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
-      {tabsValidationsState.filtered &&
+      {isDataFiltered &&
       tabsValidationsState.validationList.validations.length === tabsValidationsState.filteredData.length
         ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
         : ''}
@@ -708,6 +713,7 @@ export const QCList = ({
 
   const FILTER_OPTIONS = [
     {
+      key: 'search',
       label: resourcesContext.messages['searchByQcList'],
       searchBy: ['shortCode', 'name', 'description', 'message'],
       type: 'SEARCH'
@@ -717,13 +723,13 @@ export const QCList = ({
         { key: 'table', label: resourcesContext.messages['table'] },
         { key: 'field', label: resourcesContext.messages['field'] },
         { key: 'entityType', label: resourcesContext.messages['entityType'] },
-        { key: 'levelError', label: resourcesContext.messages['levelError'] },
+        { key: 'levelError', label: resourcesContext.messages['levelError'], template: 'LevelError' },
         {
           key: 'automatic',
           label: resourcesContext.messages['creationMode'],
           multiSelectOptions: [
-            { type: resourcesContext.messages['automatic'], value: true },
-            { type: resourcesContext.messages['manual'], value: false }
+            { type: resourcesContext.messages['automatic'].toUpperCase(), value: true },
+            { type: resourcesContext.messages['manual'].toUpperCase(), value: false }
           ]
         },
         {
@@ -732,7 +738,8 @@ export const QCList = ({
           multiSelectOptions: [
             { type: resourcesContext.messages['enabled'], value: true },
             { type: resourcesContext.messages['disabled'], value: false }
-          ]
+          ],
+          template: 'LevelError'
         },
         {
           key: 'isCorrect',
@@ -740,7 +747,8 @@ export const QCList = ({
           multiSelectOptions: [
             { type: resourcesContext.messages['valid'], value: true },
             { type: resourcesContext.messages['invalid'], value: false }
-          ]
+          ],
+          template: 'LevelError'
         }
       ],
       type: 'MULTI_SELECT'
@@ -803,7 +811,7 @@ export const QCList = ({
               property: 'id',
               condition:
                 validationContext.isFetchingData ||
-                tabsValidationsState.filtered ||
+                isDataFiltered ||
                 tabsValidationsState.hasEmptyFields ||
                 tabsValidationsState.isTableSorted,
               requiredFields: ['name', 'message', 'shortCode']

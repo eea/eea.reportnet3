@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -19,9 +20,13 @@ const applyDates = ({ filterBy, filterByKeys, item }) => {
     .map(filteredKey => {
       const dates = filterBy[filteredKey];
       const value = new Date(item[filteredKey]).getTime();
-      if (dates[0] && !dates[1]) return value >= getStartOfDay(dates[0]) && getEndOfDay(dates[0]) >= value;
-      else if (dates[0] && dates[1]) return value >= getStartOfDay(dates[0]) && getEndOfDay(dates[1]) >= value;
-      else return true;
+      if (dates[0] && !dates[1]) {
+        return value >= getStartOfDay(dates[0]) && getEndOfDay(dates[0]) >= value;
+      } else if (dates[0] && dates[1]) {
+        return value >= getStartOfDay(dates[0]) && getEndOfDay(dates[1]) >= value;
+      } else {
+        return true;
+      }
     })
     .reduce((previousValue, currentValue) => previousValue && currentValue);
 };
@@ -40,9 +45,7 @@ const applyMultiSelects = ({ filterBy, filterByKeys, item }) => {
   const filteredKeys = filterByKeys.MULTI_SELECT.filter(key => Object.keys(filterBy).includes(key));
 
   return filteredKeys.every(
-    filteredKey =>
-      isEmpty(filterBy[filteredKey]) ||
-      filterBy[filteredKey].toString().toUpperCase().includes(item[filteredKey].toString().toUpperCase())
+    filteredKey => isEmpty(filterBy[filteredKey]) || filterBy[filteredKey].includes(item[filteredKey].toString())
   );
 };
 
@@ -51,7 +54,9 @@ const applySearch = ({ filterByKeys, item, value }) => {
 
   return (
     isEmpty(filteredKeys) ||
-    filteredKeys.some(key => areEquals(value, '') || item[key].toLowerCase().includes(value.toLowerCase()))
+    filteredKeys.some(
+      key => areEquals(value, '') || (!isNil(item[key]) && item[key].toLowerCase().includes(value.toLowerCase()))
+    )
   );
 };
 
