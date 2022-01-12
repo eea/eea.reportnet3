@@ -168,7 +168,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
 
   return (
     <Dialog
-      className={`responsiveDialog ${styles.dialogSize}`}
+      className={`responsiveDialog ${styles.dialogWidth}`}
       footer={dialogFooter}
       header={resourcesContext.messages['qcHistoryDialogHeader']}
       onHide={onCloseDialog}

@@ -5,14 +5,17 @@
   }
 }
 
-.dialogSize,
 .dialogContent,
 .noDataContent {
-  min-height: 42vh;
+  min-height: 56vh;
+}
+
+.dialogWidth {
+  min-width: 70vw;
 }
 
 .loadingSpinner {
-  height: 42vh;
+  height: 56vh;
   display: flex;
   justify-content: center;
   align-items: center;
