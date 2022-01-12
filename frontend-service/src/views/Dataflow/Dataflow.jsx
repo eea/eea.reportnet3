@@ -1505,6 +1505,7 @@ const Dataflow = () => {
         {dataflowState.isReportingDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
+            isCustodian={isLeadDesigner}
             isEditForm
             isVisible={dataflowState.isReportingDataflowDialogVisible}
             manageDialogs={manageDialogs}
