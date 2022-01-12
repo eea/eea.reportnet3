@@ -108,14 +108,14 @@ export const useLeftSideBar = (
         icon: 'users',
         isVisible: buttonsVisibility.usersListBtn,
         label:
-          ((isNil(dataProviderId) && dataflowState.isCustodian) ||
+          ((isNil(dataProviderId) && dataflowState.hasCustodianPermissions) ||
             (isNil(representativeId) && dataflowState.isObserver)) &&
           dataflowState.status === config.dataflowStatus.OPEN
             ? TextByDataflowTypeUtils.getKeyByDataflowType(dataflowState.dataflowType, 'userListBtnLabel')
             : 'dataflowUsersList',
         onClick: () => manageDialogs('isUserListVisible', true),
         title:
-          ((isNil(dataProviderId) && dataflowState.isCustodian) ||
+          ((isNil(dataProviderId) && dataflowState.hasCustodianPermissions) ||
             (isNil(representativeId) && dataflowState.isObserver)) &&
           dataflowState.status === config.dataflowStatus.OPEN
             ? TextByDataflowTypeUtils.getKeyByDataflowType(dataflowState.dataflowType, 'userListBtnLabel')
