@@ -140,7 +140,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
           break;
       }
 
-      return <Column body={template} field={col.field} header={header} key={col.field} />;
+      return <Column body={template} field={col.field} header={header} key={col.field} sortable />;
     });
   };
 
