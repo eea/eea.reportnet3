@@ -25,8 +25,8 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const filterBy = useRecoilValue(filterByState('userList'));
-  const isDataFiltered = !isEmpty(filterBy);
 
+  const [isDataFiltered, setIsDataFiltered] = useState(false);
   const [userListData, setUserListData] = useState([]);
   const [filteredData, setFilteredData] = useState(userListData);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,10 +36,16 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   }, []);
 
   useEffect(() => {
+    const isDataFiltered = existFilterByWithData(filterBy);
+    setIsDataFiltered(isDataFiltered);
     if (!isDataFiltered) {
       setFilteredData(userListData);
     }
-  }, [isDataFiltered]);
+  }, [filterBy]);
+
+  const existFilterByWithData = filterBy => {
+    return Object.values(filterBy).filter(item => !isEmpty(item)).length > 0;
+  };
 
   const fetchData = async () => {
     try {
