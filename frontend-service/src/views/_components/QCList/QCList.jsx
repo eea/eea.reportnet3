@@ -717,13 +717,13 @@ export const QCList = ({
         { key: 'table', label: resourcesContext.messages['table'] },
         { key: 'field', label: resourcesContext.messages['field'] },
         { key: 'entityType', label: resourcesContext.messages['entityType'] },
-        { key: 'levelError', label: resourcesContext.messages['levelError'], template: 'LEVEL_ERROR' },
+        { key: 'levelError', label: resourcesContext.messages['levelError'], template: 'LevelError' },
         {
           key: 'automatic',
           label: resourcesContext.messages['creationMode'],
           multiSelectOptions: [
-            { type: resourcesContext.messages['automatic'], value: true },
-            { type: resourcesContext.messages['manual'], value: false }
+            { type: resourcesContext.messages['automatic'].toUpperCase(), value: true },
+            { type: resourcesContext.messages['manual'].toUpperCase(), value: false }
           ]
         },
         {
@@ -733,7 +733,7 @@ export const QCList = ({
             { type: resourcesContext.messages['enabled'], value: true },
             { type: resourcesContext.messages['disabled'], value: false }
           ],
-          template: 'QC_STATUS'
+          template: 'LevelError'
         },
         {
           key: 'isCorrect',
@@ -742,7 +742,7 @@ export const QCList = ({
             { type: resourcesContext.messages['valid'], value: true },
             { type: resourcesContext.messages['invalid'], value: false }
           ],
-          template: 'QC_VALIDITY'
+          template: 'LevelError'
         }
       ],
       type: 'MULTI_SELECT'

@@ -353,15 +353,11 @@ export const MyFilters = ({
   };
 
   const renderMultiSelectOptionTemplate = (template, type) => {
-    switch (template) {
-      case 'LEVEL_ERROR':
-      case 'QC_STATUS':
-      case 'QC_VALIDITY':
-        return <LevelError type={type} />;
-
-      default:
-        return <span className={styles.statusBox}>{type.toString().toUpperCase()}</span>;
+    if (template === 'LevelError') {
+      return <LevelError type={type} />;
     }
+
+    return <span className={styles.statusBox}>{type}</span>;
   };
 
   const renderSearch = option => {
