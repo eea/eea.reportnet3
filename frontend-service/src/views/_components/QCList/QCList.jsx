@@ -658,10 +658,11 @@ export const QCList = ({
     isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
   const onRowEditorValueChange = (props, value, isText = false) => {
-    const inmQCs = [...tabsValidationsState.validationList.validations];
-    const inmEditingRows = [...tabsValidationsState.editingRows];
+    const inmQCs = cloneDeep(tabsValidationsState.validationList.validations);
+    const inmEditingRows = cloneDeep(tabsValidationsState.editingRows);
     const qcIdx = inmQCs.findIndex(qc => qc.id === props.rowData.id);
     const editIdx = inmEditingRows.findIndex(qc => qc.id === props.rowData.id);
+
     if (inmQCs[qcIdx][props.field] !== value && editIdx !== -1) {
       inmQCs[qcIdx][props.field] = isText ? value.trim() : value;
       inmEditingRows[editIdx][props.field] = isText ? value.trim() : value;
