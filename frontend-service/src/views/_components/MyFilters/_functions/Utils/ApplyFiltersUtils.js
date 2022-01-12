@@ -53,7 +53,9 @@ const applySearch = ({ filterByKeys, item, value }) => {
 
   return (
     isEmpty(filteredKeys) ||
-    filteredKeys.some(key => areEquals(value, '') || item[key].toLowerCase().includes(value.toLowerCase()))
+    filteredKeys.some(
+      key => areEquals(value, '') || (item[key] && item[key].toLowerCase().includes(value.toLowerCase()))
+    )
   );
 };
 
