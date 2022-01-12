@@ -22,7 +22,7 @@ import { ValidationService } from 'services/ValidationService';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
-export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validationId }) => {
+export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validationId, validations }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -31,9 +31,12 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
+  const isAllQCsHistoryDialog = isNil(validationId);
+
   useEffect(() => {
     getQcHistoryData();
   }, []);
+
 
   const renderHistoryDialogContent = () => {
     const columns = getHistoryColumns();
@@ -88,8 +91,8 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     return columnData.map(col => {
       if (
         col.field === 'ruleBefore' ||
-        col.field === 'ruleInfoId' ||
-        (!isNil(validationId) && col.field === 'ruleId')
+        (!isAllQCsHistoryDialog && col.field === 'ruleInfoId') ||
+        (!isAllQCsHistoryDialog && col.field === 'ruleId')
       ) {
         return null;
       }
@@ -121,7 +124,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     setLoadingStatus('pending');
 
     try {
-      const response = isNil(validationId)
+      const response = isAllQCsHistoryDialog
         ? await ValidationService.getAllQCsHistoricInfo(datasetId)
         : await ValidationService.getQcHistoricInfo(datasetId, validationId);
       const data = response.data;
@@ -141,8 +144,14 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     </div>
   );
 
-  const ruleIdTemplate = rowData => {
-    return <div>{rowData.ruleId}</div>;
+  const nameTemplate = rowData => {
+    const [currentRule] = validations.filter(validation => rowData.id !== validation.id);
+    return <div>{currentRule?.name}</div>;
+  };
+
+  const codeTemplate = rowData => {
+    const [currentRule] = validations.filter(validation => rowData.id !== validation.id);
+    return <div>{currentRule?.shortCode}</div>;
   };
 
   const timestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;

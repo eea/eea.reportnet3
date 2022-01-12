@@ -1304,8 +1304,15 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             dataflowId={dataflowId}
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={datasetSchemaAllTables}
-            datasetSchemaId={designerState.datasetSchemaId}
-          />
+            datasetSchemaId={designerState.datasetSchemaId}>
+            {designerState.isHistoryDialogVisible && (
+              <QCsHistory
+                datasetId={datasetId}
+                isDialogVisible={designerState.isHistoryDialogVisible}
+                onCloseDialog={onCloseHistoryDialog}
+              />
+            )}
+          </QCList>
         </Dialog>
       );
     }
@@ -1693,14 +1700,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         />
         {validationsListDialog()}
         {renderUniqueConstraintsDialog()}
-
-        {designerState.isHistoryDialogVisible && (
-          <QCsHistory
-            datasetId={datasetId}
-            isDialogVisible={designerState.isHistoryDialogVisible}
-            onCloseDialog={onCloseHistoryDialog}
-          />
-        )}
 
         <Integrations
           dataflowId={dataflowId}
