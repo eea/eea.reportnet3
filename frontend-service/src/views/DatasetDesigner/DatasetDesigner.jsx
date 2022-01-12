@@ -1030,7 +1030,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       />
 
       <Button
-        className="p-button-secondary  p-button-animated-blink"
+        className="p-button-secondary p-button-animated-blink"
         icon="info"
         label={resourcesContext.messages['allQCsHistoryBtn']}
         onClick={() => setIsHistoryDialogVisible(true)}
