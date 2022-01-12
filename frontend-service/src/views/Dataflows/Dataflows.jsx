@@ -531,11 +531,7 @@ const Dataflows = () => {
       },
       {
         nestedOptions: [
-          {
-            key: 'status',
-            label: resourcesContext.messages['status'],
-            isSortable: true
-          },
+          { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' },
           { key: 'userRole', label: resourcesContext.messages['userRole'], isSortable: true },
           {
             key: 'pinned',
@@ -580,7 +576,7 @@ const Dataflows = () => {
     },
     {
       nestedOptions: [
-        { key: 'status', label: resourcesContext.messages['status'], isSortable: true },
+        { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' },
         { key: 'pinned', label: resourcesContext.messages['pinned'], isSortable: true }
       ],
       type: 'MULTI_SELECT'
