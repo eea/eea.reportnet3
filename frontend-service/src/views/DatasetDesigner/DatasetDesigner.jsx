@@ -27,7 +27,7 @@ import { MainLayout } from 'views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Menu } from 'views/_components/Menu';
 import { QCList } from 'views/_components/QCList';
-import { QCsHistory } from 'views/_components/QCsHistory';
+import { QCGenericHistory } from './_components/QCGenericHistory';
 import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
@@ -1000,6 +1000,13 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     <Fragment>
       <Button
         className="p-button-secondary p-button-animated-blink"
+        icon="info"
+        label={resourcesContext.messages['allQCsHistoryBtn']}
+        onClick={() => setIsHistoryDialogVisible(true)}
+        style={{ float: 'left' }}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
         disabled={designerState.isDownloadingQCRules}
         icon={designerState.isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadQCsButtonLabel']}
@@ -1029,13 +1036,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         style={{ float: 'left' }}
       />
 
-      <Button
-        className="p-button-secondary"
-        disabled
-        icon="info"
-        label={resourcesContext.messages['allQCsHistoryBtn']}
-        onClick={() => setIsHistoryDialogVisible(true)}
-      />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
@@ -1695,14 +1695,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         {validationsListDialog()}
         {renderUniqueConstraintsDialog()}
 
-        {designerState.isHistoryDialogVisible && (
-          <QCsHistory
-            datasetId={datasetId}
-            isDialogVisible={designerState.isHistoryDialogVisible}
-            onCloseDialog={onCloseHistoryDialog}
-          />
-        )}
-
         <Integrations
           dataflowId={dataflowId}
           datasetId={datasetId}
@@ -1799,6 +1791,14 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               visible={designerState.isValidationViewerVisible}
             />
           </Dialog>
+        )}
+
+        {designerState.isHistoryDialogVisible && (
+          <QCGenericHistory
+            datasetId={datasetId}
+            isDialogVisible={designerState.isHistoryDialogVisible}
+            onCloseDialog={onCloseHistoryDialog}
+          />
         )}
 
         {designerState.isImportDatasetDialogVisible && (

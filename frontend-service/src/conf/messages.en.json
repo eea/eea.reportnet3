@@ -1010,7 +1010,7 @@
     "qcEnabled": "Enabled",
     "qcManager": "QC Manager",
     "qcRuleCreationError": "Error creating the rule, please check it",
-    "qcRules": "QC Rules",
+    "qcRules": "QC rules",
     "qcRuleUpdatingError": "Error updating the rule, please check it",
     "quickEdit": "Quick edit",
     "readAndWritePermission": "Read/Write",
@@ -1439,6 +1439,9 @@
     "unpinned": "Unpinned",
     "isViewUpdated": "Note: The data may not be up to date because the view has not been updated. The dataset must be validated.",
     "moveUp": "Move up",
-    "moveDown": "Move down"
+    "moveDown": "Move down",
+    "allQCsHistoryHeader": "All QCs history",
+    "metadata": "Metadata",
+    "timestamp": "Timestamp"
   }
 }
