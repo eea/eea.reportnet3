@@ -189,12 +189,12 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
   );
 
   const nameTemplate = rowData => {
-    const [currentRule] = validations.filter(validation => rowData.ruleId === validation.id);
+    const currentRule = validations.find(validation => rowData.ruleId === validation.id);
     return <div>{currentRule?.name}</div>;
   };
 
   const codeTemplate = rowData => {
-    const [currentRule] = validations.filter(validation => rowData.ruleId === validation.id);
+    const currentRule = validations.find(validation => rowData.ruleId === validation.id);
     return <div>{currentRule?.shortCode}</div>;
   };
 
