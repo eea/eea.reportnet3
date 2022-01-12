@@ -10,9 +10,6 @@ export const qcListReducer = (state, { type, payload }) => {
     case 'IS_DELETE_DIALOG_VISIBLE':
       return { ...state, isDeleteDialogVisible: payload.value };
 
-    case 'IS_FILTERED':
-      return { ...state, filtered: payload.value };
-
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
