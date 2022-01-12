@@ -20,7 +20,6 @@ import java.util.Optional;
 import org.apache.commons.io.FileUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMapper;
 import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.mapper.FieldValidationMapper;
@@ -86,7 +85,6 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
-import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -1135,24 +1133,6 @@ public class DatasetServiceTest {
    */
   @Rule
   public ExpectedException thrown = ExpectedException.none();
-
-  /**
-   * Export file test.
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Test
-  public void exportFileTest() throws EEAException, IOException {
-    byte[] expectedResult = "".getBytes();
-    ReportingDataset dataset = new ReportingDataset();
-    dataset.setDataflowId(1L);
-    when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
-    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-        Mockito.anyBoolean())).thenReturn(expectedResult);
-    assertEquals("not equals", expectedResult,
-        datasetService.exportFile(1L, FileTypeEnum.CSV.getValue(), ""));
-  }
 
   /**
    * Update field test.
@@ -2916,68 +2896,6 @@ public class DatasetServiceTest {
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.anyIterable());
   }
 
-
-
-  /**
-   * Save public files.
-   *
-   * @throws IOException Signals that an I/O exception has occurred.
-   * @throws InvalidFileException the invalid file exception
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void savePublicFiles() throws IOException, InvalidFileException, EEAException {
-    DataSetMetabase dataSetMetabase = new DataSetMetabase();
-    dataSetMetabase.setDataflowId(1L);
-    dataSetMetabase.setDataProviderId(1L);
-    dataSetMetabase.setDatasetSchema("603362319d49f04fce13b68f");
-    List<RepresentativeVO> representativeList = new ArrayList<>();
-    RepresentativeVO representativeVO = new RepresentativeVO();
-    representativeVO.setDataProviderId(1L);
-    representativeVO.setRestrictFromPublic(false);
-    representativeList.add(representativeVO);
-    DataProviderVO dataProvider = new DataProviderVO();
-    dataProvider.setLabel("SPAIN");
-    dataProvider.setId(1l);
-    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.anyLong()))
-        .thenReturn(representativeList);
-    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
-        .thenReturn(dataProvider);
-
-    List<DesignDataset> desingDataset = new ArrayList<>();
-    DesignDataset designDataset = new DesignDataset();
-    designDataset.setDatasetSchema("603362319d49f04fce13b68f");
-    designDataset.setDataSetName("test");
-    desingDataset.add(designDataset);
-    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
-        .thenReturn(desingDataset);
-    List<DataSetMetabase> datasetMetabaseList = new ArrayList<>();
-    DataSetMetabase dataSetMetabaseEnd = new DataSetMetabase();
-    dataSetMetabaseEnd.setDatasetSchema("603362319d49f04fce13b68f");
-    datasetMetabaseList.add(dataSetMetabaseEnd);
-    Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
-        Mockito.anyLong())).thenReturn(datasetMetabaseList);
-    Mockito.when(schemasRepository.findAvailableInPublicByIdDataSetSchema(Mockito.any()))
-        .thenReturn(true);
-    DataSetSchema dataSetSchema = new DataSetSchema();
-    dataSetSchema.setAvailableInPublic(true);
-    dataSetSchema.setTableSchemas(new ArrayList<>());
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(dataSetSchema);
-    when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
-    byte[] expectedResult = "".getBytes();
-    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-        Mockito.anyBoolean())).thenReturn(expectedResult);
-    Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
-        Mockito.anyLong())).thenReturn(datasetMetabaseList);
-    DataFlowVO dataflow = new DataFlowVO();
-    dataflow.setId(1L);
-    dataflow.setType(TypeDataflowEnum.REPORTING);
-    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
-    datasetService.savePublicFiles(1L, 1L);
-    Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
-  }
-
-
   /**
    * Export public file throws.
    *
@@ -3615,72 +3533,6 @@ public class DatasetServiceTest {
       Assert.assertEquals(EEAErrorMessage.IS_RESTRICT_FROM_PUBLIC, e.getMessage());
       throw e;
     }
-  }
-
-  @Test
-  public void createReferenceDatasetFiles() throws EEAException, IOException {
-    DesignDataset desingDataset = new DesignDataset();
-    desingDataset.setId(2L);
-    desingDataset.setDatasetSchema("5cf0e9b3b793310e9ceca190");
-    DataSetSchema schema = new DataSetSchema();
-    schema.setIdDataSetSchema(new ObjectId());
-    schema.setAvailableInPublic(true);
-    schema.setReferenceDataset(true);
-    TableSchema desingTableSchema = new TableSchema();
-    desingTableSchema.setToPrefill(Boolean.TRUE);
-    desingTableSchema.setIdTableSchema(new ObjectId("5cf0e9b3b793310e9ceca191"));
-    RecordSchema recordSchema = new RecordSchema();
-    recordSchema.setIdRecordSchema(new ObjectId("5cf0e9b3b793310e9ceca192"));
-    List<FieldSchema> fieldSchemas = new ArrayList<>();
-    FieldSchema fieldSchema = new FieldSchema();
-    fieldSchema.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca193"));
-    fieldSchema.setIdRecord(recordSchema.getIdRecordSchema());
-    fieldSchema.setType(DataType.ATTACHMENT);
-    fieldSchemas.add(fieldSchema);
-    recordSchema.setFieldSchema(fieldSchemas);
-    desingTableSchema.setRecordSchema(recordSchema);
-    List<TableSchema> desingTableSchemas = new ArrayList<>();
-    desingTableSchemas.add(desingTableSchema);
-    schema.setTableSchemas(desingTableSchemas);
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-    List<RecordValue> recordDesignValues = new ArrayList<>();
-    RecordValue record = new RecordValue();
-    TableValue table = new TableValue();
-    table.setId(1L);
-    record.setTableValue(table);
-    record.setIdRecordSchema(recordSchema.getIdRecordSchema().toString());
-    recordDesignValues.add(record);
-    DataSetMetabase dataset = new DataSetMetabase();
-    dataset.setDataflowId(1L);
-    dataset.setId(1L);
-    dataset.setDatasetSchema("5cf0e9b3b793310e9ceca193");
-
-    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
-
-    when(designDatasetRepository.findByDataflowId(Mockito.anyLong()))
-        .thenReturn(new ArrayList<DesignDataset>());
-    when(dataSetMetabaseRepository.findDataflowIdById(Mockito.any())).thenReturn(1L);
-    List<FieldValue> fieldValues = new ArrayList<>();
-    FieldValue field = new FieldValue();
-    field.setType(DataType.ATTACHMENT);
-    field.setId("0A07FD45F1CD7965A2B0F13E57948A13");
-    field.setRecord(record);
-    fieldValues.add(field);
-
-    AttachmentValue attachment = new AttachmentValue();
-    attachment.setFieldValue(field);;
-    when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
-    byte[] expectedResult = "".getBytes();
-    when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-        Mockito.anyBoolean())).thenReturn(expectedResult);
-    attachment.setContent(expectedResult);
-    when(attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(Mockito.anyString()))
-        .thenReturn(Arrays.asList(attachment));
-
-
-    datasetService.createReferenceDatasetFiles(dataset);
-    Mockito.verify(fileExportFactory, times(1)).createContext(Mockito.any());
-
   }
 
   @Test

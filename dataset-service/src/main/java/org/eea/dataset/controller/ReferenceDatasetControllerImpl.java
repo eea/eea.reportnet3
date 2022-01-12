@@ -1,5 +1,6 @@
 package org.eea.dataset.controller;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.eea.dataset.service.ReferenceDatasetService;
@@ -113,8 +114,8 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
       @ApiParam(type = "Boolean", value = "updatable",
           example = "0") @RequestParam("updatable") Boolean updatable) {
     try {
-      referenceDatasetService.updateUpdatable(datasetId, updatable);
-    } catch (EEAException e) {
+      referenceDatasetService.updateUpdatableReferenceDataset(datasetId, updatable);
+    } catch (EEAException | IOException e) {
       LOG_ERROR.error("Error updating reference dataset. DatasetId: {}. Error Message: {}",
           datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,

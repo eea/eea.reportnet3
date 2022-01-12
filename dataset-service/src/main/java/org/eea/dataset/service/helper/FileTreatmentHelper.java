@@ -5,7 +5,6 @@ package org.eea.dataset.service.helper;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +24,7 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
@@ -38,7 +38,11 @@ import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -52,11 +56,15 @@ import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
@@ -103,6 +111,9 @@ public class FileTreatmentHelper implements DisposableBean {
 
   /** The Constant USER: {@value}. */
   private static final String USER = "root";
+
+  /** The Constant FILE_PUBLIC_DATASET_PATTERN_NAME. */
+  private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s";
 
   /** The import executor service. */
   private ExecutorService importExecutorService;
@@ -183,6 +194,18 @@ public class FileTreatmentHelper implements DisposableBean {
   /** The record store controller zuul. */
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
+
+  /** The design dataset repository. */
+  @Autowired
+  private DesignDatasetRepository designDatasetRepository;
+
+  /** The data set metabase repository. */
+  @Autowired
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * Initialize the executor service.
@@ -1278,12 +1301,11 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param tableSchemaId the table schema id
    * @param tableName the table name
    * @throws EEAException the EEA exception
-   * @throws FileNotFoundException the file not found exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Async
   public void exportFile(Long datasetId, String mimeType, String tableSchemaId, String tableName)
-      throws EEAException, FileNotFoundException, IOException {
+      throws EEAException, IOException {
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
         .fileName(tableName).datasetSchemaId(tableSchemaId).error("Error exporting table data")
@@ -1293,7 +1315,7 @@ public class FileTreatmentHelper implements DisposableBean {
         "Failed generating file from datasetId {} with schema {}.", datasetId, tableSchemaId);
     fileFolder.mkdirs();
     try {
-      byte[] file = datasetService.exportFile(datasetId, mimeType, tableSchemaId);
+      byte[] file = createFile(datasetId, mimeType, tableSchemaId);
       File fileWrite =
           new File(new File(pathPublicFile, "dataset-" + datasetId), tableName + "." + mimeType);
       try (OutputStream out = new FileOutputStream(fileWrite.toString());) {
@@ -1306,6 +1328,257 @@ public class FileTreatmentHelper implements DisposableBean {
           tableSchemaId);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_FAILED_EVENT, null,
           notificationVO);
+    }
+  }
+
+  /**
+   * Creates the reference dataset files.
+   *
+   * @param dataset the dataset
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Async
+  public void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
+
+    List<DesignDataset> desingDataset =
+        designDatasetRepository.findByDataflowId(dataset.getDataflowId());
+    // look for the name of the design dataset to put the right name to the file
+    String datasetDesingName = "";
+    for (DesignDataset designDatasetVO : desingDataset) {
+      if (designDatasetVO.getDatasetSchema().equalsIgnoreCase(dataset.getDatasetSchema())) {
+        datasetDesingName = designDatasetVO.getDataSetName();
+      }
+    }
+
+    try {
+      // create the excel file
+      byte[] file = createFile(dataset.getId(), FileTypeEnum.XLSX.getValue(), null);
+      // we save the file in its files
+      if (null != file) {
+        String nameFileUnique = String.format("%s", datasetDesingName);
+        String nameFileScape = nameFileUnique + ".xlsx";
+
+        // we create the files and zip with the attachment if it is necessary
+        createFilesAndZip(dataset.getDataflowId(), null, dataset, file, nameFileUnique,
+            nameFileScape);
+
+        // we save the file in metabase with the name without the route
+        dataset.setPublicFileName(nameFileUnique + ".zip");
+        dataSetMetabaseRepository.save(dataset);
+      }
+    } catch (EEAException e) {
+      LOG_ERROR.error("File not created in dataflow {}. Message: {}", dataset.getDataflowId(),
+          e.getMessage(), e);
+    }
+    LOG.info("File created in dataflowId {}", dataset.getDataflowId());
+
+  }
+
+  /**
+   * Save public files.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataSetDataProvider the data set data provider
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  public void savePublicFiles(Long dataflowId, Long dataSetDataProvider) throws IOException {
+
+    LOG.info("Start creating files. DataflowId: {} DataProviderId: {}", dataflowId,
+        dataSetDataProvider);
+
+    List<RepresentativeVO> representativeList =
+        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
+
+    // we find representative
+    RepresentativeVO representative = representativeList.stream().filter(
+        representativeData -> representativeData.getDataProviderId().equals(dataSetDataProvider))
+        .findAny().orElse(null);
+
+    if (null != representative) {
+      // we create the dataflow folder to save it
+
+      File directoryDataflow = new File(pathPublicFile, "dataflow-" + dataflowId);
+      File directoryDataProvider =
+          new File(directoryDataflow, "dataProvider-" + representative.getDataProviderId());
+      // we create the dataprovider folder to save it andwe always delete it and put new files
+      FileUtils.deleteDirectory(directoryDataProvider);
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+      if (!TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
+        createAllDatasetFiles(dataflowId, representative.getDataProviderId());
+      } else {
+        // we delete all file names in the table dataset
+        List<DataSetMetabase> datasetMetabaseList = dataSetMetabaseRepository
+            .findByDataflowIdAndDataProviderId(dataflowId, representative.getDataProviderId());
+        datasetMetabaseList.stream().forEach(datasetFileName -> {
+          datasetFileName.setPublicFileName(null);
+        });
+        dataSetMetabaseRepository.saveAll(datasetMetabaseList);
+      }
+    }
+  }
+
+  /**
+   * Creates the all dataset files.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  private void createAllDatasetFiles(Long dataflowId, Long dataProviderId) throws IOException {
+
+    DataProviderVO dataProvider = representativeControllerZuul.findDataProviderById(dataProviderId);
+
+    List<DataSetMetabase> datasetMetabaseList =
+        dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
+
+    // now we create all files depends if they are avaliable
+    for (DataSetMetabase datasetToFile : datasetMetabaseList) {
+      if (schemasRepository
+          .findAvailableInPublicByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()))) {
+
+        // we put the good in the correct field
+        List<DesignDataset> desingDataset = designDatasetRepository.findByDataflowId(dataflowId);
+        // we find the name of the dataset to asing it for file
+        String datasetDesingName = "";
+        for (DesignDataset designDatasetVO : desingDataset) {
+          if (designDatasetVO.getDatasetSchema()
+              .equalsIgnoreCase(datasetToFile.getDatasetSchema())) {
+            datasetDesingName = designDatasetVO.getDataSetName();
+          }
+        }
+
+        try {
+          // 1º we create
+          byte[] file = createFile(datasetToFile.getId(), FileTypeEnum.XLSX.getValue(), null);
+          // we save the file in its files
+          if (null != file) {
+            String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
+                dataProvider.getCode(), datasetDesingName);
+            String nameFileScape = nameFileUnique + ".xlsx";
+
+            // we create the files and zip with the document if it is necessary
+            createFilesAndZip(dataflowId, dataProviderId, datasetToFile, file, nameFileUnique,
+                nameFileScape);
+
+
+            // we save the file in metabase with the name without the route
+            datasetToFile.setPublicFileName(nameFileUnique + ".zip");
+            dataSetMetabaseRepository.save(datasetToFile);
+          }
+        } catch (EEAException e) {
+          LOG_ERROR.error(
+              "File not created in dataflow {} with dataprovider {} with datasetId {} message {}",
+              dataflowId, datasetToFile.getDataProviderId(), datasetToFile.getId(), e.getMessage(),
+              e);
+        }
+        LOG.info("Start files created in DataflowId: {} with DataProviderId: {}", dataflowId,
+            datasetToFile.getDataProviderId());
+      } else {
+        datasetToFile.setPublicFileName(null);
+        dataSetMetabaseRepository.save(datasetToFile);
+      }
+    }
+  }
+
+  /**
+   * Creates the file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   * @param tableSchemaId the table schema id
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Transactional
+  public byte[] createFile(Long datasetId, String mimeType, final String tableSchemaId)
+      throws EEAException, IOException {
+    // Get the dataFlowId from the metabase
+    Long idDataflow = datasetService.getDataFlowIdById(datasetId);
+
+    // Find if the dataset type is EU to include the countryCode
+    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
+        || DatasetTypeEnum.COLLECTION.equals(datasetType);
+
+    final IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
+    LOG.info("End of createFile");
+    return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode,
+        false);
+  }
+
+  private void createFilesAndZip(Long dataflowId, Long dataProviderId,
+      DataSetMetabase datasetToFile, byte[] file, String nameFileUnique, String nameFileScape)
+      throws IOException {
+
+    // we create folder to save the file.zip
+    File fileFolderProvider = null;
+    if (dataProviderId != null) {
+      fileFolderProvider = new File((new File(pathPublicFile, "dataflow-" + dataflowId.toString())),
+          "dataProvider-" + dataProviderId.toString());
+    } else {
+      fileFolderProvider = new File(pathPublicFile, "dataflow-" + dataflowId.toString());
+    }
+    fileFolderProvider.mkdirs();
+
+    // we create the file.zip
+    File fileWriteZip = null;
+    if (dataProviderId != null) {
+      fileWriteZip =
+          new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+              "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".zip");
+    } else {
+      fileWriteZip = new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
+          nameFileUnique + ".zip");
+    }
+    // create the context to add all files in a treemap inside to attachment and file information
+    try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+      // we get the dataschema and check every table to see if find any field attachemnt
+      DataSetSchema dataSetSchema =
+          schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
+      for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+
+        // we find if in any table have one field type ATTACHMENT
+        List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
+            .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
+            .collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
+
+          LOG.info("We  are in tableSchema with id {} looking if we have attachments",
+              tableSchema.getIdTableSchema());
+          // We took every field for every table
+          for (FieldSchema fieldAttach : fieldSchemaAttachment) {
+            List<AttachmentValue> attachmentValue = attachmentRepository
+                .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
+
+            // if there are filled we create a folder and inside of any folder we create the fields
+            if (!CollectionUtils.isEmpty(attachmentValue)) {
+              LOG.info(
+                  "We  are in tableSchema with id {}, checking field {} and we have attachments files",
+                  tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
+
+              for (AttachmentValue attachment : attachmentValue) {
+                try {
+                  ZipEntry eFieldAttach = new ZipEntry(
+                      tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
+                  out.putNextEntry(eFieldAttach);
+                  out.write(attachment.getContent(), 0, attachment.getContent().length);
+                } catch (ZipException e) {
+                  LOG.info("Error creating file {} because already exist", attachment.getFileName(),
+                      e);
+                }
+                out.closeEntry();
+              }
+            }
+          }
+        }
+      }
+
+      ZipEntry e = new ZipEntry(nameFileScape);
+      out.putNextEntry(e);
+      out.write(file, 0, file.length);
+      out.closeEntry();
+      LOG.info("We create file {} in the route ", fileWriteZip);
     }
   }
 }
