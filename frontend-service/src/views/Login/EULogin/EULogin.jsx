@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
@@ -18,8 +18,6 @@ const EULogin = () => {
   const navigate = useNavigate();
 
   const userContext = useContext(UserContext);
-
-  const [isLoading] = useState(true);
 
   useEffect(() => {
     onLogin();
@@ -52,7 +50,7 @@ const EULogin = () => {
   return (
     <div className="rp-container">
       <div className={`${styles.loginBoxContainer}`}>
-        {isLoading && <img alt="EEA logo" className={styles.logo} src={logo} />}
+        <img alt="EEA logo" className={styles.logo} src={logo} />
       </div>
     </div>
   );

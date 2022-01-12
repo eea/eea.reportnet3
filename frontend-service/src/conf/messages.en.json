@@ -1435,6 +1435,7 @@
     "loadHistoryDataError": "Error loading history data in QC rules",
     "noHistoryData": "There are no historic changes",
     "allQCsHistoryBtn": "QCs history",
+    "unpinned": "Unpinned",
     "isViewUpdated": "Note: The data may not be up to date because the view has not been updated. The dataset must be validated."
   }
 }

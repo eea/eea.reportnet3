@@ -339,7 +339,7 @@ export const MyFilters = ({
           inputClassName={`p-float-label ${styles.label}`}
           inputId={`${option.key}_input`}
           isFilter={true}
-          itemTemplate={item => <LevelError type={item.type} />}
+          itemTemplate={item => renderMultiSelectOptionTemplate(option.template, item.type)}
           key={option.key}
           label={option.label || ''}
           notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
@@ -352,11 +352,21 @@ export const MyFilters = ({
     );
   };
 
+  const renderMultiSelectOptionTemplate = (template, type) => {
+    if (template === 'LevelError') {
+      return <LevelError type={type} />;
+    }
+
+    return <span className={styles.statusBox}>{type}</span>;
+  };
+
   const renderSearch = option => {
-    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderSearch(nestedOption));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(nestedOption => renderSearch(nestedOption));
+    }
 
     return (
-      <div className={styles.block}>
+      <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div className={`p-float-label ${styles.label} ${styles.elementFilter}`}>
           <InputText
