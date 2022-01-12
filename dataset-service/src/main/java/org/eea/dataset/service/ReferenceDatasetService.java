@@ -42,14 +42,14 @@ public interface ReferenceDatasetService {
    */
   Set<DataFlowVO> getDataflowsReferenced(Long dataflowId);
 
-
   /**
-   * Update updatable.
+   * Update updatable reference dataset.
    *
    * @param datasetId the dataset id
    * @param updatable the updatable
    * @throws EEAException the EEA exception
-   * @throws IOException
+   * @throws IOException Signals that an I/O exception has occurred.
    */
-  void updateUpdatable(Long datasetId, Boolean updatable) throws EEAException, IOException;
+  void updateUpdatableReferenceDataset(Long datasetId, Boolean updatable)
+      throws EEAException, IOException;
 }

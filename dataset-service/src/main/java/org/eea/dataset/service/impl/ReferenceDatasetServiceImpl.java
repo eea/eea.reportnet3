@@ -129,14 +129,15 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
   }
 
   /**
-   * Update updatable.
+   * Update updatable reference dataset.
    *
    * @param datasetId the dataset id
    * @param updatable the updatable
    * @throws EEAException the EEA exception
-   * @throws IOException
+   * @throws IOException Signals that an I/O exception has occurred.
    */
-  public void updateUpdatable(Long datasetId, Boolean updatable) throws EEAException, IOException {
+  public void updateUpdatableReferenceDataset(Long datasetId, Boolean updatable)
+      throws EEAException, IOException {
 
     ReferenceDataset referenceDataset = referenceDatasetRepository.findById(datasetId).orElse(null);
     if (null == referenceDataset) {

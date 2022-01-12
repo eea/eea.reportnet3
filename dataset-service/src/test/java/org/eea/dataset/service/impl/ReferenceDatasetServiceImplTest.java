@@ -158,7 +158,7 @@ public class ReferenceDatasetServiceImplTest {
         .thenReturn(Optional.of(referenceDataset));
     Optional<DataSetMetabase> dataSetMetabase = Optional.of(new DataSetMetabase());
     Mockito.when(datasetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(dataSetMetabase);
-    referenceDatasetService.updateUpdatable(1L, false);
+    referenceDatasetService.updateUpdatableReferenceDataset(1L, false);
     assertTrue(referenceDataset.getUpdatable().equals(Boolean.FALSE));
   }
 
@@ -169,7 +169,7 @@ public class ReferenceDatasetServiceImplTest {
     referenceDataset.setUpdatable(true);
     Mockito.when(referenceDatasetRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(referenceDataset));
-    referenceDatasetService.updateUpdatable(1L, true);
+    referenceDatasetService.updateUpdatableReferenceDataset(1L, true);
     assertTrue(referenceDataset.getUpdatable().equals(Boolean.TRUE));
   }
 
@@ -178,7 +178,7 @@ public class ReferenceDatasetServiceImplTest {
     Mockito.when(referenceDatasetRepository.findById(Mockito.any()))
         .thenReturn(Optional.ofNullable(null));
     try {
-      referenceDatasetService.updateUpdatable(1L, true);
+      referenceDatasetService.updateUpdatableReferenceDataset(1L, true);
     } catch (EEAException e) {
       assertEquals(EEAErrorMessage.DATASET_NOTFOUND, e.getMessage());
       throw e;

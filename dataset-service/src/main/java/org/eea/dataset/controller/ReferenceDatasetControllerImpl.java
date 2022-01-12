@@ -114,7 +114,7 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
       @ApiParam(type = "Boolean", value = "updatable",
           example = "0") @RequestParam("updatable") Boolean updatable) {
     try {
-      referenceDatasetService.updateUpdatable(datasetId, updatable);
+      referenceDatasetService.updateUpdatableReferenceDataset(datasetId, updatable);
     } catch (EEAException | IOException e) {
       LOG_ERROR.error("Error updating reference dataset. DatasetId: {}. Error Message: {}",
           datasetId, e.getMessage(), e);
