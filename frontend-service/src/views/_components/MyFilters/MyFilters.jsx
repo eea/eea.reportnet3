@@ -361,10 +361,12 @@ export const MyFilters = ({
   };
 
   const renderSearch = option => {
-    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderSearch(nestedOption));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(nestedOption => renderSearch(nestedOption));
+    }
 
     return (
-      <div className={styles.block}>
+      <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div className={`p-float-label ${styles.label} ${styles.elementFilter}`}>
           <InputText

@@ -708,6 +708,7 @@ export const QCList = ({
 
   const FILTER_OPTIONS = [
     {
+      key: 'search',
       label: resourcesContext.messages['searchByQcList'],
       searchBy: ['shortCode', 'name', 'description', 'message'],
       type: 'SEARCH'
