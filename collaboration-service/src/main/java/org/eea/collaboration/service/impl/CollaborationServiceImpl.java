@@ -218,7 +218,9 @@ public class CollaborationServiceImpl implements CollaborationService {
     if (authorities.contains(
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)))
         || authorities.contains(new SimpleGrantedAuthority(
-            ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))) {
+            ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))
+        || authorities.contains(new SimpleGrantedAuthority(
+            ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT.getAccessRole(dataflowId)))) {
       stream = stream.filter(Message::isDirection);
     }
 
