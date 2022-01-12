@@ -521,25 +521,26 @@ const Dataflows = () => {
     const filters = [
       {
         nestedOptions: [
-          { key: 'name', label: resourcesContext.messages['name'], order: 0, isSortable: true },
-          { key: 'description', label: resourcesContext.messages['description'], order: 1, isSortable: true },
-          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2, isSortable: true },
-          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3, isSortable: true },
-          { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4, isSortable: true }
+          { key: 'name', label: resourcesContext.messages['name'], isSortable: true },
+          { key: 'description', label: resourcesContext.messages['description'], isSortable: true },
+          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], isSortable: true },
+          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], isSortable: true },
+          { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true }
         ],
         type: 'INPUT'
       },
       {
         nestedOptions: [
+          { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' },
+          { key: 'userRole', label: resourcesContext.messages['userRole'], isSortable: true },
           {
-            key: 'status',
-            label: resourcesContext.messages['status'],
-            order: 0,
-            category: 'LEVEL_ERROR',
-            isSortable: true
-          },
-          { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1, isSortable: true },
-          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
+            key: 'pinned',
+            label: resourcesContext.messages['pinned'],
+            multiSelectOptions: [
+              { type: resourcesContext.messages['pinned'].toUpperCase(), value: 'pinned' },
+              { type: resourcesContext.messages['unpinned'].toUpperCase(), value: 'unpinned' }
+            ]
+          }
         ],
         type: 'MULTI_SELECT'
       },
@@ -575,7 +576,7 @@ const Dataflows = () => {
     },
     {
       nestedOptions: [
-        { key: 'status', label: resourcesContext.messages['status'], category: 'LEVEL_ERROR', isSortable: true },
+        { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' },
         { key: 'pinned', label: resourcesContext.messages['pinned'], isSortable: true }
       ],
       type: 'MULTI_SELECT'

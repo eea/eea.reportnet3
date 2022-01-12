@@ -140,7 +140,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get snapshots by dataset id", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get snapshots"),
       @ApiResponse(code = 400, message = "Dataset id incorrect")})
   public List<SnapshotVO> getSnapshotsByIdDataset(@ApiParam(type = "Long", value = "Dataset Id",
@@ -170,7 +170,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @PostMapping(value = "/dataset/{idDataset}/create", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Create snapshot", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   public void createSnapshot(
       @ApiParam(type = "Long", value = "Dataset Id", example = "0") @LockCriteria(
           name = "datasetId") @PathVariable("idDataset") Long datasetId,
@@ -193,9 +193,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/v1/{idSnapshot}/dataset/{idDataset}/delete")
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
   @ApiOperation(value = "Delete dataset snapshot by snapshot id",
-      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD, CUSTODIAN SUPPORT \n\n Reference dataset: CUSTODIAN, STEWARD")
+      notes = "Allowed roles: \n\n Reporting dataset: STEWARD, LEAD REPORTER, CUSTODIAN, REPORTER WRITE \n\n Data collection: CUSTODIAN, STEWARD \n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT \n\n Reference dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete snapshot"),
       @ApiResponse(code = 400, message = "Dataset id incorrect or user request not found")})
   public void deleteSnapshot(
@@ -225,7 +225,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @DeleteMapping(value = "/{idSnapshot}/dataset/{idDataset}/delete")
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_CUSTODIAN','DATASET_REPORTER_WRITE','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD')")
   @ApiOperation(value = "Delete dataset snapshot by id", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete snapshot"),
       @ApiResponse(code = 400, message = "Dataset id incorrect or user request not found")})
@@ -248,7 +248,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @LockMethod(removeWhenFinish = false)
   @PostMapping(value = "/{idSnapshot}/dataset/{idDataset}/restore",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @ApiOperation(value = "Restore snapshot", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully restore snapshot"),
       @ApiResponse(code = 400, message = "Dataset id incorrect"),
@@ -527,7 +527,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/v1/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_CUSTODIAN_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_CUSTODIAN_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD')")
   @ApiOperation(value = "Get dataset historic releases by dataset id",
       notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD \n\n Data collection: CUSTODIAN, STEWARD \n\n EU dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
@@ -559,7 +559,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_CUSTODIAN_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_CUSTODIAN_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_CUSTODIAN_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD')")
   @ApiOperation(value = "Get historic releases", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 400, message = "Dataset not found")})
@@ -583,7 +583,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @GetMapping(value = "/historicReleasesRepresentative",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get historic releases by representative", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT')")
   public List<ReleaseVO> historicReleasesByRepresentative(
       @ApiParam(type = "Long", value = "Dataflow Id",
           example = "0") @RequestParam("dataflowId") Long dataflowId,

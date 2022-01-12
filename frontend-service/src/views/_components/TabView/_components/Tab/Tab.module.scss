@@ -64,3 +64,44 @@ input.p_tabview_input_design {
 .tabViewTabNavigationShown {
   height: 2.7rem !important;
 }
+
+.tooltipButton {
+  margin-top: 0.5rem !important;
+  margin-right: 0.5rem !important;
+}
+.tooltipContent {
+  max-height: 300px !important;
+  z-index: 3003 !important;
+}
+
+.fieldText {
+  text-align: left;
+  font-weight: bold;
+  .propertyLabel {
+    color: var(--success-color-lighter);
+    max-height: 100px;
+    font-weight: 600;
+    overflow: hidden;
+  }
+}
+
+.templateWrapper {
+  display: flex;
+  justify-content: center;
+  .checkTemplate {
+    font-size: 14pt;
+  }
+}
+
+.tableDescriptionTemplate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 30vh;
+  overflow: auto;
+  white-space: pre-line;
+}
+
+.tooltipWrapper {
+  white-space: pre-line;
+}

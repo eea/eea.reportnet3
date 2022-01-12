@@ -152,16 +152,6 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     if (null == dataFlow) {
       throw new EntityNotFoundException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    Long dataFlowId = dataFlow.getId();
-
-    List<ResourceAccessVO> resources = userManagementControllerZull
-        .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN);
-
-    // get idDataflow
-    if (resources.stream()
-        .noneMatch(resourceAccessVO -> resourceAccessVO.getId().equals(dataFlowId))) {
-      throw new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN);
-    }
 
     try {
       webLinkRepository.deleteById(webLinkId);
@@ -189,8 +179,6 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     }
     Long dataFlowId = dataFlow.getId();
 
-    List<ResourceAccessVO> resources = userManagementControllerZull
-        .getResourcesByUser(ResourceTypeEnum.DATAFLOW, SecurityRoleEnum.DATA_CUSTODIAN);
 
     Pattern urlPattern = Pattern.compile(REGEX_URL);
 
@@ -198,11 +186,6 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
 
     if (!urlMatcher.find()) {
       throw new WrongDataExceptions(EEAErrorMessage.URL_FORMAT_INCORRECT);
-    }
-    // get idDataflow
-    if (resources.stream()
-        .noneMatch(resourceAccessVO -> resourceAccessVO.getId().equals(dataFlowId))) {
-      throw new ResourceNoFoundException(EEAErrorMessage.FORBIDDEN);
     }
 
     Optional<Weblink> weblinkFound = webLinkRepository.findById(weblink.getId());

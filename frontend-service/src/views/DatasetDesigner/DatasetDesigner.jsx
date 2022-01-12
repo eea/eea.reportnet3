@@ -27,6 +27,8 @@ import { MainLayout } from 'views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Menu } from 'views/_components/Menu';
 import { QCList } from 'views/_components/QCList';
+import { QCGenericHistory } from './_components/QCGenericHistory';
+import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
 import { TabsDesigner } from './_components/TabsDesigner';
@@ -35,7 +37,6 @@ import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
 import { Validations } from 'views/DatasetDesigner/_components/Validations';
-import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -119,6 +120,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     isDownloadingValidations: false,
     isDuplicatedToManageUnique: false,
     isExportTableSchemaDialogVisible: false,
+    isHistoryDialogVisible: false,
     isImportDatasetDialogVisible: false,
     isImportOtherSystemsDialogVisible: false,
     isImportTableSchemaDialogVisible: false,
@@ -983,8 +985,26 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     }
   };
 
+  const setIsHistoryDialogVisible = isHistoryDialogVisible => {
+    designerDispatch({
+      type: 'SET_IS_HISTORY_DIALOG_VISIBLE',
+      payload: isHistoryDialogVisible
+    });
+  };
+
+  const onCloseHistoryDialog = () => {
+    setIsHistoryDialogVisible(false);
+  };
+
   const renderActionButtonsValidationDialog = (
     <Fragment>
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon="info"
+        label={resourcesContext.messages['allQCsHistoryBtn']}
+        onClick={() => setIsHistoryDialogVisible(true)}
+        style={{ float: 'left' }}
+      />
       <Button
         className="p-button-secondary p-button-animated-blink"
         disabled={designerState.isDownloadingQCRules}
@@ -1020,7 +1040,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         className="p-button-secondary p-button-animated-blink"
         icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['validateSqlRulesBtn']}
-        onClick={() => validateQcRules()}
+        onClick={validateQcRules}
         tooltip={resourcesContext.messages['validateRulesBtnTootip']}
         tooltipOptions={{ position: 'top' }}
       />
@@ -1028,7 +1048,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
         label={resourcesContext.messages['close']}
-        onClick={() => onHideValidationsDialog()}
+        onClick={onHideValidationsDialog}
       />
     </Fragment>
   );
@@ -1771,6 +1791,14 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               visible={designerState.isValidationViewerVisible}
             />
           </Dialog>
+        )}
+
+        {designerState.isHistoryDialogVisible && (
+          <QCGenericHistory
+            datasetId={datasetId}
+            isDialogVisible={designerState.isHistoryDialogVisible}
+            onCloseDialog={onCloseHistoryDialog}
+          />
         )}
 
         {designerState.isImportDatasetDialogVisible && (

@@ -172,7 +172,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
     List<UserRepresentationVO> observers = userManagementControllerZuul
         .getUsersByGroup(ResourceGroupEnum.DATAFLOW_OBSERVER.getGroupName(dataflowVO.getId()));
     List<UserRepresentationVO> custodianSupport = userManagementControllerZuul.getUsersByGroup(
-        ResourceGroupEnum.DATAFLOW_CUSTODIAN_SUPPORT.getGroupName(dataflowVO.getId()));
+        ResourceGroupEnum.DATAFLOW_STEWARD_SUPPORT.getGroupName(dataflowVO.getId()));
     List<String> emails = new ArrayList<>();
     if (null != custodians) {
       custodians.stream().forEach(custodian -> emails.add(custodian.getEmail()));

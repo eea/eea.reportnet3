@@ -107,7 +107,7 @@ const ValidationExpressionGroup = ({
                 }}
                 optionLabel="label"
                 options={config.validations.logicalOperators}
-                placeholder={resourcesContext.messages.union}
+                placeholder={resourcesContext.messages['union']}
                 value={first(
                   config.validations.logicalOperators.filter(option => option.value === expressionValues.union)
                 )}
