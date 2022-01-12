@@ -203,10 +203,9 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
   const renderIsViewUpdatedMessage = () => {
     if (!isViewUpdated) {
       return (
-        <p className={styles.IsViewUpdatedMessage}>
-          <span className="pi pi-info-circle"></span>
-          {resourcesContext.messages['isViewUpdated']}
-        </p>
+        <div className={styles.IsViewUpdatedMessage}>
+          <p>{resourcesContext.messages['isViewUpdated']}</p>
+        </div>
       );
     }
   };
