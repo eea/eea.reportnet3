@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -54,7 +55,7 @@ const applySearch = ({ filterByKeys, item, value }) => {
   return (
     isEmpty(filteredKeys) ||
     filteredKeys.some(
-      key => areEquals(value, '') || (item[key] && item[key].toLowerCase().includes(value.toLowerCase()))
+      key => areEquals(value, '') || (!isNil(item[key]) && item[key].toLowerCase().includes(value.toLowerCase()))
     )
   );
 };
