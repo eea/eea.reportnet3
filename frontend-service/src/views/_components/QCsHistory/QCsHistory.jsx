@@ -103,7 +103,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       return [];
     }
 
-    const columnData = getColumnsInOrder(Object.keys(qcHistoryData[0])).map(key => ({ field: key, header: key }));
+    const columnData = getColumnsInOrder(Object.keys(qcHistoryData[0])).map(key => ({ field: key }));
 
     return columnData.map(col => {
       if (
@@ -115,6 +115,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       }
 
       let template;
+      let header = capitalizeHeader(col.field);
 
       switch (col.field) {
         case 'expression':
@@ -123,7 +124,12 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
           template = checkTemplate;
           break;
         case 'ruleId':
-          template = ruleIdTemplate;
+          template = nameTemplate;
+          header = 'Name';
+          break;
+        case 'ruleInfoId':
+          template = codeTemplate;
+          header = 'Code';
           break;
         case 'timestamp':
           template = timestampTemplate;
@@ -133,7 +139,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
           break;
       }
 
-      return <Column body={template} field={col.field} header={col.header.toUpperCase()} key={col.field} />;
+      return <Column body={template} field={col.field} header={header} key={col.field} />;
     });
   };
 
@@ -154,6 +160,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       .sort((a, b) => a.index - b.index)
       .map(orderedKey => orderedKey.id);
   };
+
   const getQcHistoryData = async () => {
     setLoadingStatus('pending');
 
@@ -171,6 +178,8 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       setLoadingStatus('failed');
     }
   };
+
+  const capitalizeHeader = str => `${str.charAt(0).toUpperCase()}${str.substr(1).toLowerCase()}`;
 
   const checkTemplate = (rowData, column) => (
     <div className={styles.checkedValueColumn}>
