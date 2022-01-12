@@ -339,7 +339,7 @@ export const MyFilters = ({
           inputClassName={`p-float-label ${styles.label}`}
           inputId={`${option.key}_input`}
           isFilter={true}
-          itemTemplate={item => <LevelError type={item.type} />}
+          itemTemplate={item => renderMultiSelectOptionTemplate(option.template, item.type)}
           key={option.key}
           label={option.label || ''}
           notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
@@ -350,6 +350,18 @@ export const MyFilters = ({
         />
       </div>
     );
+  };
+
+  const renderMultiSelectOptionTemplate = (template, type) => {
+    switch (template) {
+      case 'LEVEL_ERROR':
+      case 'QC_STATUS':
+      case 'QC_VALIDITY':
+        return <LevelError type={type} />;
+
+      default:
+        return <span className={styles.statusBox}>{type.toString().toUpperCase()}</span>;
+    }
   };
 
   const renderSearch = option => {
