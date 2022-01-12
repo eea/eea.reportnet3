@@ -362,7 +362,10 @@
     "user-image-bg-hover": "var(--main-font-color)",
     "user-image-bg-opacity": "0.6",
     "webform-table-bg": "var(--c-gray-10)",
-    "webform-table-border": "1px solid var(--c-gray-10)"
+    "webform-table-border": "1px solid var(--c-gray-10)",
+    "bg-table": "var(--c-gray-5)",
+    "bg-table-button": "var(--c-white-color)",
+    "box-shadow-table": "var(--c-gray-25)"
   },
   "dark": {
     "accent-color": "var(--accent-color-dark-mode)",
@@ -728,7 +731,10 @@
     "user-image-bg-hover": "var(--main-font-color)",
     "user-image-bg-opacity": "0.6",
     "webform-table-bg": "var(--bg-dark-01dp)",
-    "webform-table-border": "1px solid var(--c-gray-75)"
+    "webform-table-border": "1px solid var(--c-gray-75)",
+    "bg-table": "var(--bg-dark-01dp)",
+    "bg-table-button": "var(--bg-dark-00dp)",
+    "box-shadow-table": "var(--accent-color-dark-mode)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
