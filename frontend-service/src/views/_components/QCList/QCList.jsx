@@ -1,4 +1,4 @@
-import { cloneElement, Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import cloneDeep from 'lodash/cloneDeep';
@@ -41,7 +41,6 @@ import { getExpressionString } from 'views/DatasetDesigner/_components/Validatio
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const QCList = ({
-  children,
   dataflowId,
   dataset,
   datasetSchemaAllTables,
@@ -757,14 +756,6 @@ export const QCList = ({
     }
   ];
 
-  const renderAllQCsHistory = () => {
-    if (children) {
-      return cloneElement(children, { validations: tabsValidationsState?.validationList?.validations });
-    }
-
-    return null;
-  };
-
   const validationList = () => {
     if (tabsValidationsState.isLoading) {
       return (
@@ -852,7 +843,6 @@ export const QCList = ({
           validationId={tabsValidationsState.validationId}
         />
       )}
-      {renderAllQCsHistory()}
       {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
     </Fragment>
   );
