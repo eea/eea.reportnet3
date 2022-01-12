@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import orderBy from 'lodash/orderBy';
 
 import styles from './QCsHistory.module.scss';
 
@@ -170,7 +171,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
         : await ValidationService.getQcHistoricInfo(datasetId, validationId);
       const data = response.data;
 
-      setQcHistoryData(data);
+      setQcHistoryData(orderBy(data, 'timestamp', 'desc'));
       setLoadingStatus('success');
     } catch (error) {
       console.error('HistoryData - getQcHistoryData.', error);
