@@ -3,6 +3,7 @@ import { useContext, useLayoutEffect, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
 import { routes } from 'conf/routes';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -12,6 +13,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const useBigButtonListRepresentative = ({
+  dataflowId,
   dataflowState,
   dataProviderId,
   getDataHistoricReleases,
@@ -36,6 +38,9 @@ const useBigButtonListRepresentative = ({
   const getButtonsVisibility = () => {
     const isManualAcceptance = dataflowState.data.manualAcceptance;
     const isTestDataset = parseInt(representativeId) === 0;
+    const isStewardSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.STEWARD_SUPPORT.key
+    ]);
     const isReleased =
       !isNil(dataflowState.data.datasets) &&
       dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
@@ -55,7 +60,7 @@ const useBigButtonListRepresentative = ({
       help: true,
       receipt: isLeadReporterOfThisCountry && isReleased,
       release: isLeadReporterOfThisCountry && !isTestDataset,
-      testDatasets: isTestDataset
+      testDatasets: isTestDataset || (isStewardSupport && isTestDataset)
     };
   };
 
@@ -63,7 +68,7 @@ const useBigButtonListRepresentative = ({
     if (
       isNil(dataflowState.data.referenceDatasets) ||
       dataflowState.data.representatives.length > 1 ||
-      dataflowState.isCustodian
+      dataflowState.hasCustodianPermissions
     ) {
       return [];
     }
