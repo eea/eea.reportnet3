@@ -28,6 +28,8 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
 
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [qcHistoryData, setQcHistoryData] = useState([]);
+  const [isRecursivelyOpenedDialog, setIsRecursivelyOpenedDialog] = useState(false);
+  const [clickedValidationId, setClickedValidationId] = useState(null);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
@@ -37,6 +39,15 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     getQcHistoryData();
   }, []);
 
+  const onRowClick = id => {
+    setClickedValidationId(id);
+    setIsRecursivelyOpenedDialog(true);
+  };
+
+  const onCloseRecursivelyOpenedDialog = () => {
+    setIsRecursivelyOpenedDialog(false);
+    setClickedValidationId(null);
+  };
 
   const renderHistoryDialogContent = () => {
     const columns = getHistoryColumns();
@@ -71,9 +82,15 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
         autoLayout
         className={styles.dialogContent}
         hasDefaultCurrentPage
+        onRowClick={event => {
+          if (isAllQCsHistoryDialog) {
+            onRowClick(event.data.ruleId);
+          }
+        }}
         paginator
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
+        selectionMode={isAllQCsHistoryDialog ? 'single' : null}
         totalRecords={qcHistoryData.length}
         value={qcHistoryData}>
         {columns}
@@ -165,6 +182,17 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       onClick={onCloseDialog}
     />
   );
+
+  if (isRecursivelyOpenedDialog) {
+    return (
+      <QCsHistory
+        datasetId={datasetId}
+        isDialogVisible={isRecursivelyOpenedDialog}
+        onCloseDialog={onCloseRecursivelyOpenedDialog}
+        validationId={clickedValidationId}
+      />
+    );
+  }
 
   return (
     <Dialog
