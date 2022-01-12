@@ -531,7 +531,7 @@ const Dataflows = () => {
       },
       {
         nestedOptions: [
-          { isSortable: true, key: 'status', label: resourcesContext.messages['status'], template: 'LevelError' },
+          { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' },
           { key: 'userRole', label: resourcesContext.messages['userRole'], isSortable: true },
           {
             key: 'pinned',
