@@ -551,6 +551,7 @@ export const FieldsDesigner = ({
         return <Spinner className={styles.spinner} />;
       }
     };
+
     const renderMainFields = () => {
       if (viewType['tabularData']) {
         if (!isEmpty(fields)) {
@@ -562,6 +563,7 @@ export const FieldsDesigner = ({
         return renderFields();
       }
     };
+
     return (
       <Fragment>
         {renderSpinner()}
