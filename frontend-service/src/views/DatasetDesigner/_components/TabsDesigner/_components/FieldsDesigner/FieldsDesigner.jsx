@@ -545,13 +545,31 @@ export const FieldsDesigner = ({
     </ConfirmDialog>
   );
 
-  const renderAllFields = () => (
-    <Fragment>
-      {isLoading && <Spinner className={styles.spinner} />}
-      {viewType['tabularData'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
-      {!viewType['tabularData'] && renderNewField()}
-    </Fragment>
-  );
+  const renderAllFields = () => {
+    const renderSpinner = () => {
+      if (isLoading) {
+        return <Spinner className={styles.spinner} />;
+      }
+    };
+    const renderMainFields = () => {
+      if (viewType['tabularData']) {
+        if (!isEmpty(fields)) {
+          return previewData();
+        } else {
+          return renderNoFields();
+        }
+      } else {
+        return renderFields();
+      }
+    };
+    return (
+      <Fragment>
+        {renderSpinner()}
+        {renderMainFields()}
+        {renderNewField()}
+      </Fragment>
+    );
+  };
 
   const renderErrors = (errorTitle, error) => {
     return (
@@ -572,48 +590,48 @@ export const FieldsDesigner = ({
   };
 
   const renderNewField = () => {
-    return (
-      //<div className={styles.fieldDesignerWrapper} key="0">
-      <FieldDesigner
-        addField={true}
-        checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
-        checkInvalidCharacters={name => FieldsDesignerUtils.checkInvalidCharacters(name)}
-        codelistItems={[]}
-        datasetId={datasetId}
-        datasetSchemaId={datasetSchemaId}
-        fieldFileProperties={{}}
-        fieldHasMultipleValues={false}
-        fieldId="-1"
-        fieldLink={null}
-        fieldMustBeUsed={false}
-        fieldName=""
-        fieldReadOnly={false}
-        fieldRequired={false}
-        fields={fields}
-        fieldType=""
-        fieldValue=""
-        hasPK={!isNil(fields) && fields.filter(field => field.pk).length > 0}
-        index="-1"
-        initialFieldIndexDragged={initialFieldIndexDragged}
-        isCodelistOrLink={isCodelistOrLink}
-        isDataflowOpen={isDataflowOpen}
-        isDesignDatasetEditorRead={isDesignDatasetEditorRead}
-        isLoading={isLoading}
-        isReferenceDataset={isReferenceDataset}
-        onCodelistAndLinkShow={onCodelistAndLinkShow}
-        onFieldDragAndDrop={onFieldDragAndDrop}
-        onNewFieldAdd={onFieldAdd}
-        onShowDialogError={onShowDialogError}
-        recordSchemaId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
-        setIsLoading={(loading, ref) => {
-          setRefElement(ref.element);
-          setIsLoading(loading);
-        }}
-        tableSchemaId={table.tableSchemaId}
-        totalFields={!isNil(fields) ? fields.length : undefined}
-      />
-      //</div>
-    );
+    if (!viewType['tabularData']) {
+      return (
+        <FieldDesigner
+          addField={true}
+          checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
+          checkInvalidCharacters={name => FieldsDesignerUtils.checkInvalidCharacters(name)}
+          codelistItems={[]}
+          datasetId={datasetId}
+          datasetSchemaId={datasetSchemaId}
+          fieldFileProperties={{}}
+          fieldHasMultipleValues={false}
+          fieldId="-1"
+          fieldLink={null}
+          fieldMustBeUsed={false}
+          fieldName=""
+          fieldReadOnly={false}
+          fieldRequired={false}
+          fields={fields}
+          fieldType=""
+          fieldValue=""
+          hasPK={!isNil(fields) && fields.filter(field => field.pk).length > 0}
+          index="-1"
+          initialFieldIndexDragged={initialFieldIndexDragged}
+          isCodelistOrLink={isCodelistOrLink}
+          isDataflowOpen={isDataflowOpen}
+          isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+          isLoading={isLoading}
+          isReferenceDataset={isReferenceDataset}
+          onCodelistAndLinkShow={onCodelistAndLinkShow}
+          onFieldDragAndDrop={onFieldDragAndDrop}
+          onNewFieldAdd={onFieldAdd}
+          onShowDialogError={onShowDialogError}
+          recordSchemaId={!isUndefined(table.recordSchemaId) ? table.recordSchemaId : table.recordId}
+          setIsLoading={(loading, ref) => {
+            setRefElement(ref.element);
+            setIsLoading(loading);
+          }}
+          tableSchemaId={table.tableSchemaId}
+          totalFields={!isNil(fields) ? fields.length : undefined}
+        />
+      );
+    }
   };
 
   const renderFields = () => {
@@ -621,7 +639,6 @@ export const FieldsDesigner = ({
       !isNil(fields) && !isEmpty(fields) ? (
         fields.map((field, index) => {
           return (
-            //<div className={styles.fieldDesignerWrapper} key={field.fieldId}>
             <FieldDesigner
               bulkDelete={bulkDelete}
               checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
@@ -678,7 +695,6 @@ export const FieldsDesigner = ({
               tableSchemaId={table.tableSchemaId}
               totalFields={!isNil(fields) ? fields.length : undefined}
             />
-            //  </div>
           );
         })
       ) : (
