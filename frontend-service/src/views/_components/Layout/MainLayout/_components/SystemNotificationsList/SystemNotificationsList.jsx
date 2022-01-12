@@ -79,7 +79,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       }
     ];
 
-    let columnsArray = headers.map(col => (
+    const columnsArray = headers.map(col => (
       <Column
         body={col.template}
         className={col.className}

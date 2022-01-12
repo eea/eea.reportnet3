@@ -21,7 +21,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
 import { MyFilters } from 'views/_components/MyFilters';
 import { QCFieldEditor } from './_components/QCFieldEditor';
-import { QCsHistory } from 'views/_components/QCsHistory';
+import { QCSpecificHistory } from 'views/_components/QCSpecificHistory';
 import { Spinner } from 'views/_components/Spinner';
 import { TrafficLight } from 'views/_components/TrafficLight';
 
@@ -52,7 +52,7 @@ export const QCList = ({
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
-  const filterBy = useRecoilValue(filterByState('qcList'));
+  const filterBy = useRecoilValue(filterByState(`qcList_${dataset.datasetId}`));
   const isDataFiltered = !isEmpty(filterBy);
 
   const [tabsValidationsState, tabsValidationsDispatch] = useReducer(qcListReducer, {
@@ -196,10 +196,11 @@ export const QCList = ({
         validationsServiceList?.validations?.map(validation => {
           return {
             automaticType: validation.automaticType,
-            id: validation.id,
             description: validation.description,
+            id: validation.id,
             message: validation.message,
-            name: validation.name
+            name: validation.name,
+            shortCode: validation.shortCode
           };
         })
       );
@@ -657,10 +658,11 @@ export const QCList = ({
     isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
   const onRowEditorValueChange = (props, value, isText = false) => {
-    const inmQCs = [...tabsValidationsState.validationList.validations];
-    const inmEditingRows = [...tabsValidationsState.editingRows];
+    const inmQCs = cloneDeep(tabsValidationsState.validationList.validations);
+    const inmEditingRows = cloneDeep(tabsValidationsState.editingRows);
     const qcIdx = inmQCs.findIndex(qc => qc.id === props.rowData.id);
     const editIdx = inmEditingRows.findIndex(qc => qc.id === props.rowData.id);
+
     if (inmQCs[qcIdx][props.field] !== value && editIdx !== -1) {
       inmQCs[qcIdx][props.field] = isText ? value.trim() : value;
       inmEditingRows[editIdx][props.field] = isText ? value.trim() : value;
@@ -787,7 +789,7 @@ export const QCList = ({
             data={tabsValidationsState.validationList.validations}
             getFilteredData={onLoadFilteredData}
             options={FILTER_OPTIONS}
-            viewType="qcList"
+            viewType={`qcList_${dataset.datasetId}`}
           />
         </div>
         {!isEmpty(tabsValidationsState.filteredData) ? (
@@ -834,16 +836,14 @@ export const QCList = ({
   return (
     <Fragment>
       {validationList()}
-
       {tabsValidationsState.isHistoryDialogVisible && (
-        <QCsHistory
+        <QCSpecificHistory
           datasetId={dataset.datasetId}
           isDialogVisible={tabsValidationsState.isHistoryDialogVisible}
           onCloseDialog={onCloseHistoryDialog}
           validationId={tabsValidationsState.validationId}
         />
       )}
-
       {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
     </Fragment>
   );

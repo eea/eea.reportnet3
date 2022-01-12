@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
+import orderBy from 'lodash/orderBy';
 
-import styles from './QCsHistory.module.scss';
+import styles from './QCSpecificHistory.module.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
@@ -22,7 +22,7 @@ import { ValidationService } from 'services/ValidationService';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
-export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validationId }) => {
+export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, validationId }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -36,8 +36,6 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
   }, []);
 
   const renderHistoryDialogContent = () => {
-    const columns = getHistoryColumns();
-
     if (loadingStatus === 'pending') {
       return (
         <div className={styles.loadingSpinner}>
@@ -55,7 +53,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       );
     }
 
-    if (isEmpty(columns)) {
+    if (isEmpty(qcHistoryData)) {
       return (
         <div className={styles.noDataContent}>
           <h3>{resourcesContext.messages['noHistoryData']}</h3>
@@ -73,47 +71,41 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
         rowsPerPageOptions={[5, 10, 15]}
         totalRecords={qcHistoryData.length}
         value={qcHistoryData}>
-        {columns}
+        {getHistoryColumns()}
       </DataTable>
     );
   };
 
   const getHistoryColumns = () => {
-    if (isEmpty(qcHistoryData)) {
-      return [];
-    }
-
-    const columnData = Object.keys(qcHistoryData[0]).map(key => ({ field: key, header: key }));
-
-    return columnData.map(col => {
-      if (
-        col.field === 'ruleBefore' ||
-        col.field === 'ruleInfoId' ||
-        (!isNil(validationId) && col.field === 'ruleId')
-      ) {
-        return null;
+    const headers = [
+      {
+        id: 'user',
+        label: resourcesContext.messages['user']
+      },
+      {
+        id: 'timestamp',
+        label: resourcesContext.messages['timestamp'],
+        template: timestampTemplate
+      },
+      {
+        id: 'expression',
+        label: resourcesContext.messages['expressionText'],
+        template: checkTemplate
+      },
+      {
+        id: 'metadata',
+        label: resourcesContext.messages['metadata'],
+        template: checkTemplate
+      },
+      {
+        id: 'status',
+        label: resourcesContext.messages['status'],
+        template: checkTemplate
       }
+    ];
 
-      let template;
-
-      switch (col.field) {
-        case 'expression':
-        case 'metadata':
-        case 'status':
-          template = checkTemplate;
-          break;
-        case 'ruleId':
-          template = ruleIdTemplate;
-          break;
-        case 'timestamp':
-          template = timestampTemplate;
-          break;
-        default:
-          template = null;
-          break;
-      }
-
-      return <Column body={template} field={col.field} header={col.header.toUpperCase()} key={col.field} />;
+    return headers.map(header => {
+      return <Column body={header.template} field={header.id} header={header.label} key={header.id} sortable />;
     });
   };
 
@@ -121,12 +113,9 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     setLoadingStatus('pending');
 
     try {
-      const response = isNil(validationId)
-        ? await ValidationService.getAllQCsHistoricInfo(datasetId)
-        : await ValidationService.getQcHistoricInfo(datasetId, validationId);
+      const response = await ValidationService.getQcHistoricInfo(datasetId, validationId);
       const data = response.data;
-
-      setQcHistoryData(data);
+      setQcHistoryData(orderBy(data, 'timestamp', 'desc'));
       setLoadingStatus('success');
     } catch (error) {
       console.error('HistoryData - getQcHistoryData.', error);
@@ -140,10 +129,6 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       {rowData[column.field] ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
     </div>
   );
-
-  const ruleIdTemplate = rowData => {
-    return <div>{rowData.ruleId}</div>;
-  };
 
   const timestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
 
@@ -159,7 +144,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
 
   return (
     <Dialog
-      className={`responsiveDialog ${styles.dialogSize}`}
+      className={`responsiveDialog ${styles.dialogWidth}`}
       footer={dialogFooter}
       header={resourcesContext.messages['qcHistoryDialogHeader']}
       onHide={onCloseDialog}
