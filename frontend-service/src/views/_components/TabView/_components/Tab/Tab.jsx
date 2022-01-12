@@ -129,7 +129,7 @@ const Tab = ({
     if (rowData.key === 'description') {
       return (
         <div className={styles.templateWrapper}>
-          <p className={styles.tableDescriptionTemplate}>{rowData.value || '-'}</p>
+          <label className={styles.tableDescriptionTemplate}>{rowData.value || '-'}</label>
         </div>
       );
     } else if (
@@ -189,7 +189,6 @@ const Tab = ({
         {renderPrefilled()}
         {renderFixedNumber()}
         {renderNotEmpty()}
-        <p className={styles.moreInfoLabel}>{resourcesContext.messages['detailedInfoTooltip']}</p>
       </div>
     );
   };
