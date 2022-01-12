@@ -110,6 +110,8 @@ export const FieldDesigner = ({
 
   const [fieldDesignerState, dispatchFieldDesigner] = useReducer(fieldDesignerReducer, initialFieldDesignerState);
 
+  const { isDragging } = fieldDesignerState;
+
   const fieldTypeRef = useRef();
   const inputRef = useRef();
 
@@ -251,7 +253,7 @@ export const FieldDesigner = ({
 
   const onBlurFieldDescription = description => {
     if (!isUndefined(description)) {
-      if (!fieldDesignerState.isDragging) {
+      if (!isDragging) {
         //New field
         if (fieldId === '-1') {
           if (
@@ -272,7 +274,7 @@ export const FieldDesigner = ({
 
   const onBlurFieldName = name => {
     if (!isUndefined(name)) {
-      if (!fieldDesignerState.isDragging) {
+      if (!isDragging) {
         if (fieldId === '-1') {
           if (
             name === '' &&
@@ -515,18 +517,11 @@ export const FieldDesigner = ({
     }
   };
 
-  const onFieldDragDrop = event => {
+  const onFieldDragDrop = () => {
     if (!isUndefined(initialFieldIndexDragged)) {
-      //Get the dragged field
-      //currentTarget gets the child's target parent
-      const childs = event.currentTarget.childNodes;
-      for (let i = 0; i < childs.length; i++) {
-        if (childs[i].nodeName === 'INPUT') {
-          if (!isUndefined(onFieldDragAndDrop)) {
-            onFieldDragAndDrop(initialFieldIndexDragged, childs[i].value);
-            dispatchFieldDesigner({ type: 'TOGGLE_IS_DRAGGING', payload: false });
-          }
-        }
+      if (!isUndefined(onFieldDragAndDrop)) {
+        onFieldDragAndDrop(initialFieldIndexDragged, fieldName);
+        dispatchFieldDesigner({ type: 'TOGGLE_IS_DRAGGING', payload: false });
       }
     }
   };
@@ -553,7 +548,7 @@ export const FieldDesigner = ({
   const onFieldDragOver = () => {
     if (!isUndefined(initialFieldIndexDragged)) {
       if (index !== initialFieldIndexDragged) {
-        if (!fieldDesignerState.isDragging) {
+        if (!isDragging) {
           if (
             (index === '-1' && totalFields - initialFieldIndexDragged !== 1) ||
             (index !== '-1' && initialFieldIndexDragged - index !== -1)
@@ -588,8 +583,14 @@ export const FieldDesigner = ({
     }
   };
 
+  const onMoveFieldUpDown = order => {
+    if (!isUndefined(onFieldDragAndDrop)) {
+      onFieldDragAndDrop(index, fieldName, true, order);
+    }
+  };
+
   const onPKChange = checked => {
-    if (!fieldDesignerState.isDragging) {
+    if (!isDragging) {
       if (fieldId === '-1') {
         if (validField()) {
           onFieldAdd({ pk: checked });
@@ -602,7 +603,7 @@ export const FieldDesigner = ({
   };
 
   const onReadOnlyChange = checked => {
-    if (!fieldDesignerState.isDragging) {
+    if (!isDragging) {
       if (fieldId === '-1') {
         if (validField()) {
           onFieldAdd({ readOnly: checked });
@@ -615,7 +616,7 @@ export const FieldDesigner = ({
   };
 
   const onRequiredChange = checked => {
-    if (!fieldDesignerState.isDragging) {
+    if (!isDragging) {
       if (fieldId === '-1') {
         if (validField()) {
           onFieldAdd({ required: checked });
@@ -872,26 +873,6 @@ export const FieldDesigner = ({
 
   const renderCheckboxes = () => (
     <Fragment>
-      {!addField ? (
-        <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
-          <div className={styles.draggableFieldCell}>{resourcesContext.messages['moveField']}</div>
-          <div className={styles.draggableFieldCell}>
-            <FontAwesomeIcon
-              aria-label={resourcesContext.messages['moveField']}
-              icon={AwesomeIcons('move')}
-              style={{ width: '32px', opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
-            />
-          </div>
-        </div>
-      ) : (
-        <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
-          <div className={styles.draggableFieldCell}>
-            {resourcesContext.messages['add']} {resourcesContext.messages['field']}
-          </div>
-          <div className={styles.draggableFieldCell}></div>
-        </div>
-      )}
-
       <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
         <div className={styles.draggableFieldCell}>
           <span className={styles.PKWrap}>
@@ -911,7 +892,7 @@ export const FieldDesigner = ({
             ariaLabel={resourcesContext.messages['pk']}
             checked={fieldDesignerState.fieldPKValue}
             className={`datasetSchema-pk-help-step ${
-              fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+              isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
             } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
             disabled={
               (!isNil(fieldDesignerState.fieldTypeValue) &&
@@ -944,7 +925,7 @@ export const FieldDesigner = ({
             ariaLabel={resourcesContext.messages['required']}
             checked={fieldDesignerState.fieldRequiredValue}
             className={`datasetSchema-required-help-step ${
-              fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+              isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
             } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled} `}
             disabled={
               Boolean(fieldDesignerState.fieldPKValue) || isDataflowOpen || isDesignDatasetEditorRead || isLoading
@@ -969,7 +950,7 @@ export const FieldDesigner = ({
             ariaLabel={resourcesContext.messages['readOnly']}
             checked={fieldDesignerState.fieldReadOnlyValue}
             className={`datasetSchema-readOnly-help-step ${
-              fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+              isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
             } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
             id={`${fieldId}_check_readOnly`}
@@ -998,7 +979,7 @@ export const FieldDesigner = ({
           <div className={styles.draggableFieldCell}>
             <Button
               className={`${styles.codelistButton} p-button-secondary-transparent ${
-                fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+                isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
               }`}
               disabled={isDataflowOpen || isDesignDatasetEditorRead}
               label={
@@ -1034,7 +1015,7 @@ export const FieldDesigner = ({
           <div className={styles.draggableFieldCell}>
             <Button
               className={`${styles.codelistButton} p-button-secondary-transparent ${
-                fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+                isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
               }`}
               disabled={
                 isDataflowOpen ||
@@ -1076,7 +1057,7 @@ export const FieldDesigner = ({
           <div className={styles.draggableFieldCell}>
             <Button
               className={`${styles.codelistButton} p-button-secondary-transparent ${
-                fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+                isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
               }`}
               disabled={isDataflowOpen || isDesignDatasetEditorRead}
               label={`${resourcesContext.messages['validExtensions']} ${
@@ -1100,7 +1081,7 @@ export const FieldDesigner = ({
       return (
         <span
           className={`${styles.emptyCodelistOrLink} ${
-            fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+            isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
           }`}></span>
       );
     }
@@ -1116,7 +1097,7 @@ export const FieldDesigner = ({
               <div
                 className={`${styles.button} ${styles.deleteButton} ${
                   fieldPKReferenced ? styles.disabledDeleteButton : ''
-                } ${fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive} ${
+                } ${isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive} ${
                   isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''
                 }`}
                 draggable={true}
@@ -1145,7 +1126,7 @@ export const FieldDesigner = ({
             <div className={styles.draggableFieldCell}>
               <Checkbox
                 checked={markedForDeletion.some(markedField => markedField.fieldId === fieldId)}
-                className={`${fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive} ${
+                className={`${isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive} ${
                   isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled
                 }`}
                 disabled={fieldPKReferenced || isDataflowOpen || isDesignDatasetEditorRead || isLoading}
@@ -1200,6 +1181,51 @@ export const FieldDesigner = ({
     }
   };
 
+  const renderDragAndDrop = () => {
+    const renderArrows = (condition, icon, order, text) => {
+      if (condition) {
+        return (
+          <FontAwesomeIcon
+            aria-label={resourcesContext.messages[text]}
+            className={styles.moveArrows}
+            icon={AwesomeIcons(icon)}
+            onClick={() => onMoveFieldUpDown(order)}
+            style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
+          />
+        );
+      } else {
+        return <div className={styles.emptyArrow}></div>;
+      }
+    };
+
+    if (!addField) {
+      return (
+        <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
+          <div className={styles.draggableFieldCell}>{resourcesContext.messages['moveField']}</div>
+          <div className={styles.draggableFieldCell}>
+            <FontAwesomeIcon
+              aria-label={resourcesContext.messages['moveField']}
+              className={styles.dragAndDropIcon}
+              icon={AwesomeIcons('move')}
+              style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
+            />
+            {renderArrows(index > 0, 'arrowUp', -1, 'moveUp')}
+            {renderArrows(index < fields.length - 1, 'arrowDown', 2, 'moveDown')}
+          </div>
+        </div>
+      );
+    } else {
+      return (
+        <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
+          <div className={styles.draggableFieldCell}>
+            {resourcesContext.messages['add']} {resourcesContext.messages['field']}
+          </div>
+          <div className={styles.draggableFieldCell}></div>
+        </div>
+      );
+    }
+  };
+
   const duplicateButtonTooltipName = `${fieldDesignerState.fieldValue}_tooltip`;
 
   const renderDuplicateButtonTooltip = () => (
@@ -1218,7 +1244,7 @@ export const FieldDesigner = ({
           <div className={styles.draggableFieldCell}>
             <div
               className={`${styles.button} ${styles.duplicateButton} ${
-                fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+                isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
               } ${isDataflowOpen || isLoading || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
               data-for={duplicateButtonTooltipName}
               data-tip
@@ -1263,7 +1289,7 @@ export const FieldDesigner = ({
           <InputText
             autoFocus={false}
             className={`${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
-              fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+              isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
             }`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
             id={fieldName !== '' ? fieldName : 'newField'}
@@ -1304,7 +1330,7 @@ export const FieldDesigner = ({
         <div className={styles.draggableFieldCell}>
           <InputTextarea
             autoFocus={false}
-            className={`${fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive}`}
+            className={`${isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive}`}
             collapsedHeight={33}
             disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
             expandableOnClick={true}
@@ -1338,7 +1364,7 @@ export const FieldDesigner = ({
             appendTo={document.body}
             ariaLabel={'fieldType'}
             className={`${styles.dropdownFieldType} ${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
-              fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+              isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
             }`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
             inputId={`${fieldName}_fieldType`}
@@ -1407,7 +1433,7 @@ export const FieldDesigner = ({
           <div className={styles.draggableFieldCell}>
             <Button
               className={`p-button-secondary-transparent button ${styles.qcButton} ${
-                fieldDesignerState.isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
+                isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
               } ${
                 !isUndefined(fieldDesignerState.fieldTypeValue) &&
                 !config.validations.bannedFieldsNames.sqlFields.includes(
@@ -1549,8 +1575,8 @@ export const FieldDesigner = ({
   return (
     <Fragment>
       <div
-        className={`${styles.draggableFieldDiv} ${fieldDesignerState.isDragging ? styles.disablePointerEvent : ''} ${
-          fieldDesignerState.isDragging && styles.fieldSeparatorDragging
+        className={`${styles.draggableFieldDiv} ${isDragging ? styles.disablePointerEvent : ''} ${
+          isDragging && styles.fieldSeparatorDragging
         } fieldRow datasetSchema-fieldDesigner-help-step`}
         draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
         onDragEnd={onFieldDragEnd}
@@ -1560,6 +1586,7 @@ export const FieldDesigner = ({
         onDragStart={onFieldDragStart}
         onDrop={onFieldDragDrop}
         style={{ cursor: isDataflowOpen || isDesignDatasetEditorRead ? 'default' : 'grab' }}>
+        {renderDragAndDrop()}
         {renderCheckboxes()}
         {renderInputs()}
         {renderCodelistFileAndLinkButtons()}

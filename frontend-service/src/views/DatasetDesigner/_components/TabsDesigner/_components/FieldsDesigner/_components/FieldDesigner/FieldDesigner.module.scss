@@ -153,6 +153,15 @@
   }
 }
 
+.dragAndDropIcon {
+  width: 32px;
+}
+@media (max-width: 1090px) {
+  .dragAndDropIcon {
+    display: none;
+  }
+}
+
 .duplicateButton {
   cursor: pointer;
   &:hover {
@@ -197,6 +206,17 @@
 
 .flip {
   animation: flip 0.5s;
+}
+
+.emptyArrow {
+  content: '';
+  display: inline-block;
+  width: 32px;
+}
+
+.moveArrows {
+  cursor: pointer;
+  width: 32px;
 }
 
 .qcButton {

@@ -18,16 +18,13 @@
 .fieldDesignerWrapper:last-child {
   margin-bottom: 1rem;
 }
-.fieldsWrapper {
-  position: relative;
-  .spinner {
-    position: absolute;
-    top: 40%;
-  }
-}
 
 .contentTable {
   width: 100%;
+  .spinner {
+    position: absolute;
+    top: 75%;
+  }
 }
 
 .fieldsHeader {

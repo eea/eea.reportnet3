@@ -296,13 +296,10 @@ export const FieldsDesigner = ({
     updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, fixedNumber, notEmpty: checked });
   };
 
-  const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName) => {
-    reorderField(draggedFieldIdx, droppedFieldName);
-  };
+  const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName, upDownOrder = false, order) =>
+    reorderField(draggedFieldIdx, droppedFieldName, upDownOrder, order);
 
-  const onFieldDragAndDropStart = draggedFieldIdx => {
-    setInitialFieldIndexDragged(draggedFieldIdx);
-  };
+  const onFieldDragAndDropStart = draggedFieldIdx => setInitialFieldIndexDragged(draggedFieldIdx);
 
   const onKeyChange = event => {
     if (event.key === 'Escape') {
@@ -550,11 +547,7 @@ export const FieldsDesigner = ({
 
   const renderAllFields = () => (
     <Fragment>
-      {isLoading && (
-        <div className={styles.overlay}>
-          <Spinner className={styles.spinner} />
-        </div>
-      )}
+      {isLoading && <Spinner className={styles.spinner} />}
       {viewType['tabularData'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
       {!viewType['tabularData'] && renderNewField()}
     </Fragment>
@@ -694,22 +687,30 @@ export const FieldsDesigner = ({
     return renderedFields;
   };
 
-  const reorderField = async (draggedFieldIdx, droppedFieldName) => {
+  const reorderField = async (draggedFieldIdx, droppedFieldName, upDownOrder, order) => {
+    const getDragAndDropPosition = (inmFields, droppedFieldIdx) => {
+      if (droppedFieldIdx === -1) {
+        return inmFields.length;
+      } else {
+        if (draggedFieldIdx < droppedFieldIdx) {
+          return droppedFieldIdx - 1;
+        } else {
+          return droppedFieldIdx;
+        }
+      }
+    };
+
     try {
       setIsLoading(true);
       const inmFields = [...fields];
-      const droppedFieldIdx = FieldsDesignerUtils.getIndexByFieldName(droppedFieldName, inmFields);
-      await DatasetService.updateFieldOrder(
-        datasetId,
-        droppedFieldIdx === -1
-          ? inmFields.length
-          : draggedFieldIdx < droppedFieldIdx
-          ? droppedFieldIdx - 1
-          : droppedFieldIdx,
-        inmFields[draggedFieldIdx].fieldId
-      );
-      setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
-      onChangeFields(inmFields, false, table.tableSchemaId);
+      const droppedFieldIdx = !upDownOrder
+        ? FieldsDesignerUtils.getIndexByFieldName(droppedFieldName, inmFields)
+        : draggedFieldIdx + order;
+      const position = !upDownOrder ? getDragAndDropPosition(inmFields, droppedFieldIdx) : droppedFieldIdx;
+      await DatasetService.updateFieldOrder(datasetId, position, inmFields[draggedFieldIdx].fieldId);
+      const shiftedFields = [...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)];
+      setFields(shiftedFields);
+      onChangeFields(shiftedFields, false, table.tableSchemaId);
     } catch (error) {
       console.error('FieldsDesigner - reorderField.', error);
     } finally {
