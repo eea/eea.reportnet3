@@ -17,6 +17,7 @@ import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferenced
 import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -65,6 +66,10 @@ public class ReferenceDatasetServiceImplTest {
 
   @Mock
   private DatasetService datasetService;
+
+  /** The file treatment helper. */
+  @Mock
+  private FileTreatmentHelper fileTreatmentHelper;
 
   /** The data set metabase. */
   @Mock

@@ -14,8 +14,8 @@ import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepositor
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferencedSchema;
 import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
 import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.ReferenceDatasetService;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -72,9 +72,9 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
   @Autowired
   private DataSetMetabaseRepository datasetMetabaseRepository;
 
-  /** The dataset service. */
+  /** The file treatment helper. */
   @Autowired
-  private DatasetService datasetService;
+  private FileTreatmentHelper fileTreatmentHelper;
 
 
   /**
@@ -143,11 +143,11 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
       throw new EEAException(String.format(EEAErrorMessage.DATASET_NOTFOUND, datasetId));
     }
     referenceDataset.setUpdatable(updatable);
+    referenceDatasetRepository.save(referenceDataset);
     if (!updatable) {
       DataSetMetabase dataset = datasetMetabaseRepository.findById(datasetId).orElse(null);
-      datasetService.createReferenceDatasetFiles(dataset);
+      fileTreatmentHelper.createReferenceDatasetFiles(dataset);
     }
-    referenceDatasetRepository.save(referenceDataset);
   }
 
 }
