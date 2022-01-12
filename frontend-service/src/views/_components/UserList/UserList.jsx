@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
+import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -7,7 +8,7 @@ import styles from './UserList.module.scss';
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
+import { MyFilters } from 'views/_components/MyFilters';
 import { Spinner } from 'views/_components/Spinner';
 
 import { DataflowService } from 'services/DataflowService';
@@ -15,15 +16,19 @@ import { DataflowService } from 'services/DataflowService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { filterByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
+
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const filterBy = useRecoilValue(filterByState('userList'));
+  const isDataFiltered = !isEmpty(filterBy);
+
   const [userListData, setUserListData] = useState([]);
   const [filteredData, setFilteredData] = useState(userListData);
-  const [isDataFiltered, setIsDataFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -57,15 +62,14 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
     }
   };
 
-  const getFilteredState = value => setIsDataFiltered(value);
-
   const getFilters = filterOptions => {
     return (
-      <Filters
+      <MyFilters
+        className="userList"
         data={userListData}
         getFilteredData={onLoadFilteredData}
-        getFilteredSearched={getFilteredState}
         options={filterOptions}
+        viewType="userList"
       />
     );
   };
@@ -85,14 +89,43 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
 
   const onLoadFilteredData = value => setFilteredData(value);
 
+  // const filterOptionsWithDataflowIdRepresentativeId = [
+  //   { type: 'multiselect', properties: [{ name: 'role' }] },
+  //   { type: 'input', properties: [{ name: 'email' }] },
+  //   {
+  //     type: 'multiselect',
+  //     properties: [
+  //       {
+  //         name: 'dataProviderName',
+  //         showInput: true,
+  //         label: TextByDataflowTypeUtils.getLabelByDataflowType(
+  //           resourcesContext.messages,
+  //           dataflowType,
+  //           'userListDataProviderFilterLabel'
+  //         )
+  //       }
+  //     ]
+  //   }
+  // ];
+
+  // const filterOptionsNoRepresentative = [
+  //   { type: 'input', properties: [{ name: 'dataflowName' }] },
+  //   { type: 'multiselect', properties: [{ name: 'role' }] },
+  //   { type: 'input', properties: [{ name: 'email' }] }
+  // ];
+
+  // const filterOptionsHasRepresentativeId = [
+  //   { type: 'multiselect', properties: [{ name: 'role' }] },
+  //   { type: 'input', properties: [{ name: 'email' }] }
+  // ];
+
   const filterOptionsWithDataflowIdRepresentativeId = [
-    { type: 'multiselect', properties: [{ name: 'role' }] },
-    { type: 'input', properties: [{ name: 'email' }] },
     {
-      type: 'multiselect',
-      properties: [
+      type: 'MULTI_SELECT',
+      nestedOptions: [
+        { key: 'role', label: resourcesContext.messages['role'] },
         {
-          name: 'dataProviderName',
+          key: 'dataProviderName',
           showInput: true,
           label: TextByDataflowTypeUtils.getLabelByDataflowType(
             resourcesContext.messages,
@@ -101,18 +134,24 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
           )
         }
       ]
-    }
+    },
+    { type: 'INPUT', key: 'email', label: resourcesContext.messages['email'] }
   ];
 
   const filterOptionsNoRepresentative = [
-    { type: 'input', properties: [{ name: 'dataflowName' }] },
-    { type: 'multiselect', properties: [{ name: 'role' }] },
-    { type: 'input', properties: [{ name: 'email' }] }
+    {
+      type: 'INPUT',
+      nestedOptions: [
+        { key: 'dataflowName', label: resourcesContext.messages['dataflowName'] },
+        { key: 'email', label: resourcesContext.messages['email'] }
+      ]
+    },
+    { type: 'MULTI_SELECT', nestedOptions: [{ key: 'role', label: resourcesContext.messages['role'] }] }
   ];
 
   const filterOptionsHasRepresentativeId = [
-    { type: 'multiselect', properties: [{ name: 'role' }] },
-    { type: 'input', properties: [{ name: 'email' }] }
+    { type: 'MULTI_SELECT', nestedOptions: [{ key: 'role', label: resourcesContext.messages['role'] }] },
+    { type: 'INPUT', key: 'email', label: resourcesContext.messages['email'] }
   ];
 
   const renderFilters = () => {
