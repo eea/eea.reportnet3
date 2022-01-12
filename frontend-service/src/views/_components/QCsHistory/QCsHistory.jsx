@@ -3,6 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import orderBy from 'lodash/orderBy';
+import capitalize from 'lodash/capitalize';
 
 import styles from './QCsHistory.module.scss';
 
@@ -116,7 +117,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       }
 
       let template;
-      let header = capitalizeHeader(col.field);
+      let header = capitalize(col.field);
 
       switch (col.field) {
         case 'expression':
@@ -179,8 +180,6 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       setLoadingStatus('failed');
     }
   };
-
-  const capitalizeHeader = str => `${str.charAt(0).toUpperCase()}${str.substr(1).toLowerCase()}`;
 
   const checkTemplate = (rowData, column) => (
     <div className={styles.checkedValueColumn}>
