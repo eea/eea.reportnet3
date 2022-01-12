@@ -4,7 +4,6 @@ import { config } from 'conf';
 import { routes } from 'conf/routes';
 
 import camelCase from 'lodash/camelCase';
-import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -24,6 +23,8 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
+import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
+
 const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -37,6 +38,8 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     firstPageRecord: 0
   });
   const [totalRecords, setTotalRecords] = useState(0);
+
+  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
   useEffect(() => {
     const headers = [
@@ -169,11 +172,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           key: notification.key,
           message: notification.message,
           levelError: capitalizedLevelError,
-          date: dayjs(notification.date).format(
-            `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-              userContext.userProps.amPm24h ? '' : ' A'
-            }`
-          ),
+          date: getDateTimeFormatByUserPreferences(notification.date),
 
           downloadButton: notification.onClick ? (
             <span className={styles.center}>

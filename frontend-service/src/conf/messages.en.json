@@ -1428,6 +1428,13 @@
     "qcHistoryButtonTooltip": "View QC history",
     "impossibleRequesterRoleError": "The user cannot be assigned as requester",
     "callFmeProcessFailedEvent": "Error calling to FME at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
+    "invalid": "Invalid",
+    "searchByQcList": "Search by (code, name, description, message)",
+    "tableInfo": "Table info",
+    "loadHistoryDataError": "Error loading history data in QC rules",
+    "noHistoryData": "There are no historic changes",
+    "allQCsHistoryBtn": "QCs history",
+    "isViewUpdated": "Note: The data may not be up to date because the view has not been updated. The dataset must be validated.",
     "moveUp": "Move up",
     "moveDown": "Move down"
   }

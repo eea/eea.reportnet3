@@ -11,16 +11,16 @@ import styles from './QCList.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
-import { ButtonQCHistory } from './_components/ButtonQCHistory';
 import { Checkbox } from 'views/_components/Checkbox';
-import { Dropdown } from 'views/_components/Dropdown';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
+import { Dropdown } from 'views/_components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
+import { MyFilters } from 'views/_components/MyFilters';
 import { QCFieldEditor } from './_components/QCFieldEditor';
+import { QCsHistory } from 'views/_components/QCsHistory';
 import { Spinner } from 'views/_components/Spinner';
 import { TrafficLight } from 'views/_components/TrafficLight';
 
@@ -51,6 +51,7 @@ export const QCList = ({
 
   const [tabsValidationsState, tabsValidationsDispatch] = useReducer(qcListReducer, {
     deletedRuleId: null,
+    editingRows: [],
     filtered: false,
     filteredData: [],
     hasEmptyFields: false,
@@ -59,7 +60,7 @@ export const QCList = ({
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isDeletingRule: false,
-    editingRows: [],
+    isHistoryDialogVisible: false,
     isLoading: true,
     isTableSorted: false,
     sortFieldValidations: null,
@@ -83,8 +84,6 @@ export const QCList = ({
     }
   }, [validationContext.isAutomaticRuleUpdated]);
 
-  const getFilteredState = value => tabsValidationsDispatch({ type: 'IS_FILTERED', payload: { value } });
-
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {tabsValidationsState.filtered &&
@@ -99,6 +98,25 @@ export const QCList = ({
         : ''}
     </Fragment>
   );
+
+  const setIsHistoryDialogVisible = isHistoryDialogVisible => {
+    tabsValidationsDispatch({
+      type: 'SET_IS_HISTORY_DIALOG_VISIBLE',
+      payload: isHistoryDialogVisible
+    });
+  };
+
+  const setValidationId = validationId => tabsValidationsDispatch({ type: 'SET_VALIDATION_ID', payload: validationId });
+
+  const onOpenHistoryDialog = validationId => {
+    setIsHistoryDialogVisible(true);
+    setValidationId(validationId);
+  };
+
+  const onCloseHistoryDialog = () => {
+    setIsHistoryDialogVisible(false);
+    setValidationId('');
+  };
 
   const isDeleteDialogVisible = value =>
     tabsValidationsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
@@ -122,7 +140,7 @@ export const QCList = ({
     } catch (error) {
       console.error('ValidationsList - onDeleteValidation.', error);
       notificationContext.add({ type: 'DELETE_RULE_ERROR' }, true);
-      validationId('');
+      setValidationId('');
     } finally {
       onHideDeleteDialog();
       tabsValidationsDispatch({
@@ -187,7 +205,7 @@ export const QCList = ({
       updatedRuleId = null;
       isFetchingData = false;
       isLoading(false);
-      validationId('');
+      setValidationId('');
       validationContext.onFetchingData(isFetchingData, updatedRuleId);
     }
   };
@@ -347,6 +365,22 @@ export const QCList = ({
     return 'edit';
   };
 
+  const renderHistoricButton = id => {
+    return (
+      <Button
+        className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+        disabled={validationContext.isFetchingData}
+        icon="info"
+        onClick={() => {
+          onOpenHistoryDialog(id);
+        }}
+        tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
+        tooltipOptions={{ position: 'top' }}
+        type="button"
+      />
+    );
+  };
+
   const editAndDeleteTemplate = row => {
     let rowType = 'field';
 
@@ -383,10 +417,8 @@ export const QCList = ({
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
-        <ButtonQCHistory
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
-          rowId={row.id}
-        />
+        {row.hasHistoric && renderHistoricButton(row.id)}
+
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
           disabled={validationContext.isFetchingData}
@@ -409,10 +441,6 @@ export const QCList = ({
 
     return (
       <Fragment>
-        <ButtonQCHistory
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
-          rowId={row.id}
-        />
         <Button
           className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${styles.editRowButton}`}
           disabled={validationContext.isFetchingData}
@@ -422,6 +450,7 @@ export const QCList = ({
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
+        {row.hasHistoric && renderHistoricButton(row.id)}
       </Fragment>
     );
   };
@@ -619,8 +648,6 @@ export const QCList = ({
     return fieldColumns;
   };
 
-  const validationId = value => tabsValidationsDispatch({ type: 'ON_LOAD_VALIDATION_ID', payload: { value } });
-
   const checkIsEmptyValidations = () =>
     isUndefined(tabsValidationsState.validationList) || isEmpty(tabsValidationsState.validationList);
 
@@ -679,18 +706,44 @@ export const QCList = ({
     }
   };
 
-  const filterOptions = [
+  const FILTER_OPTIONS = [
     {
-      type: 'multiselect',
-      properties: [
-        { name: 'table', showInput: true },
-        { name: 'field', showInput: true },
-        { name: 'entityType' },
-        { name: 'levelError' },
-        { name: 'automatic', label: resourcesContext.messages['creationMode'] },
-        { name: 'enabled', label: resourcesContext.messages['statusQC'] },
-        { name: 'isCorrect' }
-      ]
+      label: resourcesContext.messages['searchByQcList'],
+      searchBy: ['shortCode', 'name', 'description', 'message'],
+      type: 'SEARCH'
+    },
+    {
+      nestedOptions: [
+        { key: 'table', label: resourcesContext.messages['table'] },
+        { key: 'field', label: resourcesContext.messages['field'] },
+        { key: 'entityType', label: resourcesContext.messages['entityType'] },
+        { key: 'levelError', label: resourcesContext.messages['levelError'] },
+        {
+          key: 'automatic',
+          label: resourcesContext.messages['creationMode'],
+          multiSelectOptions: [
+            { type: resourcesContext.messages['automatic'], value: true },
+            { type: resourcesContext.messages['manual'], value: false }
+          ]
+        },
+        {
+          key: 'enabled',
+          label: resourcesContext.messages['statusQC'],
+          multiSelectOptions: [
+            { type: resourcesContext.messages['enabled'], value: true },
+            { type: resourcesContext.messages['disabled'], value: false }
+          ]
+        },
+        {
+          key: 'isCorrect',
+          label: resourcesContext.messages['isCorrect'],
+          multiSelectOptions: [
+            { type: resourcesContext.messages['valid'], value: true },
+            { type: resourcesContext.messages['invalid'], value: false }
+          ]
+        }
+      ],
+      type: 'MULTI_SELECT'
     }
   ];
 
@@ -721,14 +774,12 @@ export const QCList = ({
             pointerEvents: tabsValidationsState.editingRows.length > 0 ? 'none' : 'auto',
             opacity: tabsValidationsState.editingRows.length > 0 ? '0.5' : 1
           }}>
-          <Filters
-            className="filter-lines"
+          <MyFilters
+            className="qcList"
             data={tabsValidationsState.validationList.validations}
             getFilteredData={onLoadFilteredData}
-            getFilteredSearched={getFilteredState}
-            options={filterOptions}
-            searchAll
-            searchBy={['shortCode', 'name', 'description', 'message']}
+            options={FILTER_OPTIONS}
+            viewType="qcList"
           />
         </div>
         {!isEmpty(tabsValidationsState.filteredData) ? (
@@ -738,7 +789,7 @@ export const QCList = ({
             editMode="row"
             hasDefaultCurrentPage={true}
             loading={false}
-            onRowClick={event => validationId(event.data.id)}
+            onRowClick={event => setValidationId(event.data.id)}
             onRowEditCancel={onRowEditCancel}
             onRowEditInit={onRowEditInit}
             onRowEditSave={onUpdateValidationRule}
@@ -775,6 +826,16 @@ export const QCList = ({
   return (
     <Fragment>
       {validationList()}
+
+      {tabsValidationsState.isHistoryDialogVisible && (
+        <QCsHistory
+          datasetId={dataset.datasetId}
+          isDialogVisible={tabsValidationsState.isHistoryDialogVisible}
+          onCloseDialog={onCloseHistoryDialog}
+          validationId={tabsValidationsState.validationId}
+        />
+      )}
+
       {tabsValidationsState.isDeleteDialogVisible && deleteValidationDialog()}
     </Fragment>
   );

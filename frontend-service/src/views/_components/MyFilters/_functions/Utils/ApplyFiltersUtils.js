@@ -40,8 +40,19 @@ const applyMultiSelects = ({ filterBy, filterByKeys, item }) => {
   const filteredKeys = filterByKeys.MULTI_SELECT.filter(key => Object.keys(filterBy).includes(key));
 
   return filteredKeys.every(
-    filteredKey => isEmpty(filterBy[filteredKey]) || filterBy[filteredKey].includes(item[filteredKey].toUpperCase())
+    filteredKey =>
+      isEmpty(filterBy[filteredKey]) ||
+      filterBy[filteredKey].toString().toUpperCase().includes(item[filteredKey].toString().toUpperCase())
   );
 };
 
-export const ApplyFiltersUtils = { applyDates, applyInputs, applyMultiSelects };
+const applySearch = ({ filterByKeys, item, value }) => {
+  const filteredKeys = filterByKeys.SEARCH.filter(key => key);
+
+  return (
+    isEmpty(filteredKeys) ||
+    filteredKeys.some(key => areEquals(value, '') || item[key].toLowerCase().includes(value.toLowerCase()))
+  );
+};
+
+export const ApplyFiltersUtils = { applyDates, applyInputs, applyMultiSelects, applySearch };
