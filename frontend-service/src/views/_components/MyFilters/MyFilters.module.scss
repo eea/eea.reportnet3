@@ -86,7 +86,6 @@
     height: 2rem;
     padding-left: 0em;
     width: 90% !important;
-    z-index: 3000;
 
     label {
       color: var(--font-filters);
@@ -201,10 +200,6 @@
   .resetButton {
     grid-area: button;
     margin: auto;
-  }
-
-  .multiselectFilter {
-    z-index: inherit;
   }
 
   .searchInput {
