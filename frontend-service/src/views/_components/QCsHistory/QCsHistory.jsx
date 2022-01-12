@@ -103,7 +103,7 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
       return [];
     }
 
-    const columnData = Object.keys(qcHistoryData[0]).map(key => ({ field: key, header: key }));
+    const columnData = getColumnsInOrder(Object.keys(qcHistoryData[0])).map(key => ({ field: key, header: key }));
 
     return columnData.map(col => {
       if (
@@ -137,6 +137,23 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
     });
   };
 
+  const getColumnsInOrder = historyDataKeys => {
+    const historyDataKeysInOrder = [
+      { id: 'ruleInfoId', index: 0 },
+      { id: 'ruleId', index: 1 },
+      { id: 'user', index: 2 },
+      { id: 'timestamp', index: 3 },
+      { id: 'metadata', index: 4 },
+      { id: 'expression', index: 5 },
+      { id: 'status', index: 6 }
+    ];
+
+    return historyDataKeys
+      .map(key => historyDataKeysInOrder.filter(orderedKey => key === orderedKey.id))
+      .flat()
+      .sort((a, b) => a.index - b.index)
+      .map(orderedKey => orderedKey.id);
+  };
   const getQcHistoryData = async () => {
     setLoadingStatus('pending');
 
