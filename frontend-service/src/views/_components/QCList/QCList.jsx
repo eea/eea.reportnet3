@@ -53,7 +53,7 @@ export const QCList = ({
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
-  const filterBy = useRecoilValue(filterByState('qcList'));
+  const filterBy = useRecoilValue(filterByState(`qcList_${dataset.datasetId}`));
   const isDataFiltered = !isEmpty(filterBy);
 
   const [tabsValidationsState, tabsValidationsDispatch] = useReducer(qcListReducer, {
@@ -797,7 +797,7 @@ export const QCList = ({
             data={tabsValidationsState.validationList.validations}
             getFilteredData={onLoadFilteredData}
             options={FILTER_OPTIONS}
-            viewType="qcList"
+            viewType={`qcList_${dataset.datasetId}`}
           />
         </div>
         {!isEmpty(tabsValidationsState.filteredData) ? (
