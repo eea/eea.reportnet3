@@ -27,10 +27,10 @@ export const QCsHistory = ({ datasetId, isDialogVisible, onCloseDialog, validati
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const [clickedValidationId, setClickedValidationId] = useState(null);
+  const [isRecursivelyOpenedDialog, setIsRecursivelyOpenedDialog] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [qcHistoryData, setQcHistoryData] = useState([]);
-  const [isRecursivelyOpenedDialog, setIsRecursivelyOpenedDialog] = useState(false);
-  const [clickedValidationId, setClickedValidationId] = useState(null);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
