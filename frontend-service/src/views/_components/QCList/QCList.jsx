@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
 import cloneDeep from 'lodash/cloneDeep';
@@ -48,11 +49,13 @@ export const QCList = ({
   reporting = false,
   setHasValidations = () => {}
 }) => {
+  const { datasetId } = useParams();
+
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
-  const filterBy = useRecoilValue(filterByState('qcList'));
+  const filterBy = useRecoilValue(filterByState(`qcList_${datasetId}`));
   const isDataFiltered = !isEmpty(filterBy);
 
   const [tabsValidationsState, tabsValidationsDispatch] = useReducer(qcListReducer, {
@@ -787,7 +790,7 @@ export const QCList = ({
             data={tabsValidationsState.validationList.validations}
             getFilteredData={onLoadFilteredData}
             options={FILTER_OPTIONS}
-            viewType="qcList"
+            viewType={`qcList_${datasetId}`}
           />
         </div>
         {!isEmpty(tabsValidationsState.filteredData) ? (
