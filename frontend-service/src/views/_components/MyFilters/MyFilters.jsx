@@ -348,6 +348,7 @@ export const MyFilters = ({
           className={styles.multiselectFilter}
           filter={option?.showInput}
           headerClassName={styles.selectHeader}
+          id={option.key}
           inputClassName={`p-float-label ${styles.label}`}
           inputId={`${option.key}_input`}
           isFilter={true}
