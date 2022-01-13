@@ -33,6 +33,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { isNil } from 'lodash';
 
 export const DataflowHelp = () => {
   const navigate = useNavigate();
@@ -155,14 +156,19 @@ export const DataflowHelp = () => {
       setIsLoading(false);
       if (!hasCustodianPermissions) {
         if (!isEmpty(data.datasets)) {
-          const datasetSchemas = data.datasets.map(async datasetSchema => {
+          const datasets = [...data.datasets, ...data.referenceDatasets];
+
+          const datasetSchemas = datasets.map(async datasetSchema => {
             return await onLoadDatasetSchema(datasetSchema.datasetId);
           });
+
           Promise.all(datasetSchemas).then(completed => {
             completed.forEach(datasetSchema => {
-              datasetSchema.datasetId = data.datasets.find(
-                dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
-              ).datasetId;
+              if (!isNil(completed.datasetId)) {
+                datasetSchema.datasetId = data.datasets.find(
+                  dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
+                ).datasetId;
+              }
             });
 
             setDatasetsSchemas(uniqBy(completed, 'datasetSchemaId'));
