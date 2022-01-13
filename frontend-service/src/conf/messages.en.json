@@ -1442,6 +1442,7 @@
     "moveDown": "Move down",
     "allQCsHistoryHeader": "All QCs history",
     "metadata": "Metadata",
-    "timestamp": "Timestamp"
+    "timestamp": "Timestamp",
+    "copyToClipboardError": "Error copying to clipboard"
   }
 }

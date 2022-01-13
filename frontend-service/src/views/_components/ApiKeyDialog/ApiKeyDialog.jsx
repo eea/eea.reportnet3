@@ -1,4 +1,6 @@
-import { Fragment, useContext, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useLayoutEffect, useState } from 'react';
+
+import ReactTooltip from 'react-tooltip';
 
 import styles from './ApiKeyDialog.module.scss';
 
@@ -10,15 +12,13 @@ import { Spinner } from 'views/_components/Spinner';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'services/DataflowService';
-import { TooltipUtils } from 'views/_functions/Utils/TooltipUtils';
 
 const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCustodian, manageDialogs }) => {
   const resourcesContext = useContext(ResourcesContext);
 
-  const inputTextRef = useRef(null);
-
   const [apiKey, setApiKey] = useState('');
   const [isKeyLoading, setIsKeyLoading] = useState(false);
+  const [copyResultMessage, setCopyResultMessage] = useState('');
 
   useLayoutEffect(() => {
     onGetApiKey();
@@ -27,14 +27,10 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
   const onCloseDialog = () => manageDialogs('isApiKeyDialogVisible', false);
 
   const onCopyToClipboard = () => {
-    navigator.clipboard.writeText(inputTextRef.current.value).then(
-      () => console.log('Copied to clipboard.'),
-      error => console.error('ApiKeyDialog - onCopyToClipboard.', error)
+    navigator.clipboard.writeText(apiKey).then(
+      () => setCopyResultMessage(resourcesContext.messages['copyToClipboardSuccess']),
+      () => setCopyResultMessage(resourcesContext.messages['copyToClipboardError'])
     );
-
-    setTimeout(() => {
-      TooltipUtils.removeElementsByClass('p-tooltip');
-    }, 750);
   };
 
   const onGetApiKey = async () => {
@@ -90,19 +86,28 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
 
         <div className={styles.input_api}>
           <div className={styles.flex}>
-            <InputText className={styles.inputText} id="apiKey" readOnly ref={inputTextRef} value={apiKey} />
+            <InputText className={styles.inputText} id="apiKey" readOnly value={apiKey} />
             <label className="srOnly" htmlFor="apiKey">
               {apiKey}
             </label>
-            <Button
-              className={`p-button-primary ${styles.copyBtn}`}
-              icon="copy"
-              onClick={onCopyToClipboard}
-              showDelay="3000"
-              tooltip={resourcesContext.messages['copyToClipboardSuccess']}
-              tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
-            />
+            <span data-for="onCopyToClipboardBtn" data-tip>
+              <Button className={`p-button-primary ${styles.copyBtn}`} icon="copy" onClick={onCopyToClipboard} />
+            </span>
           </div>
+
+          <ReactTooltip
+            afterHide={() => setCopyResultMessage('')}
+            afterShow={() => setTimeout(ReactTooltip.hide, 750)}
+            border
+            className={styles.tooltip}
+            delayShow={100}
+            effect="solid"
+            event="mouseup"
+            id="onCopyToClipboardBtn"
+            place="top">
+            <span>{copyResultMessage}</span>
+          </ReactTooltip>
+
           <p className={styles.ids_info}>
             <span className={styles.ids_label}>
               {resourcesContext.messages['dataflow']}: <strong>{dataflowId} </strong>
