@@ -1916,7 +1916,7 @@ public class RulesServiceImpl implements RulesService {
    */
   private boolean checkDatasetComparisonHasChange(Rule ruleActual,
       IntegrityVO originalIntegrityVO) {
-    var actualIntegrityVO = new IntegrityVO();
+    IntegrityVO actualIntegrityVO = null;
     if (ruleActual.getIntegrityConstraintId() != null) {
       actualIntegrityVO = getIntegrityConstraint(ruleActual.getIntegrityConstraintId().toString());
     }
