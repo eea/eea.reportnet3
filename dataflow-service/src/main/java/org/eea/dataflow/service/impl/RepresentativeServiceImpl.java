@@ -634,7 +634,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         if (null != representative.getLeadReporters() && representative.getLeadReporters().stream()
             .filter(reporter -> !Boolean.TRUE.equals(leadReporter.getInvalid())
                 && leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
-            .collect(Collectors.counting()) == 0) {
+            .collect(Collectors.counting()) == 1) {
           modifyLeadReporterPermissions(leadReporter.getEmail().toLowerCase(), representative,
               false);
           leadReporter.setEmail(leadReporterVO.getEmail());
