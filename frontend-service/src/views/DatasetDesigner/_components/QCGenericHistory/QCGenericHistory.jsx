@@ -93,50 +93,50 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
   };
 
   const getHistoryColumns = () => {
-    const headers = [
+    const columns = [
       {
-        id: 'ruleCode',
-        label: resourcesContext.messages['ruleCode'],
+        key: 'ruleCode',
+        header: resourcesContext.messages['ruleCode'],
         template: ruleCodeTemplate
       },
       {
-        id: 'name',
-        label: resourcesContext.messages['name'],
+        key: 'name',
+        header: resourcesContext.messages['name'],
         template: nameTemplate
       },
       {
-        id: 'user',
-        label: resourcesContext.messages['user']
+        key: 'user',
+        header: resourcesContext.messages['user']
       },
       {
-        id: 'timestamp',
-        label: resourcesContext.messages['timestamp'],
+        key: 'timestamp',
+        header: resourcesContext.messages['timestamp'],
         template: timestampTemplate
       },
       {
-        id: 'expression',
-        label: resourcesContext.messages['expressionText'],
+        key: 'expression',
+        header: resourcesContext.messages['expressionText'],
         template: checkTemplate
       },
       {
-        id: 'metadata',
-        label: resourcesContext.messages['metadata'],
+        key: 'metadata',
+        header: resourcesContext.messages['metadata'],
         template: checkTemplate
       },
       {
-        id: 'status',
-        label: resourcesContext.messages['status'],
+        key: 'status',
+        header: resourcesContext.messages['status'],
         template: checkTemplate
       },
       {
-        id: 'actions',
-        label: resourcesContext.messages['actions'],
+        key: 'actions',
+        header: resourcesContext.messages['actions'],
         template: actionsTemplate
       }
     ];
 
-    return headers.map(header => {
-      return <Column body={header.template} field={header.id} header={header.label} key={header.id} sortable />;
+    return columns.map(column => {
+      return <Column body={column.template} field={column.key} header={column.header} key={column.key} sortable />;
     });
   };
 
