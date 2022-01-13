@@ -1,5 +1,4 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -16,36 +15,21 @@ import { DataflowService } from 'services/DataflowService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { filterByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
-
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const filterBy = useRecoilValue(filterByState('userList'));
-
-  const [isDataFiltered, setIsDataFiltered] = useState(false);
   const [userListData, setUserListData] = useState([]);
-  const [filteredData, setFilteredData] = useState(userListData);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { filteredData, isFiltered } = useFilters('userList');
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  useEffect(() => {
-    const isDataFiltered = existFilterByWithData(filterBy);
-    setIsDataFiltered(isDataFiltered);
-    if (!isDataFiltered) {
-      setFilteredData(userListData);
-    }
-  }, [filterBy]);
-
-  const existFilterByWithData = filterBy => {
-    return Object.values(filterBy).filter(item => !isEmpty(item)).length > 0;
-  };
 
   const fetchData = async () => {
     try {
@@ -59,7 +43,6 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
         userData = await DataflowService.getUserList(dataflowId, representativeId);
       }
       setUserListData(userData);
-      setFilteredData(userData);
     } catch (error) {
       console.error('UserList - fetchData.', error);
       notificationContext.add({ type: 'LOAD_USERS_LIST_ERROR' }, true);
@@ -69,31 +52,21 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   };
 
   const getFilters = filterOptions => {
-    return (
-      <MyFilters
-        className="userList"
-        data={userListData}
-        getFilteredData={onLoadFilteredData}
-        options={filterOptions}
-        viewType="userList"
-      />
-    );
+    return <MyFilters className="userList" data={userListData} options={filterOptions} viewType="userList" />;
   };
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
-      {isDataFiltered && userListData.length !== filteredData.length
+      {isFiltered && userListData.length !== filteredData.length
         ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {userListData.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
-      {isDataFiltered && userListData.length === filteredData.length
+      {isFiltered && userListData.length === filteredData.length
         ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
   );
-
-  const onLoadFilteredData = value => setFilteredData(value);
 
   const filterOptionsWithDataflowIdRepresentativeId = [
     {
