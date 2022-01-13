@@ -296,7 +296,7 @@ const BigButtonListReference = ({
               route: routes.REFERENCE_DATASET,
               params: { dataflowId: dataflowId, datasetId: referenceDataset.datasetId }
             }),
-          visibility: dataflowState.hasCustodianPermissions || dataflowState.isCustodianUser
+          visibility: dataflowState.isCustodian || dataflowState.isCustodianUser
         };
       });
 
@@ -321,7 +321,7 @@ const BigButtonListReference = ({
       : !isCreateReferenceEnabled
       ? resourcesContext.messages['disabledCreateDataCollectionSchemasWithError']
       : '',
-    visibility: isDesignStatus && dataflowState.hasCustodianPermissions
+    visibility: isDesignStatus && dataflowState.isCustodian
   };
 
   const newSchemaBigButton = {
@@ -332,7 +332,7 @@ const BigButtonListReference = ({
     helpClassName: 'dataflow-new-schema-help-step',
     layout: isCloningStatus ? 'defaultBigButton' : 'menuBigButton',
     model: isCloningStatus ? [] : newSchemaModel,
-    visibility: isDesignStatus && dataflowState.hasCustodianPermissions
+    visibility: isDesignStatus && dataflowState.isCustodian
   };
 
   const designDatasetButtons = isNil(dataflowState.data.designDatasets)
@@ -354,7 +354,7 @@ const BigButtonListReference = ({
         layout: 'defaultBigButton',
         onSaveName: onSaveName,
         placeholder: resourcesContext.messages['datasetSchemaNamePlaceholder'],
-        visibility: isDesignStatus && dataflowState.hasCustodianPermissions
+        visibility: isDesignStatus && dataflowState.isCustodian
       }));
 
   const bigButtonList = [

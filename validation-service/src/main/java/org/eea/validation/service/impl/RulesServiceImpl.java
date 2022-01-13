@@ -469,7 +469,7 @@ public class RulesServiceImpl implements RulesService {
       createRule(datasetSchemaId, rule);
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
-    addHistoricRuleInfo(rule, null, datasetId);
+    addHistoricRuleInfo(rule, null, datasetId, null);
   }
 
   /**
@@ -810,6 +810,11 @@ public class RulesServiceImpl implements RulesService {
     if (null == ruleOriginal) {
       throw new EEAException(EEAErrorMessage.RULE_NOT_FOUND);
     }
+    var originalIntegrityVO = new IntegrityVO();
+    if (ruleOriginal.getIntegrityConstraintId() != null) {
+      originalIntegrityVO =
+          getIntegrityConstraint(ruleOriginal.getIntegrityConstraintId().toString());
+    }
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
@@ -831,7 +836,7 @@ public class RulesServiceImpl implements RulesService {
       }
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
-    addHistoricRuleInfo(rule, ruleOriginal, datasetId);
+    addHistoricRuleInfo(rule, ruleOriginal, datasetId, originalIntegrityVO);
   }
 
   /**
@@ -913,7 +918,7 @@ public class RulesServiceImpl implements RulesService {
           // Save the modified rule
           rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
 
-          addHistoricRuleInfo(rule, originalRule, datasetId);
+          addHistoricRuleInfo(rule, originalRule, datasetId, null);
         } else {
           LOG_ERROR.error("Rule not found for datasetSchemaId {} and ruleId {}", datasetSchemaId,
               ruleId);
@@ -1855,16 +1860,18 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
+
   /**
    * Adds the historic rule info.
    *
    * @param rule the rule
    * @param ruleOriginal the rule original
    * @param datasetId the dataset id
+   * @param originalIntegrityVO the original integrity VO
    * @throws EEAException the EEA exception
    */
-  private void addHistoricRuleInfo(Rule rule, Rule ruleOriginal, Long datasetId)
-      throws EEAException {
+  private void addHistoricRuleInfo(Rule rule, Rule ruleOriginal, Long datasetId,
+      IntegrityVO originalIntegrityVO) throws EEAException {
     UserRepresentationVO user = userManagementControllerZuul.getUserByUserId();
     Audit audit = auditRepository.getAuditByRuleId(rule.getRuleId());
     if (null == audit) {
@@ -1874,7 +1881,7 @@ public class RulesServiceImpl implements RulesService {
       LOG.info("Adding new information in the historic of the rule {}", rule.getRuleId());
       boolean metadata = checkMetadataHasChange(rule, ruleOriginal);
       boolean status = checkStatusHasChange(rule, ruleOriginal);
-      boolean expression = checkExpressionHasChange(rule, ruleOriginal);
+      boolean expression = checkExpressionHasChange(rule, ruleOriginal, originalIntegrityVO);
       try {
         auditRepository.updateAudit(audit, user, rule, status, expression, metadata);
       } catch (JsonProcessingException e) {
@@ -1884,20 +1891,80 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
+
   /**
    * Check expression has change.
    *
    * @param ruleActual the rule actual
    * @param ruleOriginal the rule original
+   * @param originalIntegrityVO the original integrity VO
    * @return true, if successful
    */
-  private boolean checkExpressionHasChange(Rule ruleActual, Rule ruleOriginal) {
+  private boolean checkExpressionHasChange(Rule ruleActual, Rule ruleOriginal,
+      IntegrityVO originalIntegrityVO) {
+    return checkSQLSentenceHasChange(ruleActual, ruleOriginal)
+        || checkExpressionTextHasChange(ruleActual, ruleOriginal)
+        || checkDatasetComparisonHasChange(ruleActual, originalIntegrityVO);
+  }
+
+  /**
+   * Check dataset comparison has change.
+   *
+   * @param ruleActual the rule actual
+   * @param originalIntegrityVO the original integrity VO
+   * @return true, if successful
+   */
+  private boolean checkDatasetComparisonHasChange(Rule ruleActual,
+      IntegrityVO originalIntegrityVO) {
+    IntegrityVO actualIntegrityVO = null;
+    if (ruleActual.getIntegrityConstraintId() != null) {
+      actualIntegrityVO = getIntegrityConstraint(ruleActual.getIntegrityConstraintId().toString());
+    }
+    return (actualIntegrityVO != null && originalIntegrityVO != null
+        && ruleActual.getSqlSentence() == null && ruleActual.getExpressionText().equals("")
+        && (!(actualIntegrityVO.getOriginFields().equals(originalIntegrityVO.getOriginFields()))
+            || !(actualIntegrityVO.getReferencedFields()
+                .equals(originalIntegrityVO.getReferencedFields()))
+            || (actualIntegrityVO.getOriginFields().size() > originalIntegrityVO.getOriginFields()
+                .size()
+                || actualIntegrityVO.getReferencedFields().size() > originalIntegrityVO
+                    .getReferencedFields().size())));
+  }
+
+  /**
+   * Check SQL sentence has change.
+   *
+   * @param ruleActual the rule actual
+   * @param ruleOriginal the rule original
+   * @return true, if successful
+   */
+  private boolean checkSQLSentenceHasChange(Rule ruleActual, Rule ruleOriginal) {
     boolean change = false;
     if (ruleActual.getSqlSentence() == null && ruleOriginal.getSqlSentence() == null) {
       change = false;
     } else {
       if ((ruleActual.getSqlSentence() != null && ruleOriginal.getSqlSentence() == null)
           || !(ruleActual.getSqlSentence().equals(ruleOriginal.getSqlSentence()))) {
+        change = true;
+      }
+    }
+    return change;
+  }
+
+  /**
+   * Check expression text has change.
+   *
+   * @param ruleActual the rule actual
+   * @param ruleOriginal the rule original
+   * @return true, if successful
+   */
+  private boolean checkExpressionTextHasChange(Rule ruleActual, Rule ruleOriginal) {
+    boolean change = false;
+    if (ruleActual.getExpressionText() == null && ruleOriginal.getExpressionText() == null) {
+      change = false;
+    } else {
+      if ((ruleActual.getExpressionText() != null && ruleOriginal.getExpressionText() == null)
+          || !(ruleActual.getExpressionText().equals(ruleOriginal.getExpressionText()))) {
         change = true;
       }
     }

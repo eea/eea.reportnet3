@@ -1431,11 +1431,12 @@ public class DatasetServiceImpl implements DatasetService {
           schemasRepository.findByIdDataSetSchema(new ObjectId(originDesign.getDatasetSchema()));
       if (StringUtils.isNoneBlank(originDesign.getDatasetSchema())) {
 
-        List<TableSchema> listOfTablesFiltered = getTablesFromSchema(schema);
+        List<TableSchema> listOfTablesFiltered = getTablesFromSchema(schema, true);
+        List<TableSchema> listOfTables = getTablesFromSchema(schema, false);
         // if there are tables of the origin dataset with tables ToPrefill, then we'll copy the data
         if (!listOfTablesFiltered.isEmpty()) {
           Map<String, String> dictionary =
-              filterDictionary(dictionaryOriginTargetObjectId, listOfTablesFiltered);
+              filterDictionary(dictionaryOriginTargetObjectId, listOfTables);
           List<String> tableSchemasIdPrefill = new ArrayList<>();
           listOfTablesFiltered.stream()
               .forEach(t -> tableSchemasIdPrefill.add(t.getIdTableSchema().toString()));
@@ -1647,7 +1648,7 @@ public class DatasetServiceImpl implements DatasetService {
   private void spreadDataPrefill(DataSetSchema datasetSchema, Long originId,
       DataSetMetabase targetDataset) {
     // get tables from schema
-    List<TableSchema> listOfTablesFiltered = getTablesFromSchema(datasetSchema);
+    List<TableSchema> listOfTablesFiltered = getTablesFromSchema(datasetSchema, true);
     // get the data from designs datasets
     if (!listOfTablesFiltered.isEmpty()) {
       TenantResolver.setTenantName(String.format(DATASET_ID, originId));
@@ -1846,17 +1847,21 @@ public class DatasetServiceImpl implements DatasetService {
     });
   }
 
+
+
   /**
    * Gets the tables from schema.
    *
    * @param schema the schema
+   * @param prefillChecked the prefill checked
    * @return the tables from schema
    */
-  private List<TableSchema> getTablesFromSchema(DataSetSchema schema) {
+  private List<TableSchema> getTablesFromSchema(DataSetSchema schema, Boolean prefillChecked) {
     List<TableSchema> listOfTables = schema.getTableSchemas();
     List<TableSchema> listOfTablesFiltered = new ArrayList<>();
     for (TableSchema desingTableToPrefill : listOfTables) {
-      if (Boolean.TRUE.equals(desingTableToPrefill.getToPrefill())) {
+      if (Boolean.TRUE.equals(desingTableToPrefill.getToPrefill())
+          || Boolean.FALSE.equals(prefillChecked)) {
         listOfTablesFiltered.add(desingTableToPrefill);
       }
     }
@@ -3218,7 +3223,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public Boolean getCheckView(@DatasetId Long datasetId) {
+  public Boolean getCheckView(Long datasetId) {
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     return datasetRepository.findViewUpdatedById(datasetId);
   }
 
