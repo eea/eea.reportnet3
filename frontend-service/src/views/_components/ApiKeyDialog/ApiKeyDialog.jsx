@@ -66,13 +66,13 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
         disabled={isKeyLoading}
         icon={isKeyLoading ? 'spinnerAnimate' : 'key'}
         label={resourcesContext.messages['generateApiKey']}
-        onClick={() => onGenerateApiKey()}
+        onClick={onGenerateApiKey}
       />
       <Button
         className="p-button-secondary p-button-right-aligned"
         icon="cancel"
         label={resourcesContext.messages['close']}
-        onClick={() => onCloseDialog()}
+        onClick={onCloseDialog}
       />
     </Fragment>
   );
@@ -82,8 +82,8 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
       blockScroll={false}
       footer={footer}
       header={resourcesContext.messages['apiKeyDialogHead']}
-      modal={true}
-      onHide={() => onCloseDialog()}
+      modal
+      onHide={onCloseDialog}
       style={{ width: '80%', maxWidth: '650px' }}
       visible={isApiKeyDialogVisible}
       zIndex={3003}>
