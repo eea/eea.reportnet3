@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, memo, useContext, useEffect, useReducer, useState } from 'react';
 import ReactDOMServer from 'react-dom/server';
 
