@@ -1,9 +1,10 @@
-import { Fragment, useContext, useLayoutEffect, useState } from 'react';
+import { Fragment, useContext, useLayoutEffect, useRef, useState } from 'react';
 
 import styles from './ApiKeyDialog.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
+import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -14,9 +15,10 @@ import { TooltipUtils } from 'views/_functions/Utils/TooltipUtils';
 const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCustodian, manageDialogs }) => {
   const resourcesContext = useContext(ResourcesContext);
 
+  const inputTextRef = useRef(null);
+
   const [apiKey, setApiKey] = useState('');
   const [isKeyLoading, setIsKeyLoading] = useState(false);
-  const [textAreaRef, setTextAreaRef] = useState(null);
 
   useLayoutEffect(() => {
     onGetApiKey();
@@ -25,10 +27,10 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
   const onCloseDialog = () => manageDialogs('isApiKeyDialogVisible', false);
 
   const onCopyToClipboard = () => {
-    const textArea = textAreaRef;
-    textArea.select();
-    document.execCommand('copy');
-    window.getSelection().removeAllRanges();
+    navigator.clipboard.writeText(inputTextRef.current.value).then(
+      () => console.log('Copied to clipboard.'),
+      error => console.error('ApiKeyDialog - onCopyToClipboard.', error)
+    );
 
     setTimeout(() => {
       TooltipUtils.removeElementsByClass('p-tooltip');
@@ -88,7 +90,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
 
         <div className={styles.input_api}>
           <div className={styles.flex}>
-            <textarea className={styles.textarea} id="apiKey" readOnly ref={textAreaRef} rows={1} value={apiKey} />
+            <InputText className={styles.inputText} id="apiKey" readOnly ref={inputTextRef} value={apiKey} />
             <label className="srOnly" htmlFor="apiKey">
               {apiKey}
             </label>

@@ -16,11 +16,11 @@
     align-self: start;
     margin-top: 0.5em;
   }
-  .textarea {
+  .inputText {
     background-color: var(--api-key-inputtext-bg);
     border-radius: 4px 0px 0px 4px;
     border: none;
-    box-shadow: 0 0 0 0 Transparent;
+    box-shadow: 0 0 0 0 transparent;
     color: var(--inputtext-color);
     font-weight: 600;
     margin: 0;
@@ -28,6 +28,11 @@
     outline: none;
     text-align: center;
     flex-shrink: 0;
+    &:focus {
+      border-color: transparent !important;
+      box-shadow: 0 0 0 0 transparent !important;
+      outline: none;
+    }
   }
 }
 .input_api {
