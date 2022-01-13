@@ -21,6 +21,8 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.DatasetHistoricRuleVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -122,7 +124,7 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand
   @GetMapping(value = "/{datasetSchemaId}/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
   @ApiOperation(value = "Retrieves a rules schema based on a given dataset id", hidden = true)
   public RulesSchemaVO findRuleSchemaByDatasetId(@ApiParam(
       value = "Dataset schema id used in the search",
@@ -189,8 +191,9 @@ public class RulesControllerImpl implements RulesController {
     try {
       rulesService.deleteRuleById(datasetId, ruleId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting rule: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      LOG_ERROR.error("Error deleting rule: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.ERROR_DELETING_RULE);
     }
   }
 
@@ -261,7 +264,8 @@ public class RulesControllerImpl implements RulesController {
           e.getMessage(), ruleVO.getReferenceId(), ruleVO.getDescription(), ruleVO.getRuleName(),
           ruleVO.getWhenCondition(), ruleVO.getThenCondition(), ruleVO.getShortCode(),
           ruleVO.getType(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.ERROR_CREATING_RULE);
     }
   }
 
@@ -309,8 +313,8 @@ public class RulesControllerImpl implements RulesController {
             "Error creating the automatic rule for idDatasetSchema {} and field with id {} for a {} ",
             datasetSchemaId, referenceId, typeData);
       }
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_CREATING_RULE,
-          e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.ERROR_CREATING_RULE);
     }
     LOG.info("creation automatic rule for a type {} at lv of {} successfully", typeData,
         typeEntityEnum);
@@ -344,7 +348,8 @@ public class RulesControllerImpl implements RulesController {
           e.getMessage(), ruleVO.getRuleId(), ruleVO.getReferenceId(), ruleVO.getDescription(),
           ruleVO.getRuleName(), ruleVO.getWhenCondition(), ruleVO.getThenCondition(),
           ruleVO.getShortCode(), ruleVO.getType(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.ERROR_UPDATING_RULE);
     }
   }
 
@@ -368,7 +373,8 @@ public class RulesControllerImpl implements RulesController {
       rulesService.updateAutomaticRule(datasetId, ruleVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating automatic rule: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.ERROR_UPDATING_RULE);
     }
   }
 
@@ -519,7 +525,7 @@ public class RulesControllerImpl implements RulesController {
       return rulesService.copyRulesSchema(copy);
     } catch (EEAException e) {
       LOG_ERROR.error("Error copying rule: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.COPYING_RULE);
     }
   }
 
@@ -752,7 +758,7 @@ public class RulesControllerImpl implements RulesController {
           importRules.getDictionaryOriginTargetObjectId(), importRules.getIntegritiesVO());
     } catch (EEAException e) {
       LOG_ERROR.error("Error importing the rules: {}", e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_RULE);
     }
   }
 
@@ -763,7 +769,7 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @PostMapping(value = "/exportQC/{datasetId}")
   @ApiOperation(value = "Exports all the QCs into a CSV file", hidden = true)
   public void exportQCCSV(@ApiParam(value = "Dataset id used in the export process.",
@@ -791,7 +797,7 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @GetMapping("/downloadQC/{datasetId}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @ApiOperation(value = "Download the generated CSV file containing the QCs", hidden = true)
   @ApiResponse(code = 404, message = "Couldn't find a file with the specified name.")
   public void downloadQCCSV(
@@ -819,8 +825,8 @@ public class RulesControllerImpl implements RulesController {
           "Downloading file generated when exporting QC Rules. DatasetId {}. Filename {}. Error message: {}",
           datasetId, fileName, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
-          "Trying to download a file generated during the export QC Rules process but the file is not found, datasetID: %s + filename: %s + message: %s ",
-          datasetId, fileName, e.getMessage()), e);
+          "Trying to download a file generated during the export QC Rules process but the file is not found, datasetID: %s + filename: %s.",
+          datasetId, fileName));
     }
   }
 
@@ -862,22 +868,22 @@ public class RulesControllerImpl implements RulesController {
       String sqlError = e.getCause().getCause().getCause().getMessage() != null
           ? e.getCause().getCause().getCause().getMessage()
           : "";
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, sqlError, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, sqlError);
     } catch (EEAForbiddenSQLCommandException e) {
       LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}",
           sqlRule.getSqlRule(), e.getMessage());
-      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          EEAErrorMessage.SQL_COMMAND_NOT_ALLOWED);
     } catch (EEAException e) {
       LOG_ERROR.error("User doesn't have access to one of the datasets: {}", sqlRule.getSqlRule(),
           e);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.RUNNING_RULE);
     } catch (NumberFormatException e) {
       LOG_ERROR.error("Wrong id for dataset in SQL Rule execution: {}", sqlRule.getSqlRule(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          "Wrong id for dataset in SQL Rule execution");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RUNNING_RULE);
     } catch (StringIndexOutOfBoundsException e) {
       LOG_ERROR.error("SQL sentence has wrong format, please check: {}", sqlRule.getSqlRule(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RUNNING_RULE);
     }
 
     return obtainedTableValues;
@@ -914,26 +920,72 @@ public class RulesControllerImpl implements RulesController {
     } catch (ParseException e) {
       LOG_ERROR.error("There was an error trying to parse the explain plan: {}",
           sqlRule.getSqlRule(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error(
           "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.",
           sqlRule.getSqlRule(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     } catch (EEAForbiddenSQLCommandException e) {
       LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}",
           sqlRule.getSqlRule(), e.getMessage());
-      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          EEAErrorMessage.SQL_COMMAND_NOT_ALLOWED);
     } catch (EEAException e) {
       LOG_ERROR.error("User doesn't have access to one of the datasets: {}", sqlRule.getSqlRule(),
           e);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
     } catch (StringIndexOutOfBoundsException e) {
       LOG_ERROR.error("SQL sentence has wrong format, please check: {}", sqlRule.getSqlRule(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     return sqlCost;
   }
+
+  /**
+   * Gets the rule historic.
+   *
+   * @param datasetId the dataset id
+   * @param ruleId the rule id
+   * @return the rule historic
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN')")
+  @ApiOperation(value = "Get a historic information about the updates of a rule", hidden = true)
+  @GetMapping(value = "/historicInfo")
+  public List<RuleHistoricInfoVO> getRuleHistoric(
+      @ApiParam(value = "Dataset id used in the get of a historic rule",
+          example = "1") @RequestParam("datasetId") long datasetId,
+      @ApiParam(value = "Rule id used in the get of a historic rule",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("ruleId") String ruleId) {
+    try {
+      return rulesService.getRuleHistoricInfo(datasetId, ruleId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Not found rule historic information, please check rule with id: {}", ruleId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.HISTORIC_QC_NOT_FOUND);
+    }
+  }
+
+  /**
+   * Gets the rule historic by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the rule historic by dataset id
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN')")
+  @ApiOperation(value = "Get the historic information of the all rules in the dataset",
+      hidden = true)
+  @GetMapping(value = "/historicDatasetRules")
+  public List<DatasetHistoricRuleVO> getRuleHistoricByDatasetId(
+      @ApiParam(value = "Dataset id used in the get of a historic rule",
+          example = "1") @RequestParam("datasetId") long datasetId) {
+    return rulesService.getRuleHistoricInfoByDatasetId(datasetId);
+  }
+
 }

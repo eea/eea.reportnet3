@@ -1,14 +1,19 @@
 package org.eea.validation.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.SqlRuleVO;
 import org.eea.validation.exception.EEAForbiddenSQLCommandException;
@@ -626,9 +631,7 @@ public class RulesControllerImplTest {
     try {
       rulesControllerImpl.runSqlRule(1L, sqlRule, true);
     } catch (ResponseStatusException e) {
-      assertEquals(
-          "422 UNPROCESSABLE_ENTITY; nested exception is org.eea.validation.exception.EEAForbiddenSQLCommandException",
-          e.getMessage());
+      assertEquals(EEAErrorMessage.SQL_COMMAND_NOT_ALLOWED, e.getReason());
       throw e;
     }
 
@@ -643,11 +646,42 @@ public class RulesControllerImplTest {
     try {
       rulesControllerImpl.runSqlRule(1L, sqlRule, true);
     } catch (ResponseStatusException e) {
-      assertEquals("403 FORBIDDEN; nested exception is org.eea.exception.EEAException",
-          e.getMessage());
+      assertEquals(EEAErrorMessage.RUNNING_RULE, e.getReason());
       throw e;
     }
 
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getRuleHistoricExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(rulesService).getRuleHistoricInfo(Mockito.anyLong(),
+        Mockito.any());
+    try {
+      rulesControllerImpl.getRuleHistoric(1L, "RULE_ID");
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test
+  public void getRuleHistoricTest() throws EEAException {
+    List<RuleHistoricInfoVO> historicExpected = new ArrayList<>();
+    RuleHistoricInfoVO ruleInfo = new RuleHistoricInfoVO();
+    ruleInfo.setExpression(true);
+    ruleInfo.setMetadata(false);
+    ruleInfo.setRuleBefore("");
+    ruleInfo.setRuleId("ruleid");
+    ruleInfo.setRuleInfoId("ruleinfoid");
+    ruleInfo.setStatus(false);
+    ruleInfo.setTimestamp(new Date());
+    ruleInfo.setUser("user");
+    historicExpected.add(ruleInfo);
+
+    Mockito.when(rulesService.getRuleHistoricInfo(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(historicExpected);
+
+    assertEquals(rulesControllerImpl.getRuleHistoric(1L, "ruleId"), historicExpected);
   }
 
 

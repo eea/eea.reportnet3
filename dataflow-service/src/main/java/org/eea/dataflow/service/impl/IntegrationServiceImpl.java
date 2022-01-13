@@ -415,7 +415,8 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Transactional
   public void executeExternalIntegration(Long datasetId, Long integrationId,
       IntegrationOperationTypeEnum operation, Boolean replace) throws EEAException {
-
+    // Mark the view data in the dataset as non updated as we are going to import data
+    datasetControllerZuul.updateCheckView(datasetId, false);
     // Delete the previous data in the dataset if we have chosen it before the call to FME
     if (Boolean.TRUE.equals(replace)) {
       LOG.info("Replacing the data previous the execution of an external integration in dataset {}",

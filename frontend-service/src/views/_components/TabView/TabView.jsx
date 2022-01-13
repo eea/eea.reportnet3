@@ -208,15 +208,19 @@ const TabView = ({
     return (
       !(isDataflowOpen && isDesignDatasetEditorRead && tab.props.addTab) && (
         <Tab
+          additionalInfo={tab.props.description}
           addTab={tab.props.addTab}
           ariaControls={ariaControls}
           checkEditingTabs={checkEditingTabs}
           children={tab.props.children}
           className={classNamed}
+          description={tab.props.description}
           designMode={designMode}
           disabled={tab.props.disabled}
           divScrollTabsRef={divTabsRef.current}
           editable={tab.props.editable}
+          fixedNumber={tab.props.fixedNumber}
+          hasInfoTooltip={tab.props.hasInfoTooltip}
           hasPKReferenced={tab.props.hasPKReferenced}
           header={tab.props.header}
           headerStyle={tab.props.headerStyle}
@@ -229,6 +233,7 @@ const TabView = ({
           key={id}
           leftIcon={tab.props.leftIcon}
           newTab={tab.props.newTab}
+          notEmpty={tab.props.notEmpty}
           onTabAddCancel={onTabAddCancel}
           onTabBlur={onTabBlur}
           onTabDeleteClick={onTabDeleteClicked}
@@ -243,11 +248,13 @@ const TabView = ({
           }}
           onTabMouseWheel={onTabMouseWheel}
           onTabNameError={onTabNameError}
+          readOnly={tab.props.readOnly}
           rightIcon={tab.props.rightIcon}
           rightIconClass={tab.props.rightIconClass}
           scrollTo={scrollTo}
           selected={selected}
           tableSchemaId={tab.props.tableSchemaId}
+          toPrefill={tab.props.toPrefill}
           totalTabs={totalTabs}
         />
       )
@@ -266,14 +273,14 @@ const TabView = ({
       <div className={styles.headersWrapper}>
         <Icon
           className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
-          icon={'stepBackward'}
+          icon="stepBackward"
           onClick={() => {
             scrollTo(0, 0);
           }}
         />
         <Icon
           className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
-          icon={'caretLeft'}
+          icon="caretLeft"
           onClick={e => {
             scrollTo(divTabsRef.current.scrollLeft - divTabsRef.current.clientWidth * 0.75, 0);
           }}
@@ -285,14 +292,14 @@ const TabView = ({
         </div>
         <Icon
           className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
-          icon={'caretRight'}
+          icon="caretRight"
           onClick={() => {
             scrollTo(divTabsRef.current.scrollLeft + divTabsRef.current.clientWidth * 0.75, 0);
           }}
         />
         <Icon
           className={`${styles.navigationTabIcons} ${isNavigationHidden ? styles.iconHidden : null}`}
-          icon={'stepForward'}
+          icon="stepForward"
           onClick={() => {
             scrollTo(ulTabsRef.current.clientWidth + 100, 0);
           }}
@@ -312,7 +319,7 @@ const TabView = ({
 
   const renderConfirmDialog = () => (
     <ConfirmDialog
-      classNameConfirm={'p-button-danger'}
+      classNameConfirm="p-button-danger"
       header={resourcesContext.messages['deleteTabHeader']}
       labelCancel={resourcesContext.messages['no']}
       labelConfirm={resourcesContext.messages['yes']}

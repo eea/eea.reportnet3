@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useLayoutEffect, useState } from 'react';
 
 import styles from './ApiKeyDialog.module.scss';
 
@@ -18,7 +18,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
   const [isKeyLoading, setIsKeyLoading] = useState(false);
   const [textAreaRef, setTextAreaRef] = useState(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     onGetApiKey();
   }, []);
 
@@ -70,7 +70,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
       />
       <Button
         className="p-button-secondary p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => onCloseDialog()}
       />
@@ -117,7 +117,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
                 </label>
                 <Button
                   className={`p-button-primary ${styles.copyBtn}`}
-                  icon={'copy'}
+                  icon="copy"
                   onClick={() => onCopyToClipboard()}
                   showDelay="3000"
                   tooltip={resourcesContext.messages['copyToClipboardSuccess']}

@@ -302,7 +302,7 @@ const DatasetSchema = ({
             onClick={() => onDownloadTableDefinitions(parsedDesignDataset.datasetId)}
           />
           <Button
-            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+            className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
             icon={expandAll ? 'angleRight' : 'angleDown'}
             label={expandAll ? resourcesContext.messages['collapseAll'] : resourcesContext.messages['expandAll']}
             onClick={() => setExpandAll(!expandAll)}

@@ -137,7 +137,7 @@ export const useSetColumns = (
         )}
         {hasWritePermissions && !isDataflowOpen && !isDesignDatasetEditorRead && (!colSchema.readOnly || !isReporting) && (
           <Button
-            className={`p-button-animated-blink p-button-secondary-transparent`}
+            className="p-button-animated-blink p-button-secondary-transparent"
             icon="import"
             onClick={() => {
               setIsAttachFileVisible(true);
@@ -157,7 +157,7 @@ export const useSetColumns = (
           !isNil(value) &&
           value !== '' && (
             <Button
-              className={`p-button-animated-blink p-button-secondary-transparent`}
+              className="p-button-animated-blink p-button-secondary-transparent"
               icon="trash"
               onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId)}
             />

@@ -102,7 +102,7 @@ export const TableManagement = ({
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['cancel']}
         onClick={onCancelRowEdit}
       />
@@ -310,7 +310,7 @@ export const TableManagement = ({
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button
-          className={'p-button-secondary'}
+          className="p-button-secondary"
           disabled={!hasTable || isSaving}
           icon={hasRecord ? 'edit' : 'add'}
           label={

@@ -31,6 +31,16 @@ export const ValidationRepository = {
   getAll: async (dataflowId, datasetSchemaId) =>
     await HTTPRequester.get({ url: getUrl(ValidationConfig.getAll, { dataflowId, datasetSchemaId }) }),
 
+  getAllQCsHistoricInfo: async datasetId =>
+    await HTTPRequester.get({
+      url: getUrl(ValidationConfig.getAllQCsHistoricInfo, { datasetId })
+    }),
+
+  getQcHistoricInfo: async (datasetId, ruleId) =>
+    await HTTPRequester.get({
+      url: getUrl(ValidationConfig.getQcHistoricInfo, { datasetId, ruleId })
+    }),
+
   runSqlRule: async (datasetId, sqlSentence, showInternalFields) =>
     await HTTPRequester.post({
       url: getUrl(ValidationConfig.runSqlRule, { datasetId, sqlSentence, showInternalFields }),
@@ -49,5 +59,7 @@ export const ValidationRepository = {
     await HTTPRequester.post({
       url: getUrl(ValidationConfig.evaluateSqlSentence, { datasetId }),
       data: { sqlRule: sqlSentence }
-    })
+    }),
+
+  viewUpdated: async datasetId => await HTTPRequester.get({ url: getUrl(ValidationConfig.viewUpdated, { datasetId }) })
 };

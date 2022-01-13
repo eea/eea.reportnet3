@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 
-import styles from './App.module.css';
+import styles from './App.module.scss';
 
 import { routes } from 'conf/routes';
 
@@ -138,7 +138,10 @@ const App = () => {
                             />
                             <Route
                               element={
-                                <PrivateRoute component={Dataset} componentProps={{ isReferenceDataset: true }} />
+                                <PrivateRoute
+                                  component={Dataset}
+                                  componentProps={{ isReferenceDatasetReferenceDataflow: true }}
+                                />
                               }
                               exact
                               path={routes.REFERENCE_DATASET}

@@ -40,6 +40,7 @@ import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetCo
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
@@ -522,6 +523,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // release snapshot when the user press create+release
     } catch (Exception e) {
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
       EventType eventType = null;
       switch (type) {
         case SNAPSHOT:
@@ -586,6 +590,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     LOG.info(
         "Copying the data from the dataset {} to dataset {} because this is a cloning process and there are tables to prefill",
         originDataset, targetDataset);
+
+    String nameFileTableValue = pathSnapshot + String.format(FILE_CLONE_PATTERN_NAME, originDataset,
+        targetDataset, LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+
     String nameFileRecordValue = pathSnapshot + String.format(FILE_CLONE_PATTERN_NAME,
         originDataset, targetDataset, LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
@@ -610,6 +618,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
       placeHolders = builder.deleteCharAt(builder.length() - 1).toString();
 
+      String copyQueryTable = "COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
+          + originDataset + ".table_value) to STDOUT";
       String copyQueryRecord = "COPY (SELECT rv.id, rv.id_record_schema, rv.id_table, "
           + partitionDatasetTarget + ", rv.data_provider_code FROM dataset_" + originDataset
           + ".record_value rv, dataset_" + originDataset + ".table_value tv "
@@ -628,6 +638,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               + "WHERE at.field_value_id =fv.id and fv.id_record = rv.id and rv.id_table=tv.id"
               + " and tv.id_table_schema in (" + placeHolders + ")) to STDOUT";
 
+      // Copy table_value
+      printToFile(nameFileTableValue, copyQueryTable, cm);
       // Copy record_value
       printToFile(nameFileRecordValue, copyQueryRecord, cm);
       // Copy field_value
@@ -635,12 +647,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Copy attachment_value
       printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
 
-      modifySnapshotFile(dictionaryOriginTargetObjectId,
-          Arrays.asList(nameFileRecordValue, nameFileFieldValue, nameFileAttachmentValue));
+      modifySnapshotFile(dictionaryOriginTargetObjectId, Arrays.asList(nameFileTableValue,
+          nameFileRecordValue, nameFileFieldValue, nameFileAttachmentValue), targetDataset);
 
     } catch (SQLException | IOException e) {
       LOG_ERROR.error("Error creating the data from the origin dataset {}", originDataset, e);
-      deleteFile(Arrays.asList(nameFileRecordValue, nameFileFieldValue, nameFileAttachmentValue));
+      deleteFile(Arrays.asList(nameFileTableValue, nameFileRecordValue, nameFileFieldValue,
+          nameFileAttachmentValue));
     }
 
     // Copy the data from the snapshot file into the target dataset
@@ -652,6 +665,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         Statement stmt = con.createStatement()) {
       con.setAutoCommit(true);
       CopyManager cm = new CopyManager((BaseConnection) con);
+
+      // Delete the previous table values
+      String sql = DELETE_FROM_DATASET + targetDataset + ".table_value";
+      stmt.executeUpdate(sql);
+
+      String copyQueryTable =
+          COPY_DATASET + targetDataset + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
+      copyFromFile(copyQueryTable, nameFileTableValue, cm);
 
       String copyQueryRecord = COPY_DATASET + targetDataset
           + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
@@ -677,13 +698,303 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
   /**
+   * Restore data snapshot.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   * @param partitionId the partition id
+   * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
+   *
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
+      boolean prefillingReference) throws SQLException, IOException {
+
+    EventType successEventType = Boolean.TRUE.equals(deleteData)
+        ? Boolean.TRUE.equals(isSchemaSnapshot)
+            ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
+            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : EventType.RELEASE_COMPLETED_EVENT;
+    EventType failEventType =
+        Boolean.TRUE.equals(deleteData)
+            ? Boolean.TRUE.equals(isSchemaSnapshot)
+                ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
+                : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
+            : EventType.RELEASE_FAILED_EVENT;
+
+    restoreSnapshot(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
+        deleteData, successEventType, failEventType, prefillingReference);
+
+  }
+
+  /**
+   * Delete data snapshot.
+   *
+   * @param idReportingDataset the id reporting dataset
+   * @param idSnapshot the id snapshot
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
+
+    String nameFileDatasetValue =
+        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
+    String nameFileTableValue =
+        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
+    String nameFileRecordValue =
+        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
+    String nameFileFieldValue =
+        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
+    String nameAttachmentValue =
+        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX;
+
+    Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
+    Files.deleteIfExists(path1);
+    Path path2 = Paths.get(pathSnapshot + nameFileTableValue);
+    Files.deleteIfExists(path2);
+    Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
+    Files.deleteIfExists(path3);
+    Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
+    Files.deleteIfExists(path4);
+    Path path5 = Paths.get(pathSnapshot + nameAttachmentValue);
+    Files.deleteIfExists(path5);
+  }
+
+  /**
+   * Delete dataset.
+   *
+   * @param datasetSchemaName the dataset schema name
+   */
+  @Override
+  public void deleteDataset(String datasetSchemaName) {
+    StringBuilder stringBuilder = new StringBuilder("DROP SCHEMA IF EXISTS ");
+    stringBuilder.append(datasetSchemaName).append(" CASCADE");
+    jdbcTemplate.execute(stringBuilder.toString());
+  }
+
+  /**
+   * Creates the data set from other.
+   *
+   * @param sourceDatasetName the source dataset name
+   * @param destinationDataSetName the destination data set name
+   */
+  @Override
+  public void createDataSetFromOther(String sourceDatasetName, String destinationDataSetName) {
+    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
+  }
+
+  /**
+   * Execute query view commands.
+   *
+   * @param command the command
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  @Override
+  public void executeQueryViewCommands(String command) throws RecordStoreAccessException {
+    jdbcTemplate.execute(command);
+    LOG.info("Command on Query View executed: {}", command);
+  }
+
+
+  /**
+   * Creates the update query view.
+   *
+   * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   */
+  @Override
+  public void createUpdateQueryView(Long datasetId, boolean isMaterialized) {
+    LOG.info("Executing createUpdateQueryView on the datasetId {}. Materialized: {}", datasetId,
+        isMaterialized);
+    DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
+    // delete all views because some names can be changed
+    try {
+      deleteAllViewsFromSchema(datasetId);
+      deleteAllMatViewsFromSchema(datasetId);
+    } catch (RecordStoreAccessException e1) {
+      LOG_ERROR.error("Error deleting Query view: {}", e1.getMessage(), e1);
+    }
+
+    datasetSchema.getTableSchemas().stream()
+        .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
+        .forEach(table -> {
+          List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
+          try {
+            // create materialiced view or query view of all tableSchemas
+            executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
+                datasetId, true);
+            createIndexMaterializedView(datasetId, table.getNameTableSchema());
+            // execute view permission
+            executeViewPermissions(table.getNameTableSchema(), datasetId);
+          } catch (RecordStoreAccessException e) {
+            LOG_ERROR.error("Error creating Query view: {}", e.getMessage(), e);
+          }
+        });
+  }
+
+
+
+  /**
+   * Update materialized query view.
+   *
+   * @param datasetId the dataset id
+   * @param user the user
+   * @param released the released
+   */
+  @Override
+  @Async
+  public void updateMaterializedQueryView(Long datasetId, String user, Boolean released) {
+    LOG.info(" Update Materialized Views from Dataset id: %s", datasetId);
+
+    DataSetMetabaseVO datasetMetabaseVO =
+        dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    Long dataflowId = datasetMetabaseVO.getDataflowId();
+    try {
+      switch (datasetMetabaseVO.getDatasetTypeEnum()) {
+        case DESIGN:
+          List<DesignDatasetVO> designDatasets =
+              dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(dataflowId);
+
+          for (DesignDatasetVO dataset : designDatasets) {
+            launchUpdateMaterializedQueryView(dataset.getId());
+          }
+          break;
+        case REPORTING:
+          List<ReportingDatasetVO> reportingDatasets =
+              dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowIdAndProviderId(
+                  dataflowId, datasetMetabaseVO.getDataProviderId());
+
+          for (ReportingDatasetVO dataset : reportingDatasets) {
+            launchUpdateMaterializedQueryView(dataset.getId());
+          }
+          break;
+        case TEST:
+          List<TestDatasetVO> testDatasets =
+              testDatasetControllerZuul.findTestDatasetByDataflowId(dataflowId);
+          for (TestDatasetVO dataset : testDatasets) {
+            launchUpdateMaterializedQueryView(dataset.getId());
+          }
+          break;
+        case COLLECTION:
+          List<DataCollectionVO> dataCollectionDatasets =
+              dataCollectionControllerZuul.findDataCollectionIdByDataflowId(dataflowId);
+          for (DataCollectionVO dataset : dataCollectionDatasets) {
+            launchUpdateMaterializedQueryView(dataset.getId());
+          }
+          break;
+        case EUDATASET:
+          List<EUDatasetVO> euDatasets =
+              euDatasetControllerZuul.findEUDatasetByDataflowId(dataflowId);
+          for (EUDatasetVO dataset : euDatasets) {
+            launchUpdateMaterializedQueryView(dataset.getId());
+          }
+          break;
+        case REFERENCE:
+          List<ReferenceDatasetVO> references =
+              referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId);
+          for (ReferenceDatasetVO dataset : references) {
+            launchUpdateMaterializedQueryView(dataset.getId());
+          }
+          break;
+        default:
+          break;
+      }
+    } catch (RecordStoreAccessException e) {
+      LOG_ERROR.error("Error updating Materialized view: {}", e.getMessage(), e);
+    }
+    Map<String, Object> values = new HashMap<>();
+    values.put(LiteralConstants.DATASET_ID, datasetId);
+    values.put(LiteralConstants.USER,
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    values.put("released", released);
+    values.put("updateViews", false);
+    LOG.info(
+        "The user set on updateMaterializedQueryView threadPropertiesManager is {}, dataset {}",
+        SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+    LOG.info("The user set on securityContext is {}",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
+  }
+
+  /**
+   * Launch update materialized query view.
+   *
+   * @param datasetId the dataset id
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  @Override
+  public void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException {
+
+    if (!Boolean.TRUE.equals(datasetControllerZuul.getCheckView(datasetId))) {
+      datasetControllerZuul.updateCheckView(datasetId, true);
+      String viewToUpdate =
+          "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
+      List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
+
+      String updateQuery = "refresh materialized view concurrently dataset_";
+
+      for (String view : viewList) {
+        executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
+      }
+      LOG.info("These views: {} have been refreshed.", viewList);
+    } else {
+      LOG.info("The views from the dataset {} are updated, no need to refresh.", datasetId);
+    }
+  }
+
+  /**
+   * Refresh materialized query.
+   *
+   * @param datasetIds the dataset ids
+   */
+  @Override
+  @Async
+  public void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation,
+      boolean released, Long datasetId) {
+    datasetIds.forEach(id -> {
+      if (!Boolean.TRUE.equals(datasetControllerZuul.getCheckView(id))) {
+        datasetControllerZuul.updateCheckView(id, true);
+        String viewToUpdate =
+            "select matviewname from pg_matviews  where schemaname = 'dataset_" + id + "'";
+        List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
+
+        String updateQuery = "refresh materialized view concurrently dataset_";
+
+        for (String view : viewList) {
+          try {
+            executeQueryViewCommands(updateQuery + id + "." + "\"" + view + "\"");
+          } catch (RecordStoreAccessException e) {
+            LOG_ERROR.error("Error refreshing materialized view from dataset {}", id);
+          }
+        }
+        LOG.info("These materialized views: {} have been refreshed.", viewList);
+      } else {
+        LOG.info("The views from the dataset {} are updated, no need to refresh.", id);
+      }
+    });
+    if (Boolean.TRUE.equals(continueValidation)) {
+      Map<String, Object> values = new HashMap<>();
+      values.put(LiteralConstants.DATASET_ID, datasetId);
+      values.put("released", released);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
+    }
+  }
+
+
+  /**
    * Modify snapshot file.
    *
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    * @param nameFiles the name files
    */
   private void modifySnapshotFile(Map<String, String> dictionaryOriginTargetObjectId,
-      List<String> nameFiles) {
+      List<String> nameFiles, Long datasetId) {
 
     if (!CollectionUtils.isEmpty(nameFiles)) {
       nameFiles.stream().forEach(f -> {
@@ -691,21 +1002,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         Path pathFile = Paths.get(f);
         List<String> replaced = new ArrayList<>();
 
-        // for (Map.Entry<String, String> entry : dictionaryOriginTargetObjectId.entrySet()) {
         try (Stream<String> lines = Files.lines(pathFile)) {
-          // replaced = lines.map(line -> line.replace(entry.getKey(), entry.getValue()))
-          // .collect(Collectors.toList());
-          replaced =
-              lines.map(line -> line = modifyingLine(dictionaryOriginTargetObjectId, line, f))
-                  .collect(Collectors.toList());
+          replaced = lines
+              .map(line -> line = modifyingLine(dictionaryOriginTargetObjectId, line, f, datasetId))
+              .collect(Collectors.toList());
           Files.write(pathFile, replaced);
         } catch (IOException e) {
           LOG_ERROR.error("Error modifying the file {} during the data copy in cloning process", f);
         }
-        // }
       });
     }
   }
+
 
   /**
    * Modifying line.
@@ -716,7 +1024,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @return the string
    */
   private String modifyingLine(Map<String, String> dictionaryOriginTargetObjectId, String line,
-      String fileName) {
+      String fileName, Long datasetId) {
 
     String[] lineSplitted = line.split("\t");
 
@@ -727,6 +1035,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     if (fileName.contains("FieldValue")) {
       String fieldSchema = lineSplitted[3];
       line = line.replace(fieldSchema, dictionaryOriginTargetObjectId.get(fieldSchema));
+    }
+    if (fileName.contains("TableValue")) {
+      String oldDatasetId = lineSplitted[2];
+      String tableSchemaId = lineSplitted[1];
+      line = line.replace(oldDatasetId, datasetId.toString());
+      if (null != dictionaryOriginTargetObjectId) {
+        line = line.replace(tableSchemaId, dictionaryOriginTargetObjectId.get(tableSchemaId));
+      }
     }
     return line;
   }
@@ -851,97 +1167,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
-  /**
-   * Restore data snapshot.
-   *
-   * @param idReportingDataset the id reporting dataset
-   * @param idSnapshot the id snapshot
-   * @param partitionId the partition id
-   * @param datasetType the dataset type
-   * @param isSchemaSnapshot the is schema snapshot
-   * @param deleteData the delete data
-   *
-   * @throws SQLException the SQL exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Override
-  public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
-      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
-      boolean prefillingReference) throws SQLException, IOException {
-
-    EventType successEventType = Boolean.TRUE.equals(deleteData)
-        ? Boolean.TRUE.equals(isSchemaSnapshot)
-            ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RELEASE_COMPLETED_EVENT;
-    EventType failEventType =
-        Boolean.TRUE.equals(deleteData)
-            ? Boolean.TRUE.equals(isSchemaSnapshot)
-                ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT
-                : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
-            : EventType.RELEASE_FAILED_EVENT;
-
-    restoreSnapshot(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
-        deleteData, successEventType, failEventType, prefillingReference);
-
-  }
-
-  /**
-   * Delete data snapshot.
-   *
-   * @param idReportingDataset the id reporting dataset
-   * @param idSnapshot the id snapshot
-   *
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Override
-  public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
-
-    String nameFileDatasetValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
-    String nameFileTableValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
-    String nameFileRecordValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
-    String nameFileFieldValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
-    String nameAttachmentValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX;
-
-    Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
-    Files.deleteIfExists(path1);
-    Path path2 = Paths.get(pathSnapshot + nameFileTableValue);
-    Files.deleteIfExists(path2);
-    Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
-    Files.deleteIfExists(path3);
-    Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
-    Files.deleteIfExists(path4);
-    Path path5 = Paths.get(pathSnapshot + nameAttachmentValue);
-    Files.deleteIfExists(path5);
-  }
-
-  /**
-   * Delete dataset.
-   *
-   * @param datasetSchemaName the dataset schema name
-   */
-  @Override
-  public void deleteDataset(String datasetSchemaName) {
-    StringBuilder stringBuilder = new StringBuilder("DROP SCHEMA IF EXISTS ");
-    stringBuilder.append(datasetSchemaName).append(" CASCADE");
-    jdbcTemplate.execute(stringBuilder.toString());
-  }
-
-  /**
-   * Creates the data set from other.
-   *
-   * @param sourceDatasetName the source dataset name
-   * @param destinationDataSetName the destination data set name
-   */
-  @Override
-  public void createDataSetFromOther(String sourceDatasetName, String destinationDataSetName) {
-    throw new java.lang.UnsupportedOperationException("Operation not implemented yet");
-  }
 
   /**
    * Restore snapshot.
@@ -981,7 +1206,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         Statement stmt = con.createStatement()) {
       con.setAutoCommit(true);
 
-      if (Boolean.TRUE.equals(deleteData)) {
+      if (Boolean.TRUE.equals(deleteData)
+          || (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference)) {
         String sql = composeDeleteSql(datasetId, partitionId, datasetType);
         LOG.info("Deleting previous data");
         stmt.executeUpdate(sql);
@@ -1062,11 +1288,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void copyProcess(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType,
       CopyManager cm) throws IOException, SQLException {
-    if (DatasetTypeEnum.DESIGN.equals(datasetType)) {
+    if (DatasetTypeEnum.DESIGN.equals(datasetType)
+        || DatasetTypeEnum.REFERENCE.equals(datasetType)) {
       // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
       // not neccesary
       String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+
+      modifySnapshotFile(null, Arrays.asList(nameFileTableValue), datasetId);
 
       String copyQueryTable =
           COPY_DATASET + datasetId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
@@ -1114,10 +1343,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         sql = DELETE_FROM_DATASET + idReportingDataset + ".record_value";
         break;
       case REPORTING:
+      case TEST:
         sql = DELETE_FROM_DATASET + idReportingDataset + ".record_value WHERE dataset_partition_id="
             + partitionId;
         break;
       case DESIGN:
+      case REFERENCE:
         sql = DELETE_FROM_DATASET + idReportingDataset + ".table_value";
         break;
       default:
@@ -1280,183 +1511,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
-  /**
-   * Execute query view commands.
-   *
-   * @param command the command
-   * @throws RecordStoreAccessException the record store access exception
-   */
-  @Override
-  public void executeQueryViewCommands(String command) throws RecordStoreAccessException {
-    jdbcTemplate.execute(command);
-    LOG.info("Command on Query View executed: {}", command);
-  }
-
-
-  /**
-   * Creates the update query view.
-   *
-   * @param datasetId the dataset id
-   * @param isMaterialized the is materialized
-   */
-  @Override
-  public void createUpdateQueryView(Long datasetId, boolean isMaterialized) {
-    LOG.info("Executing createUpdateQueryView on the datasetId {}. Materialized: {}", datasetId,
-        isMaterialized);
-    DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
-    // delete all views because some names can be changed
-    try {
-      deleteAllViewsFromSchema(datasetId);
-    } catch (RecordStoreAccessException e1) {
-      LOG_ERROR.error("Error deleting Query view: {}", e1.getMessage(), e1);
-    }
-
-    datasetSchema.getTableSchemas().stream()
-        .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
-        .forEach(table -> {
-          List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
-          try {
-            // create materialiced view or query view of all tableSchemas
-            executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
-                datasetId, isMaterialized);
-            if (isMaterialized) {
-              createIndexMaterializedView(datasetId, table.getNameTableSchema());
-            }
-            // execute view permission
-            executeViewPermissions(table.getNameTableSchema(), datasetId);
-          } catch (RecordStoreAccessException e) {
-            LOG_ERROR.error("Error creating Query view: {}", e.getMessage(), e);
-          }
-        });
-  }
-
-
-  /**
-   * Update materialized query view.
-   *
-   * @param datasetId the dataset id
-   * @param user the user
-   * @param released the released
-   */
-  @Override
-  @Async
-  public void updateMaterializedQueryView(Long datasetId, String user, Boolean released) {
-    LOG.info(" Update Materialized Views");
-
-    DataSetMetabaseVO datasetMetabaseVO =
-        dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    Long dataflowId = datasetMetabaseVO.getDataflowId();
-    try {
-      switch (datasetMetabaseVO.getDatasetTypeEnum()) {
-        case REPORTING:
-          List<ReportingDatasetVO> reportingDatasets =
-              dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowIdAndProviderId(
-                  dataflowId, datasetMetabaseVO.getDataProviderId());
-
-          for (ReportingDatasetVO dataset : reportingDatasets) {
-            launchUpdateMaterializedQueryView(dataset.getId());
-          }
-          break;
-        case TEST:
-          List<TestDatasetVO> testDatasets =
-              testDatasetControllerZuul.findTestDatasetByDataflowId(dataflowId);
-          for (TestDatasetVO dataset : testDatasets) {
-            launchUpdateMaterializedQueryView(dataset.getId());
-          }
-          break;
-        case COLLECTION:
-          List<DataCollectionVO> dataCollectionDatasets =
-              dataCollectionControllerZuul.findDataCollectionIdByDataflowId(dataflowId);
-          for (DataCollectionVO dataset : dataCollectionDatasets) {
-            launchUpdateMaterializedQueryView(dataset.getId());
-          }
-          break;
-        case EUDATASET:
-          List<EUDatasetVO> euDatasets =
-              euDatasetControllerZuul.findEUDatasetByDataflowId(dataflowId);
-          for (EUDatasetVO dataset : euDatasets) {
-            launchUpdateMaterializedQueryView(dataset.getId());
-          }
-          break;
-        case REFERENCE:
-          List<ReferenceDatasetVO> references =
-              referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId);
-          for (ReferenceDatasetVO dataset : references) {
-            launchUpdateMaterializedQueryView(dataset.getId());
-          }
-          break;
-        default:
-          break;
-      }
-    } catch (RecordStoreAccessException e) {
-      LOG_ERROR.error("Error updating Materialized view: {}", e.getMessage(), e);
-    }
-    Map<String, Object> values = new HashMap<>();
-    values.put(LiteralConstants.DATASET_ID, datasetId);
-    values.put(LiteralConstants.USER,
-        SecurityContextHolder.getContext().getAuthentication().getName());
-    values.put("released", released);
-    values.put("updateViews", false);
-    LOG.info(
-        "The user set on updateMaterializedQueryView threadPropertiesManager is {}, dataset {}",
-        SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
-    LOG.info("The user set on securityContext is {}",
-        SecurityContextHolder.getContext().getAuthentication().getName());
-    kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
-  }
-
-  /**
-   * Launch update materialized query view.
-   *
-   * @param datasetId the dataset id
-   * @throws RecordStoreAccessException the record store access exception
-   */
-  @Override
-  public void launchUpdateMaterializedQueryView(Long datasetId) throws RecordStoreAccessException {
-    String viewToUpdate =
-        "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
-    List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
-
-    String updateQuery = "refresh materialized view concurrently dataset_";
-
-    for (String view : viewList) {
-      executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
-    }
-    LOG.info("These views: {} have been refreshed.", viewList);
-  }
-
-  /**
-   * Refresh materialized query.
-   *
-   * @param datasetIds the dataset ids
-   */
-  @Override
-  @Async
-  public void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation,
-      boolean released, Long datasetId) {
-    datasetIds.forEach(id -> {
-      String viewToUpdate =
-          "select matviewname from pg_matviews  where schemaname = 'dataset_" + id + "'";
-      List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
-
-      String updateQuery = "refresh materialized view concurrently dataset_";
-
-      for (String view : viewList) {
-        try {
-          executeQueryViewCommands(updateQuery + id + "." + "\"" + view + "\"");
-        } catch (RecordStoreAccessException e) {
-          LOG_ERROR.error("Error refreshing materialized view from dataset {}", id);
-        }
-      }
-      LOG.info("These materialized views: {} have been refreshed.", viewList);
-    });
-    if (Boolean.TRUE.equals(continueValidation)) {
-      Map<String, Object> values = new HashMap<>();
-      values.put(LiteralConstants.DATASET_ID, datasetId);
-      values.put("released", released);
-      kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
-    }
-  }
 
 
   /**
@@ -1493,6 +1547,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       executeQueryViewCommands(dropQuery + datasetId + "." + "\"" + view + "\"");
     }
     LOG.info("These views: {} have been deleted.", viewList);
+  }
+
+
+  /**
+   * Delete all mat views from schema.
+   *
+   * @param datasetId the dataset id
+   * @throws RecordStoreAccessException the record store access exception
+   */
+  private void deleteAllMatViewsFromSchema(Long datasetId) throws RecordStoreAccessException {
+    String selectMatViews =
+        "select matviewname from pg_matviews where schemaname like 'dataset_" + datasetId + "'";
+
+    List<String> matViewList = jdbcTemplate.queryForList(selectMatViews, String.class);
+
+    String dropQuery = "drop materialized view if exists dataset_";
+
+    for (String view : matViewList) {
+      executeQueryViewCommands(dropQuery + datasetId + "." + "\"" + view + "\"");
+    }
+    LOG.info("These views: {} have been deleted.", matViewList);
   }
 
   /**

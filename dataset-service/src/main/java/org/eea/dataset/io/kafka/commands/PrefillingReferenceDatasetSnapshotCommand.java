@@ -3,7 +3,7 @@ package org.eea.dataset.io.kafka.commands;
 import java.io.IOException;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
@@ -26,9 +26,9 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The dataset snapshot service. */
+  /** The file treatment helper. */
   @Autowired
-  private DatasetService datasetService;
+  private FileTreatmentHelper fileTreatmentHelper;
 
   /** The dataset metabase repository. */
   @Autowired
@@ -62,7 +62,7 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
     if (null != dataset) {
       try {
         recordStoreControllerZuul.refreshMaterializedView(datasetId);
-        datasetService.createReferenceDatasetFiles(dataset);
+        fileTreatmentHelper.createReferenceDatasetFiles(dataset);
       } catch (IOException e) {
         LOG_ERROR.error(
             "Error creating the reference dataset {} files during the creation. Error: {}",

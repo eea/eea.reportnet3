@@ -397,7 +397,7 @@ const RepresentativesList = ({
           {!isNewLeadReporter && (
             <Button
               className={`p-button-rounded p-button-secondary-transparent ${styles.deleteButton}`}
-              icon={'trash'}
+              icon="trash"
               onClick={() => {
                 handleDialogs('deleteLeadReporter', true);
                 formDispatcher({ type: 'LEAD_REPORTER_DELETE_ID', payload: { id: leadReporter.id } });

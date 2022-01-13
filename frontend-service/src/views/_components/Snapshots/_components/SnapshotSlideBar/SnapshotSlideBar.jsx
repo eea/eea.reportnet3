@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect, useState } from 'react';
 
 import { useRecoilValue } from 'recoil';
@@ -116,7 +115,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
       visible={isVisible}>
       <div className={styles.content}>
         <div className={styles.title}>
-          <h3>{resourcesContext.messages.createSnapshotTitle}</h3>
+          <h3>{resourcesContext.messages['createSnapshotTitle']}</h3>
         </div>
         <div className={`${styles.newContainer} ${styles.section}`}>
           <div className={styles.createForm}>
@@ -134,7 +133,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                   name="createSnapshotDescription"
                   onChange={e => setInputValue(e.target.value)}
                   onKeyDown={e => onPressEnter(e)}
-                  placeholder={resourcesContext.messages.createSnapshotPlaceholder}
+                  placeholder={resourcesContext.messages['createSnapshotPlaceholder']}
                   rows={10}
                   type="text"
                   value={inputValue}
@@ -162,7 +161,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                   ? resourcesContext.messages['snapshotsEmptyDescription']
                   : inputValue.length > config.INPUT_MAX_LENGTH
                   ? resourcesContext.messages['snapshotsWrongLengthDescription']
-                  : resourcesContext.messages.createSnapshotTooltip}
+                  : resourcesContext.messages['createSnapshotTooltip']}
               </ReactTooltip>
             </div>
           </div>
@@ -172,7 +171,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
         ) : snapshotListData.length > 0 ? (
           <SnapshotsList snapshotListData={snapshotListData} />
         ) : (
-          <h3>{resourcesContext.messages.snapshotsDoNotExist}</h3>
+          <h3>{resourcesContext.messages['snapshotsDoNotExist']}</h3>
         )}
       </div>
     </Sidebar>
