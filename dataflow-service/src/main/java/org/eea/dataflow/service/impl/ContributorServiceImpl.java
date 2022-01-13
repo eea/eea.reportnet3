@@ -139,8 +139,8 @@ public class ContributorServiceImpl implements ContributorService {
           resource);
       getContributorList(SecurityRoleEnum.DATA_STEWARD.toString(), contributorVOList, dataflowId,
           resource);
-      getContributorList(SecurityRoleEnum.STEWARD_SUPPORT.toString(), contributorVOList,
-          dataflowId, resource);
+      getContributorList(SecurityRoleEnum.STEWARD_SUPPORT.toString(), contributorVOList, dataflowId,
+          resource);
     }
 
     return contributorVOList;
@@ -380,7 +380,7 @@ public class ContributorServiceImpl implements ContributorService {
         referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId).stream()
             .map(ReferenceDatasetVO::getId).collect(Collectors.toList()),
         isObserver ? ResourceGroupEnum.REFERENCEDATASET_OBSERVER
-            : ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN);
+            : ResourceGroupEnum.REFERENCEDATASET_STEWARD_SUPPORT);
 
     if (!isObserver) {
       // testdataset
@@ -538,12 +538,11 @@ public class ContributorServiceImpl implements ContributorService {
       case STEWARD_SUPPORT:
         createRequesterGroupsResources(dataflowId, contributorVO, dataProviderId,
             resourceAssignationVOList, resourceInfoVOs, SecurityRoleEnum.STEWARD_SUPPORT,
-            ResourceGroupEnum.DATAFLOW_STEWARD_SUPPORT,
-            ResourceGroupEnum.DATASET_STEWARD_SUPPORT,
+            ResourceGroupEnum.DATAFLOW_STEWARD_SUPPORT, ResourceGroupEnum.DATASET_STEWARD_SUPPORT,
             ResourceGroupEnum.DATACOLLECTION_STEWARD_SUPPORT,
             ResourceGroupEnum.EUDATASET_STEWARD_SUPPORT,
             ResourceGroupEnum.TESTDATASET_STEWARD_SUPPORT, null,
-            ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN);
+            ResourceGroupEnum.REFERENCEDATASET_STEWARD_SUPPORT);
         break;
       default:
         break;
