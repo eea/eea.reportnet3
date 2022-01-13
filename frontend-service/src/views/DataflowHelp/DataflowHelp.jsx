@@ -2,6 +2,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniqBy from 'lodash/uniqBy';
 
@@ -33,7 +34,6 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { isNil } from 'lodash';
 
 export const DataflowHelp = () => {
   const navigate = useNavigate();
