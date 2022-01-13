@@ -95,64 +95,37 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
 
   const onLoadFilteredData = value => setFilteredData(value);
 
-  // const filterOptionsWithDataflowIdRepresentativeId = [
-  //   { type: 'multiselect', properties: [{ name: 'role' }] },
-  //   { type: 'input', properties: [{ name: 'email' }] },
-  //   {
-  //     type: 'multiselect',
-  //     properties: [
-  //       {
-  //         name: 'dataProviderName',
-  //         showInput: true,
-  //         label: TextByDataflowTypeUtils.getLabelByDataflowType(
-  //           resourcesContext.messages,
-  //           dataflowType,
-  //           'userListDataProviderFilterLabel'
-  //         )
-  //       }
-  //     ]
-  //   }
-  // ];
-
-  // const filterOptionsNoRepresentative = [
-  //   { type: 'input', properties: [{ name: 'dataflowName' }] },
-  //   { type: 'multiselect', properties: [{ name: 'role' }] },
-  //   { type: 'input', properties: [{ name: 'email' }] }
-  // ];
-
-  // const filterOptionsHasRepresentativeId = [
-  //   { type: 'multiselect', properties: [{ name: 'role' }] },
-  //   { type: 'input', properties: [{ name: 'email' }] }
-  // ];
-
   const filterOptionsWithDataflowIdRepresentativeId = [
     {
       type: 'MULTI_SELECT',
-      nestedOptions: [
-        { key: 'role', label: resourcesContext.messages['role'] },
-        {
-          key: 'dataProviderName',
-          showInput: true,
-          label: TextByDataflowTypeUtils.getLabelByDataflowType(
-            resourcesContext.messages,
-            dataflowType,
-            'userListDataProviderFilterLabel'
-          )
-        }
-      ]
+      key: 'role',
+      label: resourcesContext.messages['role']
     },
-    { type: 'INPUT', key: 'email', label: resourcesContext.messages['email'] }
+    { type: 'INPUT', key: 'email', label: resourcesContext.messages['email'] },
+    {
+      type: 'MULTI_SELECT',
+      key: 'dataProviderName',
+      showInput: true,
+      label: TextByDataflowTypeUtils.getLabelByDataflowType(
+        resourcesContext.messages,
+        dataflowType,
+        'userListDataProviderFilterLabel'
+      )
+    }
   ];
 
   const filterOptionsNoRepresentative = [
     {
       type: 'INPUT',
-      nestedOptions: [
-        { key: 'dataflowName', label: resourcesContext.messages['dataflowName'] },
-        { key: 'email', label: resourcesContext.messages['email'] }
-      ]
+      key: 'dataflowName',
+      label: resourcesContext.messages['dataflowName']
     },
-    { type: 'MULTI_SELECT', nestedOptions: [{ key: 'role', label: resourcesContext.messages['role'] }] }
+    { type: 'MULTI_SELECT', nestedOptions: [{ key: 'role', label: resourcesContext.messages['role'] }] },
+    {
+      type: 'INPUT',
+      key: 'email',
+      label: resourcesContext.messages['email']
+    }
   ];
 
   const filterOptionsHasRepresentativeId = [
