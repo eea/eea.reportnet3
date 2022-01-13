@@ -50,6 +50,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 const { parseDataflows, sortDataflows } = DataflowsUtils;
 const { permissions } = config;
@@ -84,7 +85,6 @@ const Dataflows = () => {
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     reference: [],
     reporting: [],
-    filteredData: { business: [], citizenScience: [], reference: [], reporting: [] },
     pinnedSeparatorIndex: -1
   });
 
@@ -94,7 +94,6 @@ const Dataflows = () => {
   const {
     activeIndex,
     dataflowsCount,
-    filteredData,
     isAdmin,
     isCustodian,
     isNationalCoordinator,
@@ -140,6 +139,8 @@ const Dataflows = () => {
         ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
+
+  const { filteredData } = useFilters(tabId);
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -246,6 +247,10 @@ const Dataflows = () => {
     setActiveIndexTabOnBack();
   }, [isCustodian, isAdmin]);
 
+  useEffect(() => {
+    onUpdatePinnedSeparatorPosition();
+  }, [filteredData]);
+
   const setIsValidatingAllDataflowsUsers = isValidatingAllDataflowsUsers => {
     dataflowsDispatch({ type: 'SET_IS_VALIDATING_ALL_DATAFLOWS_USERS', payload: { isValidatingAllDataflowsUsers } });
   };
@@ -326,12 +331,11 @@ const Dataflows = () => {
     }
   };
 
-  const getFilteredData = data => {
-    const orderedFilteredData = sortDataflows(data);
+  const onUpdatePinnedSeparatorPosition = () => {
+    const orderedFilteredData = sortDataflows(filteredData);
     const orderedPinned = orderedFilteredData.map(el => el.pinned);
 
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf('pinned'));
-    dataflowsDispatch({ type: 'GET_FILTERED_DATA', payload: { type: tabId, data } });
   };
 
   const manageDialogs = (dialog, value) => {
@@ -397,7 +401,7 @@ const Dataflows = () => {
     const { business, citizenScience, reference, reporting } = dataflowsState;
 
     const copyData = [...reporting, ...reference, ...business, ...citizenScience];
-    const copyFilteredData = [...filteredData[tabId]];
+    const copyFilteredData = [...filteredData];
 
     const userProperties = updateUserPropertiesPinnedDataflows({ pinnedItem, data: copyData });
 
@@ -602,15 +606,10 @@ const Dataflows = () => {
             onTabChange={event => onChangeTab(event.index, event.value)}
           />
         </div>
-        <MyFilters
-          data={dataflowsState[tabId]}
-          getFilteredData={getFilteredData}
-          options={options[tabId]}
-          viewType={tabId}
-        />
+        <MyFilters data={dataflowsState[tabId]} options={options[tabId]} viewType={tabId} />
         <DataflowsList
           className="dataflowList-accepted-help-step"
-          filteredData={filteredData[tabId]}
+          filteredData={filteredData}
           isAdmin={isAdmin}
           isCustodian={isCustodian}
           isLoading={loadingStatus[tabId]}
