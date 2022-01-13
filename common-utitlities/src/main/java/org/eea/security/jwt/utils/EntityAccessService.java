@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -33,9 +32,8 @@ public class EntityAccessService {
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  @Autowired
-  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
