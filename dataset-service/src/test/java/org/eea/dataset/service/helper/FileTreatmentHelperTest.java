@@ -1042,9 +1042,11 @@ public class FileTreatmentHelperTest {
    */
   @After
   public void afterTests() {
-    File file = new File("./dataset-1");
+    File fileDataset = new File("./dataset-1");
+    File fileDataflow = new File("./dataflow-1");
     try {
-      FileUtils.deleteDirectory(file);
+      FileUtils.deleteDirectory(fileDataset);
+      FileUtils.deleteDirectory(fileDataflow);
     } catch (IOException e) {
 
     }
